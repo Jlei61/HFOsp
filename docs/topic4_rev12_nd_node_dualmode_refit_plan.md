@@ -539,3 +539,19 @@ on all three networks but worsened the mean patient fit. No field is frozen.
 5. Do not read patient held-out endpoints or use natural KMeans for this
    reduction. A final shortlist must be frozen before fresh selection networks
    are opened.
+
+Stage-AA completed all 63 runs. `stage_z_g04_m` improved the mean soft objective,
+mode 0, mode 1 and direction, but mode 1 improved in only 4/9 networks and its
+90% bootstrap interval crossed zero. Node remains unfrozen.
+
+## Stage-AB omitted Pareto recovery
+
+1. Recover only `stage_z_g11_p`, an existing Stage-Z Pareto candidate omitted
+   solely after the RMS-0.52 diversity quota was filled.
+2. Copy its exact field hash and run it on the already opened Stage-AA fit
+   networks 2271--2279; reuse the existing anchor trajectories for pairing.
+3. Report the same paired bootstrap endpoints as Stage-AA. Do not use held-out,
+   natural KMeans, EE, E-to-I or Z/M.
+4. If `g11+` also lacks mode-1 network stability, proceed to a frozen continuous
+   interpolation around `g04-` using `g11+` as the mode-fit donor and `g05+` as
+   the direction donor. Do not extend the candidate library before this check.

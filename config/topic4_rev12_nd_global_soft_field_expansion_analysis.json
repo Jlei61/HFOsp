@@ -1,0 +1,22 @@
+{
+  "schema_id": "topic4_rev12_nd_global_soft_field_expansion_analysis_v1",
+  "output_root": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_aa_global_soft_field_expansion/analysis",
+  "inputs": {
+    "stage_z_summary": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_z_global_soft_field_screen/aggregate/fit_soft_global_summary.json",
+      "sha256": "6613078fd433a78ae30a6e66e4d3315d520884f37c5529078ea3cbad3887fefc"
+    },
+    "stage_aa_summary": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_aa_global_soft_field_expansion/aggregate/fit_soft_global_summary.json",
+      "sha256": "b9694f9236671e667f7b84af41d948d982b6fe12c4e83337bf723bedeb5ec71a"
+    },
+    "stage_aa_nomination": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_aa_global_soft_field_expansion/aggregate/fit_nomination_decision.json",
+      "sha256": "63d6027a06db58bd62d76264670399dbc6905a2d9e7b8ad54d218a7fd8fb0af2"
+    }
+  },
+  "anchor_candidate_id": "stage_z_anchor",
+  "bootstrap": {"draws": 4096, "confidence": 0.90, "seed": 20260826},
+  "mode_network_stability_reference": "at_least_6_of_9_fresh_networks",
+  "claim_boundary": "Zero-simulation paired-network audit. Fresh nine-network results are primary; the earlier three networks are a sensitivity pool. Mean improvement is not Node acceptance when one patient mode lacks network-level stability."
+}

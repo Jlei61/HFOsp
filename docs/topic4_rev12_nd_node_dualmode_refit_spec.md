@@ -909,3 +909,18 @@ rule plus the unchanged anchor onto nine fresh fit networks 2271--2279. All
 seven field hashes remain unchanged. This 63-run expansion measures whether the
 fit-direction tradeoff is stable; it may reduce the fit shortlist but still
 cannot select the final Node field or inspect patient held-out data.
+
+Stage-AA completed 63/63 runs. `stage_z_g04_m` was the only candidate with
+positive fresh-network mean utilities for the soft objective, both modes and
+causal direction. Its 90% paired network-bootstrap intervals were positive for
+mode 0 and direction, but not for the total objective or mode 1; mode 1 improved
+in only 4/9 networks. It is therefore a balanced development anchor, not an
+accepted Node field.
+
+The Stage-Z diversity cap omitted `stage_z_g11_p` after two other RMS-0.52
+fields filled that radius. This field was nevertheless Pareto-optimal, had the
+second-lowest Stage-Z soft objective, jointly low mode-0/mode-1 losses and
+positive causal direction. Before inventing a new interpolation family, one
+fit-only recovery runs this already simulated candidate on the same nine
+Stage-AA networks. This is an explicit development follow-up, not an independent
+selection or confirmation result.
