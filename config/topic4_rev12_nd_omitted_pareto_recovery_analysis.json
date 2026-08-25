@@ -1,0 +1,23 @@
+{
+  "schema_id": "topic4_rev12_nd_omitted_pareto_recovery_analysis_v1",
+  "output_root": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_ab_omitted_pareto_recovery/analysis",
+  "inputs": {
+    "stage_aa_summary": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_aa_global_soft_field_expansion/aggregate/fit_soft_global_summary.json",
+      "sha256": "b9694f9236671e667f7b84af41d948d982b6fe12c4e83337bf723bedeb5ec71a"
+    },
+    "stage_ab_summary": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_ab_omitted_pareto_recovery/aggregate/fit_soft_global_summary.json",
+      "sha256": "b57521c8159214bd179f394c19d76600b42df8e93ad984347e382c101f3ff8e6"
+    },
+    "stage_ab_complete": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_ab_omitted_pareto_recovery/status/stage_ab_complete.json",
+      "sha256": "28ea0a88a778dfbbbe22f6e2c8fdaa40e6cfbd7bd6cda9274d22c1100a912d51"
+    }
+  },
+  "anchor_candidate_id": "stage_z_anchor",
+  "recovery_candidate_id": "stage_z_g11_p",
+  "bootstrap": {"draws": 4096, "confidence": 0.90, "seed": 20260827},
+  "mode_network_stability_reference": "at_least_6_of_9_fresh_networks",
+  "claim_boundary": "Fit-only paired audit on the already opened Stage-AA network pool. A mode-1-only tendency cannot freeze the Node field when mode 0, the global objective, or topology are not protected. Patient held-out and natural KMeans are not used."
+}

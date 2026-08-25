@@ -924,3 +924,32 @@ positive causal direction. Before inventing a new interpolation family, one
 fit-only recovery runs this already simulated candidate on the same nine
 Stage-AA networks. This is an explicit development follow-up, not an independent
 selection or confirmation result.
+
+Stage-AB completed 9/9 runs without runaway or missing artifacts. On the fresh
+networks, `stage_z_g11_p` improved mode 1 in 6/9 networks, but worsened the mean
+soft objective and mode 0, improved causal direction in only 4/9 networks, and
+reduced both cross-network topology reproducibility and between-mode topology
+separation. All corresponding 90% paired bootstrap intervals except the
+compound-event diagnostic crossed zero. Its formal status is therefore
+`OMITTED_PARETO_MODE1_ONLY_NO_BALANCED_STABILITY`: it supplies a local mode-1
+direction but cannot freeze Node.
+
+Stage-AC is the final small response-surface experiment before another global
+search is considered. Let `C_0` be the unchanged Stage-Z anchor coefficients,
+and `C_4`, `C_11` and `C_5` be the coefficients of the balanced, mode-1 and
+causal-direction donors. The frozen continuous field is
+
+```text
+C = C_4 + lambda_11 (C_11 - C_0) + lambda_05 (C_5 - C_0),
+lambda_11 in {0, 0.25, 0.50},
+lambda_05 in {0, 0.15, 0.30}.
+```
+
+The already run origin is omitted, leaving eight fields. This is coefficient
+interpolation in one complete two-dimensional spline, not allocation of a
+fixed number of cores. Every candidate preserves the coefficient budget, uses
+no patient/contact coordinates for construction, and must remain below 0.54
+RMS from the anchor on the uniform sheet grid. The same nine fit networks are
+reused so the experiment estimates a local donor-dose response surface. It
+cannot inspect held-out, use natural KMeans for selection, or open EE, E-to-I
+or Z/M.

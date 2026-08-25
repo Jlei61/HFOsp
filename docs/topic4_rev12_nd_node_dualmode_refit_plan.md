@@ -555,3 +555,27 @@ mode 0, mode 1 and direction, but mode 1 improved in only 4/9 networks and its
 4. If `g11+` also lacks mode-1 network stability, proceed to a frozen continuous
    interpolation around `g04-` using `g11+` as the mode-fit donor and `g05+` as
    the direction donor. Do not extend the candidate library before this check.
+
+Stage-AB completed all 9 runs. `g11+` showed a mode-1-only tendency (6/9
+networks) but did not improve the total objective, mode 0, causal direction or
+topology stably. It is not a Node candidate and closes the omitted-Pareto
+explanation.
+
+## Stage-AC local continuous donor interpolation
+
+1. Freeze `g04-` as the balanced center, `g11+ - anchor` as the mode-1 donor
+   direction and `g05+ - anchor` as the causal-direction donor direction.
+2. Run the 3 x 3 dose grid `lambda_11={0,0.25,0.50}` by
+   `lambda_05={0,0.15,0.30}`, excluding the already observed zero-zero field.
+   This gives eight complete continuous spline fields, not eight core layouts.
+3. Require unchanged coefficient budget, unique field hashes, no observation
+   coordinates, and residual surface RMS <=0.54 before simulation.
+4. Run all eight fields on fit networks 2271--2279. Use up to 14 one-thread
+   workers with 32 GiB memory reserve and a 600 s monitor interval (72 runs).
+5. Pair each field to the existing `g04-` and anchor trajectories. A field may
+   advance only if the total soft objective and both modes improve in mean,
+   both modes improve in at least 6/9 networks, and causal direction is not
+   traded away. Natural KMeans and patient held-out remain unopened.
+6. If no field meets this fit-only balance, do not tune EE, E-to-I or Z/M. Use
+   the response surface to decide whether one additional local interpolation is
+   identified or whether the current Node family/target is insufficient.
