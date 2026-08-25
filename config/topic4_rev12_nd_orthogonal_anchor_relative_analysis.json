@@ -1,0 +1,38 @@
+{
+  "schema_id": "topic4_rev12_nd_orthogonal_anchor_relative_analysis_v2",
+  "scientific_role": "fit_only_anchor_relative_local_curvature_audit",
+  "inputs": {
+    "candidate_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_u_orthogonal_free_field_screen/candidate_manifest.json",
+      "sha256": "c8e0b8023da92e1b0c5b104813abc17f602cfd938daece44fce836c22caec178"
+    },
+    "aggregate": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_u_orthogonal_free_field_screen/aggregate/fit_cascade_summary.json",
+      "sha256": "59b9d1014fc477d65abefd165b52f65a44b1b1f30d23fb6620ccc341d495cdda"
+    }
+  },
+  "output": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_u_orthogonal_free_field_screen/analysis/orthogonal_mode_response_anchor_relative_v2.json",
+  "screen": {
+    "minimum_same_sign_networks": 2,
+    "amplitude_grid": [-0.04, -0.03, -0.02, -0.01, 0.01, 0.02, 0.03, 0.04],
+    "maximum_nonzero_modes": 3,
+    "maximum_l2_amplitude": 0.06,
+    "required_positive_aggregate_endpoints": [
+      "objective_utility",
+      "patient_mode_0_utility",
+      "patient_mode_1_utility",
+      "kmeans_utility",
+      "direction_utility"
+    ],
+    "required_network_support_endpoints": [
+      "objective_utility",
+      "patient_mode_0_utility",
+      "patient_mode_1_utility"
+    ],
+    "minimum_monotonicity_delta": 0.0,
+    "protected_endpoint_weight": 0.5,
+    "network_dispersion_weight": 0.15,
+    "maximum_proposals": 4
+  },
+  "claim_boundary": "Retrospective fit-network local surrogate only. It cancels unsupported outer extrapolation and may nominate small direct-SNN canaries. The diagonal quadratic ignores cross-mode interactions and cannot select a Node field, open fresh networks, or justify EE, E-to-I or Z/M."
+}

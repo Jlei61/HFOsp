@@ -427,9 +427,25 @@ scientific acceptance conditions in the spec are jointly met.
 
 ## Current execution order
 
-Phase 1m and mode-mean rescoring are complete.  Complete the corrected v2
-coordinate diagnostic, freeze Stage-U at a clean commit, then run its 93 fit
-workers under the resource controller.  Aggregate and analyze all seven
-predeclared endpoints before generating any field combination.  Do not open
-fresh selection, intervention, confirmation, EE, E-to-I or Z/M; the manual
-capacity control remains non-selectable and cannot initialize the search.
+Phase 1m, mode-mean rescoring, the corrected coordinate diagnostic and Stage-U
+are complete.  Stage-U finished 93/93 runs, but no `+/-0.08` field improved the
+aggregate objective over its anchor.  The original six-mode RMS 0.16 follow-up
+was based on symmetric-arm slopes rather than anchor-relative improvement and is
+cancelled without simulation.
+
+Run the immutable anchor-relative v2 audit, then freeze one final fit-only
+Stage-W trust-region canary:
+
+1. replay the anchor on fit networks 2241--2243;
+2. test `f01+`, `f02-`, `f11+` and `f14+` at RMS 0.03 to establish whether the
+   endpoint-specific Stage-U effects contract locally;
+3. test no more than two sparse combinations selected by the diagonal local
+   surrogate, with coefficient L2 radius at most 0.06;
+4. aggregate the full objective, both patient-mode losses, natural KMeans,
+   direction, monotonicity, OOD, compound fraction and source topology;
+5. stop on the fit pool unless one direct simulation improves the aggregate
+   objective and both patient modes with at least two-of-three network support.
+
+This uses at most 21 short runs.  Fresh selection, intervention, confirmation,
+EE, E-to-I and Z/M remain closed.  The smooth manual capacity control remains
+non-selectable and cannot initialize the search.

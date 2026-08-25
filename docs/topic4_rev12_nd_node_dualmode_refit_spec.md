@@ -589,6 +589,39 @@ round: no combination proposal is allowed until mode effects show cross-network
 sign support.  The smooth manual capacity control is not simulated and only
 audits generic span coverage.
 
+Stage-U completed all 93/93 frozen runs without failure or runaway.  The anchor
+remained the best aggregate field (`J_fit=2.0608`, patient loss 1.2313, natural
+KMeans alignment 0.7303, OOD 0.5364, compound fraction 0.5759, causal-direction
+score 0.1668).  Every single-mode field at either sign of RMS 0.08 had a worse
+aggregate objective.  Some endpoints moved in useful but opposing directions:
+`f01+` and `f02-` improved both patient-mode losses, whereas `f11+` and `f14+`
+partly improved KMeans/direction, but none jointly improved the anchor.
+
+The first Stage-U response sidecar selected six proposed RMS 0.16 checks from
+the slope between the negative and positive arms.  That rule is not actionable:
+one arm can be better than the opposite arm while both remain worse than the
+anchor.  The sidecar is retained as audit provenance, but its outer-amplitude
+follow-up is cancelled and must not be launched.
+
+The replacement anchor-relative audit fits a diagonal local quadratic through
+`-0.08`, `0` and `+0.08` for each generic mode.  It may nominate sparse canaries
+only within coefficient L2 radius 0.06 and only when the surrogate predicts
+positive aggregate changes in the full objective, both patient modes, natural
+KMeans and causal direction with at least two-of-three network sign support for
+the objective and both modes.  This is a retrospective trust-region diagnostic,
+not a field optimizer: cross-mode interactions are unmeasured, predicted gains
+are small (about 0.01 utility), and every nominated combination requires direct
+SNN validation on the same fit networks before any fresh network is opened.
+
+The direct Stage-W canary therefore contains the anchor, four single-direction
+components needed for attribution (`f01+`, `f02-`, `f11+`, `f14+`) at reduced
+RMS 0.03, and at most two sparse combinations nominated by the anchor-relative
+audit.  It is limited to fit networks 2241--2243.  Stage-W closes as a bounded
+negative result if no directly simulated candidate simultaneously improves the
+aggregate objective and both patient-mode losses with at least two-of-three
+network support; selection, confirmation, intervention, EE, E-to-I and Z/M stay
+closed in that case.
+
 ## 8. Mode-specific source topology
 
 The SNN worker derives a 1 mm sheet-bin onset map for every returned event from
