@@ -1,0 +1,43 @@
+{
+  "schema_id": "topic4_rev12_nd_orthogonal_free_field_analysis_v1",
+  "scientific_role": "fit_only_orthogonal_mode_response_analysis",
+  "inputs": {
+    "stage_config": {
+      "path": "config/topic4_rev12_nd_orthogonal_free_field_screen.json",
+      "sha256": "a465faa64c7e58d6bec81ca311a509f29c518e4ed73ed5c0c1eaa43d1db6c0c7"
+    },
+    "candidate_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_u_orthogonal_free_field_screen/candidate_manifest.json",
+      "sha256": "c8e0b8023da92e1b0c5b104813abc17f602cfd938daece44fce836c22caec178"
+    }
+  },
+  "aggregate": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_u_orthogonal_free_field_screen/aggregate/fit_cascade_summary.json",
+  "output": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_u_orthogonal_free_field_screen/analysis/orthogonal_mode_response.json",
+  "screen": {
+    "minimum_same_sign_networks": 2,
+    "maximum_outer_followup_modes": 6,
+    "primary_endpoints": [
+      "patient_utility",
+      "kmeans_utility",
+      "direction_utility",
+      "monotonicity_utility"
+    ],
+    "safety_endpoints": ["ood_utility", "compound_utility"],
+    "aggregate_topology_endpoints": [
+      "topology_reliability_utility",
+      "topology_separation_utility"
+    ],
+    "balanced_weights": {
+      "patient_utility": 1.0,
+      "kmeans_utility": 0.5,
+      "ood_utility": 0.25,
+      "compound_utility": 0.25,
+      "direction_utility": 0.5,
+      "monotonicity_utility": 0.5,
+      "topology_reliability_utility": 0.25,
+      "topology_separation_utility": 0.25
+    },
+    "outer_amplitude": 0.16
+  },
+  "claim_boundary": "Fit-network derivative screen only. Endpoint champions identify modes for an outer-amplitude response check; they are not selected Node fields and cannot open patient held-out, selection, intervention, EE, E-to-I or Z/M."
+}
