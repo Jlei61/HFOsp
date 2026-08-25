@@ -65,6 +65,7 @@ ALLOWED_SCIENTIFIC_ROLES = {
     "development_only_causal_continuation_and_capacity",
     "development_only_orthogonal_free_field_screen",
     "development_only_local_curvature_canary",
+    "development_only_local_curvature_replication",
 }
 
 

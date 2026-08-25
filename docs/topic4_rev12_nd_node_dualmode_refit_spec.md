@@ -623,6 +623,28 @@ direction, with at least two-of-three network support for the objective and both
 mode losses; selection, confirmation, intervention, EE, E-to-I and Z/M stay
 closed in that case.
 
+Stage-W completed all 21/21 runs.  No candidate satisfied the frozen joint
+advance rule.  The most informative near miss was `f14+0.03`: its aggregate
+objective improved by 0.0155 utility, patient mode-0 and mode-1 utilities by
+0.0156 and 0.0123, direction by 0.0478 and monotonicity by 0.0290.  Natural
+KMeans alignment decreased by 0.0223, however, and paired network effects were
+heterogeneous: total utility improved in only one of three networks and mode-1
+loss improved in only one of three.  The aggregate gain was therefore driven by
+network 2243 and cannot open selection.  Complete held-out event-cloud R2 moved
+only from -0.907 to -0.856 and remains negative; this diagnostic was not used to
+choose the next fit experiment.
+
+Because three networks cannot distinguish a reproducible small effect from one
+network-specific response, Stage-X freezes a paired uncertainty replication of
+only the anchor and `f14+0.03` on new fit networks 2251--2259.  It does not
+resume field search.  One joint decision is made after all nine pairs finish:
+aggregate utility, both patient-mode utilities, natural KMeans and causal
+direction must all improve, and utility plus both mode losses must improve in at
+least six of nine paired networks.  Patient held-out quantities, source-topology
+plots and historical Fig.4 diagnostics are reported but cannot affect this
+decision.  Failure closes this local free-field basin; success permits only a
+fresh-selection review, not Node-field acceptance.
+
 ## 8. Mode-specific source topology
 
 The SNN worker derives a 1 mm sheet-bin onset map for every returned event from

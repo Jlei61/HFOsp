@@ -450,3 +450,21 @@ Stage-W trust-region canary:
 This uses at most 21 short runs.  Fresh selection, intervention, confirmation,
 EE, E-to-I and Z/M remain closed.  The smooth manual capacity control remains
 non-selectable and cannot initialize the search.
+
+Stage-W finished 21/21 runs and did not open selection.  Freeze one uncertainty
+replication before deciding whether to close the local basin:
+
+1. copy only the Stage-W anchor and `f14+0.03` field without modification;
+2. run their paired common-random-number comparison on new fit seeds
+   2251--2259;
+3. report paired network deltas and 90% network-bootstrap intervals for the
+   objective, both patient modes, KMeans, direction, OOD, compound fraction and
+   topology;
+4. open a fresh-selection review only if all five aggregate endpoints improve
+   and objective/mode-0/mode-1 each improve in at least six of nine networks;
+5. otherwise close the current anchor-local cosine basin and redesign the
+   optimization target/search globally before any additional SNN run.
+
+No held-out patient endpoint may select Stage-X or alter its decision.  EE,
+E-to-I, Z/M, intervention, selection and confirmation remain closed during the
+replication.
