@@ -1,0 +1,37 @@
+{
+  "schema_id": "topic4_rev12_nd_local_curvature_replication_analysis_v1",
+  "scientific_role": "fit_only_paired_local_field_replication_analysis",
+  "inputs": {
+    "stage_config": {
+      "path": "config/topic4_rev12_nd_local_curvature_replication.json",
+      "sha256": "344e9cca881c12f472c12522f1a9e9b078107671fd45268cb1ea57092d0dd3ac"
+    },
+    "candidate_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_x_local_curvature_replication/candidate_manifest.json",
+      "sha256": "229d258f0a733d09e711c09d0ab5c7538642b63d6d1a93d9685f843aae4ed507"
+    }
+  },
+  "aggregate": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_x_local_curvature_replication/aggregate/fit_cascade_summary.json",
+  "output": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_x_local_curvature_replication/analysis/paired_replication_result.json",
+  "decision": {
+    "anchor_candidate_id": "stage_x_anchor",
+    "candidate_id": "stage_x_f14p03",
+    "required_aggregate_endpoints": [
+      "objective_utility",
+      "patient_mode_0_utility",
+      "patient_mode_1_utility",
+      "kmeans_utility",
+      "direction_utility"
+    ],
+    "required_sign_endpoints": [
+      "objective_utility",
+      "patient_mode_0_utility",
+      "patient_mode_1_utility"
+    ],
+    "minimum_positive_networks": 6,
+    "bootstrap_draws": 20000,
+    "bootstrap_interval": [0.05, 0.95],
+    "bootstrap_seed": 20260825
+  },
+  "claim_boundary": "Nine-network paired fit replication only. The analysis may open a review of fresh selection seeds but cannot select or accept the field. Patient held-out diagnostics do not enter the decision. EE, E-to-I, Z/M, confirmation and intervention remain closed."
+}
