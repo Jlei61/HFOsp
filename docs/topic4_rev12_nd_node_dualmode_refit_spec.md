@@ -888,7 +888,9 @@ replication, with no more than two from one radius; best soft fit and best causa
 direction are retained as sentinels. This screen cannot freeze Node or open
 selection, intervention, EE, E-to-I or Z/M by itself.
 
-The queue may use up to 20 workers because that concurrency already completed
-Stage-U without crossing the memory reserve. It remains dynamically bounded by
-measured available memory, a conservative 10 GiB per-worker estimate, at least
-32 GiB reserved memory and a 600 s controller interval.
+Stage-Z's first resource canary showed that worker memory grows during the
+trajectory: 20 workers reduced available memory from 230 GiB to 19 GiB before
+any worker completed, so the controller stopped the batch before OOM. The
+frozen rerun therefore uses at most 14 workers, a 14 GiB per-worker estimate,
+at least 32 GiB reserved memory and a 600 s controller interval. This resource
+correction changes no candidate, seed, simulation or selection rule.

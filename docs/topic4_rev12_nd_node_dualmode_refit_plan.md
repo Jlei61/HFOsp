@@ -513,7 +513,9 @@ confirmation, intervention, EE, E-to-I and Z/M remain closed.
    retaining the best soft-fit and best-direction sentinels.
 6. Do not select or freeze a field from these three networks. First expand the
    nominees on fresh fit networks, then freeze a shortlist before selection.
-7. Use the previously validated maximum of 20 one-thread workers, dynamically
-   reduced from live memory with a 32 GiB reserve. The launcher and one-shot
-   finisher run under `systemd-run --user` plus `nohup`; both wait at 600 s
-   intervals rather than continuous polling.
+7. Use at most 14 one-thread workers with a 14 GiB mature-worker estimate,
+   dynamically reduced from live memory with a 32 GiB reserve. The initial
+   20-worker launch was stopped before OOM after available memory fell to
+   19 GiB; it produced no completed artifact and changes no scientific split.
+   The launcher and one-shot finisher run under `systemd-run --user` plus
+   `nohup`; both wait at 600 s intervals rather than continuous polling.

@@ -118,8 +118,8 @@
   },
   "resources": {
     "numerical_threads_per_worker": 1,
-    "maximum_workers": 20,
-    "estimated_worker_gib": 10.0,
+    "maximum_workers": 14,
+    "estimated_worker_gib": 14.0,
     "reserved_available_memory_gib": 32,
     "monitor_interval_seconds": 600,
     "long_run_launcher": "systemd-run --user plus nohup"
