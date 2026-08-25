@@ -468,3 +468,32 @@ replication before deciding whether to close the local basin:
 No held-out patient endpoint may select Stage-X or alter its decision.  EE,
 E-to-I, Z/M, intervention, selection and confirmation remain closed during the
 replication.
+
+Stage-X finished 18/18 paired runs and closed the anchor-local basin.  The
+`f14+0.03` candidate failed the aggregate objective, mode-1, KMeans and causal
+direction requirements and improved the primary objective in only four of nine
+new networks.  Do not run another local amplitude or seed extension.
+
+Before any additional SNN simulation, complete Stage-Y:
+
+1. retain the frozen classifier's patient-mapped `P(TB)` rather than thresholding
+   it at 0.5 for the fit score;
+2. compute probability-weighted recruitment, precedence, profile and event-cloud
+   distances for both patient modes;
+3. protect the weaker mode and add continuous occupancy, ambiguity and
+   mode-contrast terms;
+4. keep causal direction and full-map monotonicity as separate Pareto axes;
+5. remove natural KMeans from the fit scalar and reserve it for final Fig.4
+   validation;
+6. pass synthetic exact-two-mode, ambiguous-cloud, one-mode, contact-permutation
+   and exact-event-replication controls;
+7. rescore all Stage-U/W/X artifacts without simulation.
+
+Stage-Y passed all frozen controls and rescored 40 fields.  It again found no
+replicable Stage-X gain: paired mean utility was +0.0021 with a 5/4 sign split.
+The best historical soft-score field, `stage_u_f02_m`, remains only an
+initialization clue because it has three fit networks and weak causal-direction
+support.  The next run must therefore be a global, observation-invariant
+continuous-field search with patient rank fit, causal direction and topology
+kept as explicit Pareto axes.  It may use fit networks only; fresh selection,
+confirmation, intervention, EE, E-to-I and Z/M remain closed.

@@ -195,10 +195,11 @@ def test_event_sensitivity_loader_preserves_edge_axes(tmp_path, monkeypatch):
     path.with_suffix(".json").write_text(json.dumps({"seed": 7}))
     monkeypatch.setattr(
         cascade_aggregate, "assign_direction_modes",
-        lambda onsets, **kwargs: {
-            "labels": np.zeros(len(onsets), int),
-            "ood": np.zeros(len(onsets), bool),
-        },
+            lambda onsets, **kwargs: {
+                "labels": np.zeros(len(onsets), int),
+                "probability_B": np.zeros(len(onsets), float),
+                "ood": np.zeros(len(onsets), bool),
+            },
     )
     rows = load_event_sensitivity_workers(
         path, np.asarray(["A", "B", "C"]),

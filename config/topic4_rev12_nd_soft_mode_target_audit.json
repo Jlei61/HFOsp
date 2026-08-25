@@ -1,0 +1,67 @@
+{
+  "schema_id": "topic4_rev12_nd_soft_mode_target_audit_v1",
+  "scientific_role": "development_only_zero_simulation_target_audit",
+  "output_root": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_y_soft_mode_target_audit",
+  "inputs": {
+    "cohort_config": {
+      "path": "config/topic4_data_driven_snn_cohort_v1.json",
+      "sha256": "1dda710517a65002d21618f26569df91077ba6d02953fbfcee9b2f98b0ac4249"
+    },
+    "classifier_config": {
+      "path": "config/topic4_rev11_nlc_frozen_substrate_confirmation.json",
+      "sha256": "7e3ff4786a96ed5fc5b27f7b6b292eb5d7cd51fedb847f669c0e648165835df7"
+    }
+  },
+  "libraries": [
+    {
+      "library_id": "stage_u",
+      "config": {
+        "path": "config/topic4_rev12_nd_orthogonal_free_field_screen.json",
+        "sha256": "a465faa64c7e58d6bec81ca311a509f29c518e4ed73ed5c0c1eaa43d1db6c0c7"
+      },
+      "manifest": {
+        "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_u_orthogonal_free_field_screen/candidate_manifest.json",
+        "sha256": "c8e0b8023da92e1b0c5b104813abc17f602cfd938daece44fce836c22caec178"
+      }
+    },
+    {
+      "library_id": "stage_w",
+      "config": {
+        "path": "config/topic4_rev12_nd_local_curvature_canary.json",
+        "sha256": "18349f1aa6a9a199628eba74835f5d65c785fe927e1118f4f39678802d8dd714"
+      },
+      "manifest": {
+        "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_w_local_curvature_canary/candidate_manifest.json",
+        "sha256": "0bb3f5c5c0a3dd0333a9fa056b0b918bad503d15a02752655528d4aa8faff8a2"
+      }
+    },
+    {
+      "library_id": "stage_x",
+      "config": {
+        "path": "config/topic4_rev12_nd_local_curvature_replication.json",
+        "sha256": "344e9cca881c12f472c12522f1a9e9b078107671fd45268cb1ea57092d0dd3ac"
+      },
+      "manifest": {
+        "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_x_local_curvature_replication/candidate_manifest.json",
+        "sha256": "229d258f0a733d09e711c09d0ab5c7538642b63d6d1a93d9685f843aae4ed507"
+      }
+    }
+  ],
+  "soft_objective": {
+    "tau": 0.25,
+    "occupancy_weight": 0.5,
+    "ambiguity_weight": 0.25,
+    "contrast_weight": 0.5,
+    "projection_seed": 20260825,
+    "projection_count": 64,
+    "calibration_sample_size": 6,
+    "calibration_draws": 256,
+    "calibration_seed": 20260825,
+    "patient_reference_events_per_mode": 512
+  },
+  "decision": {
+    "replication_tolerance": 1e-12,
+    "control_margin": 1e-6
+  },
+  "claim_boundary": "Zero-simulation audit of a continuous patient-mode fit target. Natural KMeans remains a blind validation endpoint and no patient held-out endpoint is scored or used for ranking. Passing this audit authorizes target development only; it does not authorize a field or scientific claim."
+}

@@ -15,8 +15,11 @@ from src.topic4_node_dualmode import (
     normalize_event_ranks,
     shaft_balanced_feature_weights,
     sliced_wasserstein,
+    soft_dual_mode_objective,
+    soft_topology_network_reproducibility,
     topology_network_reproducibility,
     topology_reproducibility,
+    weighted_sliced_wasserstein,
     weighted_r2,
 )
 
@@ -194,6 +197,62 @@ def test_duplicate_event_count_does_not_change_sliced_wasserstein():
     assert repeated < 1e-12
 
 
+def test_weighted_sliced_wasserstein_is_invariant_to_exact_replication():
+    patient, _ = _patient_modes()
+    features = event_features(normalize_event_ranks(patient))
+    feature_weights = shaft_balanced_feature_weights(NAMES)
+    projections = fixed_projection_matrix(features.shape[1], n_directions=16, seed=5)
+    once = weighted_sliced_wasserstein(
+        features, features, x_event_weights=np.ones(len(features)),
+        weights=feature_weights, projections=projections,
+    )
+    repeated = weighted_sliced_wasserstein(
+        np.repeat(features, 4, axis=0), features,
+        x_event_weights=np.ones(4 * len(features)),
+        weights=feature_weights, projections=projections,
+    )
+    assert once < 1e-12
+    assert repeated < 1e-12
+
+
+def test_soft_objective_prefers_two_confident_patient_modes_to_ambiguous_cloud():
+    patient, labels = _patient_modes(repeats=12)
+    projections = fixed_projection_matrix(2 * len(NAMES), n_directions=24, seed=41)
+    kwargs = dict(
+        patient_ranks=patient, patient_labels=labels, contact_names=NAMES,
+        projections=projections, calibration=_unit_floor_calibration(),
+    )
+    confident = soft_dual_mode_objective(
+        patient, labels.astype(float), **kwargs,
+    )
+    ambiguous = soft_dual_mode_objective(
+        patient, np.full(len(patient), 0.5), **kwargs,
+    )
+    one_mode = soft_dual_mode_objective(
+        patient[labels == 0], np.zeros(np.sum(labels == 0)), **kwargs,
+    )
+    assert confident["objective"] < ambiguous["objective"]
+    assert confident["objective"] < one_mode["objective"]
+    assert ambiguous["ambiguity"] == 1.0
+    assert one_mode["modes"]["1"]["missing"]
+
+
+def test_soft_objective_changes_continuously_across_classifier_midpoint():
+    patient, labels = _patient_modes(repeats=10)
+    projections = fixed_projection_matrix(2 * len(NAMES), n_directions=16, seed=42)
+    kwargs = dict(
+        patient_ranks=patient, patient_labels=labels, contact_names=NAMES,
+        projections=projections, calibration=_unit_floor_calibration(),
+    )
+    below = soft_dual_mode_objective(
+        patient, np.where(labels == 1, 0.4999, 0.0001), **kwargs,
+    )
+    above = soft_dual_mode_objective(
+        patient, np.where(labels == 1, 0.5001, 0.0001), **kwargs,
+    )
+    assert abs(below["objective"] - above["objective"]) < 1e-3
+
+
 def _topology_maps(*, random=False, identical=False, seed=0):
     rng = np.random.default_rng(seed)
     maps, labels = [], []
@@ -247,6 +306,19 @@ def test_network_topology_reliability_weights_networks_equally():
     assert result["modes"]["1"]["n_networks"] == 2
     assert result["mean_across_network_template_cosine"] > 0.99
     assert result["equal_network_between_mode_distance"] > 0.2
+
+
+def test_soft_topology_requires_probability_specific_templates():
+    maps, labels = _topology_maps()
+    coupled = soft_topology_network_reproducibility(
+        [maps, maps], [labels.astype(float), labels.astype(float)],
+    )
+    ambiguous = soft_topology_network_reproducibility(
+        [maps, maps], [np.full(len(maps), 0.5), np.full(len(maps), 0.5)],
+    )
+    assert coupled["mean_across_network_template_cosine"] > 0.99
+    assert coupled["equal_network_between_mode_distance"] > 0.2
+    assert ambiguous["equal_network_between_mode_distance"] < 1e-12
 
 
 def test_lse_equal_inputs_has_no_log_two_offset():

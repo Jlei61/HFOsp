@@ -304,6 +304,10 @@ def _load_network_worker(npz_path: Path, target_names: np.ndarray,
     if label_map.shape != (2,) or set(label_map.tolist()) != {0, 1}:
         raise ValueError("old-to-patient label map must be a permutation")
     returned_onsets = onsets[selected]
+    raw_probability_b = np.asarray(assigned["probability_B"], float)
+    patient_probability_b = (
+        raw_probability_b if int(label_map[1]) == 1 else 1.0 - raw_probability_b
+    )
     formal_clean = _formal_clean_mask(
         returned_onsets, np.asarray(assigned["ood"], bool)[selected],
         classifier_contract["groups"],
@@ -313,6 +317,7 @@ def _load_network_worker(npz_path: Path, target_names: np.ndarray,
         "ranks": ranks[selected],
         "onsets": returned_onsets,
         "labels": label_map[raw_labels][selected],
+        "probability_B": patient_probability_b[selected],
         "ood": np.asarray(assigned["ood"], bool)[selected],
         "formal_clean": formal_clean,
         "n_detected": int(len(returned)),

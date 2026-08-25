@@ -427,6 +427,11 @@ def load_event_sensitivity_workers(npz_path: Path, target_names: np.ndarray,
             embedding=classifier_contract["embedding"],
             classifier=classifier_contract["classifier"],
         )
+        raw_probability_b = np.asarray(assigned["probability_B"], float)
+        patient_probability_b = (
+            raw_probability_b if int(label_map[1]) == 1
+            else 1.0 - raw_probability_b
+        )
         rows.append({
             "variant": {
                 "sensitivity_value": float(values[index]),
@@ -448,6 +453,7 @@ def load_event_sensitivity_workers(npz_path: Path, target_names: np.ndarray,
                 "labels": label_map[np.asarray(assigned["labels"], int)][
                     current_returned
                 ],
+                "probability_B": patient_probability_b[current_returned],
                 "ood": np.asarray(assigned["ood"], bool)[current_returned],
                 "n_detected": n_events,
                 "n_returned": int(np.sum(current_returned)),

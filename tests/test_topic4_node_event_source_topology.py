@@ -10,6 +10,8 @@ from src.topic4_node_dualmode import (
     causal_root_displacement,
     causal_wave_monotonicity,
     causal_wave_monotonicity_alignment,
+    soft_causal_direction_alignment,
+    soft_causal_wave_monotonicity_alignment,
 )
 
 
@@ -91,6 +93,24 @@ def test_causal_direction_does_not_reward_eventwise_sign_cancellation():
     assert mixed["score"] == 0.0
 
 
+def test_soft_causal_direction_requires_probability_direction_coupling():
+    maps = np.asarray([
+        _horizontal_wave(), _horizontal_wave(),
+        _horizontal_wave(reverse=True), _horizontal_wave(reverse=True),
+    ])
+    coupled = soft_causal_direction_alignment(
+        maps, np.asarray([0.01, 0.02, 0.98, 0.99]),
+        axis_unit=np.asarray([1.0, 0.0]),
+        expected_mode_signs=np.asarray([1.0, -1.0]),
+    )
+    ambiguous = soft_causal_direction_alignment(
+        maps, np.full(4, 0.5), axis_unit=np.asarray([1.0, 0.0]),
+        expected_mode_signs=np.asarray([1.0, -1.0]),
+    )
+    assert coupled["score"] > 0.9
+    assert ambiguous["score"] == 0.0
+
+
 def test_causal_wave_monotonicity_uses_the_complete_onset_map():
     forward = causal_wave_monotonicity(
         _horizontal_wave(), axis_unit=np.asarray([1.0, 0.0]),
@@ -130,3 +150,18 @@ def test_causal_wave_monotonicity_clips_after_mode_mean():
         expected_mode_signs=np.asarray([1.0, -1.0]),
     )
     assert mixed["score"] == 0.0
+
+
+def test_soft_wave_monotonicity_rejects_one_direction_for_both_modes():
+    opposite = soft_causal_wave_monotonicity_alignment(
+        np.asarray([_horizontal_wave(), _horizontal_wave(reverse=True)]),
+        np.asarray([0.01, 0.99]), axis_unit=np.asarray([1.0, 0.0]),
+        expected_mode_signs=np.asarray([1.0, -1.0]),
+    )
+    same = soft_causal_wave_monotonicity_alignment(
+        np.asarray([_horizontal_wave(), _horizontal_wave()]),
+        np.asarray([0.01, 0.99]), axis_unit=np.asarray([1.0, 0.0]),
+        expected_mode_signs=np.asarray([1.0, -1.0]),
+    )
+    assert opposite["score"] > 0.9
+    assert same["score"] == 0.0

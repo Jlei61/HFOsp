@@ -284,6 +284,32 @@ def _weighted_quantile_grid(values: np.ndarray, n_quantiles: int) -> np.ndarray:
     return np.quantile(values, quantiles, method="inverted_cdf")
 
 
+def _normalized_event_weights(weights: np.ndarray, n_events: int) -> np.ndarray:
+    values = np.asarray(weights, float)
+    if values.shape != (int(n_events),) or not np.all(np.isfinite(values)):
+        raise ValueError("event weights must be finite and align with events")
+    if np.any(values < 0.0) or float(np.sum(values)) <= 0.0:
+        raise ValueError("event weights must be nonnegative with positive mass")
+    return values / float(np.sum(values))
+
+
+def _weighted_empirical_quantiles(values: np.ndarray, weights: np.ndarray,
+                                  n_quantiles: int) -> np.ndarray:
+    values = np.asarray(values, float)
+    weights = _normalized_event_weights(weights, len(values))
+    order = np.argsort(values, kind="stable")
+    ordered = values[order]
+    unique, inverse = np.unique(ordered, return_inverse=True)
+    unique_weights = np.bincount(
+        inverse, weights=weights[order], minlength=len(unique),
+    )
+    cumulative = np.cumsum(unique_weights)
+    cumulative[-1] = 1.0
+    quantiles = np.linspace(0.0, 1.0, int(n_quantiles))
+    indices = np.searchsorted(cumulative, quantiles, side="left")
+    return unique[np.clip(indices, 0, len(unique) - 1)]
+
+
 def fixed_projection_matrix(n_features: int, *, n_directions: int = 64,
                             seed: int = 20260821) -> np.ndarray:
     """Generate deterministic unit directions for sliced-Wasserstein scoring."""
@@ -315,6 +341,43 @@ def sliced_wasserstein(x: np.ndarray, y: np.ndarray, *, weights: np.ndarray,
     for direction in range(projections.shape[0]):
         xq = _weighted_quantile_grid(x_projection[:, direction], n_quantiles)
         yq = _weighted_quantile_grid(y_projection[:, direction], n_quantiles)
+        distances.append(float(np.sqrt(np.mean((xq - yq) ** 2))))
+    return float(np.mean(distances))
+
+
+def weighted_sliced_wasserstein(
+        x: np.ndarray, y: np.ndarray, *, x_event_weights: np.ndarray,
+        weights: np.ndarray, projections: np.ndarray,
+        y_event_weights: np.ndarray | None = None,
+        n_quantiles: int = 101) -> float:
+    """Sliced-Wasserstein distance for a probability-weighted event cloud."""
+    x = np.asarray(x, float)
+    y = np.asarray(y, float)
+    feature_weights = np.asarray(weights, float)
+    projections = np.asarray(projections, float)
+    if x.ndim != 2 or y.ndim != 2 or x.shape[1] != y.shape[1]:
+        raise ValueError("event samples must share a feature dimension")
+    if not len(x) or not len(y):
+        raise ValueError("event samples must be non-empty")
+    x_weights = _normalized_event_weights(x_event_weights, len(x))
+    y_weights = _normalized_event_weights(
+        np.ones(len(y), float) if y_event_weights is None else y_event_weights,
+        len(y),
+    )
+    if (feature_weights.shape != (x.shape[1],)
+            or projections.shape[1] != x.shape[1]):
+        raise ValueError("weights or projections do not match event features")
+    scale = np.sqrt(feature_weights / np.sum(feature_weights))
+    x_projection = (x * scale) @ projections.T
+    y_projection = (y * scale) @ projections.T
+    distances = []
+    for direction in range(projections.shape[0]):
+        xq = _weighted_empirical_quantiles(
+            x_projection[:, direction], x_weights, n_quantiles,
+        )
+        yq = _weighted_empirical_quantiles(
+            y_projection[:, direction], y_weights, n_quantiles,
+        )
         distances.append(float(np.sqrt(np.mean((xq - yq) ** 2))))
     return float(np.mean(distances))
 
@@ -408,6 +471,220 @@ def mode_distribution_components(model_ranks: np.ndarray, patient_ranks: np.ndar
             model_features, patient_features, weights=weights,
             projections=projections,
         ),
+    }
+
+
+def _weighted_precedence_distribution(ranks: np.ndarray, event_weights: np.ndarray,
+                                      i: int, j: int) -> np.ndarray:
+    values = np.asarray(ranks, float)
+    weights = _normalized_event_weights(event_weights, len(values))
+    both = np.isfinite(values[:, i]) & np.isfinite(values[:, j])
+    i_before = both & (values[:, i] < values[:, j])
+    j_before = both & (values[:, j] < values[:, i])
+    tied = both & ~(i_before | j_before)
+    return np.asarray([
+        np.sum(weights[i_before]) + 0.5 * np.sum(weights[tied]),
+        np.sum(weights[j_before]) + 0.5 * np.sum(weights[tied]),
+        np.sum(weights[~both]),
+    ], float)
+
+
+def weighted_mode_distribution_components(
+        model_ranks: np.ndarray, model_event_weights: np.ndarray,
+        patient_ranks: np.ndarray, contact_names: np.ndarray,
+        projections: np.ndarray) -> dict:
+    """Four patient-mode distances with continuous model event membership."""
+    model_normalized = normalize_event_ranks(model_ranks)
+    patient_normalized = normalize_event_ranks(patient_ranks)
+    event_weights = _normalized_event_weights(
+        model_event_weights, len(model_normalized),
+    )
+    feature_weights = shaft_balanced_feature_weights(contact_names)
+    model_features = event_features(model_normalized)
+    patient_features = event_features(patient_normalized)
+    shafts = _shaft_names(contact_names)
+
+    model_recruitment = np.sum(
+        event_weights[:, None] * np.isfinite(model_normalized), axis=0,
+    )
+    patient_recruitment = np.isfinite(patient_normalized).mean(axis=0)
+    recruitment = float(np.mean([
+        np.mean(np.abs(
+            model_recruitment[shafts == shaft]
+            - patient_recruitment[shafts == shaft]
+        ))
+        for shaft in ("ICL", "SCL")
+    ]))
+
+    pair_classes = {"ICL-ICL": [], "SCL-SCL": [], "ICL-SCL": []}
+    for i, j in combinations(range(len(shafts)), 2):
+        pair = f"{shafts[i]}-{shafts[j]}"
+        if pair == "SCL-ICL":
+            pair = "ICL-SCL"
+        model_distribution = _weighted_precedence_distribution(
+            model_normalized, event_weights, i, j,
+        )
+        patient_distribution = _precedence_distribution(
+            patient_normalized, i, j,
+        )
+        pair_classes[pair].append(
+            js_divergence(model_distribution, patient_distribution)
+        )
+    precedence_classes = {
+        name: float(np.mean(values)) for name, values in pair_classes.items()
+    }
+    model_profile = np.sum(event_weights[:, None] * model_features, axis=0)
+    patient_profile = np.mean(patient_features, axis=0)
+    profile = float(np.sqrt(np.sum(
+        feature_weights * (model_profile - patient_profile) ** 2
+    )))
+    return {
+        "recruitment": recruitment,
+        "precedence": float(np.mean(list(precedence_classes.values()))),
+        "precedence_classes": precedence_classes,
+        "profile": profile,
+        "cloud": weighted_sliced_wasserstein(
+            model_features, patient_features,
+            x_event_weights=event_weights,
+            weights=feature_weights, projections=projections,
+        ),
+    }
+
+
+def _soft_prototype_contrast(model_ranks: np.ndarray,
+                             probability_b: np.ndarray,
+                             patient_ranks: np.ndarray,
+                             patient_labels: np.ndarray,
+                             contact_names: np.ndarray) -> dict:
+    model_features = event_features(normalize_event_ranks(model_ranks))
+    patient_features = event_features(normalize_event_ranks(patient_ranks))
+    probabilities = np.asarray(probability_b, float)
+    weights = shaft_balanced_feature_weights(contact_names)
+    mode_weights = (1.0 - probabilities, probabilities)
+    if any(float(np.sum(current)) <= 1e-12 for current in mode_weights):
+        return {
+            "loss": 1.0,
+            "alignment": 0.0,
+            "weighted_cosine": 0.0,
+            "model_to_patient_amplitude_ratio": 0.0,
+            "amplitude_agreement": 0.0,
+            "model_prototypes": None,
+        }
+    model_prototypes = np.asarray([
+        np.sum(
+            _normalized_event_weights(current, len(model_features))[:, None]
+            * model_features,
+            axis=0,
+        )
+        for current in mode_weights
+    ])
+    patient_prototypes = np.asarray([
+        np.mean(patient_features[np.asarray(patient_labels, int) == mode], axis=0)
+        for mode in (0, 1)
+    ])
+    model_delta = model_prototypes[0] - model_prototypes[1]
+    patient_delta = patient_prototypes[0] - patient_prototypes[1]
+    model_norm = float(np.sqrt(np.sum(weights * model_delta ** 2)))
+    patient_norm = float(np.sqrt(np.sum(weights * patient_delta ** 2)))
+    denominator = model_norm * patient_norm
+    cosine = (
+        0.0 if denominator <= 0.0
+        else float(np.sum(weights * model_delta * patient_delta) / denominator)
+    )
+    ratio = 0.0 if patient_norm <= 0.0 else model_norm / patient_norm
+    amplitude_agreement = (
+        0.0 if ratio <= 0.0 else float(np.exp(-abs(np.log(ratio))))
+    )
+    alignment = float(max(0.0, cosine) * amplitude_agreement)
+    return {
+        "loss": float(1.0 - alignment),
+        "alignment": alignment,
+        "weighted_cosine": cosine,
+        "model_to_patient_amplitude_ratio": ratio,
+        "amplitude_agreement": amplitude_agreement,
+        "model_prototypes": model_prototypes,
+    }
+
+
+def soft_dual_mode_objective(
+        model_ranks: np.ndarray, probability_b: np.ndarray,
+        patient_ranks: np.ndarray, patient_labels: np.ndarray,
+        contact_names: np.ndarray, *, projections: np.ndarray,
+        calibration: dict, tau: float = 0.25,
+        occupancy_weight: float = 0.5,
+        ambiguity_weight: float = 0.25,
+        contrast_weight: float = 0.5) -> dict:
+    """Continuous patient-mode objective without a 0.5 label discontinuity."""
+    model_ranks = np.asarray(model_ranks, float)
+    probabilities = np.asarray(probability_b, float)
+    patient_ranks = np.asarray(patient_ranks, float)
+    patient_labels = np.asarray(patient_labels, int)
+    if (model_ranks.ndim != 2 or probabilities.shape != (len(model_ranks),)
+            or patient_ranks.ndim != 2
+            or model_ranks.shape[1] != patient_ranks.shape[1]
+            or patient_labels.shape != (len(patient_ranks),)
+            or not np.all(np.isfinite(probabilities))
+            or np.any((probabilities < 0.0) | (probabilities > 1.0))):
+        raise ValueError("soft dual-mode arrays do not align")
+    if not len(model_ranks):
+        raise ValueError("soft dual-mode objective requires returned model events")
+    per_mode, losses = {}, []
+    for mode, mode_weights in enumerate((1.0 - probabilities, probabilities)):
+        if float(np.sum(mode_weights)) <= 1e-12:
+            normalized = {
+                key: 2.0 for key in ("recruitment", "precedence", "profile", "cloud")
+            }
+            raw = None
+            missing = True
+        else:
+            raw = weighted_mode_distribution_components(
+                model_ranks, mode_weights,
+                patient_ranks[patient_labels == mode], contact_names, projections,
+            )
+            normalized = normalize_components_floor_ratio(raw, calibration, mode)
+            missing = False
+        mean = float(np.mean(list(normalized.values())))
+        normalized_mass = float(np.mean(mode_weights))
+        effective_events = float(
+            np.sum(mode_weights) ** 2 / max(np.sum(mode_weights ** 2), 1e-12)
+        )
+        per_mode[str(mode)] = {
+            **normalized,
+            "raw": raw,
+            "missing": missing,
+            "mean": mean,
+            "soft_occupancy": normalized_mass,
+            "effective_events": effective_events,
+        }
+        losses.append(mean)
+    model_occupancy = np.asarray([
+        np.mean(1.0 - probabilities), np.mean(probabilities),
+    ])
+    patient_occupancy = np.bincount(patient_labels, minlength=2).astype(float)
+    occupancy = js_divergence(model_occupancy, patient_occupancy)
+    ambiguity = float(np.mean(4.0 * probabilities * (1.0 - probabilities)))
+    contrast = _soft_prototype_contrast(
+        model_ranks, probabilities, patient_ranks, patient_labels, contact_names,
+    )
+    weakest = lse_max(np.asarray(losses), tau=tau)
+    objective = (
+        weakest + float(occupancy_weight) * occupancy
+        + float(ambiguity_weight) * ambiguity
+        + float(contrast_weight) * contrast["loss"]
+    )
+    return {
+        "modes": per_mode,
+        "weakest_mode_lse": weakest,
+        "occupancy_js": occupancy,
+        "ambiguity": ambiguity,
+        "contrast": contrast,
+        "objective": float(objective),
+        "weights": {
+            "weakest_mode_lse": 1.0,
+            "occupancy_js": float(occupancy_weight),
+            "ambiguity": float(ambiguity_weight),
+            "contrast_loss": float(contrast_weight),
+        },
     }
 
 
@@ -2209,6 +2486,112 @@ def topology_network_reproducibility(onset_maps_by_network: list[np.ndarray],
     }
 
 
+def soft_topology_network_reproducibility(
+        onset_maps_by_network: list[np.ndarray],
+        probability_b_by_network: list[np.ndarray]) -> dict:
+    """Equal-network source topology with continuous patient-mode membership."""
+    if len(onset_maps_by_network) != len(probability_b_by_network):
+        raise ValueError("network source maps and probabilities do not align")
+    mode_templates = {0: [], 1: []}
+    within_network = []
+    per_network = []
+    for maps, probabilities in zip(
+            onset_maps_by_network, probability_b_by_network):
+        maps = np.asarray(maps, float)
+        probabilities = np.asarray(probabilities, float)
+        if maps.ndim != 3 or probabilities.shape != (len(maps),):
+            raise ValueError("one network source map bundle does not align")
+        if (not np.all(np.isfinite(probabilities))
+                or np.any((probabilities < 0.0) | (probabilities > 1.0))):
+            raise ValueError("mode probabilities must lie in [0, 1]")
+        if not len(maps):
+            continue
+        features = source_topology_features(maps)
+        row = {"modes": {}}
+        network_reliabilities = []
+        for mode, weights in enumerate((1.0 - probabilities, probabilities)):
+            total = float(np.sum(weights))
+            if total <= 1e-12:
+                row["modes"][str(mode)] = {
+                    "soft_mass": total,
+                    "split_half_cosine": float("nan"),
+                }
+                continue
+            normalized = _normalized_event_weights(weights, len(features))
+            template = np.sum(normalized[:, None] * features, axis=0)
+            mode_templates[mode].append(template)
+            halves = []
+            for selected in (np.arange(len(features)) % 2 == 0,
+                             np.arange(len(features)) % 2 == 1):
+                half_weights = weights[selected]
+                if not np.any(selected) or float(np.sum(half_weights)) <= 1e-12:
+                    halves.append(None)
+                else:
+                    normalized_half = _normalized_event_weights(
+                        half_weights, int(np.sum(selected)),
+                    )
+                    halves.append(np.sum(
+                        normalized_half[:, None] * features[selected], axis=0,
+                    ))
+            reliability = (
+                float("nan") if any(half is None for half in halves)
+                else cosine_similarity(halves[0], halves[1])
+            )
+            if np.isfinite(reliability):
+                network_reliabilities.append(reliability)
+                within_network.append(reliability)
+            row["modes"][str(mode)] = {
+                "soft_mass": total,
+                "effective_events": float(
+                    total ** 2 / max(np.sum(weights ** 2), 1e-12)
+                ),
+                "split_half_cosine": reliability,
+            }
+        row["mean_split_half_cosine"] = (
+            float(np.mean(network_reliabilities))
+            if network_reliabilities else float("nan")
+        )
+        per_network.append(row)
+    modes, equal_network_templates = {}, []
+    for mode in (0, 1):
+        templates = mode_templates[mode]
+        similarities = np.asarray([
+            cosine_similarity(templates[left], templates[right])
+            for left, right in combinations(range(len(templates)), 2)
+        ], float)
+        similarities = similarities[np.isfinite(similarities)]
+        modes[str(mode)] = {
+            "n_networks": int(len(templates)),
+            "pairwise_network_cosine_mean": (
+                float(np.mean(similarities)) if len(similarities) else float("nan")
+            ),
+        }
+        equal_network_templates.append(
+            np.mean(templates, axis=0) if templates else None
+        )
+    separation = (
+        float("nan") if any(template is None for template in equal_network_templates)
+        else 1.0 - cosine_similarity(
+            equal_network_templates[0], equal_network_templates[1],
+        )
+    )
+    across = np.asarray([
+        modes[str(mode)]["pairwise_network_cosine_mean"] for mode in (0, 1)
+    ], float)
+    across = across[np.isfinite(across)]
+    return {
+        "modes": modes,
+        "mean_within_network_split_half_cosine": (
+            float(np.mean(within_network)) if within_network else float("nan")
+        ),
+        "mean_across_network_template_cosine": (
+            float(np.mean(across)) if len(across) else float("nan")
+        ),
+        "equal_network_between_mode_distance": separation,
+        "per_network": per_network,
+    }
+
+
 def causal_root_displacement(onset_map: np.ndarray, *, bin_mm: float = 1.0,
                              tail_fraction: float = 0.2) -> dict:
     """Measure one root's early-to-late displacement from its onset map.
@@ -2322,6 +2705,69 @@ def causal_direction_alignment(onset_maps: np.ndarray, labels: np.ndarray, *,
     }
 
 
+def soft_causal_direction_alignment(
+        onset_maps: np.ndarray, probability_b: np.ndarray, *,
+        axis_unit: np.ndarray, expected_mode_signs: np.ndarray,
+        bin_mm: float = 1.0, tail_fraction: float = 0.2) -> dict:
+    """Continuously couple patient-mode probability to opposite root motion."""
+    maps = np.asarray(onset_maps, float)
+    probabilities = np.asarray(probability_b, float)
+    axis = np.asarray(axis_unit, float)
+    signs = np.asarray(expected_mode_signs, float)
+    if maps.ndim != 3 or probabilities.shape != (len(maps),):
+        raise ValueError("causal-root maps and mode probabilities do not align")
+    if (not np.all(np.isfinite(probabilities))
+            or np.any((probabilities < 0.0) | (probabilities > 1.0))):
+        raise ValueError("mode probabilities must lie in [0, 1]")
+    if axis.shape != (2,) or not np.all(np.isfinite(axis)):
+        raise ValueError("axis_unit must be a finite 2-D vector")
+    norm = float(np.linalg.norm(axis))
+    if norm <= 0.0 or signs.shape != (2,) or set(np.sign(signs).tolist()) != {-1.0, 1.0}:
+        raise ValueError("patient axis and opposite mode signs are required")
+    axis = axis / norm
+    projections, selected_probabilities = [], []
+    for onset, probability in zip(maps, probabilities):
+        record = causal_root_displacement(
+            onset, bin_mm=bin_mm, tail_fraction=tail_fraction,
+        )
+        if not record["evaluable"]:
+            continue
+        displacement = np.asarray(record["displacement_xy_mm"], float)
+        projections.append(float(
+            np.dot(displacement, axis) / record["distance_mm"]
+        ))
+        selected_probabilities.append(float(probability))
+    projections = np.asarray(projections, float)
+    selected_probabilities = np.asarray(selected_probabilities, float)
+    modes, scores = {}, []
+    for mode, mode_weights in enumerate(
+            (1.0 - selected_probabilities, selected_probabilities)):
+        if not len(projections) or float(np.sum(mode_weights)) <= 1e-12:
+            signed, score, effective = float("nan"), 0.0, 0.0
+        else:
+            normalized = _normalized_event_weights(mode_weights, len(projections))
+            signed = float(signs[mode] * np.sum(normalized * projections))
+            score = float(max(0.0, signed))
+            effective = float(
+                np.sum(mode_weights) ** 2 / max(np.sum(mode_weights ** 2), 1e-12)
+            )
+        modes[str(mode)] = {
+            "soft_mass": float(np.sum(mode_weights)),
+            "effective_events": effective,
+            "mean_signed_axis_cosine": signed,
+            "alignment_score": score,
+        }
+        scores.append(score)
+    return {
+        "score": float(min(scores)),
+        "weakest_mode_protected": True,
+        "modes": modes,
+        "n_evaluable": int(len(projections)),
+        "tail_fraction": float(tail_fraction),
+        "bin_mm": float(bin_mm),
+    }
+
+
 def causal_wave_monotonicity(onset_map: np.ndarray, *, axis_unit: np.ndarray,
                              bin_mm: float = 1.0) -> dict:
     """Measure whether recruitment time changes monotonically along one axis.
@@ -2412,5 +2858,59 @@ def causal_wave_monotonicity_alignment(
         "weakest_mode_protected": True,
         "modes": modes,
         "n_evaluable": int(len(rows)),
+        "bin_mm": float(bin_mm),
+    }
+
+
+def soft_causal_wave_monotonicity_alignment(
+        onset_maps: np.ndarray, probability_b: np.ndarray, *,
+        axis_unit: np.ndarray, expected_mode_signs: np.ndarray,
+        bin_mm: float = 1.0) -> dict:
+    """Continuously couple patient-mode probability to axial wave monotonicity."""
+    maps = np.asarray(onset_maps, float)
+    probabilities = np.asarray(probability_b, float)
+    signs = np.asarray(expected_mode_signs, float)
+    if maps.ndim != 3 or probabilities.shape != (len(maps),):
+        raise ValueError("causal-root maps and mode probabilities do not align")
+    if (not np.all(np.isfinite(probabilities))
+            or np.any((probabilities < 0.0) | (probabilities > 1.0))):
+        raise ValueError("mode probabilities must lie in [0, 1]")
+    if signs.shape != (2,) or set(np.sign(signs).tolist()) != {-1.0, 1.0}:
+        raise ValueError("opposite expected mode signs are required")
+    correlations, selected_probabilities = [], []
+    for onset, probability in zip(maps, probabilities):
+        record = causal_wave_monotonicity(
+            onset, axis_unit=axis_unit, bin_mm=bin_mm,
+        )
+        if not record["evaluable"]:
+            continue
+        correlations.append(float(record["axis_time_spearman"]))
+        selected_probabilities.append(float(probability))
+    correlations = np.asarray(correlations, float)
+    selected_probabilities = np.asarray(selected_probabilities, float)
+    modes, scores = {}, []
+    for mode, mode_weights in enumerate(
+            (1.0 - selected_probabilities, selected_probabilities)):
+        if not len(correlations) or float(np.sum(mode_weights)) <= 1e-12:
+            signed, score, effective = float("nan"), 0.0, 0.0
+        else:
+            normalized = _normalized_event_weights(mode_weights, len(correlations))
+            signed = float(signs[mode] * np.sum(normalized * correlations))
+            score = float(max(0.0, signed))
+            effective = float(
+                np.sum(mode_weights) ** 2 / max(np.sum(mode_weights ** 2), 1e-12)
+            )
+        modes[str(mode)] = {
+            "soft_mass": float(np.sum(mode_weights)),
+            "effective_events": effective,
+            "mean_signed_axis_time_spearman": signed,
+            "alignment_score": score,
+        }
+        scores.append(score)
+    return {
+        "score": float(min(scores)),
+        "weakest_mode_protected": True,
+        "modes": modes,
+        "n_evaluable": int(len(correlations)),
         "bin_mm": float(bin_mm),
     }

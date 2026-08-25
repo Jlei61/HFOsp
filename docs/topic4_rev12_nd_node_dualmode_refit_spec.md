@@ -645,6 +645,55 @@ plots and historical Fig.4 diagnostics are reported but cannot affect this
 decision.  Failure closes this local free-field basin; success permits only a
 fresh-selection review, not Node-field acceptance.
 
+Stage-X completed all 18/18 paired runs.  `f14+0.03` did not reproduce its
+Stage-W advantage: the primary objective utility was negative on average, its
+90% network-bootstrap interval included zero, and only four of nine networks
+improved.  Aggregate patient mode-1 loss, natural KMeans alignment and causal
+direction also worsened.  The frozen decision is therefore
+`CLOSE_CURRENT_ANCHOR_LOCAL_BASIN`.  No further amplitude, seed or local
+cosine continuation is permitted from this result.
+
+### 7.1 Continuous patient-mode target audit
+
+The closed local basin exposed a separate target problem.  The frozen patient
+classifier already returns a continuous `P(TB)` for every causal-family event,
+but the fit path thresholded it at 0.5 and then optimized a hard KMeans
+alignment.  A small event-cloud displacement could therefore change both its
+patient-mode membership and its scalar loss discontinuously.  KMeans is still
+required for the Fig.4-style final validation, but it is not a suitable field
+fit coordinate.
+
+Stage-Y is a zero-simulation audit.  It retains the causal-family event unit and
+replaces hard membership in the development score with patient-mapped
+classifier probabilities.  For mode `k`, recruitment, precedence, profile and
+event-cloud distances use probability weights `1-P(TB)` or `P(TB)`.  The two
+mode losses remain protected by a smooth worst-mode LSE.  Three additional
+continuous terms prevent a single or ambiguous event cloud from masquerading
+as two modes:
+
+```text
+J_soft = LSE(D_TA, D_TB)
+       + 0.50 * JS(soft occupancy, patient occupancy)
+       + 0.25 * mean[4 P(TB)(1-P(TB))]
+       + 0.50 * (1 - aligned mode-contrast amplitude).
+```
+
+The target must prefer an exact two-mode patient-training reconstruction over
+an ambiguous continuous cloud, a one-mode generator and a contact-permuted
+generator.  Exact replication of every event must leave the score unchanged.
+All four controls passed.  The first 40-field zero-simulation rescore ranked
+`stage_u_f02_m` first, but this is only a three-network development result and
+does not freeze that field.  More importantly, Stage-X's paired soft-objective
+utility was only +0.0021 with five positive and four negative networks, which
+independently confirms that the local candidate has no stable advantage.
+
+Natural KMeans, its silhouette and held-out K2-vs-K1 density evidence are now
+final-validation diagnostics.  They cannot enter a global fit scalar.  The
+continuous causal-direction and full-map monotonicity scores remain separate
+Pareto axes so that a good contact-rank distribution cannot hide one-direction
+or spatially synchronous sheet activity.  Patient held-out events remain
+excluded from field fitting and ranking.
+
 ## 8. Mode-specific source topology
 
 The SNN worker derives a 1 mm sheet-bin onset map for every returned event from
