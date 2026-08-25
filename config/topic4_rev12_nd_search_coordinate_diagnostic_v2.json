@@ -1,0 +1,35 @@
+{
+  "schema_id": "topic4_rev12_nd_search_coordinate_diagnostic_v2",
+  "scientific_role": "zero_simulation_search_coordinate_diagnostic",
+  "inputs": {
+    "stage_s_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_s_edge_supported_field_refit/candidate_manifest.json",
+      "sha256": "6c8dc1e655c92edba908548904498d3d2c28cda82f6151f7c1d3a5d86ccd0fc4"
+    },
+    "stage_s_summary": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_s_edge_supported_field_refit/aggregate/fit_cascade_summary_mode_mean_direction.json",
+      "sha256": "1efc07fdebf112bdac3c139f78fa9c7b90f046d041941f5c5b4cba423517485b"
+    },
+    "stage_t_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_t_causal_continuation_capacity/candidate_manifest.json",
+      "sha256": "a036bf4e1936b47c6053ef647935bf3495b5c01086f3a5774426e0877c5eccc3"
+    },
+    "stage_t_summary": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_t_causal_continuation_capacity/aggregate/fit_cascade_summary_mode_mean_direction.json",
+      "sha256": "26137f7a5a2030fbfc6411f54e8ec068677b358557bef1567cafb25dbfcc9dda"
+    }
+  },
+  "surface_grid_per_axis": 31,
+  "advisory_actionability": {
+    "scale_sign_agreement_min": 0.75,
+    "stage_t_spearman_min": 0.50,
+    "seed_sign_agreement_min": 0.67,
+    "required_endpoints": ["objective_utility", "direction_utility"]
+  },
+  "output": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/search_coordinate_diagnostic_v2/search_coordinate_diagnostic.json",
+  "supersedes": {
+    "schema_id": "topic4_rev12_nd_search_coordinate_diagnostic_v1",
+    "reason": "v1 projected raw spline coefficients without applying the coefficient-mean centering used by continuous_surface"
+  },
+  "claim_boundary": "Zero-simulation diagnostic of the four existing observation-invariant whole-sheet coordinates. The manual smooth control is used only to audit span coverage and never to generate or select a data-driven candidate."
+}

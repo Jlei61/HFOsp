@@ -76,6 +76,112 @@ def sobol_coarse_residuals(*, n_residuals: int, n_basis: int = 4,
     return output
 
 
+def cosine_sheet_residuals(*, maximum_frequency: int = 3,
+                           target_n_basis: int = 18, degree: int = 3,
+                           sheet_mm: float = 20.0,
+                           projection_grid_per_axis: int = 61) -> dict:
+    """Build an ordered orthonormal low-frequency basis over the whole sheet.
+
+    The construction uses only the uniform sheet domain.  It does not receive
+    contact, shaft, patient-source or manual-core coordinates.  Constant mode
+    (0, 0) is excluded because the downstream field budget removes a global
+    offset.
+    """
+    maximum_frequency = int(maximum_frequency)
+    target_n_basis = int(target_n_basis)
+    degree = int(degree)
+    if maximum_frequency <= 0 or target_n_basis < degree + 1:
+        raise ValueError("cosine basis dimensions are invalid")
+    grid = uniform_sheet_grid(
+        int(projection_grid_per_axis), sheet_mm=float(sheet_mm),
+    )
+    x = grid[:, 0]
+    y = grid[:, 1]
+    spline = tensor_basis(
+        grid, target_n_basis, degree=degree, L=float(sheet_mm),
+    )
+    coefficient_count = target_n_basis ** 2
+    centering = np.eye(coefficient_count) - np.full(
+        (coefficient_count, coefficient_count), 1.0 / coefficient_count,
+    )
+    centered_spline = spline @ centering
+    effective_spline = centered_spline - np.mean(centered_spline, axis=0, keepdims=True)
+    mode_indices = sorted(
+        [
+            (kx, ky)
+            for kx in range(maximum_frequency + 1)
+            for ky in range(maximum_frequency + 1)
+            if (kx, ky) != (0, 0)
+        ],
+        key=lambda pair: (
+            pair[0] ** 2 + pair[1] ** 2,
+            max(pair), pair[0], pair[1],
+        ),
+    )
+    target_vectors: list[np.ndarray] = []
+    coefficient_vectors: list[np.ndarray] = []
+    fitted_vectors: list[np.ndarray] = []
+    rows = []
+    for mode_index, (kx, ky) in enumerate(mode_indices):
+        target = (
+            np.cos(np.pi * float(kx) * x / float(sheet_mm))
+            * np.cos(np.pi * float(ky) * y / float(sheet_mm))
+        )
+        target = target - float(np.mean(target))
+        for previous in target_vectors:
+            target = target - float(np.mean(target * previous)) * previous
+        target_rms = float(np.sqrt(np.mean(target ** 2)))
+        if target_rms <= 1e-12:
+            raise RuntimeError("cosine target basis became degenerate")
+        target = target / target_rms
+        unconstrained, *_ = np.linalg.lstsq(effective_spline, target, rcond=None)
+        # Solve directly in the coefficient-mean-zero subspace used by
+        # continuous_surface rather than fitting and centering afterwards.
+        coefficients = centering @ unconstrained
+        fitted = spline @ coefficients
+        for previous_coefficients, previous_surface in zip(
+                coefficient_vectors, fitted_vectors):
+            effective = fitted - float(np.mean(fitted))
+            projection = float(np.mean(effective * previous_surface))
+            coefficients = coefficients - projection * previous_coefficients
+            fitted = fitted - projection * previous_surface
+        effective = fitted - float(np.mean(fitted))
+        fitted_rms = float(np.sqrt(np.mean(effective ** 2)))
+        if fitted_rms <= 1e-12:
+            raise RuntimeError("projected cosine basis became degenerate")
+        coefficients = coefficients / fitted_rms
+        fitted = fitted / fitted_rms
+        effective = fitted - float(np.mean(fitted))
+        target_vectors.append(target)
+        coefficient_vectors.append(coefficients)
+        fitted_vectors.append(effective)
+        rows.append({
+            "mode_index": int(mode_index),
+            "kx": int(kx), "ky": int(ky),
+            "spatial_frequency_norm": float(np.hypot(kx, ky)),
+            "coefficients": coefficients.reshape(
+                target_n_basis, target_n_basis,
+            ),
+            "projection_rmse": float(np.sqrt(np.mean((effective - target) ** 2))),
+            "surface_mean": float(np.mean(fitted)),
+            "effective_surface_rms": float(np.sqrt(np.mean(effective ** 2))),
+        })
+    surfaces = np.column_stack(fitted_vectors)
+    gram = surfaces.T @ surfaces / len(surfaces)
+    off_diagonal = gram - np.eye(len(rows))
+    return {
+        "rows": rows,
+        "maximum_frequency": maximum_frequency,
+        "n_modes": int(len(rows)),
+        "target_n_basis": target_n_basis,
+        "degree": degree,
+        "sheet_mm": float(sheet_mm),
+        "projection_grid_per_axis": int(projection_grid_per_axis),
+        "maximum_absolute_gram_error": float(np.max(np.abs(off_diagonal))),
+        "observation_coordinates_used": False,
+    }
+
+
 def residual_candidate(anchor: dict, residual: np.ndarray, *, amplitude: float,
                        candidate_id: str, residual_index: int,
                        coarse_n_basis: int = 4) -> dict:

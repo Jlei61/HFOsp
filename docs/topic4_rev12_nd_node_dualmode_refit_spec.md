@@ -569,6 +569,26 @@ and
 The original aggregates remain audit evidence and must not be used for field
 ranking.
 
+A zero-simulation coordinate audit then tested whether the four Stage-S Sobol
+directions supplied a reproducible local gradient.  The first audit artifact
+(`search_coordinate_diagnostic_v1`) is invalid because it projected raw spline
+coefficients without applying both constant equivalences used by the simulator:
+coefficient-mean removal in `continuous_surface` and spatial-constant removal by
+the mass projection.  It is retained as provenance only.  The corrected v2
+artifact performs every projection on the effective mean-free sheet surface.
+
+The next fit-only screen, Stage-U, therefore does not continue along the failed
+four-direction response surface.  It freezes the corrected Stage-S scalar leader
+as a data-driven anchor and spans the uniform 20 mm sheet with all 15 nonconstant
+two-dimensional cosine modes up to frequency index three.  These modes are
+projected into the stored 18 x 18 spline in the effective mean-free surface
+metric, are mutually orthonormal, and use no contact, shaft, patient-source or
+manual-core coordinate.  Each mode is tested symmetrically at surface RMS 0.08
+on fit networks 2241--2243.  This is a derivative screen, not a field-selection
+round: no combination proposal is allowed until mode effects show cross-network
+sign support.  The smooth manual capacity control is not simulated and only
+audits generic span coverage.
+
 ## 8. Mode-specific source topology
 
 The SNN worker derives a 1 mm sheet-bin onset map for every returned event from

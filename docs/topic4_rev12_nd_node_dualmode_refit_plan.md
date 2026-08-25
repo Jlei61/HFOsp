@@ -297,6 +297,40 @@ values.  The corrected Stage-S leader is `stage_i_a02_d01_s00_p`
 `stage_t_a02_directional_coherence_s00` (`J=2.0107`, direction `0.1816`).
 Thus Stage-T did not improve the selectable field library.
 
+Coordinate diagnostic result: the initial v1 projection omitted the simulator's
+constant-field equivalence and is invalidated.  The corrected v2 diagnostic
+uses centered effective sheet surfaces.  Unless v2 reverses the decision, the
+four Sobol directions are closed and must not seed another response-surface
+continuation.
+
+## Phase 1n: orthogonal continuous free-field screen
+
+1. Freeze `stage_i_a02_d01_s00_p`, the corrected Stage-S scalar leader, as the
+   only anchor.  Do not use the manual capacity control as an anchor or target.
+2. Generate all 15 nonconstant 2-D cosine modes with frequency indices 0--3 on
+   the uniform 20 mm sheet.  Project them into the 18 x 18 spline after removing
+   both coefficient and spatial constants.  Require effective surface RMS 1,
+   pairwise Gram error below `1e-10`, and no observation coordinates.
+3. Run the anchor and `+/-0.08` for every mode on fit networks 2241--2243 with
+   Node only, the frozen causal-family event unit and exact-neuron contact
+   readout.  This is 31 fields x 3 networks = 93 workers.
+4. For patient loss, natural KMeans alignment, OOD, compound fraction,
+   mode-mean causal direction, full-map monotonicity and source-topology
+   reproducibility, estimate symmetric per-network mode slopes.  A mode may
+   enter a combination proposal only when its sign is supported across networks;
+   the outer `+/-0.16` amplitude is reserved for a later scale check of the
+   retained modes.
+5. Do not open selection/confirmation networks or intervention.  If no generic
+   low-frequency mode has reproducible directional and patient-distribution
+   signal, diagnose objective noise/event support before adding higher spatial
+   frequencies.
+
+The 15-mode basis has maximum Gram error `2.0e-15`.  As a diagnostic only, it
+captures 78.2% of the manual capacity-control delta energy from the data-driven
+anchor, versus about 46% for the old four-direction span.  This verifies a
+material capacity expansion without using the manual control to orient or
+select any mode.
+
 ## Phase 1f: native-worker parity before refitting
 
 1. Make `lineage_restricted_sheet_activity` the formal contact readout in the
@@ -393,10 +427,9 @@ scientific acceptance conditions in the spec are jointly met.
 
 ## Current execution order
 
-Phase 1m simulation and the frozen zero-simulation mode-mean direction rescore
-are complete.  Compare the corrected Pareto set with the 16 algorithmic GIFs
-and diagnose whether the existing continuous-field coordinates contain a
-predictive gradient before freezing another fit library.  Do not open fresh
-selection, intervention, confirmation, EE, E-to-I or Z/M.  The next field
-library must be designed from the corrected objective and cannot use the manual
-capacity control as a selectable initialization.
+Phase 1m and mode-mean rescoring are complete.  Complete the corrected v2
+coordinate diagnostic, freeze Stage-U at a clean commit, then run its 93 fit
+workers under the resource controller.  Aggregate and analyze all seven
+predeclared endpoints before generating any field combination.  Do not open
+fresh selection, intervention, confirmation, EE, E-to-I or Z/M; the manual
+capacity control remains non-selectable and cannot initialize the search.

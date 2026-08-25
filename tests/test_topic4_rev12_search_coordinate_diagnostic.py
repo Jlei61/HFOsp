@@ -5,11 +5,14 @@ from pathlib import Path
 import numpy as np
 
 from scripts.diagnose_topic4_rev12_search_coordinates import (
+    _field_surfaces,
     advisory_status,
     agreement_summary,
     project_coordinates,
     scale_predictivity,
 )
+from src.topic4_continuous_field import tensor_basis
+from src.topic4_node_field_search import uniform_sheet_grid
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -97,3 +100,17 @@ def test_search_coordinate_script_is_directly_invocable():
         cwd=ROOT, text=True, capture_output=True, check=False,
     )
     assert result.returncode == 0, result.stderr
+
+
+def test_field_surface_projection_removes_unidentifiable_coefficient_mean():
+    coefficients = np.arange(16, dtype=float).reshape(4, 4)
+    manifest = {"candidates": [{
+        "candidate_id": "field",
+        "node_field": {"n_basis": 4, "degree": 3, "coefficients": coefficients},
+    }]}
+    grid = uniform_sheet_grid(9)
+    basis = tensor_basis(grid, 4, degree=3, L=20.0)
+    first = _field_surfaces(manifest, basis)["field"]
+    manifest["candidates"][0]["node_field"]["coefficients"] = coefficients + 50.0
+    second = _field_surfaces(manifest, basis)["field"]
+    assert np.allclose(first, second)

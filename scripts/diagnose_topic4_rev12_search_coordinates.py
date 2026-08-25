@@ -245,12 +245,14 @@ def _surface_basis(manifest: dict, *, grid_per_axis: int) -> np.ndarray:
 
 
 def _field_surfaces(manifest: dict, basis: np.ndarray) -> dict[str, np.ndarray]:
-    return {
-        candidate["candidate_id"]: basis @ np.asarray(
-            candidate["node_field"]["coefficients"], float,
-        ).ravel()
-        for candidate in manifest["candidates"]
-    }
+    output = {}
+    for candidate in manifest["candidates"]:
+        surface = basis @ (
+            np.asarray(candidate["node_field"]["coefficients"], float).ravel()
+            - float(np.mean(candidate["node_field"]["coefficients"]))
+        )
+        output[candidate["candidate_id"]] = surface - float(np.mean(surface))
+    return output
 
 
 def project_coordinates(target: np.ndarray, basis_vectors: np.ndarray) -> dict:
