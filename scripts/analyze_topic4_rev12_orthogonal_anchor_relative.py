@@ -10,6 +10,7 @@ import math
 import os
 import re
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -19,6 +20,7 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 ARTIFACT_ROOT = Path("/home/honglab/leijiaxin/HFOsp")
 MODE_ID = re.compile(r"^stage_u_f(?P<mode>\d+)_(?P<sign>[mp])$")
+sys.path.insert(0, str(ROOT))
 
 from scripts.analyze_topic4_rev12_orthogonal_free_field_screen import (  # noqa: E402
     AGGREGATE_ENDPOINTS,

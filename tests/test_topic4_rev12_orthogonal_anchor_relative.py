@@ -4,6 +4,17 @@ from scripts.analyze_topic4_rev12_orthogonal_anchor_relative import (
 )
 
 
+def test_script_entrypoint_can_import_from_scripts_directory():
+    import subprocess
+    import sys
+
+    result = subprocess.run(
+        [sys.executable, "scripts/analyze_topic4_rev12_orthogonal_anchor_relative.py", "--help"],
+        check=False, capture_output=True, text=True,
+    )
+    assert result.returncode == 0, result.stderr
+
+
 def _row(*, objective, mode0, mode1, kmeans=0.5, direction=0.4):
     seeds = (1, 2, 3)
     return {
