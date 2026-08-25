@@ -444,7 +444,8 @@ Stage-W trust-region canary:
 4. aggregate the full objective, both patient-mode losses, natural KMeans,
    direction, monotonicity, OOD, compound fraction and source topology;
 5. stop on the fit pool unless one direct simulation improves the aggregate
-   objective and both patient modes with at least two-of-three network support.
+   objective, both patient modes, natural KMeans and causal direction, with at
+   least two-of-three network support for the objective and both mode losses.
 
 This uses at most 21 short runs.  Fresh selection, intervention, confirmation,
 EE, E-to-I and Z/M remain closed.  The smooth manual capacity control remains

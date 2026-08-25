@@ -618,8 +618,9 @@ components needed for attribution (`f01+`, `f02-`, `f11+`, `f14+`) at reduced
 RMS 0.03, and at most two sparse combinations nominated by the anchor-relative
 audit.  It is limited to fit networks 2241--2243.  Stage-W closes as a bounded
 negative result if no directly simulated candidate simultaneously improves the
-aggregate objective and both patient-mode losses with at least two-of-three
-network support; selection, confirmation, intervention, EE, E-to-I and Z/M stay
+aggregate objective, both patient-mode losses, natural KMeans and causal
+direction, with at least two-of-three network support for the objective and both
+mode losses; selection, confirmation, intervention, EE, E-to-I and Z/M stay
 closed in that case.
 
 ## 8. Mode-specific source topology

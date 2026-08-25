@@ -1,0 +1,32 @@
+{
+  "schema_id": "topic4_rev12_nd_local_curvature_result_analysis_v1",
+  "scientific_role": "fit_only_direct_local_curvature_validation",
+  "inputs": {
+    "stage_config": {
+      "path": "config/topic4_rev12_nd_local_curvature_canary.json",
+      "sha256": "18349f1aa6a9a199628eba74835f5d65c785fe927e1118f4f39678802d8dd714"
+    },
+    "candidate_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_w_local_curvature_canary/candidate_manifest.json",
+      "sha256": "0bb3f5c5c0a3dd0333a9fa056b0b918bad503d15a02752655528d4aa8faff8a2"
+    }
+  },
+  "aggregate": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_w_local_curvature_canary/aggregate/fit_cascade_summary.json",
+  "output": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_w_local_curvature_canary/analysis/direct_anchor_relative_result.json",
+  "decision": {
+    "minimum_same_sign_networks": 2,
+    "required_aggregate_endpoints": [
+      "objective_utility",
+      "patient_mode_0_utility",
+      "patient_mode_1_utility",
+      "kmeans_utility",
+      "direction_utility"
+    ],
+    "required_network_endpoints": [
+      "objective_utility",
+      "patient_mode_0_utility",
+      "patient_mode_1_utility"
+    ]
+  },
+  "claim_boundary": "Direct fit-network validation only. A candidate may open a fresh-selection review but is not selected, confirmed or accepted. Source-topology and complete held-out event-cloud acceptance remain unresolved; EE, E-to-I and Z/M remain closed."
+}
