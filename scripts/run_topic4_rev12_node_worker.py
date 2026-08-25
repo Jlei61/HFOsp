@@ -64,6 +64,7 @@ ALLOWED_SCIENTIFIC_ROLES = {
     "development_only_full_fit_replay_after_event_identity_fix",
     "development_only_causal_continuation_and_capacity",
     "development_only_orthogonal_free_field_screen",
+    "development_only_local_curvature_canary",
 }
 
 
