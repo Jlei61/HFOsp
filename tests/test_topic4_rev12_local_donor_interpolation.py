@@ -6,6 +6,7 @@ import numpy as np
 import pytest
 
 from scripts.freeze_topic4_rev12_local_donor_interpolation import build_candidates
+from scripts.run_topic4_rev12_node_worker import _validate_scientific_role
 
 
 ROOT = Path("/home/honglab/leijiaxin/HFOsp")
@@ -82,3 +83,11 @@ def test_interpolation_stops_if_stage_ab_mode1_evidence_changes():
     inputs[-1]["status"] = "OMITTED_PARETO_NO_BALANCED_STABILITY"
     with pytest.raises(RuntimeError, match="mode-1 donor"):
         build_candidates(*inputs, _design())
+
+
+def test_interpolation_config_uses_a_worker_supported_scientific_role():
+    config = json.loads((
+        Path(__file__).parents[1]
+        / "config/topic4_rev12_nd_local_donor_interpolation.json"
+    ).read_text())
+    _validate_scientific_role(config["scientific_role"])
