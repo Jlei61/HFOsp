@@ -4,6 +4,7 @@ from src.topic4_node_field_search import (
     coarse_residual_to_coefficients,
     normalize_surface_residual,
     residual_candidate,
+    sobol_cosine_combinations,
     sobol_coarse_residuals,
 )
 from src.topic4_continuous_field import continuous_surface
@@ -30,6 +31,18 @@ def test_sobol_residuals_are_deterministic_and_contact_free():
     second = sobol_coarse_residuals(n_residuals=5, seed=7)
     assert all(np.array_equal(left, right) for left, right in zip(first, second))
     assert all(np.isclose(np.mean(row), 0.0) for row in first)
+
+
+def test_global_cosine_combinations_are_antithetic_with_frozen_radii():
+    rows = sobol_cosine_combinations(
+        n_pairs=5, n_modes=15, radii=(0.16, 0.34, 0.52), seed=7,
+    )
+    assert len(rows) == 10
+    for pair in range(5):
+        left, right = rows[2 * pair:2 * pair + 2]
+        assert np.allclose(left["coefficients"], -right["coefficients"])
+        assert np.isclose(left["coefficient_l2"], left["radius"])
+        assert left["radius"] == (0.16, 0.34, 0.52)[pair % 3]
 
 
 def test_residual_candidate_changes_the_field_hash_without_components():

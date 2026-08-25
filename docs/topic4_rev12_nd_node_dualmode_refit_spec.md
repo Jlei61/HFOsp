@@ -861,3 +861,34 @@ patient-constrained continuous excitability field can organize two reproducible
 interictal propagation modes.  It would not identify anatomical cores, prove
 patient causality, establish clinical generalization or validate an ictal
 mechanism.
+
+## 16. Stage-Z global soft-field screen
+
+Stage-X closed the tested anchor-local basin and Stage-Y showed that hard
+`P(TB)>=0.5` labels discard useful continuous information. Stage-Z therefore
+tests a genuinely multidirectional but still continuous Node field. It is not
+a new core-count model and does not use electrode locations to place basis
+functions.
+
+The search span consists of the 15 non-constant cosine modes with spatial
+frequencies `kx,ky=0..3`, projected onto the frozen 18 x 18 spline field. These
+modes are built on a uniform 20 x 20 mm sheet and receive no contact, shaft,
+patient-source or manual-core coordinates. Sixteen scrambled-Sobol directions
+are paired antithetically at sheet-space RMS radii 0.16, 0.34 and 0.52. The
+frozen anchor and historical soft-score benchmark bring the fit screen to 34
+fields. Every field is simulated on the same three new fit networks
+2261--2263, giving 102 common-random-number runs.
+
+Nomination is exploratory and Pareto-based. Its five axes are soft patient
+training objective (minimize), soft causal direction, causal wave monotonicity,
+cross-network source-topology reproducibility and between-mode source-topology
+separation (maximize). Natural KMeans is a final validation diagnostic and
+patient held-out data are unopened. Up to six nominees may pass to expanded fit
+replication, with no more than two from one radius; best soft fit and best causal
+direction are retained as sentinels. This screen cannot freeze Node or open
+selection, intervention, EE, E-to-I or Z/M by itself.
+
+The queue may use up to 20 workers because that concurrency already completed
+Stage-U without crossing the memory reserve. It remains dynamically bounded by
+measured available memory, a conservative 10 GiB per-worker estimate, at least
+32 GiB reserved memory and a 600 s controller interval.

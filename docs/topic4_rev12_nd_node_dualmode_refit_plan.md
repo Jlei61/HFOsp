@@ -497,3 +497,23 @@ support.  The next run must therefore be a global, observation-invariant
 continuous-field search with patient rank fit, causal direction and topology
 kept as explicit Pareto axes.  It may use fit networks only; fresh selection,
 confirmation, intervention, EE, E-to-I and Z/M remain closed.
+
+## Stage-Z execution
+
+1. Freeze the 15-mode uniform-sheet cosine span, 16 Sobol antithetic pairs at
+   RMS 0.16/0.34/0.52, the Stage-U anchor and `stage_u_f02_m` benchmark.
+2. Audit exact antithetic symmetry, requested sheet-space RMS, unique field
+   hashes and absence of contact/patient/manual-core coordinates.
+3. Run 34 fields x fit networks 2261--2263 for 20 s with the frozen causal-family
+   observation. EE, E-to-I and Z/M remain off.
+4. Aggregate the Stage-Y soft objective and four independent causal/topology
+   axes. Event-definition sensitivities and natural KMeans are diagnostic only;
+   held-out patient data remain unopened.
+5. Nominate at most six Pareto fields, no more than two per radius, while always
+   retaining the best soft-fit and best-direction sentinels.
+6. Do not select or freeze a field from these three networks. First expand the
+   nominees on fresh fit networks, then freeze a shortlist before selection.
+7. Use the previously validated maximum of 20 one-thread workers, dynamically
+   reduced from live memory with a 32 GiB reserve. The launcher and one-shot
+   finisher run under `systemd-run --user` plus `nohup`; both wait at 600 s
+   intervals rather than continuous polling.

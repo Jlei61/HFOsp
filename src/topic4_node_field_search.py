@@ -182,6 +182,38 @@ def cosine_sheet_residuals(*, maximum_frequency: int = 3,
     }
 
 
+def sobol_cosine_combinations(*, n_pairs: int, n_modes: int,
+                              radii: tuple[float, ...],
+                              seed: int = 20260825) -> list[dict]:
+    """Generate deterministic antithetic directions in a free cosine span."""
+    n_pairs, n_modes = int(n_pairs), int(n_modes)
+    radius_values = tuple(float(value) for value in radii)
+    if n_pairs <= 0 or n_modes <= 0 or not radius_values:
+        raise ValueError("global combination dimensions must be positive")
+    if any(not np.isfinite(value) or value <= 0.0 for value in radius_values):
+        raise ValueError("global combination radii must be finite and positive")
+    engine = qmc.Sobol(d=n_modes, scramble=True, seed=int(seed))
+    sample_count = 1 << int(np.ceil(np.log2(max(2, n_pairs))))
+    samples = 2.0 * engine.random_base2(int(np.log2(sample_count))) - 1.0
+    rows = []
+    for pair_index, sample in enumerate(samples[:n_pairs]):
+        norm = float(np.linalg.norm(sample))
+        if norm <= 1e-12:
+            raise RuntimeError("Sobol global direction became degenerate")
+        unit = sample / norm
+        radius = radius_values[pair_index % len(radius_values)]
+        for sign in (-1.0, 1.0):
+            coefficients = sign * radius * unit
+            rows.append({
+                "pair_index": int(pair_index),
+                "sign": int(sign),
+                "radius": radius,
+                "coefficients": coefficients,
+                "coefficient_l2": float(np.linalg.norm(coefficients)),
+            })
+    return rows
+
+
 def residual_candidate(anchor: dict, residual: np.ndarray, *, amplitude: float,
                        candidate_id: str, residual_index: int,
                        coarse_n_basis: int = 4) -> dict:
