@@ -628,3 +628,34 @@ mode 0 relative to `g04-`. The status is
    without deleting the recruitment, shaft-precedence or event-cloud terms that
    exposed the manual control's mismatch. Otherwise revise the event target or
    Node mechanism before spending more simulation.
+
+Stage-AE found an observed cross-mode trade-off: the manual capacity field
+improves mode-1 direction while worsening all four mode-0 patient loss terms.
+It also found that the old 16-direction, three-network Stage-Z library is too
+ill-conditioned and noisy for gradient-based proposal generation. It does not
+support another interpolation from the old candidates.
+
+## Stage-AF orthogonal paired response calibration
+
+1. Center the experiment on the data-driven `stage_z_g04_m` field. Do not use
+   the manual field coefficients, contact positions or patient source
+   coordinates.
+2. Reuse the 15 orthonormal whole-sheet cosine modes from Stage-Z. Add and
+   subtract each mode at a common effective surface RMS of 0.18, producing 30
+   continuous spline fields. The exact midpoint of every pair must reconstruct
+   `g04-` coefficient by coefficient.
+3. Run all 30 fields on fit networks 2271--2279 with Node only, common random
+   numbers, the causal-family event unit and the full soft patient target. This
+   is 270 runs. Use the resource controller's measured-memory limit, at most 14
+   one-thread workers, a 32 GiB reserve and a 600 s monitor interval.
+4. Estimate each basis-mode slope independently from its positive/negative
+   pair within each network. Report network bootstrap intervals and gradient
+   cosine across leave-network-out fits for total patient fit, mode 0, mode 1,
+   mode-specific causal direction and monotonicity.
+5. Only if the orthogonal slopes identify a reproducible joint-improvement
+   direction, freeze a small Stage-AG candidate set generated from the
+   patient-derived objective and causal metrics. The manual capacity field may
+   not initialize or anchor those candidates.
+6. If no reproducible direction preserves both patient modes while improving
+   the weak causal direction, stop field-only optimization and revise the Node
+   mechanism or event target before opening EE, E-to-I or Z/M.

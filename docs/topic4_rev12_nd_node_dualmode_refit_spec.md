@@ -1008,3 +1008,32 @@ only already generated fit artifacts. Any revised optimization target must be
 derived from the patient mode axes and model causal trajectories, not from the
 manual field geometry. The manual field remains a capacity control and may not
 seed or anchor a claimed recovery.
+
+Stage-AE completed without simulation. Relative to `g04-`, the manual control's
+mode-1 causal direction increased by 0.183, while mode-0 causal direction
+decreased by 0.064. All four mode-0 patient loss terms worsened: recruitment
+0.370, precedence 0.234, profile 0.317 and event cloud 0.144. Mode-1 patient
+losses moved slightly in the favorable direction, while its soft occupancy and
+effective event count increased. Thus the observed trade-off is specifically a
+shift toward a directionally coherent mode 1 at the expense of the full mode-0
+distribution. This is not proof that patient matching and opposite causal
+propagation are mathematically incompatible.
+
+The old Stage-Z perturbation library cannot identify a trustworthy local search
+gradient. Its 16 by 15 direction matrix is full rank but has condition number
+69.8. Leave-one-direction Pearson correlation was 0.205 for mode 0, -0.179 for
+mode 1 and 0.086 for mode-1 causal direction; cross-network gradient cosine was
+also unstable. The status is
+`OBSERVED_CROSS_MODE_TRADEOFF_NEW_PAIRED_DESIGN_REQUIRED`. Therefore another
+field proposal cannot be calculated from the old three-network screen without
+substantial overfitting.
+
+Stage-AF is a fit-only orthogonal response calibration around `g04-`. It uses
+the 15 observation-invariant low-frequency cosine basis functions already
+frozen in Stage-Z, one positive and one negative perturbation per basis mode,
+at one small common sheet-RMS radius. The design is exactly orthogonal and does
+not use contact, manual-core or patient-source coordinates. It is run on the
+nine opened fit networks with Node only. Its purpose is to estimate paired
+network response slopes for the full patient objective, each patient mode, and
+each mode's causal direction and monotonicity. It does not select or confirm a
+Node field by itself.
