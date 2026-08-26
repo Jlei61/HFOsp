@@ -1097,3 +1097,23 @@ field, total h-weighted threshold modulation, network topology, EE, E-to-I and
 Z/M, and it must include the current mapping exactly as a bitwise-reference
 arm. A negative result closes this microheterogeneity explanation rather than
 licensing another field search.
+
+Stage-AH completed 24/24 new runs with no runaway. Shrinking signed depth did
+not remove the trade-off. At the unchanged anchor, `rho=0.5` improved mode-1
+causal direction by 0.094 (90% paired bootstrap interval 0.044--0.149), but
+worsened the total soft objective by 0.094, mode 0 by 0.062 and mode-0 causal
+direction by 0.075. At `g10+`, `rho=0` improved mode-1 direction by 0.206
+(0.117--0.289) relative to its own `rho=1` mapping, while worsening the total
+objective by 0.138, mode 0 by 0.093 and mode-0 direction by 0.189. No mapping
+had positive mean utility for the total objective, both patient modes and both
+directions relative to the unchanged Stage-AG anchor. The formal status is
+`SIGNED_DEPTH_SHRINKAGE_DOES_NOT_RESOLVE_TWO_MODE_TRADEOFF`.
+
+This experiment varies the variance, negative-depth fraction and tails of the
+frozen signed depth distribution together; it therefore cannot identify
+random neuronal assignment as a cause. Its negative result closes depth
+shrinkage, not every possible Node mapping. Before another simulation, existing
+Node amplitude/gain artifacts must be audited to determine whether a scalar
+threshold-depth axis has already been tested. If it has, the next revision must
+address the patient/event representation or use a genuinely distinct Node
+channel rather than repeat field or gain scans.

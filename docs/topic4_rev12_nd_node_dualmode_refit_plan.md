@@ -728,3 +728,22 @@ closed.
 6. This is a mechanism audit, not a parameter optimization. If shrinkage does
    not resolve the two-mode tradeoff consistently, close signed
    microheterogeneity as the explanation. Do not tune intermediate rho values.
+
+Stage-AH completed 24/24 runs without runaway and found no balanced mapping.
+Depth shrinkage consistently moved the system toward mode-1 direction while
+sacrificing mode 0 and the full patient objective. It is therefore another
+expression of the same cross-mode trade-off, not a rescue. Do not scan more
+rho values or permute `d` after this negative strength test.
+
+## Stage-AI zero-simulation Node-axis inventory
+
+1. Inventory every completed rev12 Node-only field-amplitude, outer-amplitude,
+   threshold-depth and exact-neuron experiment before defining another run.
+2. Re-score only existing fit artifacts with the current causal-family event
+   unit when the required whole-sheet arrays exist; otherwise record why parity
+   is impossible rather than substituting the old detector-fragment metric.
+3. Determine whether a scalar Node gain has already crossed a range broad
+   enough to change event regime. If yes, close gain as a duplicated proposal.
+4. Only if gain is genuinely unresolved may a small paired gain canary be
+   frozen. Otherwise revise the patient/event target or introduce a distinct
+   data-driven Node channel. EE, E-to-I and Z/M remain closed.
