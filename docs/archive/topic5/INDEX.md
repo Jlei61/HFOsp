@@ -1,5 +1,34 @@
 # Topic 5 Archive Index
 
+- **2026-08-18 Epi-PRSSM v0.1 新合同（审阅后修订）**：
+  [`scientific spec`](../../superpowers/specs/2026-08-18-topic5-epi-prssm-v0_1.md) ·
+  [`figure contract`](../../superpowers/specs/2026-08-18-topic5-epi-prssm-figure-contract.md) ·
+  [`implementation plan`](../../superpowers/plans/2026-08-18-topic5-epi-prssm-v0_1.md) ·
+  [`autonomous agent prompt`](../../superpowers/plans/2026-08-18-topic5-epi-prssm-autonomous-agent-prompt.md)。
+  主轴改为 H1=可 open-loop 的慢状态、H2a=状态调制事件分布、H2b=冻结状态连接
+  preictal/early-ictal、H3a/b=IED exposure 是否更新间期功能状态及是否与发作转换方向一致。H3 是独立机制扩展，
+  不再作为 H1/H2 的总 gate；generator 改为 G0 leaky → G1 graph-CLDS → G2 graph-GRU-ODE →
+  G3 resource-anchored 阶梯，primary observer 不逐事件改写 resource。全项目只保留数据/泄漏完整性、
+  seizure-label 前 interictal freeze、正式 untouched test 三个硬门，其余阴性结果自动降低对应 claim，实验继续。
+
+- **2026-08-18 Epi-PRSSM v0.1 首轮探索性执行结果**：
+  [`白话版报告`](epi_prssm_v0_1_plain_chinese_report_2026-08-18.md) ·
+  [`技术报告`](epi_prssm_v0_1_technical_report_2026-08-18.md) ·
+  机器可读汇总 `results/epi_prssm/v0_1/FINAL_RUN_SUMMARY.json` ·
+  接手说明 `results/epi_prssm/v0_1/CURRENT_HANDOFF.md`。
+  34 位患者、864,163 次间期事件、2,097 个记录块；Hard Gate A 通过，与上一代冻结管线的
+  通道/事件映射 34/34 逐元素一致（`results/epi_prssm/v0_1/baseline/CONTACT_RNN_PARITY.md`）。
+  **全项目尺子：逐患者中位数只有 3.8% 的参与度方差是随时间变的**，其余是各自固定的 repertoire。
+  三处由 just-in-time synthetic 或代码审计抓出、且会让结论作废的问题已修并重跑：
+  (1) H1 第一级台阶原本与「只有固定习惯」的臂相比，增益主要来自适配器逐触点参数，已改为与
+  容量配平的冻结状态臂相比；(2) 资源类 synthetic 真值原本走 spec 禁止的「直接改触点兴奋性」
+  通路，已改写为调制潜状态到读出的增益；(3) 状态时间常数写成 `softplus(log τ)` 时实际初始化在
+  5.7 秒且训练预算内最多到约 20 秒，**模型在结构上无法表示慢状态**，已改为对数空间指数参数化，
+  受影响运行归档在 `results/epi_prssm/v0_1/_invalidated_tau_parametrisation/`。
+  H2b 的分母瓶颈是数据取法（间期事件按确定无疑的间期时段挑选，发作附近被排除，
+  最后一个间期事件通常在数小时以前）；early-ictal transfer 未运行（盲法临床起始触点 0/71）。
+  正式未触碰检验分区**一次都未开启**，本轮全部为开发分区结果。
+
 - `event_innovation_v3_0_execution_handoff_2026-08-03.md` — V3.0 已完成边界、实时进程、剩余 cumulative aggregate / acceptance / 归档步骤与禁止偏离项。**已闭环**，执行结果见下方 `event_innovation_v3_0_acceptance_2026-08-03.md`。
 
 ## 当前后续合同（2026-08-03）
@@ -205,3 +234,35 @@
 ### `constructive_event_generation_sufficiency_v0_1_report_2026-07-30.md` — **局部 transition 可生成，但完整双向事件充分性 Gate 失败**
 - 34 人 × 3 seeds 的 102 个 source-conditioned free-running 单元全部完成；history 改善 first-order transition fingerprint，但不改善 suffix rank/precedence，只有 9/34 人至少两项达到人体 split-half 经验范围。
 - 独立 rank-progress STOP 在 34/34 人必要；22 位 train-only 双模态+物理轴合格患者中，history 未改善 template 或 signed-axis fidelity。Gate C 与 SNN bridge 按合同锁定。
+# Continuous marked-state R1.2b 收口与下一阶段
+
+- `continuous_marked_state_r1_2b_closeout_2026-08-25.md`：冻结 R1.2b 为有限
+  target-alignment 诊断，规定 persistent-vs-memoryless、完整 raw R1.3、精确
+  H2a 与长尺度最小 T2-S1 的执行边界。
+- `continuous_marked_state_r1_3_preregistered_contract_2026-08-25.md`：正式固定
+  三人×三 seed 的 paired explicit/full-raw 训练、inner selection、H2a 端点与
+  梯度/更新量验收口径；smoke 不进入正式聚合。
+- `continuous_marked_state_t2_s1_long_scale_human_contract_2026-08-25.md`：把 H3
+  的 `N=100` 降为短尺度参照，预注册 `N=1000` 为当前两位可测患者的主探索；
+  `N=10000` 只在张家齐等高事件量患者具备同合同 T1 后执行，历史严格不跨记录缺口。
+- `continuous_marked_state_t2_long_total_effect_contract_2026-08-26.md`：把 H3 从
+  下一事件 residual edge 扩展为长窗 total-effect 候选；固定张家齐 `N=10000`
+  与约 6 小时两尺度、occurrence+load 双输入、no-edge 与因果延迟 1000 次
+  counterfactual，并以冻结 T1 decoder 空间为主评分。
+- `continuous_marked_state_long_t1_triage_contract_2026-08-26.md`：在三位事前固定
+  长记录患者上完成 target-trained R1.3 三 seed 分诊，并把 H3 独立支持改为
+  real window 与 causal-delayed 额外 1,000 events 的联合区间。9/9 T1 完成，
+  但无人同时满足 2/3 persistent T1 与 TRAIN/validation 各至少 3 个完整不重叠窗；
+  因此新人体 H3 按合同 0 作业，判为不可检验而非生物学阴性。权威报告位于
+  `results/epi_prssm/continuous_marked_state/r1/r1_3_long_triage_goal_report/`。
+
+### 2026-08-26 近期 goals 综合复审
+
+- 白话版：`results/epi_prssm/continuous_marked_state/r1/final_reports/recent_goals_integrated_review_plain_2026-08-26.md`
+- 技术版：`results/epi_prssm/continuous_marked_state/r1/final_reports/recent_goals_integrated_review_technical_2026-08-26.md`
+- 两版统一审阅 2026-08-21 至 2026-08-26 的 Raw-SEEG、R1.2/R1.2b/R1.3 与短至超长尺度 H3，并已吸收第二轮代码复审：H2b 当前重算为 +0.4582 SD、21/27、p=0.0059、339 次可评分发作，但仪器修复后仍需重跑；六小时 boxcar 为 7/7 拟合发散、不可估计；H3 资格按真实记录覆盖段而不是 `event_session` 计算。两版明确区分 accepted development evidence、结构零、发散/不可测人体结果与尚未打开的正式检验分区。
+- 第二轮更正记录仅作审计链，正文不再依赖读者另行覆盖：`recent_goals_integrated_review_post_review_corrections_2026-08-26.md`
+  - 机器重算：`results/epi_prssm/continuous_marked_state/r1/final_reports/recent_goals_post_review_audit.json`
+- 前一轮长尺度更正记录：`continuous_marked_state_t2_long_total_post_review_corrections_2026-08-26.md`
+- 最终下一版合同：`continuous_marked_state_r1_4_t2_r2_0_contract_2026-08-27.md`
+  - 六患者 R1.4 复现 H1/H2a；H3 主实验回到 H3-S0 支持最稳定的 N=100 一步 generator-edge；N=1,000–2,000 与六小时 boxcar 退出当前主线。

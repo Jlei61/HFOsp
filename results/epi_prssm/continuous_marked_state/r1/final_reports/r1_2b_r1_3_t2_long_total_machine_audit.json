@@ -1,0 +1,112 @@
+{
+  "claim_boundary": "development instrument result; one high-event-count patient; no causal, cohort, seizure or formal-test claim",
+  "denominators": {
+    "event_count_10000": {
+      "generator_time_constant_minutes": 54.062375995447596,
+      "median_effective_weighted_events": 2408.8830456459023,
+      "train_windows": 11905,
+      "validation_effective_independent_windows": 1.8110376800971981,
+      "validation_endpoint_span_hours": 1.6318166667222977,
+      "validation_next_event_pairs": 4714,
+      "validation_windows": 4715,
+      "windows_cross_unrecorded_gap": 0,
+      "windows_cross_unrecorded_gap_recomputed": 0
+    },
+    "physical_6h": {
+      "generator_time_constant_minutes": 54.062375995447596,
+      "median_effective_weighted_events": 2285.4929883349932,
+      "train_windows": 7922,
+      "validation_effective_independent_windows": 2.3972512789792844,
+      "validation_endpoint_span_hours": 2.160018333329095,
+      "validation_next_event_pairs": 5990,
+      "validation_windows": 5991,
+      "windows_cross_unrecorded_gap": 0,
+      "windows_cross_unrecorded_gap_recomputed": 0
+    }
+  },
+  "engineering_completion": {
+    "all_formal_test_partition_flags_false": true,
+    "all_sealed_flags_false": true,
+    "human_long_fits_complete": 6,
+    "human_long_fits_expected": 6,
+    "r1_3_t1_fits_complete": 3,
+    "r1_3_t1_fits_expected": 3,
+    "synthetic_status": "COMPLETE"
+  },
+  "hashes": {
+    "aggregator": "a20522a77083c07138e7625d3ef67ba372bd923bf62fc13d79b8f8445daa07ff",
+    "contract": "3060728ee9b6d10772feb0790de2efba7cf8ca95eb4726c95ae5413515449e82",
+    "handoff": "090b6601078b6ff401999bbf080e926b209889a8569e54af8f901f0b8c58a5de",
+    "human_runner": "24596248037ec9d293b032e3d8da245565c6e112046aa224b468b43ae37d4af4",
+    "long_total_module": "a061e03074fba736bd30c8ffea478bdaf39ee744bfd539f34e04b50826739e0a",
+    "plain_report": "64d8be2f708241d77b90468ca5e6ab150dc10e87efc79043f5b4d0187e52443b",
+    "post_review_auditor": "9a10f55076305c962b7781472033379d20fe696795b87ec59bd938895665e9ec",
+    "post_review_corrections": "c771fdea1101c8cfdbb6775b7edad55bccbf233162d161c8919df35f161efd16",
+    "synthetic_runner": "d48156fa8b0e99d1d0bd01ba9edf797da029c528d358e7dd4806e04c8a1a376d",
+    "technical_report": "a24090181c4970bf06681a703d5e090a8c6aeed145d6839b390a9e18ca5551a5"
+  },
+  "post_review": {
+    "corrections": [
+      "real_minus_no_edge demoted: the exposure arms own a free state-space intercept, worth -445 on an exposure-free target",
+      "nominal window is not the tested time scale: the generator time constant is 54.1 min, not 6 h",
+      "window counts are not a sample size: 1.8 / 2.4 effective independent validation windows",
+      "short-scale T2-S1 '0/2' was a structural zero; the correct denominator is 0/0"
+    ],
+    "date": "2026-08-26",
+    "human_results_predate_the_fixes": [
+      "t2_long_total_effect_decoder_space_v1"
+    ],
+    "record": "docs/archive/topic5/continuous_marked_state_t2_long_total_post_review_corrections_2026-08-26.md",
+    "stale_artefacts_requiring_a_rerun_before_citation": [
+      "t2_s1_long_scale/human/**/result.json (placebo donor exclusion now covers validation targets)"
+    ]
+  },
+  "result_hashes": {
+    "human_summary": "cad1b5763c1af06970a5fadf033f85508fd461d83db403163f6eb33fa499a7fe",
+    "per_seed_csv": "22fa6b3fd147c80b578e3bd2097d19cf26ed97a65dafe7cf2e77e7346e531f6e",
+    "post_review_audit": "7133c77eb937a1a5a916330d006933657891feea893909d8bf2b4abe1ad3c85c",
+    "synthetic_result": "f00b9d5062253efe111e7ef729add04a25cef00ada377cbb5ed02a082a4258e2"
+  },
+  "revision": "t2_long_total_effect_decoder_space_v2_intercept_matched",
+  "scientific_admissibility": {
+    "decoder_rank": [
+      0
+    ],
+    "distinct_seed_payloads": {
+      "event_count_10000": 1,
+      "physical_6h": 1
+    },
+    "event_count_10000_admissible_seeds": 0,
+    "human_scientific_status": [
+      "UNTESTABLE_T1_INSTRUMENT_DEGENERATE"
+    ],
+    "physical_6h_admissible_seeds": 0,
+    "structural_zero_is_not_h3_negative": true,
+    "synthetic_acceptance": {
+      "drift_null_no_load_timing_gain": true,
+      "drift_null_real_does_not_beat_intercept": true,
+      "mixed_real_beats_delayed": true,
+      "mixed_real_beats_intercept_matched": true,
+      "mixed_theta_direction_recovered": true,
+      "null_real_gain_small": true,
+      "occurrence_real_and_delayed_both_beat_intercept_matched": true,
+      "offset_null_no_load_timing_gain": true,
+      "offset_null_real_does_not_beat_intercept": true,
+      "offset_null_reproduces_intercept_artefact": true
+    },
+    "synthetic_acceptance_all_true": true,
+    "t1_seeds": 3,
+    "t1_selected_epoch_zero_seeds": 3,
+    "t1_state_model_entirely_at_initialisation": true
+  },
+  "status": "COMPLETE",
+  "subject": "yuquan_zhangjiaqi",
+  "tests": {
+    "failed": 0,
+    "log": "/home/honglab/leijiaxin/HFOsp/results/epi_prssm/continuous_marked_state/r1/t2_long_total_effect/logs/final_pytest.log",
+    "log_sha256": "c18dcc6b3ae36155640a397f45c6591133117f1616a400f3973f0a5f829155b2",
+    "passed": 87,
+    "summary_line": "87 passed, 12 warnings in 21.15s",
+    "warnings": 12
+  }
+}

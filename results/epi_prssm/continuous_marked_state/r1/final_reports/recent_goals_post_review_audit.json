@@ -1,0 +1,1754 @@
+{
+  "boxcar_endpoint_support": {
+    "yuquan_chenziyang/event_count_3000": {
+      "boxcar_corrected_effective_independent_validation_windows": 1.1793118778207132,
+      "boxcar_window_minutes": 283.269950000445,
+      "recorded_effective_independent_validation_windows": 6.169215232698521
+    },
+    "yuquan_chenziyang/event_count_4000": {
+      "boxcar_corrected_effective_independent_validation_windows": 0.9075725540605356,
+      "boxcar_window_minutes": 368.08474999666214,
+      "recorded_effective_independent_validation_windows": 6.169215232698521
+    },
+    "yuquan_chenziyang/physical_6h": {
+      "boxcar_corrected_effective_independent_validation_windows": 0.9280969278319674,
+      "boxcar_window_minutes": 359.9447500010331,
+      "recorded_effective_independent_validation_windows": 6.169215232698521
+    },
+    "yuquan_hanyuxuan/event_count_2000": {
+      "boxcar_corrected_effective_independent_validation_windows": 0.48012524043091337,
+      "boxcar_window_minutes": 590.9752833366394,
+      "recorded_effective_independent_validation_windows": 5.217759198152745
+    },
+    "yuquan_hanyuxuan/physical_6h": {
+      "boxcar_corrected_effective_independent_validation_windows": 0.7901530697659213,
+      "boxcar_window_minutes": 359.09769999980927,
+      "recorded_effective_independent_validation_windows": 5.217759198152745
+    }
+  },
+  "current_module_revision": "t2_long_total_effect_decoder_space_v4_scaled_ridge_estimability_guarded",
+  "formal_test_partition_opened": false,
+  "h2b_primary_cell_from_producer_table": {
+    "all_eligible": {
+      "analysed_seizures": 339,
+      "favourable_patients": 21,
+      "median_shift_in_null_sd": 0.4582428876668366,
+      "patients": 27,
+      "sign_test_p": 0.005924612283706665
+    },
+    "eligible_rows_in_table": 361,
+    "high_observability": {
+      "analysed_seizures": 201,
+      "favourable_patients": 17,
+      "median_shift_in_null_sd": 0.2666551476757377,
+      "patients": 27,
+      "sign_test_p": 0.24778856337070465
+    },
+    "note": "seizures behind the readout are fewer than the eligible rows because a seizure with a degenerate pseudo-onset null yields no z",
+    "premise_met_rows": 203
+  },
+  "h3_independent_window_budget": {
+    "epilepsiae_620": {
+      "any_verdict_changes": false,
+      "candidate_windows": [
+        {
+          "event_session": {
+            "qualifies": false,
+            "train": 7,
+            "validation": 1,
+            "windows": 9147
+          },
+          "full_instrument_support_events": 2000,
+          "recorded_coverage_segment": {
+            "qualifies": false,
+            "train": 0,
+            "validation": 0,
+            "windows": 0
+          },
+          "scale_events": 1000,
+          "verdict_changes_with_partition": false
+        },
+        {
+          "event_session": {
+            "qualifies": false,
+            "train": 3,
+            "validation": 0,
+            "windows": 5399
+          },
+          "full_instrument_support_events": 3000,
+          "recorded_coverage_segment": {
+            "qualifies": false,
+            "train": 0,
+            "validation": 0,
+            "windows": 0
+          },
+          "scale_events": 2000,
+          "verdict_changes_with_partition": false
+        },
+        {
+          "event_session": {
+            "qualifies": false,
+            "train": 2,
+            "validation": 0,
+            "windows": 3399
+          },
+          "full_instrument_support_events": 4000,
+          "recorded_coverage_segment": {
+            "qualifies": false,
+            "train": 0,
+            "validation": 0,
+            "windows": 0
+          },
+          "scale_events": 3000,
+          "verdict_changes_with_partition": false
+        },
+        {
+          "event_session": {
+            "qualifies": false,
+            "train": 1,
+            "validation": 0,
+            "windows": 1621
+          },
+          "full_instrument_support_events": 5000,
+          "recorded_coverage_segment": {
+            "qualifies": false,
+            "train": 0,
+            "validation": 0,
+            "windows": 0
+          },
+          "scale_events": 4000,
+          "verdict_changes_with_partition": false
+        },
+        {
+          "event_session": {
+            "qualifies": false,
+            "train": 1,
+            "validation": 0,
+            "windows": 621
+          },
+          "full_instrument_support_events": 6000,
+          "recorded_coverage_segment": {
+            "qualifies": false,
+            "train": 0,
+            "validation": 0,
+            "windows": 0
+          },
+          "scale_events": 5000,
+          "verdict_changes_with_partition": false
+        },
+        {
+          "event_session": {
+            "qualifies": false,
+            "train": 0,
+            "validation": 0,
+            "windows": 0
+          },
+          "full_instrument_support_events": 11000,
+          "recorded_coverage_segment": {
+            "qualifies": false,
+            "train": 0,
+            "validation": 0,
+            "windows": 0
+          },
+          "scale_events": 10000,
+          "verdict_changes_with_partition": false
+        }
+      ],
+      "minimum_nonoverlapping_each_split": 3,
+      "n_event_sessions": 9,
+      "n_recorded_segments": 64,
+      "subject": "epilepsiae_620"
+    },
+    "epilepsiae_922": {
+      "any_verdict_changes": true,
+      "candidate_windows": [
+        {
+          "event_session": {
+            "qualifies": true,
+            "train": 36,
+            "validation": 11,
+            "windows": 83050
+          },
+          "full_instrument_support_events": 2000,
+          "recorded_coverage_segment": {
+            "qualifies": true,
+            "train": 21,
+            "validation": 7,
+            "windows": 28766
+          },
+          "scale_events": 1000,
+          "verdict_changes_with_partition": false
+        },
+        {
+          "event_session": {
+            "qualifies": true,
+            "train": 23,
+            "validation": 8,
+            "windows": 73258
+          },
+          "full_instrument_support_events": 3000,
+          "recorded_coverage_segment": {
+            "qualifies": true,
+            "train": 10,
+            "validation": 3,
+            "windows": 13501
+          },
+          "scale_events": 2000,
+          "verdict_changes_with_partition": false
+        },
+        {
+          "event_session": {
+            "qualifies": true,
+            "train": 16,
+            "validation": 5,
+            "windows": 65235
+          },
+          "full_instrument_support_events": 4000,
+          "recorded_coverage_segment": {
+            "qualifies": false,
+            "train": 4,
+            "validation": 2,
+            "windows": 5128
+          },
+          "scale_events": 3000,
+          "verdict_changes_with_partition": true
+        },
+        {
+          "event_session": {
+            "qualifies": true,
+            "train": 12,
+            "validation": 4,
+            "windows": 58235
+          },
+          "full_instrument_support_events": 5000,
+          "recorded_coverage_segment": {
+            "qualifies": false,
+            "train": 0,
+            "validation": 2,
+            "windows": 1749
+          },
+          "scale_events": 4000,
+          "verdict_changes_with_partition": true
+        },
+        {
+          "event_session": {
+            "qualifies": true,
+            "train": 9,
+            "validation": 4,
+            "windows": 52122
+          },
+          "full_instrument_support_events": 6000,
+          "recorded_coverage_segment": {
+            "qualifies": false,
+            "train": 0,
+            "validation": 1,
+            "windows": 204
+          },
+          "scale_events": 5000,
+          "verdict_changes_with_partition": true
+        },
+        {
+          "event_session": {
+            "qualifies": false,
+            "train": 3,
+            "validation": 2,
+            "windows": 28115
+          },
+          "full_instrument_support_events": 11000,
+          "recorded_coverage_segment": {
+            "qualifies": false,
+            "train": 0,
+            "validation": 0,
+            "windows": 0
+          },
+          "scale_events": 10000,
+          "verdict_changes_with_partition": false
+        }
+      ],
+      "minimum_nonoverlapping_each_split": 3,
+      "n_event_sessions": 11,
+      "n_recorded_segments": 49,
+      "subject": "epilepsiae_922"
+    },
+    "epilepsiae_958": {
+      "any_verdict_changes": true,
+      "candidate_windows": [
+        {
+          "event_session": {
+            "qualifies": true,
+            "train": 41,
+            "validation": 15,
+            "windows": 102163
+          },
+          "full_instrument_support_events": 2000,
+          "recorded_coverage_segment": {
+            "qualifies": false,
+            "train": 2,
+            "validation": 0,
+            "windows": 738
+          },
+          "scale_events": 1000,
+          "verdict_changes_with_partition": true
+        },
+        {
+          "event_session": {
+            "qualifies": true,
+            "train": 27,
+            "validation": 10,
+            "windows": 94163
+          },
+          "full_instrument_support_events": 3000,
+          "recorded_coverage_segment": {
+            "qualifies": false,
+            "train": 0,
+            "validation": 0,
+            "windows": 0
+          },
+          "scale_events": 2000,
+          "verdict_changes_with_partition": true
+        },
+        {
+          "event_session": {
+            "qualifies": true,
+            "train": 18,
+            "validation": 7,
+            "windows": 86237
+          },
+          "full_instrument_support_events": 4000,
+          "recorded_coverage_segment": {
+            "qualifies": false,
+            "train": 0,
+            "validation": 0,
+            "windows": 0
+          },
+          "scale_events": 3000,
+          "verdict_changes_with_partition": true
+        },
+        {
+          "event_session": {
+            "qualifies": true,
+            "train": 13,
+            "validation": 6,
+            "windows": 79237
+          },
+          "full_instrument_support_events": 5000,
+          "recorded_coverage_segment": {
+            "qualifies": false,
+            "train": 0,
+            "validation": 0,
+            "windows": 0
+          },
+          "scale_events": 4000,
+          "verdict_changes_with_partition": true
+        },
+        {
+          "event_session": {
+            "qualifies": true,
+            "train": 12,
+            "validation": 5,
+            "windows": 72237
+          },
+          "full_instrument_support_events": 6000,
+          "recorded_coverage_segment": {
+            "qualifies": false,
+            "train": 0,
+            "validation": 0,
+            "windows": 0
+          },
+          "scale_events": 5000,
+          "verdict_changes_with_partition": true
+        },
+        {
+          "event_session": {
+            "qualifies": false,
+            "train": 5,
+            "validation": 2,
+            "windows": 42474
+          },
+          "full_instrument_support_events": 11000,
+          "recorded_coverage_segment": {
+            "qualifies": false,
+            "train": 0,
+            "validation": 0,
+            "windows": 0
+          },
+          "scale_events": 10000,
+          "verdict_changes_with_partition": false
+        }
+      ],
+      "minimum_nonoverlapping_each_split": 3,
+      "n_event_sessions": 9,
+      "n_recorded_segments": 135,
+      "subject": "epilepsiae_958"
+    },
+    "yuquan_chengshuai": {
+      "any_verdict_changes": false,
+      "candidate_windows": [
+        {
+          "event_session": {
+            "qualifies": true,
+            "train": 8,
+            "validation": 3,
+            "windows": 20060
+          },
+          "full_instrument_support_events": 2000,
+          "recorded_coverage_segment": {
+            "qualifies": true,
+            "train": 8,
+            "validation": 3,
+            "windows": 20060
+          },
+          "scale_events": 1000,
+          "verdict_changes_with_partition": false
+        },
+        {
+          "event_session": {
+            "qualifies": false,
+            "train": 5,
+            "validation": 2,
+            "windows": 19060
+          },
+          "full_instrument_support_events": 3000,
+          "recorded_coverage_segment": {
+            "qualifies": false,
+            "train": 5,
+            "validation": 2,
+            "windows": 19060
+          },
+          "scale_events": 2000,
+          "verdict_changes_with_partition": false
+        },
+        {
+          "event_session": {
+            "qualifies": false,
+            "train": 4,
+            "validation": 2,
+            "windows": 18060
+          },
+          "full_instrument_support_events": 4000,
+          "recorded_coverage_segment": {
+            "qualifies": false,
+            "train": 4,
+            "validation": 2,
+            "windows": 18060
+          },
+          "scale_events": 3000,
+          "verdict_changes_with_partition": false
+        },
+        {
+          "event_session": {
+            "qualifies": false,
+            "train": 3,
+            "validation": 2,
+            "windows": 17060
+          },
+          "full_instrument_support_events": 5000,
+          "recorded_coverage_segment": {
+            "qualifies": false,
+            "train": 3,
+            "validation": 2,
+            "windows": 17060
+          },
+          "scale_events": 4000,
+          "verdict_changes_with_partition": false
+        },
+        {
+          "event_session": {
+            "qualifies": false,
+            "train": 2,
+            "validation": 1,
+            "windows": 16060
+          },
+          "full_instrument_support_events": 6000,
+          "recorded_coverage_segment": {
+            "qualifies": false,
+            "train": 2,
+            "validation": 1,
+            "windows": 16060
+          },
+          "scale_events": 5000,
+          "verdict_changes_with_partition": false
+        },
+        {
+          "event_session": {
+            "qualifies": false,
+            "train": 1,
+            "validation": 1,
+            "windows": 11060
+          },
+          "full_instrument_support_events": 11000,
+          "recorded_coverage_segment": {
+            "qualifies": false,
+            "train": 1,
+            "validation": 1,
+            "windows": 11060
+          },
+          "scale_events": 10000,
+          "verdict_changes_with_partition": false
+        }
+      ],
+      "minimum_nonoverlapping_each_split": 3,
+      "n_event_sessions": 1,
+      "n_recorded_segments": 1,
+      "subject": "yuquan_chengshuai"
+    },
+    "yuquan_chenziyang": {
+      "any_verdict_changes": false,
+      "candidate_windows": [
+        {
+          "event_session": {
+            "qualifies": false,
+            "train": 2,
+            "validation": 1,
+            "windows": 5045
+          },
+          "full_instrument_support_events": 2000,
+          "recorded_coverage_segment": {
+            "qualifies": false,
+            "train": 2,
+            "validation": 1,
+            "windows": 5045
+          },
+          "scale_events": 1000,
+          "verdict_changes_with_partition": false
+        },
+        {
+          "event_session": {
+            "qualifies": false,
+            "train": 1,
+            "validation": 1,
+            "windows": 4045
+          },
+          "full_instrument_support_events": 3000,
+          "recorded_coverage_segment": {
+            "qualifies": false,
+            "train": 1,
+            "validation": 1,
+            "windows": 4045
+          },
+          "scale_events": 2000,
+          "verdict_changes_with_partition": false
+        },
+        {
+          "event_session": {
+            "qualifies": false,
+            "train": 1,
+            "validation": 1,
+            "windows": 3045
+          },
+          "full_instrument_support_events": 4000,
+          "recorded_coverage_segment": {
+            "qualifies": false,
+            "train": 1,
+            "validation": 1,
+            "windows": 3045
+          },
+          "scale_events": 3000,
+          "verdict_changes_with_partition": false
+        },
+        {
+          "event_session": {
+            "qualifies": false,
+            "train": 1,
+            "validation": 1,
+            "windows": 2045
+          },
+          "full_instrument_support_events": 5000,
+          "recorded_coverage_segment": {
+            "qualifies": false,
+            "train": 1,
+            "validation": 1,
+            "windows": 2045
+          },
+          "scale_events": 4000,
+          "verdict_changes_with_partition": false
+        },
+        {
+          "event_session": {
+            "qualifies": false,
+            "train": 0,
+            "validation": 1,
+            "windows": 1045
+          },
+          "full_instrument_support_events": 6000,
+          "recorded_coverage_segment": {
+            "qualifies": false,
+            "train": 0,
+            "validation": 1,
+            "windows": 1045
+          },
+          "scale_events": 5000,
+          "verdict_changes_with_partition": false
+        },
+        {
+          "event_session": {
+            "qualifies": false,
+            "train": 0,
+            "validation": 0,
+            "windows": 0
+          },
+          "full_instrument_support_events": 11000,
+          "recorded_coverage_segment": {
+            "qualifies": false,
+            "train": 0,
+            "validation": 0,
+            "windows": 0
+          },
+          "scale_events": 10000,
+          "verdict_changes_with_partition": false
+        }
+      ],
+      "minimum_nonoverlapping_each_split": 3,
+      "n_event_sessions": 1,
+      "n_recorded_segments": 1,
+      "subject": "yuquan_chenziyang"
+    },
+    "yuquan_hanyuxuan": {
+      "any_verdict_changes": false,
+      "candidate_windows": [
+        {
+          "event_session": {
+            "qualifies": false,
+            "train": 1,
+            "validation": 1,
+            "windows": 2373
+          },
+          "full_instrument_support_events": 2000,
+          "recorded_coverage_segment": {
+            "qualifies": false,
+            "train": 1,
+            "validation": 1,
+            "windows": 2373
+          },
+          "scale_events": 1000,
+          "verdict_changes_with_partition": false
+        },
+        {
+          "event_session": {
+            "qualifies": false,
+            "train": 1,
+            "validation": 1,
+            "windows": 1373
+          },
+          "full_instrument_support_events": 3000,
+          "recorded_coverage_segment": {
+            "qualifies": false,
+            "train": 1,
+            "validation": 1,
+            "windows": 1373
+          },
+          "scale_events": 2000,
+          "verdict_changes_with_partition": false
+        },
+        {
+          "event_session": {
+            "qualifies": false,
+            "train": 0,
+            "validation": 1,
+            "windows": 373
+          },
+          "full_instrument_support_events": 4000,
+          "recorded_coverage_segment": {
+            "qualifies": false,
+            "train": 0,
+            "validation": 1,
+            "windows": 373
+          },
+          "scale_events": 3000,
+          "verdict_changes_with_partition": false
+        },
+        {
+          "event_session": {
+            "qualifies": false,
+            "train": 0,
+            "validation": 0,
+            "windows": 0
+          },
+          "full_instrument_support_events": 5000,
+          "recorded_coverage_segment": {
+            "qualifies": false,
+            "train": 0,
+            "validation": 0,
+            "windows": 0
+          },
+          "scale_events": 4000,
+          "verdict_changes_with_partition": false
+        },
+        {
+          "event_session": {
+            "qualifies": false,
+            "train": 0,
+            "validation": 0,
+            "windows": 0
+          },
+          "full_instrument_support_events": 6000,
+          "recorded_coverage_segment": {
+            "qualifies": false,
+            "train": 0,
+            "validation": 0,
+            "windows": 0
+          },
+          "scale_events": 5000,
+          "verdict_changes_with_partition": false
+        },
+        {
+          "event_session": {
+            "qualifies": false,
+            "train": 0,
+            "validation": 0,
+            "windows": 0
+          },
+          "full_instrument_support_events": 11000,
+          "recorded_coverage_segment": {
+            "qualifies": false,
+            "train": 0,
+            "validation": 0,
+            "windows": 0
+          },
+          "scale_events": 10000,
+          "verdict_changes_with_partition": false
+        }
+      ],
+      "minimum_nonoverlapping_each_split": 3,
+      "n_event_sessions": 1,
+      "n_recorded_segments": 1,
+      "subject": "yuquan_hanyuxuan"
+    },
+    "yuquan_pengzihang": {
+      "any_verdict_changes": false,
+      "candidate_windows": [
+        {
+          "event_session": {
+            "qualifies": true,
+            "train": 9,
+            "validation": 3,
+            "windows": 17693
+          },
+          "full_instrument_support_events": 2000,
+          "recorded_coverage_segment": {
+            "qualifies": true,
+            "train": 9,
+            "validation": 3,
+            "windows": 17693
+          },
+          "scale_events": 1000,
+          "verdict_changes_with_partition": false
+        },
+        {
+          "event_session": {
+            "qualifies": false,
+            "train": 4,
+            "validation": 2,
+            "windows": 15439
+          },
+          "full_instrument_support_events": 3000,
+          "recorded_coverage_segment": {
+            "qualifies": false,
+            "train": 4,
+            "validation": 2,
+            "windows": 15439
+          },
+          "scale_events": 2000,
+          "verdict_changes_with_partition": false
+        },
+        {
+          "event_session": {
+            "qualifies": false,
+            "train": 3,
+            "validation": 1,
+            "windows": 13439
+          },
+          "full_instrument_support_events": 4000,
+          "recorded_coverage_segment": {
+            "qualifies": false,
+            "train": 3,
+            "validation": 1,
+            "windows": 13439
+          },
+          "scale_events": 3000,
+          "verdict_changes_with_partition": false
+        },
+        {
+          "event_session": {
+            "qualifies": false,
+            "train": 2,
+            "validation": 1,
+            "windows": 11439
+          },
+          "full_instrument_support_events": 5000,
+          "recorded_coverage_segment": {
+            "qualifies": false,
+            "train": 2,
+            "validation": 1,
+            "windows": 11439
+          },
+          "scale_events": 4000,
+          "verdict_changes_with_partition": false
+        },
+        {
+          "event_session": {
+            "qualifies": false,
+            "train": 2,
+            "validation": 1,
+            "windows": 9439
+          },
+          "full_instrument_support_events": 6000,
+          "recorded_coverage_segment": {
+            "qualifies": false,
+            "train": 2,
+            "validation": 1,
+            "windows": 9439
+          },
+          "scale_events": 5000,
+          "verdict_changes_with_partition": false
+        },
+        {
+          "event_session": {
+            "qualifies": false,
+            "train": 1,
+            "validation": 0,
+            "windows": 3870
+          },
+          "full_instrument_support_events": 11000,
+          "recorded_coverage_segment": {
+            "qualifies": false,
+            "train": 1,
+            "validation": 0,
+            "windows": 3870
+          },
+          "scale_events": 10000,
+          "verdict_changes_with_partition": false
+        }
+      ],
+      "minimum_nonoverlapping_each_split": 3,
+      "n_event_sessions": 4,
+      "n_recorded_segments": 4,
+      "subject": "yuquan_pengzihang"
+    }
+  },
+  "h3_partition_finding": "the eligibility audit grouped candidate windows by event_session; the H3 design groups by recorded coverage segment, which is strictly finer, so every Epilepsiae subject was credited with windows the design cannot build",
+  "purpose": "post-review recomputation of the bearing numbers in recent_goals_integrated_review_*_2026-08-26.md, from frozen artifacts only",
+  "sealed_opened": false,
+  "status": "COMPLETE",
+  "very_long_estimability": {
+    "arms_audited": 70,
+    "estimable_arms": 44,
+    "max_arm_over_intercept_ratio": 6809.097806680224,
+    "median_delayed_shared_exposure_fraction": 0.6666666666666666,
+    "non_estimable_arms": 26,
+    "ridge_pinned_at_grid_max": 47,
+    "rows": [
+      {
+        "arm_over_intercept_ratio": 1.2019761825608704,
+        "delayed_shares_exposure_fraction": 0.6666666666666666,
+        "estimable": true,
+        "floored_blocks": 0,
+        "kernel": "boxcar",
+        "result": "t2_very_long_boxcar/human/yuquan_chenziyang/event_count_3000/seed_0/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 0,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_chenziyang",
+        "window": "event_count_3000"
+      },
+      {
+        "arm_over_intercept_ratio": 1.0189796486371803,
+        "delayed_shares_exposure_fraction": 0.6666666666666666,
+        "estimable": true,
+        "floored_blocks": 0,
+        "kernel": "boxcar",
+        "result": "t2_very_long_boxcar/human/yuquan_chenziyang/event_count_3000/seed_1/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 1,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_chenziyang",
+        "window": "event_count_3000"
+      },
+      {
+        "arm_over_intercept_ratio": 2.1400548386609666,
+        "delayed_shares_exposure_fraction": 0.6666666666666666,
+        "estimable": true,
+        "floored_blocks": 0,
+        "kernel": "boxcar",
+        "result": "t2_very_long_boxcar/human/yuquan_chenziyang/event_count_3000/seed_2/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 2,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_chenziyang",
+        "window": "event_count_3000"
+      },
+      {
+        "arm_over_intercept_ratio": 1.2435491730411852,
+        "delayed_shares_exposure_fraction": 0.6666666666666666,
+        "estimable": true,
+        "floored_blocks": 0,
+        "kernel": "boxcar",
+        "result": "t2_very_long_boxcar/human/yuquan_chenziyang/event_count_3000/seed_3/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 3,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_chenziyang",
+        "window": "event_count_3000"
+      },
+      {
+        "arm_over_intercept_ratio": 1.5278480072569796,
+        "delayed_shares_exposure_fraction": 0.6666666666666666,
+        "estimable": true,
+        "floored_blocks": 1,
+        "kernel": "boxcar",
+        "result": "t2_very_long_boxcar/human/yuquan_chenziyang/event_count_3000/seed_4/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 4,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_chenziyang",
+        "window": "event_count_3000"
+      },
+      {
+        "arm_over_intercept_ratio": 0.6683672132883604,
+        "delayed_shares_exposure_fraction": 0.6666666666666666,
+        "estimable": true,
+        "floored_blocks": 0,
+        "kernel": "boxcar",
+        "result": "t2_very_long_boxcar/human/yuquan_chenziyang/event_count_3000/seed_5/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 5,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_chenziyang",
+        "window": "event_count_3000"
+      },
+      {
+        "arm_over_intercept_ratio": 1.5233512029994882,
+        "delayed_shares_exposure_fraction": 0.6666666666666666,
+        "estimable": true,
+        "floored_blocks": 1,
+        "kernel": "boxcar",
+        "result": "t2_very_long_boxcar/human/yuquan_chenziyang/event_count_3000/seed_6/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 6,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_chenziyang",
+        "window": "event_count_3000"
+      },
+      {
+        "arm_over_intercept_ratio": 0.9562561941024224,
+        "delayed_shares_exposure_fraction": 0.75,
+        "estimable": true,
+        "floored_blocks": 1,
+        "kernel": "boxcar",
+        "result": "t2_very_long_boxcar/human/yuquan_chenziyang/event_count_4000/seed_0/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 0,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_chenziyang",
+        "window": "event_count_4000"
+      },
+      {
+        "arm_over_intercept_ratio": 1.0120271510358245,
+        "delayed_shares_exposure_fraction": 0.75,
+        "estimable": true,
+        "floored_blocks": 1,
+        "kernel": "boxcar",
+        "result": "t2_very_long_boxcar/human/yuquan_chenziyang/event_count_4000/seed_1/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 1,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_chenziyang",
+        "window": "event_count_4000"
+      },
+      {
+        "arm_over_intercept_ratio": 0.7456638431422407,
+        "delayed_shares_exposure_fraction": 0.75,
+        "estimable": true,
+        "floored_blocks": 1,
+        "kernel": "boxcar",
+        "result": "t2_very_long_boxcar/human/yuquan_chenziyang/event_count_4000/seed_2/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 2,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_chenziyang",
+        "window": "event_count_4000"
+      },
+      {
+        "arm_over_intercept_ratio": 0.8965220714615281,
+        "delayed_shares_exposure_fraction": 0.75,
+        "estimable": true,
+        "floored_blocks": 1,
+        "kernel": "boxcar",
+        "result": "t2_very_long_boxcar/human/yuquan_chenziyang/event_count_4000/seed_3/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 3,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_chenziyang",
+        "window": "event_count_4000"
+      },
+      {
+        "arm_over_intercept_ratio": 0.9455609187749736,
+        "delayed_shares_exposure_fraction": 0.75,
+        "estimable": true,
+        "floored_blocks": 1,
+        "kernel": "boxcar",
+        "result": "t2_very_long_boxcar/human/yuquan_chenziyang/event_count_4000/seed_4/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 4,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_chenziyang",
+        "window": "event_count_4000"
+      },
+      {
+        "arm_over_intercept_ratio": 0.884696366325901,
+        "delayed_shares_exposure_fraction": 0.75,
+        "estimable": true,
+        "floored_blocks": 0,
+        "kernel": "boxcar",
+        "result": "t2_very_long_boxcar/human/yuquan_chenziyang/event_count_4000/seed_5/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 5,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_chenziyang",
+        "window": "event_count_4000"
+      },
+      {
+        "arm_over_intercept_ratio": 1.4925494144954745,
+        "delayed_shares_exposure_fraction": 0.75,
+        "estimable": true,
+        "floored_blocks": 0,
+        "kernel": "boxcar",
+        "result": "t2_very_long_boxcar/human/yuquan_chenziyang/event_count_4000/seed_6/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 6,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_chenziyang",
+        "window": "event_count_4000"
+      },
+      {
+        "arm_over_intercept_ratio": 0.35115757167691664,
+        "delayed_shares_exposure_fraction": 0.7435239805078225,
+        "estimable": true,
+        "floored_blocks": 1,
+        "kernel": "boxcar",
+        "result": "t2_very_long_boxcar/human/yuquan_chenziyang/physical_6h/seed_0/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 0,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_chenziyang",
+        "window": "physical_6h"
+      },
+      {
+        "arm_over_intercept_ratio": 0.688575588290544,
+        "delayed_shares_exposure_fraction": 0.7435239805078225,
+        "estimable": true,
+        "floored_blocks": 1,
+        "kernel": "boxcar",
+        "result": "t2_very_long_boxcar/human/yuquan_chenziyang/physical_6h/seed_1/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 1,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_chenziyang",
+        "window": "physical_6h"
+      },
+      {
+        "arm_over_intercept_ratio": 0.38738896517788,
+        "delayed_shares_exposure_fraction": 0.7435239805078225,
+        "estimable": true,
+        "floored_blocks": 1,
+        "kernel": "boxcar",
+        "result": "t2_very_long_boxcar/human/yuquan_chenziyang/physical_6h/seed_2/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 2,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_chenziyang",
+        "window": "physical_6h"
+      },
+      {
+        "arm_over_intercept_ratio": 0.44771345508570887,
+        "delayed_shares_exposure_fraction": 0.7435239805078225,
+        "estimable": true,
+        "floored_blocks": 1,
+        "kernel": "boxcar",
+        "result": "t2_very_long_boxcar/human/yuquan_chenziyang/physical_6h/seed_3/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 3,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_chenziyang",
+        "window": "physical_6h"
+      },
+      {
+        "arm_over_intercept_ratio": 0.38326789258083,
+        "delayed_shares_exposure_fraction": 0.7435239805078225,
+        "estimable": true,
+        "floored_blocks": 1,
+        "kernel": "boxcar",
+        "result": "t2_very_long_boxcar/human/yuquan_chenziyang/physical_6h/seed_4/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 4,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_chenziyang",
+        "window": "physical_6h"
+      },
+      {
+        "arm_over_intercept_ratio": 0.30925635449998595,
+        "delayed_shares_exposure_fraction": 0.7435239805078225,
+        "estimable": true,
+        "floored_blocks": 0,
+        "kernel": "boxcar",
+        "result": "t2_very_long_boxcar/human/yuquan_chenziyang/physical_6h/seed_5/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 5,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_chenziyang",
+        "window": "physical_6h"
+      },
+      {
+        "arm_over_intercept_ratio": 1.2070411065258502,
+        "delayed_shares_exposure_fraction": 0.7435239805078225,
+        "estimable": true,
+        "floored_blocks": 0,
+        "kernel": "boxcar",
+        "result": "t2_very_long_boxcar/human/yuquan_chenziyang/physical_6h/seed_6/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 6,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_chenziyang",
+        "window": "physical_6h"
+      },
+      {
+        "arm_over_intercept_ratio": 1.229676615525767,
+        "delayed_shares_exposure_fraction": 0.5,
+        "estimable": true,
+        "floored_blocks": 3,
+        "kernel": "boxcar",
+        "result": "t2_very_long_boxcar/human/yuquan_hanyuxuan/event_count_2000/seed_0/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 0,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_hanyuxuan",
+        "window": "event_count_2000"
+      },
+      {
+        "arm_over_intercept_ratio": 1.2202920750531068,
+        "delayed_shares_exposure_fraction": 0.5,
+        "estimable": true,
+        "floored_blocks": 2,
+        "kernel": "boxcar",
+        "result": "t2_very_long_boxcar/human/yuquan_hanyuxuan/event_count_2000/seed_1/result.json",
+        "ridge_at_grid_max": false,
+        "seed": 1,
+        "selected_ridge": 0.0001,
+        "subject": "yuquan_hanyuxuan",
+        "window": "event_count_2000"
+      },
+      {
+        "arm_over_intercept_ratio": 1.158784662879078,
+        "delayed_shares_exposure_fraction": 0.5,
+        "estimable": true,
+        "floored_blocks": 2,
+        "kernel": "boxcar",
+        "result": "t2_very_long_boxcar/human/yuquan_hanyuxuan/event_count_2000/seed_2/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 2,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_hanyuxuan",
+        "window": "event_count_2000"
+      },
+      {
+        "arm_over_intercept_ratio": 1.0814430166751823,
+        "delayed_shares_exposure_fraction": 0.5,
+        "estimable": true,
+        "floored_blocks": 3,
+        "kernel": "boxcar",
+        "result": "t2_very_long_boxcar/human/yuquan_hanyuxuan/event_count_2000/seed_3/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 3,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_hanyuxuan",
+        "window": "event_count_2000"
+      },
+      {
+        "arm_over_intercept_ratio": 1.0058924923072794,
+        "delayed_shares_exposure_fraction": 0.5,
+        "estimable": true,
+        "floored_blocks": 3,
+        "kernel": "boxcar",
+        "result": "t2_very_long_boxcar/human/yuquan_hanyuxuan/event_count_2000/seed_4/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 4,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_hanyuxuan",
+        "window": "event_count_2000"
+      },
+      {
+        "arm_over_intercept_ratio": 1.1483265134560494,
+        "delayed_shares_exposure_fraction": 0.5,
+        "estimable": true,
+        "floored_blocks": 3,
+        "kernel": "boxcar",
+        "result": "t2_very_long_boxcar/human/yuquan_hanyuxuan/event_count_2000/seed_5/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 5,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_hanyuxuan",
+        "window": "event_count_2000"
+      },
+      {
+        "arm_over_intercept_ratio": 0.9863606542242446,
+        "delayed_shares_exposure_fraction": 0.5,
+        "estimable": true,
+        "floored_blocks": 2,
+        "kernel": "boxcar",
+        "result": "t2_very_long_boxcar/human/yuquan_hanyuxuan/event_count_2000/seed_6/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 6,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_hanyuxuan",
+        "window": "event_count_2000"
+      },
+      {
+        "arm_over_intercept_ratio": 67.82322226923242,
+        "delayed_shares_exposure_fraction": 0.18896999188969993,
+        "estimable": false,
+        "floored_blocks": 1,
+        "kernel": "boxcar",
+        "result": "t2_very_long_boxcar/human/yuquan_hanyuxuan/physical_6h/seed_0/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 0,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_hanyuxuan",
+        "window": "physical_6h"
+      },
+      {
+        "arm_over_intercept_ratio": 95.14737252204797,
+        "delayed_shares_exposure_fraction": 0.18896999188969993,
+        "estimable": false,
+        "floored_blocks": 1,
+        "kernel": "boxcar",
+        "result": "t2_very_long_boxcar/human/yuquan_hanyuxuan/physical_6h/seed_1/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 1,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_hanyuxuan",
+        "window": "physical_6h"
+      },
+      {
+        "arm_over_intercept_ratio": 20.007434493151028,
+        "delayed_shares_exposure_fraction": 0.18896999188969993,
+        "estimable": false,
+        "floored_blocks": 0,
+        "kernel": "boxcar",
+        "result": "t2_very_long_boxcar/human/yuquan_hanyuxuan/physical_6h/seed_2/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 2,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_hanyuxuan",
+        "window": "physical_6h"
+      },
+      {
+        "arm_over_intercept_ratio": 93.55907473101712,
+        "delayed_shares_exposure_fraction": 0.18896999188969993,
+        "estimable": false,
+        "floored_blocks": 0,
+        "kernel": "boxcar",
+        "result": "t2_very_long_boxcar/human/yuquan_hanyuxuan/physical_6h/seed_3/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 3,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_hanyuxuan",
+        "window": "physical_6h"
+      },
+      {
+        "arm_over_intercept_ratio": 56.39870311851951,
+        "delayed_shares_exposure_fraction": 0.18896999188969993,
+        "estimable": false,
+        "floored_blocks": 0,
+        "kernel": "boxcar",
+        "result": "t2_very_long_boxcar/human/yuquan_hanyuxuan/physical_6h/seed_4/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 4,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_hanyuxuan",
+        "window": "physical_6h"
+      },
+      {
+        "arm_over_intercept_ratio": 148.75117269318756,
+        "delayed_shares_exposure_fraction": 0.18896999188969993,
+        "estimable": false,
+        "floored_blocks": 1,
+        "kernel": "boxcar",
+        "result": "t2_very_long_boxcar/human/yuquan_hanyuxuan/physical_6h/seed_5/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 5,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_hanyuxuan",
+        "window": "physical_6h"
+      },
+      {
+        "arm_over_intercept_ratio": 53.670137124494545,
+        "delayed_shares_exposure_fraction": 0.18896999188969993,
+        "estimable": false,
+        "floored_blocks": 1,
+        "kernel": "boxcar",
+        "result": "t2_very_long_boxcar/human/yuquan_hanyuxuan/physical_6h/seed_6/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 6,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_hanyuxuan",
+        "window": "physical_6h"
+      },
+      {
+        "arm_over_intercept_ratio": 0.5651406843067188,
+        "delayed_shares_exposure_fraction": 0.6666666666666666,
+        "estimable": true,
+        "floored_blocks": 0,
+        "kernel": "generator_weighted",
+        "result": "t2_very_long_discovery/human/yuquan_chenziyang/event_count_3000/seed_0/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 0,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_chenziyang",
+        "window": "event_count_3000"
+      },
+      {
+        "arm_over_intercept_ratio": 2.5362011122674373,
+        "delayed_shares_exposure_fraction": 0.6666666666666666,
+        "estimable": true,
+        "floored_blocks": 0,
+        "kernel": "generator_weighted",
+        "result": "t2_very_long_discovery/human/yuquan_chenziyang/event_count_3000/seed_1/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 1,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_chenziyang",
+        "window": "event_count_3000"
+      },
+      {
+        "arm_over_intercept_ratio": 1.4226368246763044,
+        "delayed_shares_exposure_fraction": 0.6666666666666666,
+        "estimable": true,
+        "floored_blocks": 0,
+        "kernel": "generator_weighted",
+        "result": "t2_very_long_discovery/human/yuquan_chenziyang/event_count_3000/seed_2/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 2,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_chenziyang",
+        "window": "event_count_3000"
+      },
+      {
+        "arm_over_intercept_ratio": 1.43661971875329,
+        "delayed_shares_exposure_fraction": 0.6666666666666666,
+        "estimable": true,
+        "floored_blocks": 0,
+        "kernel": "generator_weighted",
+        "result": "t2_very_long_discovery/human/yuquan_chenziyang/event_count_3000/seed_3/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 3,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_chenziyang",
+        "window": "event_count_3000"
+      },
+      {
+        "arm_over_intercept_ratio": 3.981668961237527,
+        "delayed_shares_exposure_fraction": 0.6666666666666666,
+        "estimable": true,
+        "floored_blocks": 1,
+        "kernel": "generator_weighted",
+        "result": "t2_very_long_discovery/human/yuquan_chenziyang/event_count_3000/seed_4/result.json",
+        "ridge_at_grid_max": false,
+        "seed": 4,
+        "selected_ridge": 0.0001,
+        "subject": "yuquan_chenziyang",
+        "window": "event_count_3000"
+      },
+      {
+        "arm_over_intercept_ratio": 0.9285594882245563,
+        "delayed_shares_exposure_fraction": 0.6666666666666666,
+        "estimable": true,
+        "floored_blocks": 0,
+        "kernel": "generator_weighted",
+        "result": "t2_very_long_discovery/human/yuquan_chenziyang/event_count_3000/seed_5/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 5,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_chenziyang",
+        "window": "event_count_3000"
+      },
+      {
+        "arm_over_intercept_ratio": 6.0076541352044135,
+        "delayed_shares_exposure_fraction": 0.6666666666666666,
+        "estimable": false,
+        "floored_blocks": 1,
+        "kernel": "generator_weighted",
+        "result": "t2_very_long_discovery/human/yuquan_chenziyang/event_count_3000/seed_6/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 6,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_chenziyang",
+        "window": "event_count_3000"
+      },
+      {
+        "arm_over_intercept_ratio": 2.046221098810523,
+        "delayed_shares_exposure_fraction": 0.75,
+        "estimable": true,
+        "floored_blocks": 1,
+        "kernel": "generator_weighted",
+        "result": "t2_very_long_discovery/human/yuquan_chenziyang/event_count_4000/seed_0/result.json",
+        "ridge_at_grid_max": false,
+        "seed": 0,
+        "selected_ridge": 0.0001,
+        "subject": "yuquan_chenziyang",
+        "window": "event_count_4000"
+      },
+      {
+        "arm_over_intercept_ratio": 1.4504742027165711,
+        "delayed_shares_exposure_fraction": 0.75,
+        "estimable": true,
+        "floored_blocks": 1,
+        "kernel": "generator_weighted",
+        "result": "t2_very_long_discovery/human/yuquan_chenziyang/event_count_4000/seed_1/result.json",
+        "ridge_at_grid_max": false,
+        "seed": 1,
+        "selected_ridge": 0.0001,
+        "subject": "yuquan_chenziyang",
+        "window": "event_count_4000"
+      },
+      {
+        "arm_over_intercept_ratio": 1.3005417193676017,
+        "delayed_shares_exposure_fraction": 0.75,
+        "estimable": true,
+        "floored_blocks": 1,
+        "kernel": "generator_weighted",
+        "result": "t2_very_long_discovery/human/yuquan_chenziyang/event_count_4000/seed_2/result.json",
+        "ridge_at_grid_max": false,
+        "seed": 2,
+        "selected_ridge": 1.0,
+        "subject": "yuquan_chenziyang",
+        "window": "event_count_4000"
+      },
+      {
+        "arm_over_intercept_ratio": 3.512531181334287,
+        "delayed_shares_exposure_fraction": 0.75,
+        "estimable": true,
+        "floored_blocks": 1,
+        "kernel": "generator_weighted",
+        "result": "t2_very_long_discovery/human/yuquan_chenziyang/event_count_4000/seed_3/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 3,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_chenziyang",
+        "window": "event_count_4000"
+      },
+      {
+        "arm_over_intercept_ratio": 7.434689033408217,
+        "delayed_shares_exposure_fraction": 0.75,
+        "estimable": false,
+        "floored_blocks": 1,
+        "kernel": "generator_weighted",
+        "result": "t2_very_long_discovery/human/yuquan_chenziyang/event_count_4000/seed_4/result.json",
+        "ridge_at_grid_max": false,
+        "seed": 4,
+        "selected_ridge": 0.0001,
+        "subject": "yuquan_chenziyang",
+        "window": "event_count_4000"
+      },
+      {
+        "arm_over_intercept_ratio": 1.1638905509985187,
+        "delayed_shares_exposure_fraction": 0.75,
+        "estimable": true,
+        "floored_blocks": 0,
+        "kernel": "generator_weighted",
+        "result": "t2_very_long_discovery/human/yuquan_chenziyang/event_count_4000/seed_5/result.json",
+        "ridge_at_grid_max": false,
+        "seed": 5,
+        "selected_ridge": 0.0001,
+        "subject": "yuquan_chenziyang",
+        "window": "event_count_4000"
+      },
+      {
+        "arm_over_intercept_ratio": 10.238207077137204,
+        "delayed_shares_exposure_fraction": 0.75,
+        "estimable": false,
+        "floored_blocks": 0,
+        "kernel": "generator_weighted",
+        "result": "t2_very_long_discovery/human/yuquan_chenziyang/event_count_4000/seed_6/result.json",
+        "ridge_at_grid_max": false,
+        "seed": 6,
+        "selected_ridge": 1.0,
+        "subject": "yuquan_chenziyang",
+        "window": "event_count_4000"
+      },
+      {
+        "arm_over_intercept_ratio": 2.082917116699807,
+        "delayed_shares_exposure_fraction": 0.7435239805078225,
+        "estimable": true,
+        "floored_blocks": 1,
+        "kernel": "generator_weighted",
+        "result": "t2_very_long_discovery/human/yuquan_chenziyang/physical_6h/seed_0/result.json",
+        "ridge_at_grid_max": false,
+        "seed": 0,
+        "selected_ridge": 0.0001,
+        "subject": "yuquan_chenziyang",
+        "window": "physical_6h"
+      },
+      {
+        "arm_over_intercept_ratio": 1.4526725108748142,
+        "delayed_shares_exposure_fraction": 0.7435239805078225,
+        "estimable": true,
+        "floored_blocks": 1,
+        "kernel": "generator_weighted",
+        "result": "t2_very_long_discovery/human/yuquan_chenziyang/physical_6h/seed_1/result.json",
+        "ridge_at_grid_max": false,
+        "seed": 1,
+        "selected_ridge": 0.0001,
+        "subject": "yuquan_chenziyang",
+        "window": "physical_6h"
+      },
+      {
+        "arm_over_intercept_ratio": 1.3351727512085751,
+        "delayed_shares_exposure_fraction": 0.7435239805078225,
+        "estimable": true,
+        "floored_blocks": 1,
+        "kernel": "generator_weighted",
+        "result": "t2_very_long_discovery/human/yuquan_chenziyang/physical_6h/seed_2/result.json",
+        "ridge_at_grid_max": false,
+        "seed": 2,
+        "selected_ridge": 1.0,
+        "subject": "yuquan_chenziyang",
+        "window": "physical_6h"
+      },
+      {
+        "arm_over_intercept_ratio": 3.7703727713556767,
+        "delayed_shares_exposure_fraction": 0.7435239805078225,
+        "estimable": true,
+        "floored_blocks": 1,
+        "kernel": "generator_weighted",
+        "result": "t2_very_long_discovery/human/yuquan_chenziyang/physical_6h/seed_3/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 3,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_chenziyang",
+        "window": "physical_6h"
+      },
+      {
+        "arm_over_intercept_ratio": 7.927512931639901,
+        "delayed_shares_exposure_fraction": 0.7435239805078225,
+        "estimable": false,
+        "floored_blocks": 1,
+        "kernel": "generator_weighted",
+        "result": "t2_very_long_discovery/human/yuquan_chenziyang/physical_6h/seed_4/result.json",
+        "ridge_at_grid_max": false,
+        "seed": 4,
+        "selected_ridge": 0.0001,
+        "subject": "yuquan_chenziyang",
+        "window": "physical_6h"
+      },
+      {
+        "arm_over_intercept_ratio": 1.1346982298548527,
+        "delayed_shares_exposure_fraction": 0.7435239805078225,
+        "estimable": true,
+        "floored_blocks": 0,
+        "kernel": "generator_weighted",
+        "result": "t2_very_long_discovery/human/yuquan_chenziyang/physical_6h/seed_5/result.json",
+        "ridge_at_grid_max": false,
+        "seed": 5,
+        "selected_ridge": 0.0001,
+        "subject": "yuquan_chenziyang",
+        "window": "physical_6h"
+      },
+      {
+        "arm_over_intercept_ratio": 11.106303619746825,
+        "delayed_shares_exposure_fraction": 0.7435239805078225,
+        "estimable": false,
+        "floored_blocks": 0,
+        "kernel": "generator_weighted",
+        "result": "t2_very_long_discovery/human/yuquan_chenziyang/physical_6h/seed_6/result.json",
+        "ridge_at_grid_max": false,
+        "seed": 6,
+        "selected_ridge": 1.0,
+        "subject": "yuquan_chenziyang",
+        "window": "physical_6h"
+      },
+      {
+        "arm_over_intercept_ratio": 575.8983935062929,
+        "delayed_shares_exposure_fraction": 0.5,
+        "estimable": false,
+        "floored_blocks": 3,
+        "kernel": null,
+        "result": "t2_very_long_discovery/human/yuquan_hanyuxuan/event_count_2000/seed_0/result.json",
+        "ridge_at_grid_max": false,
+        "seed": 0,
+        "selected_ridge": 1.0,
+        "subject": "yuquan_hanyuxuan",
+        "window": "event_count_2000"
+      },
+      {
+        "arm_over_intercept_ratio": 53.397371578838396,
+        "delayed_shares_exposure_fraction": 0.5,
+        "estimable": false,
+        "floored_blocks": 2,
+        "kernel": "generator_weighted",
+        "result": "t2_very_long_discovery/human/yuquan_hanyuxuan/event_count_2000/seed_1/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 1,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_hanyuxuan",
+        "window": "event_count_2000"
+      },
+      {
+        "arm_over_intercept_ratio": 147.37810330386534,
+        "delayed_shares_exposure_fraction": 0.5,
+        "estimable": false,
+        "floored_blocks": 2,
+        "kernel": "generator_weighted",
+        "result": "t2_very_long_discovery/human/yuquan_hanyuxuan/event_count_2000/seed_2/result.json",
+        "ridge_at_grid_max": false,
+        "seed": 2,
+        "selected_ridge": 0.0001,
+        "subject": "yuquan_hanyuxuan",
+        "window": "event_count_2000"
+      },
+      {
+        "arm_over_intercept_ratio": 328.13099904918704,
+        "delayed_shares_exposure_fraction": 0.5,
+        "estimable": false,
+        "floored_blocks": 3,
+        "kernel": "generator_weighted",
+        "result": "t2_very_long_discovery/human/yuquan_hanyuxuan/event_count_2000/seed_3/result.json",
+        "ridge_at_grid_max": false,
+        "seed": 3,
+        "selected_ridge": 1.0,
+        "subject": "yuquan_hanyuxuan",
+        "window": "event_count_2000"
+      },
+      {
+        "arm_over_intercept_ratio": 1379.7835979039455,
+        "delayed_shares_exposure_fraction": 0.5,
+        "estimable": false,
+        "floored_blocks": 3,
+        "kernel": "generator_weighted",
+        "result": "t2_very_long_discovery/human/yuquan_hanyuxuan/event_count_2000/seed_4/result.json",
+        "ridge_at_grid_max": false,
+        "seed": 4,
+        "selected_ridge": 1.0,
+        "subject": "yuquan_hanyuxuan",
+        "window": "event_count_2000"
+      },
+      {
+        "arm_over_intercept_ratio": 2375.332216586467,
+        "delayed_shares_exposure_fraction": 0.5,
+        "estimable": false,
+        "floored_blocks": 3,
+        "kernel": "generator_weighted",
+        "result": "t2_very_long_discovery/human/yuquan_hanyuxuan/event_count_2000/seed_5/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 5,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_hanyuxuan",
+        "window": "event_count_2000"
+      },
+      {
+        "arm_over_intercept_ratio": 332.8112624726339,
+        "delayed_shares_exposure_fraction": 0.5,
+        "estimable": false,
+        "floored_blocks": 2,
+        "kernel": "generator_weighted",
+        "result": "t2_very_long_discovery/human/yuquan_hanyuxuan/event_count_2000/seed_6/result.json",
+        "ridge_at_grid_max": false,
+        "seed": 6,
+        "selected_ridge": 0.01,
+        "subject": "yuquan_hanyuxuan",
+        "window": "event_count_2000"
+      },
+      {
+        "arm_over_intercept_ratio": 1519.289387930009,
+        "delayed_shares_exposure_fraction": 0.18896999188969993,
+        "estimable": false,
+        "floored_blocks": 1,
+        "kernel": "generator_weighted",
+        "result": "t2_very_long_discovery/human/yuquan_hanyuxuan/physical_6h/seed_0/result.json",
+        "ridge_at_grid_max": false,
+        "seed": 0,
+        "selected_ridge": 0.0001,
+        "subject": "yuquan_hanyuxuan",
+        "window": "physical_6h"
+      },
+      {
+        "arm_over_intercept_ratio": 1029.4575410927048,
+        "delayed_shares_exposure_fraction": 0.18896999188969993,
+        "estimable": false,
+        "floored_blocks": 1,
+        "kernel": "generator_weighted",
+        "result": "t2_very_long_discovery/human/yuquan_hanyuxuan/physical_6h/seed_1/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 1,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_hanyuxuan",
+        "window": "physical_6h"
+      },
+      {
+        "arm_over_intercept_ratio": 134.27897246639736,
+        "delayed_shares_exposure_fraction": 0.18896999188969993,
+        "estimable": false,
+        "floored_blocks": 0,
+        "kernel": "generator_weighted",
+        "result": "t2_very_long_discovery/human/yuquan_hanyuxuan/physical_6h/seed_2/result.json",
+        "ridge_at_grid_max": false,
+        "seed": 2,
+        "selected_ridge": 0.0001,
+        "subject": "yuquan_hanyuxuan",
+        "window": "physical_6h"
+      },
+      {
+        "arm_over_intercept_ratio": 206.51959165323296,
+        "delayed_shares_exposure_fraction": 0.18896999188969993,
+        "estimable": false,
+        "floored_blocks": 0,
+        "kernel": "generator_weighted",
+        "result": "t2_very_long_discovery/human/yuquan_hanyuxuan/physical_6h/seed_3/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 3,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_hanyuxuan",
+        "window": "physical_6h"
+      },
+      {
+        "arm_over_intercept_ratio": 6809.097806680224,
+        "delayed_shares_exposure_fraction": 0.18896999188969993,
+        "estimable": false,
+        "floored_blocks": 0,
+        "kernel": "generator_weighted",
+        "result": "t2_very_long_discovery/human/yuquan_hanyuxuan/physical_6h/seed_4/result.json",
+        "ridge_at_grid_max": false,
+        "seed": 4,
+        "selected_ridge": 0.0001,
+        "subject": "yuquan_hanyuxuan",
+        "window": "physical_6h"
+      },
+      {
+        "arm_over_intercept_ratio": 884.0625949022897,
+        "delayed_shares_exposure_fraction": 0.18896999188969993,
+        "estimable": false,
+        "floored_blocks": 1,
+        "kernel": "generator_weighted",
+        "result": "t2_very_long_discovery/human/yuquan_hanyuxuan/physical_6h/seed_5/result.json",
+        "ridge_at_grid_max": false,
+        "seed": 5,
+        "selected_ridge": 0.0001,
+        "subject": "yuquan_hanyuxuan",
+        "window": "physical_6h"
+      },
+      {
+        "arm_over_intercept_ratio": 356.7470253319142,
+        "delayed_shares_exposure_fraction": 0.18896999188969993,
+        "estimable": false,
+        "floored_blocks": 1,
+        "kernel": "generator_weighted",
+        "result": "t2_very_long_discovery/human/yuquan_hanyuxuan/physical_6h/seed_6/result.json",
+        "ridge_at_grid_max": true,
+        "seed": 6,
+        "selected_ridge": 100.0,
+        "subject": "yuquan_hanyuxuan",
+        "window": "physical_6h"
+      }
+    ],
+    "rule": "an arm scoring more than four times the constant it nests is extrapolating; its contrast is non-estimable, not an exposure null"
+  }
+}
