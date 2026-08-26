@@ -50,6 +50,8 @@ def _metric(row: dict, axis: str) -> float:
 def _selection_evaluable(row: dict, axes: list[str]) -> bool:
     if not row.get("fit_valid", False):
         return False
+    if not row.get("candidate", {}).get("selection_eligible", True):
+        return False
     return bool(np.all(np.isfinite([
         _metric(row, axis) for axis in axes
     ])))

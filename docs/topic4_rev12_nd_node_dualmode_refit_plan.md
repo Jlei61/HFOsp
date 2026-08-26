@@ -579,3 +579,23 @@ explanation.
 6. If no field meets this fit-only balance, do not tune EE, E-to-I or Z/M. Use
    the response surface to decide whether one additional local interpolation is
    identified or whether the current Node family/target is insufficient.
+
+Stage-AC completed 72/72 runs. No field advanced. The mode-1 donor had no stable
+mode-1 main effect and worsened mode 0; the direction donor improved causal
+direction while worsening mode 0 and the total objective. No further dose
+density is identified from this response surface.
+
+## Stage-AD non-selectable manual capacity replication
+
+1. Copy the exact `stage_t_manual_smooth_capacity` spline and field hash from
+   Stage-T. Preserve `selection_eligible=false` and its historical-geometry
+   disclosure.
+2. Run only this control on fit networks 2271--2279 with the same 20 s Node-only
+   simulation, event unit and soft metrics (9 runs, up to 9 workers).
+3. Require the aggregate Pareto code to exclude non-selectable fields. Report
+   patient-fit metrics descriptively, but judge capacity from weakest-mode
+   causal direction, monotonicity and both-mode event support across networks.
+4. If directional capacity is stable, close blind field interpolation and
+   diagnose why patient-fit and direction conflict before changing the target.
+   If capacity is unstable, record `NODE_ONLY_DIRECTIONAL_CAPACITY_UNRESOLVED`
+   and do not spend more simulation on the current Node-only scaffold.

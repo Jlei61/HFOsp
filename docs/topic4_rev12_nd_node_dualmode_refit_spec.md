@@ -953,3 +953,31 @@ RMS from the anchor on the uniform sheet grid. The same nine fit networks are
 reused so the experiment estimates a local donor-dose response surface. It
 cannot inspect held-out, use natural KMeans for selection, or open EE, E-to-I
 or Z/M.
+
+Stage-AC completed 72/72 runs. No field met the fit-only balanced advancement
+rule. The best joint-mean cell, `stage_ac_m000_d030`, improved the total soft
+objective in 7/9 networks, mode 1 in 6/9 and causal direction in 6/9, but mode 0
+in only 4/9; it also did not outperform the `g04` center. Across the complete
+factorial surface, increasing the mode-1 donor dose significantly worsened the
+total objective and mode 0 without a stable mode-1 benefit. Increasing the
+direction donor to 0.30 significantly improved causal direction but worsened
+the total objective and mode 0. The status is
+`LOCAL_INTERPOLATION_DIRECTION_ONLY_NO_BALANCED_NODE_FIELD`. Further dose
+densification on these fit networks is closed.
+
+A zero-simulation implementation audit also shows that signed threshold depth
+does not explain this failure at the resolved spatial scale. Across the nine
+networks, 1 mm maps of the continuous field have pairwise correlation about
+0.999; the realized signed excitability map `-delta Vtheta` remains correlated
+about 0.94--0.96 across networks and about 0.97 with `h` within a network. Thus
+the field is reproduced consistently, but it does not consistently determine
+both propagation modes.
+
+Stage-AD therefore repeats the historical smooth dual-core spline only as a
+non-selectable capacity control on the same nine networks. It uses the exact
+historical field hash and cannot enter Pareto nomination, initialize a claimed
+data-driven recovery or open held-out. If it expresses stable opposite causal
+modes, the Node-only scaffold has directional capacity and the unresolved
+problem is joint patient-distribution recovery. If it fails on nine networks,
+the earlier two-network capacity result is not robust enough to justify further
+Node-field search on this scaffold.

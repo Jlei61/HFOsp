@@ -12,7 +12,8 @@ from src.topic4_node_field_search import uniform_sheet_grid
 ARTIFACT_ROOT = Path("/home/honglab/leijiaxin/HFOsp")
 
 
-def _candidate(candidate_id, radius, soft, direction, topology, *, kmeans=0.0):
+def _candidate(candidate_id, radius, soft, direction, topology, *, kmeans=0.0,
+               selection_eligible=True):
     return {
         "candidate_id": candidate_id,
         "fit_valid": True,
@@ -23,6 +24,7 @@ def _candidate(candidate_id, radius, soft, direction, topology, *, kmeans=0.0):
         "soft_topology_mode_separation": topology,
         "natural_kmeans_match": kmeans,
         "candidate": {
+            "selection_eligible": selection_eligible,
             "node_field": {"residual_coordinates": {"radius": radius}}
         },
     }
@@ -113,5 +115,27 @@ def test_nomination_excludes_missing_topology_instead_of_treating_nan_as_pareto(
         "maximum_per_radius": 2,
     }
     decision = _nominate([missing, valid], selection)
+    assert decision["candidate_ids"] == ["valid"]
+    assert decision["pareto_candidate_ids"] == ["valid"]
+
+
+def test_nomination_excludes_a_nonselectable_capacity_control():
+    valid = _candidate("valid", 0.16, 0.8, 0.1, 0.1)
+    capacity = _candidate(
+        "manual_capacity", None, 0.1, 0.9, 0.9,
+        selection_eligible=False,
+    )
+    selection = {
+        "axes": [
+            "mean_soft_objective:min",
+            "mean_soft_causal_direction:max",
+            "mean_soft_causal_monotonicity:max",
+            "soft_topology_across_network:max",
+            "soft_topology_mode_separation:max",
+        ],
+        "maximum_nominees": 3,
+        "maximum_per_radius": 2,
+    }
+    decision = _nominate([capacity, valid], selection)
     assert decision["candidate_ids"] == ["valid"]
     assert decision["pareto_candidate_ids"] == ["valid"]

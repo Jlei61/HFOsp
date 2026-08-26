@@ -1,0 +1,31 @@
+{
+  "schema_id": "topic4_rev12_nd_local_donor_interpolation_analysis_v1",
+  "output_root": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_ac_local_donor_interpolation/analysis",
+  "inputs": {
+    "stage_aa_summary": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_aa_global_soft_field_expansion/aggregate/fit_soft_global_summary.json",
+      "sha256": "b9694f9236671e667f7b84af41d948d982b6fe12c4e83337bf723bedeb5ec71a"
+    },
+    "stage_ac_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_ac_local_donor_interpolation/candidate_manifest.json",
+      "sha256": "27f500136da14f9a0c9c6cadaf3f7462ec308b0f93a8495583fe5afe6708b9b7"
+    },
+    "stage_ac_summary": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_ac_local_donor_interpolation/aggregate/fit_soft_global_summary.json",
+      "sha256": "e49e0193692552ba5f6b79d730038097bf23eb0e88242e9ddc903883a86139a7"
+    },
+    "stage_ac_complete": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_ac_local_donor_interpolation/status/stage_ac_complete.json",
+      "sha256": "87f3c2b4b3fbbc0e3c77c33da98a9a5cf33fa178dcf762da601698aeac59cea2"
+    }
+  },
+  "anchor_candidate_id": "stage_z_anchor",
+  "balanced_center_id": "stage_z_g04_m",
+  "bootstrap": {"draws": 4096, "confidence": 0.90, "seed": 20260828},
+  "advancement": {
+    "required_positive_mean_endpoints": ["soft_objective", "mode_0", "mode_1", "causal_direction"],
+    "minimum_positive_networks_per_mode": 6,
+    "direction_must_not_be_negative": true
+  },
+  "claim_boundary": "Fit-only paired response-surface audit. The same nine networks are the independent units. Candidate advancement protects both patient modes and direction; Pareto membership or one favorable mean is not sufficient. Patient held-out and natural KMeans remain unopened."
+}
