@@ -81,13 +81,14 @@ def t2_table(rows: list[dict]) -> str:
     if not rows:
         return "没有患者通过冻结的稳定 T1 条件，因此人体 T2 未启动。"
     output = [
-        "| 患者 | source | 可估计 seed | 支持不足 seed | next real−placebo | next real−current | H5 state MSE | H5 mark | H10 state MSE | H10 mark |",
-        "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|",
+        "| 患者 | source | 可估计 seed | 结构零 seed | 支持不足 seed | next real−placebo | next real−current | H5 state MSE | H5 mark | H10 state MSE | H10 mark |",
+        "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for row in rows:
         output.append(
             f"| {patient_label(row['subject'])} | {row['source']} | "
             f"{row['estimable_seeds']}/3 | "
+            f"{row['structural_zero_seeds']}/3 | "
             f"{row['support_ineligible_seeds']}/3 | "
             f"{number(row['next_real_minus_placebo_joint'])} | "
             f"{number(row['next_real_minus_current_joint'])} | "
@@ -154,6 +155,10 @@ def main() -> None:
         by_subject[subject]["explicit_continuation_favourable_seeds"] >= 2
         for subject in stable_r1_subjects
     )
+    stable_time_specific = sum(
+        by_subject[subject]["explicit_time_specific_favourable_seeds"] >= 2
+        for subject in stable_r1_subjects
+    )
     raw_estimable = sum(
         value.get("raw_joint_estimable_seeds", 3) >= 2
         for value in by_subject.values()
@@ -200,7 +205,7 @@ def main() -> None:
 
 ## 一句话结论
 
-六患者复现后，跨窗口预测记忆在 {persistent}/6 位患者中达到至少 2/3 seed 同向，正确时刻专属性在 {time_specific}/6 位中达到同一标准。first subset 和 later continuation 在全六人中分别有 {first_subset}/6 和 {continuation}/6 同向，但真正可承重的是稳定 T1 患者内的 {stable_first_subset}/{len(stable_r1_subjects)} 和 {stable_continuation}/{len(stable_r1_subjects)}；其余方向性结果不单独称 H2a 复现。raw waveform 在 {raw_estimable}/6 位患者中至少有 2 个 seed 可估计，其中 {raw}/6 位达到至少 2/3 seed 同向，但在稳定 T1 患者中仅 {raw_stable}/{len(stable_r1_subjects)}；结构零不计作 raw 阴性。因此 raw 仍是敏感性信息，而不是主结论。{h3_sentence}
+六患者扩展后，跨窗口预测记忆在 {persistent}/6 位患者中达到至少 2/3 seed 同向。但这 3 位恰好是已有 R1.3 信号的 E620、E958 和黄瀚文；新加入的 E922、彭子航、韩宇轩为 0/3 稳定 T1。因此这是“原三例保留，新三例未独立复现”，不是六人队列复现。correct−wrong 方向有利为 {time_specific}/6，但只有同时具备 persistent memory 的 {stable_time_specific}/6 可称 time-specific persistent state estimate。first subset 和 later continuation 在全六人中分别有 {first_subset}/6 和 {continuation}/6 同向，但真正可承重的是稳定 T1 患者内的 {stable_first_subset}/{len(stable_r1_subjects)} 和 {stable_continuation}/{len(stable_r1_subjects)}；其余方向性结果不单独称 H2a 复现。raw waveform 在 {raw_estimable}/6 位患者中至少有 2 个 seed 可估计，其中 {raw}/6 位达到至少 2/3 seed 同向，但在稳定 T1 患者中仅 {raw_stable}/{len(stable_r1_subjects)}；唯一“2/3 同向”是整体 T1 不稳的韩宇轩，中位增量仅约 `-6.1e-7`。结构零不计作 raw 阴性；raw 仍是敏感性信息，而不是主结论。{h3_sentence}
 
 ## 这轮真正做了什么
 
@@ -216,7 +221,7 @@ def main() -> None:
 
 {r1_table(r1['patient_arm'])}
 
-安全读法：persistent−memoryless 回答“跨窗口保留是否有用”；correct−wrong 回答“是否属于正确时刻”；first subset 与 continuation 只在整体 T1 也稳定时，才直接承担下一场 IED 空间 repertoire 的 H2a 结论。Y-黄瀚文只有 107 个 validation events，效应大但支持小，必须与 E620/E958 分开看。raw−explicit 不稳定时，只能说显式 spectral/variance/autocorrelation 已解释大部分当前可见增量。
+安全读法：persistent−memoryless 回答“跨窗口保留是否有用”；correct−wrong 回答“是否属于正确时刻”；first subset 与 continuation 只在整体 T1 也稳定时，才直接承担下一场 IED 空间 repertoire 的 H2a 结论。三位稳定患者在 10-donor 敏感性中仍为 9/9 seed 正确时刻有利，但这不改变“新增三人 0/3 稳定”的外推限制。Y-黄瀚文只有 107 个 validation events，效应大但支持小，必须与 E620/E958 分开看。raw−explicit 不稳定时，只能说显式 spectral/variance/autocorrelation 已解释大部分当前可见增量。
 
 ## H2b：修复后的发作前结果
 
@@ -234,12 +239,12 @@ def main() -> None:
 
 {t2_table(t2_rows)}
 
-next-event 只支持 exposure-conditioned prediction；只有真实边可估计且产生非零位移，并在 H5/H10 同时改善未来 state MSE 与 mark，才记为一次 jump 经冻结 generator 保留下来的 state update。本轮 load H5/H10 达到至少 2/3 seed 的患者数分别为 {load_h5}/{len(load_rows)}、{load_h10}/{len(load_rows)}。聚合器独立复算该标签，并纠正了 {stored_persistence_mismatches} 个“真实边为零却因 placebo 更差而被标阳”的旧标签。允许扩 N=50/200 的患者-source 组合为 {len(expansion)} 个；本轮没有自动扩尺度。
+next-event 只支持 exposure-conditioned prediction；只有真实边可估计且产生非零位移，并在 H5/H10 同时改善未来 state MSE 与 mark，才记为一次 jump 经冻结 generator 保留下来的 state update。表中差值只在真实边可估计的 seed 上取中位；结构零不混入数值中位。本轮 load H5/H10 达到至少 2/3 seed 的患者数分别为 {load_h5}/{len(load_rows)}、{load_h10}/{len(load_rows)}。聚合器独立复算该标签，并纠正了 {stored_persistence_mismatches} 个“真实边为零却因 placebo 更差而被标阳”的旧标签。允许扩 N=50/200 的患者-source 组合为 {len(expansion)} 个；本轮没有自动扩尺度。
 
 ## 目前对三个假设的证据力度
 
-- **H1：** 六患者 development 复现后，以 persistent 和 correct-time 两层分别判断；仍不称 autonomous physiological state。
-- **H2a：** 仍是最强假设；承重证据是稳定 T1 患者中 {stable_first_subset}/{len(stable_r1_subjects)} 的 first subset 和 {stable_continuation}/{len(stable_r1_subjects)} 的 continuation，而不是把整体 joint 未改善患者的端点方向也算成复现。
+- **H1：** 原 R1.3 三人 3/3 保留 persistent + correct-time，新增三人 0/3 稳定；合计只能写 {stable_time_specific}/6 的 time-specific persistent state development evidence，不能称独立复现或 autonomous physiological state。
+- **H2a：** 仍是目前最强的预测假设；承重证据是三位已稳定患者中 {stable_first_subset}/{len(stable_r1_subjects)} 的 first subset 和 {stable_continuation}/{len(stable_r1_subjects)} 的 continuation，但新增患者没有给出新的稳定 H2a 复现。
 - **H2b：** 修复后数字可作为新的 development 探索结果，但仍不是 seizure mechanism。
 - **H3a：** 只按上表的可估计 next-event 与 H5/H10 分层解释；没有 H5/H10 持续就不称 state update。
 - **H3b：** 未运行，继续保持未支持。
@@ -254,7 +259,7 @@ next-event 只支持 exposure-conditioned prediction；只有真实边可估计�
 
 ## 给合作者的一段话
 
-> 这一阶段先在六位固定 development 患者中重新检验了“脑状态是否跨窗口保留，以及是否属于正确时刻”，再只在这两项较稳定的患者上检验最近 100 次 IED 的不可预测部分能否改变下一次事件和更远的状态。这样避免了上一轮在退化 T1、免费截距和伪长时间尺度上继续堆作业。H2a 仍由下一次 IED 的 first subset 和 continuation 承担；H2b 已用修复后的 pseudo-onset 仪器重跑；H3 只按 next-event 与 H5/H10 分层陈述，不能从预测增量直接升级为因果机制。正式检验分区仍然关闭。
+> 这一阶段在六位固定 development 患者中重新检验了“脑状态是否跨窗口保留，以及是否属于正确时刻”。信号仅在原有三例中保留，新增三例没有独立复现，因此 H1/H2a 仍是有限的 development 预测证据。随后只在稳定 T1 患者上检验最近 100 次 IED 的不可预测部分能否改变下一次事件和更远的状态，没有可扩尺度的阳性组合。H2b 已用修复后的 pseudo-onset 仪器重跑；H3 只能按可估计、结构零和支持不足分层陈述，不能从预测差值升级为因果机制。正式检验分区仍然关闭。
 """
 
     technical = f"""# Continuous marked-state R1.4 / T2-R2.0 阶段报告：技术版
@@ -283,7 +288,7 @@ innovation 在 TRAIN 内按时间分成 5 折交叉拟合，validation predictio
 
 {r1_table(r1['patient_arm'])}
 
-患者级计数：persistent {persistent}/6；correct-time {time_specific}/6；first subset 全六人方向 {first_subset}/6、稳定 T1 内 {stable_first_subset}/{len(stable_r1_subjects)}；continuation 全六人方向 {continuation}/6、稳定 T1 内 {stable_continuation}/{len(stable_r1_subjects)}；raw 可估计 {raw_estimable}/6，raw joint 有利 {raw}/6，其中稳定 T1 内 {raw_stable}/{len(stable_r1_subjects)}。进入 T2 的患者为 {len(stable)} 位：{', '.join(stable) if stable else 'none'}。
+患者级计数：persistent {persistent}/6；correct−wrong 方向 {time_specific}/6，与 persistent 同时成立 {stable_time_specific}/6；first subset 全六人方向 {first_subset}/6、稳定 T1 内 {stable_first_subset}/{len(stable_r1_subjects)}；continuation 全六人方向 {continuation}/6、稳定 T1 内 {stable_continuation}/{len(stable_r1_subjects)}；raw 可估计 {raw_estimable}/6，raw joint 有利 {raw}/6，其中稳定 T1 内 {raw_stable}/{len(stable_r1_subjects)}。稳定三人全部来自先前 R1.3 组，新增三人为 0/3；这一轮是 extension screen，不是 independent replication。进入 T2 的患者为 {len(stable)} 位：{', '.join(stable) if stable else 'none'}。
 
 ## 3. T2-R2.0 synthetic 与 estimability
 
@@ -299,7 +304,7 @@ synthetic revision=`{synthetic['revision']}`；positive/zero/reversed-sign × 3 
 
 {t2_table(t2_rows)}
 
-primary increment 要求同一 seed 的 real next-event joint NLL 同时小于 state-matched non-overlap placebo 与 current-event-only。patient/source 扩展要求至少 2/3 seeds 可估计且达到 primary increment；scale expansion candidates={json.dumps(expansion, ensure_ascii=False)}。H5/H10 直接从 anchor post-event state 经冻结 matrix exponential 到目标事件，不读新 raw observation、不施加后续 T2 jump；state target 是冻结 T1 的 filtered pre-event state。persistence 标签在聚合时依据数值重算，强制要求 real edge estimable + nonzero displacement + state MSE<placebo + mark NLL<placebo；本轮发现并纠正 stored flag mismatches={stored_persistence_mismatches}。
+primary increment 要求同一 seed 的 real next-event joint NLL 同时小于 state-matched non-overlap placebo 与 current-event-only。patient/source 扩展要求至少 2/3 seeds 可估计且达到 primary increment；scale expansion candidates={json.dumps(expansion, ensure_ascii=False)}。主表 contrast 仅对 real edge estimable seed 取中位，结构零单列不入数值分母。H5/H10 直接从 anchor post-event state 经冻结 matrix exponential 到目标事件，不读新 raw observation、不施加后续 T2 jump；state target 是冻结 T1 的 filtered pre-event state。persistence 标签在聚合时依据数值重算，强制要求 real edge estimable + nonzero displacement + state MSE<placebo + mark NLL<placebo；本轮发现并纠正 stored flag mismatches={stored_persistence_mismatches}。
 
 ## 5. H2b 修复后重跑
 

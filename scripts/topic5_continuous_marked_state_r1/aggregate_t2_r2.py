@@ -96,6 +96,15 @@ def corrected_persistence(value: dict, horizon: str) -> dict:
     )
 
 
+def edge_estimable_payloads(payloads: list[dict]) -> list[dict]:
+    """Return only fitted real-edge results eligible for effect summaries."""
+    return [
+        value for value in payloads
+        if value.get("analysis_status", "ESTIMATED") == "ESTIMATED"
+        and bool(value["real_edge_estimable"])
+    ]
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -124,16 +133,17 @@ def main() -> None:
                 value for value in payloads
                 if value.get("analysis_status", "ESTIMATED") == "ESTIMATED"
             ]
+            edge_estimable = edge_estimable_payloads(payloads)
             row = {"subject": subject, "source": source, "n_seeds": 3}
             for label, path in FIELDS.items():
-                row[label] = median([path_value(value, path) for value in estimated])
-            row["estimable_seeds"] = int(sum(
-                value["real_edge_estimable"] for value in payloads
-            ))
+                row[label] = median([
+                    path_value(value, path) for value in edge_estimable
+                ])
+            row["estimable_seeds"] = int(len(edge_estimable))
             row["primary_increment_seeds"] = int(sum(
                 value["primary_next_event_increment"] for value in payloads
             ))
-            corrected = {
+            corrected_all = {
                 horizon: [corrected_persistence(value, horizon)
                           for value in estimated]
                 for horizon in ("H5", "H10")
@@ -141,17 +151,17 @@ def main() -> None:
             stored_flag_mismatches = sum(
                 value["one_shot_persistence"][horizon][
                     "state_and_mark_persist"
-                ] != corrected[horizon][index]["state_and_mark_persist"]
+                ] != corrected_all[horizon][index]["state_and_mark_persist"]
                 for index, value in enumerate(estimated)
                 for horizon in ("H5", "H10")
             )
             row["H5_persistence_seeds"] = int(sum(
-                value["state_and_mark_persist"]
-                for value in corrected["H5"]
+                corrected_persistence(value, "H5")["state_and_mark_persist"]
+                for value in edge_estimable
             ))
             row["H10_persistence_seeds"] = int(sum(
-                value["state_and_mark_persist"]
-                for value in corrected["H10"]
+                corrected_persistence(value, "H10")["state_and_mark_persist"]
+                for value in edge_estimable
             ))
             row["stored_persistence_flag_mismatches"] = int(
                 stored_flag_mismatches

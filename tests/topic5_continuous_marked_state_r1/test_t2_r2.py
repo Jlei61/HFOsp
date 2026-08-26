@@ -230,6 +230,19 @@ def test_aggregator_recomputes_and_rejects_stale_zero_edge_flag() -> None:
     )["state_and_mark_persist"] is False
 
 
+def test_aggregator_excludes_structural_zero_from_effect_summary() -> None:
+    fitted = {"analysis_status": "ESTIMATED", "real_edge_estimable": True}
+    structural_zero = {
+        "analysis_status": "ESTIMATED", "real_edge_estimable": False,
+    }
+    support_limited = {
+        "analysis_status": "NOT_ESTIMABLE", "real_edge_estimable": False,
+    }
+    assert aggregate_t2_r2.edge_estimable_payloads([
+        fitted, structural_zero, support_limited,
+    ]) == [fitted]
+
+
 def test_support_limited_seed_is_persisted_and_aggregated_without_blocking(
     tmp_path, monkeypatch,
 ) -> None:
