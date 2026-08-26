@@ -61,7 +61,7 @@ def _surface_amplitudes(candidates: list[dict[str, Any]]) -> list[float]:
         for record in _nested_values(residual, keys):
             value = record["value"]
             if isinstance(value, (int, float)):
-                values.add(abs(float(value)))
+                values.add(round(abs(float(value)), 12))
     return sorted(values)
 
 
@@ -81,6 +81,9 @@ def inspect_manifest(path: Path, current_event_unit: str,
         field_hash = (candidate.get("node_field") or {}).get("field_sha256")
         if field_hash:
             field_hashes.add(str(field_hash))
+    mapping_audit = manifest.get("mapping_audit") or {}
+    if "reference_rho" in mapping_audit:
+        shrinkage_values.add(float(mapping_audit["reference_rho"]))
     return {
         "stage": path.parent.name,
         "manifest": str(path),
@@ -184,7 +187,7 @@ def build_inventory(config: dict[str, Any], artifact_root: Path) -> dict[str, An
                 record for row in gain_rows
                 for record in row["scalar_node_gain_records"]
             ],
-            "outer_geometry_amplitude_was_executed": False,
+            "stage_u_outer_followup_was_executed": False,
             "current_event_unit_rescoring_needed": False,
             "reason": (
                 "Current causal-family stages already score broad continuous-field "

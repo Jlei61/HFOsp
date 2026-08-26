@@ -11,14 +11,17 @@ assert SPEC.loader is not None
 SPEC.loader.exec_module(MODULE)
 
 
-def _manifest(tmp_path, candidates, event="edge_supported_causal_family_observation"):
+def _manifest(tmp_path, candidates, event="edge_supported_causal_family_observation",
+              extra=None):
     stage = tmp_path / "node_stage_test"
     stage.mkdir()
     path = stage / "candidate_manifest.json"
-    path.write_text(json.dumps({
+    payload = {
         "status": "DONE", "event_unit": {"name": event},
         "candidates": candidates,
-    }))
+    }
+    payload.update(extra or {})
+    path.write_text(json.dumps(payload))
     return path
 
 
@@ -40,11 +43,11 @@ def test_signed_depth_and_global_gain_are_separate_axes(tmp_path):
     path = _manifest(tmp_path, [{
         "node_field": {"field_sha256": "field"},
         "node_mapping": {"signed_depth_shrinkage": 0.5, "node_gain": 1.25},
-    }])
+    }], extra={"mapping_audit": {"reference_rho": 1.0}})
     row = MODULE.inspect_manifest(path, "edge_supported_causal_family_observation", {
         "node_gain", "threshold_gain",
     })
-    assert row["signed_depth_shrinkage_values"] == [0.5]
+    assert row["signed_depth_shrinkage_values"] == [0.5, 1.0]
     assert row["has_scalar_node_gain"]
     assert row["scalar_node_gain_records"] == [{"key": "node_gain", "value": 1.25}]
 
