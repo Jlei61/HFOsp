@@ -177,6 +177,9 @@ def test_worker_accepts_engine_derived_event_identity_canary_role():
     _validate_scientific_role(
         "development_only_global_continuous_node_field_screen"
     )
+    _validate_scientific_role(
+        "development_only_scalar_node_gain_canary"
+    )
     with pytest.raises(RuntimeError, match="scientific role"):
         _validate_scientific_role("patient_selected_event_window")
 

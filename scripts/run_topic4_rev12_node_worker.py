@@ -68,6 +68,7 @@ ALLOWED_SCIENTIFIC_ROLES = {
     "development_only_local_curvature_replication",
     "development_only_global_continuous_node_field_screen",
     "development_only_signed_depth_mapping_audit",
+    "development_only_scalar_node_gain_canary",
 }
 
 
