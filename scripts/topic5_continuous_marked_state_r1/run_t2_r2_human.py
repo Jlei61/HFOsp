@@ -19,6 +19,7 @@ from src.topic5_continuous_marked_state_r1.t2_r2 import (
     evaluate_horizon_mark,
     evaluate_r2_edge,
     fit_r2_edge,
+    classify_one_shot_persistence,
 )
 from src.topic5_continuous_marked_state_r1.t2_r2_human import (
     R1_4_REVISION,
@@ -268,26 +269,13 @@ def main() -> None:
     )
     persistence = {}
     for horizon in (5, 10):
-        mark_increment = bool(
+        persistence[f"H{horizon}"] = classify_one_shot_persistence(
             comparisons[f"H{horizon}"][
                 "real_minus_state_matched_placebo"
-            ]["mark_nll_per_event"] < 0
+            ],
+            horizon_metrics[f"H{horizon}"]["real_cumulative"],
+            real_edge_estimable=estimable,
         )
-        state_increment = bool(
-            comparisons[f"H{horizon}"][
-                "real_minus_state_matched_placebo"
-            ]["state_mse_to_filtered_target"] < 0
-        )
-        persistence[f"H{horizon}"] = {
-            "mark_prediction_increment": mark_increment,
-            "state_prediction_increment": state_increment,
-            "state_and_mark_persist": bool(mark_increment and state_increment),
-            "nonzero_propagated_displacement": bool(
-                horizon_metrics[f"H{horizon}"]["real_cumulative"][
-                    "mean_state_displacement_from_no_edge"
-                ] > 1e-8
-            ),
-        }
 
     checkpoint_path = output / "edges.pt"
     atomic_torch(checkpoint_path, {

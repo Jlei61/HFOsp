@@ -14,6 +14,7 @@ from src.topic5_continuous_marked_state_r1.t2_r2 import (
     evaluate_horizon_mark,
     fit_load_innovation_crossfit,
     fit_r2_edge,
+    classify_one_shot_persistence,
     state_matched_nonoverlap_placebo,
 )
 from src.topic5_continuous_marked_state_r1.t2_s1 import OneStepDesign
@@ -191,6 +192,42 @@ def test_horizon_scores_future_state_accuracy_not_only_nonzero_displacement() ->
     )
     assert fitted.mean_state_displacement_from_no_edge > 0
     assert fitted.state_mse_to_filtered_target < base.state_mse_to_filtered_target
+
+
+def test_persistence_label_requires_estimable_nonzero_real_edge() -> None:
+    favourable = {
+        "mark_nll_per_event": -0.2,
+        "state_mse_to_filtered_target": -0.1,
+    }
+    moved = {"mean_state_displacement_from_no_edge": 0.5}
+    zero = {"mean_state_displacement_from_no_edge": 0.0}
+    assert classify_one_shot_persistence(
+        favourable, moved, real_edge_estimable=True
+    )["state_and_mark_persist"] is True
+    assert classify_one_shot_persistence(
+        favourable, moved, real_edge_estimable=False
+    )["state_and_mark_persist"] is False
+    assert classify_one_shot_persistence(
+        favourable, zero, real_edge_estimable=True
+    )["state_and_mark_persist"] is False
+
+
+def test_aggregator_recomputes_and_rejects_stale_zero_edge_flag() -> None:
+    payload = {
+        "real_edge_estimable": False,
+        "comparisons": {
+            "H5": {"real_minus_state_matched_placebo": {
+                "mark_nll_per_event": -0.2,
+                "state_mse_to_filtered_target": -0.1,
+            }},
+        },
+        "validation": {"horizons": {"H5": {"real_cumulative": {
+            "mean_state_displacement_from_no_edge": 0.0,
+        }}}},
+    }
+    assert aggregate_t2_r2.corrected_persistence(
+        payload, "H5"
+    )["state_and_mark_persist"] is False
 
 
 def test_support_limited_seed_is_persisted_and_aggregated_without_blocking(

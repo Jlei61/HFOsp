@@ -175,6 +175,9 @@ def main() -> None:
     load_primary = sum(row["primary_increment_seeds"] >= 2 for row in load_rows)
     load_h5 = sum(row["H5_persistence_seeds"] >= 2 for row in load_rows)
     load_h10 = sum(row["H10_persistence_seeds"] >= 2 for row in load_rows)
+    stored_persistence_mismatches = sum(
+        row.get("stored_persistence_flag_mismatches", 0) for row in t2_rows
+    )
 
     if load_primary:
         h3_sentence = (
@@ -231,7 +234,7 @@ def main() -> None:
 
 {t2_table(t2_rows)}
 
-next-event 只支持 exposure-conditioned prediction；只有 H5/H10 同时改善未来 state MSE 与 mark，才记为一次 jump 经冻结 generator 保留下来的 state update。本轮 load H5/H10 达到至少 2/3 seed 的患者数分别为 {load_h5}/{len(load_rows)}、{load_h10}/{len(load_rows)}。允许扩 N=50/200 的患者-source 组合为 {len(expansion)} 个；本轮没有自动扩尺度。
+next-event 只支持 exposure-conditioned prediction；只有真实边可估计且产生非零位移，并在 H5/H10 同时改善未来 state MSE 与 mark，才记为一次 jump 经冻结 generator 保留下来的 state update。本轮 load H5/H10 达到至少 2/3 seed 的患者数分别为 {load_h5}/{len(load_rows)}、{load_h10}/{len(load_rows)}。聚合器独立复算该标签，并纠正了 {stored_persistence_mismatches} 个“真实边为零却因 placebo 更差而被标阳”的旧标签。允许扩 N=50/200 的患者-source 组合为 {len(expansion)} 个；本轮没有自动扩尺度。
 
 ## 目前对三个假设的证据力度
 
@@ -296,7 +299,7 @@ synthetic revision=`{synthetic['revision']}`；positive/zero/reversed-sign × 3 
 
 {t2_table(t2_rows)}
 
-primary increment 要求同一 seed 的 real next-event joint NLL 同时小于 state-matched non-overlap placebo 与 current-event-only。patient/source 扩展要求至少 2/3 seeds 可估计且达到 primary increment；scale expansion candidates={json.dumps(expansion, ensure_ascii=False)}。H5/H10 直接从 anchor post-event state 经冻结 matrix exponential 到目标事件，不读新 raw observation、不施加后续 T2 jump；state target 是冻结 T1 的 filtered pre-event state。
+primary increment 要求同一 seed 的 real next-event joint NLL 同时小于 state-matched non-overlap placebo 与 current-event-only。patient/source 扩展要求至少 2/3 seeds 可估计且达到 primary increment；scale expansion candidates={json.dumps(expansion, ensure_ascii=False)}。H5/H10 直接从 anchor post-event state 经冻结 matrix exponential 到目标事件，不读新 raw observation、不施加后续 T2 jump；state target 是冻结 T1 的 filtered pre-event state。persistence 标签在聚合时依据数值重算，强制要求 real edge estimable + nonzero displacement + state MSE<placebo + mark NLL<placebo；本轮发现并纠正 stored flag mismatches={stored_persistence_mismatches}。
 
 ## 5. H2b 修复后重跑
 

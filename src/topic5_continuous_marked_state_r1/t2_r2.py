@@ -599,3 +599,36 @@ def evaluate_r2_edge(model, edge: ExposureEdge, design: OneStepDesign, *,
     return _evaluate_rows(
         model, edge, design, rows, device=device, batch_size=batch_size
     )
+
+
+def classify_one_shot_persistence(
+    comparison: dict,
+    real_metrics: dict,
+    *,
+    real_edge_estimable: bool,
+) -> dict:
+    """Classify persistence only when the real edge actually moved state.
+
+    A zero-selected real edge can look better than a nonzero placebo edge, but
+    that contrast is not evidence that the real exposure produced a persistent
+    update.  Keep the component signs for diagnosis while requiring a fitted,
+    estimable real edge and nonzero propagated displacement for the combined
+    label.
+    """
+    mark_increment = bool(comparison["mark_nll_per_event"] < 0)
+    state_increment = bool(comparison["state_mse_to_filtered_target"] < 0)
+    nonzero_displacement = bool(
+        real_metrics["mean_state_displacement_from_no_edge"] > 1e-8
+    )
+    return {
+        "mark_prediction_increment": mark_increment,
+        "state_prediction_increment": state_increment,
+        "state_and_mark_persist": bool(
+            real_edge_estimable
+            and nonzero_displacement
+            and mark_increment
+            and state_increment
+        ),
+        "nonzero_propagated_displacement": nonzero_displacement,
+        "requires_estimable_nonzero_real_edge": True,
+    }

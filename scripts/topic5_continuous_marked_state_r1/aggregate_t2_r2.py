@@ -10,7 +10,10 @@ from pathlib import Path
 import numpy as np
 
 from src.topic5_continuous_marked_state_r1 import contract
-from src.topic5_continuous_marked_state_r1.t2_r2 import T2_R2_REVISION
+from src.topic5_continuous_marked_state_r1.t2_r2 import (
+    T2_R2_REVISION,
+    classify_one_shot_persistence,
+)
 from src.topic5_continuous_marked_state_r1.t2_r2_human import R1_4_REVISION, SOURCES
 
 
@@ -83,6 +86,16 @@ def load(path: Path) -> dict:
     return value
 
 
+def corrected_persistence(value: dict, horizon: str) -> dict:
+    return classify_one_shot_persistence(
+        value["comparisons"][horizon][
+            "real_minus_state_matched_placebo"
+        ],
+        value["validation"]["horizons"][horizon]["real_cumulative"],
+        real_edge_estimable=bool(value["real_edge_estimable"]),
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -120,14 +133,29 @@ def main() -> None:
             row["primary_increment_seeds"] = int(sum(
                 value["primary_next_event_increment"] for value in payloads
             ))
+            corrected = {
+                horizon: [corrected_persistence(value, horizon)
+                          for value in estimated]
+                for horizon in ("H5", "H10")
+            }
+            stored_flag_mismatches = sum(
+                value["one_shot_persistence"][horizon][
+                    "state_and_mark_persist"
+                ] != corrected[horizon][index]["state_and_mark_persist"]
+                for index, value in enumerate(estimated)
+                for horizon in ("H5", "H10")
+            )
             row["H5_persistence_seeds"] = int(sum(
-                value["one_shot_persistence"]["H5"]["state_and_mark_persist"]
-                for value in payloads
+                value["state_and_mark_persist"]
+                for value in corrected["H5"]
             ))
             row["H10_persistence_seeds"] = int(sum(
-                value["one_shot_persistence"]["H10"]["state_and_mark_persist"]
-                for value in payloads
+                value["state_and_mark_persist"]
+                for value in corrected["H10"]
             ))
+            row["stored_persistence_flag_mismatches"] = int(
+                stored_flag_mismatches
+            )
             row["structural_zero_seeds"] = int(sum(
                 not value["fits"]["real_cumulative"]["edge_left_zero_initialisation"]
                 for value in estimated
@@ -164,6 +192,7 @@ def main() -> None:
                 key: row[key] for key in (
                     "estimable_seeds", "primary_increment_seeds",
                     "H5_persistence_seeds", "H10_persistence_seeds",
+                    "stored_persistence_flag_mismatches",
                     "structural_zero_seeds", "support_ineligible_seeds",
                     "support_ineligible_reasons", "eligible_for_scale_expansion",
                 )
