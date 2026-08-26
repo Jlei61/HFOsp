@@ -696,3 +696,35 @@ contrast has sheet RMS 2.40 while all prior data-driven searches stopped at
 8. If no broad field jointly improves total patient fit, both patient modes and
    causal direction relative to the paired center, close continuous-field-only
    search. Do not densify radii or add workers to the same design.
+
+Stage-AG completed 150/150 runs. The paired six-network audit found no field
+with positive mean utility for the total objective, both modes and both
+mode-specific directions. `g10+` is the best fit candidate but sacrifices
+mode-1 direction in 6/6 networks; the strongest mode-1 direction candidates
+substantially sacrifice patient fit and mode-0 direction. No Stage-AG nominee
+advances to fresh selection networks. Broad coefficient-only field search is
+closed.
+
+## Stage-AH signed-depth mapping audit
+
+1. Keep the continuous fields fixed. Use only the unchanged `stage_ag_anchor`
+   and the best patient-fit `stage_ag_g10_p`; the latter is a diagnostic field,
+   not an accepted candidate.
+2. Let the frozen signed depth vector be `d`, and for each field define
+   `mu_h = sum(h*d)/sum(h)`. Test
+   `d_rho = mu_h + rho*(d-mu_h)` for `rho={1.0,0.5,0.0}`. This exactly preserves
+   `sum(h*d_rho)` for each field. `rho=1` must be bitwise identical to the
+   current Node reconstruction; `rho=0` makes the threshold-depth channel
+   spatially monotone in `h` without changing its h-weighted total.
+3. Reuse Stage-AG `rho=1` trajectories. Run only `rho=0.5` and `rho=0.0` for
+   the two fields on networks 2281--2286: 24 new 20-s Node-only simulations.
+4. Freeze topology, delays, noise seeds, field coefficients, total field
+   budget, EE, E-to-I and Z/M. Use up to 12 one-thread workers with at least
+   32 GiB available memory and a 600-s monitor.
+5. Pair every result within field and network to `rho=1`. Report the full soft
+   objective, both patient modes, both causal directions and monotonicities,
+   topology, OOD, event support and runaway. Natural KMeans is diagnostic only;
+   patient held-out stays unopened.
+6. This is a mechanism audit, not a parameter optimization. If shrinkage does
+   not resolve the two-mode tradeoff consistently, close signed
+   microheterogeneity as the explanation. Do not tune intermediate rho values.

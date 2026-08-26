@@ -1,0 +1,37 @@
+{
+  "schema_id": "topic4_rev12_nd_broad_nonlocal_result_audit_v1",
+  "output_root": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_ag_broad_nonlocal_screen/analysis",
+  "inputs": {
+    "candidate_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_ag_broad_nonlocal_screen/candidate_manifest.json",
+      "sha256": "3bffa7b297dd4b9ef1e60658eca9902fb310b908e2b95f34fd0aa725fd0648c4"
+    },
+    "stage_ag_complete": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_ag_broad_nonlocal_screen/status/stage_ag_complete.json",
+      "sha256": "2ca36935643b03e85fcc75334550f4f4fc9fe364de327fb9b4d6c248a6f955bf"
+    },
+    "fit_summary": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_ag_broad_nonlocal_screen/aggregate/fit_soft_global_summary.json",
+      "sha256": "1dae0db1292108babcde4897a9ab2658e43d6cfbde098f8717321cf5d0062d4a"
+    }
+  },
+  "anchor_candidate_id": "stage_ag_anchor",
+  "primary_endpoints": [
+    "soft_objective",
+    "mode_0",
+    "mode_1",
+    "mode_0_direction",
+    "mode_1_direction"
+  ],
+  "diagnostic_endpoints": [
+    "mode_0_monotonicity",
+    "mode_1_monotonicity"
+  ],
+  "bootstrap_draws": 10000,
+  "bootstrap_confidence": 0.90,
+  "bootstrap_seed": 20260826,
+  "patient_heldout_used": false,
+  "natural_kmeans_used_for_selection": false,
+  "selection_opened": false,
+  "claim_boundary": "Paired fit-network result audit only. Positive utility means better than the unchanged Stage-AG anchor on the same network. The audit may close further coefficient-only broad-field search, but cannot freeze Node, open patient held-out, or authorize EE, E-to-I or Z/M."
+}

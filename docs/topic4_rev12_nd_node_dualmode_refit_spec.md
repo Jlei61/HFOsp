@@ -1074,3 +1074,26 @@ replication; it cannot freeze Node, open intervention, or alter EE, E-to-I or
 Z/M. If broad candidates still show no joint patient/direction improvement,
 continuous-field optimization closes and the Node mechanism or event target
 must be revised before further SNN search.
+
+Stage-AG completed 150/150 runs on six paired fit networks without failed
+workers. A post-run network-level audit supersedes the aggregate Pareto
+nomination as the scientific readout. None of the 24 perturbed fields had
+positive mean utility simultaneously for the total patient objective, both
+patient modes and both mode-specific causal directions. The best patient-fit
+field, `stage_ag_g10_p`, improved the mean objective by 0.038, mode 0 by 0.064
+and mode 1 by 0.017, but worsened mode-1 causal direction by 0.041 on average
+and on all 6/6 networks. Conversely, the strongest mode-1 direction field,
+`stage_ag_g08_m`, improved that direction by 0.479 while worsening the total
+objective by 0.385, mode 0 by 0.338 and mode-0 direction by 0.681. The formal
+status is
+`BROAD_FIELD_SEARCH_PATIENT_DIRECTION_TRADEOFF_PERSISTS_NO_BALANCED_NODE_CANDIDATE`.
+
+This closes insufficient coefficient span as the leading explanation. The
+next experiment may audit the Node mapping itself, but may not add another
+continuous-field basis or use the manual capacity field as an initializer.
+The first bounded mapping audit tests whether frozen signed per-neuron depth
+heterogeneity obscures the patient-derived coarse field. It must preserve the
+field, total h-weighted threshold modulation, network topology, EE, E-to-I and
+Z/M, and it must include the current mapping exactly as a bitwise-reference
+arm. A negative result closes this microheterogeneity explanation rather than
+licensing another field search.
