@@ -141,8 +141,13 @@ def main() -> None:
         value["explicit_continuation_favourable_seeds"] >= 2
         for value in by_subject.values()
     )
+    raw_estimable = sum(
+        value.get("raw_joint_estimable_seeds", 3) >= 2
+        for value in by_subject.values()
+    )
     raw = sum(
-        value["raw_joint_favourable_seeds"] >= 2
+        value.get("raw_joint_estimable_seeds", 3) >= 2
+        and value["raw_joint_favourable_seeds"] >= 2
         for value in by_subject.values()
     )
     stable = t2["stable_t1_subjects"]
@@ -174,7 +179,7 @@ def main() -> None:
 
 ## 一句话结论
 
-六患者复现后，跨窗口预测记忆在 {persistent}/6 位患者中达到至少 2/3 seed 同向，正确时刻专属性在 {time_specific}/6 位中达到同一标准；first subset 为 {first_subset}/6，later continuation 为 {continuation}/6。raw waveform 相对 explicit 背景统计仅 {raw}/6 位达到至少 2/3 seed 同向，因此 raw 仍是敏感性信息，而不是主结论。{h3_sentence}
+六患者复现后，跨窗口预测记忆在 {persistent}/6 位患者中达到至少 2/3 seed 同向，正确时刻专属性在 {time_specific}/6 位中达到同一标准；first subset 为 {first_subset}/6，later continuation 为 {continuation}/6。raw waveform 在 {raw_estimable}/6 位患者中至少有 2 个 seed 可估计，其中 {raw}/6 位达到至少 2/3 seed 同向；结构零不计作 raw 阴性。因此 raw 仍是敏感性信息，而不是主结论。{h3_sentence}
 
 ## 这轮真正做了什么
 
@@ -257,7 +262,7 @@ innovation 在 TRAIN 内按时间分成 5 折交叉拟合，validation predictio
 
 {r1_table(r1['patient_arm'])}
 
-患者级计数：persistent {persistent}/6；correct-time {time_specific}/6；first subset {first_subset}/6；continuation {continuation}/6；raw joint {raw}/6。进入 T2 的患者为 {len(stable)} 位：{', '.join(stable) if stable else 'none'}。
+患者级计数：persistent {persistent}/6；correct-time {time_specific}/6；first subset {first_subset}/6；continuation {continuation}/6；raw 可估计 {raw_estimable}/6，raw joint 有利 {raw}/6。进入 T2 的患者为 {len(stable)} 位：{', '.join(stable) if stable else 'none'}。
 
 ## 3. T2-R2.0 synthetic 与 estimability
 

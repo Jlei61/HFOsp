@@ -31,6 +31,7 @@ from src.topic5_continuous_marked_state_r1.r1_3 import (
     R1_3_REVISION,
     FullAnchorObservationLoader,
     FullTargetObserverStateModel,
+    classify_raw_gradient_coverage,
     fit_target_observer,
     initialise_raw_from_explicit,
     materialize_embedding,
@@ -379,16 +380,27 @@ def main() -> None:
     wrong_endpoint_median = median_metric_dict(wrong_endpoint)
 
     parameter_updates = update_norms(initial_state, model)
+    raw_analysis_status = None
+    raw_non_estimable_reason = None
     if args.arm == "explicit_raw":
         raw_gradients = [
             trace.selection_gradient_max.get("raw_tokenizer", 0.0),
             trace.selection_gradient_max.get("raw_temporal_layer_0", 0.0),
             trace.selection_gradient_max.get("raw_temporal_layer_1", 0.0),
         ]
-        if not all(np.isfinite(value) and value > 0.0 for value in raw_gradients):
+        try:
+            raw_analysis_status, raw_non_estimable_reason = (
+                classify_raw_gradient_coverage(raw_gradients)
+            )
+        except ValueError as error:
             raise RuntimeError(
                 f"raw target-gradient coverage failed: {raw_gradients}"
-            )
+            ) from error
+        # A paired explicit checkpoint can leave the complete downstream raw
+        # path at an exact structural zero (for example when the explicit T1
+        # itself selected epoch zero).  That is not evidence against raw
+        # waveform information and must not abort H1/H2a.  Persist the paired
+        # no-update result, but exclude it from the raw favourable denominator.
         common = {
             key: parameter_updates[key] for key in (
                 "spatial_fusion", "observation_correction",
@@ -422,7 +434,11 @@ def main() -> None:
         "subject": args.subject,
         "arm": args.arm,
         "seed": int(args.seed),
-        "full_raw_temporal_target_trained": args.arm == "explicit_raw",
+        "full_raw_temporal_target_trained": (
+            args.arm == "explicit_raw" and raw_analysis_status == "ESTIMATED"
+        ),
+        "raw_analysis_status": raw_analysis_status,
+        "raw_non_estimable_reason": raw_non_estimable_reason,
         "raw_patch_tokenizer_target_gradient": (
             trace.selection_gradient_max.get("raw_tokenizer", 0.0)
         ),

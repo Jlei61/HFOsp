@@ -23,6 +23,17 @@ from .raw_observation import RawAnchorReader
 R1_3_REVISION = "r1_3_full_raw_temporal_exact_target_isolated_increment_v2"
 
 
+def classify_raw_gradient_coverage(
+        gradients: list[float] | tuple[float, ...]) -> tuple[str, str | None]:
+    """Separate a broken gradient audit from a structurally unestimable arm."""
+    values = np.asarray(gradients, dtype=np.float64)
+    if values.ndim != 1 or values.size == 0 or not np.isfinite(values).all():
+        raise ValueError(f"non-finite raw target-gradient coverage: {values.tolist()}")
+    if bool(np.all(values > 0.0)):
+        return "ESTIMATED", None
+    return "NOT_ESTIMABLE", "ZERO_OR_PARTIAL_TARGET_GRADIENT"
+
+
 class FullTargetObserverStateModel(FrozenEmbeddingStateModel):
     """Persistent state with a complete trainable observation Transformer."""
 

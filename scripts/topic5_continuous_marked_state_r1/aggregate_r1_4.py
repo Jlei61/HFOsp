@@ -90,6 +90,13 @@ def median(values: list[float | None]) -> float | None:
     return float(np.median(take)) if take else None
 
 
+def select_estimable_raw(payloads: list[dict]) -> list[dict]:
+    return [
+        value for value in payloads
+        if value.get("raw_analysis_status", "ESTIMATED") == "ESTIMATED"
+    ]
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -130,10 +137,19 @@ def main() -> None:
                 ] is True for value in payloads
             )
             if arm == "explicit_raw":
+                estimated_raw = select_estimable_raw(payloads)
                 row["raw_minus_explicit_joint"] = median([
                     value["paired_raw_minus_explicit"]["joint_nll_per_event"]
-                    for value in payloads
+                    for value in estimated_raw
                 ])
+                row["raw_estimable_seeds"] = len(estimated_raw)
+                row["raw_non_estimable_seeds"] = len(payloads) - len(estimated_raw)
+                row["raw_non_estimable_reasons"] = ";".join(sorted({
+                    value.get("raw_non_estimable_reason", "UNKNOWN")
+                    for value in payloads
+                    if value.get("raw_analysis_status", "ESTIMATED")
+                    == "NOT_ESTIMABLE"
+                }))
             if arm == "explicit":
                 sensitivity_paths = [
                     args.root / "sensitivity_10_donor" / subject
@@ -163,6 +179,7 @@ def main() -> None:
             rows.append(row)
         explicit = arm_payloads["explicit"]
         raw = arm_payloads["explicit_raw"]
+        estimated_raw = select_estimable_raw(raw)
         by_subject[subject] = {
             "explicit_persistent_favourable_seeds": int(sum(
                 value_at(value, FIELDS["persistent_minus_memoryless_joint"]) < 0
@@ -182,11 +199,13 @@ def main() -> None:
             )),
             "raw_minus_explicit_joint_median": median([
                 value["paired_raw_minus_explicit"]["joint_nll_per_event"]
-                for value in raw
+                for value in estimated_raw
             ]),
+            "raw_joint_estimable_seeds": len(estimated_raw),
+            "raw_joint_non_estimable_seeds": len(raw) - len(estimated_raw),
             "raw_joint_favourable_seeds": int(sum(
                 value["paired_raw_minus_explicit"]["joint_nll_per_event"] < 0
-                for value in raw
+                for value in estimated_raw
             )),
             "stable_explicit_t1_for_t2": bool(
                 sum(
