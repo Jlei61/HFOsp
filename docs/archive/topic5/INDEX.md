@@ -266,3 +266,5 @@
 - 前一轮长尺度更正记录：`continuous_marked_state_t2_long_total_post_review_corrections_2026-08-26.md`
 - 最终下一版合同：`continuous_marked_state_r1_4_t2_r2_0_contract_2026-08-27.md`
   - 六患者 R1.4 复现 H1/H2a；H3 主实验回到 H3-S0 支持最稳定的 N=100 一步 generator-edge；N=1,000–2,000 与六小时 boxcar 退出当前主线。
+- R1.4/T2-R2.0 完成后的下一阶段合同：`continuous_marked_state_r1_5_h3_long_contract_2026-08-27.md`
+  - 以三位 exact-model 未见患者加三位旧长记录校准患者做 5-seed R1.5；H3 另行探索 N=1,000/3,000/10,000 的 TRAIN-only event innovation。N=100 阴性不 gate 长尺度探索，但没有稳定 T1 时只允许报告长历史 antecedent association。

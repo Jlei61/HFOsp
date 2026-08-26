@@ -42,8 +42,27 @@ LONG_H3_DISCOVERY_SUBJECTS = (
     "yuquan_hanyuxuan",       # 3,000-event / long-clock contrast
 )
 
+# R1.5 extension is fixed from the corrected recorded-segment support audit,
+# before any R1.5 fit is run.  Only the first three are exact-model unseen;
+# the other three were already inspected in older long-record triage and are
+# retained as calibration cases, never independent replication subjects.
+R1_5_NOVEL_SUBJECTS = (
+    "epilepsiae_1096",
+    "epilepsiae_384",
+    "yuquan_zhangkexuan",
+)
+R1_5_LONG_CARRYOVER_SUBJECTS = (
+    "yuquan_chengshuai",
+    "yuquan_chenziyang",
+    "yuquan_zhangjiaqi",
+)
+R1_5_EXTENSION_SUBJECTS = (
+    *R1_5_NOVEL_SUBJECTS,
+    *R1_5_LONG_CARRYOVER_SUBJECTS,
+)
+
 EXTENDED_DEVELOPMENT_SUBJECTS = tuple(dict.fromkeys(
-    (*PILOT_SUBJECTS, *LONG_H3_DISCOVERY_SUBJECTS)
+    (*PILOT_SUBJECTS, *LONG_H3_DISCOVERY_SUBJECTS, *R1_5_EXTENSION_SUBJECTS)
 ))
 
 

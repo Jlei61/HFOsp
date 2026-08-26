@@ -100,7 +100,9 @@ def main() -> None:
         choices=contract.EXTENDED_DEVELOPMENT_SUBJECTS,
     )
     parser.add_argument("--arm", required=True, choices=("explicit", "explicit_raw"))
-    parser.add_argument("--seed", required=True, type=int, choices=(0, 1, 2))
+    parser.add_argument(
+        "--seed", required=True, type=int, choices=(0, 1, 2, 3, 4),
+    )
     parser.add_argument("--device", default="cuda")
     parser.add_argument("--experiment-label", default="r1_3_formal_pilot")
     parser.add_argument("--observer-epochs", type=int, default=2)
