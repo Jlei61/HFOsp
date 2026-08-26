@@ -58,8 +58,8 @@ def h2b_cell(population: str) -> dict | None:
 
 def r1_table(rows: list[dict]) -> str:
     output = [
-        "| 患者 | persistent−memoryless joint | correct−wrong joint | first subset | continuation | raw−explicit joint |",
-        "|---|---:|---:|---:|---:|---:|",
+        "| 患者 | validation events | persistent−memoryless joint | correct−wrong joint | first subset | continuation | raw−explicit joint |",
+        "|---|---:|---:|---:|---:|---:|---:|",
     ]
     by = {(row["subject"], row["arm"]): row for row in rows}
     for subject in dict.fromkeys(row["subject"] for row in rows):
@@ -67,6 +67,7 @@ def r1_table(rows: list[dict]) -> str:
         raw = by[(subject, "explicit_raw")]
         output.append(
             f"| {patient_label(subject)} | "
+            f"{explicit['validation_events']} | "
             f"{number(explicit['persistent_minus_memoryless_joint'])} | "
             f"{number(explicit['correct_minus_wrong_joint'])} | "
             f"{number(explicit['persistent_minus_memoryless_first_subset'])} | "
@@ -141,6 +142,18 @@ def main() -> None:
         value["explicit_continuation_favourable_seeds"] >= 2
         for value in by_subject.values()
     )
+    stable_r1_subjects = {
+        subject for subject, value in by_subject.items()
+        if value["stable_explicit_t1_for_t2"]
+    }
+    stable_first_subset = sum(
+        by_subject[subject]["explicit_first_subset_favourable_seeds"] >= 2
+        for subject in stable_r1_subjects
+    )
+    stable_continuation = sum(
+        by_subject[subject]["explicit_continuation_favourable_seeds"] >= 2
+        for subject in stable_r1_subjects
+    )
     raw_estimable = sum(
         value.get("raw_joint_estimable_seeds", 3) >= 2
         for value in by_subject.values()
@@ -149,6 +162,11 @@ def main() -> None:
         value.get("raw_joint_estimable_seeds", 3) >= 2
         and value["raw_joint_favourable_seeds"] >= 2
         for value in by_subject.values()
+    )
+    raw_stable = sum(
+        by_subject[subject].get("raw_joint_estimable_seeds", 3) >= 2
+        and by_subject[subject]["raw_joint_favourable_seeds"] >= 2
+        for subject in stable_r1_subjects
     )
     stable = t2["stable_t1_subjects"]
     expansion = t2["scale_expansion_candidates"]
@@ -179,7 +197,7 @@ def main() -> None:
 
 ## 一句话结论
 
-六患者复现后，跨窗口预测记忆在 {persistent}/6 位患者中达到至少 2/3 seed 同向，正确时刻专属性在 {time_specific}/6 位中达到同一标准；first subset 为 {first_subset}/6，later continuation 为 {continuation}/6。raw waveform 在 {raw_estimable}/6 位患者中至少有 2 个 seed 可估计，其中 {raw}/6 位达到至少 2/3 seed 同向；结构零不计作 raw 阴性。因此 raw 仍是敏感性信息，而不是主结论。{h3_sentence}
+六患者复现后，跨窗口预测记忆在 {persistent}/6 位患者中达到至少 2/3 seed 同向，正确时刻专属性在 {time_specific}/6 位中达到同一标准。first subset 和 later continuation 在全六人中分别有 {first_subset}/6 和 {continuation}/6 同向，但真正可承重的是稳定 T1 患者内的 {stable_first_subset}/{len(stable_r1_subjects)} 和 {stable_continuation}/{len(stable_r1_subjects)}；其余方向性结果不单独称 H2a 复现。raw waveform 在 {raw_estimable}/6 位患者中至少有 2 个 seed 可估计，其中 {raw}/6 位达到至少 2/3 seed 同向，但在稳定 T1 患者中仅 {raw_stable}/{len(stable_r1_subjects)}；结构零不计作 raw 阴性。因此 raw 仍是敏感性信息，而不是主结论。{h3_sentence}
 
 ## 这轮真正做了什么
 
@@ -195,7 +213,7 @@ def main() -> None:
 
 {r1_table(r1['patient_arm'])}
 
-安全读法：persistent−memoryless 回答“跨窗口保留是否有用”；correct−wrong 回答“是否属于正确时刻”；first subset 与 continuation 才直接对应下一场 IED 的空间 repertoire。raw−explicit 不稳定时，只能说显式 spectral/variance/autocorrelation 已解释大部分当前可见增量。
+安全读法：persistent−memoryless 回答“跨窗口保留是否有用”；correct−wrong 回答“是否属于正确时刻”；first subset 与 continuation 只在整体 T1 也稳定时，才直接承担下一场 IED 空间 repertoire 的 H2a 结论。Y-黄瀚文只有 107 个 validation events，效应大但支持小，必须与 E620/E958 分开看。raw−explicit 不稳定时，只能说显式 spectral/variance/autocorrelation 已解释大部分当前可见增量。
 
 ## H2b：修复后的发作前结果
 
@@ -218,7 +236,7 @@ next-event 只支持 exposure-conditioned prediction；只有 H5/H10 同时改�
 ## 目前对三个假设的证据力度
 
 - **H1：** 六患者 development 复现后，以 persistent 和 correct-time 两层分别判断；仍不称 autonomous physiological state。
-- **H2a：** 仍是最强假设，承重端点是 first subset 和 continuation，而不是只看 STOP/size。
+- **H2a：** 仍是最强假设；承重证据是稳定 T1 患者中 {stable_first_subset}/{len(stable_r1_subjects)} 的 first subset 和 {stable_continuation}/{len(stable_r1_subjects)} 的 continuation，而不是把整体 joint 未改善患者的端点方向也算成复现。
 - **H2b：** 修复后数字可作为新的 development 探索结果，但仍不是 seizure mechanism。
 - **H3a：** 只按上表的可估计 next-event 与 H5/H10 分层解释；没有 H5/H10 持续就不称 state update。
 - **H3b：** 未运行，继续保持未支持。
@@ -262,7 +280,7 @@ innovation 在 TRAIN 内按时间分成 5 折交叉拟合，validation predictio
 
 {r1_table(r1['patient_arm'])}
 
-患者级计数：persistent {persistent}/6；correct-time {time_specific}/6；first subset {first_subset}/6；continuation {continuation}/6；raw 可估计 {raw_estimable}/6，raw joint 有利 {raw}/6。进入 T2 的患者为 {len(stable)} 位：{', '.join(stable) if stable else 'none'}。
+患者级计数：persistent {persistent}/6；correct-time {time_specific}/6；first subset 全六人方向 {first_subset}/6、稳定 T1 内 {stable_first_subset}/{len(stable_r1_subjects)}；continuation 全六人方向 {continuation}/6、稳定 T1 内 {stable_continuation}/{len(stable_r1_subjects)}；raw 可估计 {raw_estimable}/6，raw joint 有利 {raw}/6，其中稳定 T1 内 {raw_stable}/{len(stable_r1_subjects)}。进入 T2 的患者为 {len(stable)} 位：{', '.join(stable) if stable else 'none'}。
 
 ## 3. T2-R2.0 synthetic 与 estimability
 
