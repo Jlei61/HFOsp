@@ -509,11 +509,13 @@ def main() -> None:
     transition = load_round_config(transition_path)
     node_mapping = candidate.get("node_mapping", {})
     depth_shrinkage = float(node_mapping.get("signed_depth_shrinkage", 1.0))
+    node_gain = float(node_mapping.get("node_gain", 1.0))
     substrate = build_substrate(
         transition, "node_baseline", args.seed, cache_dir=str(cache_dir),
         ee_dose=0.0, etoi_dose=0.0,
         node_candidate_override=candidate["node_field"],
         node_depth_shrinkage=depth_shrinkage,
+        node_gain=node_gain,
         artifact_root=artifact_root,
     )
     simulation = config["search"]["simulation"]

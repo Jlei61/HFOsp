@@ -185,6 +185,7 @@ def _cache_record(cache_hit, cache_source):
 def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=None,
                     ee_dose=1.0, etoi_dose=1.0,
                     node_candidate_override=None, node_depth_shrinkage=1.0,
+                    node_gain=1.0,
                     artifact_root=None):
     """Reconstruct one frozen arm on one network seed.
 
@@ -265,12 +266,14 @@ def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=No
     node = _candidate_node(node_candidate, positions, n_total=n_e + n_i,
                            stage=stage, config=anchor_config)
     depth_shrinkage = float(node_depth_shrinkage)
-    if depth_shrinkage != 1.0:
+    gain = float(node_gain)
+    if depth_shrinkage != 1.0 or gain != 1.0:
         node = reconstruct_node_from_h(
             node["h"], n_total=n_e + n_i,
             quantile_seed=stage["quantile_seed"],
             core_mean=engine["core_mean"], core_std=engine["core_std"],
             v_base=engine["v_base"], depth_shrinkage=depth_shrinkage,
+            node_gain=gain,
         )
     if not np.isclose(node["h"].sum(), float(stage["N_core_manual"]), atol=1e-8):
         raise RuntimeError("Node anchor field budget changed")
@@ -306,7 +309,8 @@ def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=No
         transformed = reconstruct_node_from_h(
             h_e, n_total=n_e + n_i, quantile_seed=stage["quantile_seed"],
             core_mean=engine["core_mean"], core_std=engine["core_std"],
-            v_base=engine["v_base"], depth_shrinkage=depth_shrinkage)
+            v_base=engine["v_base"], depth_shrinkage=depth_shrinkage,
+            node_gain=gain)
         vtheta, delta_vtheta = transformed["vtheta"], transformed["delta_vtheta"]
 
     # ---- 8: local connectivity mapper (pre-mapping bins captured first) ----

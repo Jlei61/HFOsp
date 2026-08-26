@@ -1117,3 +1117,27 @@ Node amplitude/gain artifacts must be audited to determine whether a scalar
 threshold-depth axis has already been tested. If it has, the next revision must
 address the patient/event representation or use a genuinely distinct Node
 channel rather than repeat field or gain scans.
+
+Stage-AI then inventoried 32 completed rev12 Node manifests, including 14 that
+already use the current edge-supported causal-family observation. Existing
+runs span continuous field geometry to sheet-RMS 2.0 and signed-depth
+shrinkage to `rho=0`, but no completed mapping applies a scalar expression gain
+to the frozen threshold modulation. The exact-neuron experiments alter event
+attribution or reuse field candidates; they do not test this axis. The formal
+inventory status is
+`SCALAR_NODE_GAIN_NOT_PREVIOUSLY_TESTED_CURRENT_CAUSAL_EVENT_UNIT`.
+
+Stage-AJ is therefore a bounded mapping canary, not another field search. For
+the unchanged Stage-AG anchor and its best patient-fit diagnostic field it
+defines
+
+`Vtheta_i = Vbase + g * (-h_i d_i)`
+
+and tests `g=0.5,0.75,1.25,1.5`; one anchor `g=0` arm is a uniform-threshold
+null and `g=1` reuses the paired Stage-AG trajectories. The field coefficients,
+signed depths, network topology, delays, detector, noise, event unit and all
+patient targets remain frozen. A candidate is balanced only if it improves the
+total objective, both mode losses and both mode-specific causal directions in
+mean utility and in at least 4/6 paired networks relative to the global
+`g=1` anchor. Failure closes scalar gain without densifying the grid. EE,
+E-to-I, Z/M, patient held-out and natural-KMeans selection remain closed.

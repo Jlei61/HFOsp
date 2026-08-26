@@ -747,3 +747,31 @@ rho values or permute `d` after this negative strength test.
 4. Only if gain is genuinely unresolved may a small paired gain canary be
    frozen. Otherwise revise the patient/event target or introduce a distinct
    data-driven Node channel. EE, E-to-I and Z/M remain closed.
+
+Stage-AI inspected 32 completed Node manifests. Fourteen already use the
+current edge-supported causal-family event unit. Those runs cover continuous
+field geometry through sheet-RMS 2.0 and signed-depth shrinkage through
+`rho=0`, but none changes the scalar expression strength of
+`delta Vtheta=-h*d`. The older exact-neuron stages changed event attribution or
+field coefficients and are superseded by causal-family refits. A bounded gain
+canary is therefore non-duplicative.
+
+## Stage-AJ scalar Node-gain canary
+
+1. Keep `stage_ag_anchor` and `stage_ag_g10_p` unchanged. The second field is a
+   diagnostic best-fit field, not an accepted Node solution.
+2. Define `Vtheta_i=Vbase+g*(-h_i*d_i)` and test
+   `g={0.5,0.75,1.25,1.5}` for both fields. Add one `g=0` uniform-threshold
+   null using the anchor field; reuse the existing `g=1` Stage-AG trajectories.
+3. Run the nine new mappings on the paired networks 2281--2286 for 20 s: 54
+   new Node-only simulations. Freeze topology, delays, detector, random seeds,
+   event unit and all spatial field coefficients.
+4. Use at most 14 one-thread workers, retain at least 32 GiB available memory,
+   and check completion no more often than every 600 s.
+5. Relative to the global `g=1` anchor, require positive mean utility and at
+   least 4/6 positive networks for the total objective, both patient modes and
+   both mode-specific causal directions. Event yield and runaway are reported,
+   not optimized separately.
+6. If no mapping meets all five endpoints, close scalar Node gain rather than
+   densifying the grid. Patient held-out, natural KMeans selection, EE, E-to-I
+   and Z/M remain closed.

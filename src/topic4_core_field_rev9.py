@@ -35,7 +35,8 @@ def reconstruct_frozen_node(theta, pos_e, *, n_total, target_count,
 
 
 def reconstruct_node_from_h(h, *, n_total, quantile_seed, core_mean,
-                            core_std, v_base, depth_shrinkage=1.0):
+                            core_std, v_base, depth_shrinkage=1.0,
+                            node_gain=1.0):
     """Apply the frozen signed threshold depths to any valid continuous field."""
     h = np.asarray(h, float)
     if h.ndim != 1 or not len(h):
@@ -56,11 +57,21 @@ def reconstruct_node_from_h(h, *, n_total, quantile_seed, core_mean,
         raise ValueError("h must have positive mass")
     weighted_mean = float(np.sum(h * d) / h_mass)
     # Preserve the historical floating-point path exactly at rho=1.
-    d_effective = d if rho == 1.0 else weighted_mean + rho * (d - weighted_mean)
+    d_shrunk = d if rho == 1.0 else weighted_mean + rho * (d - weighted_mean)
+    gain = float(node_gain)
+    if not np.isfinite(gain) or gain < 0.0:
+        raise ValueError("node_gain must be finite and nonnegative")
+    # Preserve the historical floating-point path exactly at gain=1.
+    d_effective = d_shrunk if gain == 1.0 else gain * d_shrunk
     original_budget = float(np.sum(h * d))
+    shrinkage_budget = float(np.sum(h * d_shrunk))
     effective_budget = float(np.sum(h * d_effective))
     weights = h / h_mass
     weighted_sd_original = float(np.sqrt(np.sum(weights * (d - weighted_mean) ** 2)))
+    shrinkage_mean = float(np.sum(weights * d_shrunk))
+    weighted_sd_shrunk = float(np.sqrt(
+        np.sum(weights * (d_shrunk - shrinkage_mean) ** 2)
+    ))
     effective_mean = float(np.sum(weights * d_effective))
     weighted_sd_effective = float(np.sqrt(
         np.sum(weights * (d_effective - effective_mean) ** 2)
@@ -68,22 +79,30 @@ def reconstruct_node_from_h(h, *, n_total, quantile_seed, core_mean,
     vtheta = build_vth(h, d_effective, n_total=int(n_total), n_E=n_e,
                        v_base=float(v_base))
     return dict(
-        h=h, d=d, d_effective=d_effective, vtheta=vtheta,
+        h=h, d=d, d_shrunk=d_shrunk, d_effective=d_effective, vtheta=vtheta,
         delta_vtheta=-h * d_effective,
         mapping_audit=dict(
             signed_depth_shrinkage=rho,
+            node_gain=gain,
             h_weighted_mean_depth=weighted_mean,
             h_weighted_modulation_original=original_budget,
+            h_weighted_modulation_after_shrinkage=shrinkage_budget,
             h_weighted_modulation_effective=effective_budget,
-            budget_error=effective_budget - original_budget,
+            budget_error=shrinkage_budget - original_budget,
+            gain_application_error=(
+                effective_budget - gain * shrinkage_budget
+            ),
             h_weighted_depth_sd_original=weighted_sd_original,
+            h_weighted_depth_sd_after_shrinkage=weighted_sd_shrunk,
             h_weighted_depth_sd_effective=weighted_sd_effective,
             latent_negative_fraction=float(np.mean(d < 0.0)),
+            shrunk_negative_fraction=float(np.mean(d_shrunk < 0.0)),
             effective_negative_fraction=float(np.mean(d_effective < 0.0)),
         ),
         hashes=dict(
             h_vector_sha256=array_sha256(h),
             d_vector_sha256=array_sha256(d),
+            d_shrunk_vector_sha256=array_sha256(d_shrunk),
             d_effective_vector_sha256=array_sha256(d_effective),
             vtheta_reconstructed_sha256=array_sha256(vtheta),
         ),
