@@ -599,3 +599,32 @@ density is identified from this response surface.
    diagnose why patient-fit and direction conflict before changing the target.
    If capacity is unstable, record `NODE_ONLY_DIRECTIONAL_CAPACITY_UNRESOLVED`
    and do not spend more simulation on the current Node-only scaffold.
+
+Stage-AD completed 9/9 runs. Both soft modes, weakest-mode causal direction and
+causal monotonicity were supported in all nine networks; all nine secondary
+natural-KMeans diagnostics contained two non-empty clusters with
+direction-balanced alignment above chance. The non-selectable field improved
+direction and topology separation but worsened the full patient objective and
+mode 0 relative to `g04-`. The status is
+`NODE_ONLY_DIRECTIONAL_CAPACITY_POSITIVE_PATIENT_JOINT_RECOVERY_UNRESOLVED`.
+
+## Stage-AE zero-simulation joint-objective conflict audit
+
+1. Use only Stage-AA and Stage-AD fit artifacts. Patient held-out remains
+   unopened and the manual field remains non-selectable.
+2. Decompose manual-minus-`g04-` and manual-minus-anchor paired changes for
+   each patient mode into recruitment, precedence, profile and event-cloud
+   terms. Split precedence into ICL-ICL, SCL-SCL and ICL-SCL classes.
+3. Report per-mode causal direction and monotonicity, soft occupancy, source
+   topology separation and OOD on the same nine networks. Determine whether
+   the direction gain is coupled specifically to one patient mode, one shaft or
+   cross-shaft recruitment rather than to global fit.
+4. Audit a revised direction-aware objective only retrospectively. Its
+   direction terms must come from patient-defined mode axes and model full-sheet
+   trajectories. It must neither use the manual coefficient map as a target nor
+   call the manual control patient-matched.
+5. Launch another multi-worker SNN search only if this audit identifies a
+   patient-derived continuous target that rewards both causal directions
+   without deleting the recruitment, shaft-precedence or event-cloud terms that
+   exposed the manual control's mismatch. Otherwise revise the event target or
+   Node mechanism before spending more simulation.

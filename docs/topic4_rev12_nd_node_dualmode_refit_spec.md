@@ -981,3 +981,30 @@ modes, the Node-only scaffold has directional capacity and the unresolved
 problem is joint patient-distribution recovery. If it fails on nine networks,
 the earlier two-network capacity result is not robust enough to justify further
 Node-field search on this scaffold.
+
+Stage-AD completed 9/9 runs without runaway. Both soft modes had effective
+support in every network (the smaller per-mode minimum was 16.9 effective
+events), and weakest-mode causal direction and causal monotonicity were
+strictly positive in 9/9 networks. Natural KMeans was a secondary diagnostic:
+all nine networks yielded two non-empty clusters and direction-balanced
+alignment above 0.5. The formal status is
+`NODE_ONLY_DIRECTIONAL_CAPACITY_POSITIVE_PATIENT_JOINT_RECOVERY_UNRESOLVED`.
+
+This closes scaffold incapacity as the leading explanation, but it does not
+validate the historical field as data-driven. Relative to the fit-only `g04-`
+field on the same networks, the manual control improved causal direction by
+0.154 (90% paired-bootstrap interval 0.084--0.228) and causal monotonicity by
+0.151 (0.085--0.215), while worsening the patient soft objective by 0.225
+(0.166--0.280). The mode-0 loss worsened by 0.266 (0.227--0.307), whereas the
+mode-1 improvement was small and uncertain. Mean OOD remained 0.609. Therefore
+the current failure is a joint-recovery problem: the scaffold can express two
+causal directions, but the current data-driven search does not recover that
+capacity while preserving the full patient event distribution.
+
+No further interpolation or simulation is licensed directly from Stage-AD.
+Stage-AE must first decompose the observed trade-off by recruitment,
+within-shaft precedence, cross-shaft precedence, profile and event cloud using
+only already generated fit artifacts. Any revised optimization target must be
+derived from the patient mode axes and model causal trajectories, not from the
+manual field geometry. The manual field remains a capacity control and may not
+seed or anchor a claimed recovery.

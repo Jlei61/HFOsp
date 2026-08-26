@@ -1,0 +1,37 @@
+{
+  "schema_id": "topic4_rev12_nd_manual_capacity_audit_v1",
+  "output_root": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_ad_manual_capacity_replication/analysis",
+  "inputs": {
+    "stage_ad_complete": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_ad_manual_capacity_replication/status/stage_ad_complete.json",
+      "sha256": "cacea705b0376466599f44757bb1c16c532b1d7f532923e454abfb5e90e8cdc9"
+    },
+    "stage_ad_summary": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_ad_manual_capacity_replication/aggregate/fit_soft_global_summary.json",
+      "sha256": "7c5f40750b7ccb43bf769d5de58410226b31042fee261c49e253569b9110819d"
+    },
+    "stage_aa_summary": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_aa_global_soft_field_expansion/aggregate/fit_soft_global_summary.json",
+      "sha256": "b9694f9236671e667f7b84af41d948d982b6fe12c4e83337bf723bedeb5ec71a"
+    },
+    "stage_ac_paired_audit": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_ac_local_donor_interpolation/analysis/paired_response_surface_audit.json",
+      "sha256": "fe196270e9df93a6c2ae0b6eee5c414c06532e6e02f6b03923f2994d4bded763"
+    }
+  },
+  "capacity_candidate_id": "stage_t_manual_smooth_capacity",
+  "comparison_candidate_ids": ["stage_z_anchor", "stage_z_g04_m"],
+  "capacity_description": {
+    "minimum_effective_events_per_soft_mode": 3.0,
+    "direction_sign_threshold": 0.0,
+    "monotonicity_sign_threshold": 0.0,
+    "full_support_requires_all_networks": true,
+    "natural_kmeans_role": "secondary_diagnostic_only"
+  },
+  "bootstrap": {
+    "draws": 20000,
+    "confidence": 0.9,
+    "seed": 20260825
+  },
+  "claim_boundary": "Post-run descriptive adjudication of a previously frozen, non-selectable historical smooth-field capacity control. Positive capacity means the Node-only scaffold can express opposite causal directions; it does not make the manual field data-driven, patient-matched, selectable or confirmatory. Patient held-out remains unopened."
+}
