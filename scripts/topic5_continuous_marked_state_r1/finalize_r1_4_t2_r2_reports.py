@@ -80,13 +80,14 @@ def t2_table(rows: list[dict]) -> str:
     if not rows:
         return "没有患者通过冻结的稳定 T1 条件，因此人体 T2 未启动。"
     output = [
-        "| 患者 | source | 可估计 seed | next real−placebo | next real−current | H5 state MSE | H5 mark | H10 state MSE | H10 mark |",
-        "|---|---|---:|---:|---:|---:|---:|---:|---:|",
+        "| 患者 | source | 可估计 seed | 支持不足 seed | next real−placebo | next real−current | H5 state MSE | H5 mark | H10 state MSE | H10 mark |",
+        "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for row in rows:
         output.append(
             f"| {patient_label(row['subject'])} | {row['source']} | "
             f"{row['estimable_seeds']}/3 | "
+            f"{row['support_ineligible_seeds']}/3 | "
             f"{number(row['next_real_minus_placebo_joint'])} | "
             f"{number(row['next_real_minus_current_joint'])} | "
             f"{number(row['H5_real_minus_placebo_state_mse'])} | "
@@ -105,6 +106,9 @@ def main() -> None:
     h2b_denominators = read_json(
         H2B / "h2b_denominators/H2B_DENOMINATORS__linear_graph_recurrent.json"
     )
+    h2b_sensitivity = read_json(
+        H2B / "h2b_sensitivity/H2B_SENSITIVITY_CARD.json"
+    )
     tests = read_json(T2 / "FINAL_TEST_AUDIT.json")
     h2b_all = h2b_cell("all_eligible")
     h2b_high = h2b_cell("high_observability")
@@ -118,6 +122,8 @@ def main() -> None:
         row for row in h2b_rerun["downstream"]
         if row["label"] == "verify_caliper"
     )
+    h2b_observability = h2b_sensitivity["continuous_observability"]
+    h2b_subtype = h2b_sensitivity["subtype_interaction__broad_ER"]
     by_subject = r1["by_subject"]
     persistent = sum(
         value["explicit_persistent_favourable_seeds"] >= 2
@@ -192,6 +198,7 @@ def main() -> None:
 - 主 population 层：患者中位 {number(h2b_all['median_delta'], 4)} SD，{h2b_all['n_favourable']}/{h2b_all['n_patients']} 同向，sign p={h2b_all['sign_test_p']:.4g}。
 - high-observability 敏感性层：患者中位 {number(h2b_high['median_delta'], 4)} SD，{h2b_high['n_favourable']}/{h2b_high['n_patients']} 同向，sign p={h2b_high['sign_test_p']:.4g}。
 - hard caliper 实际覆盖率为 {100 * h2b_caliper['share_with_caliper_applied']:.1f}%，机器结论为 `{h2b_caliper['scientific_status']}`；其余发作退回 soft matching，所以不能把全体结果写成“混杂已完全配平”。
+- 信号没有随可观测性稳定增强：患者内 IED 数、anchor gap、coverage 的中位 Spearman 分别为 {h2b_observability['n_ied_lookback']['median_within_patient_spearman']:+.3f}、{h2b_observability['anchor_gap_seconds']['median_within_patient_spearman']:+.3f}、{h2b_observability['coverage']['median_within_patient_spearman']:+.3f}。预先要求的 broad-ER 亚型交互只有 {h2b_subtype['n_patients_with_two_usable_subtypes']} 位患者可算，{h2b_subtype['n_patients_above_their_own_null']}/{h2b_subtype['n_patients_with_two_usable_subtypes']} 高于各自 null，sign p={h2b_subtype['sign_test_p']:.3g}，不支持统一的特定发作亚型效应。
 
 这里仍是“冻结旧 state 在发作前对齐后的关联”，不是发作机制，也不能用发作数代替患者数。此次重跑修复了 span 外发作未进入 pseudo-onset 排除、以及 nuisance 与 endpoint 使用不同 pseudo 集合两处问题。
 
@@ -275,6 +282,8 @@ primary increment 要求同一 seed 的 real next-event joint NLL 同时小于 s
 - primary all-eligible/open-loop：median={h2b_all['median_delta']:+.6f}，favourable={h2b_all['n_favourable']}/{h2b_all['n_patients']}，p={h2b_all['sign_test_p']:.8g}。
 - high-observability/open-loop：median={h2b_high['median_delta']:+.6f}，favourable={h2b_high['n_favourable']}/{h2b_high['n_patients']}，p={h2b_high['sign_test_p']:.8g}。
 - hard-caliper share={h2b_caliper['share_with_caliper_applied']:.6f}，verdict=`{h2b_caliper['scientific_status']}`；fallback seizures 保留在 population 层，故不宣称全体已平衡。
+- continuous observability：n_IED rho={h2b_observability['n_ied_lookback']['median_within_patient_spearman']:+.6f} ({h2b_observability['n_ied_lookback']['n_positive']}/{h2b_observability['n_ied_lookback']['n_patients']} positive)，anchor-gap rho={h2b_observability['anchor_gap_seconds']['median_within_patient_spearman']:+.6f}，coverage rho={h2b_observability['coverage']['median_within_patient_spearman']:+.6f}。
+- broad-ER subtype interaction：n_patients={h2b_subtype['n_patients_with_two_usable_subtypes']}，median excess over within-patient null={h2b_subtype['median_excess_over_null']:+.6f}，above-null={h2b_subtype['n_patients_above_their_own_null']}，sign p={h2b_subtype['sign_test_p']:.8g}，Fisher p={h2b_subtype['combined_p_fisher']:.8g}。
 
 修复点：pseudo exclusion 使用全部已知发作，不只 admissible span 内发作；nuisance 和 endpoint 使用相同完整 pseudo 集合。patient 是统计单位，seizure 是患者内观测。
 
@@ -309,6 +318,7 @@ primary increment 要求同一 seed 的 real next-event joint NLL 同时小于 s
                 H2B_RERUN,
                 H2B / "h2b_sensitivity/h2b_sensitivity_grid.csv",
                 H2B / "h2b_denominators/H2B_DENOMINATORS__linear_graph_recurrent.json",
+                H2B / "h2b_sensitivity/H2B_SENSITIVITY_CARD.json",
                 H2B / "seizure_link_preictal/CALIPER_VERIFICATION.json",
                 T2 / "FINAL_TEST_AUDIT.json",
             )

@@ -1,4 +1,6 @@
 from types import SimpleNamespace
+import json
+import sys
 
 import numpy as np
 import torch
@@ -15,6 +17,10 @@ from src.topic5_continuous_marked_state_r1.t2_r2 import (
     state_matched_nonoverlap_placebo,
 )
 from src.topic5_continuous_marked_state_r1.t2_s1 import OneStepDesign
+from scripts.topic5_continuous_marked_state_r1 import (
+    aggregate_t2_r2,
+    run_t2_r2_human,
+)
 
 
 def test_crossfit_innovation_never_uses_validation_outcome() -> None:
@@ -185,3 +191,55 @@ def test_horizon_scores_future_state_accuracy_not_only_nonzero_displacement() ->
     )
     assert fitted.mean_state_displacement_from_no_edge > 0
     assert fitted.state_mse_to_filtered_target < base.state_mse_to_filtered_target
+
+
+def test_support_limited_seed_is_persisted_and_aggregated_without_blocking(
+    tmp_path, monkeypatch,
+) -> None:
+    r1_root = tmp_path / "r1_4"
+    t2_root = tmp_path / "t2_r2"
+    (r1_root / "reports").mkdir(parents=True)
+    (r1_root / "reports/r1_4_summary.json").write_text(json.dumps({
+        "revision": aggregate_t2_r2.R1_4_REVISION,
+        "sealed_opened": False,
+        "by_subject": {
+            "epilepsiae_620": {"stable_explicit_t1_for_t2": True},
+        },
+    }))
+    context = SimpleNamespace(audit={
+        "r1_4_experiment_label": aggregate_t2_r2.R1_4_REVISION,
+    })
+    for source in aggregate_t2_r2.SOURCES:
+        for seed in aggregate_t2_r2.SEEDS:
+            args = SimpleNamespace(
+                subject="epilepsiae_620", source=source, seed=seed,
+            )
+            output = (
+                t2_root / "human/epilepsiae_620"
+                / f"{source}_seed_{seed}_n_100"
+            )
+            run_t2_r2_human.persist_not_estimable(
+                args, context, output,
+                "insufficient N=100 support (500 TRAIN, 42 validation)",
+                n_train=500, n_validation=42,
+            )
+    monkeypatch.setattr(sys, "argv", [
+        "aggregate_t2_r2.py", "--r1-4-root", str(r1_root),
+        "--root", str(t2_root),
+    ])
+    aggregate_t2_r2.main()
+    summary = json.loads((t2_root / "reports/t2_r2_summary.json").read_text())
+    assert len(summary["patient_source"]) == 2
+    assert all(row["support_ineligible_seeds"] == 3
+               for row in summary["patient_source"])
+    assert all(row["estimable_seeds"] == 0 for row in summary["patient_source"])
+    assert summary["scale_expansion_candidates"] == []
+
+
+def test_only_known_support_failures_are_downgraded() -> None:
+    assert run_t2_r2_human.support_limited(
+        ValueError("state-matched placebo has too few TRAIN donors")
+    )
+    assert not run_t2_r2_human.support_limited(
+        ValueError("unexpected tensor shape")
+    )

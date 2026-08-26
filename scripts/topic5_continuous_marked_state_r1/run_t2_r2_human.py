@@ -53,6 +53,91 @@ def atomic_torch(path: Path, value: dict) -> None:
     os.replace(temporary, path)
 
 
+NON_ESTIMABLE_MESSAGES = (
+    "too few TRAIN events for cross-fitting",
+    "innovation is degenerate on TRAIN",
+    "composition innovation is degenerate on TRAIN",
+    "state-matched placebo has too few TRAIN donors",
+    "T2-S1 has no exact one-step pairs",
+    "has no within-segment pairs",
+)
+
+
+def support_limited(error: ValueError) -> bool:
+    message = str(error)
+    return any(fragment in message for fragment in NON_ESTIMABLE_MESSAGES)
+
+
+def persist_not_estimable(
+    args,
+    context,
+    output: Path,
+    reason: str,
+    *,
+    design_audit: dict | None = None,
+    n_train: int | None = None,
+    n_validation: int | None = None,
+) -> None:
+    """Record a patient/seed support limitation without blocking other fits."""
+    audit = {
+        "revision": T2_R2_REVISION,
+        "source": args.source,
+        "scale_events": 100,
+        "train_next_event_pairs": n_train,
+        "validation_next_event_pairs": n_validation,
+        "raw_correction_after_anchor": False,
+        "later_t2_jumps": False,
+        "support_error": reason,
+        "sealed_opened": False,
+        **(design_audit or {}),
+    }
+    result = {
+        "status": "COMPLETE",
+        "analysis_status": "NOT_ESTIMABLE",
+        "non_estimable_reason": reason,
+        "revision": T2_R2_REVISION,
+        "r1_4_revision": R1_4_REVISION,
+        "subject": args.subject,
+        "seed": int(args.seed),
+        "source": args.source,
+        "scale_events": 100,
+        "t1": context.audit,
+        "design": audit,
+        "real_edge_estimable": False,
+        "primary_next_event_increment": False,
+        "one_shot_persistence": {
+            "H5": {"state_and_mark_persist": False},
+            "H10": {"state_and_mark_persist": False},
+        },
+        "source_hashes": {
+            "t2_r2": contract.sha256_file(
+                contract.REPO_ROOT / "src/topic5_continuous_marked_state_r1/t2_r2.py"
+            ),
+            "t2_r2_human": contract.sha256_file(
+                contract.REPO_ROOT / "src/topic5_continuous_marked_state_r1/t2_r2_human.py"
+            ),
+            "runner": contract.sha256_file(Path(__file__)),
+            "split_manifest": contract.sha256_file(contract.SPLIT_MANIFEST),
+        },
+        "formal_test_partition_opened": False,
+        "sealed_opened": False,
+        "claim_boundary": (
+            "development T2-R2.0 support limitation; not a biological negative "
+            "and not included in favourable or ordinary-negative denominators"
+        ),
+    }
+    contract.atomic_json(output / "result.json", result)
+    print(json.dumps({
+        "status": result["status"],
+        "analysis_status": result["analysis_status"],
+        "subject": args.subject,
+        "seed": args.seed,
+        "source": args.source,
+        "reason": reason,
+        "output": str(output / "result.json"),
+    }, indent=2, sort_keys=True))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--subject", required=True, choices=SUBJECTS)
@@ -71,20 +156,35 @@ def main() -> None:
     args = parser.parse_args()
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
+    output = (
+        args.output_root / "human" / args.subject
+        / f"{args.source}_seed_{args.seed}_n_100"
+    )
     context = load_fitted_r1_4_explicit_t1(
         args.subject, args.seed, device=args.device, r1_4_root=args.r1_4_root
     )
-    one_step, horizons, design_audit = build_r2_arm_designs(
-        context, source=args.source, scale_events=100
-    )
+    try:
+        one_step, horizons, design_audit = build_r2_arm_designs(
+            context, source=args.source, scale_events=100
+        )
+    except ValueError as error:
+        if not support_limited(error):
+            raise
+        persist_not_estimable(args, context, output, str(error))
+        return
     reference = one_step["real_cumulative"]
     n_train = int((reference.split == 0).sum())
     n_validation = int((reference.split == 1).sum())
     if n_train < 100 or n_validation < 100:
-        raise ValueError(
-            f"{args.subject}/{args.source}: insufficient N=100 support "
-            f"({n_train} TRAIN, {n_validation} validation)"
+        persist_not_estimable(
+            args, context, output,
+            f"insufficient N=100 support ({n_train} TRAIN, "
+            f"{n_validation} validation)",
+            design_audit=design_audit,
+            n_train=n_train,
+            n_validation=n_validation,
         )
+        return
 
     estimability = {
         label: edge_estimability_audit(
@@ -189,10 +289,6 @@ def main() -> None:
             ),
         }
 
-    output = (
-        args.output_root / "human" / args.subject
-        / f"{args.source}_seed_{args.seed}_n_100"
-    )
     checkpoint_path = output / "edges.pt"
     atomic_torch(checkpoint_path, {
         "revision": T2_R2_REVISION,
@@ -204,6 +300,7 @@ def main() -> None:
     })
     result = {
         "status": "COMPLETE",
+        "analysis_status": "ESTIMATED",
         "revision": T2_R2_REVISION,
         "r1_4_revision": R1_4_REVISION,
         "subject": args.subject,

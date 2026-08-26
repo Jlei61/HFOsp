@@ -76,6 +76,10 @@ def load(path: Path) -> dict:
         raise ValueError(f"T2 H5/H10 retained raw correction: {path}")
     if value["design"].get("later_t2_jumps") is not False:
         raise ValueError(f"T2 H5/H10 applied later jumps: {path}")
+    if value.get("analysis_status", "ESTIMATED") not in {
+        "ESTIMATED", "NOT_ESTIMABLE",
+    }:
+        raise ValueError(f"unknown T2 analysis status: {path}")
     return value
 
 
@@ -103,9 +107,13 @@ def main() -> None:
             payloads = [load(
                 args.root / "human" / subject / f"{source}_seed_{seed}_n_100/result.json"
             ) for seed in SEEDS]
+            estimated = [
+                value for value in payloads
+                if value.get("analysis_status", "ESTIMATED") == "ESTIMATED"
+            ]
             row = {"subject": subject, "source": source, "n_seeds": 3}
             for label, path in FIELDS.items():
-                row[label] = median([path_value(value, path) for value in payloads])
+                row[label] = median([path_value(value, path) for value in estimated])
             row["estimable_seeds"] = int(sum(
                 value["real_edge_estimable"] for value in payloads
             ))
@@ -122,17 +130,32 @@ def main() -> None:
             ))
             row["structural_zero_seeds"] = int(sum(
                 not value["fits"]["real_cumulative"]["edge_left_zero_initialisation"]
-                for value in payloads
+                for value in estimated
             ))
-            row["train_pairs"] = int(np.median([
-                value["design"]["train_next_event_pairs"] for value in payloads
-            ]))
-            row["validation_pairs"] = int(np.median([
-                value["design"]["validation_next_event_pairs"] for value in payloads
-            ]))
+            row["support_ineligible_seeds"] = int(len(payloads) - len(estimated))
+            row["support_ineligible_reasons"] = sorted({
+                value["non_estimable_reason"] for value in payloads
+                if value.get("analysis_status") == "NOT_ESTIMABLE"
+            })
+            train_pairs = [
+                value["design"].get("train_next_event_pairs") for value in payloads
+                if value["design"].get("train_next_event_pairs") is not None
+            ]
+            validation_pairs = [
+                value["design"].get("validation_next_event_pairs") for value in payloads
+                if value["design"].get("validation_next_event_pairs") is not None
+            ]
+            row["train_pairs"] = (
+                int(np.median(train_pairs)) if train_pairs else None
+            )
+            row["validation_pairs"] = (
+                int(np.median(validation_pairs)) if validation_pairs else None
+            )
             row["eligible_for_scale_expansion"] = bool(
                 row["estimable_seeds"] >= 2
                 and row["primary_increment_seeds"] >= 2
+                and row["next_real_minus_placebo_joint"] is not None
+                and row["next_real_minus_current_joint"] is not None
                 and row["next_real_minus_placebo_joint"] < 0
                 and row["next_real_minus_current_joint"] < 0
             )
@@ -141,7 +164,8 @@ def main() -> None:
                 key: row[key] for key in (
                     "estimable_seeds", "primary_increment_seeds",
                     "H5_persistence_seeds", "H10_persistence_seeds",
-                    "structural_zero_seeds", "eligible_for_scale_expansion",
+                    "structural_zero_seeds", "support_ineligible_seeds",
+                    "support_ineligible_reasons", "eligible_for_scale_expansion",
                 )
             }
     report = args.root / "reports"
