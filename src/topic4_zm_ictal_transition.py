@@ -185,7 +185,7 @@ def _cache_record(cache_hit, cache_source):
 def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=None,
                     ee_dose=1.0, etoi_dose=1.0,
                     node_candidate_override=None, node_depth_shrinkage=1.0,
-                    node_gain=1.0,
+                    node_gain=1.0, node_dispersion_candidate_override=None,
                     artifact_root=None):
     """Reconstruct one frozen arm on one network seed.
 
@@ -204,7 +204,9 @@ def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=No
     from scripts.run_topic4_rev9_node_kick_canary import _load_network
     from src.sef_hfo_observation import VirtualMontage
     from src.topic4_continuous_field import continuous_field_h_with_queries
-    from src.topic4_core_field_rev9 import reconstruct_node_from_h
+    from src.topic4_core_field_rev9 import (
+        reconstruct_node_from_dual_fields, reconstruct_node_from_h,
+    )
     from src.topic4_core_field_runner import _placement
     from src.topic4_graph_edge_flow import array_sha256
     from src.topic4_local_connectivity import continuous_local_e_source_flow
@@ -274,6 +276,22 @@ def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=No
             core_mean=engine["core_mean"], core_std=engine["core_std"],
             v_base=engine["v_base"], depth_shrinkage=depth_shrinkage,
             node_gain=gain,
+        )
+    if node_dispersion_candidate_override is not None:
+        if depth_shrinkage != 1.0 or gain != 1.0:
+            raise RuntimeError("dual Node fields cannot also change depth or scalar gain")
+        dispersion_candidate = dict(node_dispersion_candidate_override)
+        if dispersion_candidate.get("field_type") != "spline_continuous":
+            raise RuntimeError("Node dispersion field must be a continuous spline")
+        dispersion_node = _candidate_node(
+            dispersion_candidate, positions, n_total=n_e + n_i,
+            stage=stage, config=anchor_config,
+        )
+        node = reconstruct_node_from_dual_fields(
+            node["h"], dispersion_node["h"], n_total=n_e + n_i,
+            quantile_seed=stage["quantile_seed"],
+            core_mean=engine["core_mean"], core_std=engine["core_std"],
+            v_base=engine["v_base"],
         )
     if not np.isclose(node["h"].sum(), float(stage["N_core_manual"]), atol=1e-8):
         raise RuntimeError("Node anchor field budget changed")
@@ -361,6 +379,9 @@ def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=No
                 "placement": reg, "candidate": candidate,
                 "node_candidate": node_candidate,
                 "node_candidate_override": node_candidate_override is not None,
+                "node_dispersion_candidate_override": (
+                    node_dispersion_candidate_override is not None
+                ),
                 "node_mapping_audit": node["mapping_audit"],
                 "frozen_node_field_sha256": frozen_node_candidate["field_sha256"],
                 "pathway_dose": {"E_to_E": float(ee_dose),

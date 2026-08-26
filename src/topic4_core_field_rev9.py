@@ -109,6 +109,93 @@ def reconstruct_node_from_h(h, *, n_total, quantile_seed, core_mean,
     )
 
 
+def reconstruct_node_from_dual_fields(h_mean, h_dispersion, *, n_total,
+                                      quantile_seed, core_mean, core_std,
+                                      v_base):
+    """Separate the smooth mean-excitability and signed-dispersion envelopes.
+
+    The mapping is exactly the historical ``-h*d`` mapping when the two fields
+    are identical.  For distinct fields, the dispersion residual is centered
+    under its own field so it cannot silently change the total threshold
+    budget carried by the mean field.
+    """
+    h_mean = np.asarray(h_mean, float)
+    h_dispersion = np.asarray(h_dispersion, float)
+    if h_mean.ndim != 1 or not len(h_mean) or h_mean.shape != h_dispersion.shape:
+        raise ValueError("dual Node fields must be aligned non-empty vectors")
+    for name, values in (("h_mean", h_mean), ("h_dispersion", h_dispersion)):
+        if not np.isfinite(values).all() or np.any((values < 0.0) | (values > 1.0)):
+            raise ValueError(f"{name} must be finite and lie in [0, 1]")
+        if float(np.sum(values)) <= 0.0:
+            raise ValueError(f"{name} must have positive mass")
+    n_e = len(h_mean)
+    if int(n_total) < n_e:
+        raise ValueError("n_total cannot be smaller than the E-neuron field")
+    quantiles = sample_core_quantiles(n_e, int(quantile_seed))
+    d = signed_depth(core_thresholds(
+        quantiles, float(core_mean), float(core_std)), float(v_base))
+    mean_depth = float(np.sum(h_mean * d) / np.sum(h_mean))
+    dispersion_center = float(
+        np.sum(h_dispersion * d) / np.sum(h_dispersion)
+    )
+    dispersion_residual = d - dispersion_center
+    mean_component = -h_mean * mean_depth
+    dispersion_component = -h_dispersion * dispersion_residual
+    if not np.isclose(float(np.sum(dispersion_component)), 0.0, atol=1e-9):
+        raise RuntimeError("dual Node dispersion channel changed total threshold budget")
+    same_field = bool(np.array_equal(h_mean, h_dispersion))
+    parity_error = None
+    if same_field:
+        historical = reconstruct_node_from_h(
+            h_mean, n_total=n_total, quantile_seed=quantile_seed,
+            core_mean=core_mean, core_std=core_std, v_base=v_base,
+        )
+        delta_vtheta = historical["delta_vtheta"]
+        vtheta = historical["vtheta"]
+        parity_error = 0.0
+    else:
+        delta_vtheta = mean_component + dispersion_component
+        vtheta = np.full(int(n_total), float(v_base), dtype=float)
+        vtheta[:n_e] += delta_vtheta
+    return dict(
+        h=h_mean,
+        h_mean=h_mean,
+        h_dispersion=h_dispersion,
+        d=d,
+        d_shrunk=d,
+        d_effective=d,
+        vtheta=vtheta,
+        delta_vtheta=delta_vtheta,
+        mean_component=mean_component,
+        dispersion_component=dispersion_component,
+        mapping_audit=dict(
+            mapping_type="dual_continuous_mean_dispersion",
+            mean_depth=mean_depth,
+            dispersion_center=dispersion_center,
+            mean_component_sum=float(np.sum(mean_component)),
+            dispersion_component_sum=float(np.sum(dispersion_component)),
+            decomposition_max_abs_error=float(np.max(np.abs(
+                delta_vtheta - (mean_component + dispersion_component)
+            ), initial=0.0)),
+            total_modulation=float(np.sum(delta_vtheta)),
+            identical_fields=same_field,
+            historical_parity_max_abs_error=parity_error,
+        ),
+        hashes=dict(
+            h_vector_sha256=array_sha256(h_mean),
+            h_mean_vector_sha256=array_sha256(h_mean),
+            h_dispersion_vector_sha256=array_sha256(h_dispersion),
+            d_vector_sha256=array_sha256(d),
+            d_shrunk_vector_sha256=array_sha256(d),
+            d_effective_vector_sha256=array_sha256(d),
+            mean_component_sha256=array_sha256(mean_component),
+            dispersion_component_sha256=array_sha256(dispersion_component),
+            delta_vtheta_sha256=array_sha256(delta_vtheta),
+            vtheta_reconstructed_sha256=array_sha256(vtheta),
+        ),
+    )
+
+
 def node_reconstruction_error(reconstructed_vtheta, frozen_vtheta):
     left = np.asarray(reconstructed_vtheta)
     right = np.asarray(frozen_vtheta)

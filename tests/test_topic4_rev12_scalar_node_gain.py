@@ -7,7 +7,10 @@ import pytest
 
 from scripts.freeze_topic4_rev12_scalar_node_gain_canary import build_candidates
 from scripts.analyze_topic4_rev12_scalar_node_gain_canary import gain_audit
-from src.topic4_core_field_rev9 import reconstruct_node_from_h
+from scripts.audit_topic4_rev12_scalar_gain_crossing import crossing_audit
+from src.topic4_core_field_rev9 import (
+    reconstruct_node_from_dual_fields, reconstruct_node_from_h,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -48,6 +51,33 @@ def test_gain_scales_only_frozen_node_modulation(gain):
     assert np.allclose(changed["delta_vtheta"], gain * reference["delta_vtheta"])
     assert changed["mapping_audit"]["gain_application_error"] == pytest.approx(0.0, abs=1e-12)
     assert np.all(changed["vtheta"][len(h):] == 18.0)
+
+
+def test_identical_dual_fields_preserve_historical_node_arrays_bitwise():
+    h = np.linspace(0.01, 0.99, 100)
+    kwargs = dict(
+        n_total=125, quantile_seed=7, core_mean=17.5,
+        core_std=1.0, v_base=18.0,
+    )
+    historical = reconstruct_node_from_h(h, **kwargs)
+    dual = reconstruct_node_from_dual_fields(h, h, **kwargs)
+    assert np.array_equal(dual["delta_vtheta"], historical["delta_vtheta"])
+    assert np.array_equal(dual["vtheta"], historical["vtheta"])
+    assert dual["mapping_audit"]["historical_parity_max_abs_error"] == 0.0
+
+
+def test_dual_dispersion_field_is_zero_sum_and_distinct():
+    h_mean = np.linspace(0.01, 0.99, 100)
+    h_dispersion = h_mean[::-1].copy()
+    dual = reconstruct_node_from_dual_fields(
+        h_mean, h_dispersion, n_total=125, quantile_seed=7,
+        core_mean=17.5, core_std=1.0, v_base=18.0,
+    )
+    assert not np.array_equal(dual["delta_vtheta"], -h_mean * dual["d"])
+    assert dual["mapping_audit"]["dispersion_component_sum"] == pytest.approx(
+        0.0, abs=1e-10,
+    )
+    assert dual["mapping_audit"]["identical_fields"] is False
 
 
 def test_gain_manifest_is_bounded_and_does_not_duplicate_gain_one():
@@ -130,3 +160,46 @@ def test_gain_audit_requires_balanced_absolute_improvement():
     )
     assert result["status"] == "SCALAR_NODE_GAIN_BALANCED_CANDIDATE_FOUND"
     assert result["balanced_candidate_ids"] == ["resolved"]
+
+
+def _utility_endpoint(values):
+    return {"utilities_by_seed": {
+        str(seed): float(value) for seed, value in enumerate(values)
+    }}
+
+
+def test_crossing_audit_rejects_positive_means_without_network_majority():
+    endpoints = ["a", "b"]
+    left = {
+        "a": _utility_endpoint([-1, -1, 1, 1, 1, 1]),
+        "b": _utility_endpoint([1, 1, -1, -1, 1, 1]),
+    }
+    right = {
+        "a": _utility_endpoint([-0.2, -0.2, 1, 1, 1, 1]),
+        "b": _utility_endpoint([1, 1, -0.2, -0.2, 1, 1]),
+    }
+    result = crossing_audit(
+        left, right, left_gain=0.75, right_gain=1.0,
+        endpoints=endpoints, grid_points=11, minimum_positive_networks=5,
+    )
+    assert result["status"] == "MEAN_GAIN_CROSSING_WITHOUT_NETWORK_ROBUST_CORRIDOR"
+    assert result["mean_positive_gain_interval"] is not None
+    assert result["formal_corridor_gain_interval"] is None
+
+
+def test_crossing_audit_accepts_endpoint_majority_corridor():
+    endpoints = ["a", "b"]
+    left = {
+        "a": _utility_endpoint([-1, 1, 1, 1, 1, 1]),
+        "b": _utility_endpoint([-1, 1, 1, 1, 1, 1]),
+    }
+    right = {
+        "a": _utility_endpoint([1, 1, 1, 1, 1, 1]),
+        "b": _utility_endpoint([1, 1, 1, 1, 1, 1]),
+    }
+    result = crossing_audit(
+        left, right, left_gain=0.75, right_gain=1.0,
+        endpoints=endpoints, grid_points=11, minimum_positive_networks=4,
+    )
+    assert result["status"] == "NETWORK_ROBUST_SCALAR_GAIN_CORRIDOR_FOUND"
+    assert result["formal_corridor_gain_interval"] is not None

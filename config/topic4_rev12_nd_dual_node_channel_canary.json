@@ -1,0 +1,165 @@
+{
+  "schema_id": "topic4_rev12_nd_dual_node_channel_canary_v1",
+  "scientific_role": "development_only_dual_continuous_node_channel_canary",
+  "output_root": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_ak_dual_node_channel_canary",
+  "candidate_manifest": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_ak_dual_node_channel_canary/candidate_manifest.json",
+  "network_cache": "results/topic4_sef_hfo/data_driven_core_field_rev9/network_cache",
+  "inputs": {
+    "cohort_config": {
+      "path": "config/topic4_data_driven_snn_cohort_v1.json",
+      "sha256": "1dda710517a65002d21618f26569df91077ba6d02953fbfcee9b2f98b0ac4249"
+    },
+    "transition_config": {
+      "path": "config/topic4_data_driven_zm_ictal_transition_v1.json",
+      "sha256": "2ce70caf70ca1225ba9a95721692cf7fc9ce0f8fa9b977c85d0370c78941b20f"
+    },
+    "classifier_config": {
+      "path": "config/topic4_rev11_nlc_frozen_substrate_confirmation.json",
+      "sha256": "7e3ff4786a96ed5fc5b27f7b6b292eb5d7cd51fedb847f669c0e648165835df7"
+    },
+    "stage_ag_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_ag_broad_nonlocal_screen/candidate_manifest.json",
+      "sha256": "3bffa7b297dd4b9ef1e60658eca9902fb310b908e2b95f34fd0aa725fd0648c4"
+    },
+    "stage_ag_paired_audit": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_ag_broad_nonlocal_screen/analysis/broad_nonlocal_paired_audit.json",
+      "sha256": "5748335ed5decff8c0443fa5b2443c37152ac5046255e860e912d270091f9b67"
+    },
+    "stage_ah_result": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_ah_signed_depth_mapping_audit/analysis/signed_depth_mapping_result.json",
+      "sha256": "81c3dc314dd3fb085ed89819c083a0037b6344d9e28b5a2dff494c853155c6b1"
+    },
+    "stage_aj_result": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_aj_scalar_node_gain_canary/analysis/scalar_node_gain_result.json",
+      "sha256": "e01344bf4fc541eab481ad27bc4ea6340f3c0f7d6b6850bf5383df8656853192"
+    },
+    "stage_aj_crossing_audit": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_aj_scalar_node_gain_canary/analysis/scalar_node_gain_crossing_audit.json",
+      "sha256": "0ad92cd4da35cea7d5cdaad5500eb591126a25c889eab5850a1de1ab9e789ed1"
+    }
+  },
+  "search": {
+    "canary_network_seeds": [],
+    "fit_network_seeds": [2291, 2292, 2293, 2294, 2295, 2296],
+    "selection_network_seeds": [],
+    "confirmation_network_seeds": [],
+    "edge": "off",
+    "beta": "closed",
+    "simulation": {
+      "duration_ms": 20000.0,
+      "early_stop_runaway": true,
+      "late_runaway_is_invalid": true
+    },
+    "contact_readout": {
+      "source": "lineage_restricted_neuron_activity",
+      "kernel_width_mm": 0.25,
+      "smooth_ms": 5.0,
+      "participation_margin_fraction": 0.1,
+      "timing_fraction": 0.5
+    }
+  },
+  "dual_node_channel": {
+    "anchor_candidate_id": "stage_ag_anchor",
+    "patient_fit_candidate_id": "stage_ag_g10_p",
+    "opposite_direction_candidate_id": "stage_ag_g08_m",
+    "formula": "delta_vtheta_i = -h_mean_i*mu_mean - h_dispersion_i*(d_i-mu_dispersion)",
+    "coupled_controls": [
+      ["stage_ag_anchor", "stage_ag_anchor"],
+      ["stage_ag_g10_p", "stage_ag_g10_p"],
+      ["stage_ag_g08_m", "stage_ag_g08_m"]
+    ],
+    "cross_channel_combinations": [
+      ["stage_ag_g10_p", "stage_ag_g08_m"],
+      ["stage_ag_g10_p", "stage_ag_anchor"],
+      ["stage_ag_anchor", "stage_ag_g08_m"],
+      ["stage_ag_g08_m", "stage_ag_g10_p"]
+    ],
+    "expected_candidate_count": 7,
+    "same_field_must_equal_historical_mapping": true,
+    "dispersion_component_total_must_be_zero": true,
+    "patient_heldout_used": false,
+    "manual_field_used": false
+  },
+  "event_unit": {
+    "name": "edge_supported_causal_family_observation",
+    "minimum_active_neurons": 2,
+    "minimum_dominance": 0.7,
+    "sensitivity_minimum_dominances": [0.6, 0.7, 0.8],
+    "movie_frame_ms": 2.0,
+    "movie_bin_mm": 1.0,
+    "causal_memory_method": "local_ee_psp_tail",
+    "psp_tail_fraction": 0.5,
+    "sensitivity_psp_tail_fractions": [0.8, 0.5, 0.2],
+    "local_ee_delay_quantile": 1.0,
+    "forward_parent_neighborhood_bins": 1,
+    "minimum_parent_support": 0.001,
+    "sensitivity_minimum_parent_supports": [0.0003, 0.001, 0.003],
+    "minimum_parent_dominance": 0.7,
+    "edge_delay_rounding": "nearest",
+    "sensitivity_edge_delay_roundings": ["floor", "nearest", "ceil"],
+    "causal_memory_formula": "descending E_to_E PSP support at 50 percent of peak plus maximum local-compatible E_to_E delay",
+    "edge_support_formula": "active source count times delayed E_to_E weight divided by source-bin population and target-bin total incoming-E budget",
+    "observation_rule": "one edge-supported directed root family is one KMeans observation; detector fragments establish observability but cannot change family boundaries",
+    "compound_rule": "mixed-family detector fragments remain explicit compound observations outside A and B",
+    "root_inclusion": "local roots merge only through dominant delayed E_to_E support above the frozen incoming-budget fraction",
+    "boundary_signal": "whole_sheet_E_activity_movie_frozen_E_to_E_weights_and_delays_only",
+    "contact_geometry_used_for_boundary": false
+  },
+  "source_topology": {
+    "bin_mm": 1.0,
+    "event_window_ms": [-20.0, 180.0],
+    "baseline_window_ms": [-120.0, -20.0],
+    "frame_step_ms": 2.0,
+    "frame_width_ms": 3.0,
+    "minimum_active_neurons": 2,
+    "persistence_frames": 2,
+    "full_sheet_movie": {"enabled": true, "frame_ms": 2.0}
+  },
+  "soft_objective": {
+    "tau": 0.25,
+    "occupancy_weight": 0.5,
+    "ambiguity_weight": 0.25,
+    "contrast_weight": 0.5,
+    "projection_seed": 20260825,
+    "projection_count": 64,
+    "calibration_sample_size": 6,
+    "calibration_draws": 256,
+    "calibration_seed": 20260825,
+    "patient_reference_events_per_mode": 512,
+    "event_sensitivity_role": "mean plus standard-deviation diagnostic; primary event unit ranks the screen"
+  },
+  "pareto_selection": {
+    "axes": [
+      "mean_soft_objective:min",
+      "mean_soft_mode_0:min",
+      "mean_soft_mode_1:min",
+      "mean_soft_causal_direction:max",
+      "mean_soft_causal_monotonicity:max",
+      "soft_topology_across_network:max",
+      "soft_topology_mode_separation:max"
+    ],
+    "maximum_nominees": 2,
+    "patient_heldout_used": false,
+    "natural_kmeans_used": false
+  },
+  "analysis": {
+    "primary_endpoints": [
+      "soft_objective", "mode_0", "mode_1",
+      "mode_0_direction", "mode_1_direction"
+    ],
+    "diagnostic_endpoints": ["mode_0_monotonicity", "mode_1_monotonicity"],
+    "minimum_positive_networks_per_primary_endpoint": 4,
+    "bootstrap_draws": 10000,
+    "bootstrap_confidence": 0.90,
+    "bootstrap_seed": 20260827
+  },
+  "resources": {
+    "numerical_threads_per_worker": 1,
+    "maximum_workers": 14,
+    "estimated_worker_gib": 14.0,
+    "reserved_available_memory_gib": 32,
+    "monitor_interval_seconds": 600,
+    "long_run_launcher": "systemd-run --user plus nohup"
+  },
+  "claim_boundary": "Node-only mechanism canary on fresh fit networks. It tests whether two observation-invariant continuous fields can separately place mean excitability and signed threshold dispersion. It cannot freeze a final field, use patient held-out, or authorize EE, E-to-I or Z/M."
+}

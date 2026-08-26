@@ -1,0 +1,30 @@
+{
+  "schema_id": "topic4_rev12_nd_scalar_gain_crossing_audit_v1",
+  "output_path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_aj_scalar_node_gain_canary/analysis/scalar_node_gain_crossing_audit.json",
+  "inputs": {
+    "stage_aj_result": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_aj_scalar_node_gain_canary/analysis/scalar_node_gain_result.json",
+      "sha256": "e01344bf4fc541eab481ad27bc4ea6340f3c0f7d6b6850bf5383df8656853192"
+    },
+    "stage_ag_paired_audit": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_ag_broad_nonlocal_screen/analysis/broad_nonlocal_paired_audit.json",
+      "sha256": "5748335ed5decff8c0443fa5b2443c37152ac5046255e860e912d270091f9b67"
+    }
+  },
+  "interpolation": {
+    "left_candidate_id": "stage_aj_g10_p_gain0p75",
+    "right_candidate_id": "stage_ag_g10_p",
+    "left_gain": 0.75,
+    "right_gain": 1.0,
+    "grid_points": 1001,
+    "primary_endpoints": [
+      "soft_objective",
+      "mode_0",
+      "mode_1",
+      "mode_0_direction",
+      "mode_1_direction"
+    ],
+    "minimum_positive_networks_per_endpoint": 4
+  },
+  "claim_boundary": "Zero-simulation linear interpolation audit of already observed paired utilities. It can reject a robust scalar-gain corridor between two measured gains. It cannot establish nonlinear behavior between gains, select a Node field, use patient held-out, or authorize EE, E-to-I or Z/M."
+}

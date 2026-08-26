@@ -69,6 +69,7 @@ ALLOWED_SCIENTIFIC_ROLES = {
     "development_only_global_continuous_node_field_screen",
     "development_only_signed_depth_mapping_audit",
     "development_only_scalar_node_gain_canary",
+    "development_only_dual_continuous_node_channel_canary",
 }
 
 
@@ -511,12 +512,14 @@ def main() -> None:
     node_mapping = candidate.get("node_mapping", {})
     depth_shrinkage = float(node_mapping.get("signed_depth_shrinkage", 1.0))
     node_gain = float(node_mapping.get("node_gain", 1.0))
+    dispersion_field = candidate.get("node_dispersion_field")
     substrate = build_substrate(
         transition, "node_baseline", args.seed, cache_dir=str(cache_dir),
         ee_dose=0.0, etoi_dose=0.0,
         node_candidate_override=candidate["node_field"],
         node_depth_shrinkage=depth_shrinkage,
         node_gain=node_gain,
+        node_dispersion_candidate_override=dispersion_field,
         artifact_root=artifact_root,
     )
     simulation = config["search"]["simulation"]

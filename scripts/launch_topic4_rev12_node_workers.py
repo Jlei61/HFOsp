@@ -7,11 +7,17 @@ import json
 import os
 import re
 import subprocess
+import sys
 import time
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from scripts.run_topic4_rev12_node_worker import _validate_scientific_role  # noqa: E402
+
 ARTIFACT_ROOT = Path("/home/honglab/leijiaxin/HFOsp")
 PYTHON = Path("/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python")
 COMPLETE_STATUS = "REV12ND_NODE_WORKER_COMPLETE"
@@ -95,6 +101,7 @@ def main() -> None:
     config_path = args.config.resolve()
     artifact_root = args.artifact_root.resolve()
     config = json.loads(config_path.read_text())
+    _validate_scientific_role(config.get("scientific_role", ""))
     manifest_path = artifact_root / config["candidate_manifest"]
     manifest = json.loads(manifest_path.read_text())
     seeds = [int(seed) for seed in config["search"][f"{args.seed_pool}_network_seeds"]]

@@ -1141,3 +1141,42 @@ total objective, both mode losses and both mode-specific causal directions in
 mean utility and in at least 4/6 paired networks relative to the global
 `g=1` anchor. Failure closes scalar gain without densifying the grid. EE,
 E-to-I, Z/M, patient held-out and natural-KMeans selection remain closed.
+
+Stage-AJ completed 54/54 new trajectories with no failed worker and no
+runaway. No mapping had positive utility for the total objective, both mode
+losses and both mode-specific causal directions in at least 4/6 networks.
+The response was not flat: reducing gain preferentially restored mode-1
+direction, whereas increasing gain preferentially restored mode-0 direction.
+The apparent compromise in the mean response was audited without new
+simulation. Linear interpolation between `g10+` at `g=0.75` and `g=1.0` placed
+all five mean utilities above zero only over `g=0.9125--0.9380`; no point met
+the per-endpoint network-majority requirement, and no point had more than two
+networks jointly positive on all endpoints. The status is
+`MEAN_GAIN_CROSSING_WITHOUT_NETWORK_ROBUST_CORRIDOR`. This closes scalar gain;
+it does not justify a denser scan around a fragile mean crossing.
+
+The remaining minimal Node hypothesis is that one scalar threshold field is
+being asked to place two different quantities: coarse mean excitability and
+the envelope of frozen signed microheterogeneity. Stage-AK separates those
+quantities without adding discrete cores or an observation-density basis. For
+two continuous fields `h_mu(x)` and `h_sigma(x)`, define
+
+`delta Vtheta_i = -h_mu(x_i) mu_mu - h_sigma(x_i) (d_i - mu_sigma)`,
+
+where `mu_mu=sum_i h_mu(x_i)d_i/sum_i h_mu(x_i)` and
+`mu_sigma=sum_i h_sigma(x_i)d_i/sum_i h_sigma(x_i)`. The signed-dispersion
+term therefore sums to zero. If the two fields are identical, the mapping must
+be bitwise equal to the historical `-h_i d_i` mapping; this is an engineering
+contract, not an approximate scientific equivalence.
+
+Stage-AK is a bounded mechanism canary on fresh networks, not a two-field
+optimizer. It cross-combines only the Stage-AG anchor, the best full-fit field
+and the best mode-1-direction field, together with each field's coupled
+control. These sources were fixed by fit-only results already on disk. Six
+unused networks receive all seven mappings with common random numbers. The
+canary asks whether separating the two continuous Node channels creates a
+network-robust joint direction that was absent from geometry, depth-shrinkage
+and scalar-gain searches. It may not use patient held-out, natural KMeans,
+manual-field coordinates, EE, E-to-I or Z/M. A negative result closes this
+specific dual-threshold mapping and returns the scientific decision to the
+event/patient target or to a genuinely different Node mechanism.

@@ -775,3 +775,43 @@ canary is therefore non-duplicative.
 6. If no mapping meets all five endpoints, close scalar Node gain rather than
    densifying the grid. Patient held-out, natural KMeans selection, EE, E-to-I
    and Z/M remain closed.
+
+Stage-AJ completed 54/54 new simulations without runaway. No tested gain met
+the five-endpoint network-majority contract. Gain was nevertheless strongly
+active: lower gain improved mode-1 direction while harming mode 0 and the full
+fit; higher gain improved mode-0 direction while harming mode 1. A
+zero-simulation interpolation audit between `g=0.75` and `g=1.0` found a narrow
+interval (`0.9125--0.9380`) where all five endpoint means were positive, but no
+point gave every endpoint positive utility in at least 4/6 networks and at
+most 2/6 networks were jointly positive. Scalar gain is closed; densifying
+that interval would optimize an unstable across-network average.
+
+## Stage-AK dual continuous Node-channel canary
+
+1. Retain a continuous observation-invariant Node mechanism. Decompose the
+   frozen signed depth as a smooth mean-excitability channel and a separate
+   smooth signed-dispersion envelope:
+   `delta_vtheta_i = -h_mean_i*mu_mean -
+   h_dispersion_i*(d_i-mu_dispersion)`.
+2. Require exact historical parity when `h_mean == h_dispersion`. Center the
+   dispersion residual under its own field so its total contribution is zero;
+   changing that field may redistribute heterogeneity but cannot add a hidden
+   global threshold budget.
+3. Use only three existing data-driven Stage-AG fields: the unchanged anchor,
+   best full-fit field `g10+`, and best mode-1-direction field `g08-`. Freeze
+   their three coupled controls and four cross-channel combinations. Manual
+   fields, contacts, patient source coordinates and patient held-out cannot
+   construct a candidate.
+4. Run seven mappings on six unused fit networks 2291--2296 for 20 s: 42
+   Node-only simulations with common random numbers. Use at most 14
+   one-thread workers, retain at least 32 GiB available memory and monitor only
+   every 600 s. Zero-event and runaway results are valid negative outcomes.
+5. Relative to the coupled anchor, report the total objective, both mode
+   losses, both causal directions, monotonicity, topology, OOD and event
+   support. Also pair every cross mapping to the coupled control of its mean
+   field and to the coupled control of its dispersion field.
+6. A cross mapping advances only if the total objective, both patient modes
+   and both causal directions improve in mean and in at least 4/6 networks.
+   Otherwise close this two-channel threshold mapping. Do not open EE, E-to-I,
+   Z/M, patient held-out, natural-KMeans selection or another broad field
+   search from a negative canary.
