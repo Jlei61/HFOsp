@@ -32,6 +32,8 @@
 
 优先 `epilepsiae_620` 与 `epilepsiae_958`，因为两者已有 persistent 与 correct-time development 证据。其余患者只有在 R1.4 中形成可解释的 persistent/time-specific state 后才加入。没有 N=1,000 长整窗不构成 N=100 T2 的排除理由。
 
+“稳定 T1”固定为：同一患者 explicit 主臂 3 个 seed 中至少 2 个实际离开 epoch 0，且同时满足 persistent 优于 memoryless、correct-time 优于 5-donor matched wrong-time；不按 raw 结果或 T2 结果反向选择。
+
 所有 epoch 选择仅使用 TRAIN 内 chronological inner-validation；development validation 只作一次最终评分。formal test、sealed partition 与 seizure labels 不参与训练或选择。
 
 ## 3. R1.4 输入与模型
@@ -69,7 +71,7 @@ raw Transformer 从同 seed explicit checkpoint 接入小 residual gate：`o_k =
 3. explicit+raw vs explicit；
 4. timing、STOP/size、first subset、later continuation、same-prefix continuation 分解。
 
-wrong-time donor 必须来自同一记录覆盖段，并匹配 time of day、time since last IED、recent IED rate、last-event load/STOP、observation coverage 与 session position。
+wrong-time donor 必须来自同一记录覆盖段，并匹配 time of day、time since last IED、recent IED rate、last-event load/STOP、observation coverage 与 session position。主分析固定每个 anchor 取 5 个 donor；10-donor 只作同一 checkpoint 的敏感性分析，不参与训练或患者选择。
 
 允许结论：
 
@@ -91,6 +93,8 @@ wrong-time donor 必须来自同一记录覆盖段，并匹配 time of day、tim
 
 `phi_hat_e = E[phi(m_e) | z_e^-, r_e, o_e^-]`，
 `eta_e = phi(m_e) - phi_hat_e`。
+
+TRAIN 事件按时间顺序分为 5 折；每个 TRAIN 事件的 `phi_hat` 必须来自不含该事件的其余 TRAIN 折，validation 只使用全 TRAIN 拟合器。不得用 validation outcome 拟合或归一化 innovation。
 
 第一主 source 为 scalar load innovation；第二 source 为去除 total load 后的 participation composition，独立运行、独立报告。
 
@@ -117,6 +121,8 @@ T1 对应 `B=0`。T2 首轮从冻结 T1 checkpoint 克隆，observer、K、histo
 
 fitted-intercept 仅作常数 offset 诊断，不称同容量对照；`real-no_edge` 单独不能承担 exposure 结论。
 
+指数核理论上无限长，因此 donor 的“历史不重叠”操作化为最近 `5N=500` 个事件不重叠；此时更早历史的剩余总权重上界为 `exp(-5)=0.0067`，并逐患者报告 donor 缺失率与 state-match 距离。
+
 ### 一级：next-event counterfactual
 
 anchor event 后应用 real/placebo edge，关闭下一事件前 raw correction，比较事件 `e+1` 的 timing 与 exact mark。这是首要 estimability 与增量检验。
@@ -124,6 +130,8 @@ anchor event 后应用 real/placebo edge，关闭下一事件前 raw correction�
 ### 二级：one-shot persistence
 
 只在 anchor event 应用一次 jump，之后关闭 raw correction、不再应用新 T2 jump，各臂使用相同真实 event-history covariates；比较 H5/H10 的状态与 mark 预测。
+
+状态预测以 rollout state 到同一冻结 T1 在目标事件前得到的 filtered state 的 MSE 衡量；同时报告相对 no-edge 的非零位移。只有 real 同时优于 donor 的未来 state MSE 与 mark NLL，才命名为 one-shot persistent state update。
 
 若差异只存在于 `e+1`，命名为 `exposure-conditioned next-event prediction`；只有差异通过冻结 generator 延续到 H5/H10，才允许称 `exposure-induced state update`。
 

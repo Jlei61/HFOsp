@@ -76,3 +76,18 @@ def test_strict_swap_returns_multiple_separated_same_session_donors() -> None:
     for donor in permutation:
         assert np.all(np.abs(design.anchor_time[donor] - design.anchor_time) >= 1800.0)
     assert audit["n_donors"] == 3
+
+
+def test_strict_swap_never_bridges_recorded_coverage_segments() -> None:
+    design = _design()
+    segment = np.repeat(np.arange(4, dtype=np.int64), 2)
+    permutation, matched, audit = strict_matched_wrong_time_permutations(
+        design, np.ones(8), anchor_segment=segment,
+        n_donors=1, min_separation_seconds=1000.0,
+    )
+    assert matched.all()
+    for donor in permutation:
+        assert np.array_equal(segment[donor], segment)
+    assert audit["same_recorded_coverage_segment"] is True
+    assert audit["same_session"] is False
+    assert audit["donor_group_kind"] == "recorded_coverage_segment"

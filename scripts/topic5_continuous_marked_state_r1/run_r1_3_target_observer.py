@@ -101,12 +101,25 @@ def main() -> None:
     parser.add_argument("--arm", required=True, choices=("explicit", "explicit_raw"))
     parser.add_argument("--seed", required=True, type=int, choices=(0, 1, 2))
     parser.add_argument("--device", default="cuda")
+    parser.add_argument("--experiment-label", default="r1_3_formal_pilot")
     parser.add_argument("--observer-epochs", type=int, default=2)
     parser.add_argument("--joint-epochs", type=int, default=2)
     parser.add_argument("--chunk-anchors", type=int, default=8)
     parser.add_argument("--state-learning-rate", type=float, default=3e-4)
     parser.add_argument("--observer-learning-rate", type=float, default=3e-5)
     parser.add_argument("--raw-learning-rate", type=float, default=1e-5)
+    parser.add_argument(
+        "--initialisation-source",
+        choices=("prefer_r1_2b_same_seed", "r1_2_matching_seed"),
+        default="prefer_r1_2b_same_seed",
+        help=(
+            "R1.4 uses r1_2_matching_seed for every subject so the six-patient "
+            "replication does not give the original three an extra R1.2b stage."
+        ),
+    )
+    parser.add_argument(
+        "--matched-wrong-donors", type=int, choices=(5, 10), default=5,
+    )
     parser.add_argument(
         "--r1-2-fallback-seed-mode",
         choices=("common_seed_0", "matching_seed"),
@@ -179,7 +192,11 @@ def main() -> None:
         args.r1_2b_root / "joint" / args.subject
         / f"joint_explicit_seed_{args.seed}" / "model.pt"
     )
-    if r1_2b_path.exists():
+    use_r1_2b = (
+        args.initialisation_source == "prefer_r1_2b_same_seed"
+        and r1_2b_path.exists()
+    )
+    if use_r1_2b:
         r1_2b_explicit = fitted_r1_2b_explicit(
             args.subject, args.seed, baseline, design, stream, raw_bridge.observer,
             device=args.device, root=args.r1_2b_root,
@@ -191,9 +208,10 @@ def main() -> None:
         }
     else:
         r1_2b_explicit = None
-        fallback_seed = (
-            args.seed if args.r1_2_fallback_seed_mode == "matching_seed" else 0
-        )
+        fallback_seed = args.seed if (
+            args.initialisation_source == "r1_2_matching_seed"
+            or args.r1_2_fallback_seed_mode == "matching_seed"
+        ) else 0
         r1_2_path = (
             args.r1_2_root / "t1_full" / args.subject
             / f"explicit_d8_seed_{fallback_seed}" / "model.pt"
@@ -208,14 +226,14 @@ def main() -> None:
         initialisation = {
             "kind": (
                 "r1_2_explicit_matching_seed_then_target_alignment"
-                if args.r1_2_fallback_seed_mode == "matching_seed"
+                if fallback_seed == args.seed
                 else "r1_2_explicit_seed_0_common_core_then_target_alignment"
             ),
             "checkpoint": str(r1_2_path),
             "checkpoint_sha256": contract.sha256_file(r1_2_path),
             "fallback_seed": int(fallback_seed),
             "shared_initialisation_across_r1_3_seeds": bool(
-                args.r1_2_fallback_seed_mode == "common_seed_0"
+                fallback_seed == 0 and args.seed != 0
             ),
         }
 
@@ -323,8 +341,22 @@ def main() -> None:
         anchor_state_mode="memoryless",
     ))
     observation_coverage = np.asarray(cached_contact_mask, dtype=np.float64).mean(1)
+    anchor_segment = None
+    if args.experiment_label == "r1_4_six_patient_explicit_primary_raw_residual_v1":
+        anchor_segment = np.searchsorted(
+            coverage.stop, np.asarray(design.anchor_time, dtype=np.float64), side="right"
+        )
+        if np.any(anchor_segment >= len(coverage.start)):
+            raise ValueError("R1.4 anchor occurs after the final recorded segment")
+        anchor_inside = (
+            (design.anchor_time >= coverage.start[anchor_segment])
+            & (design.anchor_time < coverage.stop[anchor_segment])
+        )
+        if not bool(np.all(anchor_inside)):
+            raise ValueError("R1.4 anchor occurs outside recorded coverage")
     permutations, matched, match_audit = strict_matched_wrong_time_permutations(
-        design, observation_coverage, n_donors=5,
+        design, observation_coverage, anchor_segment=anchor_segment,
+        n_donors=int(args.matched_wrong_donors),
         min_separation_seconds=1800.0,
     )
     matched_correct = asdict(evaluate_full_t1(
@@ -375,6 +407,7 @@ def main() -> None:
     atomic_torch(checkpoint_path, {
         "contract": contract.REVISION,
         "r1_3_revision": R1_3_REVISION,
+        "experiment_label": args.experiment_label,
         "subject": args.subject,
         "arm": args.arm,
         "seed": args.seed,
@@ -385,6 +418,7 @@ def main() -> None:
         "status": "COMPLETE",
         "contract": contract.REVISION,
         "r1_3_revision": R1_3_REVISION,
+        "experiment_label": args.experiment_label,
         "subject": args.subject,
         "arm": args.arm,
         "seed": int(args.seed),
@@ -440,6 +474,8 @@ def main() -> None:
         "checkpoint": str(checkpoint_path),
         "checkpoint_sha256": contract.sha256_file(checkpoint_path),
         "initialisation": initialisation,
+        "initialisation_source_policy": args.initialisation_source,
+        "matched_wrong_donors": int(args.matched_wrong_donors),
         "observation_cache_manifest": str(observation_cache_manifest_path),
         "observation_cache_manifest_sha256": contract.sha256_file(
             observation_cache_manifest_path

@@ -46,6 +46,8 @@ class FittedT1Context:
     pre_event_state: np.ndarray
     event_segment: np.ndarray
     audit: dict
+    pre_event_observation: np.ndarray | None = None
+    anchor_embedding: np.ndarray | None = None
 
 
 def load_fitted_r1_2_explicit_t1(
@@ -136,6 +138,8 @@ def load_fitted_r1_2_explicit_t1(
         pre_event_state=pre_event_state.astype(np.float32),
         event_segment=segment,
         audit=audit,
+        pre_event_observation=None,
+        anchor_embedding=None,
     )
 
 
@@ -240,6 +244,13 @@ def load_fitted_explicit_t1(subject: str, seed: int, *,
             design.event_time, design.event_session, event_rows,
             state_permutation=None, device=device,
         ).float().cpu().numpy()
+    event_observation = np.zeros(
+        (len(design.event_time), embedding.shape[1]), dtype=np.float32
+    )
+    observed = np.asarray(design.event_source_anchor) >= 0
+    event_observation[observed] = embedding[
+        np.asarray(design.event_source_anchor[observed], dtype=np.int64)
+    ]
     segment = _event_coverage_segment(coverage, design.event_time)
     audit = {
         "subject": subject,
@@ -258,6 +269,8 @@ def load_fitted_explicit_t1(subject: str, seed: int, *,
         model=model, design=design, coverage=coverage, stream=stream,
         pre_event_state=pre_event_state.astype(np.float32),
         event_segment=segment, audit=audit,
+        pre_event_observation=event_observation,
+        anchor_embedding=np.asarray(embedding, dtype=np.float32),
     )
 
 

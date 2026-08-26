@@ -27,22 +27,36 @@ def strict_matched_wrong_time_permutations(
     design: FullAnchorDesign,
     observation_coverage: np.ndarray,
     *,
+    anchor_segment: np.ndarray | None = None,
     split: str = "validation",
     n_donors: int = 5,
     min_separation_seconds: float = 1800.0,
 ) -> tuple[np.ndarray, np.ndarray, dict]:
-    """Return several same-session matched wrong-time donors per anchor.
+    """Return several causally valid matched wrong-time donors per anchor.
 
     Matching uses the frozen deterministic-history coordinates for time since
     the previous event, 30 s/2 min/10 min counts, last/recent load, previous
     event extent, time of day and session position, plus raw-window contact
-    coverage.  The history coordinates are already scaled from TRAIN.
+    coverage.  The history coordinates are already scaled from TRAIN.  R1.4
+    supplies the recorded-coverage segment explicitly so an apparently
+    continuous clinical session cannot bridge an unrecorded gap.  The default
+    preserves the frozen R1.3 same-session diagnostic.
     """
     code = {"train": 0, "validation": 1}[split]
     target = np.flatnonzero(design.anchor_split == code)
     coverage = np.asarray(observation_coverage, dtype=np.float64)
     if coverage.shape != (len(design.anchor_time),):
         raise ValueError("observation coverage must have one value per anchor")
+    if anchor_segment is None:
+        donor_group = np.asarray(design.anchor_session, dtype=np.int64)
+        group_kind = "event_session"
+    else:
+        donor_group = np.asarray(anchor_segment, dtype=np.int64)
+        if donor_group.shape != (len(design.anchor_time),):
+            raise ValueError("anchor segment must have one value per anchor")
+        if np.any(donor_group < 0):
+            raise ValueError("anchor segment contains an invalid label")
+        group_kind = "recorded_coverage_segment"
     # BASE_HISTORY_NAMES indices 1..10 exclude only has_previous_event.
     feature = np.asarray(design.anchor_history[:, 1:11], dtype=np.float64)
     train = design.anchor_split == 0
@@ -59,7 +73,7 @@ def strict_matched_wrong_time_permutations(
     distances: list[float] = []
     for row in target:
         candidate = target[
-            (design.anchor_session[target] == design.anchor_session[row])
+            (donor_group[target] == donor_group[row])
             & (
                 np.abs(design.anchor_time[target] - design.anchor_time[row])
                 >= float(min_separation_seconds)
@@ -80,7 +94,9 @@ def strict_matched_wrong_time_permutations(
         "n_matched_anchors": int(matched.sum()),
         "n_donors": int(n_donors),
         "minimum_separation_seconds": float(min_separation_seconds),
-        "same_session": True,
+        "same_session": bool(anchor_segment is None),
+        "same_recorded_coverage_segment": bool(anchor_segment is not None),
+        "donor_group_kind": group_kind,
         "history_feature_indices": list(range(1, 11)),
         "observation_coverage_included": True,
         "candidate_count_median": (
