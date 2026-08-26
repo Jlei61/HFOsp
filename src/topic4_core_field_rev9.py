@@ -35,7 +35,7 @@ def reconstruct_frozen_node(theta, pos_e, *, n_total, target_count,
 
 
 def reconstruct_node_from_h(h, *, n_total, quantile_seed, core_mean,
-                            core_std, v_base):
+                            core_std, v_base, depth_shrinkage=1.0):
     """Apply the frozen signed threshold depths to any valid continuous field."""
     h = np.asarray(h, float)
     if h.ndim != 1 or not len(h):
@@ -48,13 +48,43 @@ def reconstruct_node_from_h(h, *, n_total, quantile_seed, core_mean,
     quantiles = sample_core_quantiles(n_e, int(quantile_seed))
     d = signed_depth(core_thresholds(
         quantiles, float(core_mean), float(core_std)), float(v_base))
-    vtheta = build_vth(h, d, n_total=int(n_total), n_E=n_e,
+    rho = float(depth_shrinkage)
+    if not np.isfinite(rho) or not 0.0 <= rho <= 1.0:
+        raise ValueError("depth_shrinkage must lie in [0, 1]")
+    h_mass = float(np.sum(h))
+    if h_mass <= 0.0:
+        raise ValueError("h must have positive mass")
+    weighted_mean = float(np.sum(h * d) / h_mass)
+    # Preserve the historical floating-point path exactly at rho=1.
+    d_effective = d if rho == 1.0 else weighted_mean + rho * (d - weighted_mean)
+    original_budget = float(np.sum(h * d))
+    effective_budget = float(np.sum(h * d_effective))
+    weights = h / h_mass
+    weighted_sd_original = float(np.sqrt(np.sum(weights * (d - weighted_mean) ** 2)))
+    effective_mean = float(np.sum(weights * d_effective))
+    weighted_sd_effective = float(np.sqrt(
+        np.sum(weights * (d_effective - effective_mean) ** 2)
+    ))
+    vtheta = build_vth(h, d_effective, n_total=int(n_total), n_E=n_e,
                        v_base=float(v_base))
     return dict(
-        h=h, d=d, vtheta=vtheta, delta_vtheta=-h * d,
+        h=h, d=d, d_effective=d_effective, vtheta=vtheta,
+        delta_vtheta=-h * d_effective,
+        mapping_audit=dict(
+            signed_depth_shrinkage=rho,
+            h_weighted_mean_depth=weighted_mean,
+            h_weighted_modulation_original=original_budget,
+            h_weighted_modulation_effective=effective_budget,
+            budget_error=effective_budget - original_budget,
+            h_weighted_depth_sd_original=weighted_sd_original,
+            h_weighted_depth_sd_effective=weighted_sd_effective,
+            latent_negative_fraction=float(np.mean(d < 0.0)),
+            effective_negative_fraction=float(np.mean(d_effective < 0.0)),
+        ),
         hashes=dict(
             h_vector_sha256=array_sha256(h),
             d_vector_sha256=array_sha256(d),
+            d_effective_vector_sha256=array_sha256(d_effective),
             vtheta_reconstructed_sha256=array_sha256(vtheta),
         ),
     )

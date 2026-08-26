@@ -184,7 +184,8 @@ def _cache_record(cache_hit, cache_source):
 
 def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=None,
                     ee_dose=1.0, etoi_dose=1.0,
-                    node_candidate_override=None, artifact_root=None):
+                    node_candidate_override=None, node_depth_shrinkage=1.0,
+                    artifact_root=None):
     """Reconstruct one frozen arm on one network seed.
 
     ``field_transform`` is a square-symmetry element name; when given, the node
@@ -202,6 +203,7 @@ def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=No
     from scripts.run_topic4_rev9_node_kick_canary import _load_network
     from src.sef_hfo_observation import VirtualMontage
     from src.topic4_continuous_field import continuous_field_h_with_queries
+    from src.topic4_core_field_rev9 import reconstruct_node_from_h
     from src.topic4_core_field_runner import _placement
     from src.topic4_graph_edge_flow import array_sha256
     from src.topic4_local_connectivity import continuous_local_e_source_flow
@@ -262,6 +264,14 @@ def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=No
         raise RuntimeError("Node override must be a continuous spline field")
     node = _candidate_node(node_candidate, positions, n_total=n_e + n_i,
                            stage=stage, config=anchor_config)
+    depth_shrinkage = float(node_depth_shrinkage)
+    if depth_shrinkage != 1.0:
+        node = reconstruct_node_from_h(
+            node["h"], n_total=n_e + n_i,
+            quantile_seed=stage["quantile_seed"],
+            core_mean=engine["core_mean"], core_std=engine["core_std"],
+            v_base=engine["v_base"], depth_shrinkage=depth_shrinkage,
+        )
     if not np.isclose(node["h"].sum(), float(stage["N_core_manual"]), atol=1e-8):
         raise RuntimeError("Node anchor field budget changed")
     coefficients = np.asarray(candidate["coefficients"], float)
@@ -293,12 +303,10 @@ def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=No
             raise RuntimeError("E/I field query changed the frozen E-node field")
         vtheta, delta_vtheta = node["vtheta"], node["delta_vtheta"]
     else:
-        from scripts.run_topic4_rev10_sa_spectral_field_worker import (
-            reconstruct_node_from_h)
         transformed = reconstruct_node_from_h(
             h_e, n_total=n_e + n_i, quantile_seed=stage["quantile_seed"],
             core_mean=engine["core_mean"], core_std=engine["core_std"],
-            v_base=engine["v_base"])
+            v_base=engine["v_base"], depth_shrinkage=depth_shrinkage)
         vtheta, delta_vtheta = transformed["vtheta"], transformed["delta_vtheta"]
 
     # ---- 8: local connectivity mapper (pre-mapping bins captured first) ----
@@ -349,6 +357,7 @@ def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=No
                 "placement": reg, "candidate": candidate,
                 "node_candidate": node_candidate,
                 "node_candidate_override": node_candidate_override is not None,
+                "node_mapping_audit": node["mapping_audit"],
                 "frozen_node_field_sha256": frozen_node_candidate["field_sha256"],
                 "pathway_dose": {"E_to_E": float(ee_dose),
                                    "E_to_I": float(etoi_dose)},

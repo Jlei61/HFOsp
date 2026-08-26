@@ -67,6 +67,7 @@ ALLOWED_SCIENTIFIC_ROLES = {
     "development_only_local_curvature_canary",
     "development_only_local_curvature_replication",
     "development_only_global_continuous_node_field_screen",
+    "development_only_signed_depth_mapping_audit",
 }
 
 
@@ -506,10 +507,13 @@ def main() -> None:
         artifact_root, config["inputs"]["transition_config"]["path"],
     )
     transition = load_round_config(transition_path)
+    node_mapping = candidate.get("node_mapping", {})
+    depth_shrinkage = float(node_mapping.get("signed_depth_shrinkage", 1.0))
     substrate = build_substrate(
         transition, "node_baseline", args.seed, cache_dir=str(cache_dir),
         ee_dose=0.0, etoi_dose=0.0,
         node_candidate_override=candidate["node_field"],
+        node_depth_shrinkage=depth_shrinkage,
         artifact_root=artifact_root,
     )
     simulation = config["search"]["simulation"]
@@ -1303,6 +1307,10 @@ def main() -> None:
         "mechanism_freeze": {
             "EE": "off", "E_to_I": "off", "Z_M": "off",
             "edge_coefficients_all_zero": bool(np.allclose(substrate.edge_coefficients, 0.0)),
+        },
+        "node_mapping": {
+            **substrate.extras["node_mapping_audit"],
+            "mapping_sha256": node_mapping.get("mapping_sha256"),
         },
         "arrays": {"path": str(out_npz), "sha256": _sha256(out_npz)},
         "provenance": provenance,
