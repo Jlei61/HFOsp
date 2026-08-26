@@ -1,0 +1,31 @@
+{
+  "schema_id": "topic4_rev12_nd_orthogonal_response_crossvalidation_v1",
+  "output_root": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_af_orthogonal_response_calibration/analysis",
+  "inputs": {
+    "stage_af_complete": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_af_orthogonal_response_calibration/status/stage_af_complete.json",
+      "sha256": "670250633f0ea5f1121d02f7a39af2caef1b14e056e6d9172c154345234461a1"
+    },
+    "stage_af_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_af_orthogonal_response_calibration/candidate_manifest.json",
+      "sha256": "12ce19f5b4d7d21d269d1bf85817551e6b9aebf86b8886d96c85ae77052743c7"
+    },
+    "stage_af_summary": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_af_orthogonal_response_calibration/aggregate/fit_soft_global_summary.json",
+      "sha256": "beeb9a64b71e81d2839d114406975111ec99e9c60f8dcfa79761358ca799db23"
+    },
+    "stage_af_audit_v1": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_af_orthogonal_response_calibration/analysis/orthogonal_response_audit.json",
+      "sha256": "f48e743898f67d24938a863b87c75ffc3999e024093911050453ee1c2d995ac2"
+    }
+  },
+  "required_joint_endpoints": [
+    "soft_objective", "mode_0", "mode_1",
+    "mode_0_direction", "mode_1_direction",
+    "mode_0_monotonicity", "mode_1_monotonicity"
+  ],
+  "minimum_positive_networks_per_endpoint": 6,
+  "minimum_joint_positive_networks": 6,
+  "minimum_median_heldout_margin": 0.0,
+  "claim_boundary": "Fit-only leave-one-network-out audit of the Stage-AF local linear response. It tests whether a direction estimated on eight fit networks improves unseen ninth-network slopes. It does not make the local linear prediction a simulated candidate, open patient held-out, or authorize EE, E-to-I or Z/M."
+}

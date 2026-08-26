@@ -659,3 +659,40 @@ support another interpolation from the old candidates.
 6. If no reproducible direction preserves both patient modes while improving
    the weak causal direction, stop field-only optimization and revise the Node
    mechanism or event target before opening EE, E-to-I or Z/M.
+
+Stage-AF completed 270/270 runs, but the apparent common direction was an
+in-sample result. Leave-one-network-out testing improved all seven continuous
+endpoints in 0/9 held-out networks; mode-1 fit and mode-1 causal direction were
+positive in only 4/9 and 2/9 networks. Do not simulate the mean-gradient
+candidate.
+
+## Stage-AG bounded broad-span canary
+
+The stop rule above is amended once, before changing the mechanism, because a
+zero-simulation resolution audit exposed a search-range confound: the old
+15-mode span explains 77.0% of the known smooth capacity contrast, but the
+contrast has sheet RMS 2.40 while all prior data-driven searches stopped at
+0.52 or less.
+
+1. Center only on the data-driven `stage_z_g04_m` field. The manual capacity
+   field may be used to audit span resolution, but none of its coefficients,
+   peak locations or projected directions may enter candidate construction.
+2. Construct the 35 non-constant uniform-sheet cosine modes with
+   `kx,ky=0..5`, projected onto the unchanged 18 x 18 continuous spline.
+3. Freeze 12 antithetic scrambled-Sobol pairs at sheet-RMS radii
+   0.8, 1.4 and 2.0 plus the unchanged center: 25 fields total.
+4. Run all fields on new fit networks 2281--2286 for 20 s with Node only,
+   common random numbers and the frozen causal-family observation: 150 runs.
+5. Use no more than 14 measured-memory workers, one numerical thread each,
+   retain at least 32 GiB available RAM, require at least 40 GiB free disk, and
+   inspect resources only every 600 s.
+6. Rank exploration by continuous Pareto coordinates: total soft objective,
+   mode-0 loss, mode-1 loss, weakest-mode causal direction, weakest-mode causal
+   monotonicity, source-topology reproducibility and source-topology separation.
+   No endpoint is a run blocker; zero-event and runaway fields remain valid
+   negative observations.
+7. Nominate at most four candidates for fresh-network replication. Patient
+   held-out and natural KMeans cannot select Stage-AG candidates.
+8. If no broad field jointly improves total patient fit, both patient modes and
+   causal direction relative to the paired center, close continuous-field-only
+   search. Do not densify radii or add workers to the same design.

@@ -1037,3 +1037,40 @@ nine opened fit networks with Node only. Its purpose is to estimate paired
 network response slopes for the full patient objective, each patient mode, and
 each mode's causal direction and monotonicity. It does not select or confirm a
 Node field by itself.
+
+Stage-AF completed 270/270 runs. The original training-average analysis found a
+positive common direction, but that analysis reused each network both to fit
+and to assess the direction. A stricter leave-one-network-out audit supersedes
+that interpretation. The held-out direction improved the total soft objective
+in 7/9 networks and mode 0 in 8/9, but mode 1 in only 4/9, mode-1 causal
+direction in 2/9, and all seven required continuous endpoints in 0/9. The
+median held-out joint margin was -0.394. The formal Stage-AF status is therefore
+`CROSSVALIDATED_COMMON_DIRECTION_NOT_SUPPORTED`; no candidate may be generated
+from the training-average gradient.
+
+This negative result does not yet establish field-family incapacity. A separate
+zero-simulation span audit found that the Stage-Z/AF 15-mode (`k<=3`) residual
+span captures only 77.0% of the sheet-space difference between the data-driven
+`g04-` field and the non-selectable smooth capacity control. More importantly,
+that difference has sheet RMS 2.40, whereas Stage-Z stopped at 0.52 and Stage-AF
+used 0.18. Thus all data-driven searches so far remained close to `g04-` on the
+spatial scale at which Node-only directional capacity was observed.
+
+Stage-AG is one bounded broad-span canary, not an unrestricted restart. It uses
+the 35 non-constant uniform-sheet cosine modes with `kx,ky=0..5`, projected onto
+the same continuous 18 x 18 spline field. Twelve scrambled-Sobol directions are
+paired antithetically at sheet-RMS radii 0.8, 1.4 and 2.0 around `g04-`, together
+with the unchanged center. Candidate generation receives no electrode,
+patient-source or manual-field coordinates. The manual control is used only in
+the preceding non-selectable span-resolution audit and supplies neither a
+coefficient, direction nor initialization.
+
+The 25 fields are run on six new fit networks with common random numbers. The
+screen retains the full patient soft objective, both mode losses, weakest-mode
+causal direction and monotonicity, and source-topology reproducibility and
+separation as continuous Pareto axes. Natural KMeans and patient held-out remain
+diagnostic or unopened. Stage-AG can nominate at most four fields for fresh
+replication; it cannot freeze Node, open intervention, or alter EE, E-to-I or
+Z/M. If broad candidates still show no joint patient/direction improvement,
+continuous-field optimization closes and the Node mechanism or event target
+must be revised before further SNN search.
