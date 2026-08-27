@@ -76,6 +76,8 @@ def build_r2_arm_designs(
     *,
     source: str,
     scale_events: int = 100,
+    validation_time_lower: float | None = None,
+    include_fitted_intercept_diagnostic: bool = True,
 ) -> tuple[dict, dict[int, dict], dict]:
     """Build identical-support next-event and H5/H10 arm designs."""
     if source not in SOURCES:
@@ -118,16 +120,22 @@ def build_r2_arm_designs(
         history_multiples=5,
     )
     common = eligible & matched
+    if validation_time_lower is not None:
+        common &= (
+            train | (np.asarray(design.event_time) >= float(validation_time_lower))
+        )
     zeros = np.zeros_like(real, dtype=np.float32)
     current = np.asarray(innovation, dtype=np.float32)
-    intercept = np.ones((len(real), 1), dtype=np.float32)
     exposures = {
         "no_edge": zeros,
         "real_cumulative": real,
         "state_matched_placebo": placebo,
         "current_event_only": current,
-        "fitted_intercept_diagnostic": intercept,
     }
+    if include_fitted_intercept_diagnostic:
+        exposures["fitted_intercept_diagnostic"] = np.ones(
+            (len(real), 1), dtype=np.float32
+        )
     one_step = {
         label: build_one_step_design(
             design, context.pre_event_state, context.event_segment,
@@ -171,7 +179,14 @@ def build_r2_arm_designs(
         "observer_generator_history_and_decoders_frozen": True,
         "raw_correction_after_anchor": False,
         "later_t2_jumps": False,
-        "fitted_intercept_is_diagnostic_not_primary_control": True,
+        "validation_time_lower": validation_time_lower,
+        "d_state_validation_events_excluded": validation_time_lower is not None,
+        "fitted_intercept_is_diagnostic_not_primary_control": bool(
+            include_fitted_intercept_diagnostic
+        ),
+        "free_exposure_intercept_present": bool(
+            include_fitted_intercept_diagnostic
+        ),
         "sealed_opened": False,
     }
     return one_step, horizons, audit

@@ -878,11 +878,17 @@ def evaluate_full_t1(model: FrozenEmbeddingStateModel, design: FullAnchorDesign,
                      matched_anchor_mask: np.ndarray | None = None,
                      anchor_state_mode: str = "persistent",
                      time_lower: float | None = None,
-                     time_upper: float | None = None) -> FullT1Metrics:
+                     time_upper: float | None = None,
+                     anchor_state_override: torch.Tensor | None = None,
+                     ) -> FullT1Metrics:
     model.eval()
     code = {"train": 0, "validation": 1}[split]
     with torch.no_grad():
-        if anchor_state_mode == "persistent":
+        if anchor_state_override is not None:
+            anchor_state = anchor_state_override.to(device)
+            if anchor_state.shape != (len(design.anchor_time), model.state.dim):
+                raise ValueError("anchor_state_override shape disagrees with design")
+        elif anchor_state_mode == "persistent":
             anchor_state = filtered_anchor_states(
                 model, design, embedding, device=device,
                 correction_enabled=correction_enabled,
@@ -960,7 +966,12 @@ def evaluate_full_t1(model: FrozenEmbeddingStateModel, design: FullAnchorDesign,
     denominator = max(len(event_rows), 1)
     timing = (survival - event_log) / denominator
     mark_nll = -mark_log / denominator
-    anchor_ids = design.anchor_ids(split)
+    anchor_keep = design.anchor_split == code
+    if time_lower is not None:
+        anchor_keep &= design.anchor_time >= float(time_lower)
+    if time_upper is not None:
+        anchor_keep &= design.anchor_time < float(time_upper)
+    anchor_ids = np.flatnonzero(anchor_keep)
     return FullT1Metrics(
         joint_nll_per_event=timing + mark_nll,
         timing_nll_per_event=timing,

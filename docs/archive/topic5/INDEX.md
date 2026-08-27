@@ -281,3 +281,7 @@
   - 机器审计：`continuous_marked_state_optimizer_identifiability_r1_6_machine_audit_2026-08-27.json`
   - 推荐配置：`continuous_marked_state_optimizer_identifiability_r1_6_recommended_config_2026-08-27.json`
   - 修复 R1.5 epoch 0 已见过 inner-validation 的不公平选择，并确认旧 H3 `ZERO_GRADIENT` 来自零 state readout。synthetic 与六患者短段过拟合证明模型可训练；公共配置五 seed 确认仅 E384 达到稳健 persistent+correct-time development 支持。E384 的最小 H3 6/6 未过完整控制且只有 2 个独立 validation 单元，因此 H3 仍未决，不作生物学阴性。
+- R1.7A / T2-R2.0 前瞻性 development 复现：
+  - 冻结合同：`continuous_marked_state_r1_7a_r2_0_contract_2026-08-27.md`
+  - 正式验收 R1.6 的优化器/可识别性诊断与 E384 单患者支持；R1.5 的选择偏差结果以及 H3-long 的 N=1,000/3,000/10,000、六小时 boxcar 均退出当前证据主线。
+  - 在不读取模型结果的前提下，从未参与旧决策的 development 患者中按记录与事件支持各取 Epilepsiae/Yuquan 5 人；development validation 按真实记录时长冻结为 D_state 60% 与 D_mechanism 40%。先做五 seed H1/H2a，仅对合格患者在 D_mechanism 运行无自由 exposure 截距的 N=100 T2。

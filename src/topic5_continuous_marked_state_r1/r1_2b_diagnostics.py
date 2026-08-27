@@ -31,6 +31,8 @@ def strict_matched_wrong_time_permutations(
     split: str = "validation",
     n_donors: int = 5,
     min_separation_seconds: float = 1800.0,
+    time_lower: float | None = None,
+    time_upper: float | None = None,
 ) -> tuple[np.ndarray, np.ndarray, dict]:
     """Return several causally valid matched wrong-time donors per anchor.
 
@@ -43,7 +45,12 @@ def strict_matched_wrong_time_permutations(
     preserves the frozen R1.3 same-session diagnostic.
     """
     code = {"train": 0, "validation": 1}[split]
-    target = np.flatnonzero(design.anchor_split == code)
+    target_keep = design.anchor_split == code
+    if time_lower is not None:
+        target_keep &= design.anchor_time >= float(time_lower)
+    if time_upper is not None:
+        target_keep &= design.anchor_time < float(time_upper)
+    target = np.flatnonzero(target_keep)
     coverage = np.asarray(observation_coverage, dtype=np.float64)
     if coverage.shape != (len(design.anchor_time),):
         raise ValueError("observation coverage must have one value per anchor")
@@ -142,6 +149,9 @@ def evaluate_mark_endpoints(
     anchor_state_mode: str = "persistent",
     state_permutation: np.ndarray | None = None,
     matched_anchor_mask: np.ndarray | None = None,
+    time_lower: float | None = None,
+    time_upper: float | None = None,
+    anchor_state_override: torch.Tensor | None = None,
 ) -> MarkEndpointMetrics:
     """Split exact sequential mark likelihood into interpretable endpoints.
 
@@ -153,7 +163,11 @@ def evaluate_mark_endpoints(
     model.eval()
     code = {"train": 0, "validation": 1}[split]
     with torch.no_grad():
-        if anchor_state_mode == "persistent":
+        if anchor_state_override is not None:
+            anchor_state = anchor_state_override.to(device)
+            if anchor_state.shape != (len(design.anchor_time), model.state.dim):
+                raise ValueError("anchor_state_override shape disagrees with design")
+        elif anchor_state_mode == "persistent":
             anchor_state = filtered_anchor_states(
                 model, design, embedding, device=device
             )
@@ -164,6 +178,10 @@ def evaluate_mark_endpoints(
         else:
             raise ValueError(f"unknown anchor_state_mode {anchor_state_mode!r}")
         keep = design.event_split == code
+        if time_lower is not None:
+            keep &= design.event_time >= float(time_lower)
+        if time_upper is not None:
+            keep &= design.event_time < float(time_upper)
         if matched_anchor_mask is not None:
             matched_anchor_mask = np.asarray(matched_anchor_mask, dtype=bool)
             keep &= (

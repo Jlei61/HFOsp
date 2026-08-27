@@ -61,8 +61,28 @@ R1_5_EXTENSION_SUBJECTS = (
     *R1_5_LONG_CARRYOVER_SUBJECTS,
 )
 
+# R1.7A is a prospective development replication set.  These subjects were
+# selected only after excluding every subject used for architecture,
+# optimiser, epoch-budget, threshold, or long-scale discovery decisions.  The
+# selection rule and the resulting frozen list are machine-recorded by
+# ``build_r1_7a_inventory.py``; keeping the tuple here makes all CLI entry
+# points fail closed before that manifest is read.
+R1_7A_SUBJECTS = (
+    "epilepsiae_1073",
+    "epilepsiae_1077",
+    "epilepsiae_1125",
+    "epilepsiae_1146",
+    "epilepsiae_253",
+    "yuquan_liyouran",
+    "yuquan_xuxinyi",
+    "yuquan_zhangbichen",
+    "yuquan_zhaochenxi",
+    "yuquan_wangyiyang",
+)
+
 EXTENDED_DEVELOPMENT_SUBJECTS = tuple(dict.fromkeys(
-    (*PILOT_SUBJECTS, *LONG_H3_DISCOVERY_SUBJECTS, *R1_5_EXTENSION_SUBJECTS)
+    (*PILOT_SUBJECTS, *LONG_H3_DISCOVERY_SUBJECTS, *R1_5_EXTENSION_SUBJECTS,
+     *R1_7A_SUBJECTS)
 ))
 
 
