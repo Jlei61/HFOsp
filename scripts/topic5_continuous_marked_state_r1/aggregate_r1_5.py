@@ -43,6 +43,63 @@ def load_result(path: Path) -> dict:
     return value
 
 
+def summarise_seed_evidence(payloads: list[dict],
+                            subject_role: str) -> dict:
+    """Keep no-update fits out of directional denominators."""
+    updated = [
+        value for value in payloads
+        if value["fit_trace"]["selected_total_epoch"] > 0
+    ]
+    seed_stable = [
+        bool(
+            value["fit_trace"]["selected_total_epoch"] > 0
+            and value_at(
+                value, FIELDS["persistent_minus_memoryless_joint"]
+            ) < 0
+            and value_at(value, FIELDS["correct_minus_wrong_joint"]) < 0
+        )
+        for value in payloads
+    ]
+    stable_checkpoint_hashes = {
+        value["checkpoint_sha256"]
+        for value, stable in zip(payloads, seed_stable)
+        if stable
+    }
+    return {
+        "subject_role": subject_role,
+        "updated_seeds": len(updated),
+        "no_update_seeds": len(payloads) - len(updated),
+        "persistent_favourable_seeds": int(sum(
+            value_at(
+                value, FIELDS["persistent_minus_memoryless_joint"]
+            ) < 0 for value in updated
+        )),
+        "persistent_estimable_seeds": len(updated),
+        "time_specific_favourable_seeds": int(sum(
+            value_at(value, FIELDS["correct_minus_wrong_joint"]) < 0
+            for value in updated
+        )),
+        "time_specific_estimable_seeds": len(updated),
+        "first_subset_favourable_seeds": int(sum(
+            value_at(
+                value, FIELDS["persistent_minus_memoryless_first_subset"]
+            ) < 0 for value in updated
+        )),
+        "first_subset_estimable_seeds": len(updated),
+        "continuation_favourable_seeds": int(sum(
+            value_at(
+                value, FIELDS["persistent_minus_memoryless_continuation"]
+            ) < 0 for value in updated
+        )),
+        "continuation_estimable_seeds": len(updated),
+        "joint_stable_seeds": int(sum(seed_stable)),
+        "joint_stable_distinct_checkpoints": len(stable_checkpoint_hashes),
+        "stable_explicit_t1_for_h3": bool(
+            sum(seed_stable) >= 3 and len(stable_checkpoint_hashes) >= 3
+        ),
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -83,40 +140,9 @@ def main() -> None:
             ] for value in payloads
         ]))
         rows.append(row)
-        seed_stable = [
-            bool(
-                value["fit_trace"]["selected_total_epoch"] > 0
-                and value_at(
-                    value, FIELDS["persistent_minus_memoryless_joint"]
-                ) < 0
-                and value_at(value, FIELDS["correct_minus_wrong_joint"]) < 0
-            )
-            for value in payloads
-        ]
-        by_subject[subject] = {
-            "subject_role": row["subject_role"],
-            "persistent_favourable_seeds": int(sum(
-                value_at(
-                    value, FIELDS["persistent_minus_memoryless_joint"]
-                ) < 0 for value in payloads
-            )),
-            "time_specific_favourable_seeds": int(sum(
-                value_at(value, FIELDS["correct_minus_wrong_joint"]) < 0
-                for value in payloads
-            )),
-            "first_subset_favourable_seeds": int(sum(
-                value_at(
-                    value, FIELDS["persistent_minus_memoryless_first_subset"]
-                ) < 0 for value in payloads
-            )),
-            "continuation_favourable_seeds": int(sum(
-                value_at(
-                    value, FIELDS["persistent_minus_memoryless_continuation"]
-                ) < 0 for value in payloads
-            )),
-            "joint_stable_seeds": int(sum(seed_stable)),
-            "stable_explicit_t1_for_h3": bool(sum(seed_stable) >= 3),
-        }
+        by_subject[subject] = summarise_seed_evidence(
+            payloads, row["subject_role"]
+        )
     reports = args.root / "reports"
     reports.mkdir(parents=True, exist_ok=True)
     csv_path = reports / "r1_5_patient.csv"
