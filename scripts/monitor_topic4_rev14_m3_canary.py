@@ -32,6 +32,15 @@ MANIFEST_STATUS = "REV14_M3_OBSERVATION_FREE_CANARY_FROZEN"
 MANIFEST_SCHEMA = "topic4_rev14_m3_observation_free_canary_manifest_v1"
 CONTROLLER_SCHEMA = "topic4_rev14_m3_queue_controller_v1"
 DEFAULT_UNIT_PREFIX = "codex-t4-r14-m3"
+QUEUE_EMERGENCY_STATUS = "REV14_M3_QUEUE_EMERGENCY_STOPPED"
+PREWARM_INCOMPLETE_STATUS = "REV14_M3_FULL_PREWARM_INCOMPLETE"
+QUEUE_COMPLETE_STATUS = "REV14_M3_QUEUE_COMPLETE"
+QUEUE_DRAINING_STATUS = "REV14_M3_QUEUE_DRAINING_AFTER_FAILURE"
+QUEUE_FAILED_STATUS = "REV14_M3_QUEUE_FAILED"
+PREWARM_WAIT_STATUS = "REV14_M3_FULL_PREWARM_RESOURCE_WAIT"
+PREWARM_RUNNING_STATUS = "REV14_M3_FULL_PREWARM_RUNNING"
+QUEUE_WAIT_STATUS = "REV14_M3_QUEUE_RESOURCE_WAIT"
+QUEUE_RUNNING_STATUS = "REV14_M3_QUEUE_RUNNING"
 PROTECTED_UNIT_MARKERS = ("topic4-ps-cohort-v2p1",)
 NUMERIC_ENV = {
     "BLIS_NUM_THREADS": "1",
@@ -513,7 +522,7 @@ def run_controller(
 
         if resource_decision == "emergency_stop":
             stopped = _stop_rev14_units(prefix) if execute else []
-            status = "REV14_M3_QUEUE_EMERGENCY_STOPPED"
+            status = QUEUE_EMERGENCY_STATUS
             snapshot = _snapshot(
                 status=status, jobs=jobs, expected_commit=expected_commit,
                 unit_prefix=prefix, available_gib=available_gib,
@@ -530,7 +539,7 @@ def run_controller(
             prewarm, expected_commit,
         ):
             snapshot = _snapshot(
-                status="REV14_M3_FULL_PREWARM_INCOMPLETE",
+                status=PREWARM_INCOMPLETE_STATUS,
                 jobs=jobs, expected_commit=expected_commit,
                 unit_prefix=prefix, available_gib=available_gib,
                 disk_gib=disk_gib, peak_rss_kib=None,
@@ -547,7 +556,7 @@ def run_controller(
             safe_peak = _safe_peak_rss_kib(
                 peak_rss, float(resources["worker_rss_safety_multiplier"]),
             )
-            status = "REV14_M3_QUEUE_COMPLETE"
+            status = QUEUE_COMPLETE_STATUS
             snapshot = _snapshot(
                 status=status, jobs=jobs, expected_commit=expected_commit,
                 unit_prefix=prefix, available_gib=available_gib,
@@ -562,8 +571,8 @@ def run_controller(
 
         if failed_jobs:
             status = (
-                "REV14_M3_QUEUE_DRAINING_AFTER_FAILURE"
-                if counts["active"] else "REV14_M3_QUEUE_FAILED"
+                QUEUE_DRAINING_STATUS
+                if counts["active"] else QUEUE_FAILED_STATUS
             )
             snapshot = _snapshot(
                 status=status, jobs=jobs, expected_commit=expected_commit,
@@ -596,8 +605,8 @@ def run_controller(
                     )
                 launched.append(unit)
             status = (
-                "REV14_M3_FULL_PREWARM_RESOURCE_WAIT"
-                if soft_block else "REV14_M3_FULL_PREWARM_RUNNING"
+                PREWARM_WAIT_STATUS
+                if soft_block else PREWARM_RUNNING_STATUS
             )
         else:
             peak_rss = _peak_rss_kib(prewarm["log"])
@@ -630,8 +639,8 @@ def run_controller(
                         )
                     launched.append(unit)
             status = (
-                "REV14_M3_QUEUE_RESOURCE_WAIT"
-                if soft_block or concurrency == 0 else "REV14_M3_QUEUE_RUNNING"
+                QUEUE_WAIT_STATUS
+                if soft_block or concurrency == 0 else QUEUE_RUNNING_STATUS
             )
 
         snapshot = _snapshot(

@@ -1,0 +1,104 @@
+# Topic 4 rev15: M3 coordinate-response atlas for the weak patient mode
+
+## 1. Motivation
+
+Rev14 tested 32 absolute M3 Fourier fields generated from eight observation-free
+Sobol directions. The best field improved paired `J14_v1` on two of three
+networks, but did not produce a usable two-mode anchor. Equal-network effective
+support changed from `A=4.80, B=7.72` for `exact_off` to `A=4.76, B=15.11`.
+The best field left all four A-mode distances unchanged or slightly worse while
+improving all four B-mode distances. Each network still generated roughly
+19--22 classifier-A events, but only 3--6 fell inside patient-A support. The
+failure is therefore an A-mode contact-topology mismatch, not an absence of
+events and not evidence that the optimizer merely needs more generations.
+
+The rev14 canary spanned only eight directions in a 28-dimensional M3 space.
+Rev15 asks the next minimal capacity question:
+
+> Does any individual coordinate of the complete M3 continuous field move the
+> frozen Node-only SNN toward the patient A-mode distribution without erasing
+> the already accessible B mode?
+
+This is a response atlas and candidate-construction stage, not a convergence
+claim. It must be completed before any new CMA-ES run.
+
+## 2. Frozen boundaries
+
+- The event unit, Node mapping, total field mass, signed `d_i`, topology,
+  delays, noise and 20-s duration are unchanged from rev14.
+- EE, E-to-I and Z/M remain off.
+- Patient training A/B labels, training blocks, the frozen classifier and
+  training noise floors may be used only by the post-run scorer.
+- Candidate coordinates use only the uniform 20 x 20 mm Fourier basis. Contact
+  positions, shaft identity, patient events, KMeans, figures and historical
+  core geometry cannot generate the atlas.
+- Patient held-out and ictal data remain unopened.
+- `exact_off` and uniform Node are nonselectable paired references.
+
+## 3. Coordinate atlas
+
+M3 contains 14 paired-phase modes and 28 real coordinates. For each coordinate
+`e_j`, construct the absolute fields
+
+\[
+s_{j,+}=+0.8\,\widetilde e_j,\qquad
+s_{j,-}=-0.8\,\widetilde e_j,
+\]
+
+where `widetilde e_j` has unit centered RMS on the same frozen physical-sheet
+quadrature used by rev14. After RMS normalization, coefficients are rounded to
+13 decimal places before freezing. The 56 selectable fields, uniform Node and
+`exact_off` are run on CRN seed 2331, for 58 runs total.
+
+This atlas is not a set of proposed biological cores. A coordinate is a global
+Fourier perturbation whose only role is to measure which spatial scales and
+phases can alter A-mode recruitment, precedence, profile and event-cloud
+structure.
+
+## 4. Training-only response readout
+
+Every run is rescored with the unchanged `J14_v1`. For each mode and each of
+the four components, report the paired difference from same-seed `exact_off`.
+Also report classifier counts, in-support readable counts, OOD, overlap,
+ambiguity, contrast and event support.
+
+Atlas ranking is lexicographic and exploratory:
+
+1. lower A-mode four-component mean than paired `exact_off`;
+2. B-mode mean no more than 10% above paired `exact_off`;
+3. larger A in-support effective count;
+4. lower `J14_v1`, then coordinate ID.
+
+The 10% B tolerance prevents a coordinate that merely exchanges B for A from
+being treated as a dual-mode direction. It is one construction rule, not a
+claim-level gate. If no coordinate satisfies item 1, retain the nondominated
+A/B response set as a negative atlas and do not launch a blind optimizer.
+
+## 5. Combination stage
+
+Only after the atlas is complete, construct combination directions from the
+training-only coordinate responses. Freeze the algorithm before simulating
+them:
+
+- a dense A-gradient direction estimated from signed coordinate contrasts;
+- the same direction projected to remove first-order B worsening;
+- sparse top-4 and top-8 A-improving coordinate combinations;
+- each direction at centered RMS 0.6, 0.8 and 1.0.
+
+Duplicate or sign-equivalent fields are removed before launch. Combination
+candidates are tested on fresh CRN seeds 2332--2333 together with `exact_off`.
+Networks are equally weighted. A usable anchor still requires paired
+improvement on at least two of three networks and effective support of at least
+six for both modes. Natural KMeans and held-out remain unavailable.
+
+## 6. Interpretation
+
+- A reproducible A-improving coordinate set means the original eight Sobol
+  directions missed relevant M3 capacity.
+- Coordinates that improve A only by destroying B show a static-field tradeoff,
+  not dual-mode recovery.
+- No A-improving coordinate or combination closes only this bounded M3 atlas;
+  it does not reject continuous fields or justify activating connections.
+- EE, E-to-I and Z/M remain blocked until one static Node candidate passes the
+  post-freeze Fig.4 two-cluster acceptance contract.
+
