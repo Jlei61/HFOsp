@@ -79,7 +79,8 @@
     "exact_off_bypasses_fourier": true
   },
   "search": {
-    "canary_network_seeds": [2321],
+    "source_canary_network_seeds": [2321],
+    "canary_network_seeds": [2322, 2323],
     "active_network_seeds": [2322, 2323],
     "common_random_numbers_across_candidates": true,
     "simulation": {

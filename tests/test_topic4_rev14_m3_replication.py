@@ -41,6 +41,8 @@ def test_replication_config_freezes_eight_fields_two_seeds_and_exact_off():
     config = _config()
     freezer._validate_config(config)
     assert len(config["selection"]["selected_candidate_ids"]) == 8
+    assert config["search"]["source_canary_network_seeds"] == [2321]
+    assert config["search"]["canary_network_seeds"] == [2322, 2323]
     assert config["search"]["active_network_seeds"] == [2322, 2323]
     assert config["selection"]["paired_nonselectable_benchmark"] == "exact_off"
     assert config["pathways"] == canary.EXPECTED_PATHWAYS

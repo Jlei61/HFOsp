@@ -180,7 +180,12 @@ def _validate_config(config: Mapping[str, Any]) -> None:
     }
     if any(design.get(key) != value for key, value in expected_design.items()):
         raise RuntimeError("rev14 M3 replication design changed")
-    if config.get("search", {}).get("active_network_seeds") != [2322, 2323]:
+    search = config.get("search", {})
+    if search.get("source_canary_network_seeds") != [2321]:
+        raise RuntimeError("rev14 M3 source canary seed changed")
+    if search.get("canary_network_seeds") != [2322, 2323]:
+        raise RuntimeError("rev12 compatibility replication pool changed")
+    if search.get("active_network_seeds") != [2322, 2323]:
         raise RuntimeError("rev14 M3 replication seed pool changed")
     if float(config["search"]["simulation"]["duration_ms"]) != 20000.0:
         raise RuntimeError("rev14 M3 replication duration changed")
