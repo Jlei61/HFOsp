@@ -8,6 +8,7 @@ import hashlib
 import json
 import os
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -15,6 +16,8 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
 ARTIFACT_ROOT = Path("/home/honglab/leijiaxin/HFOsp")
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from src.topic4_node_field_search import array_sha256, spline_roughness
 

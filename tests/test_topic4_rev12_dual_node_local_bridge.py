@@ -1,3 +1,7 @@
+import subprocess
+import sys
+from pathlib import Path
+
 import numpy as np
 
 from scripts.freeze_topic4_rev12_dual_node_local_bridge import (
@@ -79,3 +83,13 @@ def test_local_bridge_freezes_grid_sentinels_and_historical_anchor():
     assert candidates[0]["candidate_id"] == "stage_al_historical_anchor"
     assert sum(row["role"] == "dual_node_local_bridge_sentinel" for row in candidates) == 2
     assert len({row["mapping_sha256"] for row in audit["coordinates"]}) == 6
+
+
+def test_local_bridge_freezer_is_directly_executable():
+    root = Path(__file__).resolve().parents[1]
+    result = subprocess.run(
+        [sys.executable, str(root / "scripts/freeze_topic4_rev12_dual_node_local_bridge.py"),
+         "--help"],
+        cwd=root, text=True, capture_output=True, check=False,
+    )
+    assert result.returncode == 0, result.stderr
