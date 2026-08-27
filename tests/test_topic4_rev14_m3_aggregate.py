@@ -376,6 +376,13 @@ def test_patient_support_sidecar_schema_round_trips():
     assert set(restored.floor_distributions) == set(original.floor_distributions)
 
 
+def test_patient_support_artifact_hash_matches_freezer_contract():
+    values = np.asarray([0.125, 0.5, 0.875], dtype=np.float64)
+    assert aggregate._support_artifact_array_sha256(values) == (
+        support_freezer._array_sha256(values)
+    )
+
+
 def test_complete_aggregate_pairs_every_selectable_to_exact_off(
         tmp_path, monkeypatch):
     tree = _build_tree(tmp_path)

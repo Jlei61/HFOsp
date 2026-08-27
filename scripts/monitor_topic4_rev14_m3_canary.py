@@ -212,8 +212,8 @@ def _worker_complete(job: dict[str, Any], expected_commit: str) -> bool:
             == float(job["expected_duration_ms"])
             and provenance.get("expected_git_commit") == expected_commit
             and provenance.get("git_commit") == expected_commit
-            and provenance.get("runtime_modules_match_expected_commit") is True
-            and provenance.get("runtime_modules_dirty") is False
+            and int(provenance.get("runtime_modules_match_expected_commit", 0)) == 1
+            and int(provenance.get("runtime_modules_dirty", 1)) == 0
             and provenance.get("config_sha256")
             == job["expected_config_sha256"]
             and explicit.get("formal_ready") is True

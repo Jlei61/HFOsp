@@ -75,6 +75,16 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _support_artifact_array_sha256(values: np.ndarray) -> str:
+    """Match the array-byte contract used by the patient-support freezer."""
+    array = np.ascontiguousarray(np.asarray(values))
+    header = json.dumps({
+        "dtype": array.dtype.str,
+        "shape": list(array.shape),
+    }, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8")
+    return hashlib.sha256(header + array.view(np.uint8).tobytes()).hexdigest()
+
+
 def _jsonable(value: Any) -> Any:
     if isinstance(value, Mapping):
         return {str(key): _jsonable(item) for key, item in value.items()}
@@ -531,7 +541,7 @@ def _load_support_context(
     if set(support_arrays) != set(manifest["artifact"]["array_keys"]):
         raise AggregateContractError("patient-support sidecar array inventory changed")
     for key, expected in manifest["artifact"]["array_sha256"].items():
-        if exact._sha256_array(support_arrays[key]) != expected:
+        if _support_artifact_array_sha256(support_arrays[key]) != expected:
             raise AggregateContractError(f"patient-support array hash changed: {key}")
 
     target_record = j14_config["inputs"]["patient_training_target"]

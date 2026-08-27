@@ -76,8 +76,8 @@ def _write_complete(job, commit="b" * 40):
         "provenance": {
             "git_commit": commit,
             "expected_git_commit": commit,
-            "runtime_modules_match_expected_commit": True,
-            "runtime_modules_dirty": False,
+            "runtime_modules_match_expected_commit": 1,
+            "runtime_modules_dirty": 0,
             "config_sha256": job["expected_config_sha256"],
             "rev14_explicit_runtime_freeze": {
                 "formal_ready": True,
@@ -143,6 +143,16 @@ def test_complete_result_requires_hash_duration_and_clean_rev14_provenance(tmp_p
     payload["provenance"]["rev14_explicit_runtime_freeze"]["formal_ready"] = False
     job["json"].write_text(json.dumps(payload))
     assert not monitor._worker_complete(job, commit)
+
+
+def test_complete_result_accepts_historical_integer_provenance_booleans(tmp_path):
+    job = _job(tmp_path)
+    commit = "b" * 40
+    _write_complete(job, commit)
+    payload = json.loads(job["json"].read_text())
+    assert payload["provenance"]["runtime_modules_match_expected_commit"] == 1
+    assert payload["provenance"]["runtime_modules_dirty"] == 0
+    assert monitor._worker_complete(job, commit)
 
 
 def test_early_stopped_worker_cannot_supply_full_prewarm_rss(tmp_path):
