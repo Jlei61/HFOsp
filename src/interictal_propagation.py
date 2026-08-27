@@ -421,6 +421,8 @@ def load_subject_propagation_events(subject_dir: Path) -> Dict[str, Any]:
             "channel_names": [],
             "event_abs_times": np.zeros(0, dtype=float),
             "event_rel_times": np.zeros(0, dtype=float),
+            "event_abs_end_times": np.zeros(0, dtype=float),
+            "event_rel_end_times": np.zeros(0, dtype=float),
             "block_ids": np.zeros(0, dtype=int),
             "record_names": [],
             "block_boundaries": [],
@@ -444,6 +446,8 @@ def load_subject_propagation_events(subject_dir: Path) -> Dict[str, Any]:
     aligned_bools: List[np.ndarray] = []
     aligned_event_abs_times: List[np.ndarray] = []
     aligned_event_rel_times: List[np.ndarray] = []
+    aligned_event_abs_end_times: List[np.ndarray] = []
+    aligned_event_rel_end_times: List[np.ndarray] = []
     block_ids: List[np.ndarray] = []
     record_names: List[str] = []
     block_boundaries: List[Dict[str, Any]] = []
@@ -470,6 +474,12 @@ def load_subject_propagation_events(subject_dir: Path) -> Dict[str, Any]:
         aligned_bools.append(bool_block)
         aligned_event_abs_times.append(np.asarray(block["event_abs_times"], dtype=float))
         aligned_event_rel_times.append(np.asarray(block["event_rel_times"], dtype=float))
+        aligned_event_abs_end_times.append(
+            np.asarray(block["event_abs_end_times"], dtype=float)
+        )
+        aligned_event_rel_end_times.append(
+            np.asarray(block["event_rel_end_times"], dtype=float)
+        )
         block_ids.append(np.full(n_ev, block_id, dtype=int))
         record_names.append(str(block["record_name"]))
         block_start_times.append(float(block["start_t"]))
@@ -505,6 +515,8 @@ def load_subject_propagation_events(subject_dir: Path) -> Dict[str, Any]:
         "channel_names": channel_names,
         "event_abs_times": np.concatenate(aligned_event_abs_times, axis=0),
         "event_rel_times": np.concatenate(aligned_event_rel_times, axis=0),
+        "event_abs_end_times": np.concatenate(aligned_event_abs_end_times, axis=0),
+        "event_rel_end_times": np.concatenate(aligned_event_rel_end_times, axis=0),
         "block_ids": np.concatenate(block_ids, axis=0),
         "record_names": record_names,
         "block_boundaries": block_boundaries,

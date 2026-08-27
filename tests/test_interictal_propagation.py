@@ -198,6 +198,7 @@ def test_load_subject_propagation_events_sorts_by_start_t_and_rebuilds_times(tmp
     assert loaded["block_ids"].tolist() == [0, 1, 1]
     assert loaded["event_rel_times"].tolist() == [2.0, 1.0, 3.0]
     assert loaded["event_abs_times"].tolist() == [102.0, 201.0, 203.0]
+    assert loaded["event_abs_end_times"].tolist() == [102.5, 201.5, 203.5]
     np.testing.assert_allclose(
         loaded["lag_raw"],
         np.array([[5.0, 10.0, 13.0], [6.0, 11.0, 12.0]], dtype=float),
