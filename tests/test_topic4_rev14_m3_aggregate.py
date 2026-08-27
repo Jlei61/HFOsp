@@ -367,6 +367,25 @@ def test_analysis_only_commit_allowlist_excludes_worker_and_config_paths():
     )
 
 
+def test_historical_integer_true_is_accepted_for_frozen_edge_off_flag(tmp_path):
+    tree = _build_tree(tmp_path)
+    candidate_id = tree["candidates"][0]["candidate_id"]
+    worker_json = tree["workers"] / f"{candidate_id}_seed_2321.json"
+    payload = json.loads(worker_json.read_text())
+    payload["mechanism_freeze"]["edge_coefficients_all_zero"] = 1
+    worker_json.write_text(json.dumps(payload))
+
+    _, _, records, inventory = aggregate.inventory_workers(
+        config_path=tree["config"],
+        artifact_root=tree["root"],
+        worker_root=tree["workers"],
+    )
+
+    assert inventory["present_validated"] == len(tree["candidates"])
+    matching = [row for row in records if row["candidate_id"] == candidate_id]
+    assert matching[0]["inventory_status"] == "PRESENT_VALIDATED"
+
+
 def test_zero_event_worker_gets_finite_bad_score_without_deletion(tmp_path):
     tree = _build_tree(tmp_path)
     context, support = _contexts()

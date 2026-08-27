@@ -299,7 +299,8 @@ def _validate_worker(
     mechanism = payload.get("mechanism_freeze", {})
     if any(mechanism.get(key) != "off" for key in ("EE", "E_to_I", "Z_M")):
         raise AggregateContractError("worker activated a forbidden pathway")
-    if mechanism.get("edge_coefficients_all_zero") is not True:
+    edge_zero = mechanism.get("edge_coefficients_all_zero")
+    if not isinstance(edge_zero, (bool, int)) or int(edge_zero) != 1:
         raise AggregateContractError("worker edge coefficients are not exactly off")
     if mechanism.get("static_node_field") != candidate.get("field_kind"):
         raise AggregateContractError("worker field kind differs from manifest")
