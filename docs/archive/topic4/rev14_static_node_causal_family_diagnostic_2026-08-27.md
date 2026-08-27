@@ -53,6 +53,32 @@ the same pseudo-model events, and repeats the comparison at three objective
 seeds. Sparse or OOD events remain in the contact-distance loss but do not count
 as patient-mode support.
 
+The clean block-disjoint control gives `J14=0.8222` for a patient-training
+pseudo-model versus a disjoint patient-training reference. SCL censoring rises
+to 1.4812, a repeated single event to 2.0122, a single-mode sample to 2.6524,
+fully ambiguous assignments to 3.0125 and zero events to 3.0966. Every
+degeneration is worse at each of three frozen objective seeds.
+
+## Historical zero-simulation rescore
+
+All 366 complete 20-s static-Node trajectories from Stages Z, AG, AK and AL
+were re-audited and rescored without running the SNN. Their worker field,
+mapping, mechanism-off state, clean runtime provenance and NPZ hashes all
+match the frozen manifests. The inventory contains 12,381 contact-primary
+families, including 2,482 with fewer than three finite contacts; 4,642 members
+of overlap-connected episodes are excluded.
+
+Within the original stage-specific seed pools, the best selectable fields are:
+
+- Stage Z: `stage_z_g11_p`, `J14=1.9884`, versus anchor 2.1979;
+- Stage AG: `stage_ag_g09_m`, `J14=1.9807`, versus anchor 2.2149;
+- Stage AL: `stage_al_m100_d050`, `J14=2.0069`, versus anchor 2.1058.
+
+Stage AK remains diagnostic-only. These raw values are not compared across
+seed pools and no historical candidate replaces `exact_off` as the rev14 CRN
+comparator. The Stage-AG winner differs from the earlier draft because sparse
+and OOD families no longer inflate mode-evidence support.
+
 ## KMeans and patient geometry
 
 Pooled natural KMeans produces clusters of 33 and 39 events with seed AMI 1.0,

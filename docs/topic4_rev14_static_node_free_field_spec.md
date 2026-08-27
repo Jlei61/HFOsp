@@ -170,6 +170,13 @@ electrode coordinates. The patient objective may select coefficients, but it
 may not change where basis functions exist or how strongly a location is
 represented.
 
+The Fourier field is the complete latent field, not a residual added to any
+historical fitted map. Zero Fourier coefficients therefore produce the uniform
+fixed-mass Node field. Stage-AK `exact_off` is retained only as a nonselectable
+benchmark that bypasses the Fourier projector. The frozen `d_i` vector is
+reconstructed from the original quantile seed and threshold distribution; it
+must never be inferred by dividing a dual-field threshold vector by `h_i`.
+
 ### 5.3 Regularization
 
 Only field-function regularity is allowed:

@@ -30,7 +30,10 @@
 
 1. Implement paired-phase whole-sheet Fourier evaluation, physical-sheet
    centered-RMS dose normalization and the frozen spectral roughness surrogate.
-2. Reuse the frozen signed-depth and mass-projection mapping.
+2. Reuse the frozen signed-depth and mass-projection mapping. Zero Fourier
+   coefficients must reconstruct the uniform fixed-mass field; `exact_off`
+   remains a separate nonselectable benchmark. Reconstruct signed depth from
+   the frozen quantile contract rather than from `delta Vtheta / h`.
 3. Add Fourier-to-spline storage parity with whole-sheet `h` correlation at
    least 0.995.
 4. Test that basis values are independent of contact coordinates and contact
