@@ -1,0 +1,47 @@
+{
+  "early_stopping": {
+    "default": "no short global patience",
+    "reason": "synthetic positive seeds can first improve near epoch 100; use frozen module budgets and chronological selection"
+  },
+  "formal_test_partition_opened": false,
+  "h3_policy": {
+    "minimal_scale_events": 1000,
+    "note": "H3 learning rate cannot repair an exact-zero downstream derivative",
+    "run_only_if_stable_t1_checkpoints_at_least": 3,
+    "sources": [
+      "load",
+      "participation"
+    ]
+  },
+  "prefix_core": {
+    "chunk": 128,
+    "clip": 5.0,
+    "config_id": "prefix_high_lr_e12_c128",
+    "epochs": 12,
+    "lr": 0.001,
+    "min_delta": 0.0,
+    "optimizer": "adamw",
+    "patience": 0,
+    "selection": "base_train 0-60% -> base_select 60-80%",
+    "warmup": 0.1,
+    "weight_decay": 0.0
+  },
+  "revision": "r1_6_optimizer_identifiability_closeout_v1",
+  "sealed_opened": false,
+  "status": "COMPLETE",
+  "target_alignment": {
+    "chunk": 32,
+    "clip": 5.0,
+    "config_id": "nested_extended_budget",
+    "joint_epochs": 8,
+    "min_delta": 0.0,
+    "observer_epochs": 8,
+    "observer_ratio": 0.1,
+    "optimizer": "adamw",
+    "patience": 0,
+    "selection": "fit TRAIN first 80%; select on TRAIN last 20%; refit full TRAIN",
+    "state_lr": 0.0003,
+    "warmup": 0.1,
+    "weight_decay": 0.0
+  }
+}
