@@ -62,17 +62,25 @@ the fit.
 
 ## 3. Formal model event unit
 
-One observation is one returned, source-evaluable, edge-supported directed
-causal family. Families are sorted by onset time. Any family belonging to a
-strict time-overlap connected component of size at least two is excluded from
-the primary score, including transitive overlaps. The all-returned-family score
-is retained only as a sensitivity analysis.
+One observation is one returned edge-supported causal family. Families are
+sorted by onset time. Any family belonging to a strict time-overlap connected
+component of size at least two is excluded from the primary score, including
+transitive overlaps. Isolation is determined before source-map or contact
+readability filters.
 
-An isolated family enters the patient-training loss whenever at least three
-contacts have finite onset ranks. OOD, ICL-only, SCL-only and missing-contact
-events remain in the loss. They are not deleted by the old Fig.4
-`formal_clean` mask. Missing recruitment is a modeled state in the recruitment
-and precedence distances.
+Three masks are frozen and cannot be interchanged:
+
+- `contact_primary`: every returned isolated family with a valid interval;
+  all enter recruitment, missingness, precedence, profile and cloud losses,
+  including zero-to-two-contact, OOD, ICL-only, SCL-only and missing-SCL events;
+- `topology_primary`: `contact_primary` plus an evaluable source-onset map and
+  finite displacement; this subset is used only for onset-topology sidecars;
+- `fig4_kmeans_readable`: `contact_primary` plus at least three finite contact
+  ranks; this subset alone enters natural KMeans and the figures.
+
+Thus a source-map failure or a sparse contact readout cannot disappear from
+the patient contact loss. Missing recruitment is a modeled state in the
+recruitment and precedence distances.
 
 No fixed requirement such as 20 returned events is a biological gate. Event
 support enters as a smooth penalty and an effective-sample diagnostic. A run
@@ -185,6 +193,14 @@ block-floor q95 ratio, not an excess-noise unit. Precedence includes the
 not-jointly-recruited state, so a missing shaft cannot disappear from the
 score. Each network uses 64 frozen bootstrap draws.
 
+Within each model-mode draw, events are sampled without replacement using the
+frozen soft mode probabilities. If fewer than six distinct events have
+positive support, the unmatched rows are explicit all-contact non-recruitment
+states; the same attractive event is never copied six times. Patient events
+are sampled without replacement from one eligible patient-training recording
+block. This keeps the 6-versus-6 observation budget matched while allowing low
+support to remain a finite, ranked result.
+
 The primary exploratory fit objective is:
 
 \[
@@ -196,27 +212,37 @@ J_{14}=\operatorname{LSE}_{0.25}(D_A,D_B)
 +0.25L_{\rm support}.
 \]
 
-`f_overlap` is the fraction of returned/evaluable causal families removed by
+`f_overlap` is the fraction of returned contact-evaluable causal families removed by
 the overlap-connected rule. For soft mode weights `w_ki`, define
 
 \[
 n_{{\rm eff},k}=\frac{(\sum_iw_{ki})^2}{\sum_iw_{ki}^2},
 \]
 
+The implemented support count multiplies this conventional effective count by
+the mode-weighted mean frozen-classifier confidence `|2p_i-1|`. Events at
+`p_i=0.5` therefore cannot provide full support to both modes. When this
+confidence-adjusted support is below six, each matched distance is smoothly
+blended toward the missing-mode value 2.0 in proportion to `n_eff/6`; this
+retains continuous ranking rather than adding an event-count blocker.
+
 and
 
 \[
 L_{\rm support}=
 \frac12\sum_{k\in\{A,B\}}\frac{6}{n_{{\rm eff},k}+6}
-+f_{\rm source\text{-}non\text{-}evaluable}
++f_{\rm contact\text{-}non\text{-}evaluable}
 +f_{<3\ contacts}.
 \]
 
 The two fractions are calculated relative to returned causal families before
-overlap removal. For a run with zero scored families, each four-layer mode
+overlap removal. `contact-non-evaluable` means an invalid family interval or
+contact array; source-map failure does not remove the event from
+`contact_primary` and is reported separately as topology support. For a run
+with zero scored families, each four-layer mode
 distance is set to the frozen missing-mode value 2.0, occupancy is `log(2)`,
 contrast loss is 1.0, `n_eff=0` and the objective remains finite. Thus zero
-events, source-non-evaluable events and a small set of attractive isolated
+events, contact-non-evaluable events and a small set of attractive isolated
 events cannot crash the optimizer or evade a penalty. No additional hard
 patient-mode gates are added during exploration.
 
@@ -242,8 +268,11 @@ of convergence or a negative capacity test.
 
 ### 7.2 Local refinement
 
-If at least one M3 field improves the equal-network `J14` reference without
-runaway or collapse of either soft mode, initialize a full 28-dimensional M3
+An M3 canary is a usable anchor only if its paired `J14_v1` improvement is
+positive on at least two of seeds 2321--2323, both confidence-adjusted mode
+supports are at least six on the equal-network summary, and no run is runaway
+or numerically invalid. If at least one M3 field meets this definition,
+initialize a full 28-dimensional M3
 CMA-ES search from the best canary field. Use population 16, three generations
 and two fixed CRN fit networks, with no restart under the frozen primary
 budget. These 96 runs are an
@@ -257,12 +286,21 @@ M3+M4 search is required. A negative bounded canary is reported as
 `NOT_SUPPORTED_WITHIN_FROZEN_M3_M4_BUDGET`, not as failure of all continuous
 fields. Do not add Gaussian components or increase spline-grid freedom.
 
+The optional M4 shell uses eight observation-free Sobol shell directions with
+both signs on one canary seed (16 runs), the best four on two additional CRN
+seeds (8 runs), then population 8 for four generations on two fixed CRN fit
+networks (64 runs), with no restart. Natural KMeans remains unavailable to all
+three stages.
+
 ### 7.3 Frozen selection and confirmation
 
-Freeze at most two candidates before new-network selection. Compare the two
-candidates and the `exact_off` reference on six fresh networks with common
-random numbers. The primary unit is the network; pooled events are display
-only.
+Freeze at most two candidates before new-network selection. Compare those two
+candidates and the `exact_off` reference on four fresh selection networks with
+common random numbers using `J14_v1` only. Freeze exactly one winner before any
+natural KMeans result is computed. The winner and `exact_off` then run on six
+additional confirmation networks. The primary unit is the network; pooled
+events are display only, and a failed winner cannot be replaced by the
+runner-up.
 
 After selection is frozen, produce the two Fig.4 acceptance figures from the
 same isolated families:
@@ -277,25 +315,41 @@ held-out failure cannot be repaired by returning to the field fit.
 
 ### 7.4 Fig.4 Node-freeze acceptance
 
-Natural KMeans never enters the fit, but it is a required post-freeze
-acceptance test. On every fresh network, run K=2 with eight initial-seed blocks
-and require:
+Natural KMeans never enters the fit or selection, but it is a required
+post-freeze acceptance test. For every confirmation network, create one joint
+per-network status requiring all of the following on the same network:
 
 - at least six isolated readable families in each natural cluster and minority
   fraction at least 0.20;
 - median KMeans seed AMI at least 0.90;
 - balanced alignment with the frozen patient-training classifier at least
   0.70;
-- positive contact-split cross-fit signed matrix margin;
+- at least six in-support frozen-classifier events assigned to each patient
+  mode;
+- both contact-split folds contain both modes, all four cells are finite and
+  the minimum fold-specific signed margin is positive;
 - both natural clusters in the same network.
+- weakest-mode `J14_v1` improves against paired `exact_off`, while the other
+  mode worsens by no more than 10%.
+
+A single `patient_support_acceptance` sidecar is frozen from patient-training
+recording-block floors before launch. It jointly covers per-mode ICL and SCL
+recruitment, ICL-SCL precedence, per-mode joint-shaft participation and OOD.
+This is one combined support condition, not five independent run blockers.
+Relative improvement over `exact_off` cannot substitute for this absolute
+patient-training support condition.
 
 K2-versus-K1 held-out GMM density, silhouette and centroid valley gap are
 reported diagnostics rather than additional blockers because their finite
 sample behavior differs strongly at 20--30 events. At least four of six fresh
-networks must satisfy all acceptance criteria above. The candidate must
-also improve the weakest patient-training four-layer mode in at least four of
-six paired networks without worsening the other mode by more than 10%. Failure
-keeps the result at `STATIC_NODE_PATIENT_K2_PARTIAL` and blocks EE/E-to-I/Z/M.
+networks must satisfy the complete joint status above; this is majority
+reproducibility, not a claim of universal stability. Failure keeps the result
+at `STATIC_NODE_PATIENT_K2_PARTIAL` and blocks EE/E-to-I/Z/M.
+
+Before any confirmation launch, freeze the held-out source path and SHA-256,
+the same four-layer event-cloud formula, paired `exact_off` comparison and the
+10% non-worsening rule. Held-out remains one-time and development-only because
+this endpoint has been viewed historically.
 
 ## 8. Causal validation after field freeze
 

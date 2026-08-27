@@ -77,6 +77,15 @@
     "calibration_seed": 20260825,
     "patient_reference_events_per_mode": 512
   },
+  "formal_objective": {
+    "schema_id": "topic4_rev14_j14_v1",
+    "sample_size_per_side": 6,
+    "draws_per_network": 64,
+    "seed": 20260827,
+    "tau": 0.25,
+    "model_sampling": "confidence_weighted_without_replacement_then_missing_rows",
+    "normalization": "raw_distance_divided_by_patient_cross_block_floor_q95"
+  },
   "diagnostics": {
     "natural_kmeans_seed": 20260827,
     "minimum_fig4_readable_contacts": 3

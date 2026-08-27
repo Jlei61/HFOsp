@@ -26,10 +26,18 @@ before EE, E-to-I or Z/M are changed.
 Across seeds 2311--2313 there are 86 primary isolated families and 72
 Fig.4-readable families. Per-network counts are 26/31/29 and 24/26/22.
 
-The equal-network legacy soft score is 2.1137. Mode-specific mean errors are
+The equal-network legacy soft diagnostic is 2.1137. Mode-specific mean errors are
 0.7035 and 1.7659; weakest-mode LSE is 1.5962. Occupancy JS is 0.0087, but this
 apparently favorable occupancy does not rescue the weak mode: contrast
 alignment is only 0.1392 and contrast loss is 0.8608.
+
+This legacy number is not the rev14 optimization reference. The frozen
+`topic4_rev14_j14_v1` matched 6-versus-6 objective is 2.4853. Its mode means are
+0.9015 and 1.8201, weakest-mode LSE is 1.6533, confidence-adjusted effective
+supports are 14.78 and 12.31, overlap fraction is 0.3832 and support loss is
+0.5049. Per-network overlap fractions are 0.366, 0.311 and 0.473. All rev14
+candidates must be compared with this same objective and sampling contract;
+the 2.1137 legacy diagnostic cannot select a field.
 
 ## KMeans and patient geometry
 
@@ -63,7 +71,9 @@ rarely recruits both shafts as one isolated causal family.
 - `results/topic4_sef_hfo/data_driven_node_dualmode_rev14/static_node_causal_family_diagnostic/exact_off_static_node_fig4_bundle.npz`
 
 The JSON records all input hashes, original event indices, runtime-path hashes,
-the analysis commit and runtime dirty state. The NPZ is the sole bundle for
+the analysis commit and runtime dirty state. It also separates
+`contact_primary`, `topology_primary` and `fig4_kmeans_readable` masks. The NPZ
+is the sole bundle for
 subsequent Fig.4-style rendering of this diagnostic.
 
 ## Decision

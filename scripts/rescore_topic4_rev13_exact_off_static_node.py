@@ -44,6 +44,7 @@ from src.topic4_shaft_aware_direction import (  # noqa: E402
     all_event_shaft_participation,
     assign_direction_modes,
 )
+from src.topic4_rev14_static_node_objective import rev14_objective  # noqa: E402
 
 
 DEFAULT_ARTIFACT_ROOT = Path("/home/honglab/leijiaxin/HFOsp")
@@ -422,50 +423,67 @@ def primary_family_selection(arrays: Mapping[str, np.ndarray], *,
     if maps.shape[0] != n_events:
         raise RuntimeError("worker source maps do not align")
 
-    order = np.argsort(
-        np.asarray(arrays["event_t_on_ms"], dtype=np.float64), kind="stable",
-    )
-    base = (
-        np.asarray(arrays["event_returned"], dtype=bool)
-        & np.asarray(arrays["source_onset_evaluable"], dtype=bool)
-    )
-    selected = order[base[order]]
-    t_on = np.asarray(arrays["event_t_on_ms"], dtype=np.float64)[selected]
-    t_off = np.asarray(arrays["event_t_off_ms"], dtype=np.float64)[selected]
-    trigger = np.asarray(
+    event_t_on = np.asarray(arrays["event_t_on_ms"], dtype=np.float64)
+    event_t_off = np.asarray(arrays["event_t_off_ms"], dtype=np.float64)
+    event_trigger = np.asarray(
         arrays["event_trigger_t_on_ms"], dtype=np.float64,
-    )[selected]
+    )
+    returned = np.asarray(arrays["event_returned"], dtype=bool)
+    interval_valid = (
+        returned & np.isfinite(event_t_on) & np.isfinite(event_t_off)
+        & (event_t_off >= event_t_on)
+    )
+    order = np.argsort(event_t_on, kind="stable")
+    selected = order[interval_valid[order]]
+    t_on = event_t_on[selected]
+    t_off = event_t_off[selected]
     axis = substrate_pca_axis(arrays["positions_E"], arrays["delta_vtheta"])
     displacement = event_axis_displacements(
         maps[selected], axis_unit=axis,
         bin_mm=float(np.asarray(arrays["source_bin_mm"]).item()),
     )
-    finite = (
-        np.isfinite(displacement) & np.isfinite(t_on) & np.isfinite(t_off)
-        & np.isfinite(trigger) & (t_off >= t_on)
-    )
-    directional_indices = selected[finite]
     isolated, overlap = overlap_connected_episode_audit(
-        t_on[finite], t_off[finite], displacement[finite],
+        t_on, t_off, np.nan_to_num(displacement, nan=0.0),
     )
-    primary_indices = directional_indices[isolated]
+    primary_indices = selected[isolated]
+    primary_displacement = displacement[isolated]
+    topology = (
+        np.asarray(arrays["source_onset_evaluable"], dtype=bool)[primary_indices]
+        & np.isfinite(primary_displacement)
+        & np.isfinite(event_trigger[primary_indices])
+    )
     finite_ranks = np.sum(
         np.isfinite(np.asarray(arrays["ranks"], dtype=float)[primary_indices]),
         axis=1,
     )
     readable = finite_ranks >= int(minimum_readable_contacts)
+    returned_finite_ranks = np.sum(
+        np.isfinite(np.asarray(arrays["ranks"], dtype=float)[returned]), axis=1,
+    )
     return {
         "primary_indices": primary_indices,
+        "contact_primary_indices": primary_indices,
+        "topology_primary_within_contact": topology,
+        "topology_primary_indices": primary_indices[topology],
         "fig4_readable_within_primary": readable,
         "fig4_readable_indices": primary_indices[readable],
-        "displacements_mm": displacement[finite][isolated],
+        "displacements_mm": primary_displacement,
         "substrate_axis_xy": axis,
         "overlap_audit": overlap,
         "n_total": int(n_events),
-        "n_returned_source_evaluable": int(len(selected)),
-        "n_directional_valid": int(len(directional_indices)),
+        "n_returned": int(np.sum(returned)),
+        "n_contact_evaluable_before_overlap": int(len(selected)),
+        "n_returned_source_evaluable": int(np.sum(
+            returned & np.asarray(arrays["source_onset_evaluable"], dtype=bool)
+        )),
+        "n_directional_valid": int(np.sum(topology)),
         "n_primary_isolated": int(len(primary_indices)),
+        "n_contact_primary": int(len(primary_indices)),
+        "n_topology_primary": int(np.sum(topology)),
         "n_fig4_readable": int(np.sum(readable)),
+        "n_returned_less_than_minimum_contacts": int(np.sum(
+            returned_finite_ranks < int(minimum_readable_contacts)
+        )),
         "minimum_fig4_readable_contacts": int(minimum_readable_contacts),
     }
 
@@ -528,6 +546,26 @@ def _score_summary(score: Mapping[str, Any]) -> dict[str, float]:
     }
 
 
+def _j14_summary(score: Mapping[str, Any]) -> dict[str, float]:
+    return {
+        "objective": float(score["objective"]),
+        "weakest_mode_lse": float(score["weakest_mode_lse"]),
+        "occupancy_js": float(score["occupancy_js"]),
+        "ambiguity": float(score["ambiguity"]),
+        "contrast_loss": float(score["contrast"]["loss"]),
+        "overlap_fraction": float(score["overlap_fraction"]),
+        "support_loss": float(score["support_loss"]),
+        "mode_0_mean": float(score["modes"]["0"]["mean"]),
+        "mode_1_mean": float(score["modes"]["1"]["mean"]),
+        "mode_0_effective_events": float(
+            score["modes"]["0"]["effective_events"]
+        ),
+        "mode_1_effective_events": float(
+            score["modes"]["1"]["effective_events"]
+        ),
+    }
+
+
 def equal_network_mean(records: list[Mapping[str, float]]) -> dict[str, float]:
     if not records:
         raise ValueError("equal-network aggregation requires records")
@@ -562,6 +600,7 @@ def _runtime_paths(config_path: Path) -> tuple[Path, ...]:
         ROOT / "src/topic4_d6_natural_kmeans.py",
         ROOT / "src/topic4_shaft_aware.py",
         ROOT / "src/topic4_shaft_aware_direction.py",
+        ROOT / "src/topic4_rev14_static_node_objective.py",
     )
 
 
@@ -596,6 +635,7 @@ def produce(config_path: Path, artifact_root: Path,
     )
     contract_path = _verify_record(artifact_root, inputs["contact_contract"])
     objective = config["soft_objective"]
+    formal_objective = config["formal_objective"]
     patient = load_patient_training_target(
         target_path,
         events_per_mode=int(objective["patient_reference_events_per_mode"]),
@@ -674,6 +714,26 @@ def produce(config_path: Path, artifact_root: Path,
             ambiguity_weight=float(objective["ambiguity_weight"]),
             contrast_weight=float(objective["contrast_weight"]),
         )
+        j14 = rev14_objective(
+            ranks, assignment["probability_B"],
+            patient["all_ranks"], patient["all_labels"],
+            patient["all_blocks"], patient["contact_names"],
+            projections=projections, calibration=calibration,
+            returned_families=int(selection["n_returned"]),
+            contact_evaluable_families=int(
+                selection["n_contact_evaluable_before_overlap"]
+            ),
+            overlap_excluded_families=int(
+                selection["overlap_audit"]["n_excluded_families"]
+            ),
+            less_than_three_contact_families=int(
+                selection["n_returned_less_than_minimum_contacts"]
+            ),
+            sample_size=int(formal_objective["sample_size_per_side"]),
+            draws=int(formal_objective["draws_per_network"]),
+            seed=int(formal_objective["seed"]) + seed,
+            tau=float(formal_objective["tau"]),
+        )
         readable = np.asarray(
             selection["fig4_readable_within_primary"], dtype=bool,
         )
@@ -695,15 +755,20 @@ def produce(config_path: Path, artifact_root: Path,
             "worker_npz": str(npz_path),
             "event_selection": {
                 key: selection[key] for key in (
-                    "n_total", "n_returned_source_evaluable",
-                    "n_directional_valid", "n_primary_isolated",
-                    "n_fig4_readable", "minimum_fig4_readable_contacts",
+                    "n_total", "n_returned", "n_contact_evaluable_before_overlap",
+                    "n_returned_source_evaluable", "n_directional_valid",
+                    "n_primary_isolated", "n_contact_primary",
+                    "n_topology_primary", "n_fig4_readable",
+                    "n_returned_less_than_minimum_contacts",
+                    "minimum_fig4_readable_contacts",
                 )
             },
             "primary_original_event_indices": primary,
             "overlap_connected_episode_audit": selection["overlap_audit"],
             "soft_patient_training_score": score,
             "soft_score_summary": _score_summary(score),
+            "j14_v1": j14,
+            "j14_v1_summary": _j14_summary(j14),
             "patient_training_assignment": {
                 "mode_counts": np.bincount(
                     assignment["labels"], minlength=2,
@@ -724,6 +789,7 @@ def produce(config_path: Path, artifact_root: Path,
             "ranks": ranks,
             "onsets": onsets,
             "readable": readable,
+            "topology_primary": selection["topology_primary_within_contact"],
             "probability_B": assignment["probability_B"],
             "patient_labels": assignment["labels"],
             "frozen_old_direction_label": assignment["raw_old_labels"],
@@ -757,6 +823,9 @@ def produce(config_path: Path, artifact_root: Path,
         raise RuntimeError("exact_off workers do not share one frozen Node field")
     equal_score = equal_network_mean([
         row["soft_score_summary"] for row in per_network
+    ])
+    equal_j14 = equal_network_mean([
+        row["j14_v1_summary"] for row in per_network
     ])
     crossfit_matrix = _mean_matrix([
         np.asarray(row["contact_split_crossfit_diagnostic_only"]["matrix"], float)
@@ -814,6 +883,9 @@ def produce(config_path: Path, artifact_root: Path,
         "primary_fig4_readable": np.concatenate([
             row["readable"] for row in bundles
         ]),
+        "primary_topology_evaluable": np.concatenate([
+            row["topology_primary"] for row in bundles
+        ]),
         "primary_source_onset_maps_ms": np.concatenate([
             row["source_onset_maps"] for row in bundles
         ]),
@@ -863,10 +935,16 @@ def produce(config_path: Path, artifact_root: Path,
         "seeds": [int(row["seed"]) for row in per_network],
         "event_contract": {
             "primary": (
-                "returned AND source_onset_evaluable AND finite displacement/time; "
-                "exclude all members of overlap-connected episodes"
+                "contact_primary = returned with valid interval; exclude all "
+                "members of overlap-connected episodes before readability filters"
             ),
-            "fig4_readable": "primary AND at least 3 finite contact ranks",
+            "topology_primary": (
+                "contact_primary AND source onset/displacement evaluable"
+            ),
+            "fig4_readable": (
+                "contact_primary AND at least 3 finite contact ranks; KMeans/figure only"
+            ),
+            "contact_loss": "all contact_primary, including zero-to-two-contact families",
             "ood_filter": "none",
             "joint_shaft_filter": "none",
             "missing_scl_filter": "none",
@@ -880,6 +958,10 @@ def produce(config_path: Path, artifact_root: Path,
             ],
             "per_network_fig4_readable": [
                 int(row["event_selection"]["n_fig4_readable"])
+                for row in per_network
+            ],
+            "per_network_topology_primary": [
+                int(row["event_selection"]["n_topology_primary"])
                 for row in per_network
             ],
         },
@@ -932,6 +1014,12 @@ def produce(config_path: Path, artifact_root: Path,
         },
         "per_network": per_network,
         "equal_network_soft_score": equal_score,
+        "formal_objective": {
+            "schema_id": formal_objective["schema_id"],
+            "equal_network_summary": equal_j14,
+            "normalization": formal_objective["normalization"],
+            "sampling": formal_objective["model_sampling"],
+        },
         "equal_network_contact_split_matrix": crossfit_matrix,
         "pooled_natural_kmeans_diagnostic_only": _strip_natural(pooled_natural),
         "pooled_contact_split_crossfit_diagnostic_only": pooled_crossfit,
@@ -968,6 +1056,9 @@ def main() -> None:
         "status": payload["status"],
         "counts": payload["counts"],
         "equal_network_soft_score": payload["equal_network_soft_score"],
+        "equal_network_j14_v1": payload["formal_objective"][
+            "equal_network_summary"
+        ],
         "json": str(result["json_output"]),
         "npz": str(result["npz_output"]),
     }, indent=2))

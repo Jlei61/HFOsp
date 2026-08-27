@@ -6,8 +6,9 @@
    2311--2313.
 2. Freeze original event indices, causal-family masks, input hashes and contact
    order.
-3. Produced per-network and equal-network soft scores, OOD/shaft support,
-   natural KMeans diagnostics and a Fig.4 bundle.
+3. Produced per-network and equal-network legacy diagnostics plus the frozen
+   `J14_v1` reference, OOD/shaft support, natural KMeans diagnostics and a
+   Fig.4 bundle.
 4. Verified the frozen counts: isolated families 26/31/29 and isolated readable
    families 24/26/22.
 5. Passed zero-simulation controls for SCL censoring, single-mode collapse,
@@ -54,30 +55,37 @@
 1. Freeze the best eight selectable M3 fields without looking at KMeans or
    patient held-out.
 2. Run seeds 2322--2323 with common random numbers.
-3. If a usable M3 anchor exists, run a bounded full-M3 CMA-ES: population 16,
+3. Define a usable M3 anchor as positive paired `J14_v1` improvement on at
+   least two of seeds 2321--2323, both confidence-adjusted mode supports at
+   least six, and no runaway or numerical failure.
+4. If a usable M3 anchor exists, run a bounded full-M3 CMA-ES: population 16,
    three generations and two CRN fit networks, with no restart under the
    frozen primary budget.
-4. Release the M4 shell only around a usable frozen M3 anchor. Without such an
+5. Release the M4 shell only around a usable frozen M3 anchor. Without such an
    anchor, a shell-only result is invalid and any M4 experiment must search M3
    and M4 jointly.
-5. The optional M4-shell extension is capped at 16 canary runs, 8 replications
-   and 64 optimization runs.
-6. Do not add Gaussian cores, contact-centered basis functions or direct
+6. The optional M4-shell extension uses eight Sobol shell directions and both
+   signs on one canary seed, the best four on two replication seeds, then
+   population 8 x four generations x two CRN fit networks, with no restart:
+   16 + 8 + 64 runs.
+7. Do not add Gaussian cores, contact-centered basis functions or direct
    18 x 18 coefficient optimization.
 
 ## Phase 5: fresh-network selection
 
 1. Freeze at most two candidates and the selection rule.
-2. Run each candidate plus `exact_off` on six fresh network/noise seeds.
+2. Run each candidate plus `exact_off` on four fresh selection network/noise
+   seeds using `J14_v1` only.
 3. Score networks independently; use equal-network aggregation and paired
    differences.
 4. Freeze one candidate only if improvement is not driven by one network or by
-   overlap inflation.
-5. Once frozen, apply the predeclared natural-KMeans acceptance contract. At
+   overlap inflation. Do not inspect natural KMeans during selection.
+5. Run the winner and `exact_off` on six additional confirmation networks.
+6. Once frozen, apply the predeclared natural-KMeans acceptance contract. At
    least four of six networks must have both clusters, >=6 events per cluster,
    minority fraction >=0.20, seed AMI >=0.90, patient balanced alignment >=0.70
    and positive contact-split signed margin.
-6. Require weakest-mode improvement in at least four of six paired networks and
+7. Require weakest-mode improvement in at least four of six paired networks and
    no more than 10% degradation of the other mode.
 
 ## Phase 6: figures and one-time held-out evaluation
@@ -107,8 +115,8 @@
 - M3 alone cannot reject the free-field family. M4 shell-only search is allowed
   only around a usable M3 anchor.
 - The primary M3 budget is 34 canary runs, 16 canary replications, up to 96 M3
-  optimization runs, 18 selection runs and 6 final spatial controls: at most
-  170 new 20-s runs before intervention. A registered M4-shell extension adds
+  optimization runs, 12 selection runs and 12 confirmation runs: at most 170
+  new 20-s runs before intervention. A registered M4-shell extension adds
   at most 88 runs, for a total ceiling of 258.
 - A negative bounded result is `NOT_SUPPORTED_WITHIN_FROZEN_M3_BUDGET`, or
   `NOT_SUPPORTED_WITHIN_FROZEN_M3_M4_BUDGET` only when the M4 shell was validly

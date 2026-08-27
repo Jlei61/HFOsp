@@ -155,13 +155,15 @@ def test_primary_selection_excludes_entire_overlap_component_and_keeps_single_sh
     selected = rescore.primary_family_selection(
         arrays, minimum_readable_contacts=3,
     )
-    np.testing.assert_array_equal(selected["primary_indices"], [3])
-    np.testing.assert_array_equal(selected["fig4_readable_indices"], [3])
+    np.testing.assert_array_equal(selected["contact_primary_indices"], [3, 5])
+    np.testing.assert_array_equal(selected["topology_primary_indices"], [3])
+    np.testing.assert_array_equal(selected["fig4_readable_indices"], [3, 5])
     assert selected["overlap_audit"]["formal_action"] == (
         "EXCLUDE_ALL_MEMBERS_OF_OVERLAP_CONNECTED_EPISODES"
     )
-    assert selected["n_primary_isolated"] == 1
-    assert selected["n_fig4_readable"] == 1
+    assert selected["n_primary_isolated"] == 2
+    assert selected["n_topology_primary"] == 1
+    assert selected["n_fig4_readable"] == 2
 
 
 def test_equal_network_mean_does_not_event_weight():
