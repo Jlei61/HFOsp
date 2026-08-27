@@ -611,10 +611,17 @@ def test_preflight_applies_two_second_sentinel_only_to_compatibility_config(
         "node_accessibility": None,
         "pathways": config["pathways"],
     }
+    expected_commit = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=worker.ROOT, text=True
+    ).strip()
     monkeypatch.setattr(
         worker,
         "_rebuild_and_validate_manifest",
-        lambda *args, **kwargs: ({}, [candidate], {"candidate_exact_compare": True}),
+        lambda *args, **kwargs: (
+            {"provenance": {"git_commit": expected_commit}},
+            [candidate],
+            {"candidate_exact_compare": True},
+        ),
     )
     monkeypatch.setattr(
         worker,
@@ -630,7 +637,7 @@ def test_preflight_applies_two_second_sentinel_only_to_compatibility_config(
         "--config", str(config_path),
         "--candidate-id", "exact_off",
         "--seed", "2311",
-        "--expected-commit", "HEAD",
+        "--expected-commit", expected_commit,
         "--artifact-root", str(tmp_path),
         "--duration-ms", "2000",
         "--engineering-run-kind", "sentinel",
@@ -640,7 +647,8 @@ def test_preflight_applies_two_second_sentinel_only_to_compatibility_config(
     assert state.requested_duration_ms == 2000.0
     assert state.engineering_run_kind == "sentinel"
     assert state.rev13_provenance["manifest_rebuild"] == {
-        "candidate_exact_compare": True
+        "candidate_exact_compare": True,
+        "manifest_git_commit": expected_commit,
     }
 
 

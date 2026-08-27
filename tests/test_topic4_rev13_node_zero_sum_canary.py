@@ -53,6 +53,11 @@ def _run(candidate_id, *, seed=2311, displacement=None, runaway=False,
         "n_isolated_returned_evaluable_causal_families": int(len(values)),
         "compound_detector_fragment_fraction": compound,
         "runaway": runaway,
+        "substrate_identity": {
+            "positions_E_sha256": "positions",
+            "delta_vtheta_sha256": "node",
+            "node_mapping_sha256": "mapping",
+        },
         "whole_sheet_onset_map_kmeans_diagnostic": {
             "status": "OK",
             "formal_acceptance_role": "TOPOLOGY_VISUALIZATION_DIAGNOSTIC_ONLY",
@@ -97,6 +102,15 @@ def _matched_c020(active=None, *, off=None, raise_only=None, shuffled=None):
             "raise_only_c020", "spatial_shift_c020",
         ],
     )
+
+
+def test_paired_record_rejects_cross_arm_substrate_drift():
+    active = _run("zero_sum_c020")
+    off = _run("exact_off", displacement=_unimodal(seed=11))
+    off["substrate_identity"] = dict(off["substrate_identity"])
+    off["substrate_identity"]["delta_vtheta_sha256"] = "changed"
+    with np.testing.assert_raises_regex(RuntimeError, "frozen Node substrate"):
+        paired_record(active, off)
 
 
 def test_cluster_direction_summary_is_invariant_to_kmeans_label_swap():

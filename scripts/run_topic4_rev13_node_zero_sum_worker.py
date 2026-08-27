@@ -1142,6 +1142,7 @@ def _rebuild_and_validate_manifest(
         _assert_json_exact(manifest.get(key), config.get(key), path=f"$.{key}")
     return manifest, rebuilt_candidates, {
         "manifest_path": str(manifest_path),
+        "manifest_sha256": _sha256_file(manifest_path),
         "manifest_status": MANIFEST_STATUS,
         "config_sha256": config_sha256,
         "candidates_rebuilt_from_frozen_inputs": True,
@@ -1189,6 +1190,12 @@ def _preflight(argv: list[str] | None = None) -> tuple[argparse.Namespace, _RunS
     manifest, rebuilt_candidates, manifest_audit = _rebuild_and_validate_manifest(
         config, config_path=config_path, artifact_root=artifact_root
     )
+    expected_commit = subprocess.check_output(
+        ["git", "rev-parse", args.expected_commit], cwd=ROOT, text=True,
+    ).strip()
+    if manifest.get("provenance", {}).get("git_commit") != expected_commit:
+        raise RuntimeError("rev13 manifest was not frozen at the expected commit")
+    manifest_audit["manifest_git_commit"] = expected_commit
     matches = [
         row for row in rebuilt_candidates
         if row.get("candidate_id") == args.candidate_id

@@ -58,9 +58,12 @@ def test_config_and_manifest_are_hash_and_order_locked(tmp_path):
         "candidates": [
             {"candidate_id": row["arm_id"]} for row in config["arms"]
         ],
+        "provenance": {"git_commit": "f" * 40},
     }
     (tmp_path / config["candidate_manifest"]).write_text(json.dumps(manifest))
-    config, manifest = monitor._validate_inputs(config_path, tmp_path)
+    config, manifest = monitor._validate_inputs(
+        config_path, tmp_path, "f" * 40
+    )
     assert [row["arm_id"] for row in config["arms"]] == [
         row["candidate_id"] for row in manifest["candidates"]
     ]
@@ -99,6 +102,7 @@ def test_worker_command_is_systemd_nohup_time_v_and_single_threaded(tmp_path):
         "candidate_id": "zero_sum_c020", "seed": 2312,
         "json": tmp_path / "worker.json", "npz": tmp_path / "worker.npz",
         "status": tmp_path / "worker.status", "log": tmp_path / "worker.log",
+        "expected_duration_ms": 20000.0,
     }
     unit, command = monitor._worker_command(
         job, config_path=CONFIG, artifact_root=ARTIFACT_ROOT,
@@ -124,6 +128,7 @@ def test_sentinel_worker_command_has_frozen_two_second_override(tmp_path):
         "status": tmp_path / "worker.status", "log": tmp_path / "worker.log",
         "duration_ms": 2000.0,
         "engineering_run_kind": "sentinel",
+        "expected_duration_ms": 20000.0,
     }
     _, command = monitor._worker_command(
         job, config_path=CONFIG, artifact_root=ARTIFACT_ROOT,
@@ -158,6 +163,17 @@ def test_sentinel_success_files_cannot_complete_formal_canary(tmp_path):
             "expected_git_commit": commit,
             "runtime_modules_match_expected_commit": True,
             "runtime_modules_dirty": False,
+        },
+        "arrays": {
+            "path": str(sentinel["npz"]),
+            "sha256": monitor._sha256(sentinel["npz"]),
+        },
+        "simulation": {"duration_ms": 2000.0},
+        "execution_duration": {
+            "frozen_duration_ms": 20000.0,
+            "requested_duration_ms": 2000.0,
+            "engineering_run_kind": "sentinel",
+            "duration_override_used": True,
         },
     }))
     sentinel["status"].write_text("SUCCESS exit_code=0\n")
@@ -195,6 +211,7 @@ def test_completed_worker_requires_matching_clean_provenance(tmp_path):
         "candidate_id": "exact_off", "seed": 2311,
         "json": tmp_path / "worker.json", "npz": tmp_path / "worker.npz",
         "status": tmp_path / "worker.status", "log": tmp_path / "worker.log",
+        "expected_duration_ms": 20000.0,
     }
     job["npz"].write_bytes(b"npz")
     job["json"].write_text(json.dumps({
@@ -204,6 +221,17 @@ def test_completed_worker_requires_matching_clean_provenance(tmp_path):
             "expected_git_commit": "c" * 40,
             "runtime_modules_match_expected_commit": True,
             "runtime_modules_dirty": False,
+        },
+        "arrays": {
+            "path": str(job["npz"]),
+            "sha256": monitor._sha256(job["npz"]),
+        },
+        "simulation": {"duration_ms": 20000.0},
+        "execution_duration": {
+            "frozen_duration_ms": 20000.0,
+            "requested_duration_ms": None,
+            "engineering_run_kind": None,
+            "duration_override_used": False,
         },
     }))
     assert monitor._worker_complete(job, "c" * 40)
@@ -218,12 +246,27 @@ def test_status_tokens_do_not_treat_success_without_artifact_as_complete(tmp_pat
         "candidate_id": "exact_off", "seed": 2311,
         "json": tmp_path / "worker.json", "npz": tmp_path / "worker.npz",
         "status": tmp_path / "worker.status", "log": tmp_path / "worker.log",
+        "expected_duration_ms": 20000.0,
     }
     assert monitor._job_state(job, "d" * 40) == "pending"
     job["status"].write_text("RUNNING pid=1\n")
     assert monitor._job_state(job, "d" * 40) == "active"
     job["status"].write_text("SUCCESS exit_code=0\n")
     assert monitor._job_state(job, "d" * 40) == "failed"
+
+
+def test_stale_running_status_fails_when_systemd_unit_is_dead(tmp_path, monkeypatch):
+    job = {
+        "candidate_id": "exact_off", "seed": 2311,
+        "json": tmp_path / "worker.json", "npz": tmp_path / "worker.npz",
+        "status": tmp_path / "worker.status", "log": tmp_path / "worker.log",
+        "expected_duration_ms": 20000.0,
+    }
+    job["status"].write_text("RUNNING pid=1\n")
+    monkeypatch.setattr(monitor, "_systemd_unit_active", lambda unit: False)
+    assert monitor._job_state(
+        job, "d" * 40, expected_unit="dead.service"
+    ) == "failed"
 
 
 def test_monitor_interval_and_resource_floors_are_frozen():
@@ -235,15 +278,85 @@ def test_monitor_interval_and_resource_floors_are_frozen():
     assert resources["minimum_free_disk_gib"] == 40
 
 
+def test_parity_pass_is_a_commit_bound_hard_precondition(tmp_path):
+    output_root = tmp_path / "output"
+    rev13_json = output_root / "parity/exact_off_seed_2291.json"
+    rev13_json.parent.mkdir(parents=True)
+    commit = "1" * 40
+    rev13_json.write_text(json.dumps({
+        "provenance": {"expected_git_commit": commit},
+    }))
+    audit_path = monitor._parity_audit_path(output_root)
+    audit_path.write_text(json.dumps({
+        "schema_id": monitor.PARITY_SCHEMA,
+        "status": "PASS",
+        "inputs": {
+            "rev13_json": {
+                "path": str(rev13_json),
+                "sha256": monitor._sha256(rev13_json),
+            },
+        },
+    }))
+    assert monitor._require_parity_pass(output_root, commit)["status"] == "PASS"
+    with pytest.raises(RuntimeError, match="another commit"):
+        monitor._require_parity_pass(output_root, "2" * 40)
+
+
+def test_fit_requires_complete_noncatastrophic_seed2311_aggregate(tmp_path):
+    output_root = tmp_path / "output"
+    (output_root / "status").mkdir(parents=True)
+    (output_root / "analysis").mkdir()
+    (output_root / "aggregate").mkdir()
+    commit = "3" * 40
+    (output_root / "status/canary_controller.json").write_text(json.dumps({
+        "status": "REV13_NODE_ZERO_SUM_QUEUE_COMPLETE",
+        "expected_git_commit": commit,
+        "n_complete": 6,
+    }))
+    (output_root / "analysis/model_internal_decision.json").write_text(json.dumps({
+        "schema_id": monitor.DECISION_SCHEMA,
+        "canary_complete": True,
+    }))
+    rows = [
+        {"runaway": True, "n_returned_evaluable_causal_families": 1}
+        for _ in range(6)
+    ]
+    per_run = output_root / "aggregate/model_internal_per_run.json"
+    per_run.write_text(json.dumps({"rows": rows}))
+    with pytest.raises(RuntimeError, match="every arm ran away"):
+        monitor._require_fit_precondition(output_root, commit)
+    rows[0]["runaway"] = False
+    per_run.write_text(json.dumps({"rows": rows}))
+    monitor._require_fit_precondition(output_root, commit)
+
+
+def test_capacity_uses_full_duration_parity_peak(tmp_path):
+    output_root = tmp_path / "output"
+    (output_root / "status").mkdir(parents=True)
+    (output_root / "run_logs/parity").mkdir(parents=True)
+    (output_root / "status/sentinel_memory_audit.json").write_text(json.dumps({
+        "status": "REV13_SENTINEL_MEMORY_COMPLETE",
+        "peak_rss_kib": 100,
+    }))
+    monitor._parity_log_path(output_root).write_text(
+        "Maximum resident set size (kbytes): 700\n"
+    )
+    assert monitor._load_peak_rss(output_root) == 700
+
+
 def test_low_disk_waits_without_launching_a_new_worker(tmp_path, monkeypatch):
     config, manifest = _inputs()
     config = dict(config)
     config["output_root"] = "rev13-test-output"
     launched = []
     monkeypatch.setattr(
-        monitor, "_validate_inputs", lambda config_path, artifact_root: (config, manifest)
+        monitor, "_validate_inputs",
+        lambda config_path, artifact_root, expected_commit: (config, manifest)
     )
-    monkeypatch.setattr(monitor, "_job_state", lambda job, commit: "pending")
+    monkeypatch.setattr(monitor, "_require_parity_pass", lambda *args: {})
+    monkeypatch.setattr(
+        monitor, "_job_state", lambda job, commit, **kwargs: "pending"
+    )
     monkeypatch.setattr(monitor, "_available_memory_gib", lambda: 200.0)
     monkeypatch.setattr(monitor, "_free_disk_gib", lambda path: 39.0)
     monkeypatch.setattr(

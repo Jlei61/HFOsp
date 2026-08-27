@@ -81,6 +81,15 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _sha256_array(values: np.ndarray) -> str:
+    array = np.ascontiguousarray(np.asarray(values))
+    digest = hashlib.sha256()
+    digest.update(str(array.dtype).encode("ascii"))
+    digest.update(np.asarray(array.shape, dtype=np.int64).tobytes())
+    digest.update(array.tobytes())
+    return digest.hexdigest()
+
+
 def _jsonable(value: Any) -> Any:
     if isinstance(value, Mapping):
         return {str(key): _jsonable(item) for key, item in value.items()}
@@ -678,6 +687,13 @@ def per_run_record(worker: Mapping[str, Any], *, seed_offset: int = 0) -> dict[s
         "runaway": bool(runaway_time is not None),
         "runaway_early_stop_ms": runaway_time,
         "substrate_pca_axis_xy": axis.tolist(),
+        "substrate_identity": {
+            "positions_E_sha256": _sha256_array(arrays["positions_E"]),
+            "delta_vtheta_sha256": _sha256_array(arrays["delta_vtheta"]),
+            "node_mapping_sha256": payload.get("node_mapping", {}).get(
+                "mapping_sha256"
+            ),
+        },
         "whole_sheet_onset_map_kmeans_diagnostic": compact_topology,
         "overlap_connected_episode_audit": overlap,
         "causal_family_identity_diagnostic": {
@@ -745,6 +761,9 @@ def paired_record(
 
     matched_records = [active, off] + [control_by_id[key] for key in expected_ids
                                       if key in control_by_id]
+    substrate_identities = [row.get("substrate_identity") for row in matched_records]
+    if any(identity != substrate_identities[0] for identity in substrate_identities[1:]):
+        raise RuntimeError("paired arms do not share the frozen Node substrate")
     available_counts = [
         len(np.asarray(row.get("_directional_displacements_mm", [])))
         for row in matched_records
