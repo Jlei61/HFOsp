@@ -1,0 +1,150 @@
+{
+  "schema_id": "topic4_rev14_static_node_historical_rescore_v1",
+  "scientific_role": "development_only_zero_simulation_historical_static_node_rescore",
+  "output_root": "results/topic4_sef_hfo/data_driven_node_dualmode_rev14/static_node_historical_rescore",
+  "inputs": {
+    "patient_training_target": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/shaft_aware_patient_training_target.npz",
+      "sha256": "7d11100c0f431479f8decb17b6de97575a91dcb889887ce9e2cedbbdcd54140b"
+    },
+    "frozen_direction_classifier_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_local_connectivity_rev11_nlc/frozen_substrate_confirmation/candidate_manifest.json",
+      "sha256": "545b029d2d7947de5a27979e7166f6bc55ea2b01c64a67a9b736977ec960fcbb"
+    },
+    "contact_contract": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/contact_shaft_contract.json",
+      "sha256": "548643b6e89b61408b8bdf4cbc1566133937204dc36e8d512049cb25762fde91"
+    },
+    "exact_off_j14_interface_reference": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev14/static_node_causal_family_diagnostic/exact_off_static_node_rescore.json",
+      "sha256": "810c70e1f28ca304e07ee5ea9f2255d548fb4b04324093a40fd927d9752f2bea",
+      "schema_id": "topic4_rev14_j14_v1",
+      "equal_network_objective": 2.052717058273132,
+      "role": "current_raw_old_A_B_interface_parity_only_not_a_cross_pool_comparator"
+    },
+    "stages": [
+      {
+        "stage_id": "stage_z",
+        "seed_pool_id": "stage_z_seeds_2261_2263",
+        "root": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_z_global_soft_field_screen",
+        "manifest_sha256": "e7f31298b7a1687d105379078535537a4bdef9a2ffa13572820eda31af7340d9",
+        "manifest_status": "REV12ND_GLOBAL_SOFT_FIELD_SCREEN_FROZEN",
+        "candidate_count": 34,
+        "seeds": [2261, 2262, 2263],
+        "run_count": 102,
+        "anchor_candidate_id": "stage_z_anchor",
+        "anchor_semantics": "pool_static_exact_off_reference",
+        "selection_policy": "preserve_manifest_selection_eligibility"
+      },
+      {
+        "stage_id": "stage_ag",
+        "seed_pool_id": "stage_ag_seeds_2281_2286",
+        "root": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_ag_broad_nonlocal_screen",
+        "manifest_sha256": "3bffa7b297dd4b9ef1e60658eca9902fb310b908e2b95f34fd0aa725fd0648c4",
+        "manifest_status": "REV12ND_BROAD_NONLOCAL_FIELD_SCREEN_FROZEN",
+        "candidate_count": 25,
+        "seeds": [2281, 2282, 2283, 2284, 2285, 2286],
+        "run_count": 150,
+        "anchor_candidate_id": "stage_ag_anchor",
+        "anchor_semantics": "pool_static_exact_off_reference",
+        "selection_policy": "preserve_manifest_selection_eligibility"
+      },
+      {
+        "stage_id": "stage_ak",
+        "seed_pool_id": "stage_ak_seeds_2291_2296",
+        "root": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_ak_dual_node_channel_canary",
+        "manifest_sha256": "93854fd6f79966ff891c53a958cbf29396360142c1ade1e4f4a5acf756ae39b8",
+        "manifest_status": "REV12ND_DUAL_NODE_CHANNEL_CANARY_FROZEN",
+        "candidate_count": 7,
+        "seeds": [2291, 2292, 2293, 2294, 2295, 2296],
+        "run_count": 42,
+        "anchor_candidate_id": "stage_ak_mean_g10_p_disp_g08_m",
+        "anchor_semantics": "rev13_exact_off_source_field_within_stage_ak_pool",
+        "selection_policy": "diagnostic_only_never_selectable"
+      },
+      {
+        "stage_id": "stage_al",
+        "seed_pool_id": "stage_al_seeds_2301_2306",
+        "root": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_al_dual_node_local_bridge",
+        "manifest_sha256": "c36bdacd5b38edba2d68140e3d3cefaa2b76fab68c73695ca3c1aaeb0b10c1bc",
+        "manifest_status": "REV12ND_DUAL_NODE_LOCAL_BRIDGE_FROZEN",
+        "candidate_count": 12,
+        "seeds": [2301, 2302, 2303, 2304, 2305, 2306],
+        "run_count": 72,
+        "anchor_candidate_id": "stage_al_m100_d100",
+        "anchor_semantics": "rev13_exact_off_alias_within_stage_al_pool",
+        "selection_policy": "preserve_manifest_selection_eligibility"
+      }
+    ]
+  },
+  "frozen_direction_classifier": {
+    "semantics": "FULL_TIMING",
+    "accessed_keys": [
+      "coef",
+      "intercept",
+      "class_centers",
+      "class_precisions",
+      "ood_distance_thresholds",
+      "ood_quantile",
+      "regularization_c",
+      "n_train"
+    ]
+  },
+  "patient_mode_contract": {
+    "primary_patient_label_key": "patient_train_old_labels",
+    "model_assignment": "raw_labels_and_probability_B_from_frozen_old_A_B_classifier",
+    "shaft_aware_k2_role": "extent_diagnostic_only_not_patient_mode_identity",
+    "shaft_aware_k2_mapping_applied_to_objective": false
+  },
+  "soft_objective": {
+    "tau": 0.25,
+    "occupancy_weight": 0.5,
+    "ambiguity_weight": 0.25,
+    "contrast_weight": 0.5,
+    "projection_seed": 20260825,
+    "projection_count": 64,
+    "calibration_sample_size": 6,
+    "calibration_draws": 256,
+    "calibration_seed": 20260825,
+    "patient_reference_events_per_mode": 512,
+    "zero_event_objective": 10.0
+  },
+  "formal_objective": {
+    "schema_id": "topic4_rev14_j14_v1",
+    "sample_size_per_side": 6,
+    "draws_per_network": 64,
+    "seed": 20260827,
+    "tau": 0.25,
+    "model_sampling": "confidence_weighted_without_replacement_then_missing_rows",
+    "normalization": "raw_distance_divided_by_patient_cross_block_floor_q95",
+    "candidate_ranking_role": "formal_within_stage_seed_pool_only"
+  },
+  "diagnostics": {
+    "natural_kmeans_seed": 20260827,
+    "minimum_fig4_readable_contacts": 3,
+    "parallel_workers": 12
+  },
+  "event_masks": {
+    "contact_primary": "All returned causal families with finite ordered intervals after excluding every member of each temporal overlap-connected component; no source-map or minimum-contact requirement. This is the only model-event mask used by the patient training loss.",
+    "topology_primary": "contact_primary AND source_onset_evaluable AND finite whole-sheet displacement; topology sidecar only.",
+    "fig4_kmeans_readable": "contact_primary AND at least 3 finite contact ranks; KMeans and figure only.",
+    "forbidden_loss_filtering": [
+      "source_onset_evaluable",
+      "finite_source_displacement",
+      "minimum_finite_contact_count",
+      "OOD",
+      "joint_shaft_participation",
+      "SCL_participation"
+    ]
+  },
+  "invariants": {
+    "expected_worker_status": "REV12ND_NODE_WORKER_COMPLETE",
+    "expected_duration_ms": 20000.0,
+    "expected_total_candidates": 78,
+    "expected_total_runs": 366,
+    "required_mechanisms_off": ["EE", "E_to_I", "Z_M"],
+    "cross_seed_pool_raw_ranking": false,
+    "stage_ak_posthoc_promotion": false
+  },
+  "claim_boundary": "Zero-simulation retrospective rescore of frozen historical static Node trajectories. J14_v1 is the formal objective; the legacy soft score is Phase-0 diagnostic only. The patient loss includes every non-overlapping returned causal family, including source-map non-evaluable and 0-2-contact families; topology and Fig4 readability are separate sidecars. Patient training data and the frozen direction classifier are used; patient held-out data are not loaded. Scores and ranks are comparable only within the original stage/seed pool. Stage-AK remains diagnostic and cannot be promoted post hoc. No SNN, EE, E-to-I or Z/M inference is run."
+}
