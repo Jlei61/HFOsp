@@ -76,7 +76,7 @@ positive 必须在至少 4/5 seeds 降低 unseen inner NLL，并恢复非零参�
 - checkpoint selection：旧的“任意微小改善即更新”与 `min_delta=1e-4`、stage 内 patience=3 的诊断配置；synthetic 另用较长 patience 校准，要求同时保留正真值恢复并压低零真值的伪更新；
 - budget 以 optimizer steps 和完整时间 pass 同时报，不再只报 epoch。
 
-先做逐因素/小型覆盖，不做全因子组合。配置由 tuning seeds `0,1,2` 的 patient-first inner 指标选择；固定一个全患者公共配置，不给每位患者单独挑最好参数。seeds `3,4` 用于确认训练轨迹，development validation 只对冻结配置评分。
+先做逐因素/小型覆盖，不做全因子组合。配置由 tuning seeds `0,1,2` 的 patient-first inner 指标选择；排序先最大化至少 2/3 seeds 同向改善的患者数，若并列，再比较这些稳定患者的中位改善量，随后才使用全体患者中位数和事前配置顺序打破剩余并列。固定一个全患者公共配置，不给每位患者单独挑最好参数。seeds `3,4` 用于确认训练轨迹，development validation 只对冻结配置评分。
 
 ## 7. 每次拟合必须保存
 

@@ -213,6 +213,10 @@ def aggregate(root: Path) -> dict:
                 trace = value["trace"]
                 trajectory = trace["trajectory"]
                 selected = int(trace["selected_epoch"])
+                train_values = [
+                    float(row["evaluated_train_metrics"]["joint_nll_per_event"])
+                    for row in trajectory
+                ]
                 rows.append({
                     "config_id": config_id, "subject": subject, "seed": seed,
                     "selected_epoch": selected,
@@ -221,11 +225,13 @@ def aggregate(root: Path) -> dict:
                         - trace["base_select_joint_nll"]
                     ),
                     "train_improvement": float(
-                        trajectory[0]["evaluated_train_metrics"][
-                            "joint_nll_per_event"
-                        ] - trajectory[selected]["evaluated_train_metrics"][
-                            "joint_nll_per_event"
-                        ]
+                        train_values[0] - min(train_values)
+                    ),
+                    "terminal_train_improvement": float(
+                        train_values[0] - train_values[-1]
+                    ),
+                    "selected_train_improvement": float(
+                        train_values[0] - train_values[selected]
                     ),
                     "optimizer_steps_to_selected": int(sum(
                         int(row.get("optimizer_steps", 0))
@@ -254,6 +260,16 @@ def aggregate(root: Path) -> dict:
                 value["favourable_seeds"] >= 2
                 for value in by_subject.values()
             )),
+            "median_stable_patient_base_select_improvement": (
+                float(np.median([
+                    value["median_base_select_improvement"]
+                    for value in by_subject.values()
+                    if value["favourable_seeds"] >= 2
+                ]))
+                if any(value["favourable_seeds"] >= 2
+                       for value in by_subject.values())
+                else None
+            ),
             "median_patient_base_select_improvement": float(np.median([
                 value["median_base_select_improvement"]
                 for value in by_subject.values()
@@ -264,6 +280,14 @@ def aggregate(root: Path) -> dict:
         CONFIGS,
         key=lambda key: (
             by_config[key]["stable_patients"],
+            (
+                by_config[key][
+                    "median_stable_patient_base_select_improvement"
+                ]
+                if by_config[key][
+                    "median_stable_patient_base_select_improvement"
+                ] is not None else -float("inf")
+            ),
             by_config[key]["median_patient_base_select_improvement"],
             -list(CONFIGS).index(key),
         ),

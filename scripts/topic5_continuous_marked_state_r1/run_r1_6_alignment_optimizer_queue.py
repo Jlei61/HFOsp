@@ -41,6 +41,11 @@ def valid_selection(path: Path, expected_id: str,
         return False
     trace = value.get("fit_trace", {})
     trajectory = trace.get("trajectory", [])
+    executed = trace.get("executed_epochs_by_stage", {})
+    expected_trajectory_length = 1 + sum(
+        int(executed.get(stage, -1000))
+        for stage in ("observer_alignment", "joint_alignment")
+    )
     return bool(
         value.get("status") == "COMPLETE"
         and value.get("revision") == R1_6_REVISION
@@ -51,7 +56,12 @@ def valid_selection(path: Path, expected_id: str,
         and value.get("epoch_zero_seen_alignment_selection") is False
         and value.get("formal_test_partition_opened") is False
         and value.get("sealed_opened") is False
-        and len(trajectory) == 9
+        # Early stopping is itself one of the registered diagnostics.  A
+        # selection artifact may therefore contain fewer than the full eight
+        # training epochs; requiring exactly nine rows would silently reject
+        # every legitimately early-stopped cell after it had finished.
+        and 1 <= len(trajectory) <= 9
+        and len(trajectory) == expected_trajectory_length
         and all("evaluated_train_metrics" in row for row in trajectory)
         and all("optimizer_steps" in row for row in trajectory)
     )
@@ -203,6 +213,10 @@ def aggregate(root: Path, prefix_config: str) -> dict:
                 ).read_text())
                 trajectory = value["fit_trace"]["trajectory"]
                 selected = int(value["fit_trace"]["selected_total_epoch"])
+                train_values = [
+                    float(row["evaluated_train_joint_nll"])
+                    for row in trajectory
+                ]
                 rows.append({
                     "config_id": config_id, "run_id": run_id,
                     "subject": subject, "seed": seed,
@@ -212,8 +226,13 @@ def aggregate(root: Path, prefix_config: str) -> dict:
                         - value["fit_trace"]["inner_validation_joint_nll"]
                     ),
                     "train_improvement": float(
-                        trajectory[0]["evaluated_train_joint_nll"]
-                        - trajectory[selected]["evaluated_train_joint_nll"]
+                        train_values[0] - min(train_values)
+                    ),
+                    "terminal_train_improvement": float(
+                        train_values[0] - train_values[-1]
+                    ),
+                    "selected_train_improvement": float(
+                        train_values[0] - train_values[selected]
                     ),
                     "optimizer_steps_to_selected": int(sum(
                         int(row.get("optimizer_steps", 0))
@@ -242,6 +261,16 @@ def aggregate(root: Path, prefix_config: str) -> dict:
                 value["favourable_seeds"] >= 2
                 for value in by_subject.values()
             )),
+            "median_stable_patient_inner_improvement": (
+                float(np.median([
+                    value["median_inner_improvement"]
+                    for value in by_subject.values()
+                    if value["favourable_seeds"] >= 2
+                ]))
+                if any(value["favourable_seeds"] >= 2
+                       for value in by_subject.values())
+                else None
+            ),
             "median_patient_inner_improvement": float(np.median([
                 value["median_inner_improvement"]
                 for value in by_subject.values()
@@ -252,6 +281,11 @@ def aggregate(root: Path, prefix_config: str) -> dict:
         CONFIGS,
         key=lambda key: (
             by_config[key]["stable_patients"],
+            (
+                by_config[key]["median_stable_patient_inner_improvement"]
+                if by_config[key]["median_stable_patient_inner_improvement"]
+                is not None else -float("inf")
+            ),
             by_config[key]["median_patient_inner_improvement"],
             -list(CONFIGS).index(key),
         ), reverse=True,
