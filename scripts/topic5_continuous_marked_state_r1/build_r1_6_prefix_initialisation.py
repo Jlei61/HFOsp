@@ -36,7 +36,7 @@ def main() -> None:
     parser.add_argument(
         "--subject", required=True, choices=contract.EXTENDED_DEVELOPMENT_SUBJECTS
     )
-    parser.add_argument("--seed", required=True, type=int, choices=range(5))
+    parser.add_argument("--seed", required=True, type=int, choices=range(10))
     parser.add_argument("--device", default="cuda")
     parser.add_argument("--epochs", type=int, default=4)
     parser.add_argument("--learning-rate", type=float, default=3e-4)

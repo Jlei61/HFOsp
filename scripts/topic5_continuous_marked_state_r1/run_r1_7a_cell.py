@@ -47,8 +47,10 @@ def source_hashes() -> dict[str, str]:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--subject", required=True, choices=contract.R1_7A_SUBJECTS)
-    parser.add_argument("--seed", required=True, type=int, choices=range(5))
+    parser.add_argument("--subject", required=True, choices=contract.R1_7B_SUBJECTS)
+    parser.add_argument("--seed", required=True, type=int, choices=range(10))
+    parser.add_argument("--revision", default=R1_7A_REVISION,
+                        help="cell revision; R1.7B extension passes its own")
     parser.add_argument("--device", default="cuda")
     parser.add_argument("--r1-2-root", type=Path, required=True)
     parser.add_argument("--output-root", type=Path, required=True)
@@ -103,7 +105,7 @@ def main() -> None:
         contract.atomic_json(output / "result.json", {
             "status": "COMPLETE",
             "analysis_status": NONFINITE_GRADIENT_STATUS,
-            "revision": R1_7A_REVISION,
+            "revision": args.revision,
             "subject": args.subject, "seed": args.seed,
             "stable_checkpoint": False,
             "d_mechanism_scored_here": False,
@@ -265,7 +267,7 @@ def main() -> None:
     checkpoint.parent.mkdir(parents=True, exist_ok=True)
     temporary = checkpoint.with_suffix(".pt.tmp")
     torch.save({
-        "revision": R1_7A_REVISION, "subject": args.subject,
+        "revision": args.revision, "subject": args.subject,
         "seed": args.seed, "model": model.state_dict(), "fit_trace": asdict(trace),
         "d_state": asdict(layer),
     }, temporary)
@@ -273,7 +275,7 @@ def main() -> None:
     pm = metric_contrast(persistent, memoryless)
     cw = metric_contrast(correct, wrong_median)
     payload = {
-        "status": "COMPLETE", "revision": R1_7A_REVISION,
+        "status": "COMPLETE", "revision": args.revision,
         "subject": args.subject, "seed": args.seed,
         "frozen_r1_6_config": str(config_path),
         "frozen_r1_6_config_sha256": contract.sha256_file(config_path),
