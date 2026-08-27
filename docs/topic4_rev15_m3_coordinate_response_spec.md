@@ -80,16 +80,25 @@ Only after the atlas is complete, construct combination directions from the
 training-only coordinate responses. Freeze the algorithm before simulating
 them:
 
-- a dense A-gradient direction estimated from signed coordinate contrasts;
-- the same direction projected to remove first-order B worsening;
-- sparse top-4 and top-8 A-improving coordinate combinations;
+- Let `g_Aj=(D_A(j,+)-D_A(j,-))/(2*0.8)` and define `g_B` identically.
+  The dense A direction is `v_A=-g_A`.
+- The B-protected direction removes only a harmful first-order B component:
+  `v_AB=v_A-max(0,g_B dot v_A)g_B/(g_B dot g_B)`. A beneficial B component
+  is retained.
+- Sparse top-4 and top-8 directions use the atlas coordinates that actually
+  improve A while keeping B within 110% of paired `exact_off`. Coordinates are
+  ordered by observed A improvement, and each retained coefficient uses the
+  A-improving sign with magnitude `abs(g_Aj)`.
 - each direction at centered RMS 0.6, 0.8 and 1.0.
 
-Duplicate or sign-equivalent fields are removed before launch. Combination
-candidates are tested on fresh CRN seeds 2332--2333 together with `exact_off`.
-Networks are equally weighted. A usable anchor still requires paired
-improvement on at least two of three networks and effective support of at least
-six for both modes. Natural KMeans and held-out remain unavailable.
+Duplicate or sign-equivalent fields are removed before launch. The
+lexicographically best atlas coordinate and the best coordinate that improves
+both A and B are included at their native RMS 0.8 as independent-replication
+controls. Combination candidates are tested on fresh CRN seeds 2332--2333
+together with `exact_off`. Networks are equally weighted. A new combination
+must improve on both fresh networks; a single-coordinate control is judged on
+all three networks including construction seed 2331. Effective support must be
+at least six for both modes. Natural KMeans and held-out remain unavailable.
 
 ## 6. Interpretation
 
@@ -101,4 +110,3 @@ six for both modes. Natural KMeans and held-out remain unavailable.
   it does not reject continuous fields or justify activating connections.
 - EE, E-to-I and Z/M remain blocked until one static Node candidate passes the
   post-freeze Fig.4 two-cluster acceptance contract.
-

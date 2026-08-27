@@ -28,6 +28,12 @@ ARTIFACT_ROOT = Path("/home/honglab/leijiaxin/HFOsp")
 WORKER = ROOT / "scripts/run_topic4_rev14_m3_replication_worker.py"
 DEFAULT_UNIT_PREFIX = "codex-t4-r14-m3-rep"
 CONTROLLER_SCHEMA = "topic4_rev14_m3_replication_controller_v1"
+QUEUE_EMERGENCY_STATUS = "REV14_M3_REPLICATION_EMERGENCY_STOPPED"
+QUEUE_COMPLETE_STATUS = "REV14_M3_REPLICATION_COMPLETE"
+QUEUE_DRAINING_STATUS = "REV14_M3_REPLICATION_DRAINING_AFTER_FAILURE"
+QUEUE_FAILED_STATUS = "REV14_M3_REPLICATION_FAILED"
+QUEUE_WAIT_STATUS = "REV14_M3_REPLICATION_RESOURCE_WAIT"
+QUEUE_RUNNING_STATUS = "REV14_M3_REPLICATION_RUNNING"
 
 
 def _validate_unit_prefix(prefix: str) -> str:
@@ -244,8 +250,11 @@ def run_controller(
     base._require_clean_commit(expected_commit)
     config, manifest = _load_contract(config_path, artifact_root, expected_commit)
     jobs = base._jobs(config, manifest, artifact_root)
-    if len(jobs) != 18:
-        raise RuntimeError("M3 replication must contain 18 paired runs")
+    expected_jobs = len(manifest["candidates"]) * len(
+        config["search"]["active_network_seeds"]
+    )
+    if len(jobs) != expected_jobs:
+        raise RuntimeError("M3 replication Cartesian product is incomplete")
     resources = config["resources"]
     hard_cap = int(resources["maximum_workers"])
     recommended = int(resources["recommended_workers"])
@@ -279,7 +288,7 @@ def run_controller(
         if decision == "emergency_stop":
             stopped = base._stop_rev14_units(prefix) if execute else []
             snapshot = _snapshot(
-                status="REV14_M3_REPLICATION_EMERGENCY_STOPPED", jobs=jobs,
+                status=QUEUE_EMERGENCY_STATUS, jobs=jobs,
                 expected_commit=expected_commit, unit_prefix=prefix,
                 available_gib=available_gib, disk_gib=disk_gib,
                 safe_peak_rss_kib=safe_peak, concurrency=0,
@@ -291,7 +300,7 @@ def run_controller(
             return snapshot
         if counts["complete"] == len(jobs):
             snapshot = _snapshot(
-                status="REV14_M3_REPLICATION_COMPLETE", jobs=jobs,
+                status=QUEUE_COMPLETE_STATUS, jobs=jobs,
                 expected_commit=expected_commit, unit_prefix=prefix,
                 available_gib=available_gib, disk_gib=disk_gib,
                 safe_peak_rss_kib=safe_peak, concurrency=0,
@@ -303,8 +312,7 @@ def run_controller(
             return snapshot
         if failed_jobs:
             status = (
-                "REV14_M3_REPLICATION_DRAINING_AFTER_FAILURE"
-                if counts["active"] else "REV14_M3_REPLICATION_FAILED"
+                QUEUE_DRAINING_STATUS if counts["active"] else QUEUE_FAILED_STATUS
             )
             snapshot = _snapshot(
                 status=status, jobs=jobs, expected_commit=expected_commit,
@@ -343,9 +351,9 @@ def run_controller(
                     )
                 launched.append(unit)
         status = (
-            "REV14_M3_REPLICATION_RESOURCE_WAIT"
+            QUEUE_WAIT_STATUS
             if decision == "hold" or concurrency == 0
-            else "REV14_M3_REPLICATION_RUNNING"
+            else QUEUE_RUNNING_STATUS
         )
         snapshot = _snapshot(
             status=status, jobs=jobs, expected_commit=expected_commit,

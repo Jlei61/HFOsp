@@ -30,9 +30,13 @@
 
 ## Phase 3: freeze combinations
 
-1. Build the four registered response-derived directions from Phase 2.
+1. Build the four registered response-derived directions from Phase 2 using
+   the formulas frozen in the specification.
 2. Evaluate RMS 0.6/0.8/1.0 after deduplication.
-3. Freeze the manifest and ranking rule before any combination simulation.
+3. Add the deterministic best-overall and best-A/B single-coordinate controls
+   at RMS 0.8.
+4. Freeze all 15 candidate identities (`exact_off`, 12 combinations and two
+   single-coordinate controls) before any combination simulation.
 
 ## Phase 4: independent combination replication
 
@@ -48,4 +52,3 @@
 Only after a Node candidate is frozen: fresh-network selection, natural KMeans,
 the two Fig.4 figures, one-time developmental held-out evaluation and
 same-checkpoint hotspot interventions follow the rev14 contract unchanged.
-
