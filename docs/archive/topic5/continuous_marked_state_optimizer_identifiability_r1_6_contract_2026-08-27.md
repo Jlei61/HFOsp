@@ -65,6 +65,8 @@ positive 必须在至少 4/5 seeds 降低 unseen inner NLL，并恢复非零参�
 1. 先用 `base_train`→`base_select` 选择一个全患者公共的 prefix/core 配置，比较 learning rate、4/8/12 个完整时间 pass、64/128/256 anchors 的更新粒度、weight decay、warm-up、clip 以及 Adam 诊断；
 2. 冻结该 prefix 配置并 refit 到 TRAIN 前 80%，再在 `alignment_select` 上选择 observer/readout 配置。
 
+若最高学习率的 8-pass prefix 在全部稳定 seeds 都选择预算末端，允许在冻结前只补一个同设置 12-pass 边界延伸；不据此展开全因子矩阵。该条件已在 3/3 张克轩 seeds 触发，因此 prefix 预期单元从 96 增至 108。
+
 初始试跑中，固定旧 prefix 配置在 E1096、E384 和张家齐均 3/3 选择 epoch 0，只有张克轩更新；因此任何在旧 prefix 上展开的后半段大矩阵只算诊断，不承担最终结论。
 
 - optimizer：`AdamW` 主线；`Adam` 仅作无 weight-decay 等价诊断；
@@ -73,6 +75,7 @@ positive 必须在至少 4/5 seeds 降低 unseen inner NLL，并恢复非零参�
 - weight decay：`0` 与 `1e-3`；
 - warm-up：`0` 与前 10% optimizer steps；
 - global clip：`1.0` 与 `5.0`；
+- target-alignment 预算：常规 `4+4` 个 observer/joint pass，并加一个 `8+8` 的固定公共配置检验预算不足；
 - checkpoint selection：旧的“任意微小改善即更新”与 `min_delta=1e-4`、stage 内 patience=3 的诊断配置；synthetic 另用较长 patience 校准，要求同时保留正真值恢复并压低零真值的伪更新；
 - budget 以 optimizer steps 和完整时间 pass 同时报，不再只报 epoch。
 

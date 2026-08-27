@@ -42,6 +42,11 @@ def valid_selection(path: Path, expected_id: str,
     trace = value.get("fit_trace", {})
     trajectory = trace.get("trajectory", [])
     executed = trace.get("executed_epochs_by_stage", {})
+    config_id = expected_id.split("__prefix__", 1)[0]
+    config = CONFIGS.get(config_id, {})
+    maximum_trajectory_length = 1 + int(
+        config.get("observer_epochs", 4)
+    ) + int(config.get("joint_epochs", 4))
     expected_trajectory_length = 1 + sum(
         int(executed.get(stage, -1000))
         for stage in ("observer_alignment", "joint_alignment")
@@ -60,7 +65,7 @@ def valid_selection(path: Path, expected_id: str,
         # selection artifact may therefore contain fewer than the full eight
         # training epochs; requiring exactly nine rows would silently reject
         # every legitimately early-stopped cell after it had finished.
-        and 1 <= len(trajectory) <= 9
+        and 1 <= len(trajectory) <= maximum_trajectory_length
         and len(trajectory) == expected_trajectory_length
         and all("evaluated_train_metrics" in row for row in trajectory)
         and all("optimizer_steps" in row for row in trajectory)
@@ -132,8 +137,10 @@ def selection_task(root: Path, prefix_config: str, config_id: str,
         "scripts/topic5_continuous_marked_state_r1/run_r1_6_optimizer_cell.py",
         "--subject", subject, "--seed", str(seed),
         "--config-id", run_id, "--prefix-config-id", prefix_config,
-        "--device", "cuda", "--observer-epochs", "4",
-        "--joint-epochs", "4", "--state-learning-rate",
+        "--device", "cuda", "--observer-epochs",
+        str(config.get("observer_epochs", 4)),
+        "--joint-epochs", str(config.get("joint_epochs", 4)),
+        "--state-learning-rate",
         str(config["state_lr"]), "--observer-lr-ratio",
         str(config["observer_ratio"]), "--weight-decay",
         str(config["weight_decay"]), "--warmup-fraction",

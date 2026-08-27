@@ -42,3 +42,12 @@ def test_valid_selection_rejects_truncated_or_overlong_trace(tmp_path):
     assert not queue.valid_selection(path, "cfg", "subject", 2)
     path.write_text(json.dumps(_artifact(executed=(4, 4), trajectory_length=10)))
     assert not queue.valid_selection(path, "cfg", "subject", 2)
+
+
+def test_valid_selection_accepts_registered_extended_budget(tmp_path):
+    path = tmp_path / "result.json"
+    expected = "nested_extended_budget__prefix__chosen"
+    artifact = _artifact(executed=(8, 8), trajectory_length=17)
+    artifact["config_id"] = expected
+    path.write_text(json.dumps(artifact))
+    assert queue.valid_selection(path, expected, "subject", 2)

@@ -95,7 +95,8 @@ def main() -> None:
     }
     trace = fit_target_observer(
         model, design, loader, device=args.device,
-        observer_epochs=4, joint_epochs=4,
+        observer_epochs=int(config.get("observer_epochs", 4)),
+        joint_epochs=int(config.get("joint_epochs", 4)),
         state_lr=float(config["state_lr"]),
         observer_lr=float(config["state_lr"]) * float(config["observer_ratio"]),
         raw_lr=1e-5, chunk_anchors=int(config["chunk"]),

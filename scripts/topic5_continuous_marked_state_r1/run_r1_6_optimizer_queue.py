@@ -84,6 +84,12 @@ CONFIGS = {
         "optimizer": "adam", "chunk": 32, "min_delta": 1e-4,
         "patience": 3,
     },
+    "nested_extended_budget": {
+        "state_lr": 3e-4, "observer_ratio": 0.1,
+        "weight_decay": 0.0, "warmup": 0.1, "clip": 5.0,
+        "optimizer": "adamw", "chunk": 32, "min_delta": 0.0,
+        "patience": 0, "observer_epochs": 8, "joint_epochs": 8,
+    },
 }
 
 

@@ -55,6 +55,14 @@ CONFIGS = {
         "warmup": 0.1, "clip": 5.0, "epochs": 8, "chunk": 128,
         "min_delta": 0.0, "patience": 0,
     },
+    # The e8 high-LR arm selected the final allowed epoch in all three
+    # Zhangkexuan seeds.  This single boundary extension was registered before
+    # prefix selection was frozen; it is not a full-factorial expansion.
+    "prefix_high_lr_e12_c128": {
+        "optimizer": "adamw", "lr": 1e-3, "weight_decay": 0.0,
+        "warmup": 0.1, "clip": 5.0, "epochs": 12, "chunk": 128,
+        "min_delta": 0.0, "patience": 0,
+    },
     "prefix_adam_diagnostic_e8_c128": {
         "optimizer": "adam", "lr": 3e-4, "weight_decay": 0.0,
         "warmup": 0.1, "clip": 5.0, "epochs": 8, "chunk": 128,
