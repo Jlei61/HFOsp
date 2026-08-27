@@ -278,18 +278,19 @@ def load_patient_training_target(path: Path, *, events_per_mode: int,
     )
     names = np.asarray(arrays["contact_names"]).astype(str)
     ranks = np.asarray(arrays["patient_train_ranks"], dtype=np.float64)
-    labels = np.asarray(
+    shaft_aware_labels = np.asarray(
         arrays["patient_train_shaft_aware_k2_labels"], dtype=np.int8,
     )
     old_labels = np.asarray(arrays["patient_train_old_labels"], dtype=np.int8)
+    labels = old_labels
     blocks = np.asarray(arrays["patient_train_block_ids"])
     if ranks.ndim != 2 or ranks.shape[1] != len(names):
         raise RuntimeError("patient training ranks do not match contact order")
     if any(values.shape != (len(ranks),) for values in (
-            labels, old_labels, blocks)):
+            labels, shaft_aware_labels, blocks)):
         raise RuntimeError("patient training arrays do not align")
     if set(np.unique(labels).tolist()) != {0, 1}:
-        raise RuntimeError("shaft-aware training target is not K=2")
+        raise RuntimeError("frozen old A/B training target is not K=2")
     rng = np.random.default_rng(int(seed))
     reference_rows = []
     reference_labels = []
@@ -309,7 +310,7 @@ def load_patient_training_target(path: Path, *, events_per_mode: int,
         np.nanmean(normalized[labels == mode], axis=0) for mode in (0, 1)
     ])
     contingency = np.zeros((2, 2), dtype=np.int64)
-    for old_label, new_label in zip(old_labels, labels):
+    for old_label, new_label in zip(old_labels, shaft_aware_labels):
         contingency[int(old_label), int(new_label)] += 1
     identity = int(contingency[0, 0] + contingency[1, 1])
     swapped = int(contingency[0, 1] + contingency[1, 0])
@@ -318,6 +319,7 @@ def load_patient_training_target(path: Path, *, events_per_mode: int,
         "contact_names": names,
         "all_ranks": ranks,
         "all_labels": labels,
+        "shaft_aware_k2_labels_diagnostic_only": shaft_aware_labels,
         "all_blocks": blocks,
         "embedding": {
             "center": np.asarray(arrays["feature_center"], dtype=np.float64),
@@ -331,11 +333,12 @@ def load_patient_training_target(path: Path, *, events_per_mode: int,
         "reference_training_rows": reference_indices,
         "train_profiles": profiles,
         "full_train_mode_counts": np.bincount(labels, minlength=2),
-        "old_to_shaft_aware_k2": raw_to_k2,
+        "diagnostic_old_to_shaft_extent_mapping": raw_to_k2,
         "old_by_shaft_aware_k2_contingency": contingency,
         "loaded_training_data_keys": list(TRAINING_TARGET_KEYS),
         "loaded_frozen_embedding_keys": list(FROZEN_EMBEDDING_KEYS),
         "patient_heldout_loaded": False,
+        "primary_mode_definition": "frozen_old_A_B_direction_labels",
     }
 
 
@@ -364,21 +367,17 @@ def load_frozen_direction_classifier(manifest_path: Path,
 
 
 def _assign_training_modes(ranks: np.ndarray,
-                           frozen: Mapping[str, Any], groups: Mapping[str, Any],
-                           raw_to_k2: np.ndarray) -> dict[str, np.ndarray]:
+                           frozen: Mapping[str, Any],
+                           groups: Mapping[str, Any]) -> dict[str, np.ndarray]:
     assigned = assign_direction_modes(
         ranks, groups=groups, embedding=frozen["embedding"],
         classifier=frozen["classifier"],
     )
-    mapping = np.asarray(raw_to_k2, dtype=np.int8)
-    if mapping.shape != (2,) or set(mapping.tolist()) != {0, 1}:
-        raise ValueError("old-to-shaft-aware K2 mapping must be a permutation")
     raw_labels = np.asarray(assigned["labels"], dtype=np.int8)
     raw_probability = np.asarray(assigned["probability_B"], dtype=np.float64)
-    probability = raw_probability if int(mapping[1]) == 1 else 1.0 - raw_probability
     return {
-        "probability_B": probability,
-        "labels": mapping[raw_labels],
+        "probability_B": raw_probability,
+        "labels": raw_labels,
         "ood_distance": np.asarray(assigned["ood_distance"], dtype=np.float64),
         "ood": np.asarray(assigned["ood"], dtype=bool),
         "raw_old_labels": raw_labels,
@@ -703,7 +702,10 @@ def produce(config_path: Path, artifact_root: Path,
         )
         assignment = _assign_training_modes(
             ranks, frozen_classifier, groups,
-            patient["old_to_shaft_aware_k2"],
+        )
+        mode_evidence = (
+            np.asarray(selection["fig4_readable_within_primary"], dtype=bool)
+            & ~np.asarray(assignment["ood"], dtype=bool)
         )
         score = soft_dual_mode_objective(
             ranks, assignment["probability_B"],
@@ -729,6 +731,7 @@ def produce(config_path: Path, artifact_root: Path,
             less_than_three_contact_families=int(
                 selection["n_returned_less_than_minimum_contacts"]
             ),
+            mode_evidence_mask=mode_evidence,
             sample_size=int(formal_objective["sample_size_per_side"]),
             draws=int(formal_objective["draws_per_network"]),
             seed=int(formal_objective["seed"]) + seed,
@@ -776,6 +779,8 @@ def produce(config_path: Path, artifact_root: Path,
                 "probability_B_mean": float(np.mean(assignment["probability_B"])),
                 "ood_fraction": float(np.mean(assignment["ood"])),
                 "ood_is_diagnostic_only_and_not_filtered": True,
+                "mode_evidence_count": int(np.sum(mode_evidence)),
+                "mode_evidence_definition": "fig4_readable AND frozen-classifier in-support",
             },
             "shaft_participation_all_primary_events": support,
             "natural_kmeans_diagnostic_only": _strip_natural(natural),
@@ -905,8 +910,8 @@ def produce(config_path: Path, artifact_root: Path,
         "patient_training_reference_row": np.concatenate(
             patient["reference_training_rows"]
         ).astype(np.int64),
-        "old_to_shaft_aware_k2_label": np.asarray(
-            patient["old_to_shaft_aware_k2"], dtype=np.int8,
+        "diagnostic_old_vs_shaft_extent_mapping": np.asarray(
+            patient["diagnostic_old_to_shaft_extent_mapping"], dtype=np.int8,
         ),
         "contact_split_fold_0": np.asarray(folds[0], dtype=np.int8),
         "contact_split_fold_1": np.asarray(folds[1], dtype=np.int8),
@@ -967,6 +972,8 @@ def produce(config_path: Path, artifact_root: Path,
         },
         "patient_training_contract": {
             "source": str(target_path),
+            "primary_mode_definition": patient["primary_mode_definition"],
+            "shaft_aware_k2_role": "extent_diagnostic_only_not_patient_mode_identity",
             "loaded_training_data_keys": patient["loaded_training_data_keys"],
             "loaded_frozen_embedding_keys": patient[
                 "loaded_frozen_embedding_keys"
@@ -978,12 +985,13 @@ def produce(config_path: Path, artifact_root: Path,
             "old_by_shaft_aware_k2_contingency": patient[
                 "old_by_shaft_aware_k2_contingency"
             ],
-            "old_to_shaft_aware_k2_label": patient[
-                "old_to_shaft_aware_k2"
+            "diagnostic_old_vs_shaft_extent_mapping": patient[
+                "diagnostic_old_to_shaft_extent_mapping"
             ],
             "old_to_k2_mapping_source": (
                 "patient_train_old_labels x "
-                "patient_train_shaft_aware_k2_labels only"
+                "patient_train_shaft_aware_k2_labels diagnostic only; not "
+                "applied to frozen classifier or J14"
             ),
             "reference_events_per_mode": int(
                 objective["patient_reference_events_per_mode"]
@@ -1017,8 +1025,14 @@ def produce(config_path: Path, artifact_root: Path,
         "formal_objective": {
             "schema_id": formal_objective["schema_id"],
             "equal_network_summary": equal_j14,
+            "sample_size_per_side": int(formal_objective["sample_size_per_side"]),
+            "draws_per_network": int(formal_objective["draws_per_network"]),
+            "seed": int(formal_objective["seed"]),
+            "tau": float(formal_objective["tau"]),
+            "model_sampling": formal_objective["model_sampling"],
             "normalization": formal_objective["normalization"],
             "sampling": formal_objective["model_sampling"],
+            "projection_sha256": _sha256_array(projections),
         },
         "equal_network_contact_split_matrix": crossfit_matrix,
         "pooled_natural_kmeans_diagnostic_only": _strip_natural(pooled_natural),

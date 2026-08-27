@@ -83,6 +83,7 @@ def matched_mode_distances(
         patient_ranks: np.ndarray, patient_labels: np.ndarray,
         patient_blocks: np.ndarray, contact_names: np.ndarray, *,
         projections: np.ndarray, calibration: Mapping,
+        mode_evidence_mask: np.ndarray | None = None,
         sample_size: int = 6, draws: int = 64,
         seed: int = 20260827) -> dict:
     """Estimate four-layer mode distances using matched unique 6-vs-6 draws."""
@@ -91,11 +92,17 @@ def matched_mode_distances(
     patient_ranks = np.asarray(patient_ranks, dtype=np.float64)
     patient_labels = np.asarray(patient_labels, dtype=np.int8)
     patient_blocks = np.asarray(patient_blocks)
+    evidence = (
+        np.ones(len(model_ranks), dtype=bool)
+        if mode_evidence_mask is None
+        else np.asarray(mode_evidence_mask, dtype=bool)
+    )
     if (model_ranks.ndim != 2 or probability_b.shape != (len(model_ranks),)
             or patient_ranks.ndim != 2
             or patient_ranks.shape[1] != model_ranks.shape[1]
             or patient_labels.shape != (len(patient_ranks),)
             or patient_blocks.shape != (len(patient_ranks),)
+            or evidence.shape != (len(model_ranks),)
             or not np.all(np.isfinite(probability_b))
             or np.any((probability_b < 0.0) | (probability_b > 1.0))):
         raise ValueError("rev14 objective arrays do not align")
@@ -106,7 +113,10 @@ def matched_mode_distances(
     output = {}
     confidence = np.abs(2.0 * probability_b - 1.0)
     for mode, weights in enumerate((1.0 - probability_b, probability_b)):
-        effective = _confidence_adjusted_support(weights, confidence)
+        effective_all = _confidence_adjusted_support(weights, confidence)
+        effective = _confidence_adjusted_support(
+            weights * evidence.astype(np.float64), confidence,
+        )
         sampling_weights = weights * confidence
         blocks = _eligible_patient_blocks(
             patient_labels, patient_blocks, mode=mode, sample_size=sample_size,
@@ -150,7 +160,9 @@ def matched_mode_distances(
             "mean": float(np.mean([normalized[key] for key in COMPONENTS])),
             "raw_draw_mean": raw_mean,
             "effective_events": effective,
+            "all_contact_primary_effective_events": effective_all,
             "confidence_adjusted": True,
+            "mode_evidence_masked": True,
             "soft_occupancy": float(np.mean(weights)) if len(weights) else 0.0,
         }
     return output
@@ -195,6 +207,7 @@ def rev14_objective(
         projections: np.ndarray, calibration: Mapping,
         returned_families: int, contact_evaluable_families: int,
         overlap_excluded_families: int, less_than_three_contact_families: int,
+        mode_evidence_mask: np.ndarray | None = None,
         sample_size: int = 6, draws: int = 64, seed: int = 20260827,
         tau: float = 0.25) -> dict:
     """Compute finite J14 with explicit weak-mode and event-support costs."""
@@ -210,6 +223,13 @@ def rev14_objective(
         raise ValueError("event support counts violate the rev14 contract")
     if model_ranks.ndim != 2 or probability_b.shape != (len(model_ranks),):
         raise ValueError("model ranks and probabilities do not align")
+    evidence = (
+        np.ones(len(model_ranks), dtype=bool)
+        if mode_evidence_mask is None
+        else np.asarray(mode_evidence_mask, dtype=bool)
+    )
+    if evidence.shape != (len(model_ranks),):
+        raise ValueError("mode evidence mask does not align")
     if len(model_ranks) > contact_evaluable - overlap:
         raise ValueError("scored events exceed isolated contact-evaluable support")
 
@@ -218,7 +238,7 @@ def rev14_objective(
             model_ranks, probability_b, patient_ranks, patient_labels,
             patient_blocks, contact_names, projections=projections,
             calibration=calibration, sample_size=sample_size, draws=draws,
-            seed=seed,
+            seed=seed, mode_evidence_mask=evidence,
         )
         model_occupancy = np.asarray([
             np.mean(1.0 - probability_b), np.mean(probability_b),
@@ -239,6 +259,7 @@ def rev14_objective(
                 "mean": 2.0,
                 "raw_draw_mean": None,
                 "effective_events": 0.0,
+                "all_contact_primary_effective_events": 0.0,
                 "soft_occupancy": 0.0,
             }
             for mode in (0, 1)
@@ -289,6 +310,10 @@ def rev14_objective(
             "seed": int(seed),
             "model_sampling": "weighted_without_replacement_then_missing_rows",
             "mode_support": "soft_membership_times_absolute_classifier_margin",
+            "mode_evidence": (
+                "support uses readable in-support evidence mask; every contact-primary "
+                "event remains eligible for matched contact-distance sampling"
+            ),
             "patient_sampling": "within_one_training_recording_block_without_replacement",
             "normalization": "raw_distance_divided_by_patient_cross_block_floor_q95",
         },

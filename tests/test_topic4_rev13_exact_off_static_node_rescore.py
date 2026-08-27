@@ -69,7 +69,11 @@ def test_training_loader_accesses_only_six_training_arrays(tmp_path):
     )
     assert all("heldout" not in key.lower() for key in accessed)
     assert loaded["patient_heldout_loaded"] is False
-    np.testing.assert_array_equal(loaded["old_to_shaft_aware_k2"], [1, 0])
+    np.testing.assert_array_equal(
+        loaded["diagnostic_old_to_shaft_extent_mapping"], [1, 0],
+    )
+    np.testing.assert_array_equal(loaded["all_labels"], [1, 1, 0, 0])
+    assert loaded["primary_mode_definition"] == "frozen_old_A_B_direction_labels"
     np.testing.assert_array_equal(
         loaded["old_by_shaft_aware_k2_contingency"], [[0, 2], [2, 0]],
     )
@@ -103,7 +107,7 @@ def test_frozen_manifest_decodes_only_inference_allowlist(tmp_path, monkeypatch)
     assert len(decoded_values) == 2
 
 
-def test_old_classifier_labels_map_to_training_k2_without_refit(monkeypatch):
+def test_old_classifier_labels_remain_primary_without_refit(monkeypatch):
     monkeypatch.setattr(rescore, "assign_direction_modes", lambda *args, **kwargs: {
         "labels": np.asarray([0, 1], dtype=int),
         "probability_B": np.asarray([0.2, 0.8]),
@@ -112,11 +116,10 @@ def test_old_classifier_labels_map_to_training_k2_without_refit(monkeypatch):
     })
     assigned = rescore._assign_training_modes(
         np.zeros((2, 3)), {"embedding": {}, "classifier": {}}, {},
-        np.asarray([1, 0]),
     )
     np.testing.assert_array_equal(assigned["raw_old_labels"], [0, 1])
-    np.testing.assert_array_equal(assigned["labels"], [1, 0])
-    np.testing.assert_allclose(assigned["probability_B"], [0.8, 0.2])
+    np.testing.assert_array_equal(assigned["labels"], [0, 1])
+    np.testing.assert_allclose(assigned["probability_B"], [0.2, 0.8])
     np.testing.assert_array_equal(assigned["ood"], [False, True])
 
 

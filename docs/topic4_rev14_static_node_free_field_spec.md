@@ -11,13 +11,16 @@ capacity beyond the frozen static Node field and matched controls.
 
 The corrected static baseline nevertheless exposes a more specific problem.
 Across three fresh networks it produces stable pooled model-internal K=2
-structure, but 51.6--57.7% of all isolated causal families are outside the
-frozen patient-mode support and only 11.5--24.1% recruit both shafts. The pooled
-KMeans balanced alignment is 0.875, yet only two of three individual networks
-align well, and the contact-split patient cross-fit signed margin is negative
-in all three networks. One patient-training mode also has substantially larger
-four-layer error than the other. Thus the problem is not simply absence of
-K=2. The model K=2 and the patient K=2 are not yet the same event organization.
+structure, and after restoring the frozen old A/B mode contract the
+contact-split patient cross-fit margin is positive in all three networks. This
+is real directional geometry, not a complete recovery. Some 51.6--57.7% of all
+isolated causal families are outside the frozen patient-mode support, only
+11.5--24.1% recruit both shafts, one of three networks has poor natural-KMeans
+alignment, and both mode-level matched-distribution errors remain above the
+patient block-floor q95 scale. Thus rev14 is not trying to invent a second
+direction from zero; it asks whether a free static field can stabilize the
+existing direction signal while recovering patient support and the full event
+distribution.
 
 The historical field lineage also mixes two ideas that must now be separated.
 The runtime representation is continuous, but some selectable ancestors came
@@ -40,7 +43,8 @@ answered and the Node field is frozen.
 ### 2.1 Allowed information during fit
 
 - patient-training contact ranks, recruitment masks and recording blocks;
-- the frozen patient-training direction classifier and patient-training noise
+- the frozen old A/B direction labels, the matching frozen patient-training
+  direction classifier and patient-training noise
   floors;
 - model-internal complete causal-family boundaries and whole-sheet onset maps;
 - network safety, event support and overlap diagnostics;
@@ -59,6 +63,11 @@ answered and the Node field is frozen.
 Natural KMeans is generated only after a candidate is frozen. Patient held-out
 is opened once after model-internal selection and cannot return information to
 the fit.
+
+The primary patient modes remain the original Fig.4 A/B direction labels.
+Shaft-aware consensus KMeans has AMI 0.011 with old A/B because it mainly
+separates recruitment extent; it is an extent diagnostic and must not replace
+mode identity in `J14_v1`.
 
 ## 3. Formal model event unit
 
@@ -172,8 +181,12 @@ R_{\rm rough}=\sum_k \lVert k\rVert^4(a_k^2+b_k^2).
 There is no penalty on peak count, connected-component count, distance to an
 electrode, distance to a shaft or distance to a historical core. Effective
 area, peak count and compactness are reported as diagnostics, not optimized
-targets. Coefficients are standardized to unit surface RMS within each shell.
-`R_rough` is used only as a final tie-break within 1% of the stochastic
+targets. Coefficients are standardized to unit **centered** surface RMS within
+each shell on the physical `[0,L]^2` sheet. The weighted sheet mean is removed
+before RMS calculation because the mass-projection level `lambda` makes an
+additive constant unidentifiable. The stated `R_rough` is a spectral roughness
+surrogate, not an equality claim about the finite-sheet squared-Laplacian
+integral. It is used only as a final tie-break within 1% of the stochastic
 objective, not as a term that can automatically suppress the M4 shell.
 
 ## 6. Patient-training objective
@@ -225,6 +238,13 @@ the mode-weighted mean frozen-classifier confidence `|2p_i-1|`. Events at
 confidence-adjusted support is below six, each matched distance is smoothly
 blended toward the missing-mode value 2.0 in proportion to `n_eff/6`; this
 retains continuous ranking rather than adding an event-count blocker.
+
+Every `contact_primary` event remains eligible for matched contact-distance
+sampling, so sparse and OOD events cannot disappear from the loss. They do not,
+however, count as evidence that a patient mode is supported: the effective
+support count additionally requires at least three finite contacts and a
+frozen-classifier in-support assignment. J14 reports both the all-event soft
+count and this in-support readable evidence count.
 
 and
 

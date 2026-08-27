@@ -2,42 +2,56 @@
 
 ## Safe conclusion
 
-The frozen `exact_off` static Node field generates a stable pooled K=2 split,
-but it does not reconstruct the patient's two propagation modes on fresh
-networks. The positive pooled KMeans result is limited by poor per-network
-alignment, negative contact-split patient cross-fit margins in all three
-networks, more than half of isolated causal families being OOD, and low
-dual-shaft participation. Rev14 must therefore improve the static Node field
-before EE, E-to-I or Z/M are changed.
+The frozen `exact_off` static Node field generates a stable pooled K=2 split
+and retains the frozen old A/B patient direction geometry on contact-split
+cross-fit in all three networks. It is nevertheless only a partial
+reconstruction: one network has poor natural-KMeans alignment, more than half
+of isolated causal families are OOD, dual-shaft participation is low and the
+matched full-distribution score remains above the patient block-floor scale.
+Rev14 must improve this static Node field before EE, E-to-I or Z/M are changed.
 
 ## Frozen analysis contract
 
 - No new SNN simulation was run.
-- Primary observations are returned, source-evaluable, isolated complete
-  causal families; all members of overlap-connected episodes are excluded.
+- Primary observations are returned, isolated complete causal families; all
+  members of overlap-connected episodes are excluded. Source-evaluable events
+  form a separate topology sidecar and are not required by the contact loss.
 - OOD, single-shaft and missing-SCL events remain in the patient-training loss.
 - Patient training arrays and the frozen rev11 direction classifier are used.
   Patient held-out arrays are not loaded.
 - Networks are scored separately and then averaged with equal network weight.
 - Natural KMeans and contact-split cross-fit are diagnostics, not fit targets.
 
+An initial Phase 0 draft incorrectly replaced old A/B direction identity with
+the shaft-aware K=2 extent labels. Their training AMI is 0.011, so that mapping
+is invalid. The draft negative cross-fit matrix and `J14=2.4853` are
+superseded. This archive reports the corrected old-A/B result only; a regression
+test now locks the primary mode definition.
+
 ## Counts and patient-training score
 
 Across seeds 2311--2313 there are 86 primary isolated families and 72
 Fig.4-readable families. Per-network counts are 26/31/29 and 24/26/22.
 
-The equal-network legacy soft diagnostic is 2.1137. Mode-specific mean errors are
-0.7035 and 1.7659; weakest-mode LSE is 1.5962. Occupancy JS is 0.0087, but this
-apparently favorable occupancy does not rescue the weak mode: contrast
-alignment is only 0.1392 and contrast loss is 0.8608.
+The equal-network legacy soft diagnostic is 1.4688. Mode-specific mean errors
+are 0.9326 and 1.1669; weakest-mode LSE is 1.0771. Occupancy JS is 0.0087,
+contrast alignment is 0.3906 and contrast loss is 0.6094.
 
 This legacy number is not the rev14 optimization reference. The frozen
-`topic4_rev14_j14_v1` matched 6-versus-6 objective is 2.4853. Its mode means are
-0.9015 and 1.8201, weakest-mode LSE is 1.6533, confidence-adjusted effective
-supports are 14.78 and 12.31, overlap fraction is 0.3832 and support loss is
-0.5049. Per-network overlap fractions are 0.366, 0.311 and 0.473. All rev14
+`topic4_rev14_j14_v1` matched 6-versus-6 objective is 2.0527. Its mode means are
+1.2076 and 1.3024, weakest-mode LSE is 1.2795, confidence-adjusted readable
+in-support effective supports are 4.97 and 7.98, overlap fraction is 0.3832 and
+support loss is 0.6895. Per-network overlap fractions are 0.366, 0.311 and
+0.473. All rev14
 candidates must be compared with this same objective and sampling contract;
-the 2.1137 legacy diagnostic cannot select a field.
+the 1.4688 legacy diagnostic cannot select a field.
+
+The first anti-cheating draft reused pseudo-model events in its patient
+reference and is superseded. The frozen control instead uses disjoint recording
+blocks for pseudo-model and patient reference, applies every degeneration to
+the same pseudo-model events, and repeats the comparison at three objective
+seeds. Sparse or OOD events remain in the contact-distance loss but do not count
+as patient-mode support.
 
 ## KMeans and patient geometry
 
@@ -47,16 +61,17 @@ network heterogeneity: balanced alignment is 0.417, 0.885 and 0.846 for the
 three networks. The K2-versus-K1 held-out GMM diagnostic is negative and is not
 used as a gate.
 
-The equal-network contact-split matrix is:
+Using the frozen old A/B direction labels, the equal-network contact-split
+matrix is:
 
 ```text
-[[-0.7214, -0.6857],
- [ 0.4956,  0.5635]]
+[[ 0.5476, -0.7048],
+ [-0.5575,  0.4524]]
 ```
 
-The per-network signed margins are -0.6643, -0.6857 and -0.8143. Therefore the
-model clusters do not recover the patient mode geometry on contacts withheld
-from assignment.
+The per-network signed margins are 0.3155, 0.4286 and 0.5417. Therefore the
+direction geometry survives contact splitting, although this does not rescue
+the OOD, dual-shaft and full-distribution failures.
 
 ## Support diagnostics
 
@@ -79,11 +94,11 @@ subsequent Fig.4-style rendering of this diagnostic.
 ## Decision
 
 ```text
-STATIC_NODE_K2_INTERNAL_STRUCTURE_PRESENT
+STATIC_NODE_DIRECTION_GEOMETRY_PARTIAL_PASS
 /
-PATIENT_DUALMODE_GEOMETRY_NOT_RECOVERED
+PATIENT_SUPPORT_AND_FULL_DISTRIBUTION_FAIL
 /
-STATIC_NODE_FIELD_REFIT_REQUIRED
+STATIC_NODE_FIELD_REFINEMENT_REQUIRED
 ```
 
 This result does not authorize changes to connectivity or slow variables and

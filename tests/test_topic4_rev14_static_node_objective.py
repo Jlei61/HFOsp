@@ -49,6 +49,7 @@ def _score(ranks, probability_b, **counts):
         contact_evaluable_families=counts.get("source", len(ranks)),
         overlap_excluded_families=counts.get("overlap", 0),
         less_than_three_contact_families=counts.get("under", 0),
+        mode_evidence_mask=counts.get("evidence"),
     )
 
 
@@ -87,6 +88,21 @@ def test_all_ambiguous_events_have_zero_mode_support():
     assert result["modes"]["1"]["effective_events"] == 0.0
     assert result["modes"]["0"]["mean"] == 2.0
     assert result["modes"]["1"]["mean"] == 2.0
+
+
+def test_sparse_or_ood_events_enter_distances_but_not_mode_evidence_support():
+    patient, labels, _, _ = _patient()
+    model = patient[:16].copy()
+    evidence = np.zeros(len(model), dtype=bool)
+    result = _score(
+        model, labels[:16].astype(float), evidence=evidence, under=len(model),
+    )
+    assert result["modes"]["0"]["effective_events"] == 0.0
+    assert result["modes"]["1"]["effective_events"] == 0.0
+    assert result["modes"]["0"]["all_contact_primary_effective_events"] > 0.0
+    assert result["modes"]["1"]["all_contact_primary_effective_events"] > 0.0
+    assert result["modes"]["0"]["raw_draw_mean"] is not None
+    assert result["modes"]["1"]["raw_draw_mean"] is not None
 
 
 def test_one_repeated_attractive_event_is_worse_than_two_supported_modes():

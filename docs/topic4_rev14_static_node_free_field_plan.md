@@ -28,8 +28,8 @@
 
 ## Phase 2: Fourier implementation and parity
 
-1. Implement paired-phase whole-sheet Fourier evaluation and analytic
-   roughness.
+1. Implement paired-phase whole-sheet Fourier evaluation, physical-sheet
+   centered-RMS dose normalization and the frozen spectral roughness surrogate.
 2. Reuse the frozen signed-depth and mass-projection mapping.
 3. Add Fourier-to-spline storage parity with whole-sheet `h` correlation at
    least 0.995.
