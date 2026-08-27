@@ -5,6 +5,8 @@ import numpy as np
 from src.topic5_continuous_marked_state_r1.coverage import CoverageTable
 from src.topic5_continuous_marked_state_r1.r1_7 import (
     block_bootstrap_length_seconds,
+    complete_event_blocks_by_segment,
+    coverage_segment_for_times,
     split_validation_by_recorded_time,
 )
 
@@ -56,3 +58,22 @@ def test_bootstrap_length_is_train_only_and_bounded() -> None:
     assert block_bootstrap_length_seconds(
         sparse, np.zeros(len(sparse), dtype=np.int64)
     ) == 21600.0
+
+
+def test_event_block_count_never_pools_across_recording_gaps() -> None:
+    coverage = CoverageTable(
+        subject="synthetic",
+        start=np.asarray([0.0, 1000.0]),
+        stop=np.asarray([100.0, 1100.0]),
+        session=np.asarray([0, 0]),
+        train_end_epoch=0.0,
+        dev_end_epoch=1100.0,
+        source_hashes={},
+    )
+    time = np.concatenate([np.linspace(1, 99, 60), np.linspace(1001, 1099, 60)])
+    segment = coverage_segment_for_times(coverage, time)
+    blocks, rows = complete_event_blocks_by_segment(
+        segment, np.ones(len(time), dtype=bool), block_events=100
+    )
+    assert blocks == 0
+    assert [row["events"] for row in rows] == [60, 60]

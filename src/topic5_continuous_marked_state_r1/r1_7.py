@@ -78,3 +78,41 @@ def block_bootstrap_length_seconds(
     # About 100 median event gaps, bounded to a scientifically readable scale.
     candidate = 100.0 * float(np.median(intervals))
     return float(np.clip(candidate, minimum_seconds, maximum_seconds))
+
+
+def coverage_segment_for_times(
+    coverage: CoverageTable, event_time: np.ndarray
+) -> np.ndarray:
+    """Assign events to recorded coverage intervals, failing on gaps."""
+    time = np.asarray(event_time, dtype=np.float64)
+    segment = np.searchsorted(coverage.stop, time, side="right")
+    safe = np.minimum(segment, len(coverage.start) - 1)
+    valid = (
+        (segment < len(coverage.start))
+        & (time >= np.asarray(coverage.start)[safe])
+        & (time < np.asarray(coverage.stop)[safe])
+    )
+    if not bool(np.all(valid)):
+        raise ValueError("event time falls outside recorded coverage")
+    return segment.astype(np.int64)
+
+
+def complete_event_blocks_by_segment(
+    event_segment: np.ndarray,
+    keep: np.ndarray,
+    *,
+    block_events: int = 100,
+) -> tuple[int, list[dict[str, int]]]:
+    """Count complete event blocks without ever pooling across recording gaps."""
+    segment = np.asarray(event_segment, dtype=np.int64)
+    keep = np.asarray(keep, dtype=bool)
+    if segment.shape != keep.shape or int(block_events) < 1:
+        raise ValueError("event-block arrays disagree")
+    rows = []
+    total = 0
+    for label in np.unique(segment[keep]):
+        events = int(np.sum(keep & (segment == label)))
+        blocks = events // int(block_events)
+        rows.append({"segment": int(label), "events": events, "complete_blocks": blocks})
+        total += blocks
+    return int(total), rows

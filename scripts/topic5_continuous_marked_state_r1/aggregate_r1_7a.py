@@ -10,7 +10,11 @@ import numpy as np
 
 from src.topic5_continuous_marked_state_r1 import contract
 from src.topic5_continuous_marked_state_r1.r1_2 import load_full_design
-from src.topic5_continuous_marked_state_r1.r1_7 import R1_7A_REVISION
+from src.topic5_continuous_marked_state_r1.r1_7 import (
+    R1_7A_REVISION, complete_event_blocks_by_segment,
+    coverage_segment_for_times,
+)
+from src.topic5_continuous_marked_state_r1.coverage import CoverageTable
 
 
 SEEDS = tuple(range(5))
@@ -144,14 +148,25 @@ def main() -> None:
         d_mechanism_events = int(np.sum(
             (design.event_split == 1) & (design.event_time >= boundary)
         ))
+        coverage = CoverageTable.load(
+            args.root / "upstream_r1_2" / "coverage" / f"{subject}.npz"
+        )
+        event_segment = coverage_segment_for_times(coverage, design.event_time)
+        d_mechanism_keep = (
+            (design.event_split == 1) & (design.event_time >= boundary)
+        )
+        d_mechanism_blocks, segment_support = complete_event_blocks_by_segment(
+            event_segment, d_mechanism_keep, block_events=100
+        )
         row["d_mechanism_events"] = d_mechanism_events
-        row["d_mechanism_100_event_blocks"] = d_mechanism_events // 100
+        row["d_mechanism_100_event_blocks"] = d_mechanism_blocks
+        row["d_mechanism_segment_support"] = segment_support
         row["t2_support_class"] = (
-            "COHORT_ELIGIBLE" if d_mechanism_events >= 500
-            else "CASE_ONLY" if d_mechanism_events >= 100 else "INSUFFICIENT"
+            "COHORT_ELIGIBLE" if d_mechanism_blocks >= 5
+            else "CASE_ONLY" if d_mechanism_blocks >= 1 else "INSUFFICIENT"
         )
         row["t2_run_eligible"] = bool(
-            row["patient_stable_state"] and d_mechanism_events >= 100
+            row["patient_stable_state"] and d_mechanism_blocks >= 1
         )
         rows.append(row); by_subject[subject] = row
     stable = [row["subject"] for row in rows if row["patient_stable_state"]]

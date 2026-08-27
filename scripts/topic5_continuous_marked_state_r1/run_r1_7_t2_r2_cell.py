@@ -16,6 +16,9 @@ from src.topic5_continuous_marked_state_r1.r1_7_t2 import (
     R1_7_T2_REVISION, build_r1_7a_r2_designs, is_expected_support_limit,
     load_fitted_r1_7a_t1,
 )
+from src.topic5_continuous_marked_state_r1.r1_7 import (
+    complete_event_blocks_by_segment,
+)
 from src.topic5_continuous_marked_state_r1.t2_r2 import (
     T2_R2_REVISION, ExposureEdge, classify_one_shot_persistence,
     edge_estimability_audit, evaluate_horizon_mark, evaluate_r2_edge, fit_r2_edge,
@@ -155,14 +158,22 @@ def main() -> None:
         (context.design.event_split == 1)
         & (context.design.event_time >= context.audit["d_mechanism_start"])
     ))
+    d_keep = (
+        (context.design.event_split == 1)
+        & (context.design.event_time >= context.audit["d_mechanism_start"])
+    )
+    d_blocks, d_segment_support = complete_event_blocks_by_segment(
+        context.event_segment, d_keep, block_events=100
+    )
     result = {
         "status": "COMPLETE", "analysis_status": "ESTIMATED",
         "revision": R1_7_T2_REVISION, "t2_revision": T2_R2_REVISION,
         "subject": args.subject, "seed": args.seed, "source": args.source,
         "scale_events": 100, "t1": context.audit, "design": design_audit,
         "d_mechanism_events": d_events,
-        "d_mechanism_nonoverlap_100_event_blocks": d_events // 100,
-        "inference_class": "COHORT_ELIGIBLE" if d_events >= 500 else "CASE_ONLY",
+        "d_mechanism_nonoverlap_100_event_blocks": d_blocks,
+        "d_mechanism_segment_support": d_segment_support,
+        "inference_class": "COHORT_ELIGIBLE" if d_blocks >= 5 else "CASE_ONLY",
         "estimability": estimability, "fits": fits,
         "validation": {"next_event": next_event, "horizons": horizon_metrics},
         "comparisons": comparisons, "real_edge_estimable": estimable,
