@@ -139,3 +139,23 @@ def test_nomination_excludes_a_nonselectable_capacity_control():
     decision = _nominate([capacity, valid], selection)
     assert decision["candidate_ids"] == ["valid"]
     assert decision["pareto_candidate_ids"] == ["valid"]
+
+
+def test_nomination_defaults_radius_cap_for_nonradius_local_bridge():
+    rows = [
+        _candidate("left", None, 0.4, 0.2, 0.2),
+        _candidate("right", None, 0.5, 0.8, 0.3),
+    ]
+    selection = {
+        "axes": [
+            "mean_soft_objective:min",
+            "mean_soft_causal_direction:max",
+            "mean_soft_causal_monotonicity:max",
+            "soft_topology_across_network:max",
+            "soft_topology_mode_separation:max",
+        ],
+        "maximum_nominees": 2,
+    }
+    decision = _nominate(rows, selection)
+    assert decision["candidate_ids"] == ["left", "right"]
+    assert decision["maximum_per_radius"] == 2

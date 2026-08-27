@@ -101,7 +101,7 @@ def _nominate(rows: list[dict], selection: dict) -> dict:
         valid, key=lambda row: row["mean_soft_causal_direction"],
     )["candidate_id"]
     maximum = int(selection["maximum_nominees"])
-    maximum_per_radius = int(selection["maximum_per_radius"])
+    maximum_per_radius = int(selection.get("maximum_per_radius", maximum))
     nominated = []
     radius_counts: dict[str, int] = {}
 

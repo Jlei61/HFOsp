@@ -48,10 +48,14 @@ def main() -> None:
     ], cwd=ROOT, check=True)
     result_path = output_root / "analysis" / "dual_node_local_bridge_result.json"
     result = json.loads(result_path.read_text())
+    postprocessing_commit = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True,
+    ).strip()
     complete_path = output_root / "status" / "stage_al_complete.json"
     complete_path.write_text(json.dumps({
         "status": "REV12ND_DUAL_NODE_LOCAL_BRIDGE_COMPLETE",
-        "git_commit": expected,
+        "simulation_git_commit": expected,
+        "postprocessing_git_commit": postprocessing_commit,
         "scientific_status": result["status"],
         "balanced_candidate_ids": result["balanced_candidate_ids"],
         "result": str(result_path),
