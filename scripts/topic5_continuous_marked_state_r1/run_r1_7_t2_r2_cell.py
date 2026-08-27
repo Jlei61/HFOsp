@@ -13,7 +13,8 @@ import torch
 
 from src.topic5_continuous_marked_state_r1 import contract
 from src.topic5_continuous_marked_state_r1.r1_7_t2 import (
-    R1_7_T2_REVISION, build_r1_7a_r2_designs, load_fitted_r1_7a_t1,
+    R1_7_T2_REVISION, build_r1_7a_r2_designs, is_expected_support_limit,
+    load_fitted_r1_7a_t1,
 )
 from src.topic5_continuous_marked_state_r1.t2_r2 import (
     T2_R2_REVISION, ExposureEdge, classify_one_shot_persistence,
@@ -34,6 +35,22 @@ def save_torch(path: Path, value: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".tmp")
     torch.save(value, temporary); os.replace(temporary, path)
+
+
+def source_hashes() -> dict[str, str]:
+    return {
+        "runner": contract.sha256_file(Path(__file__)),
+        "r1_7_t2": contract.sha256_file(
+            contract.REPO_ROOT / "src/topic5_continuous_marked_state_r1/r1_7_t2.py"
+        ),
+        "t2_r2": contract.sha256_file(
+            contract.REPO_ROOT / "src/topic5_continuous_marked_state_r1/t2_r2.py"
+        ),
+        "t2_r2_human": contract.sha256_file(
+            contract.REPO_ROOT / "src/topic5_continuous_marked_state_r1/t2_r2_human.py"
+        ),
+        "split_manifest": contract.sha256_file(contract.SPLIT_MANIFEST),
+    }
 
 
 def main() -> None:
@@ -58,11 +75,14 @@ def main() -> None:
             context, source=args.source
         )
     except ValueError as error:
+        if not is_expected_support_limit(error):
+            raise
         contract.atomic_json(output / "result.json", {
             "status": "COMPLETE", "analysis_status": "NOT_ESTIMABLE",
             "revision": R1_7_T2_REVISION, "t2_revision": T2_R2_REVISION,
             "subject": args.subject, "seed": args.seed, "source": args.source,
             "non_estimable_reason": str(error), "t1": context.audit,
+            "source_hashes": source_hashes(),
             "formal_test_partition_opened": False, "sealed_opened": False,
         })
         return
@@ -75,6 +95,7 @@ def main() -> None:
             "subject": args.subject, "seed": args.seed, "source": args.source,
             "non_estimable_reason": f"insufficient pairs: {n_train} TRAIN/{n_validation} D_mechanism",
             "t1": context.audit, "design": design_audit,
+            "source_hashes": source_hashes(),
             "formal_test_partition_opened": False, "sealed_opened": False,
         })
         return
@@ -149,19 +170,7 @@ def main() -> None:
         "one_shot_persistence": persistence,
         "free_exposure_intercept_present": False,
         "checkpoint": str(checkpoint), "checkpoint_sha256": contract.sha256_file(checkpoint),
-        "source_hashes": {
-            "runner": contract.sha256_file(Path(__file__)),
-            "r1_7_t2": contract.sha256_file(
-                contract.REPO_ROOT / "src/topic5_continuous_marked_state_r1/r1_7_t2.py"
-            ),
-            "t2_r2": contract.sha256_file(
-                contract.REPO_ROOT / "src/topic5_continuous_marked_state_r1/t2_r2.py"
-            ),
-            "t2_r2_human": contract.sha256_file(
-                contract.REPO_ROOT / "src/topic5_continuous_marked_state_r1/t2_r2_human.py"
-            ),
-            "split_manifest": contract.sha256_file(contract.SPLIT_MANIFEST),
-        },
+        "source_hashes": source_hashes(),
         "formal_test_partition_opened": False, "sealed_opened": False,
         "claim_boundary": "development D_mechanism N=100 conditional increment; not causal mechanism",
     }

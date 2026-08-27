@@ -26,6 +26,7 @@ def main() -> None:
     inventory, r1, t2 = load(inventory_path), load(r1_path), load(t2_path)
     subjects = inventory["selected_subjects"]
     fits = []
+    r1_source_payloads = set()
     for subject in subjects:
         for seed in range(5):
             path = args.root / "fits" / subject / f"seed_{seed}/result.json"
@@ -53,9 +54,11 @@ def main() -> None:
             }
             if not all(checks.values()):
                 raise ValueError(f"R1.7A audit failed {path}: {checks}")
+            r1_source_payloads.add(json.dumps(value["source_hashes"], sort_keys=True))
             fits.append({"path": str(path), "sha256": contract.sha256_file(path),
                          "stable": value["stable_checkpoint"], "checks": checks})
     t2_rows = []
+    t2_source_payloads = set()
     for path in sorted((args.root / "t2_r2").glob("*/*/result.json")):
         value = load(path)
         checks = {
@@ -72,10 +75,15 @@ def main() -> None:
             })
         if not all(checks.values()):
             raise ValueError(f"T2 audit failed {path}: {checks}")
+        t2_source_payloads.add(json.dumps(value["source_hashes"], sort_keys=True))
         t2_rows.append({"path": str(path), "sha256": contract.sha256_file(path),
                         "analysis_status": value.get("analysis_status"), "checks": checks})
     if len(fits) != 50:
         raise ValueError(f"expected 50 R1.7A fits, found {len(fits)}")
+    if len(r1_source_payloads) != 1:
+        raise ValueError(f"R1.7A cells used {len(r1_source_payloads)} source payloads")
+    if t2_rows and len(t2_source_payloads) != 1:
+        raise ValueError(f"T2 cells used {len(t2_source_payloads)} source payloads")
     audit = {
         "status": "COMPLETE", "revision": "r1_7a_r2_goal_machine_audit_v1",
         "created_utc": datetime.now(timezone.utc).isoformat(),
@@ -84,6 +92,8 @@ def main() -> None:
         "t2_summary": str(t2_path), "t2_summary_sha256": contract.sha256_file(t2_path),
         "n_subjects": len(subjects), "n_r1_fits": len(fits),
         "n_t2_cells": len(t2_rows), "r1_fits": fits, "t2_cells": t2_rows,
+        "r1_source_payloads": [json.loads(value) for value in r1_source_payloads],
+        "t2_source_payloads": [json.loads(value) for value in t2_source_payloads],
         "r1_5_retired": True, "n_ge_1000_runs": 0,
         "six_hour_boxcar_runs": 0, "physical_clock_runs": 0,
         "seizure_probe_opened": False, "paper_ready_figures_modified": False,

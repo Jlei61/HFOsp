@@ -20,6 +20,27 @@ from .t2_r2_human import build_r2_arm_designs
 R1_7_T2_REVISION = "r1_7a_d_mechanism_t2_r2_n100_v1"
 
 
+EXPECTED_SUPPORT_LIMITS = (
+    "too few TRAIN events for cross-fitting",
+    "load innovation is degenerate on TRAIN",
+    "composition innovation is degenerate on TRAIN",
+    "state-matched placebo has too few TRAIN donors",
+    "T2-S1 has no exact one-step pairs",
+    "T2-R2.0 H5 has no within-segment pairs",
+    "T2-R2.0 H10 has no within-segment pairs",
+)
+
+
+def is_expected_support_limit(error: ValueError) -> bool:
+    """Return true only for pre-declared data-support failures.
+
+    Shape, alignment, checkpoint, and other implementation errors must fail the
+    job instead of being silently relabelled as a scientifically unestimable
+    patient.
+    """
+    return str(error) in EXPECTED_SUPPORT_LIMITS
+
+
 def load_fitted_r1_7a_t1(
     subject: str, seed: int, *, device: str = "cuda",
     root: Path | None = None,
