@@ -258,6 +258,20 @@ def main() -> None:
         "d_mechanism_scored_here": False,
         "checkpoint": str(checkpoint),
         "checkpoint_sha256": contract.sha256_file(checkpoint),
+        "source_hashes": {
+            "runner": contract.sha256_file(Path(__file__)),
+            "r1_7": contract.sha256_file(
+                contract.REPO_ROOT / "src/topic5_continuous_marked_state_r1/r1_7.py"
+            ),
+            "r1_2": contract.sha256_file(
+                contract.REPO_ROOT / "src/topic5_continuous_marked_state_r1/r1_2.py"
+            ),
+            "diagnostics": contract.sha256_file(
+                contract.REPO_ROOT
+                / "src/topic5_continuous_marked_state_r1/r1_2b_diagnostics.py"
+            ),
+            "split_manifest": contract.sha256_file(contract.SPLIT_MANIFEST),
+        },
         "development_validation_used_for_selection": False,
         "formal_test_partition_opened": False, "sealed_opened": False,
     }
