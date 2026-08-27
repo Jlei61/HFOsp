@@ -672,3 +672,24 @@ def test_duration_override_is_written_to_json_and_provenance():
     assert payload["provenance"]["rev13_explicit_runtime_freeze"] == {
         "all_explicit_paths_clean": True
     }
+
+
+def test_base_worker_argv_strips_rev13_only_engineering_arguments():
+    args = SimpleNamespace(
+        config=Path("config/rev13.json"),
+        candidate_id="exact_off",
+        seed=2291,
+        expected_commit="a" * 40,
+        artifact_root=Path("/artifact"),
+        out_json=Path("/output/worker.json"),
+        out_npz=Path("/output/worker.npz"),
+        duration_ms=20000.0,
+        engineering_run_kind="parity",
+    )
+    argv = worker._base_worker_argv(args)
+    assert argv[argv.index("--candidate-id") + 1] == "exact_off"
+    assert argv[argv.index("--seed") + 1] == "2291"
+    assert "--duration-ms" not in argv
+    assert "--engineering-run-kind" not in argv
+    assert argv[argv.index("--out-json") + 1] == "/output/worker.json"
+    assert argv[argv.index("--out-npz") + 1] == "/output/worker.npz"

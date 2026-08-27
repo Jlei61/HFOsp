@@ -1310,9 +1310,27 @@ def _run_rev12_composed(state: _RunState, base_module=rev12) -> None:
         base_module.main()
 
 
+def _base_worker_argv(args: argparse.Namespace) -> list[str]:
+    """Translate rev13 CLI state to the strict rev12 compatibility surface."""
+    argv = [
+        str(Path(sys.argv[0])),
+        "--config", str(args.config),
+        "--candidate-id", str(args.candidate_id),
+        "--seed", str(int(args.seed)),
+        "--expected-commit", str(args.expected_commit),
+        "--artifact-root", str(args.artifact_root),
+    ]
+    if args.out_json is not None:
+        argv.extend(["--out-json", str(args.out_json)])
+    if args.out_npz is not None:
+        argv.extend(["--out-npz", str(args.out_npz)])
+    return argv
+
+
 def main() -> None:
-    _, state = _preflight()
-    _run_rev12_composed(state)
+    args, state = _preflight()
+    with patch.object(sys, "argv", _base_worker_argv(args)):
+        _run_rev12_composed(state)
 
 
 if __name__ == "__main__":
