@@ -1,0 +1,110 @@
+{
+  "subject_id": "epilepsiae_1096",
+  "pretty_subject": "E1096",
+  "dataset": "epilepsiae",
+  "subject": "1096",
+  "status": "ok",
+  "drop_reason": "",
+  "n_events_total": 223347,
+  "n_events_sampled": 5000,
+  "n_qc_clean_events": 908,
+  "qc_retention": 0.1816,
+  "n_blocks_sampled": 136,
+  "n_blocks_qc_clean": 96,
+  "timing_only_score": 0.773616900633135,
+  "timing_plus_space_score": 0.7755572729620099,
+  "spatial_information_gain": 0.0019403723288748953,
+  "mean_train_label_ami": 0.9265478998272256,
+  "folds": [
+    {
+      "fold": 0,
+      "train_parity": "even_indexed_blocks",
+      "n_train_events": 445,
+      "n_test_events": 463,
+      "n_train_blocks": 48,
+      "n_test_blocks": 48,
+      "timing_only_score": 0.7938961179381193,
+      "timing_plus_space_score": 0.7952688479075846,
+      "spatial_information_gain": 0.0013727299694652473,
+      "train_label_ami": 0.9791684215882237,
+      "train_label_overlap": 0.9977528089887641,
+      "hybrid_label_swap_to_temporal": false,
+      "timing_only_train_cluster_counts": [
+        212,
+        233
+      ],
+      "timing_plus_space_train_cluster_counts": [
+        211,
+        234
+      ],
+      "timing_only_test_cluster_counts": [
+        233,
+        230
+      ],
+      "timing_plus_space_test_cluster_counts": [
+        232,
+        231
+      ],
+      "spatial_scale": 0.8562252098242521
+    },
+    {
+      "fold": 1,
+      "train_parity": "odd_indexed_blocks",
+      "n_train_events": 463,
+      "n_test_events": 445,
+      "n_train_blocks": 48,
+      "n_test_blocks": 48,
+      "timing_only_score": 0.7533376833281507,
+      "timing_plus_space_score": 0.7558456980164353,
+      "spatial_information_gain": 0.0025080146882846543,
+      "train_label_ami": 0.8739273780662277,
+      "train_label_overlap": 0.9827213822894169,
+      "hybrid_label_swap_to_temporal": true,
+      "timing_only_train_cluster_counts": [
+        231,
+        232
+      ],
+      "timing_plus_space_train_cluster_counts": [
+        231,
+        232
+      ],
+      "timing_only_test_cluster_counts": [
+        222,
+        223
+      ],
+      "timing_plus_space_test_cluster_counts": [
+        234,
+        211
+      ],
+      "spatial_scale": 0.8598833518362905
+    }
+  ],
+  "qc_contract": {
+    "minimum_mapped_participating_contacts": 6,
+    "minimum_participating_shafts": 2,
+    "minimum_effective_coordinate_rank": 2,
+    "minimum_loco_valid_fraction": 0.8,
+    "minimum_loco_median_signed_cosine": 0.8,
+    "template_angle_used_for_inclusion": false
+  },
+  "analysis_contract": {
+    "split": "two-way alternating recording-block cross-fit",
+    "training_spatial_view": "unit 3D early-to-late event gradient",
+    "hybrid_view_weight": "equal total train-fold variance per temporal/spatial block",
+    "heldout_assignment": "rank-template distance only; no held-out coordinates or directions",
+    "axis_estimator": "same rank-template least-squares gradient in both arms",
+    "direction_score": "equal-cluster mean signed cosine on held-out QC-clean events",
+    "null": "held-out event directions shuffled within recording block after model freeze",
+    "min_cluster_events": 20,
+    "min_shared_channels": 3,
+    "n_null": 1000,
+    "seed": 311431737
+  },
+  "source": {
+    "frozen_coordinate_record": "results/interictal_propagation_masked/template_gradient_fields/per_subject/epilepsiae_1096.json",
+    "frozen_coordinate_record_sha256": "cc6ce888602f76c157d6e2f26644b7a4d6b831d471310ed05172c6c96cc2e98b",
+    "event_artifact_root": "/mnt/epilepsia_data/interilca_inter_results/all_data_lns/1096/all_recs",
+    "sample_seed": 3375281651,
+    "selection_count": 5000
+  }
+}

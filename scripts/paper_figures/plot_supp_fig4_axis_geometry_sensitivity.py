@@ -2,8 +2,12 @@
 """Build Supplementary Figure 4 without duplicating the main 2-D field panel.
 
 Panel A is a compact rendering of the accepted directed template-axis half
-rose.  Panel B adds the non-overlapping held-out spatial read-back: whether a
-path axis fitted from one event half predicts contact rank in the other half.
+rose. Panel B shows the paired held-out direction-score gain after adding
+single-event spatial directions to training-fold clustering. Panel C adds the
+non-overlapping held-out spatial read-back: whether a path axis fitted from one
+event half predicts contact rank in the other half. Panel D adds clinical-SOZ
+contact compactness relative to patient-specific all-contact implantation
+nulls.
 """
 from __future__ import annotations
 
@@ -25,6 +29,8 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from paper_figures import plot_fig2_template_axis_direction as angle_fig  # noqa: E402
+from paper_figures import plot_interictal_spatial_information_gain as gain_fig  # noqa: E402
+import run_soz_spatial_compactness as soz_compact_fig  # noqa: E402
 from src.plot_style import COL_YQ  # noqa: E402
 
 
@@ -33,6 +39,8 @@ GEOMETRY_JSON = (
 )
 OUT_ROOT = ROOT / "results/paper-ready-figure/supp_fig4_axis_geometry"
 FIG_DIR = OUT_ROOT / "figures"
+COMPACTNESS_ROOT = ROOT / "results/spatial_modulation/soz_contact_compactness"
+GAIN_ROOT = ROOT / "results/interictal_propagation_masked/spatial_information_gain"
 COL_EPI_PURPLE = "#7A3E87"
 
 
@@ -56,6 +64,44 @@ def _heldout_rows() -> list[dict]:
     if len(rows) != 26:
         raise RuntimeError(f"expected 26 held-out axis subjects, found {len(rows)}")
     return rows
+
+
+def _compactness_payload() -> tuple[list[dict], dict]:
+    summary_path = COMPACTNESS_ROOT / "cohort_summary.json"
+    per_subject_dir = COMPACTNESS_ROOT / "per_subject"
+    if not summary_path.exists():
+        raise FileNotFoundError(f"missing compactness summary: {summary_path}")
+    records = [
+        json.loads(path.read_text())
+        for path in sorted(per_subject_dir.glob("*.json"))
+    ]
+    summary = json.loads(summary_path.read_text())
+    n_primary = summary["all_contact_primary"]["overall"]["n"]
+    if len(records) != summary["n_labelled_subjects"] or n_primary != 29:
+        raise RuntimeError(
+            "unexpected SOZ compactness cohort: "
+            f"records={len(records)}, primary={n_primary}"
+        )
+    return records, summary
+
+
+def _direction_gain_payload() -> tuple[list[dict], dict, dict]:
+    subject_csv = GAIN_ROOT / "subject_spatial_information_gain.csv"
+    summary_path = GAIN_ROOT / "spatial_information_gain_summary.json"
+    rows = gain_fig._load_rows(subject_csv)
+    payload = json.loads(summary_path.read_text())
+    summary = payload["cohort_statistics"]
+    if len(rows) != int(summary["n"]) or int(summary["n"]) != 25:
+        raise RuntimeError(
+            "unexpected spatial-information cohort: "
+            f"rows={len(rows)}, summary_n={summary['n']}"
+        )
+    if int(summary["n_positive_gain"]) != 21:
+        raise RuntimeError(
+            "unexpected spatial-information direction: "
+            f"n_positive={summary['n_positive_gain']}"
+        )
+    return rows, summary, payload
 
 
 def _draw_compact_half_rose(ax: plt.Axes, rows: list[dict]) -> dict:
@@ -226,7 +272,9 @@ def _draw_heldout(ax: plt.Axes, rows: list[dict]) -> dict:
 def main() -> None:
     FIG_DIR.mkdir(parents=True, exist_ok=True)
     angle_rows = angle_fig._load_rows()
+    gain_rows, gain_summary, gain_payload = _direction_gain_payload()
     heldout = _heldout_rows()
+    compactness_records, compactness_summary = _compactness_payload()
     plt.rcParams.update(
         {
             "font.family": "sans-serif",
@@ -235,45 +283,77 @@ def main() -> None:
             "ps.fonttype": 42,
         }
     )
-    fig = plt.figure(figsize=(5.75, 2.48), facecolor="white")
+    fig = plt.figure(figsize=(7.45, 5.20), facecolor="white")
     grid = fig.add_gridspec(
-        1, 2, width_ratios=[1.00, 0.78], wspace=0.46,
-        left=0.105, right=0.975, bottom=0.20, top=0.85,
+        2,
+        2,
+        width_ratios=[1.00, 1.03],
+        height_ratios=[1.00, 1.00],
+        wspace=0.42,
+        hspace=0.50,
+        left=0.090,
+        right=0.985,
+        bottom=0.105,
+        top=0.945,
     )
     ax_rose = fig.add_subplot(grid[0, 0], projection="polar")
-    ax_rho = fig.add_subplot(grid[0, 1])
+    ax_gain = fig.add_subplot(grid[0, 1])
+    ax_rho = fig.add_subplot(grid[1, 0])
+    ax_soz = fig.add_subplot(grid[1, 1])
     rose_summary = _draw_compact_half_rose(ax_rose, angle_rows)
+    gain_fig.draw_paired_scores(
+        ax_gain,
+        gain_rows,
+        gain_summary,
+        title=None,
+        ylabel="Held-out direction score",
+    )
     rho_summary = _draw_heldout(ax_rho, heldout)
+    soz_compact_fig.draw_compactness_panel(
+        ax_soz,
+        compactness_records,
+        "all_contact_null",
+        compactness_summary["all_contact_primary"],
+        dataset_colors={"yuquan": COL_YQ, "epilepsiae": COL_EPI_PURPLE},
+        point_size=18.0,
+        annotation_fontsize=6.0,
+        tick_fontsize=7.2,
+        line_scale=0.72,
+    )
+    ax_soz.set_ylabel("SOZ RMS radius / null median", fontsize=7.6, labelpad=2)
     fig.canvas.draw()
-    rose_pos = ax_rose.get_position()
-    rho_pos = ax_rho.get_position()
-    panel_y = max(rose_pos.y1, rho_pos.y1) + 0.075
-    fig.text(
-        rose_pos.x0 - 0.055,
-        panel_y,
-        "A",
-        ha="left",
-        va="top",
-        fontsize=11,
-        fontweight="bold",
-    )
-    fig.text(
-        rho_pos.x0 - 0.105,
-        panel_y,
-        "B",
-        ha="left",
-        va="top",
-        fontsize=11,
-        fontweight="bold",
-    )
+    for label, ax, x_offset, y_offset in (
+        ("A", ax_rose, 0.055, 0.045),
+        ("B", ax_gain, 0.055, 0.045),
+        ("C", ax_rho, 0.055, 0.035),
+        ("D", ax_soz, 0.055, 0.035),
+    ):
+        position = ax.get_position()
+        fig.text(
+            position.x0 - x_offset,
+            position.y1 + y_offset,
+            label,
+            ha="left",
+            va="top",
+            fontsize=11,
+            fontweight="bold",
+        )
     stem = FIG_DIR / "supp_fig4_axis_direction_and_heldout_readback"
     fig.savefig(stem.with_suffix(".png"), dpi=400, bbox_inches="tight", facecolor="white")
     fig.savefig(stem.with_suffix(".pdf"), bbox_inches="tight", facecolor="white")
     plt.close(fig)
 
     cohort = rho_summary["cohort"]
+    compact_all = compactness_summary["all_contact_primary"]
+    compact_overall = compact_all["overall"]
+    compact_ci = compact_overall["median_ratio_bootstrap_95ci"]
+    compact_p = compact_overall["wilcoxon_log2_ratio_less_than_0"]["p_value"]
+    compact_yq_p = compact_all["yuquan"]["wilcoxon_log2_ratio_less_than_0"]["p_value"]
+    compact_epi_p = compact_all["epilepsiae"]["wilcoxon_log2_ratio_less_than_0"]["p_value"]
+    gain_ci = gain_summary["median_gain_bootstrap_ci95"]
     caption_title = (
-        "Direction and held-out spatial read-back of interictal recruitment axes."
+        "Spatial information strengthens held-out direction read-out of "
+        "interictal recruitment axes."
     )
     caption_body = (
         f"**A,** Half-rose distribution of the directed angular separation "
@@ -282,7 +362,20 @@ def main() -> None:
         f"0\u00b0 denotes the same direction and 180\u00b0 the opposite direction; "
         f"sector labels give patient counts in 30\u00b0 bins, the radial black "
         f"line marks the median and the outer black arc the interquartile range "
-        f"(IQR). **B,** Patient-level Spearman correlation between held-out "
+        f"(IQR). **B,** Paired patient-level direction scores for timing-only "
+        f"and timing-plus-space clustering, evaluated on held-out recording "
+        f"blocks. The score is the equal-fold, equal-template mean signed cosine "
+        f"between each held-out event direction and its assigned training-template "
+        f"axis. Points denote patients, lines preserve patient pairing, violins "
+        f"show the distributions, boxes show IQRs and black horizontal lines mark "
+        f"medians. The median score increased from "
+        f"{gain_summary['timing_only_median']:.3f} to "
+        f"{gain_summary['timing_plus_space_median']:.3f}; "
+        f"{gain_summary['n_positive_gain']} of {gain_summary['n']} patients "
+        f"improved, with a median paired gain of {gain_summary['median_gain']:.3f} "
+        f"(95% bootstrap CI, {gain_ci[0]:.3f}–{gain_ci[1]:.3f}; one-sided "
+        f"paired Wilcoxon P = {gain_summary['paired_wilcoxon_greater_p']:.3g}). "
+        f"**C,** Patient-level Spearman correlation between held-out "
         f"contact recruitment rank and the path-axis coordinate fitted using "
         f"the complementary event half in Yuquan "
         f"(n = {rho_summary['yuquan']['n']} patients) and Epilepsiae "
@@ -292,13 +385,29 @@ def main() -> None:
         f"medians and vertical black lines mark IQRs. Across both cohorts, the "
         f"median held-out \u03c1 was {cohort['median_spearman_rho']:.3f} "
         f"(IQR, {cohort['iqr_spearman_rho'][0]:.3f}\u2013"
-        f"{cohort['iqr_spearman_rho'][1]:.3f}; n = {cohort['n']} patients)."
+        f"{cohort['iqr_spearman_rho'][1]:.3f}; n = {cohort['n']} patients). "
+        f"**D,** Clinical SOZ-contact compactness relative to each patient's "
+        f"mapped invasive-contact geometry. The SOZ RMS radius was divided by "
+        f"the median radius of {compactness_summary['n_null_per_subject']:,} "
+        f"equally sized random contact subsets from the same patient; the "
+        f"dashed line marks the null ratio of 1. Points denote patients "
+        f"(blue, Yuquan, n = {compact_all['yuquan']['n']}; purple, Epilepsiae, "
+        f"n = {compact_all['epilepsiae']['n']}), filled points indicate a "
+        f"patient-level empirical P < 0.05, and horizontal and vertical black "
+        f"lines mark medians and IQRs. Brackets show one-sided within-dataset "
+        f"Wilcoxon signed-rank tests of log2 ratios against 0 (Yuquan, "
+        f"P = {compact_yq_p:.2g}; Epilepsiae, P = {compact_epi_p:.2g}; "
+        f"*** denotes P < 0.001). Across both cohorts, the median ratio was "
+        f"{compact_overall['median_observed_to_null_ratio']:.3f} "
+        f"(95% bootstrap CI, {compact_ci[0]:.3f}–{compact_ci[1]:.3f}; "
+        f"n = {compact_overall['n']} patients; one-sided Wilcoxon "
+        f"P = {compact_p:.2g})."
     )
     metadata = {
         "figure": "Supplementary Figure 4",
         "caption": (
             f"Supplementary Fig. 4 | {caption_title} "
-            f"{caption_body.replace('**', '')}"
+            f"{caption_body.replace('**A,**', 'A,').replace('**B,**', 'B,').replace('**C,**', 'C,').replace('**D,**', 'D,')}"
         ),
         "main_figure_field_panel_repeated": False,
         "panel_a": {
@@ -312,12 +421,44 @@ def main() -> None:
             **rose_summary,
         },
         "panel_b": {
+            "source_table": str(
+                (GAIN_ROOT / "subject_spatial_information_gain.csv").relative_to(ROOT)
+            ),
+            "source_summary": str(
+                (GAIN_ROOT / "spatial_information_gain_summary.json").relative_to(ROOT)
+            ),
+            "definition": (
+                "Two-way alternating-recording-block cross-fit comparison of "
+                "timing-only and timing-plus-space clustering; held-out score "
+                "is the equal-fold, equal-template mean signed cosine between "
+                "each event direction and its assigned training-template axis"
+            ),
+            "cohort_flow": gain_payload["cohort_flow"],
+            "summary": gain_summary,
+        },
+        "panel_c": {
             "source": str(GEOMETRY_JSON.relative_to(ROOT)),
             "definition": (
                 "Spearman correlation between held-out contact rank and the "
                 "path-axis coordinate fitted from the complementary event half"
             ),
             "summary": rho_summary,
+        },
+        "panel_d": {
+            "source_summary": str(
+                (COMPACTNESS_ROOT / "cohort_summary.json").relative_to(ROOT)
+            ),
+            "source_table": str(
+                (COMPACTNESS_ROOT / "subject_compactness.csv").relative_to(ROOT)
+            ),
+            "definition": (
+                "Clinical SOZ-contact RMS radius divided by the median radius "
+                "of equal-size subsets drawn from all mapped invasive contacts "
+                "within subject"
+            ),
+            "n_null_per_subject": compactness_summary["n_null_per_subject"],
+            "summary": compact_all,
+            "claim_boundary": compactness_summary["claim_boundary"],
         },
         "outputs": {
             "png": str(stem.with_suffix(".png").relative_to(ROOT)),
@@ -332,10 +473,17 @@ def main() -> None:
         "### supp_fig4_axis_direction_and_heldout_readback.png\n\n"
         f"**Supplementary Fig. 4 | {caption_title}**\n\n"
         f"{caption_body}\n\n"
-        f"**关注点**：B 共 n={cohort['n']}，中位 ρ="
-        f"{cohort['median_spearman_rho']:.3f}，IQR "
+        f"**关注点**：B 显示真实空间信息带来的留出方向增益："
+        f"{gain_summary['n_positive_gain']}/{gain_summary['n']} 名患者提高，"
+        f"中位增益 {gain_summary['median_gain']:.3f}（95% CI "
+        f"{gain_ci[0]:.3f}–{gain_ci[1]:.3f}）。C 共 n={cohort['n']}，"
+        f"中位 ρ={cohort['median_spearman_rho']:.3f}，IQR "
         f"{cohort['iqr_spearman_rho'][0]:.3f}–"
-        f"{cohort['iqr_spearman_rho'][1]:.3f}。"
+        f"{cohort['iqr_spearman_rho'][1]:.3f}。D 共 n="
+        f"{compact_overall['n']}，SOZ/null RMS 半径比中位数="
+        f"{compact_overall['median_observed_to_null_ratio']:.3f}，95% CI "
+        f"{compact_ci[0]:.3f}–{compact_ci[1]:.3f}。D 只支持 clinical SOZ "
+        "触点相对患者自身植入几何更紧凑，不证明群体事件局限于 SOZ。"
         "已进入主图的 2D field panel 不在补图重复；完整患者数值进入补充表。\n",
         encoding="utf-8",
     )
