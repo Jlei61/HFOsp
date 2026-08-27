@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import copy
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 import math
 
 import numpy as np
@@ -215,7 +215,9 @@ def _set_trainable(model: FullTargetObserverStateModel, *, stage: str) -> list[s
 
 
 def _optimizer(model: FullTargetObserverStateModel, *, state_lr: float,
-               observer_lr: float, raw_lr: float) -> torch.optim.Optimizer:
+               observer_lr: float, raw_lr: float,
+               optimizer_name: str = "adamw",
+               weight_decay: float = 1e-3) -> torch.optim.Optimizer:
     state_modules = [model.state_timing, model.state_contact, model.state_size]
     if any(value.requires_grad for value in model.state.correction.parameters()):
         state_modules.append(model.state.correction)
@@ -244,14 +246,27 @@ def _optimizer(model: FullTargetObserverStateModel, *, state_lr: float,
     ]
     groups = []
     if state:
-        groups.append({"params": state, "lr": float(state_lr)})
+        groups.append({
+            "params": state, "lr": float(state_lr),
+            "base_lr": float(state_lr), "group_name": "state",
+        })
     if observer:
-        groups.append({"params": observer, "lr": float(observer_lr)})
+        groups.append({
+            "params": observer, "lr": float(observer_lr),
+            "base_lr": float(observer_lr), "group_name": "observer",
+        })
     if raw:
-        groups.append({"params": raw, "lr": float(raw_lr)})
+        groups.append({
+            "params": raw, "lr": float(raw_lr),
+            "base_lr": float(raw_lr), "group_name": "raw",
+        })
     if not groups:
         raise ValueError("R1.3 optimizer has no trainable parameters")
-    return torch.optim.AdamW(groups, weight_decay=1e-3)
+    if optimizer_name == "adamw":
+        return torch.optim.AdamW(groups, weight_decay=float(weight_decay))
+    if optimizer_name == "adam":
+        return torch.optim.Adam(groups, weight_decay=float(weight_decay))
+    raise ValueError(f"unsupported R1.3 optimizer {optimizer_name!r}")
 
 
 def _rows_for(chunk: np.ndarray, sorted_rows: np.ndarray,
@@ -284,6 +299,25 @@ def _gradient_groups(model: FullTargetObserverStateModel) -> dict[str, float]:
     return result
 
 
+def _trainable_snapshot(model: FullTargetObserverStateModel) -> dict[str, torch.Tensor]:
+    return {
+        name: value.detach().cpu().float().clone()
+        for name, value in model.named_parameters() if value.requires_grad
+    }
+
+
+def _snapshot_norms(before: dict[str, torch.Tensor],
+                    model: FullTargetObserverStateModel) -> tuple[float, float]:
+    parameter_square = 0.0
+    update_square = 0.0
+    current = dict(model.named_parameters())
+    for name, old in before.items():
+        new = current[name].detach().cpu().float()
+        parameter_square += float(old.square().sum())
+        update_square += float((new - old).square().sum())
+    return math.sqrt(parameter_square), math.sqrt(update_square)
+
+
 def train_epoch(model: FullTargetObserverStateModel,
                 design: FullAnchorDesign,
                 loader: FullAnchorObservationLoader,
@@ -292,7 +326,10 @@ def train_epoch(model: FullTargetObserverStateModel,
                 anchor_ids: np.ndarray,
                 query_time_upper: float,
                 chunk_anchors: int = 8,
-                use_amp: bool = True) -> dict[str, float]:
+                use_amp: bool = True,
+                grad_clip_norm: float | None = 1.0,
+                step_state: dict[str, int] | None = None,
+                diagnostics: dict | None = None) -> dict[str, float]:
     """One chronological truncated-BPTT pass through full TRAIN support."""
     selected = np.zeros(len(design.anchor_time), dtype=bool)
     selected[np.asarray(anchor_ids, dtype=np.int64)] = True
@@ -317,6 +354,17 @@ def train_epoch(model: FullTargetObserverStateModel,
     chunks = max(int(math.ceil(len(anchor_ids) / max(int(chunk_anchors), 1))), 1)
     scale = float(chunks) / max(event_total, 1)
     gradient_max: dict[str, float] = {}
+    if diagnostics is not None:
+        diagnostics.update({
+            "optimizer_steps": 0,
+            "events": event_total,
+            "objective_numerator": 0.0,
+            "preclip_norm_max": 0.0,
+            "postclip_norm_max": 0.0,
+            "clip_count": 0,
+            "nonfinite_gradient_steps": 0,
+            "learning_rate_last": {},
+        })
     amp_enabled = bool(use_amp and str(device).startswith("cuda"))
     scaler = torch.amp.GradScaler("cuda", enabled=amp_enabled)
     for label in design.session_label:
@@ -421,19 +469,71 @@ def train_epoch(model: FullTargetObserverStateModel,
                 )
             else:
                 survival = state.new_zeros(())
-            loss = (survival - event_log - mark_log) * scale
+            objective = survival - event_log - mark_log
+            loss = objective * scale
             optimizer.zero_grad(set_to_none=True)
+            if step_state is not None:
+                step = int(step_state.get("step", 0))
+                warmup_steps = int(step_state.get("warmup_steps", 0))
+                factor = (
+                    min(1.0, float(step + 1) / float(warmup_steps))
+                    if warmup_steps > 0 else 1.0
+                )
+                for group in optimizer.param_groups:
+                    group["lr"] = float(group["base_lr"]) * factor
+                step_state["step"] = step + 1
             scaler.scale(loss).backward()
             scaler.unscale_(optimizer)
             current = _gradient_groups(model)
             for key, value in current.items():
                 gradient_max[key] = max(gradient_max.get(key, 0.0), value)
-            torch.nn.utils.clip_grad_norm_(
-                [value for value in model.parameters() if value.requires_grad], 1.0
-            )
+            parameters = [
+                value for value in model.parameters() if value.requires_grad
+            ]
+            if grad_clip_norm is None:
+                total_square = sum(
+                    float(value.grad.detach().float().square().sum())
+                    for value in parameters if value.grad is not None
+                )
+                preclip_norm = math.sqrt(total_square)
+            else:
+                preclip_norm = float(torch.nn.utils.clip_grad_norm_(
+                    parameters, float(grad_clip_norm)
+                ))
+            if not math.isfinite(preclip_norm):
+                if diagnostics is not None:
+                    diagnostics["nonfinite_gradient_steps"] += 1
+                raise RuntimeError("R1.3 encountered a non-finite gradient norm")
             scaler.step(optimizer)
             scaler.update()
+            if diagnostics is not None:
+                diagnostics["optimizer_steps"] += 1
+                diagnostics["objective_numerator"] += float(objective.detach())
+                diagnostics["preclip_norm_max"] = max(
+                    diagnostics["preclip_norm_max"], preclip_norm
+                )
+                diagnostics["postclip_norm_max"] = max(
+                    diagnostics["postclip_norm_max"],
+                    preclip_norm if grad_clip_norm is None else min(
+                        preclip_norm, float(grad_clip_norm)
+                    ),
+                )
+                if (grad_clip_norm is not None
+                        and preclip_norm > float(grad_clip_norm)):
+                    diagnostics["clip_count"] += 1
+                diagnostics["learning_rate_last"] = {
+                    str(group.get("group_name", index)): float(group["lr"])
+                    for index, group in enumerate(optimizer.param_groups)
+                }
             state = state.detach()
+    if diagnostics is not None:
+        diagnostics["train_joint_nll_per_event"] = (
+            diagnostics["objective_numerator"] / max(event_total, 1)
+        )
+        diagnostics["clip_fraction"] = (
+            diagnostics["clip_count"]
+            / max(diagnostics["optimizer_steps"], 1)
+        )
     return gradient_max
 
 
@@ -476,6 +576,9 @@ class FitTrace:
     trajectory: list[dict]
     selection_gradient_max: dict[str, float]
     trainable_by_stage: dict[str, list[str]]
+    optimizer_config: dict
+    epoch_zero_seen_inner_validation: bool
+    refit_mode: str
 
 
 def fit_target_observer(model: FullTargetObserverStateModel,
@@ -487,8 +590,18 @@ def fit_target_observer(model: FullTargetObserverStateModel,
                         state_lr: float = 3e-4,
                         observer_lr: float = 3e-5,
                         raw_lr: float = 1e-5,
-                        chunk_anchors: int = 8) -> FitTrace:
+                        chunk_anchors: int = 8,
+                        optimizer_name: str = "adamw",
+                        weight_decay: float = 1e-3,
+                        grad_clip_norm: float | None = 1.0,
+                        warmup_fraction: float = 0.0,
+                        epoch_zero_seen_inner_validation: bool = True,
+                        refit_mode: str = "full_train") -> FitTrace:
     """TRAIN-inner selection followed by exact full-TRAIN refit."""
+    if refit_mode not in {"full_train", "selection_best"}:
+        raise ValueError(f"unknown R1.3 refit mode {refit_mode!r}")
+    if not 0.0 <= float(warmup_fraction) <= 1.0:
+        raise ValueError("warmup_fraction must be within [0, 1]")
     train = design.anchor_ids("train")
     if len(train) < 10:
         raise ValueError("R1.3 needs at least ten TRAIN anchors")
@@ -500,15 +613,30 @@ def fit_target_observer(model: FullTargetObserverStateModel,
         key: value.detach().cpu().clone() for key, value in model.state_dict().items()
     }
 
-    def inner_value() -> float:
+    def selection_values() -> tuple[dict, dict]:
         embedding = materialize_embedding(
             model, design, loader, device=device, batch_size=chunk_anchors,
             anchor_limit=int(train[-1]) + 1,
         )
-        return evaluate_full_t1(
+        fitted_train = evaluate_full_t1(
+            model, design, embedding, "train", device=device,
+            time_lower=float(design.anchor_time[inner[0]]),
+            time_upper=boundary,
+        )
+        held_out_inner = evaluate_full_t1(
             model, design, embedding, "train", device=device,
             time_lower=boundary, time_upper=train_end,
-        ).joint_nll_per_event
+        )
+        fitted_dict = (
+            asdict(fitted_train) if hasattr(fitted_train, "__dataclass_fields__")
+            else dict(vars(fitted_train))
+        )
+        held_out_dict = (
+            asdict(held_out_inner)
+            if hasattr(held_out_inner, "__dataclass_fields__")
+            else dict(vars(held_out_inner))
+        )
+        return fitted_dict, held_out_dict
 
     if model.use_raw:
         # Epoch zero is the paired explicit checkpoint, not an untrained random
@@ -517,16 +645,42 @@ def fit_target_observer(model: FullTargetObserverStateModel,
         raw_gain_initial = float(model.observer.raw_gain.detach())
         with torch.no_grad():
             model.observer.raw_gain.zero_()
-        best_value = inner_value()
+        epoch_zero_train_metrics, best_metrics = selection_values()
+        epoch_zero_train_value = float(
+            epoch_zero_train_metrics["joint_nll_per_event"]
+        )
+        best_value = float(best_metrics["joint_nll_per_event"])
+        best_selection_state = {
+            key: value.detach().cpu().clone()
+            for key, value in model.state_dict().items()
+        }
         with torch.no_grad():
             model.observer.raw_gain.fill_(raw_gain_initial)
     else:
-        best_value = inner_value()
+        epoch_zero_train_metrics, best_metrics = selection_values()
+        epoch_zero_train_value = float(
+            epoch_zero_train_metrics["joint_nll_per_event"]
+        )
+        best_value = float(best_metrics["joint_nll_per_event"])
+        best_selection_state = {
+            key: value.detach().cpu().clone()
+            for key, value in model.state_dict().items()
+        }
     best_stage = "epoch_zero"
     best_stage_epoch = 0
     best_total_epoch = 0
-    trajectory = [{"stage": best_stage, "stage_epoch": 0,
-                   "total_epoch": 0, "joint_nll": best_value}]
+    trajectory = [{
+        "stage": best_stage, "stage_epoch": 0,
+        "total_epoch": 0, "joint_nll": best_value,
+        "evaluated_train_joint_nll": epoch_zero_train_value,
+        "evaluated_train_metrics": epoch_zero_train_metrics,
+        "inner_validation_metrics": best_metrics,
+        "train_joint_nll_per_event": None,
+        "optimizer_steps": 0, "clip_fraction": None,
+        "preclip_norm_max": None, "postclip_norm_max": None,
+        "parameter_norm_before": None,
+        "update_norm": 0.0, "update_to_parameter_ratio": 0.0,
+    }]
     total_epoch = 0
     gradient_max: dict[str, float] = {}
     trainable_by_stage = {}
@@ -537,31 +691,66 @@ def fit_target_observer(model: FullTargetObserverStateModel,
     for stage, epochs in schedule:
         trainable_by_stage[stage] = _set_trainable(model, stage=stage)
         optimizer = _optimizer(
-            model, state_lr=state_lr, observer_lr=observer_lr, raw_lr=raw_lr
+            model, state_lr=state_lr, observer_lr=observer_lr, raw_lr=raw_lr,
+            optimizer_name=optimizer_name, weight_decay=weight_decay,
         )
+        approximate_steps = max(
+            int(math.ceil(len(inner) / max(int(chunk_anchors), 1))), 1
+        ) * max(int(epochs), 1)
+        step_state = {
+            "step": 0,
+            "warmup_steps": int(math.ceil(
+                float(warmup_fraction) * approximate_steps
+            )),
+        }
         for stage_epoch in range(1, epochs + 1):
             total_epoch += 1
             model.train()
+            before = _trainable_snapshot(model)
+            diagnostics: dict = {}
             current_gradient = train_epoch(
                 model, design, loader, optimizer, device=device,
                 anchor_ids=inner, query_time_upper=boundary,
                 chunk_anchors=chunk_anchors,
+                grad_clip_norm=grad_clip_norm,
+                step_state=step_state, diagnostics=diagnostics,
             )
+            parameter_norm, update_norm = _snapshot_norms(before, model)
             for key, value in current_gradient.items():
                 gradient_max[key] = max(gradient_max.get(key, 0.0), value)
-            value = inner_value()
+            evaluated_train_metrics, inner_validation_metrics = selection_values()
+            evaluated_train_value = float(
+                evaluated_train_metrics["joint_nll_per_event"]
+            )
+            value = float(inner_validation_metrics["joint_nll_per_event"])
             trajectory.append({
                 "stage": stage, "stage_epoch": stage_epoch,
                 "total_epoch": total_epoch, "joint_nll": value,
+                "evaluated_train_joint_nll": evaluated_train_value,
+                "evaluated_train_metrics": evaluated_train_metrics,
+                "inner_validation_metrics": inner_validation_metrics,
+                **diagnostics,
+                "parameter_norm_before": parameter_norm,
+                "update_norm": update_norm,
+                "update_to_parameter_ratio": (
+                    update_norm / max(parameter_norm, 1e-12)
+                ),
             })
             if value < best_value:
                 best_value = value
                 best_stage = stage
                 best_stage_epoch = stage_epoch
                 best_total_epoch = total_epoch
+                best_selection_state = {
+                    key: parameter.detach().cpu().clone()
+                    for key, parameter in model.state_dict().items()
+                }
 
-    model.load_state_dict(initial)
-    if best_total_epoch:
+    if refit_mode == "selection_best":
+        model.load_state_dict(best_selection_state)
+    else:
+        model.load_state_dict(initial)
+    if refit_mode == "full_train" and best_total_epoch:
         for stage, epochs in schedule:
             stage_limit = 0
             if best_stage == stage:
@@ -572,16 +761,28 @@ def fit_target_observer(model: FullTargetObserverStateModel,
                 continue
             _set_trainable(model, stage=stage)
             optimizer = _optimizer(
-                model, state_lr=state_lr, observer_lr=observer_lr, raw_lr=raw_lr
+                model, state_lr=state_lr, observer_lr=observer_lr, raw_lr=raw_lr,
+                optimizer_name=optimizer_name, weight_decay=weight_decay,
             )
+            approximate_steps = max(
+                int(math.ceil(len(train) / max(int(chunk_anchors), 1))), 1
+            ) * max(int(stage_limit), 1)
+            step_state = {
+                "step": 0,
+                "warmup_steps": int(math.ceil(
+                    float(warmup_fraction) * approximate_steps
+                )),
+            }
             for _ in range(stage_limit):
                 model.train()
                 train_epoch(
                     model, design, loader, optimizer, device=device,
                     anchor_ids=train, query_time_upper=train_end,
                     chunk_anchors=chunk_anchors,
+                    grad_clip_norm=grad_clip_norm,
+                    step_state=step_state,
                 )
-    elif model.use_raw:
+    elif refit_mode == "full_train" and model.use_raw:
         # A raw no-update result must be exactly the paired explicit model.
         with torch.no_grad():
             model.observer.raw_gain.zero_()
@@ -594,4 +795,22 @@ def fit_target_observer(model: FullTargetObserverStateModel,
         trajectory=trajectory,
         selection_gradient_max=gradient_max,
         trainable_by_stage=trainable_by_stage,
+        optimizer_config={
+            "optimizer": optimizer_name,
+            "state_lr": float(state_lr),
+            "observer_lr": float(observer_lr),
+            "raw_lr": float(raw_lr),
+            "weight_decay": float(weight_decay),
+            "grad_clip_norm": (
+                None if grad_clip_norm is None else float(grad_clip_norm)
+            ),
+            "warmup_fraction": float(warmup_fraction),
+            "chunk_anchors": int(chunk_anchors),
+            "observer_epochs": int(observer_epochs),
+            "joint_epochs": int(joint_epochs),
+        },
+        epoch_zero_seen_inner_validation=bool(
+            epoch_zero_seen_inner_validation
+        ),
+        refit_mode=refit_mode,
     )

@@ -273,3 +273,5 @@
   - 技术版：`continuous_marked_state_r1_5_h3_long_technical_2026-08-27.md`
   - 机器审计快照：`continuous_marked_state_r1_5_h3_long_machine_audit_2026-08-27.json`
   - R1.5 在三位新增患者中仅张克轩达到稳定、正确时刻特异的候选状态标准，增量落在 first subset 而非 continuation。H3-long 的 16 个完整对照与 10 个边界患者-source-尺度组合均无患者级支持；唯一稳定 T1 患者的独立 validation 支持不足，因此结论是未支持且仍未决，不是长尺度效应的生物学阴性。
+- R1.6 优化器与可识别性诊断合同：`continuous_marked_state_optimizer_identifiability_r1_6_contract_2026-08-27.md`
+  - 修复 R1.5 epoch 0 已见过 inner-validation 的不公平选择；先用 synthetic 与短段过拟合验证可学习性，再以选择安全的三段时间设计和公共优化配置区分训练失败、泛化失败与当前模型不可识别。

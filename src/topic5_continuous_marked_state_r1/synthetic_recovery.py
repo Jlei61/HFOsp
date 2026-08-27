@@ -30,7 +30,10 @@ class SyntheticSequence:
 
 
 def generate_synthetic(seed: int = 4, n_anchors: int = 180,
-                       train_stop: int = 120) -> SyntheticSequence:
+                       train_stop: int = 120,
+                       truth: str = "positive") -> SyntheticSequence:
+    if truth not in {"positive", "zero", "reversed"}:
+        raise ValueError(f"unknown synthetic truth {truth!r}")
     rng = np.random.default_rng(int(seed))
     latent = np.zeros((n_anchors, 2), dtype=np.float32)
     angle = 0.18
@@ -42,9 +45,10 @@ def generate_synthetic(seed: int = 4, n_anchors: int = 180,
         latent[index] = transition @ latent[index - 1] + rng.normal(0, 0.15, 2)
     observation = (latent + rng.normal(0, 0.18, latent.shape)).astype(np.float32)
     interval_minutes = 0.5
-    rate = np.exp(-0.2 + 1.2 * latent[:, 0])
+    effect = {"positive": 1.0, "zero": 0.0, "reversed": -1.0}[truth]
+    rate = np.exp(-0.2 + effect * 1.2 * latent[:, 0])
     event_count = rng.poisson(rate * interval_minutes)
-    contact_weight = np.asarray([
+    contact_weight = effect * np.asarray([
         [0.0, 1.4], [0.0, -1.4], [1.0, 0.0], [-1.0, 0.0],
     ])
     event_anchor: list[int] = []
