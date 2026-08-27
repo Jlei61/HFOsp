@@ -1,0 +1,41 @@
+{
+  "analysis": "event-subsampling seed sensitivity",
+  "status": "complete",
+  "contract": {
+    "max_events_per_subject": 5000,
+    "seeds": [20260825, 20260826, 20260827],
+    "common_patient_set_only": true,
+    "n_common_patients": 24,
+    "excluded_from_common_set": [
+      "epilepsiae_1077",
+      "yuquan_huanghanwen"
+    ],
+    "primary_statistic": "patient-level median spatial_information_gain",
+    "primary_test": "one-sided paired Wilcoxon on timing-plus-space versus timing-only",
+    "note": "Sensitivity seeds used 10 direction-shuffle draws because the paired score and Wilcoxon test do not depend on null-draw count."
+  },
+  "results": [
+    {
+      "seed": 20260825,
+      "n": 24,
+      "median_gain": 0.018567121758268357,
+      "n_positive": 20,
+      "paired_wilcoxon_greater_p": 0.0017521381378173828
+    },
+    {
+      "seed": 20260826,
+      "n": 24,
+      "median_gain": 0.01634993882050531,
+      "n_positive": 17,
+      "paired_wilcoxon_greater_p": 0.007522463798522949
+    },
+    {
+      "seed": 20260827,
+      "n": 24,
+      "median_gain": 0.02490329400526059,
+      "n_positive": 16,
+      "paired_wilcoxon_greater_p": 0.008203327655792236
+    }
+  ],
+  "verdict": "The positive held-out spatial-information gain survives all three deterministic event-subsampling seeds on the same 24-patient denominator."
+}

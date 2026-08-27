@@ -1,0 +1,102 @@
+{
+  "analysis": "interictal_spatial_information_gain",
+  "status": "complete",
+  "contract": {
+    "scientific_question": "Does patient-specific electrode geometry add information beyond within-event relative timing when discovering recurring interictal propagation modes?",
+    "statistical_unit": "patient",
+    "input_cohort": "same 26-patient two-dimensional direction-score cohort used by current Figure 2B",
+    "event_subset": "same deterministic maximum-size sample in both arms; independent geometry+LOCO QC before splitting",
+    "temporal_arm": "KMeans k=2 on canonical masked-rank features",
+    "hybrid_arm": "same temporal features plus train-fold 3D event directions, with equal total train variance per view",
+    "heldout_rule": "two-way alternating recording-block cross-fit; held-out assignment uses rank templates only",
+    "primary_metric": "patient-level timing-plus-space minus timing-only held-out direction score",
+    "direction_score": "equal-fold, equal-cluster mean signed cosine between held-out event direction and its assigned train-template gradient axis",
+    "primary_test": "one-sided paired Wilcoxon across patients",
+    "null_sensitivity": "shuffle held-out event directions within recording block after both models are frozen",
+    "claim_boundary": "supports added held-out directional information in the QC-clean, geometry-estimable event subset; not unseen-patient prediction, tissue trajectory, speed, or mechanism/causality",
+    "ictal_input": "none",
+    "spatial_coordinates_pooled_across_patients": false,
+    "k": 2,
+    "max_events_per_subject": 5000,
+    "min_train_and_test_events_per_cluster": 20,
+    "n_direction_shuffle_draws": 1000,
+    "seed": 20260825
+  },
+  "cohort_flow": {
+    "n_requested": 26,
+    "n_eligible": 25,
+    "n_skipped": 1,
+    "skipped": [
+      {
+        "subject_id": "yuquan_huanghanwen",
+        "reason": "timing_plus_space: train cluster support below 20: [17, 37]"
+      }
+    ]
+  },
+  "cohort_statistics": {
+    "n": 25,
+    "timing_only_median": 0.5064714692121572,
+    "timing_plus_space_median": 0.5684013798610377,
+    "median_gain": 0.028165477639596537,
+    "median_gain_bootstrap_ci95": [
+      0.0011393792948090065,
+      0.06322092386305983
+    ],
+    "n_positive_gain": 21,
+    "n_negative_gain": 4,
+    "paired_wilcoxon_greater_p": 0.0009078383445739746,
+    "direction_shuffle_null": {
+      "n_draws": 1000,
+      "cohort_median_null_median": -0.0023077219286535104,
+      "cohort_median_null_ci95": [
+        -0.00640035146154901,
+        0.0006922050413145899
+      ],
+      "empirical_p_observed_median_greater": 0.000999000999000999
+    },
+    "dataset_sensitivity": {
+      "epilepsiae": {
+        "n": 16,
+        "median_gain": 0.03705979701816156,
+        "n_positive": 15
+      },
+      "yuquan": {
+        "n": 9,
+        "median_gain": 0.008968765876940177,
+        "n_positive": 6
+      }
+    },
+    "absolute_direction_scores": {
+      "timing_only_median": 0.5064714692121572,
+      "timing_only_bootstrap_ci95": [
+        0.43747042609752645,
+        0.5661649277043013
+      ],
+      "timing_plus_space_median": 0.5684013798610377,
+      "timing_plus_space_bootstrap_ci95": [
+        0.5006913499605863,
+        0.631674151586789
+      ],
+      "hybrid_direction_shuffle_null_median": 0.145145158947106,
+      "hybrid_direction_shuffle_null_ci95": [
+        0.1298388555944867,
+        0.16106317573011458
+      ],
+      "hybrid_observed_vs_null_empirical_p": 0.000999000999000999
+    }
+  },
+  "source": {
+    "cohort_csv": "results/interictal_propagation_masked/axis_representativeness/subject_folded_axis_representativeness.csv",
+    "cohort_csv_sha256": "507a9657a4776d36a1757ca6b8670166b2258105a22c382ace4cec5722ae0ca9",
+    "frozen_coordinate_root": "results/interictal_propagation_masked/template_gradient_fields",
+    "event_roots": {
+      "yuquan": "/mnt/yuquan_data/yuquan_24h_edf",
+      "epilepsiae": "/mnt/epilepsia_data/interilca_inter_results/all_data_lns"
+    }
+  },
+  "outputs": {
+    "subject_csv": "results/interictal_propagation_masked/spatial_information_gain/subject_spatial_information_gain.csv",
+    "run_status_csv": "results/interictal_propagation_masked/spatial_information_gain/run_status.csv",
+    "cohort_null_npz": "results/interictal_propagation_masked/spatial_information_gain/cohort_direction_shuffle_null.npz"
+  }
+}

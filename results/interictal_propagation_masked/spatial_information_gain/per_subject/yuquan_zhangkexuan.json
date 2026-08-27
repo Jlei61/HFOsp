@@ -1,0 +1,110 @@
+{
+  "subject_id": "yuquan_zhangkexuan",
+  "pretty_subject": "Y-zhangkexuan",
+  "dataset": "yuquan",
+  "subject": "zhangkexuan",
+  "status": "ok",
+  "drop_reason": "",
+  "n_events_total": 18190,
+  "n_events_sampled": 5000,
+  "n_qc_clean_events": 4979,
+  "qc_retention": 0.9958,
+  "n_blocks_sampled": 12,
+  "n_blocks_qc_clean": 12,
+  "timing_only_score": 0.5277612612527616,
+  "timing_plus_space_score": 0.5340707095069075,
+  "spatial_information_gain": 0.006309448254145922,
+  "mean_train_label_ami": 0.18459462704901725,
+  "folds": [
+    {
+      "fold": 0,
+      "train_parity": "even_indexed_blocks",
+      "n_train_events": 2664,
+      "n_test_events": 2315,
+      "n_train_blocks": 6,
+      "n_test_blocks": 6,
+      "timing_only_score": 0.5439930786945577,
+      "timing_plus_space_score": 0.49936210751581667,
+      "spatial_information_gain": -0.04463097117874104,
+      "train_label_ami": 0.15415252877175306,
+      "train_label_overlap": 0.808933933933934,
+      "hybrid_label_swap_to_temporal": false,
+      "timing_only_train_cluster_counts": [
+        2029,
+        635
+      ],
+      "timing_plus_space_train_cluster_counts": [
+        2222,
+        442
+      ],
+      "timing_only_test_cluster_counts": [
+        1583,
+        732
+      ],
+      "timing_plus_space_test_cluster_counts": [
+        1672,
+        643
+      ],
+      "spatial_scale": 1.4377855460534121
+    },
+    {
+      "fold": 1,
+      "train_parity": "odd_indexed_blocks",
+      "n_train_events": 2315,
+      "n_test_events": 2664,
+      "n_train_blocks": 6,
+      "n_test_blocks": 6,
+      "timing_only_score": 0.5115294438109654,
+      "timing_plus_space_score": 0.5687793114979984,
+      "spatial_information_gain": 0.057249867687032996,
+      "train_label_ami": 0.2150367253262814,
+      "train_label_overlap": 0.8086393088552916,
+      "hybrid_label_swap_to_temporal": true,
+      "timing_only_train_cluster_counts": [
+        1637,
+        678
+      ],
+      "timing_plus_space_train_cluster_counts": [
+        1862,
+        453
+      ],
+      "timing_only_test_cluster_counts": [
+        2132,
+        532
+      ],
+      "timing_plus_space_test_cluster_counts": [
+        2408,
+        256
+      ],
+      "spatial_scale": 1.4194744504440444
+    }
+  ],
+  "qc_contract": {
+    "minimum_mapped_participating_contacts": 6,
+    "minimum_participating_shafts": 2,
+    "minimum_effective_coordinate_rank": 2,
+    "minimum_loco_valid_fraction": 0.8,
+    "minimum_loco_median_signed_cosine": 0.8,
+    "template_angle_used_for_inclusion": false
+  },
+  "analysis_contract": {
+    "split": "two-way alternating recording-block cross-fit",
+    "training_spatial_view": "unit 3D early-to-late event gradient",
+    "hybrid_view_weight": "equal total train-fold variance per temporal/spatial block",
+    "heldout_assignment": "rank-template distance only; no held-out coordinates or directions",
+    "axis_estimator": "same rank-template least-squares gradient in both arms",
+    "direction_score": "equal-cluster mean signed cosine on held-out QC-clean events",
+    "null": "held-out event directions shuffled within recording block after model freeze",
+    "min_cluster_events": 20,
+    "min_shared_channels": 3,
+    "n_null": 1000,
+    "seed": 1872991879
+  },
+  "source": {
+    "frozen_coordinate_record": "results/interictal_propagation_masked/template_gradient_fields/per_subject/yuquan_zhangkexuan.json",
+    "frozen_coordinate_record_sha256": "85e3aca82601ac2ac83a9f77945435b3658baa40cf15922ac5781eea69093be9",
+    "event_artifact_root": "/mnt/yuquan_data/yuquan_24h_edf/zhangkexuan",
+    "sample_seed": 2735291681,
+    "selection_count": 5000
+  }
+}

@@ -166,9 +166,9 @@ E1146 的冻结间期模板轴从三维触点空间投影到 shared patient plan
 
 ### fig2-panelb.png / .pdf
 
-左侧为 E1146/E548 的 TA/TB 单事件方向 rose，右侧为 26 名二维可评估患者的 ordered direction score 与 template-rank-shuffle cohort null。
+左侧以 E1146/E548 的同一组 fold-0 留出事件方向对比仅时序模板轴（同色虚线）和时序--空间模板轴（同色实线），右侧显示 25 名可评估患者的绝对留出方向得分、患者内配对变化和记录块内方向置换零模型。底部同一行叠加蓝色 Timing、橙色 +Space 的患者 bootstrap cohort-median 分布及灰色方向置换 cohort-median Null；底部分布区的长横括号表示 +Space 相对零模型的检验，短横括号表示 +Space 相对 Timing 的患者内配对检验。配对小提琴分布进入 Supplementary Fig. 4B。
 
-**关注点**：该 panel 支持轴的 in-sample representativeness；不是 held-out 泛化或机制证据。
+**关注点**：该 panel 支持真实三维电极信息提高患者内跨记录块的方向一致性；不是未见患者预测，也不证明连续组织轨迹、传播速度或机制因果。
 
 ### fig2-panelc.png / .pdf
 
@@ -296,19 +296,29 @@ def build_figure2(*, make_gif: bool = False, recompute_fig2c: bool = False) -> d
     outputs["a"].append(str(a_svg.relative_to(ROOT)))
     gc.collect()
 
+    spatial_gain_root = PAPER_ROOT / "fig2b_spatial_information_gain"
     subprocess.run(
-        [sys.executable, str(ROOT / "scripts/paper_figures/plot_figr_gradient_axis_validation.py"),
-         "--output-dir", str(FIG2_ROOT)],
+        [
+            sys.executable,
+            str(ROOT / "scripts/paper_figures/plot_interictal_spatial_information_gain.py"),
+            "--paper-root",
+            str(spatial_gain_root),
+        ],
         check=True,
     )
     b_outputs = {
-        "png": figures / "figr_gradient_axis_validation.png",
-        "pdf": figures / "figr_gradient_axis_validation.pdf",
-        "metadata": figures / "figr_gradient_axis_validation_metadata.json",
+        "png": spatial_gain_root / "figures/fig2b-spatial-information-gain.png",
+        "pdf": spatial_gain_root / "figures/fig2b-spatial-information-gain.pdf",
+        "metadata": (
+            spatial_gain_root
+            / "figures/fig2b-spatial-information-gain_metadata.json"
+        ),
     }
-    b_png = _move(b_outputs["png"], figures / "fig2-panelb.png")
-    b_pdf = _move(b_outputs["pdf"], figures / "fig2-panelb.pdf")
-    _move(b_outputs["metadata"], FIG2_ROOT / "fig2_panelb_metadata.json")
+    b_png = figures / "fig2-panelb.png"
+    b_pdf = figures / "fig2-panelb.pdf"
+    shutil.copy2(b_outputs["png"], b_png)
+    shutil.copy2(b_outputs["pdf"], b_pdf)
+    shutil.copy2(b_outputs["metadata"], FIG2_ROOT / "fig2_panelb_metadata.json")
     outputs["b"] = [str(b_png.relative_to(ROOT)), str(b_pdf.relative_to(ROOT))]
     del b_outputs
     gc.collect()

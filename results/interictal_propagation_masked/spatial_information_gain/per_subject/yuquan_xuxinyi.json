@@ -1,0 +1,110 @@
+{
+  "subject_id": "yuquan_xuxinyi",
+  "pretty_subject": "Y-xuxinyi",
+  "dataset": "yuquan",
+  "subject": "xuxinyi",
+  "status": "ok",
+  "drop_reason": "",
+  "n_events_total": 9646,
+  "n_events_sampled": 5000,
+  "n_qc_clean_events": 4901,
+  "qc_retention": 0.9802,
+  "n_blocks_sampled": 13,
+  "n_blocks_qc_clean": 13,
+  "timing_only_score": 0.43747042609752645,
+  "timing_plus_space_score": 0.5006913499605863,
+  "spatial_information_gain": 0.06322092386305983,
+  "mean_train_label_ami": 0.1371924398061773,
+  "folds": [
+    {
+      "fold": 0,
+      "train_parity": "even_indexed_blocks",
+      "n_train_events": 2513,
+      "n_test_events": 2388,
+      "n_train_blocks": 7,
+      "n_test_blocks": 6,
+      "timing_only_score": 0.44732373914609774,
+      "timing_plus_space_score": 0.5005310713852504,
+      "spatial_information_gain": 0.053207332239152694,
+      "train_label_ami": 0.13421352777862244,
+      "train_label_overlap": 0.7154795065658576,
+      "hybrid_label_swap_to_temporal": true,
+      "timing_only_train_cluster_counts": [
+        1029,
+        1484
+      ],
+      "timing_plus_space_train_cluster_counts": [
+        1140,
+        1373
+      ],
+      "timing_only_test_cluster_counts": [
+        1412,
+        976
+      ],
+      "timing_plus_space_test_cluster_counts": [
+        1329,
+        1059
+      ],
+      "spatial_scale": 0.9856558523920549
+    },
+    {
+      "fold": 1,
+      "train_parity": "odd_indexed_blocks",
+      "n_train_events": 2388,
+      "n_test_events": 2513,
+      "n_train_blocks": 6,
+      "n_test_blocks": 7,
+      "timing_only_score": 0.42761711304895517,
+      "timing_plus_space_score": 0.5008516285359221,
+      "spatial_information_gain": 0.07323451548696697,
+      "train_label_ami": 0.14017135183373214,
+      "train_label_overlap": 0.7303182579564489,
+      "hybrid_label_swap_to_temporal": false,
+      "timing_only_train_cluster_counts": [
+        862,
+        1526
+      ],
+      "timing_plus_space_train_cluster_counts": [
+        950,
+        1438
+      ],
+      "timing_only_test_cluster_counts": [
+        1493,
+        1020
+      ],
+      "timing_plus_space_test_cluster_counts": [
+        1500,
+        1013
+      ],
+      "spatial_scale": 0.9923832858998926
+    }
+  ],
+  "qc_contract": {
+    "minimum_mapped_participating_contacts": 6,
+    "minimum_participating_shafts": 2,
+    "minimum_effective_coordinate_rank": 2,
+    "minimum_loco_valid_fraction": 0.8,
+    "minimum_loco_median_signed_cosine": 0.8,
+    "template_angle_used_for_inclusion": false
+  },
+  "analysis_contract": {
+    "split": "two-way alternating recording-block cross-fit",
+    "training_spatial_view": "unit 3D early-to-late event gradient",
+    "hybrid_view_weight": "equal total train-fold variance per temporal/spatial block",
+    "heldout_assignment": "rank-template distance only; no held-out coordinates or directions",
+    "axis_estimator": "same rank-template least-squares gradient in both arms",
+    "direction_score": "equal-cluster mean signed cosine on held-out QC-clean events",
+    "null": "held-out event directions shuffled within recording block after model freeze",
+    "min_cluster_events": 20,
+    "min_shared_channels": 3,
+    "n_null": 1000,
+    "seed": 3363876508
+  },
+  "source": {
+    "frozen_coordinate_record": "results/interictal_propagation_masked/template_gradient_fields/per_subject/yuquan_xuxinyi.json",
+    "frozen_coordinate_record_sha256": "3054c262150224e6925b679f92fcf8505c0607c2d212304728b124e6492c9550",
+    "event_artifact_root": "/mnt/yuquan_data/yuquan_24h_edf/xuxinyi",
+    "sample_seed": 2406097276,
+    "selection_count": 5000
+  }
+}
