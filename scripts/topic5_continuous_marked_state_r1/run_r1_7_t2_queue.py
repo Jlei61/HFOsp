@@ -108,6 +108,12 @@ def main() -> None:
     contract.atomic_json(args.root / "T2_QUEUE_STATUS.json", final)
     if final["status"] != "COMPLETE":
         raise RuntimeError("R1.7A T2 failed")
+    code = run([
+        str(PYTHON), "scripts/topic5_continuous_marked_state_r1/aggregate_r1_7_t2_r2.py",
+        "--root", str(args.root),
+    ], args.root / "logs/t2_aggregate.log")
+    if code:
+        raise RuntimeError("R1.7A T2 aggregation failed")
 
 
 if __name__ == "__main__":
