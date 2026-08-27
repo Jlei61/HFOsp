@@ -326,6 +326,19 @@ def test_frozen_classifier_and_evaluation_contract_are_training_only(
         assert freezer.MANIFEST_NAME not in source
 
 
+def test_manifest_records_commit_dirty_state_and_runtime_hashes(tmp_path: Path) -> None:
+    fixture = _build_fixture(tmp_path)
+    manifest = _freeze(fixture)
+    provenance = manifest["provenance"]
+    assert len(provenance["git_commit"]) == 40
+    assert provenance["runtime_paths_dirty"] == bool(
+        provenance["runtime_dirty_porcelain"]
+    )
+    assert set(provenance["runtime_path_sha256"]) == {
+        row["absolute_path"] for row in manifest["runtime_sources"]
+    }
+
+
 def test_sparse_heldout_events_are_retained_and_only_flagged_unreadable(
         tmp_path: Path) -> None:
     fixture = _build_fixture(tmp_path, sparse_heldout=True)

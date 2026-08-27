@@ -13,6 +13,7 @@ import hashlib
 import io
 import json
 import os
+import subprocess
 import sys
 import tempfile
 import zipfile
@@ -119,6 +120,29 @@ def _file_record(path: Path, *, role: str, root: Path | None = None) -> dict:
         "absolute_path": str(path),
         "size_bytes": int(path.stat().st_size),
         "sha256": _sha256(path),
+    }
+
+
+def _git_output(*args: str) -> str:
+    try:
+        return subprocess.check_output(
+            ["git", *args], cwd=ROOT, text=True, stderr=subprocess.DEVNULL,
+        ).strip()
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return ""
+
+
+def _runtime_provenance(paths: list[Path]) -> dict:
+    relative = [str(path.resolve().relative_to(ROOT)) for path in paths]
+    dirty = _git_output("status", "--porcelain", "--", *relative)
+    return {
+        "git_commit": _git_output("rev-parse", "HEAD"),
+        "git_branch": _git_output("branch", "--show-current"),
+        "runtime_paths_dirty": bool(dirty),
+        "runtime_dirty_porcelain": dirty.splitlines(),
+        "runtime_path_sha256": {
+            str(path.resolve()): _sha256(path.resolve()) for path in paths
+        },
     }
 
 
@@ -722,6 +746,7 @@ def freeze_endpoint(
             _file_record(path, role="runtime_source", root=ROOT)
             for path in runtime_paths
         ],
+        "provenance": _runtime_provenance(runtime_paths),
     }
 
     current_snapshot = _source_snapshot(
