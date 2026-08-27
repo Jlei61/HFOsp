@@ -242,3 +242,53 @@ recovery mechanism. Patient alignment is evaluated only after the
 model-internal arm is frozen. The result would not identify a patient cellular
 mechanism, establish blind generalization, or authorize an ictal claim.
 EE/E-to-I/Z/M remain a later cross-state experiment after Node is frozen.
+
+## 10. 正式执行结果与冻结裁定（2026-08-27）
+
+本节记录预注册合同执行后的结果，不回写或放宽前述判据。详细数值见
+`docs/archive/topic4/rev13_zero_sum_node_capacity_results_2026-08-27.md`。
+
+### 10.1 工程与运行完整性
+
+- `exact_off` 与历史 Stage-AK 的 20 s common-prefix artifact parity 为
+  `PASS`：whole-sheet activity、contact envelope、sheet activity、完整内区间
+  causal-family events 及冻结底物逐项一致。
+- 六个预注册 arm 在 seeds 2311--2313 上共 18/18 runs 完成；无 runaway。
+- 所有 run 在排除 overlap-connected episode 的全部成员后，仍有至少 24 个
+  isolated returned/evaluable causal families，因而正式比较不存在事件数不足。
+- 正式 producer 未加载 patient labels、patient prototypes 或 contact
+  classifier；EE、E-to-I 与 Z/M 全程关闭。
+
+### 10.2 `zero_sum_c020` 的正式 matched-control 结果
+
+`zero_sum_c020` 是本轮唯一同时配有 `exact_off`、`raise_only_c020` 和
+`spatial_shift_c020` 的正式候选。三张网络均形成了正的 held-out K2-K1
+证据、同一网络内的相反方向和足够的少数模式占比，但没有同时超过 paired
+off 与两个同系数 matched controls：
+
+- seed 2311：超过 `exact_off` 和 `spatial_shift_c020`，但低于
+  `raise_only_c020`；
+- seed 2312：超过两个 matched controls，但低于 `exact_off`；
+- seed 2313：超过 `exact_off` 和 `spatial_shift_c020`，但低于
+  `raise_only_c020`。
+
+因此正式 network pass 为 0/3，未达到至少 2/3 networks 的预注册容量标准。
+`c=0.1` 与 `c=0.4` 仅为 signal/dose arms，且没有各自同系数 matched
+controls，不能替代 `c020` 的正式阴性结果。
+
+### 10.3 冻结裁定与边界
+
+本轮裁定冻结为：
+
+`ZERO_SUM_NODE_CAPACITY_NOT_OBSERVED`
+
+这表示在已冻结的静态连续 Node 底物上，当前 field-gated zero-sum
+activity-dependent redistribution 没有显示出超过静态底物、raise-only 和空间错配
+对照的可复制双方向容量增益。它不证明所有动态 Node 机制无效，也不证明 SNN
+缺少双模式容量。
+
+由于 model-internal capacity 未通过，本轮在此停止：不打开 patient-training
+target 或 patient held-out，不启动 patient alignment、fresh confirmation、hotspot
+intervention，也不调整 EE、E-to-I 或 Z/M。下一步不是继续扫描 `tau_a` 或 `c`，
+而是回到静态连续 Node 场，在修正后的 causal-family event unit 下诊断场本身如何
+组织完整事件、重叠 episode 和同一网络内的方向结构。
