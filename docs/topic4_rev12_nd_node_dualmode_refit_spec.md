@@ -1245,3 +1245,35 @@ admissible only if its state equation and conservation law are genuinely
 different, its disabled path is bitwise identical to rev12 Node-only, and its
 model-internal selection endpoints do not read patient mode labels. EE,
 E-to-I and Z/M remain closed.
+
+Stage-AN completed the required historical non-duplication audit. Rev10-D1
+used a non-negative spike-triggered current that only reduced excitability in
+recently active cells. Its `19 candidates x 3 networks` all completed without
+runaway, but formal mode A occurred in 0/3 networks for every candidate and
+stronger adaptation mainly removed returned events. The old family therefore
+cannot transfer excitability to an unused route and must not be rescanned.
+
+The frozen spatial OU is also distinct: it stochastically redistributes
+external E drive, opened both supervised directions but failed natural-KMeans
+and patient replication, and increased time above the event detector from
+0.060 to 0.268. A new Node canary may not tune or reinterpret that OU field.
+The resulting status is
+`HISTORICAL_DYNAMIC_NODE_FAMILIES_DO_NOT_TEST_ZERO_SUM_RECOVERY`.
+
+The only admissible next mechanism is an exploratory, bounded, field-gated
+zero-sum threshold redistribution with an explicit forced-alternation control.
+Its mathematical conservation is `sum_i delta_Vtheta_i=0`; it must not be
+described as h-weighted threshold conservation. The full contract and execution
+order are frozen in `docs/topic4_rev13_node_zero_sum_recovery_spec.md` and
+`docs/topic4_rev13_node_zero_sum_recovery_plan.md`.
+
+The completed end-time-aware Stage-AM audit further narrows this permission.
+The unconditioned adjacent-event excess replicates in train and held-out, but
+held-out support after a true post-event gap of at least 0.5 s is only `+0.0099`
+with `p=0.0505`; after at least 1 s it is `+0.0090`, `p=0.107`. The 10-s
+local-occupancy null also absorbs the short-range result in both splits. The
+frozen status is `PATIENT_MODE_MEMORY_NOT_ROBUST_TO_GAP_CONTROL`, with
+`short_lived_activity_dependent_recovery_authorized=false` and
+`persistent_state_authorized=false`. Rev13 is therefore a model-capacity
+canary only. It cannot be presented as a patient-supported recovery mechanism
+or use the patient sequence result to select its time constant or amplitude.

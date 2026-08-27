@@ -920,3 +920,23 @@ stronger mode-1 direction trades against the complete mode-0 distribution.
    rather than purely subtractive local adaptation.
 4. Freeze a bitwise-off contract, checkpoint payload and model-internal canary
    before any patient-scored replication. Keep EE, E-to-I and Z/M off.
+
+Stage-AN is complete. Rev10-D1 was a one-way subtractive current family and
+produced mode A in 0/3 networks for all 19 candidates while progressively
+suppressing event yield. The frozen spatial OU was a stochastic external-drive
+redistribution that opened supervised routes but did not replicate natural
+patient-aligned K=2. Neither experiment tests bounded zero-sum redistribution
+of threshold accessibility within the learned Node support.
+
+Proceed under the separate rev13 spec/plan. The first run is an exploratory
+model-internal capacity canary, not a patient mechanism test. It must include
+raise-only, deterministic stratified-shuffle and forced-alternation diagnostics
+before any patient score is opened.
+
+The formal Stage-AM rerun is complete with event-end-aware gaps and 4096-draw
+conditional nulls. Its status is
+`PATIENT_MODE_MEMORY_NOT_ROBUST_TO_GAP_CONTROL`: neither a short-lived recovery
+law nor a persistent state is authorized by the patient sequence. This does not
+block one bounded model-capacity canary, but it forbids using the patient audit
+to choose `tau`, amplitude or runtime state and forbids a patient-mechanism
+claim even if the canary is positive.
