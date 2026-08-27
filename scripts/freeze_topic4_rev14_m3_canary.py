@@ -207,6 +207,7 @@ def _validate_config(config: Mapping[str, Any]) -> None:
         "signs": [-1, 1],
         "sheet_length_mm": 20.0,
         "quadrature_per_axis": 128,
+        "coordinate_decimal_places": 14,
         "candidate_count": 34,
         "selectable_candidate_count": 32,
         "basis_uses_observation_geometry": False,
@@ -391,6 +392,7 @@ def _coordinate_record(
     direction_index: int | None = None,
     sign: int | None = None,
     target_rms: float | None = None,
+    decimal_places: int = 14,
 ) -> dict[str, Any]:
     record: dict[str, Any] = {
         "candidate_id": candidate_id,
@@ -401,7 +403,9 @@ def _coordinate_record(
     if coefficients is None:
         record["fourier_coordinate"] = None
         return record
-    coeff = np.asarray(coefficients, dtype=np.float64)
+    coeff = np.round(
+        np.asarray(coefficients, dtype=np.float64), decimals=int(decimal_places),
+    )
     record["fourier_coordinate"] = {
         "modes": [list(mode) for mode in modes],
         "coefficients": coeff.tolist(),
@@ -412,6 +416,7 @@ def _coordinate_record(
         "spectral_roughness_surrogate": spectral_roughness_surrogate(coeff, modes),
         "absolute_field_not_exact_off_residual": True,
         "observation_geometry_used": False,
+        "coordinate_decimal_places": int(decimal_places),
     }
     return record
 
@@ -419,18 +424,21 @@ def _coordinate_record(
 def build_candidates(config: Mapping[str, Any]) -> tuple[list[dict], dict]:
     _validate_config(config)
     design = config["m3_design"]
+    decimal_places = int(design["coordinate_decimal_places"])
     modes = mode_inventory(int(design["maximum_order"]))
     orthonormal, direction_audit = orthogonal_sobol_directions(design)
     candidates = [
         _coordinate_record(
             candidate_id="exact_off", field_kind="stage_ak_exact_off_benchmark",
             selectable=False, modes=modes, coefficients=None,
+            decimal_places=decimal_places,
         ),
         _coordinate_record(
             candidate_id="uniform_node", field_kind="zero_fourier_uniform_benchmark",
             selectable=False, modes=modes,
             coefficients=np.zeros((len(modes), 2), dtype=np.float64),
             target_rms=0.0,
+            decimal_places=decimal_places,
         ),
     ]
     for direction_index, vector in enumerate(orthonormal):
@@ -453,6 +461,7 @@ def build_candidates(config: Mapping[str, Any]) -> tuple[list[dict], dict]:
                     direction_index=direction_index,
                     sign=sign,
                     target_rms=target_rms,
+                    decimal_places=decimal_places,
                 ))
     if len(candidates) != int(design["candidate_count"]):
         raise RuntimeError("rev14 M3 candidate count changed")

@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import json
+import os
+import subprocess
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -96,6 +99,31 @@ def test_sign_pairs_are_exact_negatives_at_each_direction_and_rms():
             assert np.array_equal(
                 indexed[(direction, rms, -1)], -indexed[(direction, rms, 1)],
             )
+
+
+def test_candidate_coordinates_are_bitwise_stable_across_blas_thread_counts():
+    command = [
+        sys.executable, "-c",
+        (
+            "import json; "
+            "from scripts.freeze_topic4_rev14_m3_canary import build_candidates; "
+            "config=json.load(open('config/topic4_rev14_m3_canary.json')); "
+            "rows,_=build_candidates(config); "
+            "print(json.dumps([r.get('fourier_coordinate', {}) and "
+            "r['fourier_coordinate'].get('coefficients_sha256') for r in rows]))"
+        ),
+    ]
+    outputs = []
+    for threads in ("1", "4"):
+        environment = os.environ.copy()
+        for name in (
+                "BLIS_NUM_THREADS", "OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS",
+                "MKL_NUM_THREADS", "NUMEXPR_NUM_THREADS"):
+            environment[name] = threads
+        outputs.append(subprocess.check_output(
+            command, cwd=ROOT, env=environment, text=True,
+        ).strip())
+    assert outputs[0] == outputs[1]
 
 
 def test_original_signed_depth_formula_and_array_hash_are_frozen():

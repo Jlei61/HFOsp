@@ -289,7 +289,10 @@ objective.
 
 Generate eight linearly independent, orthogonalized Sobol directions in the M3
 coefficient space. Evaluate both signs at two surface-RMS levels, 0.8 and 1.4,
-for 32 selectable fields.
+for 32 selectable fields. After physical-sheet RMS normalization, freeze every
+coefficient to 14 decimal places so that BLAS thread count cannot change the
+candidate identity; each negative field is the exact sign flip of the same
+quantized positive coordinate.
 Add two nonselectable benchmarks: uniform Node support and the frozen Stage-AK
 `exact_off` field. The selectable fields are not initialized from v62, Stage-AK
 or any contact-target fit.
