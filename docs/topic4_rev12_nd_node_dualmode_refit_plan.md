@@ -860,3 +860,22 @@ becomes strongly negative.
    the Node mechanism or target representation; it may not add more field
    coefficients, workers, EE, E-to-I or Z/M to hide the unresolved interictal
    mismatch.
+
+Stage-AL completed 72/72 simulations on networks 2301--2306 without worker
+failure or runaway. No candidate met the five-endpoint network-majority
+contract. Several candidates improved all five endpoint means, but neither
+mode-specific causal direction reached 4/6 positive networks. A separate
+natural-KMeans audit of all 12 candidates found no hidden pass: candidates with
+positive held-out K=2 evidence did not align both clusters with the patient,
+whereas candidates with the correct matrix signs were better described by one
+cluster and retained only a weak second patient diagonal (`rho=0.03--0.17`).
+
+The previous Stage-AK cross mapping and the non-selectable manual smooth
+capacity control do enter the necessary KMeans region, proving that the same
+SNN can express opposite propagation. Both remain negative on their weakest
+complete-patient endpoint, especially mode 0. Therefore neither the optimizer
+alone nor the KMeans readout alone explains the failure. The frozen conclusion
+is `STATIC_NODE_THRESHOLD_FAMILY_INSUFFICIENT_AFTER_LOCAL_BRIDGE`: a static
+threshold field can bias which propagation is accessible, but cannot robustly
+stabilize both full patient modes across network realizations. No further
+static-field interpolation or worker expansion is authorized.
