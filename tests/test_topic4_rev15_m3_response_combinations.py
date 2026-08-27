@@ -114,6 +114,7 @@ def test_monitor_wrapper_uses_30_run_fresh_seed_contract():
             "run_topic4_rev15_m3_response_combination_worker.py"
         )
         assert monitor.base.WORKER_STATUS == worker.WORKER_STATUS
+        assert _config()["search"]["canary_network_seeds"] == [2332, 2333]
         assert _config()["search"]["active_network_seeds"] == [2332, 2333]
         assert 15 * 2 == 30
         assert _config()["resources"]["maximum_workers"] == 10
@@ -148,6 +149,24 @@ def test_prepare_payload_is_complete_without_running_snn():
     assert len(payload["candidates"]) == 15
     assert payload["direction_audit"]["patient_heldout_used"] is False
     assert np.isfinite(payload["direction_audit"]["g_A"]).all()
+
+
+def test_rev12_compatibility_config_declares_both_fresh_seeds():
+    config = _config()
+    manifest = freezer.build_manifest_payload(
+        CONFIG, artifact_root=ARTIFACT_ROOT,
+        provenance={"formal_ready": False}, status=freezer.PREPARE_STATUS,
+    )
+    compatibility, _ = worker.base._compatibility_config(
+        config, manifest, artifact_root=ARTIFACT_ROOT,
+    )
+    allowed = {
+        int(seed) for key in (
+            "canary_network_seeds", "fit_network_seeds",
+            "selection_network_seeds", "confirmation_network_seeds",
+        ) for seed in compatibility["search"].get(key, [])
+    }
+    assert {2332, 2333}.issubset(allowed)
 
 
 def test_replication_summary_requires_fresh_paired_improvement_and_support():

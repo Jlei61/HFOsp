@@ -116,6 +116,8 @@ def _validate_config(config: Mapping[str, Any]) -> None:
             raise RuntimeError(f"forbidden response-combination input used: {key}")
     if config["search"].get("source_atlas_network_seeds") != [2331]:
         raise RuntimeError("rev15 construction seed changed")
+    if config["search"].get("canary_network_seeds") != [2332, 2333]:
+        raise RuntimeError("rev15 rev12 compatibility seed pool changed")
     if config["search"].get("active_network_seeds") != [2332, 2333]:
         raise RuntimeError("rev15 fresh replication seeds changed")
     if float(config["search"]["simulation"]["duration_ms"]) != 20000.0:
