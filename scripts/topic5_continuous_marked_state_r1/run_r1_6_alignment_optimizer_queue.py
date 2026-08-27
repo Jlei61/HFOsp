@@ -67,13 +67,33 @@ def valid_selection(path: Path, expected_id: str,
         and value.get("formal_test_partition_opened") is False
         and value.get("sealed_opened") is False
         # Early stopping is itself one of the registered diagnostics.  A
-        # selection artifact may therefore contain fewer than the full eight
-        # training epochs; requiring exactly nine rows would silently reject
-        # every legitimately early-stopped cell after it had finished.
+        # selection artifact may therefore contain fewer than the full budget;
+        # its length must agree with the executed per-stage counts.
         and 1 <= len(trajectory) <= maximum_trajectory_length
         and len(trajectory) == expected_trajectory_length
         and all("evaluated_train_metrics" in row for row in trajectory)
         and all("optimizer_steps" in row for row in trajectory)
+    )
+
+
+def valid_expected_failure(path: Path, expected_id: str,
+                           subject: str, seed: int) -> bool:
+    if not path.exists():
+        return False
+    try:
+        value = json.loads(path.read_text())
+    except Exception:
+        return False
+    return bool(
+        value.get("status") == "FAILED"
+        and value.get("revision") == R1_6_REVISION
+        and value.get("stage") == "optimizer_selection"
+        and value.get("config_id") == expected_id
+        and value.get("subject") == subject and value.get("seed") == seed
+        and value.get("failure_class") == "NONFINITE_GRADIENT"
+        and value.get("development_validation_scored") is False
+        and value.get("formal_test_partition_opened") is False
+        and value.get("sealed_opened") is False
     )
 
 
@@ -137,6 +157,12 @@ def selection_task(root: Path, prefix_config: str, config_id: str,
     )
     if valid_selection(output, run_id, subject, seed):
         return {"status": "COMPLETE", "skipped": True, "output": str(output)}
+    failure = output.parent / "failure.json"
+    if valid_expected_failure(failure, run_id, subject, seed):
+        return {
+            "status": "EXPECTED_FAILURE", "skipped": True,
+            "output": str(failure), "failure_class": "NONFINITE_GRADIENT",
+        }
     command = [
         str(PYTHON),
         "scripts/topic5_continuous_marked_state_r1/run_r1_6_optimizer_cell.py",
@@ -162,10 +188,35 @@ def selection_task(root: Path, prefix_config: str, config_id: str,
         / f"{subject}_seed_{seed}.log",
     )
     value["output"] = str(output)
-    value["status"] = "COMPLETE" if (
+    complete = bool(
         value["returncode"] == 0
         and valid_selection(output, run_id, subject, seed)
-    ) else "FAIL"
+    )
+    if complete:
+        value["status"] = "COMPLETE"
+        return value
+    log_text = Path(value["log"]).read_text(errors="replace")
+    failure_class = (
+        "NONFINITE_GRADIENT"
+        if "non-finite gradient norm" in log_text
+        else "EXECUTION_FAILURE"
+    )
+    contract.atomic_json(failure, {
+        "status": "FAILED", "revision": R1_6_REVISION,
+        "stage": "optimizer_selection", "config_id": run_id,
+        "subject": subject, "seed": int(seed),
+        "failure_class": failure_class,
+        "returncode": int(value["returncode"]), "log": value["log"],
+        "development_validation_scored": False,
+        "formal_test_partition_opened": False, "sealed_opened": False,
+    })
+    value.update({
+        "status": (
+            "EXPECTED_FAILURE"
+            if failure_class == "NONFINITE_GRADIENT" else "FAIL"
+        ),
+        "failure_class": failure_class, "output": str(failure),
+    })
     return value
 
 
@@ -180,9 +231,25 @@ def write_status(root: Path, stage: str, prefix_config: str,
         for subject in OVERFIT_SUBJECTS for seed in TUNING_SEEDS
     )
     completed_selection = sum(
-        valid_selection(
+        (
+            valid_selection(
+                root / "selection_cells" / effective_id(prefix_config, config_id)
+                / subject / f"seed_{seed}/result.json",
+                effective_id(prefix_config, config_id), subject, seed,
+            )
+            or valid_expected_failure(
+                root / "selection_cells" / effective_id(prefix_config, config_id)
+                / subject / f"seed_{seed}/failure.json",
+                effective_id(prefix_config, config_id), subject, seed,
+            )
+        )
+        for config_id in CONFIGS for subject in TUNING_SUBJECTS
+        for seed in TUNING_SEEDS
+    )
+    failed_selection = sum(
+        valid_expected_failure(
             root / "selection_cells" / effective_id(prefix_config, config_id)
-            / subject / f"seed_{seed}/result.json",
+            / subject / f"seed_{seed}/failure.json",
             effective_id(prefix_config, config_id), subject, seed,
         )
         for config_id in CONFIGS for subject in TUNING_SUBJECTS
@@ -198,6 +265,7 @@ def write_status(root: Path, stage: str, prefix_config: str,
         "completed_overfit": int(completed_overfit),
         "expected_overfit": len(OVERFIT_SUBJECTS) * len(TUNING_SEEDS),
         "completed_selection": int(completed_selection),
+        "failed_selection": int(failed_selection),
         "expected_selection": (
             len(CONFIGS) * len(TUNING_SUBJECTS) * len(TUNING_SEEDS)
         ),
@@ -214,16 +282,34 @@ def require(rows: list[dict], stage: str,
         raise RuntimeError(f"R1.6 alignment optimizer {stage} failed")
 
 
+def require_selection(rows: list[dict], root: Path,
+                      prefix_config: str) -> None:
+    if any(row.get("status") not in {"COMPLETE", "EXPECTED_FAILURE"}
+           for row in rows):
+        write_status(root, "selection_fail", prefix_config, rows)
+        raise RuntimeError("R1.6 alignment optimizer selection failed")
+
+
 def aggregate(root: Path, prefix_config: str) -> dict:
     rows = []
+    failures = []
     for config_id in CONFIGS:
         run_id = effective_id(prefix_config, config_id)
         for subject in TUNING_SUBJECTS:
             for seed in TUNING_SEEDS:
-                value = json.loads((
+                result_path = (
                     root / "selection_cells" / run_id
                     / subject / f"seed_{seed}/result.json"
-                ).read_text())
+                )
+                failure_path = result_path.parent / "failure.json"
+                if valid_expected_failure(
+                    failure_path, run_id, subject, seed
+                ):
+                    failures.append(json.loads(failure_path.read_text()))
+                    continue
+                if not valid_selection(result_path, run_id, subject, seed):
+                    raise ValueError(f"missing R1.6 selection cell: {result_path}")
+                value = json.loads(result_path.read_text())
                 trajectory = value["fit_trace"]["trajectory"]
                 selected = int(value["fit_trace"]["selected_total_epoch"])
                 train_values = [
@@ -278,9 +364,21 @@ def aggregate(root: Path, prefix_config: str) -> dict:
     by_config = {}
     for config_id in CONFIGS:
         local = [row for row in rows if row["config_id"] == config_id]
+        local_failures = [
+            row for row in failures
+            if row["config_id"] == effective_id(prefix_config, config_id)
+        ]
         by_subject = {}
         for subject in TUNING_SUBJECTS:
             values = [row for row in local if row["subject"] == subject]
+            if len(values) != len(TUNING_SEEDS):
+                by_subject[subject] = {
+                    "median_inner_improvement": None,
+                    "favourable_seeds": 0,
+                    "train_favourable_seeds": 0,
+                    "complete_seeds": len(values),
+                }
+                continue
             by_subject[subject] = {
                 "median_inner_improvement": float(np.median([
                     row["inner_improvement"] for row in values
@@ -293,6 +391,13 @@ def aggregate(root: Path, prefix_config: str) -> dict:
                 )),
             }
         by_config[config_id] = {
+            "admissible": len(local_failures) == 0
+            and len(local) == len(TUNING_SUBJECTS) * len(TUNING_SEEDS),
+            "complete_cells": len(local),
+            "failed_cells": len(local_failures),
+            "failure_classes": sorted({
+                row["failure_class"] for row in local_failures
+            }),
             "stable_patients": int(sum(
                 value["favourable_seeds"] >= 2
                 for value in by_subject.values()
@@ -310,11 +415,15 @@ def aggregate(root: Path, prefix_config: str) -> dict:
             "median_patient_inner_improvement": float(np.median([
                 value["median_inner_improvement"]
                 for value in by_subject.values()
-            ])),
+                if value["median_inner_improvement"] is not None
+            ])) if any(
+                value["median_inner_improvement"] is not None
+                for value in by_subject.values()
+            ) else None,
             "by_subject": by_subject,
         }
     ranking = sorted(
-        CONFIGS,
+        [key for key in CONFIGS if by_config[key]["admissible"]],
         key=lambda key: (
             by_config[key]["stable_patients"],
             (
@@ -326,6 +435,8 @@ def aggregate(root: Path, prefix_config: str) -> dict:
             -list(CONFIGS).index(key),
         ), reverse=True,
     )
+    if not ranking:
+        raise RuntimeError("no admissible R1.6 alignment optimizer config")
     overfit_rows = []
     overfit_id = f"overfit__prefix__{prefix_config}"
     for subject in OVERFIT_SUBJECTS:
@@ -342,7 +453,7 @@ def aggregate(root: Path, prefix_config: str) -> dict:
         "status": "COMPLETE", "revision": R1_6_REVISION,
         "selected_prefix_config": prefix_config,
         "selected_config": ranking[0], "ranking": ranking,
-        "by_config": by_config, "rows": rows,
+        "by_config": by_config, "rows": rows, "failures": failures,
         "overfit_rows": overfit_rows,
         "overfit_patient_pass": {
             subject: int(sum(
@@ -396,7 +507,7 @@ def main() -> None:
          for seed in TUNING_SEEDS],
         args.workers,
     )
-    require(rows, "selection", args.root, prefix_config)
+    require_selection(rows, args.root, prefix_config)
     write_status(args.root, "aggregate", prefix_config, rows)
     aggregate(args.root, prefix_config)
     write_status(args.root, "complete", prefix_config, rows)

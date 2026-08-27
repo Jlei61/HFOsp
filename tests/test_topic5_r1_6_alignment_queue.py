@@ -51,3 +51,24 @@ def test_valid_selection_accepts_registered_extended_budget(tmp_path):
     artifact["config_id"] = expected
     path.write_text(json.dumps(artifact))
     assert queue.valid_selection(path, expected, "subject", 2)
+
+
+def test_only_nonfinite_gradient_is_an_expected_selection_failure(tmp_path):
+    path = tmp_path / "failure.json"
+    value = {
+        "status": "FAILED",
+        "revision": queue.R1_6_REVISION,
+        "stage": "optimizer_selection",
+        "config_id": "cfg",
+        "subject": "subject",
+        "seed": 2,
+        "failure_class": "NONFINITE_GRADIENT",
+        "development_validation_scored": False,
+        "formal_test_partition_opened": False,
+        "sealed_opened": False,
+    }
+    path.write_text(json.dumps(value))
+    assert queue.valid_expected_failure(path, "cfg", "subject", 2)
+    value["failure_class"] = "EXECUTION_FAILURE"
+    path.write_text(json.dumps(value))
+    assert not queue.valid_expected_failure(path, "cfg", "subject", 2)
