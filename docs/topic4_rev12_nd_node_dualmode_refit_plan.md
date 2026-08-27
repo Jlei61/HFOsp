@@ -815,3 +815,48 @@ that interval would optimize an unstable across-network average.
    Otherwise close this two-channel threshold mapping. Do not open EE, E-to-I,
    Z/M, patient held-out, natural-KMeans selection or another broad field
    search from a negative canary.
+
+Stage-AK completed 42/42 fresh-network simulations without worker failure or
+runaway. Separating mean excitability from signed-depth dispersion was active,
+but did not remove the cross-mode trade-off: the `g10` mean / `g08` dispersion
+mapping improved mode-1 direction in 6/6 networks while worsening mode-0 fit in
+6/6 and mode-0 direction in 5/6. No mapping met the five-endpoint contract.
+The corrected causal-family Fig.4 audit nevertheless showed that this cross
+mapping contains two genuine opposite propagations rather than two fragments
+of one detector window. Pooled natural KMeans was stable and direction-aligned
+(balanced alignment 0.872), but the second patient diagonal remained weak
+(`rho=0.21`). The non-selectable smooth capacity control remained stronger
+(`rho=0.45` on the weak diagonal), so network capacity is not the limiting
+factor and the data-driven field remains incomplete.
+
+## Stage-AL final dual-channel local bridge
+
+This is the final bounded test of the static Node-threshold family. It is
+justified by a sign crossing already present in Stage-AK, not by GIF appearance:
+with the `g10` mean field fixed, moving the dispersion field from `g10` toward
+`g08` changes mode-1 utility from negative to positive before mode-0 utility
+becomes strongly negative.
+
+1. Keep the same dual-channel equation, event unit, target, detector and Node-
+   only scaffold. Patient held-out and natural KMeans cannot select a field.
+2. Move the mean field only along the observation-invariant anchor-to-`g10`
+   spline direction at affine weights `1.0, 1.25, 1.5`. Move the dispersion
+   field only along the `g10`-to-`g08` spline segment at weights
+   `0.20, 0.35, 0.50`.
+3. Run the 3 x 3 local grid plus the historical anchor, coupled `g10/g10` and
+   current `g10/g08` sentinels: 12 mappings on six unused networks 2301--2306,
+   72 simulations total. Use 14 one-thread workers, retain 32 GiB available
+   memory, require 40 GiB free disk and monitor at 600-s intervals.
+4. Relative to the historical anchor, require positive mean utility and at
+   least 4/6 positive networks for all five primary endpoints: total objective,
+   mode 0, mode 1, mode-0 direction and mode-1 direction. No individual
+   endpoint or event count is a run blocker.
+5. Only candidates meeting that frozen contract receive pooled natural-KMeans,
+   Fig.4 and GIF acceptance. Those figures may reject a numerical candidate,
+   but cannot rescue or select one.
+6. If no candidate meets the contract, record
+   `STATIC_NODE_THRESHOLD_FAMILY_INSUFFICIENT_AFTER_LOCAL_BRIDGE` and stop
+   static Node-field optimization. The next scientific revision must change
+   the Node mechanism or target representation; it may not add more field
+   coefficients, workers, EE, E-to-I or Z/M to hide the unresolved interictal
+   mismatch.

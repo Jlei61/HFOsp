@@ -97,12 +97,30 @@ def _aggregate_row(aggregate: dict, candidate_id: str) -> dict:
     return rows[0]
 
 
-def _selected_seed(row: dict) -> int:
-    source_counts = {
-        int(record["seed"]): int(record["n_source_maps"])
-        for record in row["per_seed"]
-    }
-    return select_representative_seed(row["score"]["network_scores"], source_counts)
+def _selected_seed(row: dict, workers: dict[int, tuple[Path, dict]]) -> int:
+    """Select the median-objective seed from legacy or current aggregates."""
+    if "per_seed" in row:
+        source_counts = {
+            int(record["seed"]): int(record["n_source_maps"])
+            for record in row["per_seed"]
+        }
+        network_scores = row["score"]["network_scores"]
+    else:
+        source_counts = {}
+        network_scores = []
+        for record in row["per_network"]:
+            seed = int(record["seed"])
+            npz_path, worker = workers[seed]
+            source_maps, _, _ = _source_bundle(npz_path, worker)
+            labels = np.asarray(worker["labels"], int)
+            source_counts[seed] = int(len(source_maps))
+            network_scores.append({
+                "seed": seed,
+                "objective": float(record["soft_objective"]["objective"]),
+                "n_events": int(record["n_events"]),
+                "mode_counts": np.bincount(labels, minlength=2).tolist(),
+            })
+    return select_representative_seed(network_scores, source_counts)
 
 
 def _event_records(npz_path: Path, worker: dict) -> tuple[list[dict], dict[int, int]]:
@@ -400,7 +418,7 @@ def _stars(p: float) -> str:
 def render_dynamics(config: dict, aggregate: dict, candidate_id: str,
                     workers: dict, output: Path) -> dict:
     row = _aggregate_row(aggregate, candidate_id)
-    seed = _selected_seed(row)
+    seed = _selected_seed(row, workers)
     npz_path, worker = workers[seed]
     detected = _representative_detected_events(npz_path, worker)
     payload_events, mapping = _event_records(npz_path, worker)
@@ -493,7 +511,13 @@ def render_kmeans(config: dict, aggregate: dict, candidate_id: str,
     split = int(np.sum(labels[order] == 0))
     ax_heat.axvline(split - 0.5, color="#B22222", lw=1.2)
     ax_heat.set_yticks(np.arange(len(patient["contact_names"])), patient["contact_names"], fontsize=7)
-    ax_heat.set(xlabel=f"{aggregate['seed_pool']} events", ylabel="virtual contact")
+    pool_label = aggregate.get(
+        "seed_pool", f"{len(np.unique(network_ids))} networks",
+    )
+    ax_heat.set(
+        xlabel=f"{len(labels)} events across {pool_label}",
+        ylabel="virtual contact",
+    )
     ax_heat.set_title("clustered event heatmap", weight="bold", pad=24)
     ax_heat.text(
         max(0, split / 2), -0.75, f"mode 1  {split / len(labels):.0%}",
@@ -611,7 +635,9 @@ def main() -> None:
     )
     metadata = {
         "status": "REV12ND_NODE_FIGURES_COMPLETE",
-        "seed_pool": aggregate["seed_pool"],
+        "seed_pool": aggregate.get(
+            "seed_pool", f"{len(aggregate['requested_seeds'])} networks",
+        ),
         "candidate_id": args.candidate_id,
         "config": {"path": str(args.config.resolve()), "sha256": _sha256(args.config.resolve())},
         "summary": {"path": str(args.summary.resolve()), "sha256": _sha256(args.summary.resolve())},
@@ -626,13 +652,13 @@ def main() -> None:
     (output / "metadata.json").write_text(json.dumps(metadata, indent=2) + "\n")
     (output / "README.md").write_text(f"""### node_dualmode_dynamics.png
 
-连续 Node field、两个算法选出的模式事件和同一网络的 virtual-contact readout。代表网络取 {aggregate['seed_pool']} 池中最接近中位目标的 seed {dynamics['seed']}；两次事件分别是各模式在空间起始图与触点 rank 联合空间中的 medoid，并以互相独立的时间窗显示。
+连续 Node field、两个算法选出的模式事件和同一网络的 virtual-contact readout。代表网络取 {len(aggregate['requested_seeds'])} 个网络中最接近中位目标的 seed {dynamics['seed']}；两次事件分别是各模式在空间起始图与触点 rank 联合空间中的 medoid，并以互相独立的时间窗显示。
 
 **关注点**：两种触点顺序背后是否具有可区分的局部起始拓扑，而不只是同一多点活动被分成两类。
 
 ### node_dualmode_natural_kmeans.png
 
-汇总所有 {aggregate['seed_pool']} 网络的 returned episodes 后独立执行 K=2；患者标签只在聚类完成后用于语义对齐。左侧显示逐 episode rank 与 missing contact，中间比较模型和患者留出 prototype，右侧给出杆内 contact-shuffle 的方向性检验。
+汇总所有 {len(aggregate['requested_seeds'])} 个网络的 returned episodes 后独立执行 K=2；患者标签只在聚类完成后用于语义对齐。左侧显示逐 episode rank 与 missing contact，中间比较模型和患者留出 prototype，右侧给出杆内 contact-shuffle 的方向性检验。
 
 **关注点**：自然两簇是否稳定、是否在两种模式上同时对齐患者，而不是仅恢复占优模式。
 """)
