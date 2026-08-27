@@ -21,7 +21,7 @@ from scripts.topic5_continuous_marked_state_r1.run_r1_6_optimizer_confirmation_c
 
 
 PYTHON = Path("/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python")
-CONFIRMATION_SEEDS = (3, 4)
+CONFIRMATION_SEEDS = (0, 1, 2, 3, 4)
 
 
 def now() -> str:

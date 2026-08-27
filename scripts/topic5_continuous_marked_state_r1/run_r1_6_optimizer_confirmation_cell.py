@@ -50,7 +50,7 @@ def atomic_torch(path: Path, payload: dict) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--subject", required=True, choices=FIXED_SUBJECTS)
-    parser.add_argument("--seed", required=True, type=int, choices=(3, 4))
+    parser.add_argument("--seed", required=True, type=int, choices=range(5))
     parser.add_argument("--device", default="cuda")
     parser.add_argument(
         "--r1-2-root", type=Path, default=contract.RESULT_ROOT / "r1_2"
@@ -252,6 +252,10 @@ def main() -> None:
         "claim_boundary": (
             "development frozen-optimizer confirmation; seed is optimisation "
             "stability, not an independent patient"
+        ),
+        "seed_role": (
+            "independent_optimizer_confirmation" if args.seed in (3, 4)
+            else "tuning_seed_rescored_after_config_freeze"
         ),
     }
     contract.atomic_json(output / "result.json", result)
