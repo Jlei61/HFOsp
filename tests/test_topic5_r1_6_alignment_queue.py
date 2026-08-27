@@ -72,3 +72,9 @@ def test_only_nonfinite_gradient_is_an_expected_selection_failure(tmp_path):
     value["failure_class"] = "EXECUTION_FAILURE"
     path.write_text(json.dumps(value))
     assert not queue.valid_expected_failure(path, "cfg", "subject", 2)
+
+
+def test_long_record_overfit_subjects_are_in_frozen_prefix_dependency_set():
+    assert "yuquan_chengshuai" in queue.OVERFIT_SUBJECTS
+    assert "yuquan_chenziyang" in queue.OVERFIT_SUBJECTS
+    assert len(queue.OVERFIT_SUBJECTS) == 6

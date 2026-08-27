@@ -21,6 +21,9 @@ from scripts.topic5_continuous_marked_state_r1.run_r1_6_optimizer_queue import (
     parallel,
     run,
 )
+from scripts.topic5_continuous_marked_state_r1.run_r1_6_optimizer_confirmation_queue import (
+    prefix_task,
+)
 
 
 OVERFIT_SUBJECTS = TUNING_SUBJECTS + (
@@ -484,6 +487,10 @@ def main() -> None:
             or prefix_summary.get("selection_uses_development_validation") is not False):
         raise ValueError("R1.6 prefix tuning is not admissible")
     prefix_config = str(prefix_summary["selected_prefix_config"])
+    prefix_status = json.loads(
+        (args.root / "PREFIX_TUNING_STATUS.json").read_text()
+    )
+    frozen_prefix = prefix_status["configs"][prefix_config]
     lock_handle = (args.root / "alignment_tuning_queue.lock").open("w")
     try:
         fcntl.flock(lock_handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
@@ -491,7 +498,19 @@ def main() -> None:
         raise RuntimeError("R1.6 alignment queue is already running") from error
     lock_handle.write(f"pid={os.getpid()} started={now()}\n")
     lock_handle.flush()
-    write_status(args.root, "overfit", prefix_config)
+    # The two long-record confirmation subjects were not part of prefix tuning.
+    # Build their prefix checkpoints from the already frozen common config
+    # before asking the overfit runner to load them.  This is a dependency
+    # repair, not an additional configuration search.
+    write_status(args.root, "overfit_prefix", prefix_config)
+    rows = parallel(
+        prefix_task,
+        [(args.root, prefix_config, frozen_prefix, subject, seed)
+         for subject in OVERFIT_SUBJECTS for seed in TUNING_SEEDS],
+        args.workers,
+    )
+    require(rows, "overfit_prefix", args.root, prefix_config)
+    write_status(args.root, "overfit", prefix_config, rows)
     rows = parallel(
         overfit_task,
         [(args.root, prefix_config, subject, seed)
