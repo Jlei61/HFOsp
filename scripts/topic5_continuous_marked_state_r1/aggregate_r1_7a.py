@@ -62,22 +62,26 @@ def bootstrap(blocks: list[dict], key: str, *, weight_key: str = "n_events",
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", type=Path, default=contract.RESULT_ROOT / "r1_7a")
+    parser.add_argument("--revision", default=R1_7A_REVISION,
+                        help="cell revision to accept; the R1.7B extension passes its own")
+    parser.add_argument("--seeds", type=int, default=len(SEEDS),
+                        help="number of seeds per subject (5 for the frozen R1.7A)")
     args = parser.parse_args()
     inventory = json.loads((args.root / "manifests/cohort_inventory.json").read_text())
     by_subject = {}; rows = []
     for subject in inventory["selected_subjects"]:
         payloads = []
-        for seed in SEEDS:
+        for seed in range(int(args.seeds)):
             path = args.root / "fits" / subject / f"seed_{seed}/result.json"
             value = json.loads(path.read_text())
             if (value.get("status") != "COMPLETE"
-                    or value.get("revision") != R1_7A_REVISION
+                    or value.get("revision") != args.revision
                     or value.get("formal_test_partition_opened") is not False
                     or value.get("sealed_opened") is not False):
                 raise ValueError(f"invalid R1.7A result: {path}")
             payloads.append(value)
         scored, nonfinite_seeds = split_scored_payloads(payloads)
-        row = {"subject": subject, "n_seeds": 5,
+        row = {"subject": subject, "n_seeds": int(args.seeds),
                "scored_seeds": len(scored),
                "nonfinite_gradient_seeds": nonfinite_seeds,
                "stable_checkpoint_seeds": sum(v["stable_checkpoint"] for v in payloads)}
@@ -186,7 +190,7 @@ def main() -> None:
     stable = [row["subject"] for row in rows if row["patient_stable_state"]]
     t2 = [row["subject"] for row in rows if row["t2_run_eligible"]]
     summary = {
-        "status": "COMPLETE", "revision": R1_7A_REVISION,
+        "status": "COMPLETE", "revision": args.revision,
         "subjects": inventory["selected_subjects"], "n_subjects": len(rows),
         "stable_state_subjects": stable, "n_stable_state_subjects": len(stable),
         "t2_run_subjects": t2, "n_t2_run_subjects": len(t2),
