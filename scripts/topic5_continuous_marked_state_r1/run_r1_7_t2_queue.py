@@ -114,6 +114,12 @@ def main() -> None:
     ], args.root / "logs/t2_aggregate.log")
     if code:
         raise RuntimeError("R1.7A T2 aggregation failed")
+    code = run([
+        str(PYTHON), "scripts/topic5_continuous_marked_state_r1/finalize_r1_7a_r2_goal.py",
+        "--root", str(args.root),
+    ], args.root / "logs/finalize.log")
+    if code:
+        raise RuntimeError("R1.7A/T2 final machine audit failed")
 
 
 if __name__ == "__main__":
