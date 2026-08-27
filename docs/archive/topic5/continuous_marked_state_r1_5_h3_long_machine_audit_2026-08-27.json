@@ -1,0 +1,123 @@
+{
+  "audited_code_head_before_report_commit": "97a2cf40e3afc789f3c9b9e32e4f37a76b8aae77",
+  "claim_boundary": "development predictive evidence; H3 is an exact-N antecedent screen and teacher-forced latent-correction diagnostic, not causality",
+  "development_time_audit": {
+    "all_pass": true,
+    "subjects": [
+      {
+        "dev_end_epoch": 1245814930.474,
+        "maximum_event_time": 1245814930.208,
+        "subject": "epilepsiae_1096",
+        "train_events": 107572,
+        "validation_events": 34371
+      },
+      {
+        "dev_end_epoch": 1108007465.418,
+        "maximum_event_time": 1108007463.288,
+        "subject": "epilepsiae_384",
+        "train_events": 17537,
+        "validation_events": 5641
+      },
+      {
+        "dev_end_epoch": 1597352067.475,
+        "maximum_event_time": 1597352061.227,
+        "subject": "yuquan_zhangkexuan",
+        "train_events": 10179,
+        "validation_events": 1590
+      },
+      {
+        "dev_end_epoch": 1569087011.829,
+        "maximum_event_time": 1569087010.15,
+        "subject": "yuquan_chengshuai",
+        "train_events": 16545,
+        "validation_events": 5515
+      },
+      {
+        "dev_end_epoch": 1586948811.074,
+        "maximum_event_time": 1586945531.636,
+        "subject": "yuquan_chenziyang",
+        "train_events": 5764,
+        "validation_events": 1281
+      },
+      {
+        "dev_end_epoch": 1578081750.36,
+        "maximum_event_time": 1578081745.742,
+        "subject": "yuquan_zhangjiaqi",
+        "train_events": 28965,
+        "validation_events": 9655
+      }
+    ]
+  },
+  "expected_h3_long_cells": 130,
+  "formal_test_partition_opened": false,
+  "goal_changed_paths": [
+    "docs/archive/topic5/INDEX.md",
+    "docs/archive/topic5/continuous_marked_state_r1_5_h3_long_contract_2026-08-27.md",
+    "scripts/topic5_continuous_marked_state_r1/aggregate_h3_long.py",
+    "scripts/topic5_continuous_marked_state_r1/aggregate_r1_5.py",
+    "scripts/topic5_continuous_marked_state_r1/audit_r1_5_h3_long_support.py",
+    "scripts/topic5_continuous_marked_state_r1/finalize_r1_5_h3_long.py",
+    "scripts/topic5_continuous_marked_state_r1/run_h3_long_human.py",
+    "scripts/topic5_continuous_marked_state_r1/run_h3_long_queue.py",
+    "scripts/topic5_continuous_marked_state_r1/run_h3_long_synthetic.py",
+    "scripts/topic5_continuous_marked_state_r1/run_r1_3_target_observer.py",
+    "scripts/topic5_continuous_marked_state_r1/run_r1_5_queue.py",
+    "src/topic5_continuous_marked_state_r1/contract.py",
+    "src/topic5_continuous_marked_state_r1/h3_long.py",
+    "src/topic5_continuous_marked_state_r1/h3_long_human.py",
+    "src/topic5_continuous_marked_state_r1/t2_r2.py",
+    "tests/topic5_continuous_marked_state_r1/test_h3_long.py",
+    "tests/topic5_continuous_marked_state_r1/test_r1_5_aggregation.py",
+    "tests/topic5_continuous_marked_state_r1/test_t2_r2.py"
+  ],
+  "goal_commit_range": "dda5f2a5^..HEAD",
+  "h3_estimability_seed_cells": {
+    "edge_estimable_seeds": 29,
+    "nonfinite_gradient_seeds": 0,
+    "not_estimable_seeds": 30,
+    "rank_degenerate_seeds": 0,
+    "zero_gradient_seeds": 60,
+    "zero_selected_seeds": 11
+  },
+  "h3_long_cell_files": 130,
+  "h3_long_revision": "h3_long_exact_boxcar_affine_edge_v2",
+  "h3_patient_scale_source_rows": {
+    "boundary": 10,
+    "boundary_supportive": 0,
+    "full_control": 16,
+    "full_control_positive": 0
+  },
+  "instrument_checks": {
+    "support_cells_unique": true,
+    "support_development_only": true,
+    "support_hashes": true,
+    "support_revision": true,
+    "support_status": true,
+    "support_subjects_frozen": true,
+    "support_unsealed": true,
+    "synthetic_all_pass": true,
+    "synthetic_cells_exact": true,
+    "synthetic_hashes": true,
+    "synthetic_revision": true,
+    "synthetic_status": true,
+    "synthetic_unsealed": true
+  },
+  "paper_ready_or_seizure_probe_committed_changes": [],
+  "r1_5_fit_files": 30,
+  "r1_5_revision": "r1_5_long_support_explicit_extension_v1",
+  "result_package_audit": {
+    "all_pass": true,
+    "h3_long_packages": 130,
+    "r1_5_packages": 30
+  },
+  "sealed_opened": false,
+  "status": "COMPLETE",
+  "support_revision": "r1_5_h3_long_exact_recorded_segment_support_v2",
+  "synthetic_all_pass": true,
+  "synthetic_cells": 54,
+  "tests": {
+    "output": "........................................................................ [ 70%]\n..............................                                           [100%]\n=============================== warnings summary ===============================\ntests/topic5_continuous_marked_state_r1/test_observer.py: 3 warnings\ntests/topic5_continuous_marked_state_r1/test_r1_2b.py: 3 warnings\ntests/topic5_continuous_marked_state_r1/test_r1_3.py: 5 warnings\ntests/topic5_continuous_marked_state_r1/test_t1_pilot.py: 1 warning\n  /home/honglab/leijiaxin/anaconda3/envs/cuda_env/lib/python3.11/site-packages/torch/nn/modules/transformer.py:379: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True\n    warnings.warn(\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n102 passed, 12 warnings in 17.23s\n",
+    "returncode": 0,
+    "skipped": false
+  }
+}

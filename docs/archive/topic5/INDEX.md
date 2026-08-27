@@ -268,3 +268,8 @@
   - 六患者 R1.4 复现 H1/H2a；H3 主实验回到 H3-S0 支持最稳定的 N=100 一步 generator-edge；N=1,000–2,000 与六小时 boxcar 退出当前主线。
 - R1.4/T2-R2.0 完成后的下一阶段合同：`continuous_marked_state_r1_5_h3_long_contract_2026-08-27.md`
   - 以三位 exact-model 未见患者加三位旧长记录校准患者做 5-seed R1.5；H3 另行探索 N=1,000/3,000/10,000 的 TRAIN-only event innovation。N=100 阴性不 gate 长尺度探索，但没有稳定 T1 时只允许报告长历史 antecedent association。
+- R1.5/H3-long 完成报告：
+  - 白话版：`continuous_marked_state_r1_5_h3_long_plain_2026-08-27.md`
+  - 技术版：`continuous_marked_state_r1_5_h3_long_technical_2026-08-27.md`
+  - 机器审计快照：`continuous_marked_state_r1_5_h3_long_machine_audit_2026-08-27.json`
+  - R1.5 在三位新增患者中仅张克轩达到稳定、正确时刻特异的候选状态标准，增量落在 first subset 而非 continuation。H3-long 的 16 个完整对照与 10 个边界患者-source-尺度组合均无患者级支持；唯一稳定 T1 患者的独立 validation 支持不足，因此结论是未支持且仍未决，不是长尺度效应的生物学阴性。
