@@ -2,12 +2,20 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 
 from scripts import freeze_topic4_rev15_m3_coordinate_atlas as freezer
 from scripts import monitor_topic4_rev15_m3_coordinate_atlas as monitor
 from scripts import run_topic4_rev15_m3_coordinate_atlas_worker as worker
+from src.topic4_core_field import (
+    core_thresholds,
+    project_to_budget,
+    sample_core_quantiles,
+    signed_depth,
+)
+from src.topic4_rev14_fourier_field import array_sha256
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -72,6 +80,61 @@ def test_worker_wrapper_switches_only_freezer_and_status_contract():
             worker.base.PREPARE_STATUS,
             worker.base.EXPECTED_PATHWAYS,
         ) = previous
+
+
+def test_real_coordinate_reaches_projection_and_preserves_node_contract():
+    config = _config()
+    rows, _ = freezer.build_candidates(config)
+    candidate = next(row for row in rows if row["candidate_id"] == "m3_c00_p_r08")
+    assert candidate["field_kind"] == "absolute_paired_phase_fourier_m3"
+
+    rng = np.random.default_rng(1501)
+    n_e, n_i = 96, 24
+    positions = rng.uniform(0.0, 20.0, size=(n_e, 2))
+    exact_h, _ = project_to_budget(
+        np.exp(np.sin(positions[:, 0] / 3.0)), target_count=31.0,
+    )
+    quantile_seed = 77
+    core_mean, core_std, v_base = 17.5, 1.0, 18.0
+    frozen_depth = signed_depth(core_thresholds(
+        sample_core_quantiles(n_e, quantile_seed), core_mean, core_std,
+    ))
+    exact_vtheta = np.full(n_e + n_i, v_base, dtype=np.float64)
+    exact_vtheta[:n_e] = v_base - exact_h * frozen_depth
+    substrate = SimpleNamespace(
+        h_e=exact_h,
+        vtheta=exact_vtheta,
+        n_e=n_e,
+        positions_e=positions,
+        engine={
+            "v_base": v_base, "L": 20.0,
+            "core_mean": core_mean, "core_std": core_std,
+        },
+        stage={"N_core_manual": 31.0, "quantile_seed": quantile_seed},
+    )
+    config["node_mapping"]["expected_target_h_mass"] = 31.0
+    config["node_mapping"]["signed_depth_contract"] = {
+        "expected_n_e": n_e,
+        "quantile_seed": quantile_seed,
+        "core_mean_mV": core_mean,
+        "core_std_mV": core_std,
+        "v_base_mV": v_base,
+        "sha256": array_sha256(frozen_depth),
+    }
+
+    projection = worker.base._project_candidate(candidate, substrate, config)
+
+    assert np.isclose(projection["h"].sum(), 31.0, rtol=0.0, atol=1e-8)
+    assert np.array_equal(projection["vtheta"][n_e:], exact_vtheta[n_e:])
+    assert projection["audit"]["mapping"] == (
+        "absolute_fourier_s_to_mass_projected_h"
+    )
+    assert np.isclose(
+        projection["audit"]["centered_latent_surface_rms"],
+        0.8,
+        rtol=0.0,
+        atol=2e-12,
+    )
 
 
 def test_controller_contract_uses_rev15_worker_and_adaptive_hard_cap():

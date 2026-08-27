@@ -158,7 +158,7 @@ def build_candidates(config: Mapping[str, Any]) -> tuple[list[dict], dict]:
             sign_tag = "p" if sign > 0 else "m"
             record = base._coordinate_record(
                 candidate_id=f"m3_c{coordinate_index:02d}_{sign_tag}_r08",
-                field_kind="absolute_paired_phase_fourier_m3_coordinate",
+                field_kind="absolute_paired_phase_fourier_m3",
                 selectable=True, modes=modes, coefficients=coefficients,
                 direction_index=coordinate_index, sign=sign, target_rms=0.8,
                 decimal_places=decimal_places,
