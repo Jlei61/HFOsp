@@ -6,6 +6,9 @@ from scripts.topic5_continuous_marked_state_r1.run_r1_3_target_observer import (
     requires_recorded_segment_lock,
 )
 from scripts.topic5_continuous_marked_state_r1.run_r1_5_queue import complete
+from scripts.topic5_continuous_marked_state_r1.finalize_r1_5_h3_long import (
+    fmt_count,
+)
 
 
 def _payload(epoch: int, checkpoint_hash: str, value: float = -0.1) -> dict:
@@ -39,6 +42,12 @@ def test_epoch_zero_is_not_a_directional_negative_or_positive() -> None:
     assert summary["persistent_favourable_seeds"] == 0
     assert summary["joint_stable_seeds"] == 0
     assert summary["stable_explicit_t1_for_h3"] is False
+
+
+def test_report_count_formatter_does_not_add_contrast_sign() -> None:
+    assert fmt_count(None) == "NA"
+    assert fmt_count(3.0) == "3"
+    assert fmt_count(2.5) == "2.5"
 
 
 def test_patient_stability_requires_three_distinct_checkpoints() -> None:
