@@ -18,12 +18,14 @@ T2-R2.0，检验最近 100 次事件的 load innovation 或 participation-compos
    `first subset` 方向不一致，在最强患者上区间显著不利。
    合同列的三个主端点中，`same_prefix_continuation` 在本队列**与 continuation 完全等值**，
    实际只有两个独立端点。
-3. T2-R2.0 **未获得可采信支持**。冻结聚合器把 8 个 patient×source 单元中的 2 个判为
-   `patient_source_support`（`epilepsiae_1125`/participation 与 `yuquan_zhangbichen`/load），
-   但逐项复核后：`yuquan_zhangbichen`/load 是**安慰剂退化造成的假阳性**（见 §7.5），
-   `epilepsiae_1125`/participation 内部一致但**缺少独立时间块确认**，
-   而独立块确认是上一轮 R1.6 最小 H3 的判据之一。
-   因此本轮 **8/8 单元均未达到上一轮自身的证据标准**；一个候选待逐块跟进。
+3. T2-R2.0 **未获得支持，8/8 单元全部不成立**。冻结聚合器把 2 个单元判为
+   `patient_source_support`，但两者都不成立：`yuquan_zhangbichen`/load 是
+   **安慰剂退化造成的假阳性**（§7.5）；`epilepsiae_1125`/participation 在事件平均上
+   内部一致，但补做的**独立时间块重打分**（§6c）在患者优先口径下给出
+   `−0.00158 [−0.00419, +0.00060]`，**跨零**。
+   与退役的长尺度路线不同，本轮阴性是**可解释的**：仪器可证明良好
+   （零点梯度健康、满秩、24–29 个真正独立的块、逐块与事件平均方向一致、
+   不利臂的不利被正确复现），仍看不到效应。
 
 正式检验分区、sealed 分区、seizure probe 与 paper-ready figures 全程未打开或未修改。
 
@@ -234,6 +236,49 @@ state_matched_placebo / current_event_only` 共享逐行相同的 support
 - yuquan_zhangbichen/participation: 事件平均基于 835 行；互不重叠 100 事件块仅 8 个；**产物中无逐块对比**。
 
 
+## 6c. 独立时间块重打分（补做，承重）
+
+§7.1 指出冻结 T2 只有事件平均。为此新增 `evaluate_r2_edge_by_block`
+（TDD：块不跨记录段、每块恰好 `block_events` 行、段尾余数丢弃而非成短块），
+并用 `rescore_r1_7_t2_by_block.py` **不重新拟合**地重打分全部 38 个 cell：
+重载冻结 T1 checkpoint、重建同一四臂设计、载入 cell 已保存的 `edges.pt`，
+逐块评估。聚合口径与 R1.7A 的 H1 一致：**逐块取五 seed 中位数，再对块做 bootstrap**。
+
+| 患者 | 暴露 | 独立块 | 事件平均 | 逐块均值 | 95% CI | 有利块 | 判定 |
+|---|---|---:|---:|---:|---|---:|---|
+| `epilepsiae_1125` | participation | 24 | −0.00361 | −0.00158 | [−0.00419, +0.00060] | 0.62 | 跨零 |
+| `epilepsiae_1125` | load | 24 | +0.00292 | +0.00367 | [−0.00113, +0.00891] | 0.33 | 跨零 |
+| `epilepsiae_253` | load | 29 | +0.04109 | +0.04075 | [+0.01656, +0.07801] | 0.17 | 不利 |
+| `epilepsiae_253` | participation | 29 | 0.00000 | 0.00000 | [0, 0] | 0.00 | 边未离零 |
+| `yuquan_zhangbichen` | load | 8 | −0.00088 | −0.00144 | [−0.00672, +0.00408] | 0.75 | 跨零 |
+| `yuquan_zhangbichen` | participation | 8 | +0.00330 | +0.01928 | [−0.01535, +0.05808] | 0.38 | 跨零 |
+| `yuquan_liyouran` | load | 2 | +0.00284 | +0.00875 | [+0.00719, +0.01031] | 0.00 | 不利（仅 2 块）|
+| `yuquan_liyouran` | participation | 2 | 0.00000 | 0.00000 | [0, 0] | 0.00 | 边未离零 |
+
+**`block_level_support`：none。**
+
+### 逐 seed 区间会误导
+
+`epilepsiae_1125`/participation 的 seeds 0/1/2 各自区间不含零
+（−0.00436 [−0.00739,−0.00143]、−0.00821 [−0.01449,−0.00275]、−0.00203 [−0.00441,−0.00034]），
+但 seed 3 为 **+0.00190**、seed 4 为 −0.00167 且跨零。
+**单 seed 的块 bootstrap 不含 seed 间波动**，不能作为患者层证据；
+按合同的患者优先口径聚合后效应缩到 −0.00158 并跨零。
+
+### 该检验有分辨力（不是一律跨零）
+
+同一患者的 load 臂在事件平均上不利（+0.0093/+0.0130），逐块也不利且区间不含零；
+`epilepsiae_253`/load 逐块 +0.04075 [+0.01656,+0.07801]。
+两个"边从未离开零"的单元逐块恒为 0.00000。方向、量级与零值都被正确复现。
+
+### 独立块数的正确口径
+
+`epilepsiae_1125` 的原始事件块是 33，但能配成 next-event 对且完整成块的是 **24**。
+24 才是该对比的分母。`yuquan_liyouran` 只有 **2** 块，实质不可判读。
+
+产物：`t2_r2_block_rescore/`（38 cells）、`reports/t2_block_rescore_summary.json`。
+本节为探索性仪器开发，不改写冻结 T2 产物。
+
 ## 7. 已知限制（承重）
 
 ### 7.1 T2 无独立时间块对比
@@ -243,7 +288,7 @@ T2 产物只有 D_mechanism 上的 next-event 事件平均，**没有任何逐�
 行数远大于独立信息量。以 `epilepsiae_1125` 为例：事件平均基于 2904 行，
 而互不重叠的 100-event block 只有 33 个。
 R1.6 最小 H3 曾以 independent-block medians 为判据，本实现缺此项。
-**因此任何 T2 阳性在补上逐块对比之前只能登记为候选。**
+**该缺口已由 §6c 补做**：逐块重打分后 `block_level_support` 为 none，两个被冻结聚合器判为 support 的单元均跨零。但**冻结 T2 实现本身仍不产出逐块 contrast**，下一轮应把它并入主流程。
 
 ### 7.2 `real_edge_estimable` 混入拟合结果
 

@@ -297,3 +297,41 @@ def test_only_known_support_failures_are_downgraded() -> None:
     assert not run_t2_r2_human.support_limited(
         ValueError("unexpected tensor shape")
     )
+
+
+def test_per_block_evaluation_never_spans_segments_and_drops_partial_blocks() -> None:
+    """T2 contrasts must be reportable on non-overlapping within-segment blocks.
+
+    The event average spans rows whose exposure histories overlap by
+    construction, so an independent-block view is required before a T2 effect
+    can be believed.  Blocks must never straddle a recorded gap, must be exactly
+    block_events long, and a segment's remainder must be dropped rather than
+    forming a short block.
+    """
+    from src.topic5_continuous_marked_state_r1.t2_r2 import evaluate_r2_edge_by_block
+
+    model = _Model()
+    design = _synthetic_design(1.0)
+    edge = ExposureEdge(design.current_state.shape[1], 1)
+    # validation rows are 800..1199; split them into segments of 250 and 150
+    segment = np.zeros(len(design.current_index), dtype=np.int64)
+    segment[800:1050] = 5
+    segment[1050:1200] = 6
+    blocks = evaluate_r2_edge_by_block(
+        model, edge, design, split="validation", event_segment=segment,
+        device="cpu", batch_size=256, block_events=100,
+    )
+    # 250//100 + 150//100 = 2 + 1
+    assert len(blocks) == 3
+    assert [b["segment"] for b in blocks] == [5, 5, 6]
+    assert all(b["n_rows"] == 100 for b in blocks)
+    assert all("joint_nll_per_event" in b for b in blocks)
+    # a segment too short for one block contributes nothing
+    short = np.zeros(len(design.current_index), dtype=np.int64)
+    short[800:1200] = np.repeat([1, 2, 3, 4], 100)
+    short[1150:1200] = 9          # 50 leftover events in their own segment
+    blocks2 = evaluate_r2_edge_by_block(
+        model, edge, design, split="validation", event_segment=short,
+        device="cpu", batch_size=256, block_events=100,
+    )
+    assert 9 not in [b["segment"] for b in blocks2]

@@ -302,11 +302,19 @@
       `first subset` 方向不一致（最强患者上区间显著不利）。
       合同三个主端点中 `same_prefix_continuation` 在本队列与 `continuation` **逐位等值**，
       实际只有两个独立端点。
+    - **H3 独立时间块重打分（本轮补做）**：新增 `evaluate_r2_edge_by_block`，
+      用 `rescore_r1_7_t2_by_block.py` 不重新拟合地重打分全部 38 cells，
+      聚合口径同 H1（逐块取五 seed 中位数再做块 bootstrap）。
+      **`block_level_support` = none**：`epilepsiae_1125`/participation
+      −0.00158 [−0.00419,+0.00060]、`yuquan_zhangbichen`/load −0.00144 [−0.00672,+0.00408] 均跨零。
+      单 seed 区间会误导（该患者 seeds 0/1/2 不含零但 seed 3 为 +0.00190）。
+      检验有分辨力：不利臂逐块同样不利且不含零，两个"边未离零"单元逐块恒为 0。
+      产物 `t2_r2_block_rescore/` 与 `reports/t2_block_rescore_summary.json`。
     - **H3（T2-R2.0）**：8 个 patient×source 单元中冻结聚合器判 2 个为 support，但复核后
       `yuquan_zhangbichen`/load 由 **placebo−no_edge=+0.0286 的安慰剂退化**驱动
       （real−no_edge 仅 −0.00088、种子符号不一致、独立块 8 个），不予采信；
       `epilepsiae_1125`/participation 内部一致但**缺独立时间块确认**（事件平均基于 2904 行、
-      独立块仅 33 个，产物中无逐块 contrast）。**8/8 未达上一轮自身证据标准，H3 仍未决。**
+      独立块仅 33 个，产物中无逐块 contrast）。**8/8 在独立时间块口径下全部不成立；与退役长尺度路线不同，本轮阴性可解释。**
     - **三项方法学发现**：(1) T2 无逐块 contrast；(2) `real_edge_estimable` 把拟合结果
       `edge_left_zero_initialisation` 混入可估计性闸门，导致"主动判定无边"的 seed 被移出分母，
       **低报阴性**；(3) `patient_source_support` 不要求 real 相对 no_edge 有实质量级，
