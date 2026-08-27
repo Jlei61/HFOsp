@@ -45,8 +45,11 @@ MODEL_INTERNAL_ARRAY_ALLOWLIST = frozenset({
     "source_onset_evaluable",
     "event_returned",
     "event_t_on_ms",
+    "event_t_off_ms",
+    "event_trigger_t_on_ms",
     "event_fragment_count",
     "event_directed_root_id",
+    "event_root_count",
     "positions_E",
     "delta_vtheta",
     "source_bin_mm",
@@ -65,7 +68,9 @@ MINORITY_FRACTION = 0.20
 MIN_DIRECTION_CONSISTENCY = 0.70
 MIN_TEMPORAL_SIGN_BLOCKS = 2
 N_TEMPORAL_BLOCKS = 3
-MIN_FORMAL_EVENTS = 12
+MIN_FORMAL_EVENTS = 24
+PREFERRED_FORMAL_EVENTS = 30
+MIN_EVENTS_PER_DIRECTION = 6
 MINIMUM_YIELD_RATIO = 0.50
 MAXIMUM_COMPOUND_DELTA = 0.15
 WIDESPREAD_FRACTION = 0.50
@@ -158,13 +163,20 @@ def _event_map_features(onset_maps: np.ndarray) -> tuple[np.ndarray, np.ndarray]
     return np.asarray(rows, dtype=np.float64), valid
 
 
-def _contiguous_folds(n_events: int, *, n_folds: int = N_TEMPORAL_BLOCKS
-                      ) -> list[np.ndarray]:
-    if n_events < n_folds:
-        raise ValueError("contiguous folds require at least one event per fold")
-    return [np.asarray(block, dtype=np.int64) for block in np.array_split(
-        np.arange(n_events, dtype=np.int64), n_folds,
-    )]
+def _equal_time_folds(event_t_on_ms: np.ndarray, *,
+                      n_folds: int = N_TEMPORAL_BLOCKS) -> list[np.ndarray]:
+    """Split chronological events by equal-duration, not equal-count, blocks."""
+    times = np.asarray(event_t_on_ms, dtype=np.float64)
+    if times.ndim != 1 or len(times) < n_folds or not np.all(np.isfinite(times)):
+        raise ValueError("equal-time folds require finite one-dimensional times")
+    if np.any(np.diff(times) < 0.0) or float(times[-1]) <= float(times[0]):
+        raise ValueError("equal-time folds require increasing temporal support")
+    edges = np.linspace(float(times[0]), float(times[-1]), int(n_folds) + 1)
+    block_id = np.searchsorted(edges[1:-1], times, side="right")
+    return [
+        np.flatnonzero(block_id == block).astype(np.int64)
+        for block in range(int(n_folds))
+    ]
 
 
 def _fit_directional_gmm(values: np.ndarray, *, n_components: int,
@@ -178,25 +190,52 @@ def _fit_directional_gmm(values: np.ndarray, *, n_components: int,
     ).fit(np.asarray(values, dtype=np.float64).reshape(-1, 1))
 
 
-def directional_k2_formal(displacements: np.ndarray, *, seed: int
+def directional_k2_formal(displacements: np.ndarray,
+                          event_t_on_ms: np.ndarray, *, seed: int
                           ) -> dict[str, Any]:
     """Evaluate signed displacement K=2 without shuffled time folds.
 
     The input must already be chronological and event-count matched to every
-    paired arm.  Each contiguous third is held out once; the full-series K=2
+    paired arm.  Each equal-duration temporal third is held out once; the full-series K=2
     labels are used only for the frozen direction/occupancy diagnostics.
     """
     values = np.asarray(displacements, dtype=np.float64)
-    if values.ndim != 1:
-        raise ValueError("signed causal displacement must be one-dimensional")
-    values = values[np.isfinite(values)]
+    times = np.asarray(event_t_on_ms, dtype=np.float64)
+    if values.ndim != 1 or times.shape != values.shape:
+        raise ValueError("signed displacement and event times must align")
+    finite = np.isfinite(values) & np.isfinite(times)
+    values = values[finite]
+    times = times[finite]
+    order = np.argsort(times, kind="stable")
+    values = values[order]
+    times = times[order]
+    direction_counts = {
+        "negative": int(np.sum(values < 0.0)),
+        "positive": int(np.sum(values > 0.0)),
+    }
+    evaluability_reasons = []
     if len(values) < MIN_FORMAL_EVENTS:
+        evaluability_reasons.append("fewer_than_24_isolated_families")
+    if min(direction_counts.values()) < MIN_EVENTS_PER_DIRECTION:
+        evaluability_reasons.append("fewer_than_6_families_in_one_direction")
+    try:
+        folds = _equal_time_folds(times)
+    except ValueError:
+        folds = []
+        evaluability_reasons.append("equal_time_blocks_not_constructible")
+    if folds and any(len(block) == 0 for block in folds):
+        evaluability_reasons.append("one_or_more_equal_time_blocks_empty")
+    if evaluability_reasons:
         return {
-            "status": "INSUFFICIENT_MATCHED_EVENTS",
+            "status": "NOT_EVALUABLE",
             "n_events": int(len(values)),
+            "events_per_direction": direction_counts,
+            "preferred_event_count_reached": bool(
+                len(values) >= PREFERRED_FORMAL_EVENTS
+            ),
+            "evaluability_reasons": evaluability_reasons,
         }
 
-    folds = _contiguous_folds(len(values))
     heldout_deltas = []
     for fold_index, test in enumerate(folds):
         train = np.setdiff1d(np.arange(len(values)), test, assume_unique=True)
@@ -232,6 +271,20 @@ def directional_k2_formal(displacements: np.ndarray, *, seed: int
     return {
         "status": "OK",
         "n_events": int(len(values)),
+        "events_per_direction": direction_counts,
+        "preferred_event_count_reached": bool(
+            len(values) >= PREFERRED_FORMAL_EVENTS
+        ),
+        "evaluability_reasons": [],
+        "temporal_block_definition": "three_equal_duration_blocks",
+        "temporal_block_time_edges_ms": [
+            float(times[0]),
+            *[
+                float(times[0] + (times[-1] - times[0]) * block / N_TEMPORAL_BLOCKS)
+                for block in range(1, N_TEMPORAL_BLOCKS)
+            ],
+            float(times[-1]),
+        ],
         "heldout_k2_minus_k1_loglik_per_event": float(np.mean(heldout_deltas)),
         "heldout_fold_deltas": heldout_deltas,
         "cluster_labels": labels,
@@ -288,6 +341,92 @@ def event_axis_displacements(onset_maps: np.ndarray, *, axis_unit: np.ndarray,
             continue
         output.append(float(np.dot(record["displacement_xy_mm"], axis)))
     return np.asarray(output, dtype=np.float64)
+
+
+def overlap_connected_episode_audit(
+        event_t_on_ms: np.ndarray, event_t_off_ms: np.ndarray,
+        displacements: np.ndarray) -> tuple[np.ndarray, dict[str, Any]]:
+    """Identify every family belonging to a temporally overlapping episode.
+
+    A strict interval overlap joins two families.  Connectivity is transitive:
+    if A overlaps B and B overlaps C, all three are excluded from the formal
+    K=2 endpoint even when A and C do not directly overlap.
+    """
+    t_on = np.asarray(event_t_on_ms, dtype=np.float64)
+    t_off = np.asarray(event_t_off_ms, dtype=np.float64)
+    displacement = np.asarray(displacements, dtype=np.float64)
+    if t_on.ndim != 1 or t_off.shape != t_on.shape \
+            or displacement.shape != t_on.shape:
+        raise ValueError("overlap audit arrays must align")
+    if not np.all(np.isfinite(t_on)) or not np.all(np.isfinite(t_off)) \
+            or np.any(t_off < t_on):
+        raise ValueError("overlap audit requires finite ordered intervals")
+    if np.any(np.diff(t_on) < 0.0):
+        raise ValueError("overlap audit requires chronological families")
+
+    pairs = []
+    pair_direction_counts = {"same": 0, "opposite": 0, "zero_involved": 0}
+    for left in range(len(t_on)):
+        right = left + 1
+        while right < len(t_on) and t_on[right] < t_off[left]:
+            left_sign = int(np.sign(displacement[left]))
+            right_sign = int(np.sign(displacement[right]))
+            relation = (
+                "zero_involved" if left_sign == 0 or right_sign == 0
+                else "same" if left_sign == right_sign else "opposite"
+            )
+            pair_direction_counts[relation] += 1
+            pairs.append({
+                "family_indices": [int(left), int(right)],
+                "directions": [left_sign, right_sign],
+                "direction_relation": relation,
+            })
+            right += 1
+
+    components: list[list[int]] = []
+    if len(t_on):
+        current = [0]
+        current_right = float(t_off[0])
+        for index in range(1, len(t_on)):
+            if float(t_on[index]) < current_right:
+                current.append(index)
+                current_right = max(current_right, float(t_off[index]))
+            else:
+                components.append(current)
+                current = [index]
+                current_right = float(t_off[index])
+        components.append(current)
+
+    overlap_components = []
+    excluded = np.zeros(len(t_on), dtype=bool)
+    for component in components:
+        if len(component) < 2:
+            continue
+        excluded[component] = True
+        signs = np.sign(displacement[component]).astype(np.int64)
+        overlap_components.append({
+            "family_indices": [int(value) for value in component],
+            "n_families": int(len(component)),
+            "negative": int(np.sum(signs < 0)),
+            "positive": int(np.sum(signs > 0)),
+            "zero": int(np.sum(signs == 0)),
+            "contains_opposite_directions": bool(
+                np.any(signs < 0) and np.any(signs > 0)
+            ),
+        })
+
+    return ~excluded, {
+        "formal_action": "EXCLUDE_ALL_MEMBERS_OF_OVERLAP_CONNECTED_EPISODES",
+        "strict_overlap_definition": "later_t_on_ms < earlier_t_off_ms",
+        "n_input_families": int(len(t_on)),
+        "n_overlap_pairs": int(len(pairs)),
+        "n_overlap_components": int(len(overlap_components)),
+        "n_excluded_families": int(np.sum(excluded)),
+        "n_isolated_families": int(np.sum(~excluded)),
+        "overlap_pair_direction_counts": pair_direction_counts,
+        "overlap_pairs": pairs,
+        "overlap_components": overlap_components,
+    }
 
 
 def canonicalize_cluster_labels(labels: np.ndarray,
@@ -393,13 +532,14 @@ def fragmentation_audit(labels: np.ndarray, root_ids: np.ndarray,
         if np.sum(selected) > 1 and len(np.unique(labels[selected])) > 1:
             repeated_cross_cluster.append(int(root_id))
     return {
+        "formal_acceptance_role": "DIAGNOSTIC_ONLY",
         "n_families": int(len(labels)),
         "n_unique_directed_roots": int(len(np.unique(root_ids))),
         "mean_detector_fragments_per_family": (
             float(np.mean(fragment_counts)) if len(fragment_counts) else 0.0
         ),
         "cross_cluster_duplicated_root_ids": repeated_cross_cluster,
-        "k2_explained_by_family_fragmentation": bool(repeated_cross_cluster),
+        "repeated_root_crosses_k2_clusters": bool(repeated_cross_cluster),
     }
 
 
@@ -471,21 +611,43 @@ def per_run_record(worker: Mapping[str, Any], *, seed_offset: int = 0) -> dict[s
     )
     selected = order[usable[order]]
     maps = np.asarray(arrays["source_onset_maps_ms"], dtype=np.float64)[selected]
+    t_on = np.asarray(arrays["event_t_on_ms"], dtype=np.float64)[selected]
+    t_off = np.asarray(arrays["event_t_off_ms"], dtype=np.float64)[selected]
+    trigger_t_on = np.asarray(
+        arrays["event_trigger_t_on_ms"], dtype=np.float64,
+    )[selected]
     axis = substrate_pca_axis(arrays["positions_E"], arrays["delta_vtheta"])
     bin_mm = float(np.asarray(arrays["source_bin_mm"]).item())
+    displacements = event_axis_displacements(
+        maps, axis_unit=axis, bin_mm=bin_mm,
+    )
+    directional_valid = (
+        np.isfinite(displacements)
+        & np.isfinite(t_on)
+        & np.isfinite(t_off)
+        & np.isfinite(trigger_t_on)
+        & (t_off >= t_on)
+    )
+    maps = maps[directional_valid]
+    displacements = displacements[directional_valid]
+    t_on = t_on[directional_valid]
+    t_off = t_off[directional_valid]
+    trigger_t_on = trigger_t_on[directional_valid]
+    root_ids = np.asarray(arrays["event_directed_root_id"])[selected][directional_valid]
+    root_counts = np.asarray(arrays["event_root_count"])[selected][directional_valid]
+    fragment_counts = np.asarray(arrays["event_fragment_count"])[selected][directional_valid]
+    isolated, overlap = overlap_connected_episode_audit(
+        t_on, t_off, displacements,
+    )
+    isolated_maps = maps[isolated]
+    isolated_displacements = displacements[isolated]
+    isolated_t_on = t_on[isolated]
     topology_diagnostic = whole_sheet_onset_map_kmeans_diagnostic(
-        maps,
+        isolated_maps,
         axis_unit=axis,
         bin_mm=bin_mm,
         seed=20260827 + seed + int(seed_offset),
     )
-    displacements = event_axis_displacements(
-        maps, axis_unit=axis, bin_mm=bin_mm,
-    )
-    directional_valid = np.isfinite(displacements)
-    displacements = displacements[directional_valid]
-    root_ids = np.asarray(arrays["event_directed_root_id"])[selected][directional_valid]
-    fragment_counts = np.asarray(arrays["event_fragment_count"])[selected][directional_valid]
     event_unit = payload.get("event_unit", {})
     compound = event_unit.get("compound_detector_fragment_fraction")
     runaway_time = payload.get("simulation", {}).get("runaway_early_stop_ms")
@@ -502,6 +664,12 @@ def per_run_record(worker: Mapping[str, Any], *, seed_offset: int = 0) -> dict[s
         "worker_npz": str(payload["arrays"]["path"]),
         "worker_npz_sha256": str(payload["arrays"]["sha256"]),
         "n_returned_evaluable_causal_families": int(len(displacements)),
+        "n_isolated_returned_evaluable_causal_families": int(
+            len(isolated_displacements)
+        ),
+        "preferred_formal_event_count_reached": bool(
+            len(isolated_displacements) >= PREFERRED_FORMAL_EVENTS
+        ),
         "raw_detector_fragment_count": int(event_unit.get("raw_detector_fragment_count", 0)),
         "compound_detector_fragment_fraction": (
             None if compound is None else float(compound)
@@ -511,9 +679,20 @@ def per_run_record(worker: Mapping[str, Any], *, seed_offset: int = 0) -> dict[s
         "runaway_early_stop_ms": runaway_time,
         "substrate_pca_axis_xy": axis.tolist(),
         "whole_sheet_onset_map_kmeans_diagnostic": compact_topology,
-        "_directional_displacements_mm": displacements,
-        "_directed_root_ids": root_ids,
-        "_fragment_counts": fragment_counts,
+        "overlap_connected_episode_audit": overlap,
+        "causal_family_identity_diagnostic": {
+            "formal_acceptance_role": "DIAGNOSTIC_ONLY",
+            "all_root_counts_equal_one": bool(
+                len(root_counts) and np.all(root_counts == 1)
+            ),
+            "median_family_onset_lead_vs_detector_trigger_ms": (
+                float(np.median(trigger_t_on - t_on)) if len(t_on) else None
+            ),
+        },
+        "_directional_displacements_mm": isolated_displacements,
+        "_event_t_on_ms": isolated_t_on,
+        "_directed_root_ids": root_ids[isolated],
+        "_fragment_counts": fragment_counts[isolated],
         "controller": controller,
         "patient_labels_or_prototypes_loaded": False,
     }
@@ -540,8 +719,13 @@ def _matched_directional_record(record: Mapping[str, Any], *, n_events: int,
                                 seed: int) -> tuple[dict[str, Any], np.ndarray]:
     displacement = np.asarray(record.get("_directional_displacements_mm", []),
                               dtype=np.float64)
+    event_t_on = np.asarray(record.get("_event_t_on_ms", []), dtype=np.float64)
+    if event_t_on.shape != displacement.shape:
+        raise ValueError("directional displacement and event times do not align")
     indices = _matched_event_indices(len(displacement), n_events)
-    formal = directional_k2_formal(displacement[indices], seed=int(seed))
+    formal = directional_k2_formal(
+        displacement[indices], event_t_on[indices], seed=int(seed),
+    )
     return formal, indices
 
 
@@ -589,8 +773,14 @@ def paired_record(
     )
     active_delta = _finite_or(active_delta_value)
     off_delta = _finite_or(off_delta_value)
-    active_yield = int(active["n_returned_evaluable_causal_families"])
-    off_yield = int(off["n_returned_evaluable_causal_families"])
+    active_yield = int(active.get(
+        "n_isolated_returned_evaluable_causal_families",
+        len(np.asarray(active.get("_directional_displacements_mm", []))),
+    ))
+    off_yield = int(off.get(
+        "n_isolated_returned_evaluable_causal_families",
+        len(np.asarray(off.get("_directional_displacements_mm", []))),
+    ))
     yield_ratio = active_yield / max(1, off_yield)
     compound_delta = (
         _finite_or(active.get("compound_detector_fragment_fraction"), 0.0)
@@ -612,7 +802,8 @@ def paired_record(
 
     transition = {"status": "NOT_EVALUABLE", "anti_persistent": None}
     fragmentation = {
-        "k2_explained_by_family_fragmentation": None,
+        "formal_acceptance_role": "DIAGNOSTIC_ONLY",
+        "repeated_root_crosses_k2_clusters": None,
         "cross_cluster_duplicated_root_ids": [],
     }
     if active_formal.get("status") == "OK":
@@ -664,9 +855,6 @@ def paired_record(
         "not_forced_alternation": not bool(
             transition.get("anti_persistent", True)
         ),
-        "not_family_fragmentation": not bool(
-            fragmentation.get("k2_explained_by_family_fragmentation", True)
-        ),
         "controller_zero_sum_valid": bool(active["controller"].get("zero_sum_ok", False)),
         "not_widespread_saturation": not bool(
             active["controller"].get("widespread_saturation", True)
@@ -675,9 +863,6 @@ def paired_record(
             active["controller"].get("widespread_static_sign_flip", True)
         ),
     }
-    for name, passed in checks.items():
-        if not passed:
-            reasons.append(name)
     matched_control_status = (
         "MATCHED_CONTROLS_COMPLETE"
         if controls_complete else "MATCHED_CONTROL_EXTENSION_REQUIRED"
@@ -693,21 +878,40 @@ def paired_record(
         }
         for candidate_id in expected_ids if candidate_id in formal_records
     }
-    model_internal_pass = bool(controls_complete and all(checks.values()))
+    base_formal_evaluable = bool(
+        active_formal.get("status") == "OK" and off_formal.get("status") == "OK"
+    )
+    comparison_evaluable = bool(
+        base_formal_evaluable and controls_complete and controls_evaluable
+    )
+    model_internal_pass = bool(comparison_evaluable and all(checks.values()))
+    if comparison_evaluable:
+        reasons = [name for name, passed in checks.items() if not passed]
+    not_evaluable_reasons = {}
+    for candidate_id, record in formal_records.items():
+        if record.get("status") != "OK":
+            not_evaluable_reasons[candidate_id] = record.get(
+                "evaluability_reasons", [record.get("status")]
+            )
+    if not base_formal_evaluable or (controls_complete and not controls_evaluable):
+        status = "NOT_EVALUABLE"
+    elif not controls_complete:
+        status = matched_control_status
+    elif model_internal_pass:
+        status = "MODEL_INTERNAL_NETWORK_PASS"
+    else:
+        status = "MODEL_INTERNAL_NETWORK_FAIL"
     return {
         "candidate_id": str(active["candidate_id"]),
         "seed": int(active["seed"]),
-        "status": (
-            "MODEL_INTERNAL_NETWORK_PASS" if model_internal_pass
-            else matched_control_status
-            if not controls_complete
-            else "MODEL_INTERNAL_NETWORK_FAIL"
-        ),
+        "status": status,
         "paired_off_candidate_id": str(off["candidate_id"]),
         "matched_event_count_per_arm": int(n_matched),
         "matched_control_candidate_ids": available_ids,
         "expected_matched_control_candidate_ids": expected_ids,
         "matched_control_status": matched_control_status,
+        "formal_comparison_evaluable": comparison_evaluable,
+        "not_evaluable_reasons": not_evaluable_reasons,
         "directional_k2_formal": compact_active_formal,
         "matched_control_directional_k2_formal": compact_control_formal,
         "directional_k2_delta_vs_off": (
@@ -795,13 +999,19 @@ def model_internal_decision(per_run: list[dict[str, Any]],
                 if selected and all(
                     row["matched_control_status"]
                     == "MATCHED_CONTROL_EXTENSION_REQUIRED" for row in selected
-                ) else "FORMALLY_EVALUABLE"
+                ) else "NOT_EVALUABLE"
+                if any(row["status"] == "NOT_EVALUABLE" for row in selected)
+                else "FORMALLY_EVALUABLE"
             ),
             "canary_admissible": bool(selected and selected[0]["model_internal_network_pass"]),
             "capacity_pass_2_of_3": bool(len(selected) >= 3 and pass_count >= 2),
-            "failed_seeds": [
+            "not_evaluable_seeds": [
                 int(row["seed"]) for row in selected
-                if not row["model_internal_network_pass"]
+                if row["status"] == "NOT_EVALUABLE"
+            ],
+            "scientific_failed_seeds": [
+                int(row["seed"]) for row in selected
+                if row["status"] == "MODEL_INTERNAL_NETWORK_FAIL"
             ],
         })
     completed = sorted({int(row["seed"]) for row in per_run})
@@ -823,20 +1033,28 @@ def model_internal_decision(per_run: list[dict[str, Any]],
     replication_complete = all(
         set(complete_seed_arms.get(seed, [])) == all_arms for seed in expected_seeds
     )
+    formally_not_evaluable = any(
+        row["status"] == "NOT_EVALUABLE" for row in paired
+        if row["candidate_id"] == "zero_sum_c020"
+    )
     if replication_complete:
         status = (
             "REV13_ZERO_SUM_NODE_CAPACITY_OBSERVED"
             if capacity_ids else "ZERO_SUM_NODE_CAPACITY_NOT_OBSERVED"
         )
+        if formally_not_evaluable and not capacity_ids:
+            status = "REV13_DIRECTIONAL_K2_NOT_EVALUABLE"
     elif canary_complete:
         status = (
             "REV13_ZERO_SUM_NODE_CANARY_CANDIDATE_FOUND"
             if candidate_ids else "ZERO_SUM_NODE_CAPACITY_NOT_OBSERVED_IN_CANARY"
         )
+        if formally_not_evaluable and not candidate_ids:
+            status = "REV13_DIRECTIONAL_K2_NOT_EVALUABLE"
     else:
         status = "REV13_MODEL_INTERNAL_AGGREGATE_INCOMPLETE"
     return {
-        "schema_id": "topic4_rev13_node_zero_sum_model_internal_decision_v1",
+        "schema_id": "topic4_rev13_node_zero_sum_model_internal_decision_v2",
         "status": status,
         "canary_complete": bool(canary_complete),
         "replication_complete": bool(replication_complete),
@@ -853,7 +1071,13 @@ def model_internal_decision(per_run: list[dict[str, Any]],
             "required_capacity_networks_total": 3,
             "same_network_opposite_directions_required": True,
             "formal_endpoint": "signed_causal_displacement_1d",
-            "heldout_scheme": "three_contiguous_time_folds",
+            "heldout_scheme": "three_equal_duration_time_folds",
+            "overlap_policy": (
+                "exclude_all_members_of_overlap_connected_episodes_before_matching"
+            ),
+            "minimum_isolated_families": MIN_FORMAL_EVENTS,
+            "preferred_isolated_families": PREFERRED_FORMAL_EVENTS,
+            "minimum_families_per_direction": MIN_EVENTS_PER_DIRECTION,
             "event_counts_matched_across_active_off_and_controls": True,
             "minimum_within_cluster_direction_consistency": (
                 MIN_DIRECTION_CONSISTENCY
@@ -861,7 +1085,7 @@ def model_internal_decision(per_run: list[dict[str, Any]],
             "minimum_temporal_blocks_per_sign": MIN_TEMPORAL_SIGN_BLOCKS,
             "temporal_blocks_total": N_TEMPORAL_BLOCKS,
             "forced_alternation_rejected": True,
-            "family_fragmentation_rejected": True,
+            "repeated_root_fragmentation_role": "DIAGNOSTIC_ONLY",
             "same_coefficient_matched_controls_must_be_outperformed": True,
             "onset_map_kmeans_role": "TOPOLOGY_VISUALIZATION_DIAGNOSTIC_ONLY",
         },
@@ -914,6 +1138,11 @@ def write_outputs(output_root: Path, per_run: list[dict[str, Any]],
     _write_json(paths["decision_json"], decision)
     _write_csv(paths["per_run_csv"], public_per_run, [
         "candidate_id", "seed", "n_returned_evaluable_causal_families",
+        "n_isolated_returned_evaluable_causal_families",
+        "preferred_formal_event_count_reached",
+        "overlap_connected_episode_audit.n_overlap_pairs",
+        "overlap_connected_episode_audit.n_overlap_components",
+        "overlap_connected_episode_audit.n_excluded_families",
         "whole_sheet_onset_map_kmeans_diagnostic.minority_fraction",
         "whole_sheet_onset_map_kmeans_diagnostic.same_network_opposite_directions",
         "whole_sheet_onset_map_kmeans_diagnostic.kmeans_seed_ami_median",
@@ -929,7 +1158,8 @@ def write_outputs(output_root: Path, per_run: list[dict[str, Any]],
         "directional_k2_delta_vs_off",
         "returned_event_yield_ratio_vs_off", "compound_fraction_delta_vs_off",
         "transition.anti_persistent",
-        "fragmentation.k2_explained_by_family_fragmentation",
+        "fragmentation.repeated_root_crosses_k2_clusters",
+        "formal_comparison_evaluable",
         "model_internal_network_pass",
     ])
     _write_csv(paths["decision_csv"], decision.get("arms", []), [

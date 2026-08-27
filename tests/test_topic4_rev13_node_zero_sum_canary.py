@@ -14,6 +14,7 @@ from scripts.aggregate_topic4_rev13_node_zero_sum_canary import (
     fragmentation_audit,
     model_internal_decision,
     occupancy_matched_transition_null,
+    overlap_connected_episode_audit,
     paired_record,
     whole_sheet_onset_map_kmeans_diagnostic,
     write_outputs,
@@ -31,7 +32,7 @@ def _unimodal(n=36, seed=1):
 
 
 def _run(candidate_id, *, seed=2311, displacement=None, runaway=False,
-         compound=0.1, fragmented=False):
+         compound=0.1, fragmented=False, event_t_on_ms=None):
     values = np.asarray(
         _bimodal() if displacement is None else displacement,
         dtype=np.float64,
@@ -39,10 +40,17 @@ def _run(candidate_id, *, seed=2311, displacement=None, runaway=False,
     root_ids = np.arange(len(values), dtype=np.int64)
     if fragmented and len(values) >= 2:
         root_ids[1] = root_ids[0]
+    times = np.asarray(
+        np.arange(len(values), dtype=np.float64) * 100.0
+        if event_t_on_ms is None else event_t_on_ms,
+        dtype=np.float64,
+    )
+    assert times.shape == values.shape
     return {
         "candidate_id": candidate_id,
         "seed": seed,
         "n_returned_evaluable_causal_families": int(len(values)),
+        "n_isolated_returned_evaluable_causal_families": int(len(values)),
         "compound_detector_fragment_fraction": compound,
         "runaway": runaway,
         "whole_sheet_onset_map_kmeans_diagnostic": {
@@ -50,6 +58,7 @@ def _run(candidate_id, *, seed=2311, displacement=None, runaway=False,
             "formal_acceptance_role": "TOPOLOGY_VISUALIZATION_DIAGNOSTIC_ONLY",
         },
         "_directional_displacements_mm": values,
+        "_event_t_on_ms": times,
         "_directed_root_ids": root_ids,
         "_fragment_counts": np.ones(len(values), dtype=np.int64),
         "controller": {
@@ -103,7 +112,10 @@ def test_cluster_direction_summary_is_invariant_to_kmeans_label_swap():
 
 
 def test_formal_directional_k2_freezes_all_positive_criteria():
-    result = directional_k2_formal(_bimodal(), seed=19)
+    values = _bimodal()
+    result = directional_k2_formal(
+        values, np.arange(len(values)) * 100.0, seed=19,
+    )
     assert result["status"] == "OK"
     assert result["heldout_k2_minus_k1_loglik_per_event"] > 0.0
     assert result["cluster_median_axis_displacement_mm"][0] < 0.0
@@ -115,6 +127,8 @@ def test_formal_directional_k2_freezes_all_positive_criteria():
     }
     assert result["both_signs_in_at_least_two_of_three_blocks"] is True
     assert len(result["heldout_fold_deltas"]) == 3
+    assert result["temporal_block_definition"] == "three_equal_duration_blocks"
+    assert result["preferred_event_count_reached"] is True
 
 
 def test_formal_directional_k2_rejects_sign_confined_to_one_time_block():
@@ -122,13 +136,39 @@ def test_formal_directional_k2_rejects_sign_confined_to_one_time_block():
         np.tile([-3.0, -2.8], 12),
         np.tile([2.8, 3.0], 6),
     ]
-    result = directional_k2_formal(displacement, seed=21)
+    result = directional_k2_formal(
+        displacement, np.arange(len(displacement)) * 100.0, seed=21,
+    )
     assert result["heldout_k2_minus_k1_loglik_per_event"] < 0.0
     assert result["same_network_opposite_directions"] is True
     assert result["temporal_blocks_with_each_sign"] == {
         "negative": 2, "positive": 1,
     }
     assert result["both_signs_in_at_least_two_of_three_blocks"] is False
+
+
+def test_formal_k2_uses_equal_duration_not_equal_event_count_blocks():
+    values = np.r_[np.tile([-3.0, 3.0], 15), [-3.0, 3.0, -3.0, 3.0, -3.0, 3.0]]
+    times = np.r_[np.linspace(0.0, 100.0, 30), [400.0, 410.0, 800.0, 810.0, 900.0, 910.0]]
+    result = directional_k2_formal(values, times, seed=22)
+    assert result["status"] == "OK"
+    assert [
+        row["negative"] + row["positive"]
+        for row in result["temporal_block_sign_counts"]
+    ] == [30, 2, 4]
+
+
+def test_formal_k2_insufficient_support_is_not_evaluable():
+    values = np.r_[np.full(18, -3.0), np.full(5, 3.0)]
+    result = directional_k2_formal(
+        values, np.arange(len(values)) * 100.0, seed=23,
+    )
+    assert result["status"] == "NOT_EVALUABLE"
+    assert set(result["evaluability_reasons"]) == {
+        "fewer_than_24_isolated_families",
+        "fewer_than_6_families_in_one_direction",
+    }
+    assert result["events_per_direction"] == {"negative": 18, "positive": 5}
 
 
 def test_event_counts_are_matched_across_active_off_and_controls():
@@ -276,27 +316,71 @@ def test_spatial_shift_uses_support_weighted_controller_diagnostics():
     assert result["widespread_static_sign_flip"] is False
 
 
-def test_fragmentation_rejects_opposite_labels_from_one_causal_family():
+def test_overlap_connected_episode_excludes_transitive_historical_style_chain():
+    isolated, audit = overlap_connected_episode_audit(
+        event_t_on_ms=np.array([0.0, 80.0, 170.0, 400.0, 700.0]),
+        event_t_off_ms=np.array([100.0, 190.0, 250.0, 450.0, 760.0]),
+        displacements=np.array([-3.0, 3.0, -2.0, 2.0, -1.0]),
+    )
+    assert isolated.tolist() == [False, False, False, True, True]
+    assert audit["n_overlap_pairs"] == 2
+    assert audit["n_overlap_components"] == 1
+    assert audit["n_excluded_families"] == 3
+    assert audit["overlap_pair_direction_counts"] == {
+        "same": 0,
+        "opposite": 2,
+        "zero_involved": 0,
+    }
+    assert audit["overlap_components"][0]["contains_opposite_directions"] is True
+
+
+def test_touching_family_boundaries_are_not_overlap():
+    isolated, audit = overlap_connected_episode_audit(
+        event_t_on_ms=np.array([0.0, 100.0]),
+        event_t_off_ms=np.array([100.0, 200.0]),
+        displacements=np.array([-1.0, 1.0]),
+    )
+    assert isolated.tolist() == [True, True]
+    assert audit["n_overlap_pairs"] == 0
+
+
+def test_repeated_root_fragmentation_is_diagnostic_only():
     audit = fragmentation_audit(
         labels=np.array([0, 1, 0, 1]),
         root_ids=np.array([10, 10, 11, 12]),
         fragment_counts=np.array([1, 1, 2, 1]),
     )
-    assert audit["k2_explained_by_family_fragmentation"] is True
+    assert audit["formal_acceptance_role"] == "DIAGNOSTIC_ONLY"
+    assert audit["repeated_root_crosses_k2_clusters"] is True
     assert audit["cross_cluster_duplicated_root_ids"] == [10]
 
 
-def test_formal_fragmentation_cannot_be_rescued(monkeypatch):
+def test_repeated_root_diagnostic_does_not_change_formal_verdict(monkeypatch):
     original = aggregate.fragmentation_audit
 
     def forced_fragmentation(labels, root_ids, fragment_counts):
         result = original(labels, root_ids, fragment_counts)
-        result["k2_explained_by_family_fragmentation"] = True
+        result["repeated_root_crosses_k2_clusters"] = True
         return result
 
     monkeypatch.setattr(aggregate, "fragmentation_audit", forced_fragmentation)
     paired = _matched_c020()
-    assert paired["checks"]["not_family_fragmentation"] is False
+    assert "not_family_fragmentation" not in paired["checks"]
+    assert paired["fragmentation"]["repeated_root_crosses_k2_clusters"] is True
+    assert paired["model_internal_network_pass"] is True
+
+
+def test_paired_insufficient_is_not_evaluable_not_scientific_fail():
+    short = _bimodal(20)
+    paired = _matched_c020(
+        active=_run("zero_sum_c020", displacement=short),
+        off=_run("exact_off", displacement=short),
+        raise_only=_run("raise_only_c020", displacement=short),
+        shuffled=_run("spatial_shift_c020", displacement=short),
+    )
+    assert paired["status"] == "NOT_EVALUABLE"
+    assert paired["formal_comparison_evaluable"] is False
+    assert paired["failure_reasons"] == []
     assert paired["model_internal_network_pass"] is False
 
 
@@ -325,11 +409,17 @@ def test_model_internal_loaders_project_hard_allowlists(tmp_path):
     np.savez_compressed(
         arrays_path,
         event_returned=np.array([True]),
+        event_t_off_ms=np.array([100.0]),
+        event_trigger_t_on_ms=np.array([20.0]),
+        event_root_count=np.array([1]),
         contact_envelope=np.ones((2, 3)),
         patient_rank=np.ones((2, 3)),
     )
     loaded = _load_model_internal_arrays(arrays_path)
-    assert set(loaded) == {"event_returned"}
+    assert set(loaded) == {
+        "event_returned", "event_t_off_ms", "event_trigger_t_on_ms",
+        "event_root_count",
+    }
 
 
 def test_decision_and_writers_emit_paired_formal_outputs(tmp_path):
