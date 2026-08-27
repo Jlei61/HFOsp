@@ -23,6 +23,11 @@ from scripts.topic5_continuous_marked_state_r1.run_r1_6_optimizer_queue import (
 )
 
 
+OVERFIT_SUBJECTS = TUNING_SUBJECTS + (
+    "yuquan_chengshuai", "yuquan_chenziyang",
+)
+
+
 def now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -172,7 +177,7 @@ def write_status(root: Path, stage: str, prefix_config: str,
             / subject / f"seed_{seed}/result.json",
             f"overfit__prefix__{prefix_config}", subject, seed,
         )
-        for subject in TUNING_SUBJECTS for seed in TUNING_SEEDS
+        for subject in OVERFIT_SUBJECTS for seed in TUNING_SEEDS
     )
     completed_selection = sum(
         valid_selection(
@@ -188,9 +193,10 @@ def write_status(root: Path, stage: str, prefix_config: str,
         "stage": stage, "revision": R1_6_REVISION,
         "selected_prefix_config": prefix_config,
         "configs": CONFIGS, "subjects": list(TUNING_SUBJECTS),
+        "overfit_subjects": list(OVERFIT_SUBJECTS),
         "seeds": list(TUNING_SEEDS),
         "completed_overfit": int(completed_overfit),
-        "expected_overfit": len(TUNING_SUBJECTS) * len(TUNING_SEEDS),
+        "expected_overfit": len(OVERFIT_SUBJECTS) * len(TUNING_SEEDS),
         "completed_selection": int(completed_selection),
         "expected_selection": (
             len(CONFIGS) * len(TUNING_SUBJECTS) * len(TUNING_SEEDS)
@@ -245,6 +251,29 @@ def aggregate(root: Path, prefix_config: str) -> dict:
                         int(row.get("optimizer_steps", 0))
                         for row in trajectory[1:selected + 1]
                     )),
+                    "selected_stage": value["fit_trace"]["selected_stage"],
+                    "selection_gradient_max": value["fit_trace"][
+                        "selection_gradient_max"
+                    ],
+                    "median_clip_fraction": float(np.median([
+                        float(row["clip_fraction"])
+                        for row in trajectory[1:]
+                        if row.get("clip_fraction") is not None
+                    ])) if any(
+                        row.get("clip_fraction") is not None
+                        for row in trajectory[1:]
+                    ) else None,
+                    "maximum_preclip_norm": max([
+                        float(row.get("preclip_norm_max", 0.0) or 0.0)
+                        for row in trajectory[1:]
+                    ], default=0.0),
+                    "maximum_update_to_parameter_ratio": max([
+                        float(row.get("update_to_parameter_ratio", 0.0) or 0.0)
+                        for row in trajectory[1:]
+                    ], default=0.0),
+                    "total_parameter_update_norm": float(
+                        value["total_parameter_update_norm"]
+                    ),
                 })
     by_config = {}
     for config_id in CONFIGS:
@@ -299,7 +328,7 @@ def aggregate(root: Path, prefix_config: str) -> dict:
     )
     overfit_rows = []
     overfit_id = f"overfit__prefix__{prefix_config}"
-    for subject in TUNING_SUBJECTS:
+    for subject in OVERFIT_SUBJECTS:
         for seed in TUNING_SEEDS:
             value = json.loads((
                 root / "overfit" / overfit_id
@@ -320,7 +349,7 @@ def aggregate(root: Path, prefix_config: str) -> dict:
                 row["joint_nll_improvement"] > 0
                 for row in overfit_rows if row["subject"] == subject
             ))
-            for subject in TUNING_SUBJECTS
+            for subject in OVERFIT_SUBJECTS
         },
         "selection_uses_development_validation": False,
         "formal_test_partition_opened": False, "sealed_opened": False,
@@ -355,7 +384,7 @@ def main() -> None:
     rows = parallel(
         overfit_task,
         [(args.root, prefix_config, subject, seed)
-         for subject in TUNING_SUBJECTS for seed in TUNING_SEEDS],
+         for subject in OVERFIT_SUBJECTS for seed in TUNING_SEEDS],
         args.workers,
     )
     require(rows, "overfit", args.root, prefix_config)
