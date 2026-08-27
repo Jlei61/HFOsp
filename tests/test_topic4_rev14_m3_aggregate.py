@@ -341,6 +341,32 @@ def test_hash_drift_and_forbidden_fields_fail_closed(tmp_path):
     assert "forbidden" in errors["m3_04"].lower()
 
 
+def test_provenance_source_filenames_do_not_count_as_scientific_inputs():
+    payload = {
+        "provenance": {
+            "runtime_module_sha256": {
+                "src/interictal_propagation.py": "a" * 64,
+                "src/topic4_zm_ictal_transition.py": "b" * 64,
+            },
+        },
+        "patient_heldout_score": 0.1,
+    }
+    assert aggregate._forbidden_key_paths(payload) == ["$.patient_heldout_score"]
+
+
+def test_analysis_only_commit_allowlist_excludes_worker_and_config_paths():
+    assert {
+        "scripts/aggregate_topic4_rev14_m3_canary.py",
+        "tests/test_topic4_rev14_m3_aggregate.py",
+    } == set(aggregate.ANALYSIS_ONLY_ALLOWED_PATHS)
+    assert "scripts/run_topic4_rev14_m3_canary_worker.py" not in (
+        aggregate.ANALYSIS_ONLY_ALLOWED_PATHS
+    )
+    assert "config/topic4_rev14_m3_canary.json" not in (
+        aggregate.ANALYSIS_ONLY_ALLOWED_PATHS
+    )
+
+
 def test_zero_event_worker_gets_finite_bad_score_without_deletion(tmp_path):
     tree = _build_tree(tmp_path)
     context, support = _contexts()

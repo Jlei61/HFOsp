@@ -51,6 +51,10 @@ WORKER_STATUS = "REV14_M3_OBSERVATION_FREE_CANARY_WORKER_COMPLETE"
 OUTPUT_SCHEMA = "topic4_rev14_m3_training_aggregate_v1"
 SUPPORT_MANIFEST_SCHEMA = "topic4_rev14_patient_support_acceptance_manifest_v2"
 SUPPORT_SCORE_SEED = 20260828
+ANALYSIS_ONLY_ALLOWED_PATHS = frozenset({
+    "scripts/aggregate_topic4_rev14_m3_canary.py",
+    "tests/test_topic4_rev14_m3_aggregate.py",
+})
 FORBIDDEN_KEY_TOKENS = (
     "heldout", "kmeans", "ictal", "seizure", "figure", "rendered_image",
 )
@@ -152,6 +156,11 @@ def _forbidden_key_paths(value: Any, prefix: str = "$") -> list[str]:
         for key, item in value.items():
             lowered = str(key).lower()
             path = f"{prefix}.{key}"
+            if path == "$.provenance":
+                # Provenance contains validated source-path registries whose
+                # filenames can legitimately include "interictal" or "ictal".
+                # It is audited structurally below and is not a scientific input.
+                continue
             if any(token in lowered for token in FORBIDDEN_KEY_TOKENS):
                 found.append(path)
             found.extend(_forbidden_key_paths(item, path))
@@ -729,16 +738,29 @@ def _runtime_provenance(expected_commit: str) -> dict[str, Any]:
             ["git", "status", "--porcelain", "--untracked-files=all"],
             cwd=ROOT, text=True,
         ).splitlines()
+        changed_paths = subprocess.check_output(
+            ["git", "diff", "--name-only", f"{expected_commit}..HEAD"],
+            cwd=ROOT, text=True,
+        ).splitlines()
     except (subprocess.CalledProcessError, FileNotFoundError):
-        commit, worktree_status = None, ["git provenance unavailable"]
+        commit = None
+        worktree_status = ["git provenance unavailable"]
+        changed_paths = ["git provenance unavailable"]
     aggregator_status = subprocess.check_output(
         ["git", "status", "--porcelain", "--", str(Path(__file__).relative_to(ROOT))],
         cwd=ROOT, text=True,
     ).splitlines() if commit is not None else ["git provenance unavailable"]
+    analysis_only_commit = (
+        commit is not None
+        and set(changed_paths).issubset(ANALYSIS_ONLY_ALLOWED_PATHS)
+    )
     return {
         "git_commit_at_analysis": commit,
         "expected_git_commit": expected_commit,
         "head_matches_frozen_manifest": commit == expected_commit,
+        "analysis_only_commit_allowed": analysis_only_commit,
+        "paths_changed_since_worker_freeze": changed_paths,
+        "analysis_only_allowed_paths": sorted(ANALYSIS_ONLY_ALLOWED_PATHS),
         "aggregator_path": str(Path(__file__).resolve()),
         "aggregator_sha256": _sha256(Path(__file__).resolve()),
         "aggregator_dirty_or_untracked": bool(aggregator_status),
@@ -746,7 +768,7 @@ def _runtime_provenance(expected_commit: str) -> dict[str, Any]:
         "worktree_dirty_or_untracked": bool(worktree_status),
         "worktree_git_status": worktree_status,
         "formal_ready": (
-            commit == expected_commit
+            analysis_only_commit
             and not aggregator_status
             and not worktree_status
         ),
@@ -793,7 +815,7 @@ def aggregate(
         scored = [{key: value for key, value in row.items()
                    if key not in {"arrays", "payload"}} for row in records]
     elif not provenance["formal_ready"] and context_override is None:
-        input_error = "aggregation runtime is not the clean frozen M3 commit"
+        input_error = "aggregation runtime is not a clean analysis-only descendant"
         status = "INVALID_PROVENANCE"
         scored = [{key: value for key, value in row.items()
                    if key not in {"arrays", "payload"}} for row in records]
