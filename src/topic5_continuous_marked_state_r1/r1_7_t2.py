@@ -88,7 +88,8 @@ def load_fitted_r1_7a_t1(
         rows = np.arange(len(design.event_time), dtype=np.int64)
         pre_event_state = _query_states(
             model, design, anchor_state, design.event_source_anchor,
-            design.event_time, design.event_session, rows, device=device,
+            design.event_time, design.event_session, rows,
+            state_permutation=None, device=device,
         ).float().cpu().numpy()
     coverage = CoverageTable.load(upstream / "coverage" / f"{subject}.npz")
     stream = load_full_admissible_event_stream(subject, coverage)

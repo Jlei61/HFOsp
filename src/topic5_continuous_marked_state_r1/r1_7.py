@@ -10,6 +10,36 @@ from .coverage import CoverageTable
 
 R1_7A_REVISION = "r1_7a_prospective_state_replication_v1"
 
+# The frozen optimiser refuses to step on a non-finite gradient.  Such a cell is
+# an instrument failure for that seed, not a scientific negative and not a
+# silently dropped patient: it is recorded, kept in the five-seed denominator,
+# and can never be counted as a stable checkpoint.  Every other failure -- shape,
+# alignment, checkpoint, memory -- must still abort the cell.
+NONFINITE_GRADIENT_STATUS = "NONFINITE_GRADIENT"
+NONFINITE_GRADIENT_MESSAGES = (
+    "R1.3 encountered a non-finite gradient norm",
+    "R1.2 prefix encountered a non-finite gradient",
+)
+
+
+def is_nonfinite_gradient_failure(error: BaseException) -> bool:
+    """Return true only for the frozen optimiser's own non-finite gradient guard."""
+    return (
+        isinstance(error, RuntimeError)
+        and str(error) in NONFINITE_GRADIENT_MESSAGES
+    )
+
+
+def split_scored_payloads(
+    payloads: list[dict],
+) -> tuple[list[dict], int]:
+    """Separate scorable seeds from recorded non-finite optimiser failures."""
+    scored = [
+        value for value in payloads
+        if value.get("analysis_status") != NONFINITE_GRADIENT_STATUS
+    ]
+    return scored, len(payloads) - len(scored)
+
 
 @dataclass(frozen=True)
 class RecordedValidationSplit:

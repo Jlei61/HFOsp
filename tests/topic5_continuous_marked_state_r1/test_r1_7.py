@@ -77,3 +77,42 @@ def test_event_block_count_never_pools_across_recording_gaps() -> None:
     )
     assert blocks == 0
     assert [row["events"] for row in rows] == [60, 60]
+
+
+def test_only_frozen_nonfinite_gradient_guard_is_recordable() -> None:
+    """Optimiser non-finite guards are recordable; every other error must raise."""
+    from src.topic5_continuous_marked_state_r1.r1_7 import (
+        is_nonfinite_gradient_failure,
+    )
+
+    assert is_nonfinite_gradient_failure(
+        RuntimeError("R1.3 encountered a non-finite gradient norm")
+    )
+    assert is_nonfinite_gradient_failure(
+        RuntimeError("R1.2 prefix encountered a non-finite gradient")
+    )
+    # Anything else is an implementation fault and must not be relabelled.
+    assert not is_nonfinite_gradient_failure(RuntimeError("checkpoint hash mismatch"))
+    assert not is_nonfinite_gradient_failure(ValueError("R1.3 encountered a non-finite gradient norm"))
+    assert not is_nonfinite_gradient_failure(RuntimeError("CUDA out of memory"))
+
+
+def test_nonfinite_seeds_leave_denominator_intact_but_are_not_scored() -> None:
+    """A non-finite cell is never stable, never scored, never silently dropped."""
+    from src.topic5_continuous_marked_state_r1.r1_7 import split_scored_payloads
+
+    payloads = [
+        {"seed": 0, "stable_checkpoint": True},
+        {"seed": 1, "analysis_status": "NONFINITE_GRADIENT", "stable_checkpoint": False},
+        {"seed": 2, "stable_checkpoint": False},
+        {"seed": 3, "analysis_status": "NONFINITE_GRADIENT", "stable_checkpoint": False},
+        {"seed": 4, "stable_checkpoint": True},
+    ]
+    scored, nonfinite = split_scored_payloads(payloads)
+    assert [value["seed"] for value in scored] == [0, 2, 4]
+    assert nonfinite == 2
+    # denominator is the frozen five seeds, not the scored subset
+    assert len(payloads) == 5
+    # a non-finite cell can never be counted as a stable checkpoint
+    assert not any(value.get("stable_checkpoint") for _, value in enumerate(payloads)
+                   if value.get("analysis_status") == "NONFINITE_GRADIENT")
