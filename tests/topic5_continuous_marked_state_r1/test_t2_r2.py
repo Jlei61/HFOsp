@@ -89,6 +89,10 @@ def test_placebo_donor_is_train_only_and_effective_histories_do_not_overlap() ->
     same = segment[donor] == segment[np.arange(n)]
     assert np.all((~same) | (np.abs(donor - np.arange(n)) >= 100))
     assert audit["all_matched"] is True
+    assert audit["unique_donors"] > 1
+    assert audit["effective_donors"] > 1
+    assert 0 < audit["maximum_donor_reuse_fraction"] < 1
+    assert audit["match_distance_q95"] >= audit["median_match_distance"]
 
 
 class _Generator(torch.nn.Module):

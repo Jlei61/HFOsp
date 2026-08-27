@@ -149,8 +149,8 @@ def main() -> None:
         "formal_test_partition_opened": False,
         "sealed_opened": False,
         "claim_boundary": (
-            "five genuinely added development subjects plus one previously "
-            "seen long-record calibration subject; predictive evidence only"
+            "three genuinely added development subjects plus three previously "
+            "seen long-record calibration subjects; predictive evidence only"
         ),
     }
     contract.atomic_json(reports / "r1_5_summary.json", summary)

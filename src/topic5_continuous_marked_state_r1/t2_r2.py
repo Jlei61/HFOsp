@@ -282,6 +282,7 @@ def state_matched_nonoverlap_placebo(
     matched = np.zeros(len(exposure), dtype=bool)
     distances = []
     donor_rows = []
+    matched_feature_differences = []
     for row in target:
         distance, position = tree.query(z[row], k=query_k)
         candidates = donor_index[np.atleast_1d(position).astype(np.int64)]
@@ -303,6 +304,22 @@ def state_matched_nonoverlap_placebo(
         matched[row] = True
         distances.append(float(candidate_distance[chosen_position]))
         donor_rows.append(donor)
+        matched_feature_differences.append(np.abs(z[row] - z[donor]))
+    donor_array = np.asarray(donor_rows, dtype=np.int64)
+    if len(donor_array):
+        _, donor_counts = np.unique(donor_array, return_counts=True)
+        effective_donors = float(
+            np.square(donor_counts.sum()) / np.square(donor_counts).sum()
+        )
+        maximum_reuse = float(donor_counts.max() / donor_counts.sum())
+        feature_difference = np.asarray(
+            matched_feature_differences, dtype=np.float64
+        )
+    else:
+        donor_counts = np.asarray([], dtype=np.int64)
+        effective_donors = 0.0
+        maximum_reuse = 1.0
+        feature_difference = np.empty((0, feature.shape[1]), dtype=np.float64)
     return result, matched, {
         "train_donor_pool": int(len(donor_index)),
         "targets": int(len(target)),
@@ -317,8 +334,25 @@ def state_matched_nonoverlap_placebo(
         "median_match_distance": (
             float(np.median(distances)) if distances else None
         ),
+        "match_distance_q95": (
+            float(np.quantile(distances, .95)) if distances else None
+        ),
+        "match_distance_max": (
+            float(np.max(distances)) if distances else None
+        ),
+        "unique_donors": int(len(donor_counts)),
+        "effective_donors": effective_donors,
+        "maximum_donor_reuse_fraction": maximum_reuse,
+        "matched_feature_abs_z_difference_median": (
+            float(np.median(feature_difference)) if len(feature_difference)
+            else None
+        ),
+        "matched_feature_abs_z_difference_q95": (
+            float(np.quantile(feature_difference, .95))
+            if len(feature_difference) else None
+        ),
         "donor_rows_sha256": hashlib.sha256(
-            np.asarray(donor_rows, dtype=np.int64).tobytes()
+            donor_array.tobytes()
         ).hexdigest(),
     }
 
