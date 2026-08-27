@@ -59,7 +59,9 @@
 6. Use one numerical thread per worker. Derive worker count from measured peak
    RSS, reserve at least 48 GiB and retain at least 40 GiB free disk.
 7. Monitor at 600-s intervals; do not continuously poll.
-8. Aggregate with the frozen training-only `J14` producer.
+8. Aggregate and rank with the frozen training-only `J14` producer alone;
+   patient-support is an absolute acceptance diagnostic and cannot reorder the
+   canary fields.
 
 ## Phase 4: replication and refinement
 

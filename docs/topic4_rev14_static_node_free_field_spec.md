@@ -295,7 +295,9 @@ Add two nonselectable benchmarks: uniform Node support and the frozen Stage-AK
 or any contact-target fit.
 
 Run all 34 fields on seed 2321 with common random numbers for 20 s. Continue the
-best eight selectable fields on seeds 2322--2323. This is an instrument and
+best eight selectable fields by `J14_v1` alone on seeds 2322--2323; lexical
+candidate ID is the deterministic tie-break. The patient-support sidecar is
+reported here but cannot reorder the M3 canary. This is an instrument and
 capacity canary spanning only an eight-dimensional section of M3, not evidence
 of convergence or a negative capacity test.
 
