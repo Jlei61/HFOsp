@@ -33,11 +33,16 @@ def get(value: dict, path: tuple[str, ...]):
     return value
 
 
-def bootstrap(blocks: list[dict], key: str, *, draws: int = 2000) -> dict:
-    values = np.asarray([row[key] for row in blocks], dtype=np.float64)
-    weights = np.asarray([row["n_events"] for row in blocks], dtype=np.float64)
+def bootstrap(blocks: list[dict], key: str, *, weight_key: str = "n_events",
+              draws: int = 2000) -> dict:
+    usable = [row for row in blocks
+              if row.get(key) is not None and np.isfinite(row[key])
+              and row.get(weight_key, 0) > 0]
+    values = np.asarray([row[key] for row in usable], dtype=np.float64)
+    weights = np.asarray([row[weight_key] for row in usable], dtype=np.float64)
     if len(values) < 2 or not np.isfinite(values).all():
-        return {"estimate": None, "ci95": [None, None], "n_blocks": len(values)}
+        return {"estimate": None, "ci95": [None, None], "n_blocks": len(values),
+                "weight_key": weight_key}
     rng = np.random.default_rng(1701)
     sampled = []
     for _ in range(draws):
@@ -46,7 +51,8 @@ def bootstrap(blocks: list[dict], key: str, *, draws: int = 2000) -> dict:
     estimate = float(np.average(values, weights=weights))
     return {"estimate": estimate,
             "ci95": np.quantile(sampled, [0.025, 0.975]).tolist(),
-            "n_blocks": len(values), "draws": draws, "seed": 1701}
+            "n_blocks": len(values), "draws": draws, "seed": 1701,
+            "weight_key": weight_key}
 
 
 def main() -> None:
@@ -85,16 +91,50 @@ def main() -> None:
             block_medians.append({
                 "start": key[0], "stop": key[1],
                 "n_events": int(np.median([v["n_events"] for v in blocks])),
+                "n_matched_events": int(np.median([
+                    v["n_matched_events"] for v in blocks
+                ])),
                 "persistent_minus_memoryless_joint": float(np.median([
                     v["persistent_minus_memoryless"]["joint_nll_per_event"] for v in blocks
+                ])),
+                "persistent_minus_memoryless_first_subset": float(np.median([
+                    v["persistent_minus_memoryless_endpoints"][
+                        "first_group_subset_nll_per_event"
+                    ] for v in blocks
+                ])),
+                "persistent_minus_memoryless_continuation": float(np.median([
+                    v["persistent_minus_memoryless_endpoints"][
+                        "continuation_subset_nll_per_event"
+                    ] for v in blocks
                 ])),
                 "correct_minus_wrong_joint": float(np.median([
                     v["correct_minus_wrong"]["joint_nll_per_event"] for v in blocks
                 ])),
+                "correct_minus_wrong_first_subset": float(np.median([
+                    v["correct_minus_wrong_endpoints"].get(
+                        "first_group_subset_nll_per_event", np.nan
+                    ) for v in blocks
+                ])),
+                "correct_minus_wrong_continuation": float(np.median([
+                    v["correct_minus_wrong_endpoints"].get(
+                        "continuation_subset_nll_per_event", np.nan
+                    ) for v in blocks
+                ])),
             })
         row["bootstrap"] = {
-            label: bootstrap(block_medians, label)
-            for label in ("persistent_minus_memoryless_joint", "correct_minus_wrong_joint")
+            label: bootstrap(
+                block_medians, label,
+                weight_key=("n_matched_events" if label.startswith("correct")
+                            else "n_events"),
+            )
+            for label in (
+                "persistent_minus_memoryless_joint",
+                "persistent_minus_memoryless_first_subset",
+                "persistent_minus_memoryless_continuation",
+                "correct_minus_wrong_joint",
+                "correct_minus_wrong_first_subset",
+                "correct_minus_wrong_continuation",
+            )
         }
         row["n_d_state_blocks"] = len(block_medians)
         row["patient_stable_state"] = bool(row["stable_checkpoint_seeds"] >= 3)

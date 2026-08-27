@@ -190,15 +190,31 @@ def main() -> None:
                     state_permutation=permutation, matched_anchor_mask=matched,
                     anchor_state_override=persistent_state, **block_bounds,
                 )) for permutation in permutations]
+                block_correct_endpoint = asdict(evaluate_mark_endpoints(
+                    model, design, embedding, device=args.device,
+                    matched_anchor_mask=matched,
+                    anchor_state_override=persistent_state, **block_bounds,
+                ))
+                block_wrong_endpoint = [asdict(evaluate_mark_endpoints(
+                    model, design, embedding, device=args.device,
+                    state_permutation=permutation,
+                    matched_anchor_mask=matched,
+                    anchor_state_override=persistent_state, **block_bounds,
+                )) for permutation in permutations]
                 block_rows.append({
                     "segment": int(segment), "start": cursor,
                     "stop": block_stop, "n_events": int(block_p["n_events"]),
+                    "n_matched_events": int(block_correct["n_events"]),
                     "persistent_minus_memoryless": metric_contrast(block_p, block_m),
                     "persistent_minus_memoryless_endpoints": metric_contrast(
                         block_pe, block_me
                     ),
                     "correct_minus_wrong": metric_contrast(
                         block_correct, median_metric_dict(block_wrong)
+                    ),
+                    "correct_minus_wrong_endpoints": metric_contrast(
+                        block_correct_endpoint,
+                        median_metric_dict(block_wrong_endpoint),
                     ),
                 })
             cursor = block_stop

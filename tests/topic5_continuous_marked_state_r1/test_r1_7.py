@@ -9,6 +9,27 @@ from src.topic5_continuous_marked_state_r1.r1_7 import (
 )
 
 
+def test_bootstrap_excludes_zero_support_blocks() -> None:
+    import importlib.util
+    from pathlib import Path
+
+    path = Path("scripts/topic5_continuous_marked_state_r1/aggregate_r1_7a.py")
+    spec = importlib.util.spec_from_file_location("aggregate_r1_7a_test", path)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    blocks = [
+        {"effect": -1.0, "n_matched_events": 10},
+        {"effect": 99.0, "n_matched_events": 0},
+        {"effect": -3.0, "n_matched_events": 10},
+    ]
+    result = module.bootstrap(
+        blocks, "effect", weight_key="n_matched_events", draws=20
+    )
+    assert result["estimate"] == -2.0
+    assert result["n_blocks"] == 2
+
+
 def test_recorded_split_ignores_gap_duration() -> None:
     coverage = CoverageTable(
         subject="synthetic",
