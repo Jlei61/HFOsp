@@ -132,7 +132,7 @@ def test_support_contract_and_controller_scale_are_frozen():
 
 def test_freezer_rejects_spatial_control_or_k2_contract_drift():
     config = _config()
-    config["node_accessibility_contract"]["spatial_shift"]["shift_bins"] = 3
+    config["node_accessibility_contract"]["spatial_shift"]["shift_blocks"] = [3, 0]
     with pytest.raises(RuntimeError, match="spatial-shift"):
         _build(config)
 

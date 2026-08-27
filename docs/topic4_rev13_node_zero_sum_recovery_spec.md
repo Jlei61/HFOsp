@@ -116,7 +116,8 @@ The first canary contains six arms per substrate:
 5. `raise_only_c020`: identical bounded trace but no compensating lowering of
    unused field regions.
 6. `spatial_shift_c020`: deterministic half-sheet toroidal shifting of the
-   trace through eight equal-count x bins, followed by the same zero-sum
+   trace through an 8-by-8 equal-width spatial block layout with within-block
+   rank matching, followed by the same zero-sum
    centering. At each step its dynamic field is rescaled to the
    support-weighted centered SD of unshifted `zero_sum_c020`. It preserves
    coarse spatial organization and instantaneous amplitude while breaking the

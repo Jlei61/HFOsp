@@ -84,10 +84,12 @@ def _validate_static_contract(config: dict) -> None:
         raise RuntimeError("rev13 static Node scale changed")
     spatial_shift = contract.get("spatial_shift", {})
     if spatial_shift != {
-        "mapping_method": "equal_count_x_bins_toroidal_half_shift",
-        "n_x_bins": 8,
-        "shift_bins": 4,
-        "within_bin_order": "y_then_x_then_original_index",
+        "mapping_method": (
+            "rank_matched_equal_width_spatial_blocks_toroidal_shift"
+        ),
+        "block_shape": [8, 8],
+        "shift_blocks": [4, 0],
+        "within_block_order": "y_then_x_then_original_index",
         "permutation_scope": "all_E_neurons",
         "dynamic_scale_match": (
             "support_weighted_centered_SD_each_step_to_unshifted_zero_sum"
