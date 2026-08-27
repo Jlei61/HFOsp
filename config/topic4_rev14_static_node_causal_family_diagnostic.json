@@ -1,0 +1,85 @@
+{
+  "schema_id": "topic4_rev14_static_node_causal_family_diagnostic_v1",
+  "scientific_role": "development_only_zero_simulation_static_node_causal_family_diagnostic",
+  "output_root": "results/topic4_sef_hfo/data_driven_node_dualmode_rev14/static_node_causal_family_diagnostic",
+  "inputs": {
+    "patient_training_target": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/shaft_aware_patient_training_target.npz",
+      "sha256": "7d11100c0f431479f8decb17b6de97575a91dcb889887ce9e2cedbbdcd54140b"
+    },
+    "frozen_direction_classifier_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_local_connectivity_rev11_nlc/frozen_substrate_confirmation/candidate_manifest.json",
+      "sha256": "545b029d2d7947de5a27979e7166f6bc55ea2b01c64a67a9b736977ec960fcbb"
+    },
+    "contact_contract": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/contact_shaft_contract.json",
+      "sha256": "548643b6e89b61408b8bdf4cbc1566133937204dc36e8d512049cb25762fde91"
+    },
+    "workers": [
+      {
+        "seed": 2311,
+        "json": {
+          "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev13/node_zero_sum_recovery_canary/workers/exact_off_seed_2311.json",
+          "sha256": "ea25048321e9335b40d239380a2b9caa29da90450b46536a77b822429b201d03"
+        },
+        "npz": {
+          "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev13/node_zero_sum_recovery_canary/workers/exact_off_seed_2311.npz",
+          "sha256": "eac197ff2a19bd6c201b136d91fbc1e667cf55424b223a02f5920873e7d66c29"
+        }
+      },
+      {
+        "seed": 2312,
+        "json": {
+          "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev13/node_zero_sum_recovery_canary/workers/exact_off_seed_2312.json",
+          "sha256": "c2de193018fda8159ca453b09eff04cc5f9d50c252d42b5ff61125062c2321b9"
+        },
+        "npz": {
+          "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev13/node_zero_sum_recovery_canary/workers/exact_off_seed_2312.npz",
+          "sha256": "9d615cc3cb4ffcbc935c8ad7f6955c3545f2b085ed8de234ed19e645da9ba12c"
+        }
+      },
+      {
+        "seed": 2313,
+        "json": {
+          "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev13/node_zero_sum_recovery_canary/workers/exact_off_seed_2313.json",
+          "sha256": "3eda616815899384b9b6e9e8c85cc33741dd533195dbf00b6cc9bdcc06614bb4"
+        },
+        "npz": {
+          "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev13/node_zero_sum_recovery_canary/workers/exact_off_seed_2313.npz",
+          "sha256": "2deaabdd49c5c7ef4ff00b0291a7be5f074f22c6b398da6f6985395dcc3776ea"
+        }
+      }
+    ]
+  },
+  "frozen_direction_classifier": {
+    "semantics": "FULL_TIMING",
+    "fixed_events_per_mode": 6,
+    "accessed_keys": [
+      "coef",
+      "intercept",
+      "class_centers",
+      "class_precisions",
+      "ood_distance_thresholds",
+      "ood_quantile",
+      "regularization_c",
+      "n_train"
+    ]
+  },
+  "soft_objective": {
+    "tau": 0.25,
+    "occupancy_weight": 0.5,
+    "ambiguity_weight": 0.25,
+    "contrast_weight": 0.5,
+    "projection_seed": 20260825,
+    "projection_count": 64,
+    "calibration_sample_size": 6,
+    "calibration_draws": 256,
+    "calibration_seed": 20260825,
+    "patient_reference_events_per_mode": 512
+  },
+  "diagnostics": {
+    "natural_kmeans_seed": 20260827,
+    "minimum_fig4_readable_contacts": 3
+  },
+  "claim_boundary": "Post-hoc development diagnosis of the frozen exact_off static Node field using isolated causal families and patient-training data only. Natural KMeans and contact-split cross-fit are diagnostic only. Patient held-out arrays are not loaded, and no SNN simulation, field selection, connectivity, or Z/M claim is allowed."
+}
