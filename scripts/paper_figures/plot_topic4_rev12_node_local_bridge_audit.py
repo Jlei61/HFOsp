@@ -29,14 +29,36 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _align_similarity_matrix(matrix: np.ndarray) -> tuple[np.ndarray, list[int]]:
+    """Choose the KMeans row labelling that protects the weakest match."""
+    candidates = []
+    for permutation in ([0, 1], [1, 0]):
+        aligned = matrix[permutation, :]
+        diagonal = np.diag(aligned)
+        cross = np.asarray([aligned[0, 1], aligned[1, 0]])
+        score = (float(np.min(diagonal) - np.max(cross)),
+                 float(np.mean(diagonal) - np.mean(cross)))
+        candidates.append((score, aligned, permutation))
+    _, aligned, permutation = max(candidates, key=lambda item: item[0])
+    return aligned, list(permutation)
+
+
 def _point(metadata: dict) -> dict:
     natural = metadata["natural_kmeans"]
-    matrix = np.asarray(natural["similarity_matrix"], float)
+    matrix, permutation = _align_similarity_matrix(
+        np.asarray(natural["similarity_matrix"], float)
+    )
+    cross = np.asarray([matrix[0, 1], matrix[1, 0]])
     return {
         "k2_minus_k1": float(
             natural["heldout_gmm_k2_minus_k1_loglik_per_event"]
         ),
         "weakest_patient_diagonal": float(min(matrix[0, 0], matrix[1, 1])),
+        "strongest_patient_cross": float(max(cross)),
+        "patient_sign_structure": bool(
+            np.min(np.diag(matrix)) > 0.0 and np.max(cross) < 0.0
+        ),
+        "cluster_row_permutation": permutation,
         "direction_balanced_alignment": float(
             natural["direction_balanced_alignment"]
         ),
@@ -89,7 +111,7 @@ def build_audit(root: Path, result: dict, manual_metadata: dict,
         row["candidate_id"] for row in rows
         if row["role"] == "local_bridge"
         and row["k2_minus_k1"] > 0.0
-        and row["weakest_patient_diagonal"] > 0.0
+        and row["patient_sign_structure"]
     ]
     return {
         "schema_id": "topic4_rev12_nd_node_local_bridge_kmeans_audit_v1",
@@ -102,7 +124,8 @@ def build_audit(root: Path, result: dict, manual_metadata: dict,
         "gate_semantics": {
             "x_positive": "held-out GMM favors K=2 over K=1",
             "y_positive": "both model clusters correlate positively with their patient mode",
-            "upper_right": "necessary visual acceptance region, not sufficient final acceptance",
+            "patient_sign_structure": "positive matched diagonals and negative crossed cells after the better of the two KMeans row labellings",
+            "upper_right": "necessary visual acceptance region; patient sign structure and full endpoints remain required",
         },
     }
 
