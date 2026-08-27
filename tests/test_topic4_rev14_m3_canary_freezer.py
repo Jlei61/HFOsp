@@ -114,16 +114,19 @@ def test_candidate_coordinates_are_bitwise_stable_across_blas_thread_counts():
         ),
     ]
     outputs = []
-    for threads in ("1", "4"):
+    for threads in (None, "1", "4"):
         environment = os.environ.copy()
         for name in (
                 "BLIS_NUM_THREADS", "OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS",
                 "MKL_NUM_THREADS", "NUMEXPR_NUM_THREADS"):
-            environment[name] = threads
+            if threads is None:
+                environment.pop(name, None)
+            else:
+                environment[name] = threads
         outputs.append(subprocess.check_output(
             command, cwd=ROOT, env=environment, text=True,
         ).strip())
-    assert outputs[0] == outputs[1]
+    assert outputs[0] == outputs[1] == outputs[2]
 
 
 def test_original_signed_depth_formula_and_array_hash_are_frozen():

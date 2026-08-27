@@ -6,6 +6,7 @@ import argparse
 import copy
 import hashlib
 import json
+import math
 import os
 import platform
 import subprocess
@@ -31,7 +32,6 @@ from src.topic4_core_field import (  # noqa: E402
 from src.topic4_rev14_fourier_field import (  # noqa: E402
     array_sha256,
     mode_inventory,
-    normalize_shell_rms,
     spectral_roughness_surrogate,
 )
 
@@ -207,7 +207,7 @@ def _validate_config(config: Mapping[str, Any]) -> None:
         "signs": [-1, 1],
         "sheet_length_mm": 20.0,
         "quadrature_per_axis": 128,
-        "coordinate_decimal_places": 14,
+        "coordinate_decimal_places": 13,
         "candidate_count": 34,
         "selectable_candidate_count": 32,
         "basis_uses_observation_geometry": False,
@@ -382,6 +382,46 @@ def orthogonal_sobol_directions(design: Mapping[str, Any]) -> tuple[np.ndarray, 
     }
 
 
+def _deterministic_physical_basis(
+        modes: tuple[tuple[int, int], ...], *, n_per_axis: int,
+        sheet_length_mm: float) -> np.ndarray:
+    """Build the midpoint basis without a threaded matrix multiplication."""
+    axis = (
+        np.arange(int(n_per_axis), dtype=np.float64) + 0.5
+    ) * float(sheet_length_mm) / int(n_per_axis)
+    factor = math.pi / float(sheet_length_mm)
+    rows: list[list[float]] = []
+    for y in axis:
+        for x in axis:
+            row: list[float] = []
+            for nx, ny in modes:
+                phase = (float(x) * nx + float(y) * ny) * factor
+                row.extend((math.cos(phase), math.sin(phase)))
+            rows.append(row)
+    return np.asarray(rows, dtype=np.float64)
+
+
+def _deterministic_normalize_shell_rms(
+        coefficients: np.ndarray, basis: np.ndarray, *, target_rms: float,
+) -> np.ndarray:
+    """Normalize with fixed-order scalar sums, independent of BLAS threads."""
+    flat = np.asarray(coefficients, dtype=np.float64).ravel()
+    if basis.ndim != 2 or basis.shape[1] != flat.size:
+        raise RuntimeError("deterministic physical basis is misaligned")
+    values = [
+        math.fsum(float(left) * float(right) for left, right in zip(row, flat))
+        for row in basis
+    ]
+    mean = math.fsum(values) / len(values)
+    variance = math.fsum((value - mean) ** 2 for value in values) / len(values)
+    current = math.sqrt(variance)
+    if not math.isfinite(current) or current <= np.finfo(np.float64).eps:
+        raise RuntimeError("a zero shell cannot be RMS-normalized")
+    return np.asarray(coefficients, dtype=np.float64) * (
+        float(target_rms) / current
+    )
+
+
 def _coordinate_record(
     *,
     candidate_id: str,
@@ -392,7 +432,7 @@ def _coordinate_record(
     direction_index: int | None = None,
     sign: int | None = None,
     target_rms: float | None = None,
-    decimal_places: int = 14,
+    decimal_places: int = 13,
 ) -> dict[str, Any]:
     record: dict[str, Any] = {
         "candidate_id": candidate_id,
@@ -427,6 +467,10 @@ def build_candidates(config: Mapping[str, Any]) -> tuple[list[dict], dict]:
     decimal_places = int(design["coordinate_decimal_places"])
     modes = mode_inventory(int(design["maximum_order"]))
     orthonormal, direction_audit = orthogonal_sobol_directions(design)
+    deterministic_basis = _deterministic_physical_basis(
+        modes, n_per_axis=int(design["quadrature_per_axis"]),
+        sheet_length_mm=float(design["sheet_length_mm"]),
+    )
     candidates = [
         _coordinate_record(
             candidate_id="exact_off", field_kind="stage_ak_exact_off_benchmark",
@@ -442,10 +486,9 @@ def build_candidates(config: Mapping[str, Any]) -> tuple[list[dict], dict]:
         ),
     ]
     for direction_index, vector in enumerate(orthonormal):
-        unit_surface = normalize_shell_rms(
-            vector.reshape(len(modes), 2), modes, target_rms=1.0,
-            n_per_axis=int(design["quadrature_per_axis"]),
-            L=float(design["sheet_length_mm"]),
+        unit_surface = _deterministic_normalize_shell_rms(
+            vector.reshape(len(modes), 2), deterministic_basis,
+            target_rms=1.0,
         )
         for target_rms in map(float, design["surface_rms_levels"]):
             for sign in map(int, design["signs"]):
