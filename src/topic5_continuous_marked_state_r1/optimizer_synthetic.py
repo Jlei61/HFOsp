@@ -26,10 +26,17 @@ def run_optimizer_synthetic(*, seed: int, truth: str,
                             learning_rate: float = 3e-3,
                             weight_decay: float = 0.0,
                             grad_clip_norm: float | None = 1.0,
-                            warmup_fraction: float = 0.0) -> dict:
+                            warmup_fraction: float = 0.0,
+                            selection_min_delta: float = 0.0,
+                            early_stopping_patience: int | None = None) -> dict:
     """Select on a middle block and report a never-used chronological test."""
     if n_anchors < 100:
         raise ValueError("optimizer synthetic needs at least 100 anchors")
+    if float(selection_min_delta) < 0.0:
+        raise ValueError("synthetic selection_min_delta must be non-negative")
+    if (early_stopping_patience is not None
+            and int(early_stopping_patience) < 1):
+        raise ValueError("synthetic early_stopping_patience must be positive")
     base_stop = int(math.floor(0.6 * n_anchors))
     selection_stop = int(math.floor(0.8 * n_anchors))
     torch.manual_seed(int(seed))
@@ -67,7 +74,10 @@ def run_optimizer_synthetic(*, seed: int, truth: str,
         "clipped": False,
     }]
     warmup_steps = int(math.ceil(float(warmup_fraction) * max(epochs, 1)))
+    without_improvement = 0
+    executed_epochs = 0
     for epoch in range(1, int(epochs) + 1):
+        executed_epochs = int(epoch)
         if warmup_steps:
             factor = min(1.0, float(epoch) / float(warmup_steps))
             for group in optimizer.param_groups:
@@ -101,10 +111,16 @@ def run_optimizer_synthetic(*, seed: int, truth: str,
                 grad_clip_norm is not None and preclip > float(grad_clip_norm)
             ),
         })
-        if selection_value < best_value:
+        if selection_value < best_value - float(selection_min_delta):
             best_value = selection_value
             best_epoch = int(epoch)
             best_state = copy.deepcopy(model.state_dict())
+            without_improvement = 0
+        else:
+            without_improvement += 1
+        if (early_stopping_patience is not None
+                and without_improvement >= int(early_stopping_patience)):
+            break
     model.load_state_dict(best_state)
     permutation = torch.arange(n_anchors)
     permutation[selection_stop:] = permutation[selection_stop:].roll(17)
@@ -140,6 +156,12 @@ def run_optimizer_synthetic(*, seed: int, truth: str,
             None if grad_clip_norm is None else float(grad_clip_norm)
         ),
         "warmup_fraction": float(warmup_fraction),
+        "selection_min_delta": float(selection_min_delta),
+        "early_stopping_patience": (
+            None if early_stopping_patience is None
+            else int(early_stopping_patience)
+        ),
+        "executed_epochs": int(executed_epochs),
         "selected_epoch": int(best_epoch),
         "selection_nll": float(best_value),
         "test_nll": correct,

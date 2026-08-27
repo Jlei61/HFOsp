@@ -43,6 +43,8 @@ def main() -> None:
     parser.add_argument("--weight-decay", type=float, default=1e-3)
     parser.add_argument("--warmup-fraction", type=float, default=0.0)
     parser.add_argument("--grad-clip-norm", type=float, default=1.0)
+    parser.add_argument("--selection-min-delta", type=float, default=0.0)
+    parser.add_argument("--early-stopping-patience", type=int, default=0)
     parser.add_argument("--chunk-anchors", type=int, default=256)
     parser.add_argument("--optimizer", choices=("adamw", "adam"), default="adamw")
     parser.add_argument("--config-id", default="prefix_adamw_lr3e-4_wd1e-3")
@@ -81,6 +83,11 @@ def main() -> None:
             None if args.grad_clip_norm <= 0 else args.grad_clip_norm
         ),
         warmup_fraction=args.warmup_fraction, split=split,
+        selection_min_delta=args.selection_min_delta,
+        early_stopping_patience=(
+            None if args.early_stopping_patience <= 0
+            else args.early_stopping_patience
+        ),
     )
     output = (
         args.output_root / "prefix_initialisation" / args.config_id

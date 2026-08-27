@@ -103,6 +103,11 @@ def main() -> None:
         weight_decay=float(config["weight_decay"]),
         grad_clip_norm=float(config["clip"]),
         warmup_fraction=float(config["warmup"]),
+        selection_min_delta=float(config["min_delta"]),
+        early_stopping_patience=(
+            None if int(config["patience"]) <= 0
+            else int(config["patience"])
+        ),
         epoch_zero_seen_inner_validation=False,
         refit_mode="full_train",
     )

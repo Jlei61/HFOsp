@@ -115,10 +115,17 @@ def fit_prefix_safe_core(model: FrozenEmbeddingStateModel,
                          optimizer_name: str = "adamw",
                          grad_clip_norm: float | None = 1.0,
                          warmup_fraction: float = 0.0,
+                         selection_min_delta: float = 0.0,
+                         early_stopping_patience: int | None = None,
                          split: NestedTimeSplit | None = None
                          ) -> tuple[FrozenEmbeddingStateModel, dict]:
     """Fit the core without exposing epoch zero to alignment selection data."""
     split = split or nested_time_split(design)
+    if float(selection_min_delta) < 0.0:
+        raise ValueError("prefix selection_min_delta must be non-negative")
+    if (early_stopping_patience is not None
+            and int(early_stopping_patience) < 1):
+        raise ValueError("prefix early_stopping_patience must be positive")
     initial = _state_snapshot(model)
 
     def value(lower: float, upper: float) -> dict:
@@ -164,7 +171,10 @@ def fit_prefix_safe_core(model: FrozenEmbeddingStateModel,
             float(warmup_fraction) * approximate_steps
         )),
     }
+    without_improvement = 0
+    executed_epochs = 0
     for epoch in range(1, int(epochs) + 1):
+        executed_epochs = int(epoch)
         before = _state_snapshot(model)
         model.train()
         diagnostics: dict = {}
@@ -193,9 +203,15 @@ def fit_prefix_safe_core(model: FrozenEmbeddingStateModel,
             "update_norm": _update_norm(before, model),
             **diagnostics,
         })
-        if current < best_value:
+        if current < best_value - float(selection_min_delta):
             best_value = current
             best_epoch = int(epoch)
+            without_improvement = 0
+        else:
+            without_improvement += 1
+        if (early_stopping_patience is not None
+                and without_improvement >= int(early_stopping_patience)):
+            break
 
     model.load_state_dict(initial)
     if best_epoch:
@@ -236,6 +252,12 @@ def fit_prefix_safe_core(model: FrozenEmbeddingStateModel,
             None if grad_clip_norm is None else float(grad_clip_norm)
         ),
         "warmup_fraction": float(warmup_fraction),
+        "selection_min_delta": float(selection_min_delta),
+        "early_stopping_patience": (
+            None if early_stopping_patience is None
+            else int(early_stopping_patience)
+        ),
+        "executed_epochs": int(executed_epochs),
         "chunk_anchors": int(chunk_anchors),
         "epochs_budget": int(epochs),
         "epoch_zero_seen_base_select": False,

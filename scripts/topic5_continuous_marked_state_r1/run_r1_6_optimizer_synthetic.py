@@ -24,6 +24,8 @@ def main() -> None:
     parser.add_argument("--weight-decay", type=float, default=0.0)
     parser.add_argument("--grad-clip-norm", type=float, default=1.0)
     parser.add_argument("--warmup-fraction", type=float, default=0.0)
+    parser.add_argument("--selection-min-delta", type=float, default=0.0)
+    parser.add_argument("--early-stopping-patience", type=int, default=0)
     parser.add_argument(
         "--output-root", type=Path,
         default=contract.RESULT_ROOT / "optimizer_identifiability_r1_6",
@@ -38,6 +40,11 @@ def main() -> None:
                 None if args.grad_clip_norm <= 0 else args.grad_clip_norm
             ),
             warmup_fraction=args.warmup_fraction,
+            selection_min_delta=args.selection_min_delta,
+            early_stopping_patience=(
+                None if args.early_stopping_patience <= 0
+                else args.early_stopping_patience
+            ),
         )
         for truth in args.truths for seed in args.seeds
     ]

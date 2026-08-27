@@ -52,6 +52,8 @@ def main() -> None:
     parser.add_argument("--warmup-fraction", type=float, default=0.0)
     parser.add_argument("--grad-clip-norm", type=float, default=1.0)
     parser.add_argument("--optimizer", choices=("adamw", "adam"), default="adamw")
+    parser.add_argument("--selection-min-delta", type=float, default=0.0)
+    parser.add_argument("--early-stopping-patience", type=int, default=0)
     parser.add_argument("--chunk-anchors", type=int, default=8)
     parser.add_argument(
         "--r1-2-root", type=Path, default=contract.RESULT_ROOT / "r1_2"
@@ -97,6 +99,11 @@ def main() -> None:
             None if args.grad_clip_norm <= 0 else args.grad_clip_norm
         ),
         warmup_fraction=args.warmup_fraction,
+        selection_min_delta=args.selection_min_delta,
+        early_stopping_patience=(
+            None if args.early_stopping_patience <= 0
+            else args.early_stopping_patience
+        ),
         epoch_zero_seen_inner_validation=False,
         refit_mode="selection_best",
     )

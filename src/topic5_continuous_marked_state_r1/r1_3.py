@@ -584,6 +584,7 @@ class FitTrace:
     optimizer_config: dict
     epoch_zero_seen_inner_validation: bool
     refit_mode: str
+    executed_epochs_by_stage: dict[str, int]
 
 
 def fit_target_observer(model: FullTargetObserverStateModel,
@@ -600,6 +601,8 @@ def fit_target_observer(model: FullTargetObserverStateModel,
                         weight_decay: float = 1e-3,
                         grad_clip_norm: float | None = 1.0,
                         warmup_fraction: float = 0.0,
+                        selection_min_delta: float = 0.0,
+                        early_stopping_patience: int | None = None,
                         epoch_zero_seen_inner_validation: bool = True,
                         refit_mode: str = "full_train") -> FitTrace:
     """TRAIN-inner selection followed by exact full-TRAIN refit."""
@@ -607,6 +610,11 @@ def fit_target_observer(model: FullTargetObserverStateModel,
         raise ValueError(f"unknown R1.3 refit mode {refit_mode!r}")
     if not 0.0 <= float(warmup_fraction) <= 1.0:
         raise ValueError("warmup_fraction must be within [0, 1]")
+    if float(selection_min_delta) < 0.0:
+        raise ValueError("selection_min_delta must be non-negative")
+    if (early_stopping_patience is not None
+            and int(early_stopping_patience) < 1):
+        raise ValueError("early_stopping_patience must be positive or None")
     train = design.anchor_ids("train")
     if len(train) < 10:
         raise ValueError("R1.3 needs at least ten TRAIN anchors")
@@ -693,6 +701,7 @@ def fit_target_observer(model: FullTargetObserverStateModel,
         ("observer_alignment", int(observer_epochs)),
         ("joint_alignment", int(joint_epochs)),
     ]
+    executed_epochs_by_stage: dict[str, int] = {}
     for stage, epochs in schedule:
         trainable_by_stage[stage] = _set_trainable(model, stage=stage)
         optimizer = _optimizer(
@@ -708,7 +717,10 @@ def fit_target_observer(model: FullTargetObserverStateModel,
                 float(warmup_fraction) * approximate_steps
             )),
         }
+        without_improvement = 0
+        executed_epochs_by_stage[stage] = 0
         for stage_epoch in range(1, epochs + 1):
+            executed_epochs_by_stage[stage] = int(stage_epoch)
             total_epoch += 1
             model.train()
             before = _trainable_snapshot(model)
@@ -741,7 +753,7 @@ def fit_target_observer(model: FullTargetObserverStateModel,
                     update_norm / max(parameter_norm, 1e-12)
                 ),
             })
-            if value < best_value:
+            if value < best_value - float(selection_min_delta):
                 best_value = value
                 best_stage = stage
                 best_stage_epoch = stage_epoch
@@ -750,6 +762,12 @@ def fit_target_observer(model: FullTargetObserverStateModel,
                     key: parameter.detach().cpu().clone()
                     for key, parameter in model.state_dict().items()
                 }
+                without_improvement = 0
+            else:
+                without_improvement += 1
+            if (early_stopping_patience is not None
+                    and without_improvement >= int(early_stopping_patience)):
+                break
 
     if refit_mode == "selection_best":
         model.load_state_dict(best_selection_state)
@@ -761,7 +779,7 @@ def fit_target_observer(model: FullTargetObserverStateModel,
             if best_stage == stage:
                 stage_limit = best_stage_epoch
             elif best_stage == "joint_alignment" and stage == "observer_alignment":
-                stage_limit = epochs
+                stage_limit = executed_epochs_by_stage[stage]
             if stage_limit <= 0:
                 continue
             _set_trainable(model, stage=stage)
@@ -810,6 +828,11 @@ def fit_target_observer(model: FullTargetObserverStateModel,
                 None if grad_clip_norm is None else float(grad_clip_norm)
             ),
             "warmup_fraction": float(warmup_fraction),
+            "selection_min_delta": float(selection_min_delta),
+            "early_stopping_patience": (
+                None if early_stopping_patience is None
+                else int(early_stopping_patience)
+            ),
             "chunk_anchors": int(chunk_anchors),
             "observer_epochs": int(observer_epochs),
             "joint_epochs": int(joint_epochs),
@@ -818,4 +841,5 @@ def fit_target_observer(model: FullTargetObserverStateModel,
             epoch_zero_seen_inner_validation
         ),
         refit_mode=refit_mode,
+        executed_epochs_by_stage=executed_epochs_by_stage,
     )

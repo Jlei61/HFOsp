@@ -28,30 +28,42 @@ CONFIGS = {
     "prefix_current_e4_c256_v2": {
         "optimizer": "adamw", "lr": 3e-4, "weight_decay": 1e-3,
         "warmup": 0.0, "clip": 1.0, "epochs": 4, "chunk": 256,
+        "min_delta": 0.0, "patience": 0,
     },
     "prefix_more_passes_e12_c256": {
         "optimizer": "adamw", "lr": 3e-4, "weight_decay": 1e-3,
         "warmup": 0.0, "clip": 1.0, "epochs": 12, "chunk": 256,
+        "min_delta": 0.0, "patience": 0,
     },
     "prefix_more_steps_e4_c64": {
         "optimizer": "adamw", "lr": 3e-4, "weight_decay": 1e-3,
         "warmup": 0.0, "clip": 1.0, "epochs": 4, "chunk": 64,
+        "min_delta": 0.0, "patience": 0,
     },
     "prefix_no_decay_warm_e8_c128": {
         "optimizer": "adamw", "lr": 3e-4, "weight_decay": 0.0,
         "warmup": 0.1, "clip": 5.0, "epochs": 8, "chunk": 128,
+        "min_delta": 0.0, "patience": 0,
     },
     "prefix_low_lr_e12_c128": {
         "optimizer": "adamw", "lr": 1e-4, "weight_decay": 0.0,
         "warmup": 0.1, "clip": 5.0, "epochs": 12, "chunk": 128,
+        "min_delta": 0.0, "patience": 0,
     },
     "prefix_high_lr_e8_c128": {
         "optimizer": "adamw", "lr": 1e-3, "weight_decay": 0.0,
         "warmup": 0.1, "clip": 5.0, "epochs": 8, "chunk": 128,
+        "min_delta": 0.0, "patience": 0,
     },
     "prefix_adam_diagnostic_e8_c128": {
         "optimizer": "adam", "lr": 3e-4, "weight_decay": 0.0,
         "warmup": 0.1, "clip": 5.0, "epochs": 8, "chunk": 128,
+        "min_delta": 0.0, "patience": 0,
+    },
+    "prefix_patience_diagnostic_e12_c128": {
+        "optimizer": "adamw", "lr": 3e-4, "weight_decay": 0.0,
+        "warmup": 0.1, "clip": 5.0, "epochs": 12, "chunk": 128,
+        "min_delta": 1e-4, "patience": 3,
     },
 }
 
@@ -116,7 +128,7 @@ def valid(path: Path, config_id: str, subject: str, seed: int) -> bool:
         and value.get("epoch_zero_seen_alignment_selection") is False
         and value.get("formal_test_partition_opened") is False
         and value.get("sealed_opened") is False
-        and len(trajectory) == int(trace.get("epochs_budget", -1)) + 1
+        and 1 <= len(trajectory) <= int(trace.get("epochs_budget", -1)) + 1
         and all("evaluated_train_metrics" in row for row in trajectory)
         and all("optimizer_steps" in row for row in trajectory)
     )
@@ -142,6 +154,8 @@ def run_cell(root: Path, config_id: str, subject: str, seed: int) -> dict:
         "--grad-clip-norm", str(config["clip"]),
         "--chunk-anchors", str(config["chunk"]),
         "--optimizer", str(config["optimizer"]),
+        "--selection-min-delta", str(config["min_delta"]),
+        "--early-stopping-patience", str(config["patience"]),
         "--config-id", config_id, "--output-root", str(root),
     ]
     log = root / "logs/prefix_tuning" / config_id / f"{subject}_seed_{seed}.log"

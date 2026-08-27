@@ -146,6 +146,8 @@ def prefix_task(root: Path, selected_prefix_config: str,
         "--grad-clip-norm", str(prefix_config["clip"]),
         "--chunk-anchors", str(prefix_config["chunk"]),
         "--optimizer", str(prefix_config["optimizer"]),
+        "--selection-min-delta", str(prefix_config["min_delta"]),
+        "--early-stopping-patience", str(prefix_config["patience"]),
         "--config-id", selected_prefix_config, "--output-root", str(root),
     ]
     value = run(

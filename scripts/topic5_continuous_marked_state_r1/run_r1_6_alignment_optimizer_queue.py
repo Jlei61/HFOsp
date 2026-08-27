@@ -129,6 +129,8 @@ def selection_task(root: Path, prefix_config: str, config_id: str,
         str(config["weight_decay"]), "--warmup-fraction",
         str(config["warmup"]), "--grad-clip-norm", str(config["clip"]),
         "--optimizer", str(config["optimizer"]),
+        "--selection-min-delta", str(config["min_delta"]),
+        "--early-stopping-patience", str(config["patience"]),
         "--chunk-anchors", str(config["chunk"]),
         "--output-root", str(root),
     ]
