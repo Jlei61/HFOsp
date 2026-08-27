@@ -67,7 +67,9 @@
 
 1. Freeze the best eight selectable M3 fields without looking at KMeans or
    patient held-out.
-2. Run seeds 2322--2323 with common random numbers.
+2. Run the eight fields plus nonselectable `exact_off` on seeds 2322--2323
+   with common random numbers: 18 runs total. The two benchmark runs are
+   required to define the paired improvement on all three networks.
 3. Define a usable M3 anchor as positive paired `J14_v1` improvement on at
    least two of seeds 2321--2323, both confidence-adjusted mode supports at
    least six, and no runaway or numerical failure.
@@ -127,10 +129,10 @@
 - Ordinary negative scientific results do not stop the bounded M3 canary.
 - M3 alone cannot reject the free-field family. M4 shell-only search is allowed
   only around a usable M3 anchor.
-- The primary M3 budget is 34 canary runs, 16 canary replications, up to 96 M3
-  optimization runs, 12 selection runs and 12 confirmation runs: at most 170
-  new 20-s runs before intervention. A registered M4-shell extension adds
-  at most 88 runs, for a total ceiling of 258.
+- The primary M3 budget is 34 canary runs, 18 canary replications, up to 96 M3
+  optimization runs, 12 selection runs and 12 confirmation runs: at most 172
+  total new 20-s runs before intervention. A registered M4-shell
+  extension adds at most 88 runs, for a total ceiling of 260.
 - A negative bounded result is `NOT_SUPPORTED_WITHIN_FROZEN_M3_BUDGET`, or
   `NOT_SUPPORTED_WITHIN_FROZEN_M3_M4_BUDGET` only when the M4 shell was validly
   tested. Neither rejects every continuous field or authorizes EE/E-to-I/Z/M

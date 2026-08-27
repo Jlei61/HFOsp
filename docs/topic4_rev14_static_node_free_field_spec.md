@@ -299,10 +299,11 @@ or any contact-target fit.
 
 Run all 34 fields on seed 2321 with common random numbers for 20 s. Continue the
 best eight selectable fields by `J14_v1` alone on seeds 2322--2323; lexical
-candidate ID is the deterministic tie-break. The patient-support sidecar is
-reported here but cannot reorder the M3 canary. This is an instrument and
-capacity canary spanning only an eight-dimensional section of M3, not evidence
-of convergence or a negative capacity test.
+candidate ID is the deterministic tie-break. Run `exact_off` on both replication
+seeds as a nonselectable paired reference, for 18 replication runs in total.
+The patient-support sidecar is reported here but cannot reorder the M3 canary.
+This is an instrument and capacity canary spanning only an eight-dimensional
+section of M3, not evidence of convergence or a negative capacity test.
 
 ### 7.2 Local refinement
 
