@@ -176,6 +176,12 @@ fixed-mass Node field. Stage-AK `exact_off` is retained only as a nonselectable
 benchmark that bypasses the Fourier projector. The frozen `d_i` vector is
 reconstructed from the original quantile seed and threshold distribution; it
 must never be inferred by dividing a dual-field threshold vector by `h_i`.
+Because Stage-AK `exact_off` uses the historical dual continuous
+mean-dispersion mapping, it is not expected to satisfy the rev14
+`Vtheta=v_base-h*d_i` identity. Benchmark parity means that its reconstructed
+`h` and full `Vtheta` arrays bypass the rev14 projector unchanged. The numerical
+difference between the two mapping families is reported, not treated as an
+engine-parity failure.
 
 ### 5.3 Regularization
 
@@ -365,6 +371,21 @@ recruitment, ICL-SCL precedence, per-mode joint-shaft participation and OOD.
 This is one combined support condition, not five independent run blockers.
 Relative improvement over `exact_off` cannot substitute for this absolute
 patient-training support condition.
+
+The sidecar keeps the historical patient A/B labels as the patient-reference
+mode identity. Its pseudo-model side uses the frozen training-only classifier
+assignments, matching how model events are assigned at evaluation. Formal OOD
+is likewise conditioned on the classifier-assigned class; old-label-conditioned
+OOD is diagnostic only. All contact-primary model events remain in the four
+mode distances even when OOD; OOD is an additional endpoint, not a deletion
+rule. Each marginal endpoint is divided by its patient block-disjoint q95. A
+synchronized outer block split then generates the maximum across the nine
+normalized endpoints, and the q95 of this maximum is the single acceptance
+threshold. The pseudo-model and patient-reference block sets are disjoint on
+every outer draw. The frozen sidecar records the outer and inner draw counts,
+all marginal and joint distributions, block audits and hashes. If a model mode
+has fewer than the matched event budget, all-missing rows pad the deficit and
+therefore worsen rather than hide missing support.
 
 K2-versus-K1 held-out GMM density, silhouette and centroid valley gap are
 reported diagnostics rather than additional blockers because their finite

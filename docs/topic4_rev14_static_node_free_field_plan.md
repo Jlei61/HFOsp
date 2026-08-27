@@ -38,20 +38,28 @@
    least 0.995.
 4. Test that basis values are independent of contact coordinates and contact
    count.
-5. Test mass, bounds, deterministic hashes and exact-off engine parity.
+5. Test mass, bounds and deterministic hashes. For the nonselectable
+   `exact_off` benchmark, engine parity means that its reconstructed `h` and
+   full `Vtheta` arrays pass through bitwise unchanged. It does not mean that
+   the historical dual mean-dispersion mapping must satisfy the rev14 original
+   signed-depth formula; that mapping-family difference is recorded as a
+   diagnostic and is never used to reject a Fourier candidate.
 6. Keep EE, E-to-I and Z/M off in the worker and manifest.
 
 ## Phase 3: bounded M3 canary
 
-1. Freeze eight observation-free orthogonalized Sobol directions.
-2. Generate both signs at RMS 0.8 and 1.4: 32 selectable fields.
-3. Add uniform and Stage-AK `exact_off` as nonselectable benchmarks.
-4. Prewarm one network cache, then launch 34 seed-2321 runs with
+1. Freeze the training-only patient-support sidecar, including classifier-label
+   parity, synchronized joint-null distributions and block-audit hashes. Do not
+   load held-out or model artifacts.
+2. Freeze eight observation-free orthogonalized Sobol directions.
+3. Generate both signs at RMS 0.8 and 1.4: 32 selectable fields.
+4. Add uniform and Stage-AK `exact_off` as nonselectable benchmarks.
+5. Prewarm one network cache, then launch 34 seed-2321 runs with
    `systemd-run --user` plus `nohup`.
-5. Use one numerical thread per worker. Derive worker count from measured peak
+6. Use one numerical thread per worker. Derive worker count from measured peak
    RSS, reserve at least 48 GiB and retain at least 40 GiB free disk.
-6. Monitor at 600-s intervals; do not continuously poll.
-7. Aggregate with the frozen training-only `J14` producer.
+7. Monitor at 600-s intervals; do not continuously poll.
+8. Aggregate with the frozen training-only `J14` producer.
 
 ## Phase 4: replication and refinement
 

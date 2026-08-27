@@ -1,0 +1,85 @@
+{
+  "schema_id": "topic4_rev14_m3_observation_free_canary_v1",
+  "scientific_role": "development_only_observation_free_static_node_m3_canary",
+  "output_root": "results/topic4_sef_hfo/data_driven_node_dualmode_rev14/m3_observation_free_canary",
+  "candidate_manifest": "results/topic4_sef_hfo/data_driven_node_dualmode_rev14/m3_observation_free_canary/candidate_manifest.json",
+  "network_cache": "results/topic4_sef_hfo/data_driven_core_field_rev9/network_cache",
+  "inputs": {
+    "rev13_config": {
+      "path": "config/topic4_rev13_node_zero_sum_recovery.json",
+      "sha256": "f4cb16543860d7bee54f9fa703568a5d3ccf4daf8179d665aafde80e50e230ca"
+    },
+    "rev13_exact_off_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev13/node_zero_sum_recovery_canary/candidate_manifest.json",
+      "sha256": "c4de2e1932acdc2b75b5460c0493ef11e79731f2661ec48411217183578b8ea8"
+    }
+  },
+  "m3_design": {
+    "basis_family": "absolute_paired_phase_whole_sheet_fourier",
+    "maximum_order": 3,
+    "expected_modes": 14,
+    "expected_real_coefficients": 28,
+    "sobol_scramble": true,
+    "sobol_seed": 20260827,
+    "direction_count": 8,
+    "orthogonalization": "deterministic_modified_gram_schmidt_in_coefficient_space",
+    "surface_rms_levels": [0.8, 1.4],
+    "signs": [-1, 1],
+    "sheet_length_mm": 20.0,
+    "quadrature_per_axis": 128,
+    "candidate_count": 34,
+    "selectable_candidate_count": 32,
+    "candidate_generation_inputs": "sobol_seed_modes_and_physical_sheet_quadrature_only",
+    "basis_uses_observation_geometry": false,
+    "basis_uses_predeclared_objects": false
+  },
+  "node_mapping": {
+    "h_formula": "sigmoid((s_at_E_neuron-lambda)/tau_h)",
+    "lambda_constraint": "sum_E_h_equals_frozen_stage_ak_mass",
+    "expected_target_h_mass": 1129.0,
+    "tau_h": 0.25,
+    "eps": 0.001,
+    "signed_depth_source": "original_frozen_quantile_draw",
+    "signed_depth_formula": "signed_depth(core_thresholds(sample_core_quantiles(n_e,quantile_seed),core_mean,core_std),v_base)",
+    "signed_depth_contract": {
+      "expected_n_e": 32000,
+      "quantile_seed": 20260806,
+      "core_mean_mV": 17.5,
+      "core_std_mV": 1.0,
+      "v_base_mV": 18.0,
+      "sha256": "68430aff5ab740baa93964745cbaf089720a1eb4518b59f109160faf3fb018ce"
+    },
+    "vtheta_formula": "Vtheta_E=v_base-h*d_i",
+    "node_gain": 1.0,
+    "zero_fourier_is_uniform": true,
+    "exact_off_bypasses_fourier": true
+  },
+  "search": {
+    "canary_network_seeds": [2321],
+    "replication_network_seeds": [2322, 2323],
+    "active_network_seeds": [2321],
+    "common_random_numbers_across_candidates": true,
+    "simulation": {
+      "duration_ms": 20000.0,
+      "early_stop_runaway": true,
+      "late_runaway_is_invalid": true
+    }
+  },
+  "pathways": {
+    "learned_E_to_E_redistribution": "off",
+    "learned_E_to_I_redistribution": "off",
+    "Z_M": "off"
+  },
+  "resources": {
+    "numerical_threads_per_worker": 1,
+    "maximum_workers": 10,
+    "recommended_workers_after_full_prewarm": 9,
+    "stop_launching_below_available_memory_gib": 64,
+    "emergency_stop_below_available_memory_gib": 48,
+    "worker_rss_safety_multiplier": 1.2,
+    "minimum_free_disk_gib": 40,
+    "monitor_interval_seconds": 600,
+    "long_run_launcher": "systemd-run --user plus nohup"
+  },
+  "claim_boundary": "Observation-free bounded M3 capacity canary for an absolute whole-sheet Fourier Node field. Every selectable h is generated directly from s(x,y) and the frozen mass projection; it does not inherit exact_off h geometry or threshold geometry. The frozen Stage-AK exact_off field and zero-Fourier uniform Node are separate nonselectable benchmarks. Every Fourier candidate uses the original position-independent d_i draw reconstructed from the frozen quantile seed and core-threshold distribution, with an explicit array hash; d_i is never inferred from exact_off Vtheta/h. Candidate directions use only the whole-sheet Fourier coordinate contract and a frozen Sobol seed; patient labels, contact geometry, shaft identity, hand-placed objects and natural KMeans do not generate or rank candidates. EE, E-to-I and Z/M remain off. Seed 2321 and 20 s are the only active canary run contract in this manifest."
+}
