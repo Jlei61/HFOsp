@@ -1,0 +1,153 @@
+{
+  "schema_id": "topic4_rev13_node_zero_sum_recovery_v1",
+  "scientific_role": "development_only_model_internal_node_recovery_canary",
+  "output_root": "results/topic4_sef_hfo/data_driven_node_dualmode_rev13/node_zero_sum_recovery_canary",
+  "candidate_manifest": "results/topic4_sef_hfo/data_driven_node_dualmode_rev13/node_zero_sum_recovery_canary/candidate_manifest.json",
+  "network_cache": "results/topic4_sef_hfo/data_driven_core_field_rev9/network_cache",
+  "inputs": {
+    "stage_ak_config": {
+      "path": "config/topic4_rev12_nd_dual_node_channel_canary.json",
+      "sha256": "33bca2a7c7252430026e812ce21811f865ac669b6a865e34b2ee32bfc9df6109"
+    },
+    "stage_ak_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_ak_dual_node_channel_canary/candidate_manifest.json",
+      "sha256": "93854fd6f79966ff891c53a958cbf29396360142c1ade1e4f4a5acf756ae39b8"
+    },
+    "stage_al_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_al_dual_node_local_bridge/candidate_manifest.json",
+      "sha256": "c36bdacd5b38edba2d68140e3d3cefaa2b76fab68c73695ca3c1aaeb0b10c1bc"
+    }
+  },
+  "primary_substrate": {
+    "candidate_id": "stage_ak_mean_g10_p_disp_g08_m",
+    "source_candidate_ids": {
+      "mean": "stage_ag_g10_p",
+      "dispersion": "stage_ag_g08_m"
+    },
+    "mapping_type": "dual_continuous_mean_dispersion",
+    "mapping_sha256": "6e1a9b661d078de4e3cd24398d3824e8e634b06c03ef8de048342086cbb94920",
+    "mean_field_sha256": "6fe4bd9c7a24b75aa9213c94f657776f3ac3f751f43169177c0239ce75a4e37a",
+    "dispersion_field_sha256": "9514099a280b20a46a53b7ac626a0ec9cb2940f13ebf8b756abe4d6e6c899b24",
+    "support": {
+      "field_names": ["node_field", "node_dispersion_field"],
+      "formula": "g_i = (h_mean_i + h_dispersion_i) / max_j(h_mean_j + h_dispersion_j)",
+      "normalization": "maximum_over_E_neurons",
+      "minimum_denominator": 1e-12
+    },
+    "stage_al_alias": {
+      "candidate_id": "stage_al_m100_d100",
+      "mean_affine_weight": 1.0,
+      "dispersion_interpolation_weight": 1.0,
+      "coefficient_absolute_tolerance": 1e-12,
+      "count_as_additional_substrate": false
+    }
+  },
+  "node_accessibility_contract": {
+    "tau_ms": 250.0,
+    "reference_rate_hz": 50.0,
+    "amplitude_scale": "A_ref = c * sigma_node",
+    "sigma_node_formula": "support_weighted_RMS_of_static_Node_threshold_modulation",
+    "increment_formula": "q = A_ref * (1 - exp(-dt/tau)) / (r_ref * dt / 1000)",
+    "trace_bound_formula": "a_max = 2 * A_ref",
+    "a_max_multiplier": 2.0,
+    "state_update": "after_current_step_spike_reset_affects_next_step",
+    "zero_sum_formula": "delta_theta_i = g_i * (a_i - sum_j(g_j*a_j)/sum_j(g_j))",
+    "raise_only_formula": "delta_theta_i = g_i * a_i",
+    "stratified_shuffle": {
+      "seed": 20260827,
+      "support_quantile_bins": 5,
+      "signed_depth_quantile_bins": 5,
+      "permutation_scope": "E_neurons_within_joint_support_signed_depth_strata"
+    },
+    "draws_random_numbers_at_runtime": false,
+    "uses_patient_labels": false,
+    "uses_patient_prototypes": false
+  },
+  "arms": [
+    {
+      "arm_id": "exact_off",
+      "controller": null
+    },
+    {
+      "arm_id": "zero_sum_c010",
+      "controller": {"mode": "zero_sum", "c": 0.1}
+    },
+    {
+      "arm_id": "zero_sum_c020",
+      "controller": {"mode": "zero_sum", "c": 0.2}
+    },
+    {
+      "arm_id": "zero_sum_c040",
+      "controller": {"mode": "zero_sum", "c": 0.4}
+    },
+    {
+      "arm_id": "raise_only_c020",
+      "controller": {"mode": "raise_only", "c": 0.2}
+    },
+    {
+      "arm_id": "stratified_shuffle_c020",
+      "controller": {"mode": "stratified_shuffle", "c": 0.2}
+    }
+  ],
+  "search": {
+    "canary_network_seeds": [2311],
+    "fit_network_seeds": [2312, 2313],
+    "selection_network_seeds": [],
+    "confirmation_network_seeds": [],
+    "common_random_numbers_across_arms": true,
+    "simulation": {
+      "duration_ms": 10000.0,
+      "early_stop_runaway": true,
+      "late_runaway_is_invalid": true
+    }
+  },
+  "pathways": {
+    "learned_E_to_E_redistribution": "off",
+    "learned_E_to_I_redistribution": "off",
+    "Z_M": "off"
+  },
+  "event_unit": {
+    "name": "edge_supported_causal_family_observation",
+    "minimum_active_neurons": 2,
+    "minimum_dominance": 0.7,
+    "sensitivity_minimum_dominances": [0.6, 0.7, 0.8],
+    "movie_frame_ms": 2.0,
+    "movie_bin_mm": 1.0,
+    "causal_memory_method": "local_ee_psp_tail",
+    "psp_tail_fraction": 0.5,
+    "sensitivity_psp_tail_fractions": [0.8, 0.5, 0.2],
+    "local_ee_delay_quantile": 1.0,
+    "forward_parent_neighborhood_bins": 1,
+    "minimum_parent_support": 0.001,
+    "sensitivity_minimum_parent_supports": [0.0003, 0.001, 0.003],
+    "minimum_parent_dominance": 0.7,
+    "edge_delay_rounding": "nearest",
+    "sensitivity_edge_delay_roundings": ["floor", "nearest", "ceil"],
+    "causal_memory_formula": "descending E_to_E PSP support at 50 percent of peak plus maximum local-compatible E_to_E delay",
+    "edge_support_formula": "active source count times delayed E_to_E weight divided by source-bin population and target-bin total incoming-E budget",
+    "observation_rule": "one edge-supported directed root family is one KMeans observation; detector fragments establish observability but cannot change family boundaries",
+    "compound_rule": "mixed-family detector fragments remain explicit compound observations outside A and B",
+    "root_inclusion": "local roots merge only through dominant delayed E_to_E support above the frozen incoming-budget fraction",
+    "boundary_signal": "whole_sheet_E_activity_movie_frozen_E_to_E_weights_and_delays_only",
+    "contact_geometry_used_for_boundary": false
+  },
+  "source_topology": {
+    "bin_mm": 1.0,
+    "event_window_ms": [-20.0, 180.0],
+    "baseline_window_ms": [-120.0, -20.0],
+    "frame_step_ms": 2.0,
+    "frame_width_ms": 3.0,
+    "minimum_active_neurons": 2,
+    "persistence_frames": 2,
+    "full_sheet_movie": {"enabled": true, "frame_ms": 2.0}
+  },
+  "resources": {
+    "numerical_threads_per_worker": 1,
+    "maximum_workers": 14,
+    "reserved_available_memory_gib": 48,
+    "minimum_free_disk_gib": 40,
+    "monitor_interval_seconds": 600,
+    "long_run_launcher": "systemd-run --user plus nohup"
+  },
+  "claim_boundary": "Model-internal Node-only recovery canary. No patient label or prototype selects an arm. Stage-AL m100/d100 is an alias of the primary Stage-AK substrate and is not a second substrate. EE, E-to-I and Z/M remain off."
+}
