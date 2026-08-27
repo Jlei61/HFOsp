@@ -1180,3 +1180,34 @@ and scalar-gain searches. It may not use patient held-out, natural KMeans,
 manual-field coordinates, EE, E-to-I or Z/M. A negative result closes this
 specific dual-threshold mapping and returns the scientific decision to the
 event/patient target or to a genuinely different Node mechanism.
+
+Stage-AK completed 42/42 fresh-network simulations without worker failure or
+runaway. The `g10` mean / `g08` dispersion cross mapping produced two genuine
+opposite causal waves and positive held-out K=2 evidence. It nevertheless
+improved mode-1 direction in 6/6 networks while worsening mode-0 fit in 6/6
+and mode-0 direction in 5/6; its weaker patient diagonal was only `rho=0.21`.
+No mapping met the five-endpoint contract. Thus event-window correction and
+dual-channel threshold mapping do not close the full patient-mode mismatch.
+
+Stage-AL was the final bounded local bridge within this static Node-threshold
+family. It varied the mean field along the anchor-to-`g10` direction and the
+dispersion field along the `g10`-to-`g08` direction, yielding 12 mappings on
+six unused networks (72 simulations). All simulations completed without
+failure or runaway, but no candidate improved the total objective, both mode
+losses and both mode-specific causal directions in at least 4/6 networks.
+
+A post hoc natural-KMeans audit was applied uniformly to all 12 candidates and
+could not select or rescue a field. Candidates with positive held-out K=2
+evidence aligned the clusters to the wrong patient modes; candidates with the
+correct correlation signs were better described by K=1 and retained only a
+weak second diagonal (`rho=0.03--0.17`). The non-selectable manual smooth
+capacity control and the Stage-AK cross mapping both express opposite waves,
+but both worsen their weakest complete-patient endpoint. The frozen status is
+`STATIC_NODE_THRESHOLD_FAMILY_INSUFFICIENT_AFTER_LOCAL_BRIDGE`.
+
+This result closes further interpolation, basis expansion, gain scanning and
+worker expansion within a static threshold field. It does not prove that every
+Node mechanism is insufficient. The next revision must either revise the
+event/patient target contract or introduce a genuinely different, model-
+internal Node accessibility mechanism. EE, E-to-I and Z/M remain closed until
+that revised Node substrate passes the same-network Fig.4 acceptance contract.
