@@ -17,6 +17,8 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import platform
+import subprocess
 import sys
 from typing import Any, Mapping
 from unittest.mock import patch
@@ -30,10 +32,12 @@ for _path in (ROOT, ROOT / "src" / "snn_engine"):
         sys.path.insert(0, str(_path))
 
 from scripts import run_topic4_rev12_node_worker as rev12  # noqa: E402
+from scripts import freeze_topic4_rev13_node_zero_sum_recovery as rev13_freezer  # noqa: E402
 from src import topic4_zm_ictal_transition as transition_module  # noqa: E402
 from src.topic4_continuous_field import continuous_field_h_with_queries  # noqa: E402
 from src.topic4_node_accessibility import (  # noqa: E402
     FieldGatedZeroSumNodeRecovery,
+    build_spatial_shift_permutation,
 )
 
 
@@ -45,6 +49,39 @@ FORBIDDEN_CONTROLLER_TOKENS = (
     "patient", "prototype", "label", "contact", "shaft", "mode_a", "mode_b",
 )
 OFF_MODES = frozenset({"off", "exact_off", "none"})
+MANIFEST_STATUS = "REV13_NODE_ZERO_SUM_RECOVERY_CANARY_FROZEN"
+SPATIAL_SHIFT_MODE = "spatial_shift"
+EXPLICIT_RUNTIME_PATHS = (
+    "scripts/run_topic4_rev13_node_zero_sum_worker.py",
+    "scripts/run_topic4_rev12_node_worker.py",
+    "scripts/run_topic4_rev10_sa_spectral_field_worker.py",
+    "scripts/run_topic4_rev9l_forced_source_worker.py",
+    "scripts/run_topic4_core_field_stage3_fit.py",
+    "scripts/run_topic4_rev9_node_kick_canary.py",
+    "src/topic4_node_accessibility.py",
+    "src/topic4_node_dualmode.py",
+    "src/topic4_continuous_field.py",
+    "src/topic4_core_field.py",
+    "src/topic4_core_field_rev9.py",
+    "src/topic4_core_field_runner.py",
+    "src/topic4_graph_edge_flow.py",
+    "src/topic4_local_connectivity.py",
+    "src/topic4_spatial_ou_drive.py",
+    "src/topic4_zm_d4.py",
+    "src/sef_hfo_subject_placement.py",
+    "src/sef_hfo_observation.py",
+    "src/sef_hfo_events.py",
+    "src/sef_hfo_snn_adapter.py",
+    "src/snn_engine/kick_probe.py",
+    "src/snn_engine/checkpoint.py",
+    "src/snn_engine/model.py",
+    "src/snn_engine/params.py",
+    "src/snn_engine/connectivity.py",
+    "src/snn_engine/connectivity_rot.py",
+    "src/snn_engine/lfp.py",
+    "src/topic4_zm_ictal_transition.py",
+    "scripts/freeze_topic4_rev13_node_zero_sum_recovery.py",
+)
 SUBSTRATE_INPUT_KEYS = frozenset({
     "frozen_substrate_manifest",
     "rev9_base_config",
@@ -66,6 +103,112 @@ def _sha256_array(values: np.ndarray) -> str:
     digest.update(np.asarray(array.shape, dtype=np.int64).tobytes())
     digest.update(array.tobytes())
     return digest.hexdigest()
+
+
+def _sha256_file(path: Path) -> str:
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def _assert_json_exact(actual: Any, expected: Any, *, path: str = "$") -> None:
+    """Fail at the first field that differs in a frozen JSON-compatible tree."""
+    if type(actual) is not type(expected):
+        raise RuntimeError(
+            f"frozen candidate field type changed at {path}: "
+            f"{type(actual).__name__} != {type(expected).__name__}"
+        )
+    if isinstance(expected, Mapping):
+        actual_keys = set(actual)
+        expected_keys = set(expected)
+        if actual_keys != expected_keys:
+            raise RuntimeError(
+                f"frozen candidate fields changed at {path}: "
+                f"missing={sorted(expected_keys - actual_keys)}, "
+                f"extra={sorted(actual_keys - expected_keys)}"
+            )
+        for key in expected:
+            _assert_json_exact(actual[key], expected[key], path=f"{path}.{key}")
+        return
+    if isinstance(expected, list):
+        if len(actual) != len(expected):
+            raise RuntimeError(f"frozen candidate length changed at {path}")
+        for index, (actual_value, expected_value) in enumerate(zip(actual, expected)):
+            _assert_json_exact(
+                actual_value, expected_value, path=f"{path}[{index}]"
+            )
+        return
+    if actual != expected:
+        raise RuntimeError(
+            f"frozen candidate value changed at {path}: {actual!r} != {expected!r}"
+        )
+
+
+def _git_output(arguments: list[str], *, text: bool = True):
+    return subprocess.check_output(arguments, cwd=ROOT, text=text)
+
+
+def _explicit_runtime_provenance(
+    config_path: Path, expected_commit: str
+) -> dict[str, Any]:
+    """Freeze every rev13 composition path that can change numerical output."""
+    expected = _git_output(
+        ["git", "rev-parse", str(expected_commit)], text=True
+    ).strip()
+    current = _git_output(["git", "rev-parse", "HEAD"], text=True).strip()
+    if current != expected:
+        raise RuntimeError("rev13 worker is not at the expected commit")
+    try:
+        config_relative = str(config_path.resolve().relative_to(ROOT))
+    except ValueError as exc:
+        raise RuntimeError("rev13 config must live inside the frozen worktree") from exc
+    paths = [*EXPLICIT_RUNTIME_PATHS, config_relative]
+    if len(paths) != len(set(paths)):
+        raise RuntimeError("rev13 explicit provenance paths are duplicated")
+
+    records: dict[str, dict[str, Any]] = {}
+    for relative in paths:
+        absolute = ROOT / relative
+        if not absolute.is_file():
+            raise RuntimeError(f"rev13 frozen runtime path is missing: {relative}")
+        dirty_text = _git_output(
+            ["git", "status", "--porcelain", "--untracked-files=all", "--", relative],
+            text=True,
+        ).strip()
+        try:
+            committed = _git_output(
+                ["git", "show", f"{expected}:{relative}"], text=False
+            )
+        except subprocess.CalledProcessError as exc:
+            raise RuntimeError(
+                f"rev13 runtime path is not frozen at expected commit: {relative}"
+            ) from exc
+        expected_sha256 = hashlib.sha256(committed).hexdigest()
+        observed_sha256 = _sha256_file(absolute)
+        records[relative] = {
+            "observed_sha256": observed_sha256,
+            "expected_sha256": expected_sha256,
+            "matches_expected_commit": observed_sha256 == expected_sha256,
+            "dirty": bool(dirty_text),
+        }
+    dirty = [path for path, record in records.items() if record["dirty"]]
+    mismatched = [
+        path for path, record in records.items()
+        if not record["matches_expected_commit"]
+    ]
+    if dirty or mismatched:
+        raise RuntimeError(
+            "rev13 explicit runtime freeze failed: "
+            f"dirty={dirty}, mismatched={mismatched}"
+        )
+    return {
+        "git_commit": current,
+        "expected_git_commit": expected,
+        "all_explicit_paths_clean": True,
+        "all_explicit_paths_match_expected_commit": True,
+        "explicit_runtime_files": records,
+        "python_executable": sys.executable,
+        "python_version": platform.python_version(),
+        "numpy_version": np.__version__,
+    }
 
 
 def _validate_scientific_role(role: str) -> None:
@@ -158,7 +301,7 @@ def _normalized_controller_spec(candidate: Mapping[str, Any]) -> dict[str, Any]:
         if enabled:
             raise RuntimeError("an off node_accessibility mode cannot be enabled")
         mode = "exact_off"
-    elif mode not in FieldGatedZeroSumNodeRecovery.MODES:
+    elif mode not in FieldGatedZeroSumNodeRecovery.MODES | {SPATIAL_SHIFT_MODE}:
         raise RuntimeError("unknown rev13 node_accessibility mode")
     if mode != "exact_off":
         if raw.get("kind") != "field_gated_bounded_node_recovery":
@@ -232,6 +375,57 @@ def _stratified_permutation(
     return permutation
 
 
+def _spatial_shift_permutation(
+    positions_e: np.ndarray,
+    *,
+    support_g: np.ndarray,
+    L: float,
+    contract: Mapping[str, Any],
+) -> np.ndarray:
+    """Build the config-defined toroidal, one-to-one spatial matched mapping."""
+    del L  # Sheet scale is implicit in equal-width blocks of the frozen positions.
+    required = {
+        "mapping_method",
+        "block_shape",
+        "shift_blocks",
+        "within_block_order",
+        "permutation_scope",
+        "dynamic_scale_match",
+    }
+    missing = required.difference(contract)
+    if missing:
+        raise RuntimeError(
+            "spatial_shift contract is missing " + ", ".join(sorted(missing))
+        )
+    if contract["mapping_method"] != (
+        "rank_matched_equal_width_spatial_blocks_toroidal_shift"
+    ):
+        raise RuntimeError("spatial_shift mapping method changed")
+    if contract["within_block_order"] != "y_then_x_then_original_index":
+        raise RuntimeError("spatial_shift within-block ordering changed")
+    if contract["permutation_scope"] != "all_E_neurons":
+        raise RuntimeError("spatial_shift permutation scope changed")
+    if contract["dynamic_scale_match"] != (
+        "support_weighted_centered_SD_each_step_to_unshifted_zero_sum"
+    ):
+        raise RuntimeError("spatial_shift dynamic amplitude matching changed")
+    permutation = build_spatial_shift_permutation(
+        positions_e,
+        support_g=support_g,
+        block_shape=tuple(contract["block_shape"]),
+        shift_blocks=tuple(contract["shift_blocks"]),
+    )
+    if permutation.shape != (np.asarray(positions_e).shape[0],) or not np.array_equal(
+        np.sort(permutation), np.arange(permutation.size)
+    ):
+        raise RuntimeError("spatial_shift is not a complete E-neuron permutation")
+    expected = contract.get("permutation_sha256")
+    actual = _sha256_array(permutation)
+    if expected is not None and str(expected) != actual:
+        raise RuntimeError("frozen spatial_shift permutation hash changed")
+    return permutation
+
+
 def _dispersion_field_on_substrate(candidate: Mapping[str, Any], substrate) -> np.ndarray:
     field = candidate.get("node_dispersion_field")
     if not isinstance(field, Mapping):
@@ -271,10 +465,20 @@ def _controller_support(candidate: Mapping[str, Any], substrate) -> tuple[np.nda
     return support, audit
 
 
-def _static_rms(support: np.ndarray, modulation: np.ndarray) -> float:
+def _support_weighted_centered_sd(
+    support: np.ndarray, modulation: np.ndarray
+) -> float:
+    """Support-weighted centered SD used to scale dynamic Node amplitude."""
     mass = float(np.sum(support))
+    if not np.isfinite(mass) or mass <= 0.0:
+        raise RuntimeError("Node support has no finite positive mass")
     center = float(np.dot(support, modulation) / mass)
     return float(np.sqrt(np.dot(support, (modulation - center) ** 2) / mass))
+
+
+def _static_rms(support: np.ndarray, modulation: np.ndarray) -> float:
+    """Backward-compatible name for the centered-SD amplitude contract."""
+    return _support_weighted_centered_sd(support, modulation)
 
 
 def _frozen_signed_depth(substrate) -> np.ndarray:
@@ -302,6 +506,7 @@ class _ThresholdRecorder:
     controller: FieldGatedZeroSumNodeRecovery
     static_modulation: np.ndarray
     reset_mV: float
+    static_centered_sd_mV: float | None = None
     minimum_margin_mV: float = 1.0
     time_ms: list[float] = field(default_factory=list)
     threshold_min_mV: list[float] = field(default_factory=list)
@@ -309,6 +514,44 @@ class _ThresholdRecorder:
     zero_sum_error_mV: list[float] = field(default_factory=list)
     saturation_fraction: list[float] = field(default_factory=list)
     static_sign_flip_fraction: list[float] = field(default_factory=list)
+    legacy_unweighted_saturation_fraction: list[float] = field(default_factory=list)
+    legacy_unweighted_static_sign_flip_fraction: list[float] = field(
+        default_factory=list
+    )
+
+    def __post_init__(self) -> None:
+        self.static_modulation = np.asarray(self.static_modulation, dtype=np.float64)
+        if self.static_modulation.shape != (self.controller.n_e,):
+            raise ValueError("static modulation must align to the E population")
+        expected_sd = _support_weighted_centered_sd(
+            self.controller.support_g, self.static_modulation
+        )
+        if self.static_centered_sd_mV is None:
+            self.static_centered_sd_mV = expected_sd
+        elif not np.isclose(
+            float(self.static_centered_sd_mV), expected_sd, rtol=0.0, atol=1e-12
+        ):
+            raise ValueError("static centered SD does not match the frozen substrate")
+        self.static_centered_sd_mV = float(self.static_centered_sd_mV)
+        self.primary_diagnostic_mask = (
+            (self.controller.support_g >= 0.05)
+            & (np.abs(self.static_modulation) >= 0.1 * self.static_centered_sd_mV)
+        )
+        self.primary_diagnostic_weight = np.where(
+            self.primary_diagnostic_mask, self.controller.support_g, 0.0
+        )
+        self.primary_diagnostic_weight_sum = float(
+            np.sum(self.primary_diagnostic_weight)
+        )
+        if self.primary_diagnostic_weight_sum <= 0.0:
+            raise ValueError("primary Node diagnostic support is empty")
+
+    def _support_weighted_fraction(self, indicator: np.ndarray) -> float:
+        indicator = np.asarray(indicator, dtype=bool)
+        return float(
+            np.dot(self.primary_diagnostic_weight, indicator.astype(np.float64))
+            / self.primary_diagnostic_weight_sum
+        )
 
     @property
     def KIND(self):  # checkpoint machinery identifies controllers by KIND
@@ -325,21 +568,26 @@ class _ThresholdRecorder:
             or self.controller.step_index % self.controller._trace_every == 0
         ):
             dynamic = effective_e - base_array[: self.controller.n_e]
-            valid = np.abs(self.static_modulation) > 1e-12
+            legacy_valid = np.abs(self.static_modulation) > 1e-12
             combined = self.static_modulation + dynamic
-            flips = np.zeros(valid.shape, dtype=bool)
-            flips[valid] = np.signbit(combined[valid]) != np.signbit(
-                self.static_modulation[valid]
+            flips = np.zeros(legacy_valid.shape, dtype=bool)
+            flips[legacy_valid] = np.signbit(combined[legacy_valid]) != np.signbit(
+                self.static_modulation[legacy_valid]
             )
+            saturated = self.controller.state_mV >= self.controller.a_max_mV - 1e-12
             self.time_ms.append(self.controller.step_index * self.controller.dt_ms)
             self.threshold_min_mV.append(float(np.min(effective_e)))
             self.threshold_max_mV.append(float(np.max(effective_e)))
             self.zero_sum_error_mV.append(abs(float(np.sum(dynamic, dtype=np.float64))))
-            self.saturation_fraction.append(float(
-                np.mean(self.controller.state_mV >= self.controller.a_max_mV - 1e-12)
-            ))
+            self.saturation_fraction.append(self._support_weighted_fraction(saturated))
             self.static_sign_flip_fraction.append(
-                float(np.mean(flips[valid])) if np.any(valid) else 0.0
+                self._support_weighted_fraction(flips)
+            )
+            self.legacy_unweighted_saturation_fraction.append(
+                float(np.mean(saturated))
+            )
+            self.legacy_unweighted_static_sign_flip_fraction.append(
+                float(np.mean(flips[legacy_valid])) if np.any(legacy_valid) else 0.0
             )
         return effective
 
@@ -364,12 +612,38 @@ class _ThresholdRecorder:
             "static_modulation_sign_flip_fraction": np.asarray(
                 self.static_sign_flip_fraction, dtype=np.float64
             ),
+            "legacy_unweighted_saturation_fraction": np.asarray(
+                self.legacy_unweighted_saturation_fraction, dtype=np.float64
+            ),
+            "legacy_unweighted_static_modulation_sign_flip_fraction": np.asarray(
+                self.legacy_unweighted_static_sign_flip_fraction, dtype=np.float64
+            ),
         }
 
     def diagnostics(self) -> dict[str, Any]:
         arrays = self.trace_arrays()
         base = self.controller.diagnostics()
         base.update({
+            "saturation_fraction": (
+                float(arrays["saturation_fraction"][-1])
+                if arrays["saturation_fraction"].size else None
+            ),
+            "static_modulation_sign_flip_fraction": (
+                float(arrays["static_modulation_sign_flip_fraction"][-1])
+                if arrays["static_modulation_sign_flip_fraction"].size else None
+            ),
+            "legacy_unweighted_saturation_fraction": (
+                float(arrays["legacy_unweighted_saturation_fraction"][-1])
+                if arrays["legacy_unweighted_saturation_fraction"].size else None
+            ),
+            "legacy_unweighted_static_modulation_sign_flip_fraction": (
+                float(arrays[
+                    "legacy_unweighted_static_modulation_sign_flip_fraction"
+                ][-1])
+                if arrays[
+                    "legacy_unweighted_static_modulation_sign_flip_fraction"
+                ].size else None
+            ),
             "threshold_min_mV_observed": (
                 float(np.min(arrays["threshold_min_mV"]))
                 if arrays["threshold_min_mV"].size else None
@@ -386,10 +660,36 @@ class _ThresholdRecorder:
                 float(np.max(arrays["saturation_fraction"]))
                 if arrays["saturation_fraction"].size else None
             ),
+            "maximum_support_weighted_saturation_fraction": (
+                float(np.max(arrays["saturation_fraction"]))
+                if arrays["saturation_fraction"].size else None
+            ),
             "maximum_static_modulation_sign_flip_fraction": (
                 float(np.max(arrays["static_modulation_sign_flip_fraction"]))
                 if arrays["static_modulation_sign_flip_fraction"].size else None
             ),
+            "maximum_support_weighted_static_modulation_sign_flip_fraction": (
+                float(np.max(arrays["static_modulation_sign_flip_fraction"]))
+                if arrays["static_modulation_sign_flip_fraction"].size else None
+            ),
+            "maximum_legacy_unweighted_saturation_fraction": (
+                float(np.max(arrays["legacy_unweighted_saturation_fraction"]))
+                if arrays["legacy_unweighted_saturation_fraction"].size else None
+            ),
+            "maximum_legacy_unweighted_static_modulation_sign_flip_fraction": (
+                float(np.max(arrays[
+                    "legacy_unweighted_static_modulation_sign_flip_fraction"
+                ]))
+                if arrays[
+                    "legacy_unweighted_static_modulation_sign_flip_fraction"
+                ].size else None
+            ),
+            "primary_diagnostic_support_g_minimum": 0.05,
+            "primary_diagnostic_static_absolute_minimum_in_static_sd": 0.1,
+            "primary_diagnostic_support_weight": self.primary_diagnostic_weight_sum,
+            "primary_diagnostic_neuron_count": int(np.sum(self.primary_diagnostic_mask)),
+            "static_amplitude_definition": "support_weighted_centered_sd",
+            "static_centered_sd_mV": self.static_centered_sd_mV,
             "threshold_reset_margin_mV": self.minimum_margin_mV,
         })
         return base
@@ -403,10 +703,14 @@ class _RunState:
     support_audit: dict[str, Any] = field(default_factory=dict)
     controller: FieldGatedZeroSumNodeRecovery | None = None
     recorder: _ThresholdRecorder | None = None
-    static_rms_mV: float | None = None
+    static_centered_sd_mV: float | None = None
     source_config_text: str | None = None
     compatibility_config: dict[str, Any] = field(default_factory=dict)
     compatibility_audit: dict[str, Any] = field(default_factory=dict)
+    rev13_provenance: dict[str, Any] = field(default_factory=dict)
+    engineering_run_kind: str | None = None
+    requested_duration_ms: float | None = None
+    frozen_duration_ms: float = 20000.0
 
 
 def _build_controller(state: _RunState, substrate) -> _ThresholdRecorder | None:
@@ -417,7 +721,7 @@ def _build_controller(state: _RunState, substrate) -> _ThresholdRecorder | None:
     static_modulation = np.asarray(
         substrate.delta_vtheta[: substrate.n_e], dtype=np.float64
     )
-    sigma_node = _static_rms(support, static_modulation)
+    sigma_node = _support_weighted_centered_sd(support, static_modulation)
     if "a_ref_mV" in spec:
         a_ref_mV = float(spec["a_ref_mV"])
     elif "amplitude_fraction_of_static_rms" in spec:
@@ -434,6 +738,7 @@ def _build_controller(state: _RunState, substrate) -> _ThresholdRecorder | None:
 
     mode = str(spec["mode"])
     permutation = None
+    spatial_shift_permutation = None
     if mode == "stratified_shuffle":
         shuffle = spec.get("shuffle", spec.get("stratified_shuffle"))
         if not isinstance(shuffle, Mapping):
@@ -442,6 +747,23 @@ def _build_controller(state: _RunState, substrate) -> _ThresholdRecorder | None:
             support, _frozen_signed_depth(substrate), shuffle
         )
         support_audit["shuffle_permutation_sha256"] = _sha256_array(permutation)
+    elif mode == SPATIAL_SHIFT_MODE:
+        spatial_shift = spec.get("spatial_shift")
+        if not isinstance(spatial_shift, Mapping):
+            raise RuntimeError("spatial_shift lacks its frozen mapping contract")
+        spatial_shift_permutation = _spatial_shift_permutation(
+            np.asarray(substrate.positions_e, dtype=np.float64),
+            support_g=support,
+            L=float(substrate.engine["L"]),
+            contract=spatial_shift,
+        )
+        support_audit.update({
+            "spatial_shift_permutation_sha256": _sha256_array(
+                spatial_shift_permutation
+            ),
+            "spatial_shift_mapping": copy.deepcopy(dict(spatial_shift)),
+            "spatial_shift_is_complete_permutation": True,
+        })
     controller = FieldGatedZeroSumNodeRecovery(
         support,
         dt_ms=float(substrate.engine["dt"]),
@@ -450,15 +772,17 @@ def _build_controller(state: _RunState, substrate) -> _ThresholdRecorder | None:
         r_ref_hz=float(spec.get("r_ref_hz", spec.get("reference_rate_hz", 50.0))),
         mode=mode,
         shuffle_permutation=permutation,
+        spatial_shift_permutation=spatial_shift_permutation,
         trace_dt_ms=float(spec.get("trace_dt_ms", 10.0)),
     )
     state.support_audit = support_audit
-    state.static_rms_mV = sigma_node
+    state.static_centered_sd_mV = sigma_node
     state.controller = controller
     state.recorder = _ThresholdRecorder(
         controller=controller,
         static_modulation=static_modulation,
         reset_mV=float(substrate.params.V_reset),
+        static_centered_sd_mV=sigma_node,
         minimum_margin_mV=float(spec.get("minimum_reset_margin_mV", 1.0)),
     )
     return state.recorder
@@ -480,6 +804,11 @@ def _npz_additions(state: _RunState) -> dict[str, np.ndarray]:
             "node_accessibility_static_modulation_sign_flip_final": np.asarray(
                 [], dtype=bool
             ),
+            "node_accessibility_primary_diagnostic_support_mask": np.asarray(
+                [], dtype=bool
+            ),
+            "node_accessibility_primary_support_weighted_sign_flip_final": empty.copy(),
+            "node_accessibility_legacy_unweighted_sign_flip_final": empty.copy(),
         })
         for key in (
             "time_ms", "state_mean_mV", "state_max_mV", "saturation_fraction",
@@ -491,6 +820,8 @@ def _npz_additions(state: _RunState) -> dict[str, np.ndarray]:
             "time_ms", "threshold_min_mV", "threshold_max_mV",
             "zero_sum_error_mV", "saturation_fraction",
             "static_modulation_sign_flip_fraction",
+            "legacy_unweighted_saturation_fraction",
+            "legacy_unweighted_static_modulation_sign_flip_fraction",
         ):
             result[f"node_accessibility_threshold_{key}"] = empty.copy()
         return result
@@ -504,6 +835,9 @@ def _npz_additions(state: _RunState) -> dict[str, np.ndarray]:
     sign_flip[valid] = np.signbit((static + dynamic_final)[valid]) != np.signbit(
         static[valid]
     )
+    primary_mask = np.asarray(state.recorder.primary_diagnostic_mask, dtype=bool)
+    primary_sign_flip = state.recorder._support_weighted_fraction(sign_flip)
+    legacy_sign_flip = float(np.mean(sign_flip[valid])) if np.any(valid) else 0.0
     result.update({
         "node_accessibility_support_g": np.asarray(controller.support_g),
         "node_accessibility_state_final_mV": np.asarray(controller.state_mV),
@@ -513,6 +847,13 @@ def _npz_additions(state: _RunState) -> dict[str, np.ndarray]:
             + dynamic_final
         ),
         "node_accessibility_static_modulation_sign_flip_final": sign_flip,
+        "node_accessibility_primary_diagnostic_support_mask": primary_mask,
+        "node_accessibility_primary_support_weighted_sign_flip_final": np.asarray(
+            primary_sign_flip, dtype=np.float64
+        ),
+        "node_accessibility_legacy_unweighted_sign_flip_final": np.asarray(
+            legacy_sign_flip, dtype=np.float64
+        ),
     })
     for key, values in state.controller.trace_arrays().items():
         result[f"node_accessibility_trace_{key}"] = np.asarray(values)
@@ -530,10 +871,17 @@ def _validate_dynamic_diagnostics(state: _RunState) -> None:
             raise RuntimeError(f"rev13 controller trace is invalid: {key}")
     if not arrays["threshold_min_mV"].size:
         raise RuntimeError("rev13 controller threshold trace is empty")
-    for key in ("saturation_fraction", "static_modulation_sign_flip_fraction"):
+    for key in (
+        "saturation_fraction",
+        "static_modulation_sign_flip_fraction",
+        "legacy_unweighted_saturation_fraction",
+        "legacy_unweighted_static_modulation_sign_flip_fraction",
+    ):
         if np.any((arrays[key] < 0.0) | (arrays[key] > 1.0)):
             raise RuntimeError(f"rev13 controller fraction is invalid: {key}")
-    if state.controller_spec["mode"] in {"zero_sum", "stratified_shuffle"}:
+    if state.controller_spec["mode"] in {
+        "zero_sum", "stratified_shuffle", SPATIAL_SHIFT_MODE,
+    }:
         tolerance = float(state.controller_spec.get("zero_sum_atol_mV", 1e-9))
         if float(np.max(arrays["zero_sum_error_mV"])) > tolerance:
             raise RuntimeError("rev13 zero-sum threshold budget drifted")
@@ -571,7 +919,9 @@ def _controller_payload(state: _RunState) -> dict[str, Any]:
                 ),
                 "maximum_zero_sum_error_mV": 0.0,
                 "maximum_saturation_fraction": 0.0,
+                "maximum_support_weighted_saturation_fraction": 0.0,
                 "maximum_static_modulation_sign_flip_fraction": 0.0,
+                "maximum_support_weighted_static_modulation_sign_flip_fraction": 0.0,
             },
             "patient_runtime_inputs_used": False,
         }
@@ -581,7 +931,9 @@ def _controller_payload(state: _RunState) -> dict[str, Any]:
         "mode": state.controller_spec["mode"],
         "manifest": dict(state.controller_spec),
         "support": dict(state.support_audit),
-        "static_node_rms_mV": state.static_rms_mV,
+        "static_amplitude_definition": "support_weighted_centered_sd",
+        "static_node_centered_sd_mV": state.static_centered_sd_mV,
+        "static_node_rms_mV_legacy_name": state.static_centered_sd_mV,
         "diagnostics": state.recorder.diagnostics(),
         "trace_fields": sorted(_npz_additions(state)),
         "patient_runtime_inputs_used": False,
@@ -607,11 +959,23 @@ def _augment_json_payload(payload: Mapping[str, Any], state: _RunState) -> dict:
         "scientific_role": SCIENTIFIC_ROLE,
         "mechanism_freeze": mechanism,
         "node_accessibility": _controller_payload(state),
+        "execution_duration": {
+            "frozen_duration_ms": state.frozen_duration_ms,
+            "requested_duration_ms": state.requested_duration_ms,
+            "engineering_run_kind": state.engineering_run_kind,
+            "duration_override_used": state.requested_duration_ms is not None,
+        },
     })
     provenance = dict(output.get("provenance", {}))
     provenance["rev13_systemd_unit"] = os.environ.get("REV13_SYSTEMD_UNIT")
     provenance["composition_base_worker"] = "scripts/run_topic4_rev12_node_worker.py"
     provenance["compatibility_overlay"] = dict(state.compatibility_audit)
+    provenance["rev13_explicit_runtime_freeze"] = copy.deepcopy(
+        state.rev13_provenance
+    )
+    provenance["rev13_execution_duration"] = copy.deepcopy(
+        output["execution_duration"]
+    )
     output["provenance"] = provenance
     return output
 
@@ -701,6 +1065,91 @@ class _JsonProxy:
         return json.dumps(value, *args, **kwargs)
 
 
+def _validate_duration_override(
+    duration_ms: float | None,
+    engineering_run_kind: str | None,
+    *,
+    frozen_duration_ms: float,
+) -> float | None:
+    if not np.isclose(float(frozen_duration_ms), 20000.0, rtol=0.0, atol=1e-12):
+        raise RuntimeError("rev13 frozen scientific duration changed from 20000 ms")
+    if duration_ms is None:
+        if engineering_run_kind is not None:
+            raise RuntimeError("engineering run kind requires --duration-ms")
+        return None
+    if engineering_run_kind not in {"sentinel", "parity"}:
+        raise RuntimeError(
+            "--duration-ms is restricted to engineering sentinel/parity runs"
+        )
+    duration = float(duration_ms)
+    if (
+        not np.isfinite(duration)
+        or duration <= 0.0
+        or duration > float(frozen_duration_ms)
+        or duration > 20000.0
+    ):
+        raise RuntimeError("engineering duration must lie in (0, 20000] ms")
+    return duration
+
+
+def _rebuild_and_validate_manifest(
+    config: Mapping[str, Any],
+    *,
+    config_path: Path,
+    artifact_root: Path,
+) -> tuple[dict[str, Any], list[dict[str, Any]], dict[str, Any]]:
+    """Rebuild every candidate from frozen Stage-AK/AL inputs and compare exactly."""
+    manifest_path = artifact_root / str(config["candidate_manifest"])
+    manifest = json.loads(manifest_path.read_text())
+    if manifest.get("status") != MANIFEST_STATUS:
+        raise RuntimeError("rev13 candidate manifest status is not frozen")
+    config_sha256 = _sha256_file(config_path)
+    if manifest.get("config_sha256") != config_sha256:
+        raise RuntimeError("rev13 candidate manifest config_sha256 is stale")
+
+    loaded: dict[str, Any] = {}
+    input_audit: dict[str, Any] = {}
+    for name, record in config.get("inputs", {}).items():
+        path = rev12._resolve(artifact_root, record["path"])
+        observed = rev12._sha256(path)
+        if observed != record["sha256"]:
+            raise RuntimeError(f"rev13 input hash changed: {name}")
+        loaded[name] = json.loads(path.read_text())
+        input_audit[name] = {
+            "path": str(path),
+            "expected_sha256": record["sha256"],
+            "observed_sha256": observed,
+            "match": True,
+        }
+    required = {"stage_ak_config", "stage_ak_manifest", "stage_al_manifest"}
+    if set(loaded) != required:
+        raise RuntimeError("rev13 manifest rebuild input set changed")
+    rebuilt_candidates, rebuilt_substrate_audit = rev13_freezer.build_candidates(
+        loaded["stage_ak_manifest"],
+        loaded["stage_al_manifest"],
+        loaded["stage_ak_config"],
+        dict(config),
+    )
+    _assert_json_exact(
+        manifest.get("candidates"), rebuilt_candidates, path="$.candidates"
+    )
+    _assert_json_exact(
+        manifest.get("substrate_audit"),
+        rebuilt_substrate_audit,
+        path="$.substrate_audit",
+    )
+    for key in ("event_unit", "source_topology", "search", "pathways"):
+        _assert_json_exact(manifest.get(key), config.get(key), path=f"$.{key}")
+    return manifest, rebuilt_candidates, {
+        "manifest_path": str(manifest_path),
+        "manifest_status": MANIFEST_STATUS,
+        "config_sha256": config_sha256,
+        "candidates_rebuilt_from_frozen_inputs": True,
+        "candidate_exact_compare": True,
+        "input_records": input_audit,
+    }
+
+
 def _preflight(argv: list[str] | None = None) -> tuple[argparse.Namespace, _RunState]:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True, type=Path)
@@ -713,8 +1162,13 @@ def _preflight(argv: list[str] | None = None) -> tuple[argparse.Namespace, _RunS
     )
     parser.add_argument("--out-json", type=Path)
     parser.add_argument("--out-npz", type=Path)
+    parser.add_argument("--duration-ms", type=float)
+    parser.add_argument(
+        "--engineering-run-kind", choices=("sentinel", "parity")
+    )
     args = parser.parse_args(argv)
-    source_config_text = args.config.resolve().read_text()
+    config_path = args.config.resolve()
+    source_config_text = config_path.read_text()
     config = json.loads(source_config_text)
     _validate_scientific_role(config.get("scientific_role"))
     _assert_no_patient_runtime_inputs(config)
@@ -726,14 +1180,17 @@ def _preflight(argv: list[str] | None = None) -> tuple[argparse.Namespace, _RunS
     if config.get("pathways") != expected_pathways:
         raise RuntimeError("rev13 config must keep EE, E-to-I and Z/M off")
     artifact_root = args.artifact_root.resolve()
-    for name, record in config.get("inputs", {}).items():
-        path = rev12._resolve(artifact_root, record["path"])
-        if rev12._sha256(path) != record["sha256"]:
-            raise RuntimeError(f"rev13 input hash changed: {name}")
-    manifest_path = artifact_root / config["candidate_manifest"]
-    manifest = json.loads(manifest_path.read_text())
+    frozen_duration_ms = float(config["search"]["simulation"]["duration_ms"])
+    duration_ms = _validate_duration_override(
+        args.duration_ms,
+        args.engineering_run_kind,
+        frozen_duration_ms=frozen_duration_ms,
+    )
+    manifest, rebuilt_candidates, manifest_audit = _rebuild_and_validate_manifest(
+        config, config_path=config_path, artifact_root=artifact_root
+    )
     matches = [
-        row for row in manifest.get("candidates", [])
+        row for row in rebuilt_candidates
         if row.get("candidate_id") == args.candidate_id
     ]
     if len(matches) != 1:
@@ -743,15 +1200,51 @@ def _preflight(argv: list[str] | None = None) -> tuple[argparse.Namespace, _RunS
     if candidate.get("pathways") != expected_pathways:
         raise RuntimeError("rev13 candidate must keep EE, E-to-I and Z/M off")
     spec = _normalized_controller_spec(candidate)
+    if duration_ms is not None:
+        if args.candidate_id != "exact_off":
+            raise RuntimeError(
+                "engineering duration override is restricted to exact_off"
+            )
+        allowed_seed_key = (
+            "canary_network_seeds"
+            if args.engineering_run_kind == "sentinel"
+            else "engineering_parity_network_seeds"
+        )
+        if int(args.seed) not in {
+            int(seed) for seed in config["search"].get(allowed_seed_key, [])
+        }:
+            raise RuntimeError(
+                f"engineering {args.engineering_run_kind} seed is outside its frozen pool"
+            )
+    rev13_provenance = _explicit_runtime_provenance(
+        config_path, args.expected_commit
+    )
+    rev13_provenance["manifest_rebuild"] = manifest_audit
     compatibility, compatibility_audit = _compatibility_view(
         config, artifact_root=artifact_root
     )
+    if duration_ms is not None:
+        compatibility["search"]["simulation"]["duration_ms"] = duration_ms
+        compatibility_audit["engineering_duration_override"] = {
+            "kind": args.engineering_run_kind,
+            "requested_duration_ms": duration_ms,
+            "frozen_duration_ms": frozen_duration_ms,
+        }
+        if args.engineering_run_kind == "parity":
+            compatibility["search"]["selection_network_seeds"] = [int(args.seed)]
+            compatibility_audit["engineering_parity_seed_added_to_compatibility_pool"] = (
+                int(args.seed)
+            )
     return args, _RunState(
         candidate=candidate,
         controller_spec=spec,
         source_config_text=source_config_text,
         compatibility_config=compatibility,
         compatibility_audit=compatibility_audit,
+        rev13_provenance=rev13_provenance,
+        engineering_run_kind=args.engineering_run_kind,
+        requested_duration_ms=duration_ms,
+        frozen_duration_ms=frozen_duration_ms,
     )
 
 

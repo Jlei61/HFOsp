@@ -1,5 +1,7 @@
 import json
+import copy
 from pathlib import Path
+import subprocess
 from types import SimpleNamespace
 
 import numpy as np
@@ -74,7 +76,10 @@ def test_real_freezer_candidate_schema_is_accepted_without_patient_fields():
     }
     assert normalized["exact_off"] == {"mode": "exact_off", "enabled": False}
     assert normalized["zero_sum_c020"]["c"] == pytest.approx(0.2)
-    assert normalized["stratified_shuffle_c020"]["mode"] == "stratified_shuffle"
+    assert normalized["spatial_shift_c020"]["mode"] == "spatial_shift"
+    assert normalized["spatial_shift_c020"]["spatial_shift"][
+        "mapping_method"
+    ] == "rank_matched_equal_width_spatial_blocks_toroidal_shift"
     worker._assert_no_patient_runtime_inputs(config)
 
 
@@ -139,6 +144,54 @@ def test_stratified_permutation_is_deterministic_complete_and_hash_checked():
         worker._stratified_permutation(support, static, contract)
 
 
+def test_spatial_shift_mapping_is_config_defined_complete_and_amplitude_matched():
+    positions = np.column_stack((np.arange(8, dtype=float), np.zeros(8)))
+    contract = {
+        "mapping_method": "rank_matched_equal_width_spatial_blocks_toroidal_shift",
+        "block_shape": [4, 1],
+        "shift_blocks": [2, 0],
+        "within_block_order": "y_then_x_then_original_index",
+        "permutation_scope": "all_E_neurons",
+        "dynamic_scale_match": (
+            "support_weighted_centered_SD_each_step_to_unshifted_zero_sum"
+        ),
+    }
+    permutation = worker._spatial_shift_permutation(
+        positions, support_g=np.ones(8), L=8.0, contract=contract
+    )
+    assert np.array_equal(np.sort(permutation), np.arange(8))
+    assert np.array_equal(permutation, np.array([4, 5, 6, 7, 0, 1, 2, 3]))
+    contract["permutation_sha256"] = worker._sha256_array(permutation)
+    assert np.array_equal(
+        worker._spatial_shift_permutation(
+            positions, support_g=np.ones(8), L=8.0, contract=contract
+        ),
+        permutation,
+    )
+
+    support = np.ones(8)
+    shifted = worker.FieldGatedZeroSumNodeRecovery(
+        support, dt_ms=0.1, tau_ms=250.0, a_ref_mV=0.2,
+        mode="spatial_shift", spatial_shift_permutation=permutation,
+    )
+    reference = worker.FieldGatedZeroSumNodeRecovery(
+        support, dt_ms=0.1, tau_ms=250.0, a_ref_mV=0.2,
+        mode="zero_sum",
+    )
+    state = np.arange(8, dtype=float) / 10.0
+    shifted.state_mV[:] = state
+    reference.state_mV[:] = state
+    shifted_delta = shifted.delta_theta()
+    reference_delta = reference.delta_theta()
+    assert np.sum(shifted_delta) == pytest.approx(0.0, abs=1e-12)
+    assert worker._support_weighted_centered_sd(
+        support, shifted_delta
+    ) == pytest.approx(
+        worker._support_weighted_centered_sd(support, reference_delta)
+    )
+    assert not np.array_equal(shifted_delta, reference_delta)
+
+
 def test_threshold_recorder_saves_bounds_zero_sum_saturation_and_sign_flips():
     controller = worker.FieldGatedZeroSumNodeRecovery(
         np.ones(4), dt_ms=0.1, tau_ms=250.0, a_ref_mV=0.2,
@@ -157,9 +210,45 @@ def test_threshold_recorder_saves_bounds_zero_sum_saturation_and_sign_flips():
     assert arrays["zero_sum_error_mV"][0] < 1e-12
     assert arrays["saturation_fraction"][0] == pytest.approx(0.25)
     assert arrays["static_modulation_sign_flip_fraction"][0] > 0.0
+    assert arrays["legacy_unweighted_saturation_fraction"][0] == pytest.approx(0.25)
     diagnostics = recorder.diagnostics()
     assert diagnostics["threshold_min_mV_observed"] > 12.0
     assert diagnostics["maximum_zero_sum_error_mV"] < 1e-12
+    assert diagnostics["maximum_support_weighted_saturation_fraction"] == pytest.approx(0.25)
+    assert diagnostics[
+        "maximum_support_weighted_static_modulation_sign_flip_fraction"
+    ] > 0.0
+    assert diagnostics["static_amplitude_definition"] == "support_weighted_centered_sd"
+    assert diagnostics["saturation_fraction"] == pytest.approx(0.25)
+    assert diagnostics["legacy_unweighted_saturation_fraction"] == pytest.approx(0.25)
+
+
+def test_primary_diagnostics_are_support_weighted_and_keep_legacy_values():
+    support = np.array([0.01, 0.10, 0.30, 0.59])
+    controller = worker.FieldGatedZeroSumNodeRecovery(
+        support, dt_ms=0.1, tau_ms=250.0, a_ref_mV=0.2,
+        mode="zero_sum", trace_dt_ms=0.1,
+    )
+    recorder = worker._ThresholdRecorder(
+        controller=controller,
+        static_modulation=np.array([0.001, -1.0, 1.0, 1.0]),
+        reset_mV=11.0,
+    )
+    assert np.array_equal(
+        recorder.primary_diagnostic_mask, np.array([False, True, True, True])
+    )
+    indicator = np.array([True, True, False, False])
+    assert recorder._support_weighted_fraction(indicator) == pytest.approx(
+        0.10 / (0.10 + 0.30 + 0.59)
+    )
+    controller.state_mV[:] = [controller.a_max_mV, 0.0, 0.0, 0.0]
+    recorder.threshold(np.full(5, 18.0))
+    arrays = recorder.trace_arrays()
+    assert arrays["saturation_fraction"][0] == 0.0
+    assert arrays["legacy_unweighted_saturation_fraction"][0] == pytest.approx(0.25)
+    diagnostics = recorder.diagnostics()
+    assert diagnostics["saturation_fraction"] == 0.0
+    assert diagnostics["legacy_unweighted_saturation_fraction"] == pytest.approx(0.25)
 
 
 def test_threshold_recorder_fails_instead_of_clipping_at_reset_margin():
@@ -267,7 +356,9 @@ def test_off_composition_is_event_identical_and_adds_empty_dynamic_fields(tmp_pa
         "threshold_max_mV_observed": 18.1,
         "maximum_zero_sum_error_mV": 0.0,
         "maximum_saturation_fraction": 0.0,
+        "maximum_support_weighted_saturation_fraction": 0.0,
         "maximum_static_modulation_sign_flip_fraction": 0.0,
+        "maximum_support_weighted_static_modulation_sign_flip_fraction": 0.0,
     }
     assert base.last_simulation_kwargs["node_accessibility"] is None
 
@@ -289,7 +380,7 @@ def test_active_npz_and_json_augmentation_cannot_drop_controller_fields():
         controller=controller,
         recorder=recorder,
         support_audit={"support_sha256": "abc"},
-        static_rms_mV=0.2,
+        static_centered_sd_mV=0.2,
         substrate=SimpleNamespace(
             n_e=2,
             delta_vtheta=np.array([-0.2, 0.2]),
@@ -318,6 +409,9 @@ def test_active_npz_and_json_augmentation_cannot_drop_controller_fields():
     ] < 1e-12
     assert "node_accessibility_threshold_static_modulation_sign_flip_fraction" in (
         payload["node_accessibility"]["trace_fields"]
+    )
+    assert payload["node_accessibility"]["static_amplitude_definition"] == (
+        "support_weighted_centered_sd"
     )
 
 
@@ -360,3 +454,221 @@ def test_zero_sum_trace_must_stay_inside_the_frozen_tolerance():
     recorder.zero_sum_error_mV[0] = 1e-4
     with pytest.raises(RuntimeError, match="zero-sum"):
         worker._augment_npz_arrays({}, state)
+
+
+def test_manifest_is_rebuilt_from_hashed_inputs_and_compared_field_by_field(
+    tmp_path, monkeypatch
+):
+    artifact = tmp_path / "artifact"
+    artifact.mkdir()
+    input_payloads = {
+        "stage_ak_config": {"kind": "ak_config"},
+        "stage_ak_manifest": {"kind": "ak_manifest"},
+        "stage_al_manifest": {"kind": "al_manifest"},
+    }
+    inputs = {}
+    for name, payload in input_payloads.items():
+        path = artifact / f"{name}.json"
+        path.write_text(json.dumps(payload))
+        inputs[name] = {
+            "path": path.name,
+            "sha256": worker._sha256_file(path),
+        }
+    config = {
+        "candidate_manifest": "manifest.json",
+        "inputs": inputs,
+        "event_unit": {"name": "event"},
+        "source_topology": {"bin_mm": 1.0},
+        "search": {"simulation": {"duration_ms": 20000.0}},
+        "pathways": {"Z_M": "off"},
+    }
+    config_path = tmp_path / "config.json"
+    config_path.write_text(json.dumps(config))
+    candidates = [{"candidate_id": "c0", "nested": {"gain": 0.2}}]
+    substrate_audit = {"n_unique_substrates": 1}
+
+    def fake_build(stage_ak, stage_al, stage_config, received_config):
+        assert stage_ak == input_payloads["stage_ak_manifest"]
+        assert stage_al == input_payloads["stage_al_manifest"]
+        assert stage_config == input_payloads["stage_ak_config"]
+        assert received_config == config
+        return candidates, substrate_audit
+
+    monkeypatch.setattr(worker.rev13_freezer, "build_candidates", fake_build)
+    manifest = {
+        "status": worker.MANIFEST_STATUS,
+        "config_sha256": worker._sha256_file(config_path),
+        "candidates": copy.deepcopy(candidates),
+        "substrate_audit": substrate_audit,
+        "event_unit": config["event_unit"],
+        "source_topology": config["source_topology"],
+        "search": config["search"],
+        "pathways": config["pathways"],
+    }
+    (artifact / "manifest.json").write_text(json.dumps(manifest))
+    _, rebuilt, audit = worker._rebuild_and_validate_manifest(
+        config, config_path=config_path, artifact_root=artifact
+    )
+    assert rebuilt == candidates
+    assert audit["candidate_exact_compare"] is True
+
+    manifest["candidates"][0]["nested"]["gain"] = 0.2000000001
+    (artifact / "manifest.json").write_text(json.dumps(manifest))
+    with pytest.raises(RuntimeError, match=r"\$\.candidates\[0\]\.nested\.gain"):
+        worker._rebuild_and_validate_manifest(
+            config, config_path=config_path, artifact_root=artifact
+        )
+
+
+def test_explicit_runtime_provenance_hashes_each_required_path_and_fails_dirty(
+    tmp_path, monkeypatch
+):
+    root = tmp_path / "repo"
+    root.mkdir()
+    for relative in worker.EXPLICIT_RUNTIME_PATHS:
+        path = root / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(f"frozen {relative}\n")
+    config_path = root / "config/rev13.json"
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text("{}\n")
+    subprocess.run(["git", "init", "-q"], cwd=root, check=True)
+    subprocess.run(["git", "config", "user.email", "test@example.com"], cwd=root, check=True)
+    subprocess.run(["git", "config", "user.name", "Test"], cwd=root, check=True)
+    subprocess.run(["git", "add", "."], cwd=root, check=True)
+    subprocess.run(["git", "commit", "-qm", "freeze"], cwd=root, check=True)
+    expected = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=root, text=True
+    ).strip()
+    monkeypatch.setattr(worker, "ROOT", root)
+    provenance = worker._explicit_runtime_provenance(config_path, expected)
+    assert provenance["all_explicit_paths_clean"] is True
+    assert set(provenance["explicit_runtime_files"]) == {
+        *worker.EXPLICIT_RUNTIME_PATHS,
+        "config/rev13.json",
+    }
+    assert all(
+        row["matches_expected_commit"] and not row["dirty"]
+        for row in provenance["explicit_runtime_files"].values()
+    )
+
+    (root / "src/snn_engine/kick_probe.py").write_text("dirty\n")
+    with pytest.raises(RuntimeError, match="explicit runtime freeze failed"):
+        worker._explicit_runtime_provenance(config_path, expected)
+
+
+def test_duration_override_is_engineering_only_and_never_exceeds_frozen_run():
+    assert worker._validate_duration_override(
+        2000.0, "sentinel", frozen_duration_ms=20000.0
+    ) == 2000.0
+    assert worker._validate_duration_override(
+        20000.0, "parity", frozen_duration_ms=20000.0
+    ) == 20000.0
+    assert worker._validate_duration_override(
+        None, None, frozen_duration_ms=20000.0
+    ) is None
+    with pytest.raises(RuntimeError, match="restricted"):
+        worker._validate_duration_override(
+            2000.0, None, frozen_duration_ms=20000.0
+        )
+    with pytest.raises(RuntimeError, match=r"\(0, 20000\]"):
+        worker._validate_duration_override(
+            20000.1, "sentinel", frozen_duration_ms=20000.0
+        )
+    with pytest.raises(RuntimeError, match=r"\(0, 20000\]"):
+        worker._preflight([
+            "--config", str(worker.ROOT / "config/topic4_rev13_node_zero_sum_recovery.json"),
+            "--candidate-id", "exact_off",
+            "--seed", "2311",
+            "--expected-commit", "HEAD",
+            "--duration-ms", "20001",
+            "--engineering-run-kind", "sentinel",
+        ])
+
+
+def test_preflight_applies_two_second_sentinel_only_to_compatibility_config(
+    tmp_path, monkeypatch
+):
+    config = {
+        "scientific_role": worker.SCIENTIFIC_ROLE,
+        "pathways": {
+            "learned_E_to_E_redistribution": "off",
+            "learned_E_to_I_redistribution": "off",
+            "Z_M": "off",
+        },
+        "inputs": {},
+        "candidate_manifest": "unused.json",
+        "search": {
+            "simulation": {"duration_ms": 20000.0},
+            "canary_network_seeds": [2311],
+            "engineering_parity_network_seeds": [2291],
+        },
+    }
+    config_path = tmp_path / "rev13.json"
+    config_path.write_text(json.dumps(config))
+    candidate = {
+        "candidate_id": "exact_off",
+        "node_accessibility": None,
+        "pathways": config["pathways"],
+    }
+    monkeypatch.setattr(
+        worker,
+        "_rebuild_and_validate_manifest",
+        lambda *args, **kwargs: ({}, [candidate], {"candidate_exact_compare": True}),
+    )
+    monkeypatch.setattr(
+        worker,
+        "_explicit_runtime_provenance",
+        lambda *args, **kwargs: {"all_explicit_paths_clean": True},
+    )
+    monkeypatch.setattr(
+        worker,
+        "_compatibility_view",
+        lambda *args, **kwargs: (copy.deepcopy(config), {}),
+    )
+    _, state = worker._preflight([
+        "--config", str(config_path),
+        "--candidate-id", "exact_off",
+        "--seed", "2311",
+        "--expected-commit", "HEAD",
+        "--artifact-root", str(tmp_path),
+        "--duration-ms", "2000",
+        "--engineering-run-kind", "sentinel",
+    ])
+    assert config["search"]["simulation"]["duration_ms"] == 20000.0
+    assert state.compatibility_config["search"]["simulation"]["duration_ms"] == 2000.0
+    assert state.requested_duration_ms == 2000.0
+    assert state.engineering_run_kind == "sentinel"
+    assert state.rev13_provenance["manifest_rebuild"] == {
+        "candidate_exact_compare": True
+    }
+
+
+def test_duration_override_is_written_to_json_and_provenance():
+    state = worker._RunState(
+        candidate=_candidate(),
+        controller_spec={"mode": "exact_off", "enabled": False},
+        rev13_provenance={"all_explicit_paths_clean": True},
+        engineering_run_kind="sentinel",
+        requested_duration_ms=2000.0,
+        frozen_duration_ms=20000.0,
+    )
+    payload = worker._augment_json_payload({
+        "mechanism_freeze": {
+            "EE": "off", "E_to_I": "off", "Z_M": "off",
+            "edge_coefficients_all_zero": True,
+        },
+        "provenance": {},
+    }, state)
+    assert payload["execution_duration"] == {
+        "frozen_duration_ms": 20000.0,
+        "requested_duration_ms": 2000.0,
+        "engineering_run_kind": "sentinel",
+        "duration_override_used": True,
+    }
+    assert payload["provenance"]["rev13_execution_duration"] == (
+        payload["execution_duration"]
+    )
+    assert payload["provenance"]["rev13_explicit_runtime_freeze"] == {
+        "all_explicit_paths_clean": True
+    }
