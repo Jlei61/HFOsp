@@ -1,5 +1,5 @@
 {
-  "schema_id": "topic4_rev13_node_zero_sum_recovery_v1",
+  "schema_id": "topic4_rev13_node_zero_sum_recovery_v2",
   "scientific_role": "development_only_model_internal_node_recovery_canary",
   "output_root": "results/topic4_sef_hfo/data_driven_node_dualmode_rev13/node_zero_sum_recovery_canary",
   "candidate_manifest": "results/topic4_sef_hfo/data_driven_node_dualmode_rev13/node_zero_sum_recovery_canary/candidate_manifest.json",
@@ -46,18 +46,20 @@
     "tau_ms": 250.0,
     "reference_rate_hz": 50.0,
     "amplitude_scale": "A_ref = c * sigma_node",
-    "sigma_node_formula": "support_weighted_RMS_of_static_Node_threshold_modulation",
+    "sigma_node_formula": "support_weighted_centered_SD_of_static_Node_threshold_modulation",
     "increment_formula": "q = A_ref * (1 - exp(-dt/tau)) / (r_ref * dt / 1000)",
     "trace_bound_formula": "a_max = 2 * A_ref",
     "a_max_multiplier": 2.0,
     "state_update": "after_current_step_spike_reset_affects_next_step",
     "zero_sum_formula": "delta_theta_i = g_i * (a_i - sum_j(g_j*a_j)/sum_j(g_j))",
     "raise_only_formula": "delta_theta_i = g_i * a_i",
-    "stratified_shuffle": {
-      "seed": 20260827,
-      "support_quantile_bins": 5,
-      "signed_depth_quantile_bins": 5,
-      "permutation_scope": "E_neurons_within_joint_support_signed_depth_strata"
+    "spatial_shift": {
+      "mapping_method": "equal_count_x_bins_toroidal_half_shift",
+      "n_x_bins": 8,
+      "shift_bins": 4,
+      "within_bin_order": "y_then_x_then_original_index",
+      "permutation_scope": "all_E_neurons",
+      "dynamic_scale_match": "support_weighted_centered_SD_each_step_to_unshifted_zero_sum"
     },
     "draws_random_numbers_at_runtime": false,
     "uses_patient_labels": false,
@@ -85,13 +87,14 @@
       "controller": {"mode": "raise_only", "c": 0.2}
     },
     {
-      "arm_id": "stratified_shuffle_c020",
-      "controller": {"mode": "stratified_shuffle", "c": 0.2}
+      "arm_id": "spatial_shift_c020",
+      "controller": {"mode": "spatial_shift", "c": 0.2}
     }
   ],
   "search": {
     "canary_network_seeds": [2311],
     "fit_network_seeds": [2312, 2313],
+    "engineering_parity_network_seeds": [2291],
     "selection_network_seeds": [],
     "confirmation_network_seeds": [],
     "common_random_numbers_across_arms": true,
@@ -100,6 +103,25 @@
       "early_stop_runaway": true,
       "late_runaway_is_invalid": true
     }
+  },
+  "model_internal_k2_contract": {
+    "formal_feature": "signed_causal_family_displacement_along_frozen_substrate_axis",
+    "density_model": "one_dimensional_gaussian_mixture_K1_vs_K2",
+    "validation": "contiguous_time_block_heldout_log_density",
+    "n_contiguous_blocks": 3,
+    "event_count_matching": "minimum_usable_event_count_within_paired_network_arms",
+    "minimum_heldout_k2_minus_k1": 0.0,
+    "cluster_median_signs": "strictly_opposite",
+    "minimum_within_cluster_direction_consistency": 0.70,
+    "minimum_cluster_fraction": 0.20,
+    "minimum_temporal_blocks_per_direction": 2,
+    "matched_control_pairs": {
+      "zero_sum_c020": ["exact_off", "raise_only_c020", "spatial_shift_c020"]
+    },
+    "unmatched_dose_arms": ["zero_sum_c010", "zero_sum_c040"],
+    "unmatched_dose_status": "MATCHED_CONTROL_EXTENSION_REQUIRED",
+    "whole_sheet_onset_map_role": "KMeans_topology_visualization_only_not_formal_density_evidence",
+    "patient_or_contact_fields_forbidden": true
   },
   "pathways": {
     "learned_E_to_E_redistribution": "off",
@@ -149,5 +171,5 @@
     "monitor_interval_seconds": 600,
     "long_run_launcher": "systemd-run --user plus nohup"
   },
-  "claim_boundary": "Model-internal Node-only recovery canary. No patient label or prototype selects an arm. Stage-AL m100/d100 is an alias of the primary Stage-AK substrate and is not a second substrate. EE, E-to-I and Z/M remain off."
+  "claim_boundary": "Model-internal Node-only recovery canary. No patient label, contact readout or prototype selects an arm. Only c=0.2 has coefficient-matched raise-only and spatial-shift controls; c=0.1 and c=0.4 are signal/dose arms requiring a later matched-control extension before formal acceptance. Stage-AL m100/d100 is an alias of the primary Stage-AK substrate and is not a second substrate. EE, E-to-I and Z/M remain off."
 }

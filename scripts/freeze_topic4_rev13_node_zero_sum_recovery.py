@@ -25,14 +25,14 @@ EXPECTED_ARM_IDS = (
     "zero_sum_c020",
     "zero_sum_c040",
     "raise_only_c020",
-    "stratified_shuffle_c020",
+    "spatial_shift_c020",
 )
 EXPECTED_CONTROLLERS = {
     "zero_sum_c010": ("zero_sum", 0.1),
     "zero_sum_c020": ("zero_sum", 0.2),
     "zero_sum_c040": ("zero_sum", 0.4),
     "raise_only_c020": ("raise_only", 0.2),
-    "stratified_shuffle_c020": ("stratified_shuffle", 0.2),
+    "spatial_shift_c020": ("spatial_shift", 0.2),
 }
 
 
@@ -69,6 +69,8 @@ def _validate_inputs_contract(config: dict) -> None:
 
 
 def _validate_static_contract(config: dict) -> None:
+    if config.get("schema_id") != "topic4_rev13_node_zero_sum_recovery_v2":
+        raise RuntimeError("rev13 config schema changed")
     contract = config["node_accessibility_contract"]
     if float(contract["tau_ms"]) != 250.0:
         raise RuntimeError("rev13 primary tau changed")
@@ -76,6 +78,22 @@ def _validate_static_contract(config: dict) -> None:
         raise RuntimeError("rev13 reference rate changed")
     if float(contract["a_max_multiplier"]) != 2.0:
         raise RuntimeError("rev13 trace bound changed")
+    if contract.get("sigma_node_formula") != (
+        "support_weighted_centered_SD_of_static_Node_threshold_modulation"
+    ):
+        raise RuntimeError("rev13 static Node scale changed")
+    spatial_shift = contract.get("spatial_shift", {})
+    if spatial_shift != {
+        "mapping_method": "equal_count_x_bins_toroidal_half_shift",
+        "n_x_bins": 8,
+        "shift_bins": 4,
+        "within_bin_order": "y_then_x_then_original_index",
+        "permutation_scope": "all_E_neurons",
+        "dynamic_scale_match": (
+            "support_weighted_centered_SD_each_step_to_unshifted_zero_sum"
+        ),
+    }:
+        raise RuntimeError("rev13 spatial-shift control changed")
     if contract.get("uses_patient_labels") is not False:
         raise RuntimeError("patient labels cannot update rev13 state")
     if contract.get("uses_patient_prototypes") is not False:
@@ -93,8 +111,29 @@ def _validate_static_contract(config: dict) -> None:
         raise RuntimeError("rev13 canary seed changed")
     if search.get("fit_network_seeds") != [2312, 2313]:
         raise RuntimeError("rev13 fit seeds changed")
+    if search.get("engineering_parity_network_seeds") != [2291]:
+        raise RuntimeError("rev13 engineering parity seed changed")
     if float(search["simulation"]["duration_ms"]) != 10000.0:
         raise RuntimeError("rev13 duration changed")
+    k2 = config.get("model_internal_k2_contract", {})
+    if k2.get("formal_feature") != (
+        "signed_causal_family_displacement_along_frozen_substrate_axis"
+    ):
+        raise RuntimeError("rev13 formal K2 feature changed")
+    if k2.get("validation") != "contiguous_time_block_heldout_log_density":
+        raise RuntimeError("rev13 formal K2 validation changed")
+    if int(k2.get("n_contiguous_blocks", -1)) != 3:
+        raise RuntimeError("rev13 temporal block count changed")
+    if float(k2.get("minimum_within_cluster_direction_consistency", -1)) != 0.70:
+        raise RuntimeError("rev13 direction consistency changed")
+    if float(k2.get("minimum_cluster_fraction", -1)) != 0.20:
+        raise RuntimeError("rev13 minority fraction changed")
+    if k2.get("matched_control_pairs") != {
+        "zero_sum_c020": [
+            "exact_off", "raise_only_c020", "spatial_shift_c020",
+        ],
+    }:
+        raise RuntimeError("rev13 matched-control family changed")
 
 
 def _validate_arms(arms: list[dict]) -> None:
@@ -230,9 +269,9 @@ def build_candidates(stage_ak_manifest: dict, stage_al_manifest: dict,
                 "state_update": controller_contract["state_update"],
                 "draws_random_numbers_at_runtime": False,
             }
-            if controller["mode"] == "stratified_shuffle":
-                node_accessibility["stratified_shuffle"] = copy.deepcopy(
-                    controller_contract["stratified_shuffle"]
+            if controller["mode"] == "spatial_shift":
+                node_accessibility["spatial_shift"] = copy.deepcopy(
+                    controller_contract["spatial_shift"]
                 )
         candidates.append({
             "candidate_id": arm["arm_id"],
@@ -318,7 +357,7 @@ def build_manifest(config: dict, loaded: dict, input_audit: dict,
         loaded["stage_ak_config"], config,
     )
     return {
-        "schema_id": "topic4_rev13_node_zero_sum_recovery_manifest_v1",
+        "schema_id": "topic4_rev13_node_zero_sum_recovery_manifest_v2",
         "status": "REV13_NODE_ZERO_SUM_RECOVERY_CANARY_FROZEN",
         "config": str(config_path.relative_to(ROOT)),
         "config_sha256": _sha256(config_path),
@@ -326,6 +365,9 @@ def build_manifest(config: dict, loaded: dict, input_audit: dict,
         "substrate_audit": substrate_audit,
         "event_unit": copy.deepcopy(config["event_unit"]),
         "source_topology": copy.deepcopy(config["source_topology"]),
+        "model_internal_k2_contract": copy.deepcopy(
+            config["model_internal_k2_contract"]
+        ),
         "search": copy.deepcopy(config["search"]),
         "pathways": copy.deepcopy(config["pathways"]),
         "inputs": input_audit,

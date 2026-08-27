@@ -38,10 +38,11 @@ def test_rev13_frozen_config_has_exact_arms_seeds_and_closed_pathways():
     config = _config()
     assert [row["arm_id"] for row in config["arms"]] == [
         "exact_off", "zero_sum_c010", "zero_sum_c020", "zero_sum_c040",
-        "raise_only_c020", "stratified_shuffle_c020",
+        "raise_only_c020", "spatial_shift_c020",
     ]
     assert config["search"]["canary_network_seeds"] == [2311]
     assert config["search"]["fit_network_seeds"] == [2312, 2313]
+    assert config["search"]["engineering_parity_network_seeds"] == [2291]
     assert config["search"]["simulation"]["duration_ms"] == 10000.0
     assert set(config["pathways"].values()) == {"off"}
     contract = config["node_accessibility_contract"]
@@ -117,10 +118,28 @@ def test_support_contract_and_controller_scale_are_frozen():
     assert by_id["zero_sum_c020"]["node_accessibility"]["c"] == 0.2
     assert by_id["zero_sum_c040"]["node_accessibility"]["c"] == 0.4
     assert by_id["raise_only_c020"]["node_accessibility"]["mode"] == "raise_only"
-    shuffled = by_id["stratified_shuffle_c020"]["node_accessibility"]
-    assert shuffled["stratified_shuffle"] == (
-        config["node_accessibility_contract"]["stratified_shuffle"]
+    shifted = by_id["spatial_shift_c020"]["node_accessibility"]
+    assert shifted["spatial_shift"] == (
+        config["node_accessibility_contract"]["spatial_shift"]
     )
+    k2 = config["model_internal_k2_contract"]
+    assert k2["formal_feature"].startswith("signed_causal_family_displacement")
+    assert k2["minimum_temporal_blocks_per_direction"] == 2
+    assert set(k2["matched_control_pairs"]["zero_sum_c020"]) == {
+        "exact_off", "raise_only_c020", "spatial_shift_c020",
+    }
+
+
+def test_freezer_rejects_spatial_control_or_k2_contract_drift():
+    config = _config()
+    config["node_accessibility_contract"]["spatial_shift"]["shift_bins"] = 3
+    with pytest.raises(RuntimeError, match="spatial-shift"):
+        _build(config)
+
+    config = _config()
+    config["model_internal_k2_contract"]["formal_feature"] = "onset_map"
+    with pytest.raises(RuntimeError, match="formal K2"):
+        _build(config)
 
 
 def test_freezer_rejects_duplicate_or_implicit_off():
