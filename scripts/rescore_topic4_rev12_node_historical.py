@@ -160,6 +160,9 @@ def _patient_data(cohort_config: dict, artifact_root: Path) -> dict:
         "heldout_blocks": np.asarray(raw["block_ids"])[heldout_index],
         "train_blocks": np.asarray(raw["block_ids"])[train_index],
         "train_event_indices": train_index,
+        "heldout_event_indices": heldout_index,
+        "train_event_abs_times": np.asarray(raw["event_abs_times"])[train_index],
+        "heldout_event_abs_times": np.asarray(raw["event_abs_times"])[heldout_index],
     }
 
 

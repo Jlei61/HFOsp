@@ -879,3 +879,44 @@ is `STATIC_NODE_THRESHOLD_FAMILY_INSUFFICIENT_AFTER_LOCAL_BRIDGE`: a static
 threshold field can bias which propagation is accessible, but cannot robustly
 stabilize both full patient modes across network realizations. No further
 static-field interpolation or worker expansion is authorized.
+
+## Stage-AM zero-simulation mode-memory and residual audit
+
+1. Recover train and held-out patient event labels, recording-block identity
+   and absolute event times from the frozen historical-rescore input. Never
+   bridge a recording-block boundary.
+2. Compare observed same-mode transitions, lagged mutual information and run
+   lengths with 4,096 within-block occupancy-preserving label permutations.
+3. Repeat the transition comparison after requiring adjacent-event gaps of
+   0.5, 1, 2, 5 and 10 s. Distinguish overall event-history dependence from a
+   state that persists for at least 1 s.
+4. Decompose the full patient-normalized recruitment, precedence, profile and
+   event-cloud residuals for Stage-AL, Stage-AK and the manual capacity
+   control. Retain the three shaft-aware precedence classes and both causal
+   direction scores.
+5. Patient labels may reject a mechanism class, but cannot define the runtime
+   Node state, choose a field, select a time constant or increment, or enter a
+   canary endpoint.
+
+Stage-AM is complete. Overall same-mode memory replicated in train and
+held-out, and the 0.5-s gap audit retained an excess of at least 0.02 in both
+splits. The held-out effect fell below the threshold at 1 s and disappeared at
+longer gaps. The frozen status is
+`PATIENT_MODE_MEMORY_CONFINED_TO_SUBSECOND_EVENT_HISTORY`; persistent Node
+mode memory is not authorized. The residual audit identifies recruitment and
+mode-0 profile/event-cloud mismatch as the dominant failures and confirms that
+stronger mode-1 direction trades against the complete mode-0 distribution.
+
+## Stage-AN historical dynamic-Node discrimination
+
+1. Before implementing or simulating another Node state, audit the completed
+   rev10-D spike-triggered adaptation and spatial-OU experiments against the
+   current proposal.
+2. Record the exact old state equation, parameter range, substrate, event unit,
+   target and failure mode. Do not rerun a renamed version of a closed
+   mechanism.
+3. A new canary may proceed only if it introduces a testable operation absent
+   from both old families, such as field-gated zero-sum threshold redistribution
+   rather than purely subtractive local adaptation.
+4. Freeze a bitwise-off contract, checkpoint payload and model-internal canary
+   before any patient-scored replication. Keep EE, E-to-I and Z/M off.

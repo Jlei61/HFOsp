@@ -1211,3 +1211,37 @@ Node mechanism is insufficient. The next revision must either revise the
 event/patient target contract or introduce a genuinely different, model-
 internal Node accessibility mechanism. EE, E-to-I and Z/M remain closed until
 that revised Node substrate passes the same-network Fig.4 acceptance contract.
+
+Stage-AM is a zero-simulation mechanism-discrimination audit. Patient A/B
+labels are used only to test whether their temporal ordering rules out a
+persistent Node state; they cannot define or update a runtime state, choose a
+field, or tune a Node parameter. Within each recording block, event labels are
+ordered by absolute event time and compared with 4,096 occupancy-preserving
+label permutations. The same-mode excess is replicated in train and held-out
+events (`+0.0385` and `+0.0326`), but it is not persistent: after requiring
+adjacent events to be separated by at least 1 s, the held-out excess is only
+`+0.0102` (`p=0.060`), and it vanishes for gaps of 2 s or longer. Only the
+0.5-s gap audit reaches the frozen `0.02` excess threshold in both splits.
+
+The formal Stage-AM temporal status is
+`PATIENT_MODE_MEMORY_CONFINED_TO_SUBSECOND_EVENT_HISTORY`. It rejects an
+autonomous persistent mode state and permits only a bounded canary for
+short-lived, activity-dependent Node recovery. It does not choose the recovery
+time constant or increment.
+
+The same audit decomposes the residuals of Stage-AL, Stage-AK and the manual
+capacity control. Recruitment is the largest common patient-normalized loss;
+mode-0 profile and event cloud also remain outside the patient block-to-block
+q95 range, while aggregate precedence is usually already inside that range.
+Static fields generate reproducible but weakly separated source topology.
+Across Stage-AL candidates, stronger mode-1 direction is coupled to worse
+mode-0 recruitment, profile and cloud (`r=0.81`, `0.83` and `0.79`). This
+supports changing Node dynamics rather than weakening the patient target or
+making natural KMeans the optimizer.
+
+Before any new SNN run, the proposed recovery mechanism must be compared with
+the completed rev10-D adaptation and spatial-OU experiments. A new canary is
+admissible only if its state equation and conservation law are genuinely
+different, its disabled path is bitwise identical to rev12 Node-only, and its
+model-internal selection endpoints do not read patient mode labels. EE,
+E-to-I and Z/M remain closed.

@@ -1,0 +1,35 @@
+{
+  "schema_id": "topic4_rev12_nd_node_mode_memory_residual_audit_v1",
+  "scientific_role": "development_only_zero_simulation_node_mechanism_discrimination",
+  "output_root": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_am_mode_memory_residual_audit",
+  "inputs": {
+    "cohort_config": {
+      "path": "config/topic4_data_driven_snn_cohort_v1.json",
+      "sha256": "1dda710517a65002d21618f26569df91077ba6d02953fbfcee9b2f98b0ac4249"
+    },
+    "stage_al_summary": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_al_dual_node_local_bridge/aggregate/fit_soft_global_summary.json",
+      "sha256": "4ccc0d8072f0d15a0fe5e46b6589bbb0a65285ff5a771abf711a904c814f51d7"
+    },
+    "stage_ak_summary": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_ak_dual_node_channel_canary/aggregate/fit_soft_global_summary.json",
+      "sha256": "dc93518d6a73100cd6a9968ae7c13cb6c312dbd1afcf4adaa771260421775522"
+    },
+    "manual_summary": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_ad_manual_capacity_replication/aggregate/fit_soft_global_summary.json",
+      "sha256": "7c5f40750b7ccb43bf769d5de58410226b31042fee261c49e253569b9110819d"
+    }
+  },
+  "patient_mode_memory": {
+    "permutation_draws": 4096,
+    "seed": 20260827,
+    "minimum_absolute_same_mode_excess": 0.02,
+    "required_null_quantile": 0.95,
+    "minimum_events_per_block": 3,
+    "maximum_lag": 5,
+    "gap_thresholds_seconds": [0.5, 1.0, 2.0, 5.0, 10.0],
+    "short_memory_gap_seconds": 0.5,
+    "persistent_memory_gap_seconds": 1.0
+  },
+  "claim_boundary": "This audit may reject a persistent Node-memory mechanism and constrain the admissible timescale class. Patient labels cannot define or update the runtime Node state, select tau or increment, select a field, read patient ictal data, authorize EE/E-to-I/Z/M, or establish patient mechanism."
+}
