@@ -976,7 +976,10 @@ def evaluate_full_t1(model: FrozenEmbeddingStateModel, design: FullAnchorDesign,
 def _train_epoch(model: FrozenEmbeddingStateModel, design: FullAnchorDesign,
                  embedding: np.ndarray, optimizer: torch.optim.Optimizer, *,
                  device: torch.device | str, anchor_ids: np.ndarray,
-                 query_time_upper: float, chunk_anchors: int = 256) -> None:
+                 query_time_upper: float, chunk_anchors: int = 256,
+                 grad_clip_norm: float | None = 1.0,
+                 step_state: dict[str, int] | None = None,
+                 diagnostics: dict | None = None) -> None:
     selected = np.zeros(len(design.anchor_time), dtype=bool)
     selected[np.asarray(anchor_ids, dtype=np.int64)] = True
     event_allowed = np.flatnonzero(
@@ -1020,6 +1023,19 @@ def _train_epoch(model: FrozenEmbeddingStateModel, design: FullAnchorDesign,
     event_total = int(len(event_allowed))
     chunks = max(int(math.ceil(len(anchor_ids) / max(int(chunk_anchors), 1))), 1)
     scale = float(chunks) / max(event_total, 1)
+    if diagnostics is not None:
+        diagnostics.update({
+            "optimizer_steps": 0, "events": event_total,
+            "anchors": int(len(anchor_ids)),
+            "sessions": int(sum(
+                bool(np.any(selected & (design.anchor_session == label)))
+                for label in design.session_label
+            )),
+            "objective_numerator": 0.0, "preclip_norm_max": 0.0,
+            "postclip_norm_max": 0.0, "clip_count": 0,
+            "nonfinite_gradient_steps": 0, "learning_rate_last": {},
+            "gradient_group_max": {},
+        })
     for label in design.session_label:
         anchors = np.flatnonzero(selected & (design.anchor_session == label))
         if not len(anchors):
@@ -1101,12 +1117,86 @@ def _train_epoch(model: FrozenEmbeddingStateModel, design: FullAnchorDesign,
                 survival = torch.sum(weight * torch.exp(torch.clamp(q_log, max=20.0)))
             else:
                 survival = state.new_zeros(())
-            loss = (survival - event_log - mark_log) * scale
+            objective = survival - event_log - mark_log
+            loss = objective * scale
             optimizer.zero_grad(set_to_none=True)
+            if step_state is not None:
+                step = int(step_state.get("step", 0))
+                warmup_steps = int(step_state.get("warmup_steps", 0))
+                factor = (
+                    min(1.0, float(step + 1) / float(warmup_steps))
+                    if warmup_steps > 0 else 1.0
+                )
+                for group in optimizer.param_groups:
+                    group["lr"] = float(group.get("base_lr", group["lr"])) * factor
+                step_state["step"] = step + 1
             loss.backward()
-            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+            named = list(model.named_parameters())
+            group_prefix = {
+                "stable_generator": "state.generator",
+                "observation_correction": "state.correction",
+                "state_readout_timing": "state_timing",
+                "state_readout_contact": "state_contact",
+                "state_readout_size": "state_size",
+            }
+            if diagnostics is not None:
+                for label_name, prefix in group_prefix.items():
+                    square = sum(
+                        float(value.grad.detach().float().square().sum())
+                        for name, value in named
+                        if name.startswith(prefix) and value.grad is not None
+                    )
+                    norm = math.sqrt(square)
+                    previous = diagnostics["gradient_group_max"].get(
+                        label_name, 0.0
+                    )
+                    diagnostics["gradient_group_max"][label_name] = max(
+                        previous, norm
+                    )
+            parameters = [
+                value for value in model.parameters() if value.requires_grad
+            ]
+            if grad_clip_norm is None:
+                preclip = math.sqrt(sum(
+                    float(value.grad.detach().float().square().sum())
+                    for value in parameters if value.grad is not None
+                ))
+            else:
+                preclip = float(torch.nn.utils.clip_grad_norm_(
+                    parameters, float(grad_clip_norm)
+                ))
+            if not math.isfinite(preclip):
+                if diagnostics is not None:
+                    diagnostics["nonfinite_gradient_steps"] += 1
+                raise RuntimeError("R1.2 prefix encountered a non-finite gradient")
             optimizer.step()
+            if diagnostics is not None:
+                diagnostics["optimizer_steps"] += 1
+                diagnostics["objective_numerator"] += float(objective.detach())
+                diagnostics["preclip_norm_max"] = max(
+                    diagnostics["preclip_norm_max"], preclip
+                )
+                diagnostics["postclip_norm_max"] = max(
+                    diagnostics["postclip_norm_max"],
+                    preclip if grad_clip_norm is None else min(
+                        preclip, float(grad_clip_norm)
+                    ),
+                )
+                if grad_clip_norm is not None and preclip > float(grad_clip_norm):
+                    diagnostics["clip_count"] += 1
+                diagnostics["learning_rate_last"] = {
+                    str(group.get("group_name", index)): float(group["lr"])
+                    for index, group in enumerate(optimizer.param_groups)
+                }
             state = state.detach()
+    if diagnostics is not None:
+        diagnostics["train_joint_nll_per_event"] = (
+            diagnostics["objective_numerator"] / max(event_total, 1)
+        )
+        diagnostics["clip_fraction"] = (
+            diagnostics["clip_count"]
+            / max(diagnostics["optimizer_steps"], 1)
+        )
 
 
 def fit_full_t1(model: FrozenEmbeddingStateModel, design: FullAnchorDesign,

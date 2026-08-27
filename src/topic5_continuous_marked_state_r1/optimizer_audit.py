@@ -113,25 +113,36 @@ def fit_prefix_safe_core(model: FrozenEmbeddingStateModel,
                          weight_decay: float = 1e-3,
                          chunk_anchors: int = 256,
                          optimizer_name: str = "adamw",
+                         grad_clip_norm: float | None = 1.0,
+                         warmup_fraction: float = 0.0,
                          split: NestedTimeSplit | None = None
                          ) -> tuple[FrozenEmbeddingStateModel, dict]:
     """Fit the core without exposing epoch zero to alignment selection data."""
     split = split or nested_time_split(design)
     initial = _state_snapshot(model)
 
-    def value(lower: float, upper: float) -> float:
-        return float(evaluate_full_t1(
+    def value(lower: float, upper: float) -> dict:
+        return asdict(evaluate_full_t1(
             model, design, embedding, "train", device=device,
             time_lower=float(lower), time_upper=float(upper),
-        ).joint_nll_per_event)
+        ))
 
-    best_value = value(split.base_select_lower, split.base_select_upper)
+    best_metrics = value(split.base_select_lower, split.base_select_upper)
+    best_value = float(best_metrics["joint_nll_per_event"])
+    train_metrics = value(
+        float(design.anchor_time[split.base_train_ids[0]]),
+        split.base_select_lower,
+    )
     best_epoch = 0
     trajectory = [{
         "epoch": 0,
         "base_select_joint_nll": best_value,
+        "base_select_metrics": best_metrics,
+        "evaluated_train_metrics": train_metrics,
         "parameter_norm": _parameter_norm(model),
         "update_norm": 0.0,
+        "optimizer_steps": 0, "clip_fraction": None,
+        "preclip_norm_max": None, "postclip_norm_max": None,
     }]
     parameters = [value for value in model.parameters() if value.requires_grad]
     optimizer_class = {
@@ -140,24 +151,47 @@ def fit_prefix_safe_core(model: FrozenEmbeddingStateModel,
     }.get(optimizer_name)
     if optimizer_class is None:
         raise ValueError(f"unsupported prefix optimizer {optimizer_name!r}")
-    optimizer = optimizer_class(
-        parameters, lr=float(learning_rate), weight_decay=float(weight_decay)
-    )
+    optimizer = optimizer_class([{
+        "params": parameters, "lr": float(learning_rate),
+        "base_lr": float(learning_rate), "group_name": "prefix",
+    }], weight_decay=float(weight_decay))
+    approximate_steps = max(
+        int(math.ceil(len(split.base_train_ids) / max(int(chunk_anchors), 1))), 1
+    ) * max(int(epochs), 1)
+    step_state = {
+        "step": 0,
+        "warmup_steps": int(math.ceil(
+            float(warmup_fraction) * approximate_steps
+        )),
+    }
     for epoch in range(1, int(epochs) + 1):
         before = _state_snapshot(model)
         model.train()
+        diagnostics: dict = {}
         _train_epoch(
             model, design, embedding, optimizer, device=device,
             anchor_ids=split.base_train_ids,
             query_time_upper=split.base_select_lower,
             chunk_anchors=int(chunk_anchors),
+            grad_clip_norm=grad_clip_norm, step_state=step_state,
+            diagnostics=diagnostics,
         )
-        current = value(split.base_select_lower, split.base_select_upper)
+        current_metrics = value(
+            split.base_select_lower, split.base_select_upper
+        )
+        current = float(current_metrics["joint_nll_per_event"])
+        train_metrics = value(
+            float(design.anchor_time[split.base_train_ids[0]]),
+            split.base_select_lower,
+        )
         trajectory.append({
             "epoch": int(epoch),
             "base_select_joint_nll": current,
+            "base_select_metrics": current_metrics,
+            "evaluated_train_metrics": train_metrics,
             "parameter_norm": _parameter_norm(model),
             "update_norm": _update_norm(before, model),
+            **diagnostics,
         })
         if current < best_value:
             best_value = current
@@ -165,9 +199,21 @@ def fit_prefix_safe_core(model: FrozenEmbeddingStateModel,
 
     model.load_state_dict(initial)
     if best_epoch:
-        optimizer = optimizer_class(
-            parameters, lr=float(learning_rate), weight_decay=float(weight_decay)
-        )
+        optimizer = optimizer_class([{
+            "params": parameters, "lr": float(learning_rate),
+            "base_lr": float(learning_rate), "group_name": "prefix",
+        }], weight_decay=float(weight_decay))
+        approximate_steps = max(
+            int(math.ceil(
+                len(split.prefix_refit_ids) / max(int(chunk_anchors), 1)
+            )), 1
+        ) * max(int(best_epoch), 1)
+        step_state = {
+            "step": 0,
+            "warmup_steps": int(math.ceil(
+                float(warmup_fraction) * approximate_steps
+            )),
+        }
         for _ in range(best_epoch):
             model.train()
             _train_epoch(
@@ -175,6 +221,7 @@ def fit_prefix_safe_core(model: FrozenEmbeddingStateModel,
                 anchor_ids=split.prefix_refit_ids,
                 query_time_upper=split.alignment_select_lower,
                 chunk_anchors=int(chunk_anchors),
+                grad_clip_norm=grad_clip_norm, step_state=step_state,
             )
     model.eval()
     trace = {
@@ -185,6 +232,10 @@ def fit_prefix_safe_core(model: FrozenEmbeddingStateModel,
         "optimizer": optimizer_name,
         "learning_rate": float(learning_rate),
         "weight_decay": float(weight_decay),
+        "grad_clip_norm": (
+            None if grad_clip_norm is None else float(grad_clip_norm)
+        ),
+        "warmup_fraction": float(warmup_fraction),
         "chunk_anchors": int(chunk_anchors),
         "epochs_budget": int(epochs),
         "epoch_zero_seen_base_select": False,
@@ -201,6 +252,30 @@ def transfer_prefix_core(target: FullTargetObserverStateModel,
     target.state_timing.load_state_dict(core.state_timing.state_dict())
     target.state_contact.load_state_dict(core.state_contact.state_dict())
     target.state_size.load_state_dict(core.state_size.state_dict())
+
+
+def parameter_group_update_norms(initial: dict[str, torch.Tensor],
+                                 model: torch.nn.Module) -> dict[str, float]:
+    """Report update norms in the scientific parameter groups."""
+    groups = {
+        "spatial_fusion": "observer.spatial",
+        "explicit_projection": "observer.explicit",
+        "observation_correction": "state.correction",
+        "state_readout_timing": "state_timing",
+        "state_readout_contact": "state_contact",
+        "state_readout_size": "state_size",
+        "stable_generator": "state.generator",
+    }
+    current = model.state_dict()
+    result = {}
+    for label, prefix in groups.items():
+        square = 0.0
+        for name, value in current.items():
+            if name.startswith(prefix) and name in initial:
+                delta = value.detach().cpu().float() - initial[name].float()
+                square += float(delta.square().sum())
+        result[label] = math.sqrt(square)
+    return result
 
 
 def fixed_overfit_segment(design: FullAnchorDesign,

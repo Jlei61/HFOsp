@@ -41,6 +41,8 @@ def main() -> None:
     parser.add_argument("--epochs", type=int, default=4)
     parser.add_argument("--learning-rate", type=float, default=3e-4)
     parser.add_argument("--weight-decay", type=float, default=1e-3)
+    parser.add_argument("--warmup-fraction", type=float, default=0.0)
+    parser.add_argument("--grad-clip-norm", type=float, default=1.0)
     parser.add_argument("--chunk-anchors", type=int, default=256)
     parser.add_argument("--optimizer", choices=("adamw", "adam"), default="adamw")
     parser.add_argument("--config-id", default="prefix_adamw_lr3e-4_wd1e-3")
@@ -74,7 +76,11 @@ def main() -> None:
         model, design, embedding, device=args.device,
         epochs=args.epochs, learning_rate=args.learning_rate,
         weight_decay=args.weight_decay, chunk_anchors=args.chunk_anchors,
-        optimizer_name=args.optimizer, split=split,
+        optimizer_name=args.optimizer,
+        grad_clip_norm=(
+            None if args.grad_clip_norm <= 0 else args.grad_clip_norm
+        ),
+        warmup_fraction=args.warmup_fraction, split=split,
     )
     output = (
         args.output_root / "prefix_initialisation" / args.config_id

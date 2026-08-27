@@ -358,6 +358,11 @@ def train_epoch(model: FullTargetObserverStateModel,
         diagnostics.update({
             "optimizer_steps": 0,
             "events": event_total,
+            "anchors": int(len(anchor_ids)),
+            "sessions": int(sum(
+                bool(np.any(selected & (design.anchor_session == label)))
+                for label in design.session_label
+            )),
             "objective_numerator": 0.0,
             "preclip_norm_max": 0.0,
             "postclip_norm_max": 0.0,

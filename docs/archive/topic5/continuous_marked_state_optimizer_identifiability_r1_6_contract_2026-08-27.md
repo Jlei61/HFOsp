@@ -60,6 +60,13 @@ positive 必须在至少 4/5 seeds 降低 unseen inner NLL，并恢复非零参�
 
 不做无界超参数挖掘。先在 synthetic 与小样本过拟合上筛掉明显不可训练配置，再在人体验证以下小矩阵：
 
+搜索必须分两层，不能只调 target-alignment：
+
+1. 先用 `base_train`→`base_select` 选择一个全患者公共的 prefix/core 配置，比较 learning rate、4/8/12 个完整时间 pass、64/128/256 anchors 的更新粒度、weight decay、warm-up、clip 以及 Adam 诊断；
+2. 冻结该 prefix 配置并 refit 到 TRAIN 前 80%，再在 `alignment_select` 上选择 observer/readout 配置。
+
+初始试跑中，固定旧 prefix 配置在 E1096、E384 和张家齐均 3/3 选择 epoch 0，只有张克轩更新；因此任何在旧 prefix 上展开的后半段大矩阵只算诊断，不承担最终结论。
+
 - optimizer：`AdamW` 主线；`Adam` 仅作无 weight-decay 等价诊断；
 - state/readout LR：`3e-5, 1e-4, 3e-4, 1e-3`；
 - observer LR 固定为 state LR 的 `0.1`，另测 `0.03`；
