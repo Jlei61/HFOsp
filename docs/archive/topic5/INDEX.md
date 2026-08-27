@@ -1,5 +1,16 @@
 # Topic 5 Archive Index
 
+- **2026-08-28 H2b frozen interictal-state cross-task transfer v0.1**：
+  [`白话版`](continuous_marked_state_h2b_cross_task_v0_1_plain_2026-08-28.md) ·
+  [`技术版`](continuous_marked_state_h2b_cross_task_v0_1_technical_2026-08-28.md) ·
+  [`冻结合同`](continuous_marked_state_h2b_cross_task_v0_1_contract_2026-08-28.md)。
+  E384 seeds 1/3/4 的因果状态提取与低容量 seizure probe 仪器通过；30 min 主分母仅 4 次发作，
+  `B_state−B_observation=+0.1560`、persistent−memoryless `+0.1876`，严格 wrong-time n=2
+  的 correct−wrong-time `+0.8629`，均不支持 H2b。5/15 min 完整 sensitivity 为 5/5 次，
+  但不能替代 30 min 主端点。真实 phenotype 因无冻结 target 不可估计；R1.7 的 machine audit
+  虽已 `COMPLETE`，但工作树未形成 clean committed release，故未接入。本版本工程 `COMPLETE`、科学 claim eligibility=false，
+  仍是 development descriptive，不是 cohort、机制、临床预测或 formal confirmation。
+
 - **2026-08-18 Epi-PRSSM v0.1 新合同（审阅后修订）**：
   [`scientific spec`](../../superpowers/specs/2026-08-18-topic5-epi-prssm-v0_1.md) ·
   [`figure contract`](../../superpowers/specs/2026-08-18-topic5-epi-prssm-figure-contract.md) ·
