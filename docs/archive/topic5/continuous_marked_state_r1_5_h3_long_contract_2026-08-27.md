@@ -35,6 +35,7 @@
 - 主要比较：persistent−memoryless、correct−5 matched wrong-time donors。
 - 端点拆分：timing、STOP/group size、first subset、later continuation。
 - 10-donor 仅用同一 checkpoint 做敏感性，不重训。
+- R1.5 的 matched wrong-time donor 必须与目标 anchor 位于同一 recorded coverage segment；runner revision 与 SHA256 写入每个 result 和队列状态，混包结果不得 skip 或聚合。
 
 患者级稳定状态的描述条件为：至少 3/5 seeds 同时满足 persistent−memoryless < 0 与 correct−wrong < 0。它只控制“允许叫什么”，不阻止其他患者实验完成。
 

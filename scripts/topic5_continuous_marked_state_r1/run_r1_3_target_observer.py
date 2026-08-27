@@ -39,6 +39,15 @@ from src.topic5_continuous_marked_state_r1.r1_3 import (
 )
 
 
+R1_4_REVISION = "r1_4_six_patient_explicit_primary_raw_residual_v1"
+R1_5_REVISION = "r1_5_long_support_explicit_extension_v1"
+TARGET_OBSERVER_RUNNER_REVISION = "r1_3_target_observer_segment_locked_v2"
+
+
+def requires_recorded_segment_lock(experiment_label: str) -> bool:
+    return experiment_label in (R1_4_REVISION, R1_5_REVISION)
+
+
 def atomic_torch(path: Path, payload: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".tmp")
@@ -104,7 +113,10 @@ def main() -> None:
         "--seed", required=True, type=int, choices=(0, 1, 2, 3, 4),
     )
     parser.add_argument("--device", default="cuda")
-    parser.add_argument("--experiment-label", default="r1_3_formal_pilot")
+    parser.add_argument(
+        "--experiment-label", default="r1_3_formal_pilot",
+        choices=("r1_3_formal_pilot", R1_4_REVISION, R1_5_REVISION),
+    )
     parser.add_argument("--observer-epochs", type=int, default=2)
     parser.add_argument("--joint-epochs", type=int, default=2)
     parser.add_argument("--chunk-anchors", type=int, default=8)
@@ -324,8 +336,10 @@ def main() -> None:
             chunk = max(1, chunk // 2)
             torch.cuda.empty_cache()
 
+    embedding_use_amp = True
     embedding = materialize_embedding(
-        model, design, loader, device=args.device, batch_size=chunk
+        model, design, loader, device=args.device, batch_size=chunk,
+        use_amp=embedding_use_amp,
     )
     persistent = asdict(evaluate_full_t1(
         model, design, embedding, "validation", device=args.device,
@@ -345,18 +359,25 @@ def main() -> None:
     ))
     observation_coverage = np.asarray(cached_contact_mask, dtype=np.float64).mean(1)
     anchor_segment = None
-    if args.experiment_label == "r1_4_six_patient_explicit_primary_raw_residual_v1":
+    segment_lock_required = requires_recorded_segment_lock(
+        args.experiment_label
+    )
+    if segment_lock_required:
         anchor_segment = np.searchsorted(
             coverage.stop, np.asarray(design.anchor_time, dtype=np.float64), side="right"
         )
         if np.any(anchor_segment >= len(coverage.start)):
-            raise ValueError("R1.4 anchor occurs after the final recorded segment")
+            raise ValueError(
+                "segment-locked anchor occurs after the final recorded segment"
+            )
         anchor_inside = (
             (design.anchor_time >= coverage.start[anchor_segment])
             & (design.anchor_time < coverage.stop[anchor_segment])
         )
         if not bool(np.all(anchor_inside)):
-            raise ValueError("R1.4 anchor occurs outside recorded coverage")
+            raise ValueError(
+                "segment-locked anchor occurs outside recorded coverage"
+            )
     permutations, matched, match_audit = strict_matched_wrong_time_permutations(
         design, observation_coverage, anchor_segment=anchor_segment,
         n_donors=int(args.matched_wrong_donors),
@@ -499,6 +520,19 @@ def main() -> None:
             observation_cache_manifest_path
         ),
         "full_recorded_support": True,
+        "target_observer_runner_revision": TARGET_OBSERVER_RUNNER_REVISION,
+        "target_observer_runner_sha256": contract.sha256_file(
+            Path(__file__).resolve()
+        ),
+        "recorded_coverage_segment_lock_required": bool(
+            segment_lock_required
+        ),
+        "embedding_precision": {
+            "use_amp": bool(embedding_use_amp),
+            "autocast_active": bool(
+                embedding_use_amp and str(args.device).startswith("cuda")
+            ),
+        },
         "sealed_opened": False,
         "claim_boundary": (
             "development R1.3 target-trained observer; "

@@ -192,6 +192,8 @@ def main() -> None:
         and h3_status.get("revision") == H3_LONG_REVISION
         and r1.get("status") == "COMPLETE"
         and r1.get("revision") == R1_5_REVISION
+        and r1.get("target_observer_runner_sha256")
+        == r1_status.get("target_observer_runner_sha256")
         and h3.get("status") == "COMPLETE"
         and h3.get("revision") == H3_LONG_REVISION
         and support.get("revision") == H3_LONG_SUPPORT_REVISION

@@ -19,13 +19,20 @@ REVISION = "r1_5_long_support_explicit_extension_v1"
 SUBJECTS = contract.R1_5_EXTENSION_SUBJECTS
 SEEDS = (0, 1, 2, 3, 4)
 R1_2_ROOT = contract.RESULT_ROOT / "r1_2"
+TARGET_OBSERVER_RUNNER_REVISION = "r1_3_target_observer_segment_locked_v2"
+TARGET_OBSERVER_RUNNER = (
+    contract.REPO_ROOT
+    / "scripts/topic5_continuous_marked_state_r1/run_r1_3_target_observer.py"
+)
+TARGET_OBSERVER_RUNNER_SHA256 = contract.sha256_file(TARGET_OBSERVER_RUNNER)
 
 
 def now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def complete(path: Path, *, experiment: str | None = None) -> bool:
+def complete(path: Path, *, experiment: str | None = None,
+             runner_sha256: str | None = None) -> bool:
     if not path.exists():
         return False
     try:
@@ -36,6 +43,21 @@ def complete(path: Path, *, experiment: str | None = None) -> bool:
         value.get("status") == "COMPLETE"
         and value.get("sealed_opened") is False
         and (experiment is None or value.get("experiment_label") == experiment)
+        and (
+            runner_sha256 is None
+            or (
+                value.get("target_observer_runner_revision")
+                == TARGET_OBSERVER_RUNNER_REVISION
+                and value.get("target_observer_runner_sha256")
+                == runner_sha256
+                and value.get("recorded_coverage_segment_lock_required") is True
+                and value.get("validation", {}).get(
+                    "strict_matched_wrong_time", {}
+                ).get("audit", {}).get(
+                    "same_recorded_coverage_segment"
+                ) is True
+            )
+        )
     )
 
 
@@ -200,12 +222,15 @@ def observation_cache_root(subject: str, root: Path) -> Path:
 
 def fit_r1_5(subject: str, seed: int, root: Path) -> dict:
     output = root / "fits" / subject / f"explicit_seed_{seed}/result.json"
-    if complete(output, experiment=REVISION):
+    if complete(
+        output, experiment=REVISION,
+        runner_sha256=TARGET_OBSERVER_RUNNER_SHA256,
+    ):
         return {"subject": subject, "seed": seed, "status": "COMPLETE",
                 "skipped": True, "output": str(output)}
     command = [
         str(PYTHON),
-        "scripts/topic5_continuous_marked_state_r1/run_r1_3_target_observer.py",
+        str(TARGET_OBSERVER_RUNNER),
         "--subject", subject, "--arm", "explicit", "--seed", str(seed),
         "--device", "cuda", "--experiment-label", REVISION,
         "--observer-epochs", "4", "--joint-epochs", "4",
@@ -221,7 +246,10 @@ def fit_r1_5(subject: str, seed: int, root: Path) -> dict:
     value.update({"subject": subject, "seed": seed, "output": str(output)})
     value["status"] = (
         "COMPLETE" if value["returncode"] == 0
-        and complete(output, experiment=REVISION) else "FAIL"
+        and complete(
+            output, experiment=REVISION,
+            runner_sha256=TARGET_OBSERVER_RUNNER_SHA256,
+        ) else "FAIL"
     )
     return value
 
@@ -245,8 +273,13 @@ def write_status(root: Path, stage: str, rows: list[dict] | None = None) -> None
         "status": "COMPLETE" if stage == "complete" else "RUNNING",
         "stage": stage, "revision": REVISION,
         "subjects": list(SUBJECTS), "seeds": list(SEEDS),
-        "completed_fits": sum(complete(path, experiment=REVISION) for path in fits),
+        "completed_fits": sum(complete(
+            path, experiment=REVISION,
+            runner_sha256=TARGET_OBSERVER_RUNNER_SHA256,
+        ) for path in fits),
         "expected_fits": len(SUBJECTS) * len(SEEDS),
+        "target_observer_runner_revision": TARGET_OBSERVER_RUNNER_REVISION,
+        "target_observer_runner_sha256": TARGET_OBSERVER_RUNNER_SHA256,
         "last_rows": rows or [], "updated_at": now(),
         "formal_test_partition_opened": False, "sealed_opened": False,
     })

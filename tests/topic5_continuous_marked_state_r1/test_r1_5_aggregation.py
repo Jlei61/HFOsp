@@ -1,6 +1,11 @@
 from scripts.topic5_continuous_marked_state_r1.aggregate_r1_5 import (
     summarise_seed_evidence,
 )
+from scripts.topic5_continuous_marked_state_r1.run_r1_3_target_observer import (
+    R1_5_REVISION,
+    requires_recorded_segment_lock,
+)
+from scripts.topic5_continuous_marked_state_r1.run_r1_5_queue import complete
 
 
 def _payload(epoch: int, checkpoint_hash: str, value: float = -0.1) -> dict:
@@ -58,3 +63,38 @@ def test_patient_stability_requires_three_distinct_checkpoints() -> None:
     assert summary["joint_stable_seeds"] == 4
     assert summary["joint_stable_distinct_checkpoints"] == 1
     assert summary["stable_explicit_t1_for_h3"] is False
+
+
+def test_r1_5_requires_recorded_segment_lock() -> None:
+    assert requires_recorded_segment_lock(R1_5_REVISION) is True
+
+
+def test_resume_rejects_pre_segment_lock_result(tmp_path) -> None:
+    path = tmp_path / "result.json"
+    payload = {
+        "status": "COMPLETE",
+        "sealed_opened": False,
+        "experiment_label": R1_5_REVISION,
+        "target_observer_runner_revision": (
+            "r1_3_target_observer_segment_locked_v2"
+        ),
+        "target_observer_runner_sha256": "expected",
+        "recorded_coverage_segment_lock_required": True,
+        "validation": {
+            "strict_matched_wrong_time": {
+                "audit": {"same_recorded_coverage_segment": True},
+            },
+        },
+    }
+    import json
+    path.write_text(json.dumps(payload))
+    assert complete(
+        path, experiment=R1_5_REVISION, runner_sha256="expected"
+    ) is True
+    payload["validation"]["strict_matched_wrong_time"]["audit"][
+        "same_recorded_coverage_segment"
+    ] = False
+    path.write_text(json.dumps(payload))
+    assert complete(
+        path, experiment=R1_5_REVISION, runner_sha256="expected"
+    ) is False

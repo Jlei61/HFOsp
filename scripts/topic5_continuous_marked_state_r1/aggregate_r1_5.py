@@ -23,6 +23,7 @@ SUBJECTS = contract.R1_5_EXTENSION_SUBJECTS
 INDEPENDENT_EXTENSION_SUBJECTS = contract.R1_5_NOVEL_SUBJECTS
 CALIBRATION_SUBJECTS = contract.R1_5_LONG_CARRYOVER_SUBJECTS
 SEEDS = (0, 1, 2, 3, 4)
+TARGET_OBSERVER_RUNNER_REVISION = "r1_3_target_observer_segment_locked_v2"
 
 
 def load_result(path: Path) -> dict:
@@ -38,6 +39,13 @@ def load_result(path: Path) -> dict:
     swap = value["validation"]["strict_matched_wrong_time"]["audit"]
     if swap.get("same_recorded_coverage_segment") is not True:
         raise ValueError(f"R1.5 matched-swap crosses coverage segments: {path}")
+    if (
+        value.get("target_observer_runner_revision")
+        != TARGET_OBSERVER_RUNNER_REVISION
+        or not value.get("target_observer_runner_sha256")
+        or value.get("recorded_coverage_segment_lock_required") is not True
+    ):
+        raise ValueError(f"R1.5 target-observer package mismatch: {path}")
     if value.get("sealed_opened") is not False:
         raise ValueError(f"sealed partition opened: {path}")
     return value
@@ -106,12 +114,23 @@ def main() -> None:
         "--root", type=Path, default=contract.RESULT_ROOT / "r1_5",
     )
     args = parser.parse_args()
+    queue_status = json.loads((args.root / "STATUS.json").read_text())
     rows = []
     by_subject = {}
     for subject in SUBJECTS:
         payloads = [load_result(
             args.root / "fits" / subject / f"explicit_seed_{seed}" / "result.json"
         ) for seed in SEEDS]
+        runner_hashes = {
+            value["target_observer_runner_sha256"] for value in payloads
+        }
+        if runner_hashes != {
+            queue_status.get("target_observer_runner_sha256")
+        }:
+            raise ValueError(
+                f"R1.5 mixed target-observer packages for {subject}: "
+                f"{sorted(runner_hashes)}"
+            )
         row = {
             "subject": subject,
             "subject_role": (
@@ -172,6 +191,10 @@ def main() -> None:
         "stable_all_subjects": stable_all,
         "n_stable_independent_extension_subjects": len(stable_new),
         "n_stable_all_subjects": len(stable_all),
+        "target_observer_runner_revision": TARGET_OBSERVER_RUNNER_REVISION,
+        "target_observer_runner_sha256": queue_status[
+            "target_observer_runner_sha256"
+        ],
         "formal_test_partition_opened": False,
         "sealed_opened": False,
         "claim_boundary": (
