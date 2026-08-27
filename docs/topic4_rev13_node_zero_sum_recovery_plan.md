@@ -37,21 +37,26 @@
 
 1. Freeze the primary Stage-AK substrate hash and six arms from the spec.
 2. Use one unused network/noise seed with common random numbers for six runs.
-3. Run 10 s, based on the frozen model-internal event-duration median of
-   112--124 ms and onset-gap median of 262--264 ms. Zero events and runaway are
-   valid negative outcomes.
+3. Run 20 s. Historical replay showed that 10-s prefixes contain only 13--29
+   clean families and positive held-out K2 evidence in 3/6 networks, whereas
+   20 s provides 27--59 families. Zero events and runaway remain valid negative
+   outcomes.
 4. Before launch, run one 2-s `/usr/bin/time -v` sentinel. Set one numerical
    thread per worker and choose the worker count from measured peak RSS while
    retaining at least 48 GiB available memory; cap at 14 workers. Require at
    least 40 GiB free disk. Monitor no more often than every 600 s; no busy
    polling.
-5. Formal K2 evidence uses event-count-matched, contiguous-time held-out K1/K2
+5. Formal K2 evidence excludes all time-overlapping causal families and uses
+   event-count-matched, contiguous-time held-out K1/K2
    density on signed causal-family displacement. Whole-sheet onset-map KMeans
-   is descriptive. Require opposite directions, within-cluster consistency,
-   temporal-block recurrence, and the frozen fragmentation/transition nulls.
-6. Stop before replication if every zero-sum arm only suppresses events, only
-   fragments events, forces alternation, violates bounds, or is matched by the
-   spatial-shift control.
+   is descriptive. Three blocks are equal-duration. Require at least 24
+   isolated families, at least six per direction, opposite directions,
+   within-cluster consistency, temporal-block recurrence and the frozen
+   overlap/transition nulls.
+6. The one-network result is engineering-only. Proceed to the two additional
+   networks unless there is an engine/event-unit failure, all active arms are
+   runaway, or all active arms produce no causal families. Do not stop because
+   seed 2311 alone has negative or non-evaluable K2.
 
 ## Phase 3: fresh-network capacity replication
 

@@ -99,7 +99,7 @@
     "confirmation_network_seeds": [],
     "common_random_numbers_across_arms": true,
     "simulation": {
-      "duration_ms": 10000.0,
+      "duration_ms": 20000.0,
       "early_stop_runaway": true,
       "late_runaway_is_invalid": true
     }
@@ -109,6 +109,12 @@
     "density_model": "one_dimensional_gaussian_mixture_K1_vs_K2",
     "validation": "contiguous_time_block_heldout_log_density",
     "n_contiguous_blocks": 3,
+    "temporal_block_definition": "three_equal_duration_blocks_not_equal_event_count",
+    "overlap_rule": "exclude_every_family_in_any_time_overlap_connected_component",
+    "minimum_isolated_families": 24,
+    "preferred_isolated_families": 30,
+    "minimum_families_per_direction": 6,
+    "insufficient_observation_status": "NOT_EVALUABLE_EXTEND_DURATION_NOT_SCIENTIFIC_FAIL",
     "event_count_matching": "minimum_usable_event_count_within_paired_network_arms",
     "minimum_heldout_k2_minus_k1": 0.0,
     "cluster_median_signs": "strictly_opposite",

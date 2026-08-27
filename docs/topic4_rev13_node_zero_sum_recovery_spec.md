@@ -138,9 +138,11 @@ the substrate axis. The channel-swapped
 `stage_ak_mean_g08_m_disp_g10_p` mapping is a later sensitivity and is run only
 after a positive primary result.
 
-The first engineering/model-internal pass uses one unused network for six
-runs. Only if the controller is active without numerical or event-unit failure
-are two additional unused networks run, for 12 more primary trajectories.
+The first engineering pass uses one unused network for six 20-s runs. It only
+checks execution, event availability and runaway. Unless there is an engine,
+event-unit or universal-runaway failure, two additional unused networks are
+run regardless of the first network's K2 sign. No arm is selected from one
+network.
 
 ## 6. Model-internal canary endpoints
 
@@ -173,6 +175,13 @@ and later Fig.4 readout. Raw high-dimensional onset-map GMM density is not a
 formal endpoint: replay on the six historical Stage-AK networks produced
 pathologically large negative held-out K2-K1 values despite visibly separated
 directional families.
+
+The formal directional analysis excludes every family belonging to a
+time-overlap connected component with another causal family. It uses three
+equal-duration time blocks, not three equal-event-count blocks. At least 24
+isolated families and at least six events in each direction are required for
+evaluation; 30 is preferred. Insufficient observations are
+`NOT_EVALUABLE_EXTEND_DURATION`, not evidence that the mechanism failed.
 
 An arm is not a capacity candidate if KMeans improvement is explained by
 fragmenting one causal episode, if it induces anti-persistent alternation, if

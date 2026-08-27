@@ -115,7 +115,7 @@ def _validate_static_contract(config: dict) -> None:
         raise RuntimeError("rev13 fit seeds changed")
     if search.get("engineering_parity_network_seeds") != [2291]:
         raise RuntimeError("rev13 engineering parity seed changed")
-    if float(search["simulation"]["duration_ms"]) != 10000.0:
+    if float(search["simulation"]["duration_ms"]) != 20000.0:
         raise RuntimeError("rev13 duration changed")
     k2 = config.get("model_internal_k2_contract", {})
     if k2.get("formal_feature") != (
@@ -126,6 +126,18 @@ def _validate_static_contract(config: dict) -> None:
         raise RuntimeError("rev13 formal K2 validation changed")
     if int(k2.get("n_contiguous_blocks", -1)) != 3:
         raise RuntimeError("rev13 temporal block count changed")
+    if k2.get("temporal_block_definition") != (
+        "three_equal_duration_blocks_not_equal_event_count"
+    ):
+        raise RuntimeError("rev13 temporal block definition changed")
+    if k2.get("overlap_rule") != (
+        "exclude_every_family_in_any_time_overlap_connected_component"
+    ):
+        raise RuntimeError("rev13 overlap exclusion changed")
+    if int(k2.get("minimum_isolated_families", -1)) != 24:
+        raise RuntimeError("rev13 isolated-family floor changed")
+    if int(k2.get("minimum_families_per_direction", -1)) != 6:
+        raise RuntimeError("rev13 per-direction support floor changed")
     if float(k2.get("minimum_within_cluster_direction_consistency", -1)) != 0.70:
         raise RuntimeError("rev13 direction consistency changed")
     if float(k2.get("minimum_cluster_fraction", -1)) != 0.20:

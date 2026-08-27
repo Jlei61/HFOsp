@@ -43,7 +43,7 @@ def test_rev13_frozen_config_has_exact_arms_seeds_and_closed_pathways():
     assert config["search"]["canary_network_seeds"] == [2311]
     assert config["search"]["fit_network_seeds"] == [2312, 2313]
     assert config["search"]["engineering_parity_network_seeds"] == [2291]
-    assert config["search"]["simulation"]["duration_ms"] == 10000.0
+    assert config["search"]["simulation"]["duration_ms"] == 20000.0
     assert set(config["pathways"].values()) == {"off"}
     contract = config["node_accessibility_contract"]
     assert contract["tau_ms"] == 250.0
@@ -125,6 +125,9 @@ def test_support_contract_and_controller_scale_are_frozen():
     k2 = config["model_internal_k2_contract"]
     assert k2["formal_feature"].startswith("signed_causal_family_displacement")
     assert k2["minimum_temporal_blocks_per_direction"] == 2
+    assert k2["minimum_isolated_families"] == 24
+    assert k2["preferred_isolated_families"] == 30
+    assert k2["minimum_families_per_direction"] == 6
     assert set(k2["matched_control_pairs"]["zero_sum_c020"]) == {
         "exact_off", "raise_only_c020", "spatial_shift_c020",
     }
