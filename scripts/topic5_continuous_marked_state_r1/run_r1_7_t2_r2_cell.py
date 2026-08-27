@@ -149,6 +149,19 @@ def main() -> None:
         "one_shot_persistence": persistence,
         "free_exposure_intercept_present": False,
         "checkpoint": str(checkpoint), "checkpoint_sha256": contract.sha256_file(checkpoint),
+        "source_hashes": {
+            "runner": contract.sha256_file(Path(__file__)),
+            "r1_7_t2": contract.sha256_file(
+                contract.REPO_ROOT / "src/topic5_continuous_marked_state_r1/r1_7_t2.py"
+            ),
+            "t2_r2": contract.sha256_file(
+                contract.REPO_ROOT / "src/topic5_continuous_marked_state_r1/t2_r2.py"
+            ),
+            "t2_r2_human": contract.sha256_file(
+                contract.REPO_ROOT / "src/topic5_continuous_marked_state_r1/t2_r2_human.py"
+            ),
+            "split_manifest": contract.sha256_file(contract.SPLIT_MANIFEST),
+        },
         "formal_test_partition_opened": False, "sealed_opened": False,
         "claim_boundary": "development D_mechanism N=100 conditional increment; not causal mechanism",
     }
