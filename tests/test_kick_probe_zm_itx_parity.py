@@ -73,6 +73,40 @@ def _full_with_checkpoint(p, net, steps, **kwargs):
     return res, captured
 
 
+class _TinyNodeAccessibility:
+    """Deterministic test double for the engine/checkpoint protocol."""
+
+    def __init__(self, NE, N, gain=0.2):
+        self.NE = int(NE)
+        self.N = int(N)
+        self.gain = float(gain)
+        self.state = np.zeros(self.NE, dtype=float)
+        self.step_index = 0
+
+    def threshold(self, base_vth):
+        base = np.asarray(base_vth, dtype=float)
+        if base.ndim == 0:
+            base = np.full(self.N, float(base), dtype=float)
+        out = np.array(base, copy=True)
+        out[:self.NE] += self.gain * self.state
+        return out
+
+    def step(self, spikes_E, dt):
+        self.state *= np.exp(-float(dt) / 20.0)
+        self.state += np.asarray(spikes_E, dtype=float)
+        self.step_index += 1
+
+    def checkpoint_state(self):
+        return {
+            "state": np.array(self.state, copy=True),
+            "step_index": int(self.step_index),
+        }
+
+    def restore_checkpoint_state(self, payload):
+        self.state = np.array(payload["state"], copy=True)
+        self.step_index = int(payload["step_index"])
+
+
 def test_checkpoint_off_is_byte_identical():
     p, net = _tiny()
     a = _run(p, net)
@@ -256,3 +290,84 @@ def test_weighted_trace_survives_a_resume():
     weighted = slow_tail.weighted_trace_arrays()
     assert weighted is not None and len(weighted["time_ms"]) > 0
     assert np.all(np.isfinite(weighted["net_slow_current_weighted_mean"]))
+
+
+def test_node_accessibility_checkpoint_resume_is_byte_identical():
+    p, net = _tiny(T=400.0)
+    controller_full = _TinyNodeAccessibility(net["NE"], net["NE"] + net["NI"])
+    full, captured = _full_with_checkpoint(
+        p, net, [2000], node_accessibility=controller_full)
+
+    controller_tail = _TinyNodeAccessibility(net["NE"], net["NE"] + net["NI"])
+    tail = simulate_kick(
+        _tail_params(p.seed), net, KICK_BOOST=0.0, t_kick=1e9,
+        node_accessibility=controller_tail,
+        resume_state=captured[2000], time_offset_ms=200.0)
+
+    assert np.array_equal(tail["rate_E"], full["rate_E"][2000:])
+    assert np.array_equal(tail["E_spk_bool"], full["E_spk_bool"][2000:])
+    assert np.array_equal(controller_tail.state, controller_full.state)
+    assert controller_tail.step_index == controller_full.step_index
+
+
+def test_node_accessibility_with_zm_ou_checkpoint_resume_is_byte_identical():
+    p, net = _tiny(T=400.0)
+    packet = _packet(net)
+
+    slow_full, drive_full = _zm_and_ou(p, net)
+    controller_full = _TinyNodeAccessibility(net["NE"], net["NE"] + net["NI"])
+    net["rng"] = np.random.default_rng(p.seed)
+    full = simulate_kick(
+        p, net, KICK_BOOST=0.0, t_kick=1e9, slow=slow_full,
+        external_e_rate_drive=drive_full, node_accessibility=controller_full,
+        forced_spike_mask=packet, forced_spike_ms=250.0)
+
+    slow_head, drive_head = _zm_and_ou(p, net)
+    controller_head = _TinyNodeAccessibility(net["NE"], net["NE"] + net["NI"])
+    captured = {}
+    net["rng"] = np.random.default_rng(p.seed)
+    sham = simulate_kick(
+        p, net, KICK_BOOST=0.0, t_kick=1e9, slow=slow_head,
+        external_e_rate_drive=drive_head, node_accessibility=controller_head,
+        checkpoint_steps=[2000],
+        checkpoint_sink=lambda step, state: captured.setdefault(step, state))
+    assert np.array_equal(sham["E_spk_bool"][:2500], full["E_spk_bool"][:2500])
+
+    slow_tail, drive_tail = _zm_and_ou(p, net)
+    controller_tail = _TinyNodeAccessibility(net["NE"], net["NE"] + net["NI"])
+    tail = simulate_kick(
+        _tail_params(p.seed), net, KICK_BOOST=0.0, t_kick=1e9,
+        slow=slow_tail, external_e_rate_drive=drive_tail,
+        node_accessibility=controller_tail,
+        resume_state=captured[2000], time_offset_ms=200.0,
+        forced_spike_mask=packet, forced_spike_ms=250.0)
+
+    assert np.array_equal(tail["rate_E"], full["rate_E"][2000:])
+    assert np.array_equal(tail["E_spk_bool"], full["E_spk_bool"][2000:])
+    assert np.array_equal(slow_tail.z, slow_full.z)
+    assert np.array_equal(slow_tail.m, slow_full.m)
+    assert np.array_equal(drive_tail._state, drive_full._state)
+    assert np.array_equal(controller_tail.state, controller_full.state)
+    assert controller_tail.step_index == controller_full.step_index
+
+
+def test_node_accessibility_validates_threshold_and_preserves_static_vtheta():
+    p, net = _tiny(T=1.0)
+    N = net["NE"] + net["NI"]
+    frozen = np.linspace(p.V_th - 0.5, p.V_th + 0.5, N)
+    before = frozen.copy()
+    controller = _TinyNodeAccessibility(net["NE"], N)
+    _run(p, net, V_th_per_neuron=frozen, node_accessibility=controller)
+    assert np.array_equal(frozen, before)
+
+    class BadController(_TinyNodeAccessibility):
+        def threshold(self, base_vth):
+            return np.full(self.N - 1, np.nan)
+
+    bad = BadController(net["NE"], N)
+    try:
+        _run(p, net, V_th_per_neuron=frozen, node_accessibility=bad)
+    except ValueError as exc:
+        assert "finite shape" in str(exc)
+    else:
+        raise AssertionError("expected invalid node threshold to fail")

@@ -120,7 +120,7 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                   dump_pathway_trace=False, pathway_trace_dt_ms=1.0,
                   feedback_gain=0.0, feedback_tau_ms=0.0, dump_fb=False,
                   fb_override_trace=None, ee_std_mode="local",
-                  external_e_rate_drive=None):
+                  external_e_rate_drive=None, node_accessibility=None):
     """Verbatim copy of model.simulate's integration loop, with ONE addition:
     a localized transient kick on the external Poisson rate. The kick adds
     `KICK_BOOST` (extra external rate, 1/ms) to the E neurons in a disk of
@@ -334,6 +334,10 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
             I_E_rec = np.array(resume_state["I_E_rec"], copy=True)
         restore_slow(resume_state, slow)
         restore_external_drive(resume_state, external_e_rate_drive)
+        if (node_accessibility is not None or
+                resume_state.get("node_accessibility") is not None):
+            from checkpoint import restore_node_accessibility
+            restore_node_accessibility(resume_state, node_accessibility)
         _resume_step = int(resume_state["step"])
     _ckpt_steps = set() if checkpoint_steps is None else {int(v) for v in checkpoint_steps}
     if _ckpt_steps and checkpoint_sink is None:
@@ -369,7 +373,7 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         _abs_step = _resume_step + t
         if _abs_step in _ckpt_steps:                 # top of step, before any RNG draw
             from checkpoint import capture
-            checkpoint_sink(_abs_step, capture(
+            _capture_kwargs = dict(
                 step=_abs_step, absolute_time_ms=time_offset_ms + t * dt,
                 V=V, ref=ref, s_E=s_E, I_E=I_E, s_I=s_I, I_I=I_I,
                 ring_sE=ring_sE, ring_sI=ring_sI, xi=xi, rng=rng,
@@ -377,7 +381,10 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                 track_rec=track_rec,
                 s_E_rec=(s_E_rec if track_rec else None),
                 I_E_rec=(I_E_rec if track_rec else None),
-                slow=slow, external_drive=external_e_rate_drive))
+                slow=slow, external_drive=external_e_rate_drive)
+            if node_accessibility is not None:
+                _capture_kwargs["node_accessibility"] = node_accessibility
+            checkpoint_sink(_abs_step, capture(**_capture_kwargs))
         tm = time_offset_ms + t * dt
         # ----- external homogeneous Poisson rate (Eq 6) -----
         xi = ou_a * xi + ou_b * rng.standard_normal()
@@ -444,6 +451,23 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         else:
             V_th_eff = p.V_th if V_th_per_neuron is None else V_th_per_neuron
 
+        if node_accessibility is not None:
+            # A live controller must never receive the frozen substrate array
+            # by reference: threshold() is allowed to work in-place on this
+            # private copy, but cannot mutate V_th_per_neuron.
+            controller_vth = np.asarray(V_th_eff, dtype=float)
+            if controller_vth.ndim == 0:
+                controller_vth = np.full(N, float(controller_vth), dtype=float)
+            if (V_th_per_neuron is not None and
+                    np.shares_memory(controller_vth, np.asarray(V_th_per_neuron))):
+                controller_vth = np.array(controller_vth, copy=True)
+            V_th_eff = np.asarray(node_accessibility.threshold(controller_vth), dtype=float)
+            if V_th_eff.shape != (N,) or not np.isfinite(V_th_eff).all():
+                raise ValueError("node accessibility threshold must return finite shape (N,)")
+            if float(np.min(V_th_eff)) <= float(p.V_reset) + 1.0:
+                raise ValueError(
+                    "node accessibility threshold fell below V_reset + 1 mV")
+
         # off-by-default reversibility/basin perturbation (perturb=None -> no float touched -> byte-parity):
         # inhibitory_pulse = transiently RAISE the E threshold (suppress E firing) WITHOUT touching q_I.
         if perturb is not None and perturb["kind"] == "inhibitory_pulse" and perturb["t0"] <= tm < perturb["t1"]:
@@ -489,6 +513,10 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
             # qI_refill = transiently RESET the inhibitory resource to `val` (directly repair the slow var).
             if perturb is not None and perturb["kind"] == "qI_refill" and perturb["t0"] <= tm < perturb["t1"]:
                 slow.q_I[:] = perturb["val"]
+
+        if node_accessibility is not None:
+            # Current-step spikes alter only the next step's threshold.
+            node_accessibility.step(spk[:NE], dt)
 
         # ----- record -----
         rate_E[t] = spk[:NE].sum()
