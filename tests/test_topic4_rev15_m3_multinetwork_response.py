@@ -6,6 +6,7 @@ from pathlib import Path
 import numpy as np
 
 from scripts import aggregate_topic4_rev15_m3_multinetwork_response as analysis
+from scripts import wait_topic4_rev15_m3_multinetwork_then_aggregate as waiter
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -93,3 +94,20 @@ def test_response_tensor_uses_exact_sign_pairs():
     assert np.allclose(g_a[:, 0], 1.25)
     assert np.allclose(g_a[:, 27], 35.0)
     assert len(tensor["coordinate_pairs"]) == 84
+
+
+def test_waiter_requires_complete_clean_cartesian_product():
+    running = {
+        "status": "REV15_M3_MULTINETWORK_QUEUE_RUNNING",
+        "n_jobs": 116, "n_complete": 36, "n_failed": 0,
+        "n_invalid_artifact": 0,
+    }
+    assert waiter.classify(running) == "wait"
+    complete = {
+        **running, "status": waiter.COMPLETE, "n_complete": 116,
+    }
+    assert waiter.classify(complete) == "complete"
+    assert waiter.classify({**complete, "n_invalid_artifact": 1}) == "failed"
+    assert waiter.classify({
+        **running, "status": "REV15_M3_MULTINETWORK_QUEUE_FAILED",
+    }) == "failed"

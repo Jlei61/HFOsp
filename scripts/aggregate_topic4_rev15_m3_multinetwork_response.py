@@ -34,6 +34,7 @@ OUTPUT_SCHEMA = "topic4_rev15_m3_multinetwork_response_aggregate_v1"
 ALLOWED_ANALYSIS_PATHS = frozenset({
     "config/topic4_rev15_m3_multinetwork_response_analysis.json",
     "scripts/aggregate_topic4_rev15_m3_multinetwork_response.py",
+    "scripts/wait_topic4_rev15_m3_multinetwork_then_aggregate.py",
     "tests/test_topic4_rev15_m3_multinetwork_response.py",
 })
 
