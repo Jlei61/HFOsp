@@ -52,3 +52,23 @@
 Only after a Node candidate is frozen: fresh-network selection, natural KMeans,
 the two Fig.4 figures, one-time developmental held-out evaluation and
 same-checkpoint hotspot interventions follow the rev14 contract unchanged.
+
+## Phase 4b: multinetwork coordinate tensor
+
+This phase replaces direct progression to post-freeze acceptance because Phase
+4 produced no usable anchor.
+
+1. Copy the exact 58-candidate Phase-2 manifest into a new frozen manifest;
+   candidate coefficients and hashes must remain identical.
+2. Run the complete Cartesian product on seeds 2332--2333: 116 runs, 20 s each,
+   CRN within each network, Node-only, all pathways and Z/M off.
+3. Use up to nine one-thread workers, preserve at least 64 GiB available memory,
+   stop below 48 GiB or 40 GiB free disk, and monitor every 600 s.
+4. Combine these runs with the existing seed-2331 atlas only after validating
+   every worker artifact and paired same-seed `exact_off`.
+5. Estimate cross-network response consistency and construct a robust direction
+   from all three training networks. Do not choose from natural KMeans, held-out
+   data or rendered figures.
+6. Freeze any robust direction before fresh selection-network simulation. If no
+   common direction exists, close the local M3 response strategy rather than
+   relaxing the mode-support requirement.

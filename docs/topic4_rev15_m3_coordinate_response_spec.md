@@ -110,3 +110,30 @@ at least six for both modes. Natural KMeans and held-out remain unavailable.
   it does not reject continuous fields or justify activating connections.
 - EE, E-to-I and Z/M remain blocked until one static Node candidate passes the
   post-freeze Fig.4 two-cluster acceptance contract.
+
+## 7. Multinetwork response revision after the combination result
+
+The 30-run combination replication completed without engineering failures, but
+no candidate met all three training-only requirements. Five combinations
+improved A on both fresh networks, yet none protected B on both networks and
+none simultaneously retained equal-network effective support of at least six
+for both modes. The best mean response (`dense_a`, RMS 1.0) reduced A by 0.345
+and B by 0.032, but B worsened on seed 2333 and A support was 5.77. Therefore
+the seed-2331 response gradient cannot be treated as a network-invariant field
+direction.
+
+The next bounded experiment repeats the same 56 signed coordinates, uniform
+Node and `exact_off` on seeds 2332--2333. It adds no new field family and no new
+patient input. The three-network response tensor will report, per coordinate:
+
+- the sign and magnitude of A and B changes on every network;
+- sign consistency and worst-network change;
+- all four A/B distance components and effective support;
+- a robust direction constructed only if the coordinate responses support it.
+
+A later robust direction must be built from all three training networks and
+then frozen before running on new selection networks. Natural KMeans, patient
+held-out data and figures remain unavailable during construction. Failure of
+the full coordinate tensor to yield a common A-improving/B-protecting direction
+will close this local M3 response strategy; it must not be rescued by relaxing
+the support threshold or activating EE, E-to-I or Z/M.
