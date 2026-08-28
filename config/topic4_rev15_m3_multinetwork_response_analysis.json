@@ -1,0 +1,72 @@
+{
+  "schema_id": "topic4_rev15_m3_multinetwork_response_analysis_v1",
+  "scientific_role": "development_only_training_blind_multinetwork_response_tensor",
+  "output_root": "results/topic4_sef_hfo/data_driven_node_dualmode_rev15/m3_multinetwork_atlas/analysis",
+  "inputs": {
+    "multinetwork_config": {
+      "path": "config/topic4_rev15_m3_multinetwork_atlas.json",
+      "sha256": "cc3c46ece9fdfaa6eff775597ac550a4d606dc4bb27c976ad6adf8c7442c1ac3"
+    },
+    "multinetwork_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev15/m3_multinetwork_atlas/candidate_manifest.json",
+      "sha256": "c0ee8af594b20327c6fa1c8ddc2a4a8d9f1c409e30782242ff350c2896fd041f"
+    },
+    "seed2331_atlas_aggregate": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev15/m3_coordinate_atlas/analysis/m3_coordinate_atlas_aggregate.json",
+      "sha256": "89533bff0ad4da8328b516868542b2a9658861ebe1be441e177af125b6fe2e2e"
+    },
+    "failed_combination_aggregate": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev15/m3_response_combinations/analysis/m3_response_combinations_aggregate.json",
+      "sha256": "443373d127fcac5484258d8103d75eff06ea4149a1c5fea9210aa174648b5b8e"
+    },
+    "j14_config": {
+      "path": "config/topic4_rev14_static_node_historical_rescore.json",
+      "sha256": "af3116d4a56feb077d17893196eee1f2ebcc42fd77688d56e15f2a5b89631ed2"
+    },
+    "support_config": {
+      "path": "config/topic4_rev14_patient_support_acceptance.json",
+      "sha256": "5dec1ff3277294697515d701e82246c242fb627348751571a5a6fe86e008940e"
+    }
+  },
+  "response_tensor": {
+    "network_seeds": [2331, 2332, 2333],
+    "source_coordinate_rms": 0.8,
+    "central_difference_denominator": 1.6,
+    "network_weighting": "equal",
+    "metrics": ["mode_A_mean", "mode_B_mean", "mode_A_effective_support", "mode_B_effective_support", "J14"],
+    "paired_reference": "same_seed_exact_off"
+  },
+  "robust_direction_construction": {
+    "families": ["mean_a", "maximin_bprotected", "maximin_supportprotected", "consensus_sparse"],
+    "candidate_rms_levels": [0.4, 0.6, 0.8],
+    "mean_a": "negative_equal_network_mean_A_gradient",
+    "maximin_bprotected": "maximize_worst_network_linearized_A_improvement_subject_to_nonworsening_B_on_every_network_and_unit_l2_ball",
+    "maximin_supportprotected": "maximin_bprotected_plus_nonnegative_linearized_A_and_B_effective_support_on_every_network",
+    "consensus_sparse": {
+      "A_improving_sign_required_networks": 3,
+      "B_nonworsening_required_networks": 2,
+      "A_support_nondecreasing_required_networks": 2,
+      "coefficient_magnitude": "median_absolute_A_gradient",
+      "maximum_coordinates": 8
+    },
+    "optimizer": {
+      "algorithm": "scipy_SLSQP",
+      "ftol": 1e-10,
+      "maxiter": 4000,
+      "constraint_tolerance": 1e-7,
+      "positive_margin_tolerance": 1e-8
+    }
+  },
+  "progression_rule": {
+    "simulation_required_before_node_freeze": true,
+    "fresh_selection_network_seeds": [2341, 2342, 2343],
+    "A_improvement_required_networks": 3,
+    "B_protection_required_networks": 3,
+    "equal_network_effective_support_minimum_per_mode": 6.0,
+    "natural_kmeans_used_for_construction": false,
+    "patient_heldout_used_for_construction": false,
+    "figure_used_for_construction": false,
+    "EE_EtoI_ZM": "off"
+  },
+  "claim_boundary": "The response tensor and robust directions use patient-training objectives on three development networks. They can nominate fields for fresh-network simulation but cannot freeze Node, establish natural K=2, use held-out data, or support patient generalization."
+}
