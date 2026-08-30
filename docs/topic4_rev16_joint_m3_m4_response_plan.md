@@ -28,6 +28,11 @@
    queue below 64 GiB, and stop below 40 GiB free disk.
 4. Monitor every 600 s. Do not continuously poll.
 5. Preserve partial artifacts for exact resume; never mix manifests or commits.
+6. A separate fail-closed stage-transition waiter may launch Phase 4 only after
+   the atlas is 120/120, the joint aggregate validates all 120 workers, and its
+   own worktree still matches the expected clean commit. It commits the
+   generated candidate config before freezing; any extra changed path stops
+   the transition.
 
 ## Phase 3: joint tensor and candidate freeze
 
