@@ -1,5 +1,5 @@
 {
-  "schema_id": "topic4_rev15_m3_multinetwork_response_analysis_v1",
+  "schema_id": "topic4_rev15_m3_multinetwork_response_analysis_v2_full_timing",
   "scientific_role": "development_only_training_blind_multinetwork_response_tensor",
   "output_root": "results/topic4_sef_hfo/data_driven_node_dualmode_rev15/m3_multinetwork_atlas/analysis",
   "inputs": {
@@ -11,13 +11,13 @@
       "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev15/m3_multinetwork_atlas/candidate_manifest.json",
       "sha256": "c0ee8af594b20327c6fa1c8ddc2a4a8d9f1c409e30782242ff350c2896fd041f"
     },
-    "seed2331_atlas_aggregate": {
-      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev15/m3_coordinate_atlas/analysis/m3_coordinate_atlas_aggregate.json",
-      "sha256": "89533bff0ad4da8328b516868542b2a9658861ebe1be441e177af125b6fe2e2e"
+    "seed2331_atlas_config": {
+      "path": "config/topic4_rev15_m3_coordinate_atlas.json",
+      "sha256": "52fc80d43e9395acf7c3a583c39d1e2c40f429477aff924673a3c350b8071500"
     },
-    "failed_combination_aggregate": {
-      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev15/m3_response_combinations/analysis/m3_response_combinations_aggregate.json",
-      "sha256": "443373d127fcac5484258d8103d75eff06ea4149a1c5fea9210aa174648b5b8e"
+    "seed2331_atlas_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev15/m3_coordinate_atlas/candidate_manifest.json",
+      "sha256": "f8aee784d621b1334e72cfef95f9ab22ffd8d97a69694c7827ae72a69bd958e3"
     },
     "j14_config": {
       "path": "config/topic4_rev14_static_node_historical_rescore.json",
@@ -34,7 +34,9 @@
     "central_difference_denominator": 1.6,
     "network_weighting": "equal",
     "metrics": ["mode_A_mean", "mode_B_mean", "mode_A_effective_support", "mode_B_effective_support", "J14"],
-    "paired_reference": "same_seed_exact_off"
+    "paired_reference": "same_seed_exact_off",
+    "frozen_direction_classifier_input": "full_contact_onset_timing",
+    "natural_kmeans_input": "not_used_for_construction"
   },
   "robust_direction_construction": {
     "families": ["mean_a", "maximin_bprotected", "maximin_supportprotected", "consensus_sparse"],

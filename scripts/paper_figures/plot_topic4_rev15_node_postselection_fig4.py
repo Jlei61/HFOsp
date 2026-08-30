@@ -90,7 +90,7 @@ def _load_bundle(
         ranks = np.asarray(arrays["ranks"], float)[:, reorder]
         returned = np.asarray(arrays["event_returned"], bool)
         assigned = post.exact._assign_training_modes(
-            ranks, context["frozen_classifier"], context["groups"],
+            onsets, context["frozen_classifier"], context["groups"],
         )
         labels = np.asarray(assigned["labels"], int)
         clean = np.zeros(len(ranks), dtype=bool)

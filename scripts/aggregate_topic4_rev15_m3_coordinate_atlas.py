@@ -218,6 +218,8 @@ def _flat_row(
         "contrast_alignment": contrast.get("alignment"),
         "classifier_A": assignment.get("classifier_A"),
         "classifier_B": assignment.get("classifier_B"),
+        "classifier_input": assignment.get("classifier_input"),
+        "natural_kmeans_input": assignment.get("natural_kmeans_input"),
         "ood_count": assignment.get("ood_count"),
         "in_support_A": support_detail.get("n_in_support_classifier_A"),
         "in_support_B": support_detail.get("n_in_support_classifier_B"),
@@ -411,4 +413,3 @@ def main(argv: list[str] | None = None) -> None:
 
 if __name__ == "__main__":
     main()
-

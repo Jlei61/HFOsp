@@ -610,8 +610,8 @@ def _score_worker(
         arrays["contact_names"], context["patient"]["contact_names"],
     )
     assignment = (
-        exact._assign_training_modes(
-            ranks, context["frozen_classifier"], context["groups"],
+        _assign_training_modes_from_full_timing(
+            onsets, context["frozen_classifier"], context["groups"],
         )
         if len(ranks)
         else {
@@ -674,6 +674,8 @@ def _score_worker(
         },
         "overlap_connected_episode_audit": selection["overlap_audit"],
         "patient_training_assignment": {
+            "classifier_input": "full_contact_onset_timing",
+            "natural_kmeans_input": "not_computed_in_this_stage",
             "classifier_A": int(np.sum(np.asarray(assignment["labels"]) == 0)),
             "classifier_B": int(np.sum(np.asarray(assignment["labels"]) == 1)),
             "ood_count": int(np.sum(ood)),
@@ -694,6 +696,19 @@ def _score_worker(
             "figure_or_image_loaded": False,
         },
     }
+
+
+def _assign_training_modes_from_full_timing(
+    onsets: np.ndarray,
+    frozen_classifier: Mapping[str, Any],
+    groups: Mapping[str, np.ndarray],
+) -> dict[str, np.ndarray]:
+    values = np.asarray(onsets, dtype=np.float64)
+    if values.ndim != 2:
+        raise AggregateContractError(
+            "frozen direction classifier requires an event-by-contact onset matrix"
+        )
+    return exact._assign_training_modes(values, frozen_classifier, groups)
 
 
 def _csv_row(record: Mapping[str, Any]) -> dict[str, Any]:

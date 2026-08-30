@@ -139,6 +139,7 @@ def build_config(
             "both_shafts_required": True,
             "frozen_classifier_ood_excluded": True,
             "contact_order": "patient_training_target_exact",
+            "frozen_direction_classifier_input": "full_contact_onset_timing",
         },
         "natural_kmeans": {
             "k": 2,

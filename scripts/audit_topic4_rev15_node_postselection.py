@@ -348,7 +348,7 @@ def _score_network(
         arrays["contact_names"], context["patient"]["contact_names"],
     )
     assignment = exact._assign_training_modes(
-        ranks, context["frozen_classifier"], context["groups"],
+        onsets, context["frozen_classifier"], context["groups"],
     )
     clean, clean_audit = clean_event_mask(
         readable=np.asarray(
@@ -399,6 +399,8 @@ def _score_network(
     support = all_event_shaft_participation(onsets[selected], context["groups"])
     row = {
         "network_seed": int(seed),
+        "classifier_input": "full_contact_onset_timing",
+        "natural_kmeans_input": "masked_normalized_event_ranks",
         "event_selection": {**selection, **clean_audit},
         "formal_clean_global_event_indices": primary[selected],
         "kmeans_status": kmeans_status,

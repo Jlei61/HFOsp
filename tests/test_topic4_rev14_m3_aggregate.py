@@ -403,6 +403,27 @@ def test_zero_event_worker_gets_finite_bad_score_without_deletion(tmp_path):
     assert scored["patient_support"]["support"]["n_contact_primary"] == 0
 
 
+def test_patient_direction_classifier_receives_full_onset_timing(monkeypatch):
+    onsets = np.asarray([[0.0, 7.5, 13.0], [4.0, 1.0, np.nan]])
+    observed = {}
+
+    def fake_assign(values, frozen_classifier, groups):
+        observed["values"] = np.asarray(values).copy()
+        return {
+            "probability_B": np.asarray([0.25, 0.75]),
+            "labels": np.asarray([0, 1], dtype=np.int8),
+            "ood": np.asarray([False, False]),
+        }
+
+    monkeypatch.setattr(aggregate.exact, "_assign_training_modes", fake_assign)
+    result = aggregate._assign_training_modes_from_full_timing(
+        onsets, {"semantics": "FULL_TIMING"}, {"ICL": np.asarray([0, 1])},
+    )
+
+    np.testing.assert_allclose(observed["values"], onsets, equal_nan=True)
+    np.testing.assert_array_equal(result["labels"], [0, 1])
+
+
 def test_patient_support_sidecar_schema_round_trips():
     _, support_context = _contexts()
     original = support_context["calibration"]

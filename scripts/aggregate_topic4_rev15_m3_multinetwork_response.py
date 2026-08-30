@@ -30,12 +30,27 @@ from scripts.run_topic4_rev15_m3_multinetwork_atlas_worker import WORKER_STATUS 
 
 ARTIFACT_ROOT = Path("/home/honglab/leijiaxin/HFOsp")
 DEFAULT_CONFIG = ROOT / "config/topic4_rev15_m3_multinetwork_response_analysis.json"
-OUTPUT_SCHEMA = "topic4_rev15_m3_multinetwork_response_aggregate_v1"
+OUTPUT_SCHEMA = "topic4_rev15_m3_multinetwork_response_aggregate_v2_full_timing"
 ALLOWED_ANALYSIS_PATHS = frozenset({
     "config/topic4_rev15_m3_multinetwork_response_analysis.json",
+    "scripts/aggregate_topic4_rev14_m3_canary.py",
+    "scripts/aggregate_topic4_rev15_m3_coordinate_atlas.py",
     "scripts/aggregate_topic4_rev15_m3_multinetwork_response.py",
+    "scripts/aggregate_topic4_rev15_m3_robust_candidates.py",
+    "scripts/audit_topic4_rev15_node_postselection.py",
+    "scripts/freeze_topic4_rev15_m3_robust_candidates.py",
+    "scripts/launch_topic4_rev15_m3_robust_candidates.py",
+    "scripts/monitor_topic4_rev15_m3_robust_candidates.py",
+    "scripts/paper_figures/plot_topic4_rev15_node_postselection_fig4.py",
+    "scripts/prepare_topic4_rev15_m3_robust_candidate_config.py",
+    "scripts/prepare_topic4_rev15_node_postselection_config.py",
+    "scripts/run_topic4_rev15_m3_robust_candidate_worker.py",
     "scripts/wait_topic4_rev15_m3_multinetwork_then_aggregate.py",
+    "scripts/wait_topic4_rev15_m3_response_then_prepare_robust.py",
+    "tests/test_topic4_rev14_m3_aggregate.py",
     "tests/test_topic4_rev15_m3_multinetwork_response.py",
+    "tests/test_topic4_rev15_m3_robust_candidate_preparation.py",
+    "tests/test_topic4_rev15_node_postselection.py",
 })
 
 
@@ -54,7 +69,7 @@ def _resolve(root: Path, relative: str) -> Path:
 
 def _load_inputs(config_path: Path, root: Path) -> tuple[dict, dict[str, tuple[Path, dict]]]:
     config = json.loads(config_path.read_text())
-    if config.get("schema_id") != "topic4_rev15_m3_multinetwork_response_analysis_v1":
+    if config.get("schema_id") != "topic4_rev15_m3_multinetwork_response_analysis_v2_full_timing":
         raise RuntimeError("multinetwork response-analysis schema changed")
     loaded = {}
     for name, record in config["inputs"].items():
@@ -70,8 +85,23 @@ def _load_inputs(config_path: Path, root: Path) -> tuple[dict, dict[str, tuple[P
         raise RuntimeError("multinetwork manifest/config mismatch")
     if source["search"]["active_network_seeds"] != [2332, 2333]:
         raise RuntimeError("multinetwork active seed pool changed")
+    seed2331_config, seed2331_manifest, seed2331_manifest_path = atlas._load_manifest(
+        loaded["seed2331_atlas_config"][0], root,
+    )
+    if seed2331_config["search"]["active_network_seeds"] != [2331]:
+        raise RuntimeError("seed2331 atlas network changed")
+    if seed2331_manifest_path.resolve() != loaded["seed2331_atlas_manifest"][0].resolve():
+        raise RuntimeError("seed2331 atlas manifest path changed")
+    if _sha256(seed2331_manifest_path) != config["inputs"]["seed2331_atlas_manifest"]["sha256"]:
+        raise RuntimeError("seed2331 atlas manifest hash changed")
+    if seed2331_manifest != loaded["seed2331_atlas_manifest"][1]:
+        raise RuntimeError("seed2331 atlas manifest content changed")
     if config["response_tensor"]["network_seeds"] != [2331, 2332, 2333]:
         raise RuntimeError("three-network response tensor changed")
+    if config["response_tensor"].get("frozen_direction_classifier_input") != "full_contact_onset_timing":
+        raise RuntimeError("direction classifier input must remain full onset timing")
+    if config["response_tensor"].get("natural_kmeans_input") != "not_used_for_construction":
+        raise RuntimeError("natural KMeans entered response construction")
     forbidden = config["progression_rule"]
     if any(forbidden[key] for key in (
         "natural_kmeans_used_for_construction",
@@ -82,6 +112,19 @@ def _load_inputs(config_path: Path, root: Path) -> tuple[dict, dict[str, tuple[P
     if forbidden["EE_EtoI_ZM"] != "off":
         raise RuntimeError("connections or slow variables entered Node construction")
     return config, loaded
+
+
+def _seed2331_inventory(
+    loaded: Mapping[str, tuple[Path, dict]], root: Path,
+) -> tuple[list[dict], dict, Mapping[str, Any]]:
+    config, manifest, manifest_path = atlas._load_manifest(
+        loaded["seed2331_atlas_config"][0], root,
+    )
+    records, audit = atlas._inventory(
+        config=config, manifest=manifest, manifest_path=manifest_path,
+        artifact_root=root,
+    )
+    return records, audit, manifest
 
 
 def _provenance(worker_commit: str) -> dict[str, Any]:
@@ -368,20 +411,40 @@ def aggregate(config_path: Path, root: Path) -> dict[str, Any]:
     source_path, source = loaded["multinetwork_config"]
     manifest_path, manifest = loaded["multinetwork_manifest"]
     provenance = _provenance(manifest["provenance"]["git_commit"])
-    records, inventory = _inventory(source, manifest, manifest_path, root.resolve())
-    status, error, fresh_rows, tensor, directions = "INCOMPLETE", None, [], None, None
+    fresh_records, fresh_inventory = _inventory(
+        source, manifest, manifest_path, root.resolve(),
+    )
+    seed2331_records, seed2331_inventory, seed2331_manifest = _seed2331_inventory(
+        loaded, root.resolve(),
+    )
+    inventory = {
+        "expected_runs": int(seed2331_inventory["expected_runs"]) + int(fresh_inventory["expected_runs"]),
+        "present_validated": int(seed2331_inventory["present_validated"]) + int(fresh_inventory["present_validated"]),
+        "missing": list(seed2331_inventory["missing"]) + list(fresh_inventory["missing"]),
+        "invalid_artifact": list(seed2331_inventory["invalid_artifact"]) + list(fresh_inventory["invalid_artifact"]),
+        "complete_cartesian_product": bool(
+            seed2331_inventory["complete_cartesian_product"]
+            and fresh_inventory["complete_cartesian_product"]
+        ),
+        "by_source": {
+            "seed2331_raw_workers": seed2331_inventory,
+            "seeds2332_2333_raw_workers": fresh_inventory,
+        },
+    }
+    status, error, tensor, directions = "INCOMPLETE", None, None, None
     if not provenance["formal_ready"]:
         status, error = "INVALID_PROVENANCE", "analysis worktree is not a clean allowed descendant"
     elif inventory["complete_cartesian_product"]:
         try:
-            fresh_rows = _score_fresh(
-                records, manifest, loaded["j14_config"][1],
+            seed2331_rows = _score_fresh(
+                seed2331_records, seed2331_manifest, loaded["j14_config"][1],
                 loaded["support_config"][0], root.resolve(),
             )
-            seed2331 = loaded["seed2331_atlas_aggregate"][1]
-            if seed2331.get("status") != "COMPLETE" or seed2331["inventory"]["present_validated"] != 58:
-                raise RuntimeError("seed2331 source atlas is incomplete")
-            all_rows = list(seed2331["per_candidate"]) + fresh_rows
+            fresh_rows = _score_fresh(
+                fresh_records, manifest, loaded["j14_config"][1],
+                loaded["support_config"][0], root.resolve(),
+            )
+            all_rows = seed2331_rows + fresh_rows
             tensor = response_tensor(all_rows, float(config["response_tensor"]["central_difference_denominator"]))
             directions = construct_directions(tensor, config["robust_direction_construction"])
             status = "COMPLETE"
@@ -399,6 +462,11 @@ def aggregate(config_path: Path, root: Path) -> dict[str, Any]:
         "ranking_contract": {
             "natural_kmeans_used": False, "patient_heldout_used": False,
             "figure_used": False, "EE_EtoI_ZM": "off",
+            "frozen_direction_classifier_input": "full_contact_onset_timing",
+            "natural_kmeans_input": "not_used_for_construction",
+            "seed2331_numeric_source": "raw_worker_npz_rescored_in_this_aggregate",
+            "seeds2332_2333_numeric_source": "raw_worker_npz_rescored_in_this_aggregate",
+            "historical_aggregate_numeric_rows_used": False,
         },
         "claim_boundary": config["claim_boundary"],
         "outputs": {"json": str(json_path), "pair_csv": str(csv_path)},

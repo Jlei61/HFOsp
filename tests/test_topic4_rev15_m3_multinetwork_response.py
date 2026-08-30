@@ -21,6 +21,10 @@ def test_analysis_contract_is_training_only_and_three_network():
     assert config["progression_rule"]["natural_kmeans_used_for_construction"] is False
     assert config["progression_rule"]["patient_heldout_used_for_construction"] is False
     assert config["progression_rule"]["EE_EtoI_ZM"] == "off"
+    assert config["response_tensor"]["frozen_direction_classifier_input"] == "full_contact_onset_timing"
+    assert config["response_tensor"]["natural_kmeans_input"] == "not_used_for_construction"
+    assert "seed2331_atlas_aggregate" not in config["inputs"]
+    assert "failed_combination_aggregate" not in config["inputs"]
     assert loaded["multinetwork_manifest"][1]["source_atlas"][
         "candidate_payload_exact_copy"
     ] is True
@@ -94,6 +98,77 @@ def test_response_tensor_uses_exact_sign_pairs():
     assert np.allclose(g_a[:, 0], 1.25)
     assert np.allclose(g_a[:, 27], 35.0)
     assert len(tensor["coordinate_pairs"]) == 84
+
+
+def test_aggregate_rescores_seed2331_and_fresh_networks_from_raw_workers(
+    monkeypatch, tmp_path,
+):
+    config = {
+        "output_root": "analysis",
+        "response_tensor": {"central_difference_denominator": 1.6},
+        "robust_direction_construction": {},
+        "progression_rule": {},
+        "claim_boundary": "test",
+    }
+    source = {"output_root": "fresh"}
+    fresh_manifest = {"provenance": {"git_commit": "worker"}}
+    loaded = {
+        "multinetwork_config": (tmp_path / "fresh.json", source),
+        "multinetwork_manifest": (tmp_path / "fresh_manifest.json", fresh_manifest),
+        "j14_config": (tmp_path / "j14.json", {}),
+        "support_config": (tmp_path / "support.json", {}),
+    }
+    complete_58 = {
+        "expected_runs": 58, "present_validated": 58,
+        "missing": [], "invalid_artifact": [],
+        "complete_cartesian_product": True,
+    }
+    complete_116 = {
+        "expected_runs": 116, "present_validated": 116,
+        "missing": [], "invalid_artifact": [],
+        "complete_cartesian_product": True,
+    }
+    seed_manifest = {"candidates": [{"candidate_id": "seed_candidate"}]}
+    monkeypatch.setattr(analysis, "_load_inputs", lambda *args: (config, loaded))
+    monkeypatch.setattr(
+        analysis, "_provenance",
+        lambda *args: {"formal_ready": True, "snn_simulation_run": False},
+    )
+    monkeypatch.setattr(
+        analysis, "_inventory",
+        lambda *args: ([{"source": "fresh_raw_worker"}], complete_116),
+    )
+    monkeypatch.setattr(
+        analysis, "_seed2331_inventory",
+        lambda *args: (
+            [{"source": "seed2331_raw_worker"}], complete_58, seed_manifest,
+        ),
+    )
+    score_calls = []
+
+    def fake_score(records, manifest, *args):
+        score_calls.append((records[0]["source"], manifest))
+        return [{"rescored_source": records[0]["source"]}]
+
+    def fake_tensor(rows, denominator):
+        assert denominator == 1.6
+        assert [row["rescored_source"] for row in rows] == [
+            "seed2331_raw_worker", "fresh_raw_worker",
+        ]
+        return {"coordinate_pairs": []}
+
+    monkeypatch.setattr(analysis, "_score_fresh", fake_score)
+    monkeypatch.setattr(analysis, "response_tensor", fake_tensor)
+    monkeypatch.setattr(analysis, "construct_directions", lambda *args: {"mean_a": {}})
+
+    result = analysis.aggregate(tmp_path / "config.json", tmp_path)
+
+    assert result["status"] == "COMPLETE"
+    assert result["inventory"]["present_validated"] == 174
+    assert [row[0] for row in score_calls] == [
+        "seed2331_raw_worker", "fresh_raw_worker",
+    ]
+    assert result["ranking_contract"]["historical_aggregate_numeric_rows_used"] is False
 
 
 def test_waiter_requires_complete_clean_cartesian_product():
