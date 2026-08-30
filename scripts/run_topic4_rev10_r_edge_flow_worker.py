@@ -33,6 +33,7 @@ from src.topic4_dynamic_accessibility import (  # noqa: E402
     InhibitoryResourceConfig,
     SpikeTriggeredAdaptation,
 )
+from src.topic4_dual_core_ood import spatial_event_activity_grid  # noqa: E402
 from src.topic4_graph_edge_flow import (  # noqa: E402
     array_sha256,
     graph_spectral_ee_flow,
@@ -54,6 +55,14 @@ DEFAULT_CONFIG = ROOT / "config/topic4_rev10_r_graph_edge_flow.json"
 
 
 def active_network_seeds(config):
+    if config.get("schema_version") == "topic4_dual_core_ood_node_pathways_v1":
+        search = config["search"]
+        return sorted(
+            set(map(int, search["fit_network_seeds"]))
+            | set(map(int, search["selection_network_seeds"]))
+            | set(map(int, search["confirmation_network_seeds"]))
+            | set(map(int, search["pathway_network_seeds"]))
+        )
     phase = config.get("search", {}).get("phase", "fit")
     key = {
         "fit": "fit_network_seeds",
@@ -93,6 +102,7 @@ def main():
     parser.add_argument("--candidate-id", required=True)
     parser.add_argument("--seed", required=True, type=int)
     parser.add_argument("--expected-commit", required=True)
+    parser.add_argument("--manifest")
     parser.add_argument("--out-json")
     parser.add_argument("--out-npz")
     parser.add_argument("--cache-dir")
@@ -125,6 +135,7 @@ def main():
         "development_only_data_driven_node_local_connectivity_frozen_confirmation",
         "development_only_data_driven_node_local_connectivity_mechanism_confirmation",
         "development_only_hand_dual_core_vs_continuous_field_distribution_comparison",
+        "development_only_ood_guided_dual_core_node_recovery_then_frozen_pathway_factorization",
     }
     if config["scientific_role"] not in allowed_roles:
         raise RuntimeError("rev10-R scientific role changed")
@@ -137,7 +148,9 @@ def main():
             raise RuntimeError(f"input hash changed: {record['path']}")
 
     output_root = ROOT / config["output_root"]
-    manifest_path = output_root / "candidate_manifest.json"
+    manifest_path = Path(
+        args.manifest or output_root / "candidate_manifest.json"
+    ).resolve()
     manifest = json.loads(manifest_path.read_text())
     allowed_manifests = {
         "REV10R_GRAPH_SPECTRAL_LIBRARY_FROZEN",
@@ -166,6 +179,7 @@ def main():
         "REV11NLC_FROZEN_SUBSTRATE_CONFIRMATION_LIBRARY_FROZEN",
         "REV11NLC_PATHWAY_MECHANISM_CONFIRMATION_LIBRARY_FROZEN",
         "REV11NLC_DUAL_CORE_COMPARISON_LIBRARY_FROZEN",
+        "REV16_DUAL_CORE_OOD_PHASE_FROZEN",
     }
     if (manifest.get("status") not in allowed_manifests
             or manifest.get("config", {}).get("sha256") != _sha256(config_path)):
@@ -177,6 +191,9 @@ def main():
     if len(matches) != 1:
         parser.error("candidate is outside the frozen rev10-R library")
     candidate = matches[0]
+    allowed_seeds = candidate.get("allowed_network_seeds")
+    if allowed_seeds is not None and int(args.seed) not in set(map(int, allowed_seeds)):
+        parser.error("worker seed is outside the candidate phase contract")
     basis_record = None
     basis_npz = None
     if manifest["status"] == "REV10R_GRAPH_SPECTRAL_LIBRARY_FROZEN":
@@ -237,9 +254,12 @@ def main():
     snn_event_envelope = __import__(
         "src.sef_hfo_snn_adapter", fromlist=["snn_event_envelope"]
     ).snn_event_envelope
+    duration_ms = float(candidate.get(
+        "simulation_duration_ms", simulation["duration_ms"],
+    ))
     params = params_cls(
         g=engine["g"], L=engine["L"], density=engine["density"],
-        T=float(simulation["duration_ms"]), dt=engine["dt"],
+        T=duration_ms, dt=engine["dt"],
         nu_ext_ratio=cmrun.DRIVE, seed=int(args.seed),
     )
     net, n_e, n_i, cache_hit, cache_source = _load_network(
@@ -251,7 +271,10 @@ def main():
         node_candidate, positions, n_total=n_e + n_i,
         stage=stage, config=anchor_config,
     )
-    if not np.isclose(node["h"].sum(), float(stage["N_core_manual"]), atol=1e-8):
+    expected_node_budget = float(
+        node_candidate.get("target_count", stage["N_core_manual"])
+    )
+    if not np.isclose(node["h"].sum(), expected_node_budget, atol=1e-8):
         raise RuntimeError("Node anchor field budget changed")
     coefficients = np.asarray(candidate["coefficients"], float)
     if array_sha256(coefficients) != candidate["coefficients_sha256"]:
@@ -276,7 +299,8 @@ def main():
             "REV11NLC_JOINT_NODE_CONNECTIVITY_SELECTION_LIBRARY_FROZEN",
             "REV11NLC_FROZEN_SUBSTRATE_CONFIRMATION_LIBRARY_FROZEN",
             "REV11NLC_PATHWAY_MECHANISM_CONFIRMATION_LIBRARY_FROZEN",
-            "REV11NLC_DUAL_CORE_COMPARISON_LIBRARY_FROZEN"}:
+            "REV11NLC_DUAL_CORE_COMPARISON_LIBRARY_FROZEN",
+            "REV16_DUAL_CORE_OOD_PHASE_FROZEN"}:
         if node_candidate["field_type"] == "spline_continuous":
             from src.topic4_continuous_field import continuous_field_h_with_queries
             h_e, h_i, field_query_audit = continuous_field_h_with_queries(
@@ -301,7 +325,7 @@ def main():
                 **field_audit,
                 "query_semantics": (
                     "E budget is exact; I field uses the frozen E distance cutoff; "
-                    "edge coefficients are exact zero in this comparison"
+                    "edge coefficients are read from the frozen phase candidate"
                 ),
             }
         else:
@@ -509,6 +533,25 @@ def main():
         })
     onsets = np.asarray(onset_rows, float).reshape((-1, len(contact_names)))
     ranks = np.asarray(rank_rows, float).reshape((-1, len(contact_names)))
+    save_activity_grid = bool(candidate.get("save_activity_grid", False))
+    if save_activity_grid:
+        grid_contract = config["search"]["activity_grid"]
+        activity_grid = spatial_event_activity_grid(
+            spikes, positions, event_rows, dt_ms=float(engine["dt"]),
+            bin_ms=float(grid_contract["bin_ms"]),
+            spatial_bins=int(grid_contract["spatial_bins"]),
+            sheet_l_mm=float(engine["L"]),
+        )
+    else:
+        activity_grid = {
+            "activity_grid": np.empty((0, 0, 0), np.float32),
+            "activity_grid_time_ms": np.empty(0, np.float32),
+            "activity_grid_event_index": np.empty(0, np.int32),
+            "activity_grid_event_start": np.empty(0, np.int32),
+            "activity_grid_event_count": np.empty(0, np.int32),
+            "activity_grid_bin_ms": np.asarray(0.0, float),
+            "activity_grid_spatial_bins": np.asarray(0, np.int32),
+        }
     adaptation_trace = (
         slow.trace_arrays() if adaptation["mode"] != "off" else {
             key: np.empty(0, dtype=np.float32)
@@ -639,6 +682,7 @@ def main():
         mechanism_GABA_to_E_mean=np.asarray(
             pathway_trace["GABA_to_E_mean"], np.float32,
         ),
+        **activity_grid,
     )
     payload = {
         "status": "REV10R_EDGE_FLOW_WORKER_COMPLETE",
@@ -652,6 +696,8 @@ def main():
             "runaway_early_stop_ms": result["runaway_early_stop_ms"],
             "peak_active_fraction": float(np.max(active, initial=0.0)),
             "fraction_time_above_common_detector": float(np.mean(active > detector)),
+            "simulation_duration_ms": duration_ms,
+            "activity_grid_saved": save_activity_grid,
         },
         "node_anchor": {
             "candidate_id": anchor["candidate_id"],
