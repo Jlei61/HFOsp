@@ -27,6 +27,7 @@ from scripts.rescore_topic4_rev12_node_historical import (  # noqa: E402
     _patient_data,
     _reorder_patient_contract,
 )
+from scripts import rescore_topic4_rev14_static_node_historical_libraries as historical  # noqa: E402
 from scripts.run_topic4_rev10_sa_spectral_field_worker import _contact_onsets  # noqa: E402
 from scripts.run_topic4_rev9l_forced_source_worker import _runtime_provenance  # noqa: E402
 from src.topic4_node_dualmode import (  # noqa: E402
@@ -117,34 +118,69 @@ def _atomic_npz(path: Path, **arrays) -> None:
 
 def _source_bundle(npz_path: Path, worker: dict) -> tuple[np.ndarray, np.ndarray]:
     with np.load(npz_path, allow_pickle=False) as loaded:
-        returned = np.asarray(loaded["event_returned"], bool)
-        maps = np.asarray(loaded["source_onset_maps_ms"], float)[returned]
-        evaluable = np.asarray(loaded["source_onset_evaluable"], bool)[returned]
-    if len(maps) != len(worker["labels"]):
-        raise RuntimeError("source maps and returned-event labels differ")
-    return maps[evaluable], np.asarray(worker["labels"], int)[evaluable]
+        keys = (
+            "event_returned", "source_onset_evaluable", "event_t_on_ms",
+            "event_trigger_t_on_ms", "event_t_off_ms", "event_fragment_count",
+            "event_directed_root_id", "event_root_count", "onsets", "ranks",
+            "source_onset_maps_ms", "positions_E", "delta_vtheta", "source_bin_mm",
+        )
+        arrays = {key: np.asarray(loaded[key]) for key in keys}
+    selection = historical.three_layer_event_selection(
+        arrays, minimum_readable_contacts=3,
+    )
+    detected = np.asarray(selection["topology_primary_indices"], dtype=int)
+    returned_indices = np.flatnonzero(np.asarray(arrays["event_returned"], bool))
+    positions = np.searchsorted(returned_indices, detected)
+    if (np.any(positions >= len(returned_indices))
+            or not np.array_equal(returned_indices[positions], detected)
+            or len(worker["labels"]) != len(returned_indices)):
+        raise RuntimeError("complete source families and returned labels differ")
+    return (
+        np.asarray(arrays["source_onset_maps_ms"], float)[detected],
+        np.asarray(worker["labels"], int)[positions],
+    )
 
 
 def _event_contract(npz_path: Path, worker: dict, mode: int) -> dict:
     with np.load(npz_path, allow_pickle=False) as loaded:
-        returned = np.asarray(loaded["event_returned"], bool)
-        returned_indices = np.flatnonzero(returned)
-        evaluable = np.asarray(loaded["source_onset_evaluable"], bool)[returned]
-        maps = np.asarray(loaded["source_onset_maps_ms"], float)[returned][evaluable]
-        ranks = np.asarray(worker["ranks"], float)[evaluable]
-        labels = np.asarray(worker["labels"], int)[evaluable]
+        keys = (
+            "event_returned", "source_onset_evaluable", "event_t_on_ms",
+            "event_trigger_t_on_ms", "event_t_off_ms", "event_fragment_count",
+            "event_directed_root_id", "event_root_count", "onsets", "ranks",
+            "source_onset_maps_ms", "positions_E", "delta_vtheta", "source_bin_mm",
+        )
+        arrays = {key: np.asarray(loaded[key]) for key in keys}
+        selection = historical.three_layer_event_selection(
+            arrays, minimum_readable_contacts=3,
+        )
+        detected_indices = np.asarray(
+            selection["topology_primary_indices"], dtype=int,
+        )
+        returned_indices = np.flatnonzero(
+            np.asarray(arrays["event_returned"], bool),
+        )
+        returned_positions = np.searchsorted(returned_indices, detected_indices)
+        if (np.any(returned_positions >= len(returned_indices))
+                or not np.array_equal(
+                    returned_indices[returned_positions], detected_indices,
+                )
+                or len(worker["labels"]) != len(returned_indices)):
+            raise RuntimeError("complete intervention families do not align")
+        maps = np.asarray(arrays["source_onset_maps_ms"], float)[detected_indices]
+        ranks = np.asarray(worker["ranks"], float)[returned_positions]
+        labels = np.asarray(worker["labels"], int)[returned_positions]
         local = representative_event_index(maps, ranks, labels, int(mode))
-        returned_position = int(np.flatnonzero(evaluable)[local])
-        detected_index = int(returned_indices[returned_position])
+        returned_position = int(returned_positions[local])
+        detected_index = int(detected_indices[local])
         return {
             "mode": int(mode),
             "detected_event_index": detected_index,
             "returned_event_position": returned_position,
-            "event_t_on_ms": float(loaded["event_t_on_ms"][detected_index]),
-            "event_t_off_ms": float(loaded["event_t_off_ms"][detected_index]),
+            "event_t_on_ms": float(arrays["event_t_on_ms"][detected_index]),
+            "event_t_off_ms": float(arrays["event_t_off_ms"][detected_index]),
             "reference_rank": np.asarray(worker["ranks"][returned_position], float),
             "reference_source_map": np.asarray(
-                loaded["source_onset_maps_ms"][detected_index], float,
+                arrays["source_onset_maps_ms"][detected_index], float,
             ),
         }
 
@@ -199,7 +235,9 @@ def _branch_readout(substrate, transition: dict, checkpoint: dict,
                     pulse_delay_ms: float, pulse_duration_ms: float,
                     pulse_delta_vtheta: float, target_radius_mm: float,
                     classifier: dict, label_map: np.ndarray,
-                    contact_names: np.ndarray) -> tuple[dict, dict, np.ndarray]:
+                    contact_names: np.ndarray,
+                    maximum_event_shift_ms: float = 100.0,
+                    ) -> tuple[dict, dict, np.ndarray]:
     offset = float(checkpoint["absolute_time_ms"])
     target_mask = None
     perturb = None
@@ -231,7 +269,7 @@ def _branch_readout(substrate, transition: dict, checkpoint: dict,
     event = _select_branch_event(
         events,
         event_contract["event_t_on_ms"] - offset,
-        maximum_shift_ms=100.0,
+        maximum_shift_ms=float(maximum_event_shift_ms),
     )
     arrays = {"active_fraction": np.asarray(active, np.float32)}
     record = {

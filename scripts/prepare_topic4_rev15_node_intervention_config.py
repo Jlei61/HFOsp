@@ -40,6 +40,15 @@ def _record(path: Path, *, repository_root: Path,
     raise RuntimeError(f"intervention input lies outside frozen roots: {path}")
 
 
+def _resolve_record(record: dict[str, str], *, repository_root: Path,
+                    artifact_root: Path) -> Path:
+    for root in (repository_root, artifact_root):
+        path = root / str(record["path"])
+        if path.is_file() and _sha256(path) == str(record["sha256"]):
+            return path.resolve()
+    raise RuntimeError(f"intervention input changed: {record['path']}")
+
+
 def build_config(
     *, final_config_path: Path, final_audit_path: Path,
     repository_root: Path = ROOT, artifact_root: Path = ARTIFACT_ROOT,
@@ -67,6 +76,14 @@ def build_config(
         raise RuntimeError("intervention robust config changed")
     robust_config = json.loads(robust_config_path.read_text())
     manifest_path = artifact_root / str(robust_config["candidate_manifest"])
+    cohort_path = _resolve_record(
+        final_config["inputs"]["cohort_config"],
+        repository_root=repository_root, artifact_root=artifact_root,
+    )
+    classifier_path = _resolve_record(
+        final_config["inputs"]["classifier_config"],
+        repository_root=repository_root, artifact_root=artifact_root,
+    )
     return {
         "schema_id": "topic4_rev15_node_crossed_intervention_v1",
         "scientific_role": "development_only_model_internal_crossed_hotspot_necessity",
@@ -91,6 +108,14 @@ def build_config(
                 manifest_path, repository_root=repository_root,
                 artifact_root=artifact_root,
             ),
+            "cohort_config": _record(
+                cohort_path, repository_root=repository_root,
+                artifact_root=artifact_root,
+            ),
+            "classifier_config": _record(
+                classifier_path, repository_root=repository_root,
+                artifact_root=artifact_root,
+            ),
         },
         "candidate_id": candidate_id,
         "network_seeds": seeds,
@@ -113,6 +138,7 @@ def build_config(
         "intervention": {
             "checkpoint_lead_ms": 40.0,
             "continuation_ms": 300.0,
+            "maximum_event_shift_ms": 200.0,
             "pulse_delay_from_checkpoint_ms": 5.0,
             "pulse_duration_ms": 70.0,
             "pulse_delta_vtheta_mv": 20.0,

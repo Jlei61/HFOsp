@@ -173,4 +173,9 @@ frozen only if a mode hotspot affects its predicted event more than the
 opposite-mode event and the matched spatial control on at least two of three
 networks. Event survival and latency are primary ordered endpoints; rank and
 source-topology displacement explain surviving events without adding separate
-claim gates. EE, E-to-I and Z/M remain off throughout.
+claim gates. Source templates and representative events must come from the
+same complete, returned, source-evaluable and temporally isolated episode set;
+no member of an overlap-connected episode may re-enter this analysis. The
+continued-event matcher uses a frozen maximum onset shift of 200 ms so that a
+later spontaneous event is not mistaken for survival of the intervened event.
+EE, E-to-I and Z/M remain off throughout.

@@ -51,7 +51,10 @@
 
 Only after a Node candidate is frozen: fresh-network selection, natural KMeans,
 the two Fig.4 figures, one-time developmental held-out evaluation and
-same-checkpoint hotspot interventions follow the rev14 contract unchanged.
+same-checkpoint hotspot interventions follow the rev15 contracts below. In
+particular, every downstream use of source topology or a representative event
+must reuse the same complete, returned and temporally isolated episode set used
+by the post-selection audit.
 
 ## Phase 4b: multinetwork coordinate tensor
 
@@ -112,7 +115,10 @@ This phase replaces direct progression to post-freeze acceptance because Phase
    control to both native event modes; this crossed design distinguishes
    mode-selective effects from general local suppression.
 3. Branch from checkpoints 40 ms before native onset with identical state and
-   random streams. Require exact sham replay and pre-pulse spike parity.
+   random streams. Require exact sham replay and pre-pulse spike parity. Search
+   for the continued event only within the frozen 200 ms maximum onset shift;
+   an event outside that interval is treated as abolished rather than silently
+   matched to a later spontaneous episode.
 4. Use event survival and latency as the ordered primary readout. Report mode
    identity, rank displacement and source-topology displacement for surviving
    events as explanatory continuous endpoints.

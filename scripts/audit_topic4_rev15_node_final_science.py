@@ -28,6 +28,9 @@ from scripts.rescore_topic4_rev12_node_historical import (  # noqa: E402
     _reorder_patient_contract,
     score_candidate,
 )
+from scripts.run_topic4_rev12_node_intervention import (  # noqa: E402
+    _source_bundle,
+)
 from src.topic4_node_dualmode import (  # noqa: E402
     calibrate_component_scales,
     fixed_projection_matrix,
@@ -104,17 +107,6 @@ def _provenance() -> dict[str, Any]:
     ).splitlines()
     return {"analysis_commit": head, "worktree_status": status,
             "formal_ready": not status, "SNN_simulation_run": False}
-
-
-def _source_bundle(npz_path: Path, worker: Mapping[str, Any]) -> tuple[np.ndarray, np.ndarray]:
-    with np.load(npz_path, allow_pickle=False) as loaded:
-        returned = np.asarray(loaded["event_returned"], dtype=bool)
-        maps = np.asarray(loaded["source_onset_maps_ms"], dtype=float)[returned]
-        evaluable = np.asarray(loaded["source_onset_evaluable"], dtype=bool)[returned]
-    labels = np.asarray(worker["labels"], dtype=int)
-    if len(maps) != len(labels):
-        raise RuntimeError("source maps and returned-event labels differ")
-    return maps[evaluable], labels[evaluable]
 
 
 def _candidate_workers(

@@ -26,11 +26,17 @@ def _tree(tmp_path: Path) -> dict[str, Path]:
     robust = _write(repository / "config/robust.json", {
         "candidate_manifest": "results/manifest.json",
     })
+    cohort = _write(repository / "config/cohort.json", {"cohort": True})
+    classifier = _write(repository / "config/classifier.json", {"classifier": True})
     final_config = _write(repository / "config/final.json", {
         "selected_candidate": {"candidate_id": "selected"},
         "network_seeds": [2341, 2342, 2343],
         "inputs": {"robust_config": {
             "path": "config/robust.json", "sha256": _sha(robust),
+        }, "cohort_config": {
+            "path": "config/cohort.json", "sha256": _sha(cohort),
+        }, "classifier_config": {
+            "path": "config/classifier.json", "sha256": _sha(classifier),
         }},
     })
     final_audit = _write(artifact / "results/final.json", {
@@ -63,6 +69,8 @@ def test_intervention_preparer_freezes_crossed_three_network_design(tmp_path):
         "MTB_hotspot", "MTB_matched_off_template",
     ]
     assert config["decision"]["required_selective_networks"] == 2
+    assert config["intervention"]["maximum_event_shift_ms"] == 200.0
+    assert set(config["inputs"]) >= {"cohort_config", "classifier_config"}
     assert config["mechanism_freeze"] == {
         "EE": "off", "E_to_I": "off", "Z_M": "off",
     }
