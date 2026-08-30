@@ -23,6 +23,7 @@ def test_rev16_intervention_config_uses_fresh_pool(monkeypatch, tmp_path):
             "schema_id": "old", "scientific_role": "old", "output_root": "old",
             "candidate_id": "joint", "network_seeds": [2351, 2352, 2353],
             "mechanism_freeze": {"EE": "off", "E_to_I": "off", "Z_M": "off"},
+            "hotspot_construction": {},
         }
 
     old = rev15_prepare.EXPECTED_NETWORK_SEEDS
@@ -44,6 +45,10 @@ def test_rev16_intervention_config_uses_fresh_pool(monkeypatch, tmp_path):
     assert payload["mechanism_freeze"] == {
         "EE": "off", "E_to_I": "off", "Z_M": "off",
     }
+    assert payload["hotspot_construction"]["leave_one_network_out"] is True
+    assert payload["hotspot_construction"]["covariate_footprint"] == (
+        "pulse_target_disk"
+    )
     assert payload["resources"] == {
         "maximum_workers": 3, "numerical_threads_per_worker": 1,
         "safe_peak_rss_gib_per_worker": 16.0,

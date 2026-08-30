@@ -19,9 +19,9 @@ from scripts import run_topic4_rev16_node_intervention_worker as worker  # noqa:
 
 ARTIFACT_ROOT = Path("/home/honglab/leijiaxin/HFOsp")
 DEFAULT_CONFIG = ROOT / "config/topic4_rev16_node_intervention.json"
-EXPECTED_CONFIG_SCHEMA = "topic4_rev16_node_crossed_intervention_v1"
-OUTPUT_SCHEMA = "topic4_rev16_node_crossed_intervention_aggregate_v1"
-FREEZE_SCHEMA = "topic4_rev16_frozen_node_field_v1"
+EXPECTED_CONFIG_SCHEMA = "topic4_rev16_node_crossed_intervention_v2"
+OUTPUT_SCHEMA = "topic4_rev16_node_crossed_intervention_aggregate_v2"
+FREEZE_SCHEMA = "topic4_rev16_frozen_node_field_v2"
 FROZEN_STATUS = "REV16_NODE_FIELD_FROZEN"
 NOT_SELECTIVE_STATUS = "REV16_NODE_INTERVENTION_NOT_SELECTIVE"
 
@@ -31,10 +31,12 @@ def aggregate(
     artifact_root: Path = ARTIFACT_ROOT,
 ) -> dict[str, Any]:
     previous = (
-        base.EXPECTED_CONFIG_SCHEMA, base.OUTPUT_SCHEMA, base.FREEZE_SCHEMA,
+        base.EXPECTED_CONFIG_SCHEMA, base.EXPECTED_WORKER_SCHEMA,
+        base.OUTPUT_SCHEMA, base.FREEZE_SCHEMA,
         base.FROZEN_STATUS, base.NOT_SELECTIVE_STATUS, base.WORKER_STATUS,
     )
     base.EXPECTED_CONFIG_SCHEMA = EXPECTED_CONFIG_SCHEMA
+    base.EXPECTED_WORKER_SCHEMA = worker.OUTPUT_SCHEMA
     base.OUTPUT_SCHEMA = OUTPUT_SCHEMA
     base.FREEZE_SCHEMA = FREEZE_SCHEMA
     base.FROZEN_STATUS = FROZEN_STATUS
@@ -46,7 +48,8 @@ def aggregate(
         )
     finally:
         (
-            base.EXPECTED_CONFIG_SCHEMA, base.OUTPUT_SCHEMA, base.FREEZE_SCHEMA,
+            base.EXPECTED_CONFIG_SCHEMA, base.EXPECTED_WORKER_SCHEMA,
+            base.OUTPUT_SCHEMA, base.FREEZE_SCHEMA,
             base.FROZEN_STATUS, base.NOT_SELECTIVE_STATUS, base.WORKER_STATUS,
         ) = previous
 

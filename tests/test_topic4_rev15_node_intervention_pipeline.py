@@ -68,6 +68,7 @@ def _tree(tmp_path: Path, *, general=False):
         arrays = root / f"intervention_seed_{seed}.npz"
         np.savez(arrays, value=np.asarray([seed]))
         payload = {
+            "schema_id": worker.OUTPUT_SCHEMA,
             "status": worker.WORKER_STATUS,
             "candidate_id": "selected", "network_seed": seed,
             "mechanism_freeze": config["mechanism_freeze"],

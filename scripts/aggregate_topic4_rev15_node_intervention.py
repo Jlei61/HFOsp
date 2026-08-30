@@ -20,6 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 ARTIFACT_ROOT = Path("/home/honglab/leijiaxin/HFOsp")
 DEFAULT_CONFIG = ROOT / "config/topic4_rev15_node_intervention.json"
 EXPECTED_CONFIG_SCHEMA = "topic4_rev15_node_crossed_intervention_v1"
+EXPECTED_WORKER_SCHEMA = "topic4_rev15_node_crossed_intervention_worker_v1"
 OUTPUT_SCHEMA = "topic4_rev15_node_crossed_intervention_aggregate_v1"
 FREEZE_SCHEMA = "topic4_rev15_frozen_node_field_v1"
 FROZEN_STATUS = "REV15_NODE_FIELD_FROZEN"
@@ -71,6 +72,8 @@ def _validate_worker(path: Path, *, seed: int, candidate_id: str,
     if not path.is_file():
         raise RuntimeError(f"intervention worker is missing: seed {seed}")
     payload = json.loads(path.read_text())
+    if payload.get("schema_id") != EXPECTED_WORKER_SCHEMA:
+        raise RuntimeError(f"intervention worker schema changed: seed {seed}")
     if payload.get("status") != WORKER_STATUS:
         raise RuntimeError(f"intervention worker is incomplete: seed {seed}")
     if int(payload.get("network_seed")) != int(seed):

@@ -5,6 +5,7 @@ from src.topic4_node_intervention import (
     crossed_hotspot_selectivity,
     early_support_probability,
     grid_covariates,
+    intervention_footprint_covariates,
     network_balanced_early_support,
     representative_event_index,
     select_hotspot_triplet,
@@ -96,6 +97,45 @@ def test_grid_covariates_preserve_density_h_and_rate_units():
     assert result["baseline_rate_hz"][1, 1] == pytest.approx(1.0)
 
 
+def test_intervention_covariates_match_the_actual_circular_target():
+    positions = np.asarray([[0.2, 0.2], [0.8, 0.7], [1.2, 1.4]])
+    h = np.asarray([0.2, 0.6, 0.9])
+    spikes = np.zeros((1000, 3), bool)
+    spikes[[10, 20], 0] = True
+    spikes[[30, 40], 1] = True
+    spikes[[50], 2] = True
+    result = intervention_footprint_covariates(
+        positions, h, spikes, dt_ms=1.0, sheet_mm=2.0, bin_mm=1.0,
+        target_radius_mm=0.8,
+    )
+    assert result["e_density"][0, 0] == 2
+    assert result["h_mean"][0, 0] == pytest.approx(0.4)
+    assert result["baseline_rate_hz"][0, 0] == pytest.approx(2.0)
+    assert result["covariate_footprint"] == "circular_intervention_target"
+
+
+def test_mode_contrast_avoids_a_shared_absolute_hotspot():
+    mode0 = np.zeros((8, 8))
+    mode1 = np.zeros((8, 8))
+    mode0[2, 2] = mode1[2, 2] = 1.0
+    mode0[2, 6] = 0.8
+    mode1[6, 2] = 0.9
+    covariates = {
+        "h_mean": np.ones((8, 8)),
+        "e_density": np.full((8, 8), 8.0),
+        "baseline_rate_hz": np.full((8, 8), 2.0),
+    }
+    target = select_hotspot_triplet(
+        mode0, covariates, bin_mm=1.0, minimum_separation_mm=3.0,
+        competing_probability=mode1, require_positive_contrast=True,
+        maximum_standardized_l1=2.0,
+        maximum_standardized_component=1.0,
+    )
+    assert (target["dominant"]["row"], target["dominant"]["column"]) == (2, 6)
+    assert target["dominant"]["mode_probability_contrast"] == pytest.approx(0.8)
+    assert target["match_quality"]["acceptable"] is True
+
+
 def test_representative_event_is_joint_medoid():
     maps = np.full((3, 4, 4), np.nan)
     maps[0, 0, 0] = 0.0
@@ -166,4 +206,22 @@ def test_crossed_hotspot_rejects_general_suppression():
         row["native_modes"]["1"]["mode0_hotspot"] = _branch(False)
         records.append(row)
     result = crossed_hotspot_selectivity(records, required_networks=2)
+    assert result["node_freeze_permitted"] is False
+
+
+@pytest.mark.parametrize("failure", ["unmatched", "overlapping"])
+def test_crossed_hotspot_rejects_invalid_spatial_controls(failure):
+    records = [
+        _crossed_network(seed, mode0_selective=True) for seed in (1, 2, 3)
+    ]
+    for row in records:
+        native = row["native_modes"]["0"]
+        if failure == "unmatched":
+            native["mode0_matched_off_template"][
+                "control_match_acceptable"
+            ] = False
+        else:
+            native["cross_mode_hotspots_distinct"] = False
+    result = crossed_hotspot_selectivity(records, required_networks=2)
+    assert result["modes"]["0"]["pass"] is False
     assert result["node_freeze_permitted"] is False

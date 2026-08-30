@@ -62,8 +62,11 @@
    weakest-mode loss. Run the predeclared 4096-draw within-network label null
    for mode-specific source topology.
 5. If that audit advances, reconstruct the candidate and require exact array
-   parity with its worker. Run sham, crossed mode hotspots and matched controls
-   from identical checkpoints and random streams on all three networks.
+   parity with its worker. Build each network's mode-contrast hotspots from the
+   other two networks, require spatially distinct mode hotspots, and match
+   controls on Node `h`, targeted E count and baseline rate over the actual
+   pulse disk. Run sham, crossed hotspots and controls from identical
+   checkpoints and random streams on all three networks.
 6. Freeze Node only if at least two networks show mode-selective event
    survival/onset-latency effects relative to both opposite-mode and matched
    controls. EE, E-to-I and Z/M remain off until this freeze manifest exists.

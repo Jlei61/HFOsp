@@ -118,6 +118,51 @@ def grid_covariates(positions_e: np.ndarray, h_e: np.ndarray,
     }
 
 
+def intervention_footprint_covariates(
+        positions_e: np.ndarray, h_e: np.ndarray,
+        baseline_spikes: np.ndarray, *, dt_ms: float,
+        sheet_mm: float, bin_mm: float, target_radius_mm: float) -> dict:
+    """Measure matching covariates over the actual circular pulse footprint."""
+    positions = np.asarray(positions_e, float)
+    h = np.asarray(h_e, float)
+    spikes = np.asarray(baseline_spikes, bool)
+    if (positions.ndim != 2 or positions.shape[1] != 2
+            or h.shape != (len(positions),)
+            or spikes.ndim != 2 or spikes.shape[1] != len(positions)):
+        raise ValueError("positions, h and baseline spikes do not align")
+    size = int(round(float(sheet_mm) / float(bin_mm)))
+    if size <= 0 or not np.isclose(size * float(bin_mm), float(sheet_mm)):
+        raise ValueError("bin size must tile the sheet")
+    if float(target_radius_mm) <= 0.0:
+        raise ValueError("target radius must be positive")
+    duration_seconds = len(spikes) * float(dt_ms) * 1e-3
+    if duration_seconds <= 0.0:
+        raise ValueError("baseline window must be non-empty")
+
+    centers = _grid_centers((size, size), bin_mm)
+    neuron_rates = np.sum(spikes, axis=0) / duration_seconds
+    counts = np.zeros(len(centers), float)
+    h_mean = np.full(len(centers), np.nan)
+    rate = np.full(len(centers), np.nan)
+    for index, center in enumerate(centers):
+        selected = np.linalg.norm(positions - center[None, :], axis=1) <= float(
+            target_radius_mm
+        )
+        counts[index] = int(np.sum(selected))
+        if np.any(selected):
+            h_mean[index] = float(np.mean(h[selected]))
+            rate[index] = float(np.mean(neuron_rates[selected]))
+    return {
+        "h_mean": h_mean.reshape(size, size),
+        # Kept under the established key so the matcher remains reusable. Here
+        # this is the exact number of E neurons affected by the circular pulse.
+        "e_density": counts.reshape(size, size),
+        "baseline_rate_hz": rate.reshape(size, size),
+        "covariate_footprint": "circular_intervention_target",
+        "target_radius_mm": float(target_radius_mm),
+    }
+
+
 def _grid_centers(shape: tuple[int, int], bin_mm: float) -> np.ndarray:
     y, x = np.indices(shape)
     return np.column_stack([
@@ -126,13 +171,23 @@ def _grid_centers(shape: tuple[int, int], bin_mm: float) -> np.ndarray:
     ])
 
 
-def select_hotspot_triplet(early_probability: np.ndarray, covariates: dict, *,
-                           bin_mm: float, minimum_separation_mm: float = 3.0,
-                           off_template_quantile: float = 0.25) -> dict:
+def select_hotspot_triplet(
+        early_probability: np.ndarray, covariates: dict, *,
+        bin_mm: float, minimum_separation_mm: float = 3.0,
+        off_template_quantile: float = 0.25,
+        competing_probability: np.ndarray | None = None,
+        require_positive_contrast: bool = False,
+        maximum_standardized_l1: float | None = None,
+        maximum_standardized_component: float | None = None) -> dict:
     """Select dominant, separated secondary and covariate-matched control bins."""
     probability = np.asarray(early_probability, float)
     if probability.ndim != 2 or not np.all(np.isfinite(probability)):
         raise ValueError("early probability must be a finite 2D map")
+    competing = None
+    if competing_probability is not None:
+        competing = np.asarray(competing_probability, float)
+        if competing.shape != probability.shape or not np.all(np.isfinite(competing)):
+            raise ValueError("competing probability must align and be finite")
     required = ("h_mean", "e_density", "baseline_rate_hz")
     arrays = {key: np.asarray(covariates[key], float) for key in required}
     if any(value.shape != probability.shape for value in arrays.values()):
@@ -143,8 +198,16 @@ def select_hotspot_triplet(early_probability: np.ndarray, covariates: dict, *,
         raise ValueError("fewer than three populated bins are available")
     centers = _grid_centers(probability.shape, bin_mm)
     p = probability.ravel()
+    other = np.zeros_like(p) if competing is None else competing.ravel()
+    selection_score = p if competing is None else p - other
     valid_flat = valid.ravel()
-    dominant = int(np.flatnonzero(valid_flat)[np.argmax(p[valid_flat])])
+    dominant_pool = valid_flat & (p > 0.0)
+    if require_positive_contrast:
+        dominant_pool &= selection_score > 0.0
+    if not np.any(dominant_pool):
+        raise ValueError("no supported mode-discriminative hotspot is available")
+    dominant_candidates = np.flatnonzero(dominant_pool)
+    dominant = int(dominant_candidates[np.argmax(selection_score[dominant_candidates])])
     distance_to_dominant = np.linalg.norm(centers - centers[dominant], axis=1)
     secondary_pool = (
         valid_flat
@@ -157,12 +220,15 @@ def select_hotspot_triplet(early_probability: np.ndarray, covariates: dict, *,
     secondary = int(secondary_candidates[np.argmax(p[secondary_candidates])])
 
     distance_to_secondary = np.linalg.norm(centers - centers[secondary], axis=1)
-    threshold = float(np.quantile(p[valid_flat], float(off_template_quantile)))
+    union_probability = np.maximum(p, other)
+    threshold = float(np.quantile(
+        union_probability[valid_flat], float(off_template_quantile),
+    ))
     control_pool = (
         valid_flat
         & (distance_to_dominant >= minimum_separation_mm)
         & (distance_to_secondary >= minimum_separation_mm)
-        & (p <= threshold)
+        & (union_probability <= threshold)
     )
     if not np.any(control_pool):
         raise ValueError("no separated off-template control bin is available")
@@ -182,6 +248,17 @@ def select_hotspot_triplet(early_probability: np.ndarray, covariates: dict, *,
     # Lower template probability is the deterministic secondary key.
     order = np.lexsort((control_candidates, p[control_candidates], mismatch))
     control = int(control_candidates[order[0]])
+    standardized = np.abs(
+        covariate_matrix[control] - covariate_matrix[dominant]
+    ) / scale
+    standardized_l1 = float(np.sum(standardized))
+    standardized_max = float(np.max(standardized))
+    match_acceptable = bool(
+        (maximum_standardized_l1 is None
+         or standardized_l1 <= float(maximum_standardized_l1))
+        and (maximum_standardized_component is None
+             or standardized_max <= float(maximum_standardized_component))
+    )
 
     def record(index: int) -> dict:
         row, column = np.unravel_index(index, probability.shape)
@@ -191,6 +268,8 @@ def select_hotspot_triplet(early_probability: np.ndarray, covariates: dict, *,
             "column": int(column),
             "xy_mm": centers[index].tolist(),
             "early_probability": float(p[index]),
+            "competing_mode_early_probability": float(other[index]),
+            "mode_probability_contrast": float(p[index] - other[index]),
             "h_mean": float(covariate_matrix[index, 0]),
             "e_density": float(covariate_matrix[index, 1]),
             "baseline_rate_hz": float(covariate_matrix[index, 2]),
@@ -202,6 +281,19 @@ def select_hotspot_triplet(early_probability: np.ndarray, covariates: dict, *,
         "matched_off_template": record(control),
         "minimum_separation_mm": float(minimum_separation_mm),
         "off_template_quantile": float(off_template_quantile),
+        "match_quality": {
+            "covariates": list(required),
+            "standardized_absolute_difference": standardized.tolist(),
+            "standardized_l1": standardized_l1,
+            "maximum_standardized_component": standardized_max,
+            "maximum_allowed_standardized_l1": maximum_standardized_l1,
+            "maximum_allowed_standardized_component": (
+                maximum_standardized_component
+            ),
+            "acceptable": match_acceptable,
+            "control_pool_size": int(len(control_candidates)),
+            "scale": scale.tolist(),
+        },
     }
 
 
@@ -270,14 +362,25 @@ def crossed_hotspot_selectivity(
                 own["sham"],
                 own[f"mode{hotspot_mode}_matched_off_template"],
             )
+            matched_control_acceptable = bool(
+                own[f"mode{hotspot_mode}_matched_off_template"].get(
+                    "control_match_acceptable", True,
+                )
+            )
+            cross_mode_hotspots_distinct = bool(
+                own.get("cross_mode_hotspots_distinct", True)
+            )
             selective = bool(
                 own_effect > opposite_effect and own_effect > matched_effect
+                and matched_control_acceptable and cross_mode_hotspots_distinct
             )
             per_network.append({
                 "network_seed": int(network["network_seed"]),
                 "own_mode_effect_event_abolished_then_delay": list(own_effect),
                 "opposite_mode_effect_event_abolished_then_delay": list(opposite_effect),
                 "matched_control_effect_event_abolished_then_delay": list(matched_effect),
+                "matched_control_acceptable": matched_control_acceptable,
+                "cross_mode_hotspots_distinct": cross_mode_hotspots_distinct,
                 "selective": selective,
             })
         count = int(sum(row["selective"] for row in per_network))

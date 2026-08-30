@@ -26,7 +26,7 @@ DEFAULT_FINAL_AUDIT = ARTIFACT_ROOT / (
     "joint_m3_m4_candidates/final_science/analysis/node_final_science_audit.json"
 )
 DEFAULT_OUTPUT = ROOT / "config/topic4_rev16_node_intervention.json"
-OUTPUT_SCHEMA = "topic4_rev16_node_crossed_intervention_v1"
+OUTPUT_SCHEMA = "topic4_rev16_node_crossed_intervention_v2"
 
 
 def build_config(
@@ -68,9 +68,24 @@ def build_config(
             "long_run_launcher": "systemd-run --user plus nohup",
         },
     })
+    payload["hotspot_construction"].update({
+        "source": (
+            "leave_one_network_out_equal_network_mode_early_onset_probability"
+        ),
+        "leave_one_network_out": True,
+        "mode_discriminative_contrast": True,
+        "covariate_footprint": "pulse_target_disk",
+        "matching_covariates": [
+            "mean_node_h", "targeted_E_neuron_count", "baseline_E_rate_hz",
+        ],
+        "maximum_control_standardized_l1": 2.0,
+        "maximum_control_standardized_component": 1.0,
+    })
     payload["claim_boundary"] = (
         "A strong local E-threshold pulse tests rev16 model-internal regional "
-        "necessity and mode selectivity from the same checkpoint. It is not a "
+        "necessity and mode selectivity from the same checkpoint. Targets are "
+        "leave-one-network-out mode-contrast hotspots and controls are matched "
+        "over the actual pulse footprint. It is not a "
         "patient intervention, cellular-core identification, or therapeutic "
         "simulation; EE, E-to-I and Z/M remain off."
     )

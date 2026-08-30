@@ -144,9 +144,20 @@ sham, the two mode hotspots and their matched off-template controls. A strong
 local E-threshold pulse begins 5 ms after the checkpoint; intervention
 interpretation is limited to model-internal regional necessity.
 
+The target for one network is computed from the other two networks only. For
+each mode, the hotspot maximizes that mode's early-source probability relative
+to the competing mode; the two hotspots must be separated by at least 3 mm.
+Off-template controls lie in the lower quartile of the union of both mode
+templates and are matched to the hotspot over the actual 1.2-mm pulse disk,
+not a mismatched 1-mm bin. Matching uses mean Node `h`, targeted E-neuron count
+and baseline E rate, with an IQR-standardized L1 caliper of 2.0 and maximum
+single-covariate difference of 1.0. An unmatched control or overlapping mode
+hotspots can be reported descriptively but cannot support Node freezing.
+
 The primary ordered endpoints are event survival and onset latency. A mode
 hotspot is selective only when its effect on the predicted native mode exceeds
-both its effect on the opposite mode and its matched control. At least two of
+both its effect on the opposite mode and its adequately matched control. At
+least two of
 three networks must show the crossed selective pattern. The reconstructed
 `h`, `Vtheta` and `delta-Vtheta` arrays must be exactly equal to the frozen
 worker before any branch runs. Only this result may write the Node freeze

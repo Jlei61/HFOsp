@@ -41,6 +41,7 @@ from scripts.topic4_rev15_node_substrate_adapter import (  # noqa: E402
 )
 from src.topic4_node_intervention import (  # noqa: E402
     grid_covariates,
+    intervention_footprint_covariates,
     network_balanced_early_support,
     select_hotspot_triplet,
 )
@@ -193,12 +194,6 @@ def run_worker(
     event_contracts = {
         mode: _event_contract(npz_path, worker, mode) for mode in (0, 1)
     }
-    templates = {
-        mode: network_balanced_early_support(
-            maps_by_network, labels_by_network, mode,
-        ) for mode in (0, 1)
-    }
-
     substrate, projection, transition = build_projected_node_substrate(
         robust_config_path=paths["robust_config"],
         candidate_id=str(config["candidate_id"]), seed=int(seed),
@@ -241,18 +236,58 @@ def run_worker(
     baseline_window = protocol["baseline_activity_window_ms"]
     low = int(round(float(baseline_window[0]) / dt_ms))
     high = int(round(float(baseline_window[1]) / dt_ms))
-    covariates = grid_covariates(
-        substrate.positions_e, substrate.h_e, full_spikes[low:high],
-        dt_ms=dt_ms, sheet_mm=float(substrate.engine["L"]), bin_mm=1.0,
-    )
+    hotspot_contract = config["hotspot_construction"]
+    if hotspot_contract.get("leave_one_network_out", False):
+        peer_indices = [
+            index for index, peer_seed in enumerate(config["network_seeds"])
+            if int(peer_seed) != int(seed)
+        ]
+        if len(peer_indices) < 2:
+            raise RuntimeError("leave-one-network-out hotspot needs two peer networks")
+    else:
+        peer_indices = list(range(len(maps_by_network)))
+    templates = {
+        mode: network_balanced_early_support(
+            [maps_by_network[index] for index in peer_indices],
+            [labels_by_network[index] for index in peer_indices], mode,
+        ) for mode in (0, 1)
+    }
+
+    if hotspot_contract.get("covariate_footprint") == "pulse_target_disk":
+        covariates = intervention_footprint_covariates(
+            substrate.positions_e, substrate.h_e, full_spikes[low:high],
+            dt_ms=dt_ms, sheet_mm=float(substrate.engine["L"]), bin_mm=1.0,
+            target_radius_mm=float(protocol["target_radius_mm"]),
+        )
+    else:
+        covariates = grid_covariates(
+            substrate.positions_e, substrate.h_e, full_spikes[low:high],
+            dt_ms=dt_ms, sheet_mm=float(substrate.engine["L"]), bin_mm=1.0,
+        )
+    discriminative = bool(hotspot_contract.get("mode_discriminative_contrast", False))
     targets = {
         mode: select_hotspot_triplet(
             templates[mode], covariates, bin_mm=1.0,
             minimum_separation_mm=float(
-                config["hotspot_construction"]["minimum_hotspot_separation_mm"]
+                hotspot_contract["minimum_hotspot_separation_mm"]
+            ),
+            competing_probability=templates[1 - mode] if discriminative else None,
+            require_positive_contrast=discriminative,
+            maximum_standardized_l1=hotspot_contract.get(
+                "maximum_control_standardized_l1"
+            ),
+            maximum_standardized_component=hotspot_contract.get(
+                "maximum_control_standardized_component"
             ),
         ) for mode in (0, 1)
     }
+    hotspot_distance = float(np.linalg.norm(
+        np.asarray(targets[0]["dominant"]["xy_mm"], float)
+        - np.asarray(targets[1]["dominant"]["xy_mm"], float)
+    ))
+    hotspots_distinct = bool(
+        hotspot_distance >= float(hotspot_contract["minimum_hotspot_separation_mm"])
+    )
     arm_targets = {
         "sham": None,
         "mode0_hotspot": targets[0]["dominant"],
@@ -282,6 +317,10 @@ def run_worker(
             branch_spikes[arm] = spikes
             for key, value in arrays.items():
                 output_arrays[f"mode{native_mode}_{arm}_{key}"] = value
+        for target_mode in (0, 1):
+            branch_records[f"mode{target_mode}_matched_off_template"][
+                "control_match_acceptable"
+            ] = bool(targets[target_mode]["match_quality"]["acceptable"])
         sham = branch_records["sham"]
         if not sham["event_occurred"]:
             raise RuntimeError("same-checkpoint sham did not reproduce the native event")
@@ -317,6 +356,8 @@ def run_worker(
                 )
         native_modes[str(native_mode)] = {
             "event_contract": contract,
+            "cross_mode_hotspots_distinct": hotspots_distinct,
+            "cross_mode_hotspot_distance_mm": hotspot_distance,
             **branch_records,
         }
 
@@ -340,6 +381,12 @@ def run_worker(
         "network_seed": int(seed),
         "native_modes": native_modes,
         "targets": targets,
+        "target_template_network_seeds": [
+            int(config["network_seeds"][index]) for index in peer_indices
+        ],
+        "target_template_leave_one_network_out": bool(
+            hotspot_contract.get("leave_one_network_out", False)
+        ),
         "projection_parity": projection_parity,
         "arrays": {"path": str(out_npz), "sha256": _sha256(out_npz)},
         "inputs": {

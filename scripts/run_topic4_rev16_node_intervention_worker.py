@@ -15,8 +15,8 @@ from scripts import run_topic4_rev15_node_intervention_worker as base  # noqa: E
 from scripts import topic4_rev16_node_substrate_adapter as adapter  # noqa: E402
 
 
-EXPECTED_CONFIG_SCHEMA = "topic4_rev16_node_crossed_intervention_v1"
-OUTPUT_SCHEMA = "topic4_rev16_node_crossed_intervention_worker_v1"
+EXPECTED_CONFIG_SCHEMA = "topic4_rev16_node_crossed_intervention_v2"
+OUTPUT_SCHEMA = "topic4_rev16_node_crossed_intervention_worker_v2"
 WORKER_STATUS = "REV16_NODE_CROSSED_INTERVENTION_WORKER_COMPLETE"
 
 
