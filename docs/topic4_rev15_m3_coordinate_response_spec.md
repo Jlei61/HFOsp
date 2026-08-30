@@ -179,3 +179,18 @@ no member of an overlap-connected episode may re-enter this analysis. The
 continued-event matcher uses a frozen maximum onset shift of 200 ms so that a
 later spontaneous event is not mistaken for survival of the intervened event.
 EE, E-to-I and Z/M remain off throughout.
+
+## 9. Completed fresh-network verdict
+
+The frozen robust-candidate screen completed all 39 registered runs on seeds
+2341--2343 with no missing, invalid or runaway worker. None of the 12 selectable
+fields passed the joint A/B/support gate. The nearest candidate,
+`robust_mean_a_r08`, improved A on all three networks and retained aggregate
+support, but protected B on only one network; its worst B ratio was 1.271,
+above the frozen 1.10 bound. No candidate was eligible for natural KMeans,
+Fig.4, held-out scoring or intervention.
+
+This is `NO_USABLE_NODE_ANCHOR_WITHIN_M3_LOCAL_RESPONSE`. It closes the bounded
+M3 local first-order strategy rather than all continuous fields. The next
+registered experiment is a joint M3+M4 response search. Shell-only M4 around a
+failed frozen M3 anchor, relaxed gates, EE, E-to-I and Z/M remain forbidden.

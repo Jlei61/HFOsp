@@ -126,3 +126,10 @@ This phase replaces direct progression to post-freeze acceptance because Phase
    more than the opposite-mode event and its matched off-template control on at
    least two of three networks. Otherwise retain the field as exploratory and
    keep EE, E-to-I and Z/M closed.
+
+## Phase 7: completed stopping decision
+
+The 39-run Phase 5a screen is complete and yielded no usable Node anchor.
+Therefore Phases 5b and 6 did not open, and no KMeans or Fig.4 result was
+generated. Continue under the rev16 joint M3+M4 specification; do not reinterpret
+the failed M3 candidates as a shell-search anchor.

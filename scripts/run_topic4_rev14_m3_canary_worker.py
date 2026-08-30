@@ -51,6 +51,15 @@ BASE_COMPATIBILITY_ROLE = "development_only_orthogonal_free_field_screen"
 EXPECTED_PATHWAYS = freezer.EXPECTED_PATHWAYS
 
 
+def _field_design(config: Mapping[str, Any]) -> Mapping[str, Any]:
+    """Return the Fourier design while preserving legacy M3 manifests."""
+    if "field_design" in config:
+        if "m3_design" in config:
+            raise RuntimeError("Fourier config cannot define both field_design and m3_design")
+        return config["field_design"]
+    return config["m3_design"]
+
+
 def _sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with Path(path).open("rb") as handle:
@@ -185,7 +194,7 @@ def _frozen_original_signed_depth(
 
 
 def _project_candidate(candidate: Mapping[str, Any], substrate, config: Mapping[str, Any]) -> dict:
-    design = config["m3_design"]
+    design = _field_design(config)
     mapping_contract = config["node_mapping"]
     exact_h = np.asarray(substrate.h_e, dtype=np.float64)
     exact_vtheta = np.asarray(substrate.vtheta, dtype=np.float64)
@@ -306,17 +315,21 @@ def _project_candidate(candidate: Mapping[str, Any], substrate, config: Mapping[
             if not np.allclose(h, expected_uniform, rtol=0.0, atol=1e-14):
                 raise RuntimeError("zero Fourier coefficients did not produce uniform h")
             mapping = "absolute_zero_fourier_uniform_mass_projection"
-        elif field_kind == "absolute_paired_phase_fourier_m3":
+        elif field_kind in {
+            "absolute_paired_phase_fourier_m3",
+            "absolute_paired_phase_fourier_m4_shell_coordinate",
+            "absolute_paired_phase_fourier_joint_m3_m4",
+        }:
             if not candidate.get("selection_eligible"):
-                raise RuntimeError("M3 field unexpectedly became nonselectable")
+                raise RuntimeError("Fourier field unexpectedly became nonselectable")
             if not np.isclose(
                 projection["audit"]["centered_latent_surface_rms"],
                 target_rms, rtol=0.0, atol=2e-12,
             ):
-                raise RuntimeError("M3 centered surface RMS changed")
+                raise RuntimeError("Fourier centered surface RMS changed")
             mapping = "absolute_fourier_s_to_mass_projected_h"
         else:
-            raise RuntimeError("unknown rev14 M3 field kind")
+            raise RuntimeError("unknown absolute Fourier field kind")
         projection["latent_at_neurons"] = projection.pop(
             "latent_surface_at_neurons"
         )
@@ -412,8 +425,15 @@ def build_physical_dose_table(
     ]
     selectable = [row for row in rows if row["selection_eligible"]]
     benchmarks = [row for row in rows if not row["selection_eligible"]]
-    if len(selectable) != 32 or len(benchmarks) != 2:
-        raise RuntimeError("rev14 M3 physical-dose table has the wrong candidate count")
+    design = _field_design(config)
+    expected_total = int(design["candidate_count"])
+    expected_selectable = int(design["selectable_candidate_count"])
+    if (
+        len(rows) != expected_total
+        or len(selectable) != expected_selectable
+        or len(benchmarks) != expected_total - expected_selectable
+    ):
+        raise RuntimeError("absolute-Fourier physical-dose table has the wrong candidate count")
     signed_depth_hashes = {
         row["frozen_signed_depth_sha256"] for row in rows
     }
@@ -583,7 +603,7 @@ def _augment_npz_arrays(arrays: Mapping[str, np.ndarray], state: _RunState) -> d
         raise RuntimeError("rev14 M3 projection was not built before NPZ output")
     output = dict(arrays)
     coordinate = state.candidate.get("fourier_coordinate")
-    modes = mode_inventory(int(state.config["m3_design"]["maximum_order"]))
+    modes = mode_inventory(int(_field_design(state.config)["maximum_order"]))
     coefficients = (
         np.zeros((0, 2), dtype=np.float64)
         if coordinate is None else np.asarray(coordinate["coefficients"], dtype=np.float64)
