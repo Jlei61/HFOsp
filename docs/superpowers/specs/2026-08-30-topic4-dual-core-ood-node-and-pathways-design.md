@@ -34,6 +34,8 @@ results have already been inspected.
 - The frozen E1146 shared-plane geometry and both TA/TB template-geometry files
   used to place virtual contacts are explicit hash-checked inputs; none is an
   implicit worktree-relative file.
+- The network-cache source audit that fixes the engine commit, NumPy version and
+  cache key is also an explicit hash-checked input.
 
 ## Two-core Node family
 
