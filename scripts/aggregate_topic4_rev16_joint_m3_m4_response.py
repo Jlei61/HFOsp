@@ -34,7 +34,16 @@ DEFAULT_CONFIG = ROOT / "config/topic4_rev16_joint_m3_m4_response_analysis.json"
 OUTPUT_SCHEMA = "topic4_rev16_joint_m3_m4_response_aggregate_v1"
 ALLOWED_ANALYSIS_PATHS = frozenset({
     "config/topic4_rev16_joint_m3_m4_response_analysis.json",
+    "scripts/aggregate_topic4_rev16_joint_candidates.py",
     "scripts/aggregate_topic4_rev16_joint_m3_m4_response.py",
+    "scripts/freeze_topic4_rev16_joint_m3_m4_candidates.py",
+    "scripts/launch_topic4_rev16_joint_m3_m4_candidates.py",
+    "scripts/monitor_topic4_rev16_joint_m3_m4_candidates.py",
+    "scripts/prepare_topic4_rev16_joint_candidate_config.py",
+    "scripts/run_topic4_rev16_joint_m3_m4_candidate_worker.py",
+    "scripts/wait_topic4_rev16_m4_shell_then_prepare_joint.py",
+    "tests/test_topic4_rev16_joint_candidate_pipeline.py",
+    "tests/test_topic4_rev16_joint_candidates_aggregate.py",
     "tests/test_topic4_rev16_joint_m3_m4_response.py",
 })
 
