@@ -82,5 +82,7 @@
    formal-clean source event set. Run sham, crossed hotspots and controls from
    identical checkpoints and random streams on all three networks.
 5. Freeze Node only if at least two networks show mode-selective event
-   survival/onset-latency effects relative to both opposite-mode and matched
-   controls. EE, E-to-I and Z/M remain off until this freeze manifest exists.
+   native-mode retention/onset-latency effects relative to both opposite-mode
+   and matched controls. Mode switches, OOD events and loss of dual-shaft
+   recruitment do not count as survival of the native mode. EE, E-to-I and Z/M
+   remain off until this freeze manifest exists.

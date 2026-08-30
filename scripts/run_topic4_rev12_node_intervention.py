@@ -40,6 +40,7 @@ from src.topic4_node_dualmode import (  # noqa: E402
 )
 from src.topic4_node_intervention import (  # noqa: E402
     grid_covariates,
+    native_mode_outcome,
     network_balanced_early_support,
     representative_event_index,
     select_hotspot_triplet,
@@ -296,6 +297,10 @@ def _branch_readout(substrate, transition: dict, checkpoint: dict,
         "latency_from_checkpoint_ms": None,
         "patient_mode": None,
         "ood": None,
+        "dual_shaft": False,
+        "formal_clean": False,
+        "native_mode_retained": False,
+        "event_outcome": "no_returned_event",
         "rank_distance_from_sham": None,
         "source_topology_cosine_to_sham": None,
     }
@@ -317,6 +322,10 @@ def _branch_readout(substrate, transition: dict, checkpoint: dict,
     ])
     onset, rank = np.asarray(onset, float)[order], np.asarray(rank, float)[order]
     patient_mode, ood = _classify_onsets(onset, classifier, label_map)
+    mode_outcome = native_mode_outcome(
+        onset, patient_mode=patient_mode, ood=ood,
+        native_mode=int(event_contract["mode"]), groups=classifier["groups"],
+    )
     absolute_onset = offset + float(event["t_on"])
     checkpoint_step = int(round(offset / float(substrate.engine["dt"])))
     spliced = np.concatenate([full_spikes[:checkpoint_step], spikes], axis=0)
@@ -332,6 +341,7 @@ def _branch_readout(substrate, transition: dict, checkpoint: dict,
         "latency_from_checkpoint_ms": float(event["t_on"]),
         "patient_mode": patient_mode,
         "ood": ood,
+        **mode_outcome,
         "rank": rank,
         "onset": onset,
         "source_map_evaluable": bool(source["evaluable"][0]),

@@ -15,11 +15,14 @@ def _sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def _branch(event=True, latency=40.0, parity=True):
+def _branch(event=True, latency=40.0, parity=True, retained=None):
+    if retained is None:
+        retained = event
     return {
         "event_occurred": event,
         "latency_from_checkpoint_ms": latency if event else None,
         "pre_intervention_spike_parity": parity,
+        "native_mode_retained": bool(retained),
     }
 
 

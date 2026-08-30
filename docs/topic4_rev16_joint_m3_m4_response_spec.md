@@ -181,9 +181,12 @@ and baseline E rate, with an IQR-standardized L1 caliper of 2.0 and maximum
 single-covariate difference of 1.0. An unmatched control or overlapping mode
 hotspots can be reported descriptively but cannot support Node freezing.
 
-The primary ordered endpoints are event survival and onset latency. A mode
-hotspot is selective only when its effect on the predicted native mode exceeds
-both its effect on the opposite mode and its adequately matched control. At
+The primary ordered endpoints are retention of the native patient-supported
+mode and its onset latency. Event disappearance, a switch to the other patient
+mode, classifier OOD and loss of dual-shaft recruitment all count as loss of
+the native mode, but remain separate explanatory outcomes. A mode hotspot is
+selective only when its effect on the predicted native mode exceeds both its
+effect on the opposite mode and its adequately matched control. At
 least two of
 three networks must show the crossed selective pattern. The reconstructed
 `h`, `Vtheta` and `delta-Vtheta` arrays must be exactly equal to the frozen

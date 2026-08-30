@@ -107,9 +107,13 @@ def _validate_worker(path: Path, *, seed: int, candidate_id: str,
             raise RuntimeError("intervention worker lacks a crossed branch")
         if not branches["sham"].get("event_occurred"):
             raise RuntimeError("intervention sham did not reproduce its event")
+        if branches["sham"].get("native_mode_retained") is not True:
+            raise RuntimeError("intervention sham did not retain its native mode")
         for arm in required - {"sham"}:
             if branches[arm].get("pre_intervention_spike_parity") is not True:
                 raise RuntimeError("intervention branch lacks pre-pulse parity")
+            if "native_mode_retained" not in branches[arm]:
+                raise RuntimeError("intervention branch lacks mode-retention status")
     return payload, {
         "network_seed": int(seed), "json": {"path": str(path), "sha256": _sha256(path)},
         "npz": {"path": str(arrays_path), "sha256": _sha256(arrays_path)},

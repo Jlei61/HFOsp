@@ -6,7 +6,9 @@ from src.topic4_node_intervention import (
     early_support_probability,
     grid_covariates,
     intervention_footprint_covariates,
+    native_mode_outcome,
     network_balanced_early_support,
+    ordered_suppression_effect,
     representative_event_index,
     select_hotspot_triplet,
     select_representative_seed,
@@ -150,16 +152,48 @@ def test_representative_event_is_joint_medoid():
     assert representative_event_index(maps, ranks, np.zeros(3, int), 0) == 1
 
 
+@pytest.mark.parametrize(
+    ("onset", "patient_mode", "ood", "expected"),
+    [
+        ([0.0, 1.0, 2.0, 3.0], 0, False, "native_patient_mode_retained"),
+        ([0.0, 1.0, 2.0, 3.0], 1, False, "patient_mode_switch"),
+        ([0.0, 1.0, 2.0, 3.0], 0, True, "classifier_ood"),
+        ([0.0, 1.0, np.nan, np.nan], 0, False,
+         "single_shaft_or_contact_unreadable"),
+    ],
+)
+def test_native_mode_outcome_distinguishes_four_branch_results(
+    onset, patient_mode, ood, expected,
+):
+    result = native_mode_outcome(
+        np.asarray(onset), patient_mode=patient_mode, ood=ood, native_mode=0,
+        groups={"ICL": np.asarray([0, 1]), "SCL": np.asarray([2, 3])},
+    )
+    assert result["event_outcome"] == expected
+    assert result["native_mode_retained"] is (
+        expected == "native_patient_mode_retained"
+    )
+
+
 def test_empty_source_maps_are_not_silently_treated_as_controls():
     with pytest.raises(ValueError, match="no evaluable event"):
         early_support_probability(np.full((2, 4, 4), np.nan))
 
 
-def _branch(event_occurred=True, latency=40.0):
+def _branch(event_occurred=True, latency=40.0, retained=None):
+    if retained is None:
+        retained = event_occurred
     return {
         "event_occurred": event_occurred,
         "latency_from_checkpoint_ms": None if not event_occurred else latency,
+        "native_mode_retained": bool(retained),
     }
+
+
+def test_mode_switch_counts_as_loss_of_the_native_mode():
+    sham = _branch(True, 40.0, retained=True)
+    switched = _branch(True, 40.0, retained=False)
+    assert ordered_suppression_effect(sham, switched) == (1, 0.0)
 
 
 def _crossed_network(seed, *, mode0_selective=True, mode1_selective=False):

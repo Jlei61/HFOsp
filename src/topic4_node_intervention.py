@@ -318,11 +318,54 @@ def representative_event_index(onset_maps: np.ndarray, ranks: np.ndarray,
     return int(selected[int(np.argmin(distance))])
 
 
+def native_mode_outcome(
+    onset: np.ndarray, *, patient_mode: int, ood: bool, native_mode: int,
+    groups: dict[str, np.ndarray],
+) -> dict:
+    """Classify whether a branch retained its original supported patient mode."""
+    onset = np.asarray(onset, float)
+    if onset.ndim != 1 or any(shaft not in groups for shaft in ("ICL", "SCL")):
+        raise ValueError("onset and shaft groups do not define a contact event")
+    shaft_indices = {
+        shaft: np.asarray(groups[shaft], dtype=int) for shaft in ("ICL", "SCL")
+    }
+    if any(
+        indices.ndim != 1 or not len(indices)
+        or np.any(indices < 0) or np.any(indices >= len(onset))
+        for indices in shaft_indices.values()
+    ):
+        raise ValueError("shaft groups contain invalid contact indices")
+    dual_shaft = all(
+        np.isfinite(onset[shaft_indices[shaft]]).any()
+        for shaft in ("ICL", "SCL")
+    )
+    formal_clean = bool(dual_shaft and not bool(ood))
+    retained = bool(formal_clean and int(patient_mode) == int(native_mode))
+    if not dual_shaft:
+        outcome = "single_shaft_or_contact_unreadable"
+    elif bool(ood):
+        outcome = "classifier_ood"
+    elif not retained:
+        outcome = "patient_mode_switch"
+    else:
+        outcome = "native_patient_mode_retained"
+    return {
+        "dual_shaft": bool(dual_shaft),
+        "formal_clean": formal_clean,
+        "native_mode_retained": retained,
+        "event_outcome": outcome,
+    }
+
+
 def ordered_suppression_effect(sham: dict, branch: dict) -> tuple[int, float]:
-    """Prioritize event abolition, then a positive onset delay."""
+    """Prioritize loss of the native supported mode, then its onset delay."""
     if not bool(sham.get("event_occurred")):
         raise ValueError("same-checkpoint sham must reproduce the native event")
-    if not bool(branch.get("event_occurred")):
+    if sham.get("native_mode_retained") is not True:
+        raise ValueError("same-checkpoint sham must retain the native patient mode")
+    if "native_mode_retained" not in branch:
+        raise ValueError("intervention branch lacks native-mode retention status")
+    if not bool(branch.get("native_mode_retained")):
         return 1, 0.0
     sham_latency = float(sham["latency_from_checkpoint_ms"])
     branch_latency = float(branch["latency_from_checkpoint_ms"])
@@ -396,7 +439,7 @@ def crossed_hotspot_selectivity(
         "selective_hotspot_modes": passed,
         "modes": results,
         "primary_ordered_effect": (
-            "event abolition first, then nonnegative onset delay"
+            "native supported-mode loss first, then nonnegative onset delay"
         ),
         "continuous_endpoints_are_explanatory_not_additional_gates": True,
     }
