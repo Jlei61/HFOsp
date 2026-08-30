@@ -7,7 +7,7 @@ generator when all later observation corrections and T2 jumps are disabled.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 import hashlib
 import math
 
@@ -633,6 +633,44 @@ def evaluate_r2_edge(model, edge: ExposureEdge, design: OneStepDesign, *,
     return _evaluate_rows(
         model, edge, design, rows, device=device, batch_size=batch_size
     )
+
+
+def evaluate_r2_edge_by_block(model, edge: ExposureEdge, design: OneStepDesign, *,
+                              split: str, event_segment: np.ndarray,
+                              device: torch.device | str,
+                              batch_size: int = 4096,
+                              block_events: int = 100) -> list[dict]:
+    """Score one arm on non-overlapping within-segment event blocks.
+
+    The next-event average spans rows whose exponential exposure histories
+    overlap by construction (each row shares ~N events of history with its
+    neighbour), so it is not an independent-sample summary and cannot by itself
+    support a T2 effect.  This returns one metric set per complete
+    ``block_events`` block, never pooling across a recorded gap and dropping
+    each segment's remainder rather than forming a short block.
+    """
+    code = {"train": 0, "validation": 1}[split]
+    n = int(block_events)
+    if n < 1:
+        raise ValueError("block_events must be positive")
+    rows = np.flatnonzero(design.split == code)
+    segment = np.asarray(event_segment, dtype=np.int64)
+    index = np.asarray(design.current_index, dtype=np.int64)[rows]
+    if len(index) and int(index.max()) >= len(segment):
+        raise ValueError("event segment is shorter than the design index")
+    label_of_row = segment[index]
+    blocks: list[dict] = []
+    for label in np.unique(label_of_row):
+        local = np.flatnonzero(label_of_row == label)
+        for position in range(len(local) // n):
+            select = local[position * n:(position + 1) * n]
+            metric = _evaluate_rows(
+                model, edge, design, rows[select],
+                device=device, batch_size=batch_size,
+            )
+            blocks.append({"segment": int(label), "block": int(position),
+                           "n_rows": int(len(select)), **asdict(metric)})
+    return blocks
 
 
 def classify_one_shot_persistence(

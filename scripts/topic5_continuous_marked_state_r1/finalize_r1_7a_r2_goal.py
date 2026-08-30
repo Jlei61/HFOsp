@@ -8,7 +8,9 @@ import json
 from pathlib import Path
 
 from src.topic5_continuous_marked_state_r1 import contract
-from src.topic5_continuous_marked_state_r1.r1_7 import R1_7A_REVISION
+from src.topic5_continuous_marked_state_r1.r1_7 import (
+    NONFINITE_GRADIENT_STATUS, R1_7A_REVISION,
+)
 from src.topic5_continuous_marked_state_r1.r1_7_t2 import R1_7_T2_REVISION
 
 
@@ -31,32 +33,42 @@ def main() -> None:
         for seed in range(5):
             path = args.root / "fits" / subject / f"seed_{seed}/result.json"
             value = load(path)
-            support = value["d_state"]["support"]
+            nonfinite = value.get("analysis_status") == NONFINITE_GRADIENT_STATUS
             checks = {
                 "status": value.get("status") == "COMPLETE",
                 "revision": value.get("revision") == R1_7A_REVISION,
                 "subject_seed": value.get("subject") == subject and value.get("seed") == seed,
-                "layers_touch_not_overlap": support["state_stop"] == support["mechanism_start"],
-                "recorded_support_conserved": abs(
-                    support["state_recorded_seconds"]
-                    + support["mechanism_recorded_seconds"]
-                    - support["total_recorded_seconds"]
-                ) < 1e-6,
-                "state_fraction": abs(
-                    support["state_recorded_seconds"]
-                    / support["total_recorded_seconds"] - .60
-                ) < 1e-9,
                 "d_mechanism_not_scored": value.get("d_mechanism_scored_here") is False,
                 "selection_safe": value.get("development_validation_used_for_selection") is False,
                 "formal_closed": value.get("formal_test_partition_opened") is False,
                 "sealed_closed": value.get("sealed_opened") is False,
-                "checkpoint_hash": contract.sha256_file(value["checkpoint"]) == value["checkpoint_sha256"],
             }
+            if nonfinite:
+                # A recorded optimiser failure has no fitted layer to audit, but
+                # it must never be counted as a stable checkpoint.
+                checks["nonfinite_never_stable"] = value.get("stable_checkpoint") is False
+            else:
+                support = value["d_state"]["support"]
+                checks.update({
+                    "layers_touch_not_overlap": support["state_stop"] == support["mechanism_start"],
+                    "recorded_support_conserved": abs(
+                        support["state_recorded_seconds"]
+                        + support["mechanism_recorded_seconds"]
+                        - support["total_recorded_seconds"]
+                    ) < 1e-6,
+                    "state_fraction": abs(
+                        support["state_recorded_seconds"]
+                        / support["total_recorded_seconds"] - .60
+                    ) < 1e-9,
+                    "checkpoint_hash": contract.sha256_file(value["checkpoint"]) == value["checkpoint_sha256"],
+                })
             if not all(checks.values()):
                 raise ValueError(f"R1.7A audit failed {path}: {checks}")
             r1_source_payloads.add(json.dumps(value["source_hashes"], sort_keys=True))
             fits.append({"path": str(path), "sha256": contract.sha256_file(path),
-                         "stable": value["stable_checkpoint"], "checks": checks})
+                         "stable": value["stable_checkpoint"],
+                         "analysis_status": value.get("analysis_status", "ESTIMATED"),
+                         "checks": checks})
     t2_rows = []
     t2_source_payloads = set()
     for path in sorted((args.root / "t2_r2").glob("*/*/result.json")):
@@ -91,6 +103,9 @@ def main() -> None:
         "r1_summary": str(r1_path), "r1_summary_sha256": contract.sha256_file(r1_path),
         "t2_summary": str(t2_path), "t2_summary_sha256": contract.sha256_file(t2_path),
         "n_subjects": len(subjects), "n_r1_fits": len(fits),
+        "n_r1_nonfinite_gradient_cells": sum(
+            1 for row in fits if row["analysis_status"] == NONFINITE_GRADIENT_STATUS
+        ),
         "n_t2_cells": len(t2_rows), "r1_fits": fits, "t2_cells": t2_rows,
         "r1_source_payloads": [json.loads(value) for value in r1_source_payloads],
         "t2_source_payloads": [json.loads(value) for value in t2_source_payloads],

@@ -80,9 +80,24 @@ R1_7A_SUBJECTS = (
     "yuquan_wangyiyang",
 )
 
+# Development subjects that pass the identical R1.7A support thresholds but fell
+# outside its top-five-per-dataset ranking cap.  Used only by the exploratory
+# R1.7B cohort extension; R1_7A_SUBJECTS stays frozen.
+R1_7B_ADDED_SUBJECTS = (
+    "epilepsiae_1084",
+    "epilepsiae_1150",
+    "epilepsiae_442",
+    "epilepsiae_548",
+    "epilepsiae_583",
+    "epilepsiae_590",
+    "epilepsiae_635",
+)
+
+R1_7B_SUBJECTS = tuple(dict.fromkeys((*R1_7A_SUBJECTS, *R1_7B_ADDED_SUBJECTS)))
+
 EXTENDED_DEVELOPMENT_SUBJECTS = tuple(dict.fromkeys(
     (*PILOT_SUBJECTS, *LONG_H3_DISCOVERY_SUBJECTS, *R1_5_EXTENSION_SUBJECTS,
-     *R1_7A_SUBJECTS)
+     *R1_7A_SUBJECTS, *R1_7B_ADDED_SUBJECTS)
 ))
 
 

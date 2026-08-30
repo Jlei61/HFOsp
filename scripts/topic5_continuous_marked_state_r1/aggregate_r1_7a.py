@@ -12,7 +12,7 @@ from src.topic5_continuous_marked_state_r1 import contract
 from src.topic5_continuous_marked_state_r1.r1_2 import load_full_design
 from src.topic5_continuous_marked_state_r1.r1_7 import (
     R1_7A_REVISION, complete_event_blocks_by_segment,
-    coverage_segment_for_times,
+    coverage_segment_for_times, split_scored_payloads,
 )
 from src.topic5_continuous_marked_state_r1.coverage import CoverageTable
 
@@ -62,36 +62,43 @@ def bootstrap(blocks: list[dict], key: str, *, weight_key: str = "n_events",
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", type=Path, default=contract.RESULT_ROOT / "r1_7a")
+    parser.add_argument("--revision", default=R1_7A_REVISION,
+                        help="cell revision to accept; the R1.7B extension passes its own")
+    parser.add_argument("--seeds", type=int, default=len(SEEDS),
+                        help="number of seeds per subject (5 for the frozen R1.7A)")
     args = parser.parse_args()
     inventory = json.loads((args.root / "manifests/cohort_inventory.json").read_text())
     by_subject = {}; rows = []
     for subject in inventory["selected_subjects"]:
         payloads = []
-        for seed in SEEDS:
+        for seed in range(int(args.seeds)):
             path = args.root / "fits" / subject / f"seed_{seed}/result.json"
             value = json.loads(path.read_text())
             if (value.get("status") != "COMPLETE"
-                    or value.get("revision") != R1_7A_REVISION
+                    or value.get("revision") != args.revision
                     or value.get("formal_test_partition_opened") is not False
                     or value.get("sealed_opened") is not False):
                 raise ValueError(f"invalid R1.7A result: {path}")
             payloads.append(value)
-        row = {"subject": subject, "n_seeds": 5,
+        scored, nonfinite_seeds = split_scored_payloads(payloads)
+        row = {"subject": subject, "n_seeds": int(args.seeds),
+               "scored_seeds": len(scored),
+               "nonfinite_gradient_seeds": nonfinite_seeds,
                "stable_checkpoint_seeds": sum(v["stable_checkpoint"] for v in payloads)}
         for label, path in FIELDS.items():
-            values = [get(value["d_state"], path) for value in payloads]
+            values = [get(value["d_state"], path) for value in scored]
             finite = [float(value) for value in values if value is not None and np.isfinite(value)]
             row[label] = float(np.median(finite)) if finite else None
             row[label + "_favourable_seeds"] = int(sum(value < 0 for value in finite))
         keyed = {}
-        for value in payloads:
+        for value in scored:
             for block in value["d_state"]["nonoverlap_time_blocks"]:
                 key = (float(block["start"]), float(block["stop"]))
                 keyed.setdefault(key, []).append(block)
         block_medians = []
         for key, blocks in sorted(keyed.items()):
-            if len(blocks) != 5:
-                raise ValueError(f"{subject}: bootstrap block missing a seed")
+            if len(blocks) != len(scored):
+                raise ValueError(f"{subject}: bootstrap block missing a scored seed")
             block_medians.append({
                 "start": key[0], "stop": key[1],
                 "n_events": int(np.median([v["n_events"] for v in blocks])),
@@ -142,9 +149,20 @@ def main() -> None:
         }
         row["n_d_state_blocks"] = len(block_medians)
         row["patient_stable_state"] = bool(row["stable_checkpoint_seeds"] >= 3)
+        if not scored:
+            row["patient_status"] = "NONFINITE_GRADIENT_NO_SCORABLE_SEED"
+            row["d_mechanism_events"] = 0
+            row["d_mechanism_100_event_blocks"] = 0
+            row["d_mechanism_segment_support"] = []
+            row["t2_support_class"] = "INSUFFICIENT"
+            row["t2_run_eligible"] = False
+            rows.append(row); by_subject[subject] = row
+            continue
+        row["patient_status"] = ("PARTIAL_NONFINITE_GRADIENT" if nonfinite_seeds
+                                 else "SCORED")
         manifest = json.loads((args.root / "cache" / subject / "manifest.json").read_text())
         design = load_full_design(Path(manifest["design"]))
-        boundary = float(payloads[0]["d_state"]["support"]["mechanism_start"])
+        boundary = float(scored[0]["d_state"]["support"]["mechanism_start"])
         d_mechanism_events = int(np.sum(
             (design.event_split == 1) & (design.event_time >= boundary)
         ))
@@ -172,11 +190,16 @@ def main() -> None:
     stable = [row["subject"] for row in rows if row["patient_stable_state"]]
     t2 = [row["subject"] for row in rows if row["t2_run_eligible"]]
     summary = {
-        "status": "COMPLETE", "revision": R1_7A_REVISION,
+        "status": "COMPLETE", "revision": args.revision,
         "subjects": inventory["selected_subjects"], "n_subjects": len(rows),
         "stable_state_subjects": stable, "n_stable_state_subjects": len(stable),
         "t2_run_subjects": t2, "n_t2_run_subjects": len(t2),
         "by_subject": by_subject,
+        "nonfinite_gradient_cells": sum(r["nonfinite_gradient_seeds"] for r in rows),
+        "subjects_with_nonfinite_cells": [
+            r["subject"] for r in rows if r["nonfinite_gradient_seeds"]
+        ],
+        "nonfinite_cells_are_instrument_failures_not_negatives": True,
         "seed_is_optimization_uncertainty_not_scientific_replication": True,
         "scientific_uncertainty": "patient-local continuous-time block bootstrap after five-seed median",
         "ordinary_negative_results_retained": True,

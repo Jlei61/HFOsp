@@ -23,15 +23,34 @@ from src.topic5_continuous_marked_state_r1.r1_2b_diagnostics import (
 )
 from src.topic5_continuous_marked_state_r1.r1_3 import fit_target_observer, materialize_embedding
 from src.topic5_continuous_marked_state_r1.r1_7 import (
-    R1_7A_REVISION, block_bootstrap_length_seconds,
-    split_validation_by_recorded_time,
+    NONFINITE_GRADIENT_STATUS, R1_7A_REVISION, block_bootstrap_length_seconds,
+    is_nonfinite_gradient_failure, split_validation_by_recorded_time,
 )
+
+
+def source_hashes() -> dict[str, str]:
+    return {
+        "runner": contract.sha256_file(Path(__file__)),
+        "r1_7": contract.sha256_file(
+            contract.REPO_ROOT / "src/topic5_continuous_marked_state_r1/r1_7.py"
+        ),
+        "r1_2": contract.sha256_file(
+            contract.REPO_ROOT / "src/topic5_continuous_marked_state_r1/r1_2.py"
+        ),
+        "diagnostics": contract.sha256_file(
+            contract.REPO_ROOT
+            / "src/topic5_continuous_marked_state_r1/r1_2b_diagnostics.py"
+        ),
+        "split_manifest": contract.sha256_file(contract.SPLIT_MANIFEST),
+    }
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--subject", required=True, choices=contract.R1_7A_SUBJECTS)
-    parser.add_argument("--seed", required=True, type=int, choices=range(5))
+    parser.add_argument("--subject", required=True, choices=contract.R1_7B_SUBJECTS)
+    parser.add_argument("--seed", required=True, type=int, choices=range(10))
+    parser.add_argument("--revision", default=R1_7A_REVISION,
+                        help="cell revision; R1.7B extension passes its own")
     parser.add_argument("--device", default="cuda")
     parser.add_argument("--r1-2-root", type=Path, required=True)
     parser.add_argument("--output-root", type=Path, required=True)
@@ -59,21 +78,47 @@ def main() -> None:
     )
     model, design, loader = loaded["model"], loaded["design"], loaded["loader"]
     initial = {key: value.detach().cpu().clone() for key, value in model.state_dict().items()}
-    trace = fit_target_observer(
-        model, design, loader, device=args.device,
-        observer_epochs=int(align["observer_epochs"]),
-        joint_epochs=int(align["joint_epochs"]),
-        state_lr=float(align["state_lr"]),
-        observer_lr=float(align["state_lr"]) * float(align["observer_ratio"]),
-        raw_lr=1e-5, chunk_anchors=int(align["chunk"]),
-        optimizer_name=str(align["optimizer"]),
-        weight_decay=float(align["weight_decay"]),
-        grad_clip_norm=float(align["clip"]),
-        warmup_fraction=float(align["warmup"]),
-        selection_min_delta=float(align["min_delta"]),
-        early_stopping_patience=None,
-        epoch_zero_seen_inner_validation=False, refit_mode="full_train",
-    )
+    output = args.output_root / "fits" / args.subject / f"seed_{args.seed}"
+    try:
+        trace = fit_target_observer(
+            model, design, loader, device=args.device,
+            observer_epochs=int(align["observer_epochs"]),
+            joint_epochs=int(align["joint_epochs"]),
+            state_lr=float(align["state_lr"]),
+            observer_lr=float(align["state_lr"]) * float(align["observer_ratio"]),
+            raw_lr=1e-5, chunk_anchors=int(align["chunk"]),
+            optimizer_name=str(align["optimizer"]),
+            weight_decay=float(align["weight_decay"]),
+            grad_clip_norm=float(align["clip"]),
+            warmup_fraction=float(align["warmup"]),
+            selection_min_delta=float(align["min_delta"]),
+            early_stopping_patience=None,
+            epoch_zero_seen_inner_validation=False, refit_mode="full_train",
+        )
+    except RuntimeError as error:
+        # The frozen optimiser's own non-finite guard: record the seed as an
+        # instrument failure instead of aborting the whole ten-patient cohort.
+        # It is never scored and never counts as a stable checkpoint.  Any other
+        # RuntimeError is an implementation fault and must still abort.
+        if not is_nonfinite_gradient_failure(error):
+            raise
+        contract.atomic_json(output / "result.json", {
+            "status": "COMPLETE",
+            "analysis_status": NONFINITE_GRADIENT_STATUS,
+            "revision": args.revision,
+            "subject": args.subject, "seed": args.seed,
+            "stable_checkpoint": False,
+            "d_mechanism_scored_here": False,
+            "nonfinite_reason": str(error),
+            "cohort_inventory": str(inventory_path),
+            "cohort_inventory_sha256": contract.sha256_file(inventory_path),
+            "frozen_r1_6_config": str(config_path),
+            "frozen_r1_6_config_sha256": contract.sha256_file(config_path),
+            "source_hashes": source_hashes(),
+            "development_validation_used_for_selection": False,
+            "formal_test_partition_opened": False, "sealed_opened": False,
+        })
+        return
     embedding = materialize_embedding(
         model, design, loader, device=args.device, batch_size=int(align["chunk"])
     )
@@ -218,12 +263,11 @@ def main() -> None:
                     ),
                 })
             cursor = block_stop
-    output = args.output_root / "fits" / args.subject / f"seed_{args.seed}"
     checkpoint = output / "model.pt"
     checkpoint.parent.mkdir(parents=True, exist_ok=True)
     temporary = checkpoint.with_suffix(".pt.tmp")
     torch.save({
-        "revision": R1_7A_REVISION, "subject": args.subject,
+        "revision": args.revision, "subject": args.subject,
         "seed": args.seed, "model": model.state_dict(), "fit_trace": asdict(trace),
         "d_state": asdict(layer),
     }, temporary)
@@ -231,7 +275,7 @@ def main() -> None:
     pm = metric_contrast(persistent, memoryless)
     cw = metric_contrast(correct, wrong_median)
     payload = {
-        "status": "COMPLETE", "revision": R1_7A_REVISION,
+        "status": "COMPLETE", "revision": args.revision,
         "subject": args.subject, "seed": args.seed,
         "frozen_r1_6_config": str(config_path),
         "frozen_r1_6_config_sha256": contract.sha256_file(config_path),
@@ -274,20 +318,7 @@ def main() -> None:
         "d_mechanism_scored_here": False,
         "checkpoint": str(checkpoint),
         "checkpoint_sha256": contract.sha256_file(checkpoint),
-        "source_hashes": {
-            "runner": contract.sha256_file(Path(__file__)),
-            "r1_7": contract.sha256_file(
-                contract.REPO_ROOT / "src/topic5_continuous_marked_state_r1/r1_7.py"
-            ),
-            "r1_2": contract.sha256_file(
-                contract.REPO_ROOT / "src/topic5_continuous_marked_state_r1/r1_2.py"
-            ),
-            "diagnostics": contract.sha256_file(
-                contract.REPO_ROOT
-                / "src/topic5_continuous_marked_state_r1/r1_2b_diagnostics.py"
-            ),
-            "split_manifest": contract.sha256_file(contract.SPLIT_MANIFEST),
-        },
+        "source_hashes": source_hashes(),
         "development_validation_used_for_selection": False,
         "formal_test_partition_opened": False, "sealed_opened": False,
     }

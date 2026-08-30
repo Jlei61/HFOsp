@@ -297,3 +297,57 @@
   - R1.5/H3-long 退役说明：`continuous_marked_state_r1_5_retirement_2026-08-27.md`
   - 正式验收 R1.6 的优化器/可识别性诊断与 E384 单患者支持；R1.5 的选择偏差结果以及 H3-long 的 N=1,000/3,000/10,000、六小时 boxcar 均退出当前证据主线。
   - 在不读取模型结果的前提下，从未参与旧决策的 development 患者中按记录与事件支持各取 Epilepsiae/Yuquan 5 人；development validation 按真实记录时长冻结为 D_state 60% 与 D_mechanism 40%。先做五 seed H1/H2a，仅对合格患者在 D_mechanism 运行无自由 exposure 截距的 N=100 T2。
+  - **执行结果（2026-08-27 收口）**：
+    - 白话版：`continuous_marked_state_r1_7a_r2_0_plain_2026-08-27.md`
+    - 技术版：`continuous_marked_state_r1_7a_r2_0_technical_2026-08-27.md`
+    - 机器审计：`results/epi_prssm/continuous_marked_state/r1/r1_7a/reports/machine_audit.json`
+    - 50/50 R1.7A cells、38/38 T2 cells 全部完成；R1 与 T2 各自 source payload 唯一；
+      formal/sealed/seizure/paper-ready 全程关闭；无 N≥1000、六小时、物理时间产物。
+    - **H1/H2a**：按事前判据（≥3/5 seeds 同时通过 persistent 与 correct-time）**4/10 患者复现**
+      （上一轮 1/6）；但按 TRAIN 决定长度的时间块 bootstrap 区间，只有 `epilepsiae_1125`
+      在充足独立块（37/35）上两层都不跨零；`epilepsiae_253` 仅 correct-time 成立、
+      `yuquan_liyouran` 仅 persistence 成立、`yuquan_zhangbichen` 两层成立但独立块仅 5 个。
+      反例：`epilepsiae_1073` 两个差值恒为 0（状态完全未参与）；
+      `yuquan_zhaochenxi` persistent 显著劣于 memoryless（时刻编码但无跨窗口留存）。
+    - **H2a 端点**：增益集中在 selecting group size 与 later continuation；
+      `first subset` 方向不一致（最强患者上区间显著不利）。
+      合同三个主端点中 `same_prefix_continuation` 在本队列与 `continuation` **逐位等值**，
+      实际只有两个独立端点。
+    - **H3 独立时间块重打分（本轮补做）**：新增 `evaluate_r2_edge_by_block`，
+      用 `rescore_r1_7_t2_by_block.py` 不重新拟合地重打分全部 38 cells，
+      聚合口径同 H1（逐块取五 seed 中位数再做块 bootstrap）。
+      **`block_level_support` = none**：`epilepsiae_1125`/participation
+      −0.00158 [−0.00419,+0.00060]、`yuquan_zhangbichen`/load −0.00144 [−0.00672,+0.00408] 均跨零。
+      单 seed 区间会误导（该患者 seeds 0/1/2 不含零但 seed 3 为 +0.00190）。
+      检验有分辨力：不利臂逐块同样不利且不含零，两个"边未离零"单元逐块恒为 0。
+      产物 `t2_r2_block_rescore/` 与 `reports/t2_block_rescore_summary.json`。
+    - **H3（T2-R2.0）**：8 个 patient×source 单元中冻结聚合器判 2 个为 support，但复核后
+      `yuquan_zhangbichen`/load 由 **placebo−no_edge=+0.0286 的安慰剂退化**驱动
+      （real−no_edge 仅 −0.00088、种子符号不一致、独立块 8 个），不予采信；
+      `epilepsiae_1125`/participation 内部一致但**缺独立时间块确认**（事件平均基于 2904 行、
+      独立块仅 33 个，产物中无逐块 contrast）。**8/8 在独立时间块口径下全部不成立；与退役长尺度路线不同，本轮阴性可解释。**
+    - **三项方法学发现**：(1) T2 无逐块 contrast；(2) `real_edge_estimable` 把拟合结果
+      `edge_left_zero_initialisation` 混入可估计性闸门，导致"主动判定无边"的 seed 被移出分母，
+      **低报阴性**；(3) `patient_source_support` 不要求 real 相对 no_edge 有实质量级，
+      退化的 placebo 即可让判据通过。
+    - **运行事件**：5 cells 非有限梯度（`epilepsiae_1077` 4、`yuquan_zhaochenxi` 1）按 R1.6
+      先例显式记录为仪器失败并保留在分母；`r1_7_t2.py:89` 漏传 `state_permutation` 致该 T2
+      路径此前从未跑通，已修并加 AST 静态回归测试；`yuquan_zhangbichen`（52 contacts）
+      3 cells OOM，按合同以降低并发处理、未改 batch/chunk 故数值不变。测试 126 passed。
+
+- **2026-08-28 R1.7B 探索性队列扩展（10→17 位）**：
+  报告 `continuous_marked_state_r1_7b_cohort_extension_2026-08-28.md`；
+  产物 `results/epi_prssm/continuous_marked_state/r1/r1_7b_cohort_extension/`。
+  只移除 R1.7A 选人规则里"每数据集取前五位"这一条上限，其余判据与排除清单一字不改，
+  选择仍不读取任何模型结果，builder 断言结果为 R1.7A 超集。
+  4 位 Yuquan 因真实数据量不达事前阈值未纳入（验证 0.3h、训练 267/517 事件等）。
+  85 prefix + 85 fits 全部完成，零报错零 OOM；**10 位原患者逐位复现冻结结果（10×5 字段零不一致）**。
+  **复现率**：R1.7A 4/10=40% → R1.7B 6/17=35%，7 位全新患者 2/7=29%，同一量级。
+  **严格区间标准（两个差值区间均不含零且独立块≥20）从 1 位增至 2 位**：
+  `epilepsiae_1125`（37/35 块）与新增 `epilepsiae_1150`（38/35 块，跨窗口留存 −0.07409
+  [−0.10173,−0.03659]、时刻专属 −0.00527 [−0.00921,−0.00118]）。
+  反例增多：`epilepsiae_1084` 带状态显著更差（+0.05669 [+0.02627,+0.08659]）、
+  `epilepsiae_583` 留存有利但时刻专属跨零、`epilepsiae_1073` 恒为 0。
+  **仪器失败增至 10 cells / 3 患者**，其中 `epilepsiae_590` 为**整位患者 5/5 非有限梯度**——
+  按修复前的行为这一位会让整个 17 位队列中止，验证了窄口径记录改动的必要性。
+  探索性扩展，**不改写 R1.7A 预注册结果**；正式/封存分区、发作探针、成稿图未触碰。
