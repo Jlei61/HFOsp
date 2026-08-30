@@ -3,11 +3,14 @@ import numpy as np
 from src.interictal_spatial_information_gain import (
     blockwise_permutation,
     build_hybrid_training_features,
+    compute_crossfit_all_event_spatial_information_gain,
     compute_crossfit_spatial_information_gain,
     equal_view_spatial_scale,
+    fit_full_all_event_spatial_template_model,
     fit_evaluate_crossfit_fold,
     fit_full_spatial_template_model,
     fit_full_temporal_template_model,
+    permute_train_directions_within_blocks,
 )
 from src.topic5_interictal_direction_rose import fit_event_directions_3d
 
@@ -38,6 +41,37 @@ def test_blockwise_permutation_never_crosses_recording_blocks():
     permutation = blockwise_permutation(blocks, np.random.default_rng(7))
     assert sorted(permutation.tolist()) == list(range(len(blocks)))
     assert np.array_equal(blocks[permutation], blocks)
+
+
+def test_train_direction_permutation_preserves_blocks_missingness_and_test_rows():
+    directions = np.asarray([
+        [1.0, 0.0, 0.0],
+        [2.0, 0.0, 0.0],
+        [np.nan, np.nan, np.nan],
+        [4.0, 0.0, 0.0],
+        [5.0, 0.0, 0.0],
+        [6.0, 0.0, 0.0],
+        [7.0, 0.0, 0.0],
+        [8.0, 0.0, 0.0],
+    ])
+    blocks = np.repeat([0, 1], 4)
+    train = np.asarray([0, 1, 2, 4, 5, 6])
+    first = permute_train_directions_within_blocks(
+        directions, blocks, train, np.random.default_rng(23)
+    )
+    second = permute_train_directions_within_blocks(
+        directions, blocks, train, np.random.default_rng(23)
+    )
+    assert np.array_equal(first, second, equal_nan=True)
+    assert np.array_equal(np.isnan(first), np.isnan(directions))
+    assert np.array_equal(first[[3, 7]], directions[[3, 7]])
+    for block in (0, 1):
+        members = train[
+            (blocks[train] == block) & np.isfinite(directions[train]).all(1)
+        ]
+        assert sorted(first[members, 0].tolist()) == sorted(
+            directions[members, 0].tolist()
+        )
 
 
 def test_crossfit_uses_rank_only_heldout_assignment_and_returns_null():
@@ -173,3 +207,92 @@ def test_full_spatial_fit_orders_template_a_by_event_prevalence():
     )
     assert timing["cluster_counts"].tolist() == [42, 18]
     assert timing["templates"].shape == (2, 6)
+
+
+def test_all_event_missing_view_fit_keeps_spatial_missing_events():
+    coords = np.array([
+        [-2.0, 0.0, 0.0],
+        [-1.0, 1.0, 0.0],
+        [0.0, -1.0, 0.0],
+        [1.0, 1.0, 0.0],
+        [2.0, 0.0, 0.0],
+        [0.0, 2.0, 0.0],
+    ])
+    forward = np.argsort(np.argsort(coords[:, 0])).astype(float)
+    reverse = np.argsort(np.argsort(-coords[:, 0])).astype(float)
+    rng = np.random.default_rng(97)
+    rows = []
+    blocks = []
+    for block in range(4):
+        for event in range(30):
+            base = forward if event % 2 == 0 else reverse
+            rows.append(base + rng.normal(0.0, 0.025, size=6))
+            blocks.append(block)
+    ranks = np.asarray(rows, float).T
+    bools = np.ones_like(ranks, dtype=bool)
+    directions = fit_event_directions_3d(ranks, coords, min_contacts=3)[
+        "directions"
+    ]
+    directions[::5] = np.nan
+
+    full = fit_full_all_event_spatial_template_model(
+        ranks,
+        bools,
+        directions,
+        coords,
+        min_cluster_events=5,
+    )
+    assert len(full["labels"]) == ranks.shape[1]
+    assert full["cluster_counts"].sum() == ranks.shape[1]
+    assert full["n_spatial_missing_events"] == len(directions[::5])
+    assert full["cluster_spatial_counts"].sum() == np.isfinite(directions).all(1).sum()
+
+    crossfit = compute_crossfit_all_event_spatial_information_gain(
+        ranks,
+        bools,
+        directions,
+        blocks,
+        coords,
+        min_cluster_events=5,
+        min_score_events_per_cluster=2,
+        n_null=10,
+        n_train_spatial_null=4,
+        seed=9,
+    )
+    assert crossfit["n_events"] == ranks.shape[1]
+    assert crossfit["n_direction_estimable"] < crossfit["n_events"]
+    for fold in crossfit["folds"]:
+        assert sum(fold["timing_only_train_cluster_counts"]) == fold["n_train_events"]
+        assert sum(fold["timing_plus_space_train_cluster_counts"]) == fold["n_train_events"]
+        assert fold["n_test_common_assigned"] <= fold["n_test_direction_estimable"]
+    assert np.isfinite(crossfit["timing_only_score"])
+    assert np.isfinite(crossfit["timing_plus_space_score"])
+    assert np.asarray(
+        crossfit["event_weighted_direction_shuffle_null_gain"]
+    ).shape == (10,)
+    assert np.asarray(
+        crossfit["train_spatial_shuffle_null_timing_plus_space_score"]
+    ).shape == (4,)
+    assert np.asarray(
+        crossfit[
+            "event_weighted_train_spatial_shuffle_null_timing_plus_space_score"
+        ]
+    ).shape == (4,)
+    assert crossfit["contract"]["hard_geometry_loco_qc_used"] is False
+
+    repeated = compute_crossfit_all_event_spatial_information_gain(
+        ranks,
+        bools,
+        directions,
+        blocks,
+        coords,
+        min_cluster_events=5,
+        min_score_events_per_cluster=2,
+        n_null=10,
+        n_train_spatial_null=4,
+        seed=9,
+    )
+    assert np.array_equal(
+        crossfit["train_spatial_shuffle_null_timing_plus_space_score"],
+        repeated["train_spatial_shuffle_null_timing_plus_space_score"],
+    )

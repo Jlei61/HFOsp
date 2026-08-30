@@ -10,6 +10,7 @@ or sign flipping.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import sys
@@ -33,6 +34,7 @@ from scripts.plot_topic5_interictal_event_envelope_field import (  # noqa: E402
     _event_field,
     load_frozen,
 )
+import scripts.plot_topic5_interictal_event_envelope_field as event_field_module  # noqa: E402
 from scripts.run_topic5_clinical_onset_shared_field_concordance import (  # noqa: E402
     BAND,
     CLINICAL_WINDOW,
@@ -121,6 +123,14 @@ def _display_path(path: Path) -> str:
         return str(path.relative_to(ROOT))
     except ValueError:
         return str(path)
+
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def _extract_clinical_activation(
@@ -221,28 +231,43 @@ def _extract_clinical_activation(
 def _checkpoint_event(
     ds_sid: str,
     seizure_idx: int,
+    *,
+    expected_field_sha256: str | None = None,
     expected_fingerprint: str | None = None,
 ) -> tuple[dict | None, Path]:
     path = CHECKPOINT_ROOT / ds_sid / f"seizure_{int(seizure_idx):03d}.json"
     if not path.exists():
         return None, path
     payload = json.loads(path.read_text(encoding="utf-8"))
-    checkpoint_fingerprint = payload.get("field_sha256") or payload.get("field_fingerprint_sha256")
+    if (
+        expected_field_sha256 is not None
+        and payload.get("field_sha256") != expected_field_sha256
+    ):
+        return None, path
     if (
         expected_fingerprint is not None
-        and checkpoint_fingerprint is not None
-        and checkpoint_fingerprint != expected_fingerprint
+        and payload.get("field_fingerprint_sha256") != expected_fingerprint
     ):
         return None, path
     return payload.get("event"), path
 
 
-def _checkpoint_rows(ds_sid: str, n_target_contacts: int) -> list[dict]:
+def _checkpoint_rows(
+    ds_sid: str,
+    n_target_contacts: int,
+    *,
+    expected_field_sha256: str,
+    expected_fingerprint: str,
+) -> list[dict]:
     """Load complete exact-band clinical-onset checkpoint rows."""
     subject_dir = CHECKPOINT_ROOT / ds_sid
     rows = []
     for path in sorted(subject_dir.glob("seizure_*.json")):
         payload = json.loads(path.read_text(encoding="utf-8"))
+        if payload.get("field_sha256") != expected_field_sha256:
+            continue
+        if payload.get("field_fingerprint_sha256") != expected_fingerprint:
+            continue
         event = payload.get("event") or {}
         if event.get("status") != "included":
             continue
@@ -497,7 +522,7 @@ def _write_readme(out_dir: Path, stem: str, seizure_idx: int) -> Path:
 
 ### {stem}.png / .pdf
 
-E1146 的冻结 shared plane 配对图。左侧为红色语义标题的 TA early-to-late timing field；右侧为从 positive-power TA morphology 候选中目视锁定的 seizure {seizure_idx}。右图显示 clinical onset `0–10 s` broadband `1–150 Hz` baseline-normalized power，使用 `Blues`，且不做 rank 或 sign flip。两幅图严格复用同一 contact order、shared TA axis、transverse sign、TA support 与同一个 6 mm display kernel。
+E1146 的冻结 shared plane 配对图。左侧为 TA early-to-late timing field；右侧为模板更新前已固定、更新后不重新选择的 seizure {seizure_idx}。右图显示 clinical onset `0–10 s` broadband `1–150 Hz` baseline-normalized power，使用 `Blues`，且不做 rank 或 sign flip。两幅图严格复用同一 contact order、shared TA axis、transverse sign、TA support 与同一个 6 mm display kernel。
 
 **关注点**：这是一个 representative-subject shared-field readout，用于连接间期传播轴与同次发作早期能量分布；不能单独解释为 replay、因果机制或 cohort 结论。
 
@@ -505,19 +530,7 @@ E1146 的冻结 shared plane 配对图。左侧为红色语义标题的 TA early
 
 记录 raw seizure、临床窗、远端 baseline、频谱参数、冻结 fingerprint、A/B 匹配分数、逐触点原始值与显示归一化。重画时必须先通过 checkpoint score parity，不能从 ictal 值重拟合轴、平面、support 或 kernel。
 
-**关注点**：两条 colorbar 分别恢复为真实 propagation rank 与 robust-z 数值；`Blues` 令高 broadband power 为深色，与左图“早期为深色”的视觉方向一致。锁定的 seizure 2 在 15/15 触点均为正，并通过局部源区形态 gate；空间相关仍只表达触点间相对模式。右图不是 contact rank，也不改变当前 maxAB 科学统计。
-
-### candidates_positive_ta_morphology/
-
-保留 seizure 2 / 10 / 23 / 1 四个 morphology-aware positive-power 预览、完整 25 次发作审计表和逐例 metadata。正式图经目视锁定候选 1（seizure 2）；其余候选只作选择 provenance。
-
-**关注点**：候选筛选与目视选择服务代表图构图，不能当作预注册统计、独立验证或 cohort 证据。
-
-### archive/
-
-保存已撤回的 seizure 15 负 power 版本和 seizure 9 中段先亮版本。
-
-**关注点**：archive 只记录选择合同为什么修订，不得作为正式 Fig3-B 引用。
+**关注点**：两条 colorbar 分别恢复为真实 propagation rank 与 robust-z 数值。seizure 2 在模板更新前已经固定，本次只在新模板上重评；空间相关仍只表达触点间相对模式。
 """
     path = out_dir / "README.md"
     path.write_text(text, encoding="utf-8")
@@ -525,19 +538,38 @@ E1146 的冻结 shared plane 配对图。左侧为红色语义标题的 TA early
 
 
 def main() -> None:
+    global FROZEN_ROOT, CHECKPOINT_ROOT
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--subject", default="epilepsiae_1146")
     parser.add_argument(
         "--seizure-idx", type=int, default=None,
         help="explicit inventory index; default is visually locked Fig3-B seizure 2",
     )
+    parser.add_argument("--field-root", type=Path, default=FROZEN_ROOT)
+    parser.add_argument("--checkpoint-root", type=Path, default=CHECKPOINT_ROOT)
+    parser.add_argument(
+        "--allow-missing-checkpoint",
+        action="store_true",
+        help="diagnostic only; paper-ready runs fail when the matched checkpoint is absent",
+    )
     parser.add_argument("--output-dir", type=Path, default=OUT_DIR)
     args = parser.parse_args()
 
+    FROZEN_ROOT = args.field_root.resolve()
+    CHECKPOINT_ROOT = args.checkpoint_root.resolve()
+    event_field_module.FROZEN = FROZEN_ROOT
+
     ds_sid = str(args.subject).replace("/", "_")
     record, frozen_path = _load_record(ds_sid)
-    fz = load_frozen(ds_sid)
-    checkpoint_rows = _checkpoint_rows(ds_sid, len(fz["names"]))
+    fz = event_field_module.load_frozen(ds_sid)
+    field_file_sha256 = _sha256(frozen_path)
+    field_fingerprint = record["interictal_field"]["fingerprint_sha256"]
+    checkpoint_rows = _checkpoint_rows(
+        ds_sid,
+        len(fz["names"]),
+        expected_field_sha256=field_file_sha256,
+        expected_fingerprint=field_fingerprint,
+    )
     seizure_idx = LOCKED_SEIZURE_IDX if args.seizure_idx is None else int(args.seizure_idx)
     activation, extraction = _extract_clinical_activation(
         ds_sid, seizure_idx, record
@@ -545,8 +577,13 @@ def main() -> None:
     checkpoint, checkpoint_path = _checkpoint_event(
         ds_sid,
         seizure_idx,
-        expected_fingerprint=record["interictal_field"]["fingerprint_sha256"],
+        expected_field_sha256=field_file_sha256,
+        expected_fingerprint=field_fingerprint,
     )
+    if checkpoint is None and not args.allow_missing_checkpoint:
+        raise ValueError(
+            "matched field checkpoint is missing or has the wrong file/fingerprint identity"
+        )
     audit = _score_audit(record, activation, checkpoint)
     template = "A"
     rank = np.asarray(fz["rank_a"], dtype=float)
@@ -582,6 +619,10 @@ def main() -> None:
     support = np.asarray(
         fz["support_a" if template == "A" else "support_b"], dtype=float
     )
+    earliest_contacts = [
+        str(fz["names"][index])
+        for index in np.argsort(rank, kind="mergesort")[:2]
+    ]
     metadata = {
         "schema_id": SCHEMA_ID,
         "status": "paper-ready Fig3-B locked",
@@ -596,14 +637,15 @@ def main() -> None:
         "axis_direction_convention": record.get("axis_direction_convention"),
         "field_plane": "shared",
         "selected_template": template,
-        "template_selection": "TA fixed; seizure 2 visually locked from morphology-aware positive-power candidates 2, 10, 23, and 1",
+        "template_selection": "TA fixed; seizure 2 retained from the pre-refresh figure and re-evaluated without reselection",
         "seizure_selection": {
-            "criterion": "manual visual lock after transparent positive-power and local TA source-topology gate",
+            "criterion": "same seizure fixed before the template refresh; no new candidate selection",
             "n_complete_exact_candidates": len(checkpoint_rows),
             "n_morphology_candidates": len(MORPHOLOGY_CANDIDATE_IDXS),
             "morphology_candidate_indices": list(MORPHOLOGY_CANDIDATE_IDXS),
             "candidate_review_order": list(MORPHOLOGY_CANDIDATE_IDXS),
-            "locked_by_user_visual_review": bool(args.seizure_idx is None),
+            "locked_before_template_refresh": True,
+            "reselected_after_template_refresh": False,
             "selected_seizure_idx": seizure_idx,
             "selected_candidate_order": 1 if seizure_idx == LOCKED_SEIZURE_IDX else None,
             "morphology_gate": {
@@ -613,7 +655,7 @@ def main() -> None:
                 "direct_early_rank_correlation_min": DIRECT_EARLY_CORR_MIN,
                 "early4_minus_late4_normalized_min_exclusive": 0.0,
                 "earliest2_min_normalized_min": EARLIEST_PAIR_MIN_NORM,
-                "earliest_contacts": ["SCL9", "ICL11"],
+                "earliest_contacts": earliest_contacts,
             },
             "selected_morphology_metrics": morphology,
             "candidate_summary": "results/paper-ready-figure/fig3b_interictal_ictal_shared_field/figures/candidates_positive_ta_morphology/candidate_summary.json",
@@ -628,6 +670,7 @@ def main() -> None:
         "score_audit": audit,
         "checkpoint": _display_path(checkpoint_path),
         "checkpoint_present": checkpoint is not None,
+        "field_file_sha256": field_file_sha256,
         "checkpoint_max_abs_score_error": float(max_score_error),
         "display": display,
         "claim_scope": [
