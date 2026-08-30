@@ -35,9 +35,9 @@ def synthetic_aggregate() -> dict:
 
 def test_blueprint_contains_joint_m3_and_m4_coefficients():
     rows, audit = prepare.candidate_blueprint(synthetic_aggregate())
-    assert audit["selectable_candidate_count"] == 12
-    assert audit["candidate_count_including_exact"] == 13
-    assert len(rows) == 12
+    assert audit["selectable_candidate_count"] == 18
+    assert audit["candidate_count_including_exact"] == 19
+    assert len(rows) == 18
     for row in rows:
         coefficients = np.asarray(row["coefficients"])
         assert coefficients.shape == (24, 2)
@@ -83,7 +83,7 @@ def test_freezer_accepts_synthetic_dynamic_config(monkeypatch, tmp_path):
             "robust_direction_ids": audit["feasible_direction_ids"],
             "candidate_rms_levels": [0.4, 0.6, 0.8],
             "candidate_ids": audit["candidate_ids"],
-            "candidate_count": 13, "selectable_candidate_count": 12,
+            "candidate_count": 19, "selectable_candidate_count": 18,
             "deduplication_audit": [], "candidate_blueprint": rows,
             "basis_uses_observation_geometry": False,
             "basis_uses_predeclared_objects": False,
@@ -95,6 +95,7 @@ def test_freezer_accepts_synthetic_dynamic_config(monkeypatch, tmp_path):
             "simulation": {"duration_ms": 20000.0},
         },
         "selection": {
+            "fresh_J14_improvement_required_networks": 3,
             "fresh_A_improvement_required_networks": 3,
             "fresh_B_protection_required_networks": 3,
             "B_protection_ratio": 1.10,

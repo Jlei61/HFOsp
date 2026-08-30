@@ -53,13 +53,17 @@ select a field or establish two-mode recovery.
 ## 4. Joint response construction
 
 After all 120 runs validate, concatenate the frozen M3 and M4-shell central
-difference tensors into a `3 x 48` response tensor. Construct the same four
-families used in rev15, but in the joint space:
+difference tensors into a `3 x 48` response tensor. Construct six
+training-only direction families in the joint space. Four preserve the rev15
+diagnostics and two explicitly align candidate construction with the already
+frozen complete `J14_v1` objective:
 
 1. mean A descent;
-2. maximin A descent with B protected on all construction networks;
-3. maximin A descent with B and both support gradients protected;
-4. sparse coordinates with networkwise sign agreement.
+2. mean `J14_v1` descent;
+3. maximin A descent with B protected on all construction networks;
+4. maximin A descent with B and both support gradients protected;
+5. maximin `J14_v1` descent with A, B and both support gradients protected;
+6. sparse coordinates with networkwise sign agreement.
 
 Every constructed vector may contain both M3 and M4 coefficients. A vector
 restricted to M4 around a failed fixed M3 field is forbidden. Candidate RMS is
@@ -72,12 +76,16 @@ Use new CRN seeds 2351--2353 and paired `exact_off`. A candidate progresses
 only if all three networks satisfy:
 
 - A loss is lower than paired `exact_off`;
+- complete `J14_v1` loss is lower than paired `exact_off`;
 - B loss is no greater than 110% of paired `exact_off`;
 - equal-network effective support is at least six for A and B;
 - no runaway or numerical invalidity.
 
 No gate is relaxed because the M3 result was negative. Natural KMeans and the
 two Fig.4 figures remain unavailable until one candidate passes this gate.
+Among usable candidates, rank first by worst-network and then mean-network
+`J14_v1` change, before A/B tie-breaks. This prevents a field that improves a
+single mode while worsening the complete training target from being selected.
 
 ## 6. Interpretation
 

@@ -32,8 +32,15 @@ from src.topic4_rev14_fourier_field import mode_inventory, mode_shell  # noqa: E
 ARTIFACT_ROOT = Path("/home/honglab/leijiaxin/HFOsp")
 DEFAULT_CONFIG = ROOT / "config/topic4_rev16_joint_m3_m4_response_analysis.json"
 OUTPUT_SCHEMA = "topic4_rev16_joint_m3_m4_response_aggregate_v1"
+EXPECTED_DIRECTION_FAMILIES = [
+    "mean_a", "mean_j14", "maximin_bprotected",
+    "maximin_supportprotected", "maximin_j14_abprotected",
+    "consensus_sparse",
+]
 ALLOWED_ANALYSIS_PATHS = frozenset({
     "config/topic4_rev16_joint_m3_m4_response_analysis.json",
+    "docs/topic4_rev16_joint_m3_m4_response_plan.md",
+    "docs/topic4_rev16_joint_m3_m4_response_spec.md",
     "scripts/aggregate_topic4_rev16_joint_candidates.py",
     "scripts/aggregate_topic4_rev16_joint_m3_m4_response.py",
     "scripts/freeze_topic4_rev16_joint_m3_m4_candidates.py",
@@ -141,6 +148,14 @@ def _load_inputs(
         "figure_used_for_construction",
     )) or progression["EE_EtoI_ZM"] != "off":
         raise RuntimeError("rev16 joint construction opened a forbidden input")
+    if config["robust_direction_construction"].get("families") != EXPECTED_DIRECTION_FAMILIES:
+        raise RuntimeError("rev16 joint direction-family contract changed")
+    if any(int(progression[key]) != 3 for key in (
+        "J14_improvement_required_networks",
+        "A_improvement_required_networks",
+        "B_protection_required_networks",
+    )):
+        raise RuntimeError("rev16 joint fresh-network requirement changed")
     return config, loaded
 
 
@@ -310,6 +325,9 @@ def _unit(vector: np.ndarray) -> np.ndarray:
 
 def maximin_direction(
     g_a: np.ndarray, g_b: np.ndarray, *,
+    protected_losses: tuple[np.ndarray, ...] = (),
+    target_name: str = "A",
+    protected_loss_names: tuple[str, ...] = ("B",),
     support_a: np.ndarray | None = None,
     support_b: np.ndarray | None = None,
     ftol: float = 1e-10, maxiter: int = 4000,
@@ -332,11 +350,18 @@ def maximin_direction(
             "type": "ineq",
             "fun": lambda x, row=row: float(-np.dot(row, x[:-1]) - x[-1]),
         })
-    for row in g_b:
-        constraints.append({
-            "type": "ineq",
-            "fun": lambda x, row=row: float(-np.dot(row, x[:-1])),
-        })
+    loss_matrices = (g_b,) + tuple(protected_losses)
+    if len(protected_loss_names) != len(loss_matrices):
+        raise ValueError("joint protected-loss labels are misaligned")
+    for matrix in loss_matrices:
+        matrix = np.asarray(matrix, dtype=float)
+        if matrix.shape != g_a.shape:
+            raise ValueError("joint protected-loss gradients are misaligned")
+        for row in matrix:
+            constraints.append({
+                "type": "ineq",
+                "fun": lambda x, row=row: float(-np.dot(row, x[:-1])),
+            })
     for matrix in (support_a, support_b):
         if matrix is not None:
             matrix = np.asarray(matrix, dtype=float)
@@ -365,8 +390,21 @@ def maximin_direction(
         "worst_A_improvement_margin": q,
         "minimum_constraint_residual": float(np.min(residuals)),
         "direction": None if normalized is None else normalized.tolist(),
-        "predicted_A_changes": None if normalized is None else (g_a @ normalized).tolist(),
-        "predicted_B_changes": None if normalized is None else (g_b @ normalized).tolist(),
+        "target_metric": target_name,
+        "predicted_target_changes": None if normalized is None else (g_a @ normalized).tolist(),
+        "protected_loss_metrics": list(protected_loss_names),
+        "predicted_protected_loss_changes": None if normalized is None else [
+            (np.asarray(matrix, dtype=float) @ normalized).tolist()
+            for matrix in loss_matrices
+        ],
+        "predicted_A_changes": None if normalized is None or target_name != "A"
+        else (g_a @ normalized).tolist(),
+        "predicted_B_changes": None if normalized is None or target_name != "A"
+        else (g_b @ normalized).tolist(),
+        "predicted_additional_protected_loss_changes": None if normalized is None else [
+            (np.asarray(matrix, dtype=float) @ normalized).tolist()
+            for matrix in protected_losses
+        ],
     }
 
 
@@ -416,13 +454,22 @@ def construct_directions(
         "tolerance": float(optimizer["constraint_tolerance"]),
     }
     mean = _unit(-np.mean(gradients["A"], axis=0))
+    mean_j14 = _unit(-np.mean(gradients["J14"], axis=0))
     return {
         "mean_a": {"feasible": True, "direction": mean.tolist()},
+        "mean_j14": {"feasible": True, "direction": mean_j14.tolist()},
         "maximin_bprotected": maximin_direction(
             gradients["A"], gradients["B"], **kwargs,
         ),
         "maximin_supportprotected": maximin_direction(
             gradients["A"], gradients["B"],
+            support_a=gradients["support_A"],
+            support_b=gradients["support_B"], **kwargs,
+        ),
+        "maximin_j14_abprotected": maximin_direction(
+            gradients["J14"], gradients["A"],
+            protected_losses=(gradients["B"],),
+            target_name="J14", protected_loss_names=("A", "B"),
             support_a=gradients["support_A"],
             support_b=gradients["support_B"], **kwargs,
         ),

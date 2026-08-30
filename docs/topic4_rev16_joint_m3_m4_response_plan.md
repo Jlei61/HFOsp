@@ -35,14 +35,16 @@
    records on all three networks.
 2. Rescore raw workers with unchanged full-onset `J14_v1`.
 3. Concatenate the 28 M3 and 20 shell gradients into one `3 x 48` tensor.
-4. Construct the four frozen joint directions and RMS 0.4/0.6/0.8 candidates.
+4. Construct six frozen joint directions, including mean-J14 and maximin-J14
+   with A/B/support protection, at RMS 0.4/0.6/0.8.
 5. Do not use KMeans, held-out data or rendered figures for construction.
 
 ## Phase 4: fresh-network selection
 
 1. Run frozen joint candidates and paired `exact_off` on seeds 2351--2353.
-2. Require A improvement, B protection and A/B support at least six on all
-   three networks.
+2. Require complete J14 and A improvement, B protection and A/B support at
+   least six on all three networks; rank usable candidates by worst-network
+   then mean-network J14 improvement.
 3. If no candidate passes, close the bounded joint local-gradient strategy and
    audit the residual/objective before changing the field family.
 

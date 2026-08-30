@@ -163,6 +163,7 @@ def summaries(
         by_id.setdefault(row["candidate_id"], []).append(row)
     exact = {int(row["seed"]): row for row in by_id["exact_off"]}
     selection = manifest["selection"]
+    required_j14 = int(selection["fresh_J14_improvement_required_networks"])
     required_a = int(selection["fresh_A_improvement_required_networks"])
     required_b = int(selection["fresh_B_protection_required_networks"])
     b_ratio = float(selection["B_protection_ratio"])
@@ -184,14 +185,17 @@ def summaries(
                 "delta_J14_vs_exact": float(row["j14"]) - float(reference["j14"]),
                 "B_ratio_vs_exact": candidate_b / reference_b,
                 "A_improves": float(row["mode_0_mean"]) < float(reference["mode_0_mean"]),
+                "J14_improves": float(row["j14"]) < float(reference["j14"]),
                 "B_within_ratio": candidate_b <= b_ratio * reference_b,
             })
+        j14_count = sum(row["J14_improves"] for row in paired)
         a_count = sum(row["A_improves"] for row in paired)
         b_count = sum(row["B_within_ratio"] for row in paired)
         support_a = float(np.mean([row["mode_0_effective_events"] for row in paired]))
         support_b = float(np.mean([row["mode_1_effective_events"] for row in paired]))
         usable = bool(
-            a_count >= required_a and b_count >= required_b
+            j14_count >= required_j14
+            and a_count >= required_a and b_count >= required_b
             and support_a >= support_minimum and support_b >= support_minimum
         )
         output.append({
@@ -200,6 +204,7 @@ def summaries(
             "m3_l2_fraction": paired[0]["m3_l2_fraction"],
             "m4_shell_l2_fraction": paired[0]["m4_shell_l2_fraction"],
             "evaluation_network_count": len(paired),
+            "fresh_J14_improvement_count": j14_count,
             "fresh_A_improvement_count": a_count,
             "fresh_B_protection_count": b_count,
             "mean_delta_A": float(np.mean([row["delta_A_vs_exact"] for row in paired])),
@@ -207,12 +212,15 @@ def summaries(
             "mean_delta_B": float(np.mean([row["delta_B_vs_exact"] for row in paired])),
             "worst_B_ratio": float(np.max([row["B_ratio_vs_exact"] for row in paired])),
             "mean_delta_J14": float(np.mean([row["delta_J14_vs_exact"] for row in paired])),
+            "worst_delta_J14": float(np.max([row["delta_J14_vs_exact"] for row in paired])),
             "equal_network_A_effective_support": support_a,
             "equal_network_B_effective_support": support_b,
             "usable_two_mode_anchor": usable, "per_network": paired,
         })
     output.sort(key=lambda row: (
-        not row["usable_two_mode_anchor"], -row["fresh_A_improvement_count"],
+        not row["usable_two_mode_anchor"], -row["fresh_J14_improvement_count"],
+        row["worst_delta_J14"], row["mean_delta_J14"],
+        -row["fresh_A_improvement_count"],
         -row["fresh_B_protection_count"], row["worst_delta_A"],
         row["worst_B_ratio"], row["mean_delta_A"], row["candidate_id"],
     ))
@@ -258,6 +266,7 @@ def aggregate(
         "schema_id": OUTPUT_SCHEMA, "status": status, "input_error": error,
         "inventory": inventory, "provenance": provenance,
         "ranking_contract": {
+            "J14_improvement": "3/3 fresh networks",
             "A_improvement": "3/3 fresh networks",
             "B_protection": "3/3 fresh networks at <=110% paired exact",
             "equal_network_effective_support": "A>=6 and B>=6",

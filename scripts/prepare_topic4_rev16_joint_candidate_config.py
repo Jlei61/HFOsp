@@ -28,7 +28,8 @@ DEFAULT_AGGREGATE = ARTIFACT_ROOT / (
 )
 DEFAULT_OUTPUT = ROOT / "config/topic4_rev16_joint_m3_m4_candidates.json"
 FAMILY_ORDER = (
-    "mean_a", "maximin_bprotected", "maximin_supportprotected",
+    "mean_a", "mean_j14", "maximin_bprotected",
+    "maximin_supportprotected", "maximin_j14_abprotected",
     "consensus_sparse",
 )
 RMS_LEVELS = (0.4, 0.6, 0.8)
@@ -193,6 +194,7 @@ def build_config(
             },
         },
         "selection": {
+            "fresh_J14_improvement_required_networks": 3,
             "fresh_A_improvement_required_networks": 3,
             "fresh_B_protection_required_networks": 3,
             "B_protection_ratio": 1.10,

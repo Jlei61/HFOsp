@@ -110,6 +110,7 @@ def _validate_config(config: Mapping[str, Any]) -> None:
         raise RuntimeError("rev16 joint duration changed")
     selection = config["selection"]
     expected_selection = {
+        "fresh_J14_improvement_required_networks": 3,
         "fresh_A_improvement_required_networks": 3,
         "fresh_B_protection_required_networks": 3,
         "B_protection_ratio": 1.10,

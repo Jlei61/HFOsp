@@ -40,7 +40,7 @@
     "natural_kmeans_input": "not_used_for_construction"
   },
   "robust_direction_construction": {
-    "families": ["mean_a", "maximin_bprotected", "maximin_supportprotected", "consensus_sparse"],
+    "families": ["mean_a", "mean_j14", "maximin_bprotected", "maximin_supportprotected", "maximin_j14_abprotected", "consensus_sparse"],
     "candidate_rms_levels": [0.4, 0.6, 0.8],
     "consensus_sparse_maximum_coordinates": 10,
     "optimizer": {
@@ -53,6 +53,7 @@
   },
   "progression_rule": {
     "fresh_selection_network_seeds": [2351, 2352, 2353],
+    "J14_improvement_required_networks": 3,
     "A_improvement_required_networks": 3,
     "B_protection_required_networks": 3,
     "B_protection_ratio": 1.10,

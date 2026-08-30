@@ -17,6 +17,8 @@ def test_contract_is_node_only_and_training_only():
     config, loaded = analysis._load_inputs(CONFIG, ARTIFACT_ROOT)
     assert config["response_tensor"]["joint_real_coordinates"] == 48
     assert config["progression_rule"]["fresh_selection_network_seeds"] == [2351, 2352, 2353]
+    assert config["progression_rule"]["J14_improvement_required_networks"] == 3
+    assert config["robust_direction_construction"]["families"] == analysis.EXPECTED_DIRECTION_FAMILIES
     assert config["progression_rule"]["natural_kmeans_used_for_construction"] is False
     assert config["progression_rule"]["patient_heldout_used_for_construction"] is False
     assert config["progression_rule"]["EE_EtoI_ZM"] == "off"
@@ -77,6 +79,41 @@ def test_joint_maximin_protects_b_in_all_networks():
     assert direction.shape == (48,)
     assert np.all(g_a @ direction < -0.79)
     assert np.all(g_b @ direction <= 1e-7)
+
+
+def test_joint_j14_maximin_protects_a_b_and_support():
+    tensor = {
+        "gradients": {
+            key: np.zeros((3, 48), dtype=float).tolist()
+            for key in ("A", "B", "J14", "support_A", "support_B")
+        },
+    }
+    for row in range(3):
+        tensor["gradients"]["J14"][row][0] = 1.0
+        tensor["gradients"]["A"][row][1] = 1.0
+        tensor["gradients"]["B"][row][2] = 1.0
+        tensor["gradients"]["support_A"][row][3] = 1.0
+        tensor["gradients"]["support_B"][row][4] = 1.0
+    contract = {
+        "optimizer": {
+            "ftol": 1e-10, "maxiter": 4000,
+            "constraint_tolerance": 1e-7,
+        },
+        "consensus_sparse_maximum_coordinates": 10,
+    }
+    result = analysis.construct_directions(tensor, contract)[
+        "maximin_j14_abprotected"
+    ]
+    assert result["feasible_positive_margin"] is True
+    direction = np.asarray(result["direction"])
+    gradients = {
+        key: np.asarray(value) for key, value in tensor["gradients"].items()
+    }
+    assert np.all(gradients["J14"] @ direction < 0.0)
+    assert np.all(gradients["A"] @ direction <= 1e-7)
+    assert np.all(gradients["B"] @ direction <= 1e-7)
+    assert np.all(gradients["support_A"] @ direction >= -1e-7)
+    assert np.all(gradients["support_B"] @ direction >= -1e-7)
 
 
 def test_joint_sparse_can_select_m3_and_shell_coordinates():
