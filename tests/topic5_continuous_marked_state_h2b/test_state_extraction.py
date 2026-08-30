@@ -42,6 +42,16 @@ E384_COVERAGE = SOURCE_REPO / (
     "results/epi_prssm/continuous_marked_state/r1/r1_2/coverage/"
     "epilepsiae_384.npz"
 )
+E384_RAW_CACHE = Path(
+    "/mnt/yuquan_data/hfosp_cache/raw_seeg_state_r0_1/epilepsiae_384"
+)
+E384_RAW_REQUIRED = (
+    E384_RAW_CACHE / "raw_256hz.zarr",
+    E384_RAW_CACHE / "artifact_mask.zarr",
+    E384_RAW_CACHE / "train_stats.json",
+    E384_RAW_CACHE / "window_index_refined.parquet",
+    E384_RAW_CACHE / "cache_index.parquet",
+)
 E384_PREICTAL_QUERY = 1107877528.382813
 
 
@@ -79,7 +89,11 @@ def test_real_e384_stable_checkpoint_reconstructs_frozen_on_cpu(seed):
 
 @pytest.fixture(scope="module")
 def real_e384_inference_support():
-    if not E384_R16_ROOT.exists() or not E384_COVERAGE.exists():
+    if (
+        not E384_R16_ROOT.exists()
+        or not E384_COVERAGE.exists()
+        or not all(path.exists() for path in E384_RAW_REQUIRED)
+    ):
         pytest.skip("canonical E384 R1.6/raw/coverage artifacts are not mounted")
     design, _, _ = load_frozen_design(SOURCE_REPO, "epilepsiae_384")
     coverage = CoverageTable.load(E384_COVERAGE)

@@ -191,10 +191,22 @@ E384_DESIGN_MANIFEST = CANONICAL_SOURCE / (
     "results/epi_prssm/continuous_marked_state/r1/r1_5/cache/"
     "epilepsiae_384/manifest.json"
 )
+E384_RAW_CACHE = Path(
+    "/mnt/yuquan_data/hfosp_cache/raw_seeg_state_r0_1/epilepsiae_384"
+)
+E384_RAW_REQUIRED = (
+    E384_RAW_CACHE / "raw_256hz.zarr",
+    E384_RAW_CACHE / "artifact_mask.zarr",
+    E384_RAW_CACHE / "train_stats.json",
+    E384_RAW_CACHE / "window_index_refined.parquet",
+    E384_RAW_CACHE / "cache_index.parquet",
+)
 
 
 @pytest.mark.skipif(
-    not E384_DESIGN_MANIFEST.exists(), reason="canonical E384 instrument unavailable"
+    not E384_DESIGN_MANIFEST.exists()
+    or not all(path.exists() for path in E384_RAW_REQUIRED),
+    reason="canonical E384 raw-backed instrument unavailable",
 )
 def test_e384_inventory_anchor_identity_matches_state_extraction_reader() -> None:
     from src.topic5_continuous_marked_state_h2b.inventory import (

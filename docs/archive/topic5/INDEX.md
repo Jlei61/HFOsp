@@ -1,5 +1,13 @@
 # Topic 5 Archive Index
 
+- **2026-08-30 H2b frozen interictal-state cross-task transfer v0.2 启动**：
+  `continuous_marked_state_h2b_cross_task_v0_2_contract_2026-08-30.md`。
+  在看任何 R1.7×seizure transfer 结果前冻结 17 人全 checkpoint-available 队列，H1 标签只分层不 gate；
+  30 min 为主提前量，5/15/60/120 min 为 sensitivity，比较 history、current observation、
+  persistent state、memoryless 与 matched wrong-time。启动审计确认 85 cells 中 75 个 checkpoint
+  可复算、10 个为无 checkpoint 的仪器失败；13 位有冻结发作标注，11 位在 30 min coverage 初筛有候选。
+  当前两块 raw-cache 数据盘均未挂载，因此队列处于运行环境等待，不得解释为科学阴性。
+
 - **2026-08-28 H2b frozen interictal-state cross-task transfer v0.1**：
   [`白话版`](continuous_marked_state_h2b_cross_task_v0_1_plain_2026-08-28.md) ·
   [`技术版`](continuous_marked_state_h2b_cross_task_v0_1_technical_2026-08-28.md) ·
