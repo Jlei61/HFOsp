@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+
 import numpy as np
 
 from scripts import prepare_topic4_rev15_m3_robust_candidate_config as prepare
@@ -8,6 +10,7 @@ from scripts import freeze_topic4_rev15_m3_robust_candidates as freezer
 from scripts import launch_topic4_rev15_m3_robust_candidates as launcher
 from scripts import monitor_topic4_rev15_m3_robust_candidates as monitor
 from scripts import run_topic4_rev15_m3_robust_candidate_worker as worker
+from scripts import wait_topic4_rev15_m3_response_then_prepare_robust as waiter
 
 
 def _aggregate():
@@ -155,3 +158,20 @@ def test_summary_requires_three_of_three_and_two_mode_support():
     assert next(row for row in summaries if row["candidate_id"] == "low_support")[
         "usable_two_mode_anchor"
     ] is False
+
+
+def test_waiter_requires_complete_validated_response_tensor():
+    complete = {
+        "status": "COMPLETE",
+        "inventory": {
+            "complete_cartesian_product": True,
+            "present_validated": 116, "missing": [], "invalid_artifact": [],
+        },
+        "response_tensor": {"metrics": []},
+        "robust_directions": {"mean_a": {}},
+    }
+    assert waiter.classify(complete) == "complete"
+    incomplete = json.loads(json.dumps(complete))
+    incomplete["inventory"]["present_validated"] = 115
+    assert waiter.classify(incomplete) == "failed"
+    assert waiter.classify({"status": "INCOMPLETE"}) == "wait"
