@@ -38,9 +38,11 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--interval-seconds", type=int, default=300)
     parser.add_argument("--max-checks", type=int, default=288)
+    parser.add_argument("--output-root", type=Path, default=RESULT_ROOT)
     args = parser.parse_args()
-    status_path = RESULT_ROOT / "RUNTIME_MONITOR_STATUS.json"
-    log_path = RESULT_ROOT / "logs/runtime_monitor_census.log"
+    output_root = args.output_root.resolve()
+    status_path = output_root / "RUNTIME_MONITOR_STATUS.json"
+    log_path = output_root / "logs/runtime_monitor_census.log"
     log_path.parent.mkdir(parents=True, exist_ok=True)
     env = dict(os.environ)
     env["OMP_NUM_THREADS"] = "1"
@@ -52,6 +54,7 @@ def main() -> None:
     command = [
         str(PYTHON),
         str(REPO / "scripts/topic5_continuous_marked_state_h2b/build_v02_support_census.py"),
+        "--output-root", str(output_root),
     ]
     for index in range(int(args.max_checks)):
         started = datetime.now(timezone.utc).isoformat()
