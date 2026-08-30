@@ -1,0 +1,66 @@
+{
+  "schema_id": "topic4_rev16_joint_m3_m4_response_analysis_v1",
+  "scientific_role": "development_only_training_blind_joint_m3_m4_response_tensor",
+  "output_root": "results/topic4_sef_hfo/data_driven_node_dualmode_rev16/m4_shell_coordinate_atlas/analysis",
+  "inputs": {
+    "m4_shell_config": {
+      "path": "config/topic4_rev16_m4_shell_coordinate_atlas.json",
+      "sha256": "188f5f68f37d8f7ca2852af856e3d64f501f0b290f7825d9f30cefa88a2b1990"
+    },
+    "m4_shell_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev16/m4_shell_coordinate_atlas/candidate_manifest.json",
+      "sha256": "4fdc9726c1a0972c87dbff933b7b1625d2c2716f4ba340a472a51324b28b2683"
+    },
+    "m3_response_analysis_config": {
+      "path": "config/topic4_rev15_m3_multinetwork_response_analysis.json",
+      "sha256": "692d5de5721fb241b1c2e285e20458cec342f41e5d420aee4466dd0629894317"
+    },
+    "m3_response_aggregate": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev15/m3_multinetwork_atlas/analysis/m3_multinetwork_response_aggregate.json",
+      "sha256": "a5adb676978ce585725bf4e21140992f7534aabfd5ef49b77772691bc346eef0"
+    },
+    "j14_config": {
+      "path": "config/topic4_rev14_static_node_historical_rescore.json",
+      "sha256": "af3116d4a56feb077d17893196eee1f2ebcc42fd77688d56e15f2a5b89631ed2"
+    },
+    "support_config": {
+      "path": "config/topic4_rev14_patient_support_acceptance.json",
+      "sha256": "5dec1ff3277294697515d701e82246c242fb627348751571a5a6fe86e008940e"
+    }
+  },
+  "response_tensor": {
+    "network_seeds": [2331, 2332, 2333],
+    "m3_real_coordinates": 28,
+    "m4_shell_real_coordinates": 20,
+    "joint_real_coordinates": 48,
+    "source_coordinate_rms": 0.8,
+    "central_difference_denominator": 1.6,
+    "network_weighting": "equal",
+    "frozen_direction_classifier_input": "full_contact_onset_timing",
+    "natural_kmeans_input": "not_used_for_construction"
+  },
+  "robust_direction_construction": {
+    "families": ["mean_a", "maximin_bprotected", "maximin_supportprotected", "consensus_sparse"],
+    "candidate_rms_levels": [0.4, 0.6, 0.8],
+    "consensus_sparse_maximum_coordinates": 10,
+    "optimizer": {
+      "algorithm": "scipy_SLSQP",
+      "ftol": 1e-10,
+      "maxiter": 4000,
+      "constraint_tolerance": 1e-7,
+      "positive_margin_tolerance": 1e-8
+    }
+  },
+  "progression_rule": {
+    "fresh_selection_network_seeds": [2351, 2352, 2353],
+    "A_improvement_required_networks": 3,
+    "B_protection_required_networks": 3,
+    "B_protection_ratio": 1.10,
+    "equal_network_effective_support_minimum_per_mode": 6.0,
+    "natural_kmeans_used_for_construction": false,
+    "patient_heldout_used_for_construction": false,
+    "figure_used_for_construction": false,
+    "EE_EtoI_ZM": "off"
+  },
+  "claim_boundary": "The 3x48 tensor uses the frozen M3 tensor and newly rescored M4-shell raw workers on the same three development networks. It may nominate joint continuous Node fields for fresh-network simulation, but cannot freeze Node, establish natural K=2, open held-out data or activate EE, E-to-I or Z/M."
+}
