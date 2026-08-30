@@ -19,6 +19,11 @@ from src.topic4_node_intervention import crossed_hotspot_selectivity
 ROOT = Path(__file__).resolve().parents[1]
 ARTIFACT_ROOT = Path("/home/honglab/leijiaxin/HFOsp")
 DEFAULT_CONFIG = ROOT / "config/topic4_rev15_node_intervention.json"
+EXPECTED_CONFIG_SCHEMA = "topic4_rev15_node_crossed_intervention_v1"
+OUTPUT_SCHEMA = "topic4_rev15_node_crossed_intervention_aggregate_v1"
+FREEZE_SCHEMA = "topic4_rev15_frozen_node_field_v1"
+FROZEN_STATUS = "REV15_NODE_FIELD_FROZEN"
+NOT_SELECTIVE_STATUS = "REV15_NODE_INTERVENTION_NOT_SELECTIVE"
 
 
 def _sha256(path: Path) -> str:
@@ -121,7 +126,7 @@ def aggregate(*, config_path: Path = DEFAULT_CONFIG,
     config_path = config_path.resolve()
     artifact_root = artifact_root.resolve()
     config = json.loads(config_path.read_text())
-    if config.get("schema_id") != "topic4_rev15_node_crossed_intervention_v1":
+    if config.get("schema_id") != EXPECTED_CONFIG_SCHEMA:
         raise RuntimeError("intervention config schema changed")
     output_root = artifact_root / config["output_root"]
     worker_root = output_root / "workers"
@@ -145,15 +150,15 @@ def aggregate(*, config_path: Path = DEFAULT_CONFIG,
     provenance = _provenance()
     freeze = bool(selectivity["node_freeze_permitted"] and provenance["formal_ready"])
     status = (
-        "REV15_NODE_FIELD_FROZEN" if freeze
+        FROZEN_STATUS if freeze
         else "INVALID_PROVENANCE" if not provenance["formal_ready"]
-        else "REV15_NODE_INTERVENTION_NOT_SELECTIVE"
+        else NOT_SELECTIVE_STATUS
     )
     output_json = output_root / "analysis/node_intervention_aggregate.json"
     output_csv = output_root / "analysis/node_intervention_effects.csv"
     freeze_path = output_root / "analysis/node_freeze_manifest.json"
     result = {
-        "schema_id": "topic4_rev15_node_crossed_intervention_aggregate_v1",
+        "schema_id": OUTPUT_SCHEMA,
         "status": status,
         "candidate_id": config["candidate_id"],
         "network_seeds": config["network_seeds"],
@@ -178,7 +183,7 @@ def aggregate(*, config_path: Path = DEFAULT_CONFIG,
         writer.writeheader(); writer.writerows(rows)
     if freeze:
         _atomic_json(freeze_path, {
-            "schema_id": "topic4_rev15_frozen_node_field_v1",
+            "schema_id": FREEZE_SCHEMA,
             "status": "FROZEN",
             "candidate_id": config["candidate_id"],
             "network_seeds": config["network_seeds"],

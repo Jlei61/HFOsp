@@ -32,6 +32,7 @@ from src.topic4_shaft_aware_direction import all_event_shaft_participation  # no
 
 ARTIFACT_ROOT = Path("/home/honglab/leijiaxin/HFOsp")
 DEFAULT_CONFIG = ROOT / "config/topic4_rev15_node_postselection.json"
+EXPECTED_CONFIG_SCHEMA = "topic4_rev15_node_postselection_v1"
 OUTPUT_SCHEMA = "topic4_rev15_node_postselection_audit_v1"
 SEMANTIC_MODE_ORDER = (1, 0)
 SEMANTIC_MODE_NAMES = ("MTA", "MTB")
@@ -449,7 +450,7 @@ def audit(
     config_path = config_path.resolve()
     artifact_root = artifact_root.resolve()
     config = json.loads(config_path.read_text())
-    if config.get("schema_id") != "topic4_rev15_node_postselection_v1":
+    if config.get("schema_id") != EXPECTED_CONFIG_SCHEMA:
         raise RuntimeError("post-selection config schema changed")
     if config["boundaries"].get("patient_heldout_used") is not False:
         raise RuntimeError("post-selection config allows patient held-out access")
@@ -638,12 +639,7 @@ def audit(
             "field_reranking_performed": False,
             "SNN_simulation_run": False,
         },
-        "claim_boundary": (
-            "Training-semantic post-selection only. Acceptance permits the already "
-            "selected robust Node field to advance to Fig.4 inspection and one-time "
-            "held-out evaluation; it is not patient-blind confirmation and cannot "
-            "activate EE, E-to-I, or Z/M."
-        ),
+        "claim_boundary": config["claim_boundary"],
         "outputs": {"json": str(output_json), "network_csv": str(output_csv)},
     }
     _atomic_json(output_json, payload)

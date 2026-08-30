@@ -28,6 +28,10 @@ DEFAULT_AUDIT = ARTIFACT_ROOT / (
     "results/topic4_sef_hfo/data_driven_node_dualmode_rev15/"
     "m3_robust_candidates/postselection/analysis/node_postselection_audit.json"
 )
+REVISION_ID = "rev15"
+NODE_DESCRIPTION = "rev15 robust Node"
+SCIENTIFIC_ROLE = "development_only_rev15_node_postselection"
+RENDER_STATUS = "REV15_NODE_POSTSELECTION_FIG4_RENDERED"
 
 
 def _sha256(path: Path) -> str:
@@ -46,7 +50,9 @@ def _load_bundle(
     audit = json.loads(audit_path.read_text())
     accepted = audit.get("status") == "NODE_POSTSELECTION_ACCEPTED"
     if not accepted and not allow_rejected_diagnostic:
-        raise RuntimeError("rev15 Node failed post-selection; final Fig.4 is not eligible")
+        raise RuntimeError(
+            f"{NODE_DESCRIPTION} failed post-selection; final Fig.4 is not eligible"
+        )
     if audit.get("candidate_id") != config["selected_candidate"]["candidate_id"]:
         raise RuntimeError("Fig.4 audit and selected Node candidate differ")
     if audit.get("boundaries", {}).get("patient_heldout_loaded") is not False:
@@ -141,7 +147,7 @@ def _load_bundle(
     output_root = artifact_root / config["output_root"]
     return {
         "config": {
-            "scientific_role": "development_only_rev15_node_postselection",
+            "scientific_role": SCIENTIFIC_ROLE,
             "search": {"postselection_network_seeds": config["network_seeds"]},
         },
         "config_path": config_path,
@@ -222,13 +228,13 @@ def _relocate_render(
 def _write_readme(output_dir: Path, bundle: Mapping[str, Any]) -> None:
     audit = bundle["postselection_audit"]
     pooled = audit["pooled"]
-    text = f"""### fig4a_rev15_node_direct_readout
+    text = f"""### fig4a_{REVISION_ID}_node_direct_readout
 
 该图展示训练期稳健筛选得到的纯 Node 连续自由场、三张新网络内 formal-clean MTA/MTB 的起始密度，以及同一张网络中一对时间分离事件的 15 触点连续读出。EE、E-to-I 和 Z/M 全部关闭；左侧只表示冻结的 Node field。
 
 **关注点**：两种模式必须在同一网络出现，且右侧两段阴影对应完整、互不重叠的因果事件，而不是把同一次长事件切成两类。
 
-### fig4b_rev15_node_kmeans_consistency
+### fig4b_{REVISION_ID}_node_kmeans_consistency
 
 该图对完全相同的 formal-clean 事件使用 Figure 1E 的 masked-rank KMeans 语法。三网络 pooled 自然聚类与冻结方向标签的 AMI 为 {pooled['kmeans_ami_with_supervised_direction']:.3f}；矩阵行按聚类后映射的 MTA/MTB，列为患者 TA/TB。
 
@@ -281,8 +287,8 @@ def render(
     old_direct = canonical._render_direct(bundle, figure_dir)
     direct = _relocate_render(
         old_stem=old_direct,
-        new_stem=figure_dir / "fig4a_rev15_node_direct_readout",
-        bundle=bundle, figure_name="Fig4A rev15 robust Node direct readout",
+        new_stem=figure_dir / f"fig4a_{REVISION_ID}_node_direct_readout",
+        bundle=bundle, figure_name=f"Fig4A {NODE_DESCRIPTION} direct readout",
     )
     original_qualifier = canonical._kmeans_qualifier_caption
     canonical._kmeans_qualifier_caption = _postselection_qualifier(
@@ -294,12 +300,12 @@ def render(
         canonical._kmeans_qualifier_caption = original_qualifier
     kmeans = _relocate_render(
         old_stem=old_kmeans,
-        new_stem=figure_dir / "fig4b_rev15_node_kmeans_consistency",
-        bundle=bundle, figure_name="Fig4B rev15 robust Node KMeans consistency",
+        new_stem=figure_dir / f"fig4b_{REVISION_ID}_node_kmeans_consistency",
+        bundle=bundle, figure_name=f"Fig4B {NODE_DESCRIPTION} KMeans consistency",
     )
     _write_readme(figure_dir, bundle)
     payload = {
-        "status": "REV15_NODE_POSTSELECTION_FIG4_RENDERED",
+        "status": RENDER_STATUS,
         "candidate_id": bundle["candidate_id"],
         "postselection_status": bundle["postselection_audit"]["status"],
         "figures": {"direct": direct, "kmeans": kmeans},
@@ -307,7 +313,7 @@ def render(
         "plotting_only": True,
         "SNN_simulation_run": False,
     }
-    (figure_dir / "fig4_rev15_render_summary.json").write_text(
+    (figure_dir / f"fig4_{REVISION_ID}_render_summary.json").write_text(
         json.dumps(payload, indent=2) + "\n"
     )
     return payload

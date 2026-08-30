@@ -44,6 +44,9 @@ from src.topic4_node_final_science import (  # noqa: E402
 
 ARTIFACT_ROOT = Path("/home/honglab/leijiaxin/HFOsp")
 DEFAULT_CONFIG = ROOT / "config/topic4_rev15_node_final_science.json"
+EXPECTED_CONFIG_SCHEMA = "topic4_rev15_node_final_science_v1"
+EXPECTED_WORKER_STATUS = "REV15_M3_ROBUST_CANDIDATE_WORKER_COMPLETE"
+OUTPUT_SCHEMA = "topic4_rev15_node_final_science_audit_v1"
 
 
 def _sha256(path: Path) -> str:
@@ -123,7 +126,7 @@ def _candidate_workers(
         if not npz_path.is_file() or not json_path.is_file():
             raise RuntimeError(f"final-science worker is missing: {candidate_id}:{seed}")
         payload = json.loads(json_path.read_text())
-        if payload.get("status") != "REV15_M3_ROBUST_CANDIDATE_WORKER_COMPLETE":
+        if payload.get("status") != EXPECTED_WORKER_STATUS:
             raise RuntimeError(f"final-science worker is incomplete: {candidate_id}:{seed}")
         if payload.get("candidate_id") != candidate_id or int(payload.get("seed")) != seed:
             raise RuntimeError("final-science worker identity changed")
@@ -185,7 +188,7 @@ def audit(config_path: Path = DEFAULT_CONFIG,
     config_path = config_path.resolve()
     artifact_root = artifact_root.resolve()
     config = json.loads(config_path.read_text())
-    if config.get("schema_id") != "topic4_rev15_node_final_science_v1":
+    if config.get("schema_id") != EXPECTED_CONFIG_SCHEMA:
         raise RuntimeError("final-science config schema changed")
     if config["boundaries"].get("field_reranking_allowed") is not False:
         raise RuntimeError("final-science config allows field reranking")
@@ -332,7 +335,7 @@ def audit(config_path: Path = DEFAULT_CONFIG,
     output_json = output_root / "node_final_science_audit.json"
     output_csv = output_root / "node_final_science_paired_networks.csv"
     payload = {
-        "schema_id": "topic4_rev15_node_final_science_audit_v1",
+        "schema_id": OUTPUT_SCHEMA,
         "status": status,
         "candidate_id": candidate_id,
         "paired_reference_candidate_id": "exact_off",

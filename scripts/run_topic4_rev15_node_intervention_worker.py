@@ -53,6 +53,8 @@ from kick_probe import simulate_kick  # noqa: E402
 
 
 ARTIFACT_ROOT = Path("/home/honglab/leijiaxin/HFOsp")
+EXPECTED_CONFIG_SCHEMA = "topic4_rev15_node_crossed_intervention_v1"
+OUTPUT_SCHEMA = "topic4_rev15_node_crossed_intervention_worker_v1"
 WORKER_STATUS = "REV15_NODE_CROSSED_INTERVENTION_WORKER_COMPLETE"
 
 
@@ -162,7 +164,7 @@ def run_worker(
     config_path = config_path.resolve()
     artifact_root = artifact_root.resolve()
     config = json.loads(config_path.read_text())
-    if config.get("schema_id") != "topic4_rev15_node_crossed_intervention_v1":
+    if config.get("schema_id") != EXPECTED_CONFIG_SCHEMA:
         raise RuntimeError("intervention config schema changed")
     if int(seed) not in {int(value) for value in config["network_seeds"]}:
         raise RuntimeError("intervention seed is outside the frozen pool")
@@ -332,7 +334,7 @@ def run_worker(
     })
     _atomic_npz(out_npz, **output_arrays)
     payload = {
-        "schema_id": "topic4_rev15_node_crossed_intervention_worker_v1",
+        "schema_id": OUTPUT_SCHEMA,
         "status": WORKER_STATUS,
         "candidate_id": config["candidate_id"],
         "network_seed": int(seed),

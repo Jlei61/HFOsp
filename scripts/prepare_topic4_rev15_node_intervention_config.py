@@ -17,6 +17,8 @@ DEFAULT_FINAL_AUDIT = ARTIFACT_ROOT / (
     "m3_robust_candidates/final_science/analysis/node_final_science_audit.json"
 )
 DEFAULT_OUTPUT = ROOT / "config/topic4_rev15_node_intervention.json"
+EXPECTED_NETWORK_SEEDS = [2341, 2342, 2343]
+OUTPUT_SCHEMA = "topic4_rev15_node_crossed_intervention_v1"
 
 
 def _sha256(path: Path) -> str:
@@ -66,7 +68,7 @@ def build_config(
     if candidate_id != final_config["selected_candidate"]["candidate_id"]:
         raise RuntimeError("intervention candidate differs from final audit")
     seeds = [int(value) for value in final_config["network_seeds"]]
-    if seeds != [2341, 2342, 2343]:
+    if seeds != EXPECTED_NETWORK_SEEDS:
         raise RuntimeError("intervention network pool changed")
     robust_record = final_config["inputs"]["robust_config"]
     robust_config_path = repository_root / str(robust_record["path"])
@@ -85,7 +87,7 @@ def build_config(
         repository_root=repository_root, artifact_root=artifact_root,
     )
     return {
-        "schema_id": "topic4_rev15_node_crossed_intervention_v1",
+        "schema_id": OUTPUT_SCHEMA,
         "scientific_role": "development_only_model_internal_crossed_hotspot_necessity",
         "output_root": (
             "results/topic4_sef_hfo/data_driven_node_dualmode_rev15/"
