@@ -4,7 +4,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from scripts import freeze_topic4_rev16_joint_m3_m4_candidates as freezer
+from scripts import freeze_topic4_rev16_node_confirmation as freezer
 from scripts import run_topic4_rev14_m3_canary_worker as shared_worker
 from scripts import topic4_rev15_node_substrate_adapter as base
 

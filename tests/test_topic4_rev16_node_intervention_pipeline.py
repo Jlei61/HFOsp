@@ -6,6 +6,7 @@ from scripts import aggregate_topic4_rev15_node_intervention as rev15_aggregate
 from scripts import aggregate_topic4_rev16_node_intervention as aggregate
 from scripts import prepare_topic4_rev15_node_intervention_config as rev15_prepare
 from scripts import prepare_topic4_rev16_node_intervention_config as prepare
+from scripts import prepare_topic4_rev16_node_postselection_config as post
 from scripts import audit_topic4_rev16_node_final_science as final_audit
 from scripts import prepare_topic4_rev16_node_final_science_config as final_config
 from scripts import run_topic4_rev15_node_intervention_worker as rev15_worker
@@ -21,7 +22,7 @@ def test_rev16_intervention_config_uses_fresh_pool(monkeypatch, tmp_path):
         seen["seeds_during_build"] = rev15_prepare.EXPECTED_NETWORK_SEEDS
         return {
             "schema_id": "old", "scientific_role": "old", "output_root": "old",
-            "candidate_id": "joint", "network_seeds": [2351, 2352, 2353],
+            "candidate_id": "joint", "network_seeds": post.NETWORK_SEEDS,
             "mechanism_freeze": {"EE": "off", "E_to_I": "off", "Z_M": "off"},
             "hotspot_construction": {},
         }
@@ -39,7 +40,7 @@ def test_rev16_intervention_config_uses_fresh_pool(monkeypatch, tmp_path):
         final_audit_path=tmp_path / "audit.json",
         repository_root=tmp_path, artifact_root=tmp_path,
     )
-    assert seen["seeds_during_build"] == [2351, 2352, 2353]
+    assert seen["seeds_during_build"] == [2361, 2362, 2363]
     assert rev15_prepare.EXPECTED_NETWORK_SEEDS == old
     assert payload["schema_id"] == prepare.OUTPUT_SCHEMA
     assert payload["mechanism_freeze"] == {
@@ -147,7 +148,7 @@ def _monitor_config(tmp_path):
     return {
         "schema_id": worker.EXPECTED_CONFIG_SCHEMA,
         "output_root": "results/intervention", "candidate_id": "joint",
-        "network_seeds": [2351, 2352, 2353],
+        "network_seeds": post.NETWORK_SEEDS,
         "mechanism_freeze": {"EE": "off", "E_to_I": "off", "Z_M": "off"},
         "resources": {
             "maximum_workers": 3, "numerical_threads_per_worker": 1,
@@ -163,7 +164,7 @@ def test_intervention_monitor_preserves_memory_reserve(monkeypatch, tmp_path):
     config = _monitor_config(tmp_path)
     monkeypatch.setattr(monitor, "load_contract", lambda *args, **kwargs: config)
     monkeypatch.setattr(monitor, "classify", lambda **kwargs: {
-        "states": {"2351": "pending", "2352": "pending", "2353": "pending"},
+        "states": {"2361": "pending", "2362": "pending", "2363": "pending"},
         "invalid": [],
     })
     monkeypatch.setattr(
@@ -193,7 +194,7 @@ def test_intervention_monitor_launches_only_frozen_three(monkeypatch, tmp_path):
     launched = []
     monkeypatch.setattr(monitor, "load_contract", lambda *args, **kwargs: config)
     monkeypatch.setattr(monitor, "classify", lambda **kwargs: {
-        "states": {"2351": "pending", "2352": "pending", "2353": "pending"},
+        "states": {"2361": "pending", "2362": "pending", "2363": "pending"},
         "invalid": [],
     })
     monkeypatch.setattr(
@@ -216,7 +217,7 @@ def test_intervention_monitor_launches_only_frozen_three(monkeypatch, tmp_path):
         expected_commit="a" * 40, unit_prefix=monitor.DEFAULT_UNIT_PREFIX,
         worker_cap=3, execute=True,
     )
-    assert launched == [2351, 2352, 2353]
+    assert launched == [2361, 2362, 2363]
     assert result["n_active"] == 3
     assert result["status"] == monitor.RUNNING
 
@@ -227,7 +228,7 @@ def test_intervention_monitor_rejects_success_status_without_artifact(
     config = _monitor_config(tmp_path)
     status = (
         tmp_path / config["output_root"]
-        / "run_logs/workers/intervention_seed_2351.status"
+        / "run_logs/workers/intervention_seed_2361.status"
     )
     status.parent.mkdir(parents=True)
     status.write_text("SUCCESS exit_code=0\n")
@@ -239,5 +240,5 @@ def test_intervention_monitor_rejects_success_status_without_artifact(
         artifact_root=tmp_path, expected_commit="a" * 40,
         unit_prefix=monitor.DEFAULT_UNIT_PREFIX,
     )
-    assert snapshot["states"]["2351"] == "invalid"
+    assert snapshot["states"]["2361"] == "invalid"
     assert "stale status" in snapshot["invalid"][0]

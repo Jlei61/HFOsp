@@ -7,7 +7,7 @@ from scripts import audit_topic4_rev16_node_final_science as audit
 from scripts import prepare_topic4_rev15_node_final_science_config as rev15_prepare
 from scripts import prepare_topic4_rev16_node_final_science_config as prepare
 from scripts import prepare_topic4_rev16_node_postselection_config as post
-from scripts import run_topic4_rev16_joint_m3_m4_candidate_worker as worker
+from scripts import run_topic4_rev16_node_confirmation_worker as worker
 
 
 def _write(path, payload):
@@ -56,7 +56,7 @@ def test_rev16_final_config_preserves_one_time_boundary(monkeypatch, tmp_path):
         artifact_root=tmp_path,
     )
     assert payload["schema_id"] == prepare.OUTPUT_SCHEMA
-    assert payload["network_seeds"] == [2351, 2352, 2353]
+    assert payload["network_seeds"] == [2361, 2362, 2363]
     assert payload["boundaries"]["field_reranking_allowed"] is False
     assert payload["boundaries"]["patient_heldout_used_for_field_selection"] is False
     assert payload["boundaries"]["EE_EtoI_ZM"] == "off"

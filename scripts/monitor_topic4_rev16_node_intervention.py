@@ -24,6 +24,7 @@ if str(ROOT) not in sys.path:
 
 from scripts import aggregate_topic4_rev15_node_intervention as validation  # noqa: E402
 from scripts import aggregate_topic4_rev16_node_intervention as aggregate  # noqa: E402
+from scripts import prepare_topic4_rev16_node_postselection_config as post  # noqa: E402
 from scripts import run_topic4_rev16_node_intervention_worker as worker  # noqa: E402
 
 
@@ -101,7 +102,7 @@ def load_contract(
     config = json.loads(config_path.read_text())
     if config.get("schema_id") != worker.EXPECTED_CONFIG_SCHEMA:
         raise RuntimeError("rev16 intervention config schema changed")
-    if config.get("network_seeds") != [2351, 2352, 2353]:
+    if config.get("network_seeds") != post.NETWORK_SEEDS:
         raise RuntimeError("rev16 intervention network pool changed")
     if config.get("mechanism_freeze") != {
         "EE": "off", "E_to_I": "off", "Z_M": "off",

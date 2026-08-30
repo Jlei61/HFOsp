@@ -7,8 +7,9 @@ import pytest
 
 from scripts import audit_topic4_rev15_node_postselection as rev15_audit
 from scripts import audit_topic4_rev16_node_postselection as audit
+from scripts import audit_topic4_rev16_node_confirmation as confirmation_audit
 from scripts import prepare_topic4_rev16_node_postselection_config as prepare
-from scripts import run_topic4_rev16_joint_m3_m4_candidate_worker as worker
+from scripts import run_topic4_rev16_node_confirmation_worker as worker
 from scripts.paper_figures import (
     plot_topic4_rev15_node_postselection_fig4 as rev15_figure,
 )
@@ -68,6 +69,7 @@ def _inputs(tmp_path):
         "status": "COMPLETE",
         "inventory": {"complete_cartesian_product": True},
         "ranking_contract": {
+            "J14_improvement": "3/3 fresh networks",
             "natural_kmeans_used": False, "patient_heldout_used": False,
             "ictal_data_used": False, "figure_used": False,
             "EE_EtoI_ZM": "off",
@@ -75,28 +77,36 @@ def _inputs(tmp_path):
         "best_usable_anchor": "joint",
         "usable_two_mode_anchor_ids": ["joint"],
     })
+    confirm = artifact / "results/confirmation/audit.json"
+    _write(confirm, {
+        "schema_id": confirmation_audit.OUTPUT_SCHEMA,
+        "status": confirmation_audit.COMPLETE_STATUS,
+        "candidate_id": "joint", "network_seeds": prepare.NETWORK_SEEDS,
+        "inventory": {"complete_cartesian_product": True},
+    })
     figure2 = artifact / "inputs/figure2.json"
     _write(figure2, {"interictal_field": {}})
-    return repository, artifact, config_path, aggregate_path, figure2
+    return repository, artifact, config_path, aggregate_path, confirm, figure2
 
 
 def test_rev16_postselection_uses_fresh_pool_without_reranking(tmp_path):
-    repository, artifact, config, aggregate, figure2 = _inputs(tmp_path)
+    repository, artifact, config, aggregate, confirm, figure2 = _inputs(tmp_path)
     payload = prepare.build_config(
         candidate_config_path=config, candidate_aggregate_path=aggregate,
+        confirmation_audit_path=confirm,
         artifact_root=artifact, repository_root=repository,
         figure2_field_path=figure2,
     )
     assert payload["schema_id"] == prepare.OUTPUT_SCHEMA
     assert payload["selected_candidate"]["candidate_id"] == "joint"
-    assert payload["network_seeds"] == [2351, 2352, 2353]
+    assert payload["network_seeds"] == [2361, 2362, 2363]
     assert payload["boundaries"]["natural_kmeans_used_for_field_selection"] is False
     assert payload["boundaries"]["patient_heldout_used"] is False
     assert payload["boundaries"]["EE_EtoI_ZM"] == "off"
 
 
 def test_rev16_postselection_rejects_absent_anchor(tmp_path):
-    repository, artifact, config, aggregate, figure2 = _inputs(tmp_path)
+    repository, artifact, config, aggregate, confirm, figure2 = _inputs(tmp_path)
     data = json.loads(aggregate.read_text())
     data["best_usable_anchor"] = None
     data["usable_two_mode_anchor_ids"] = []
@@ -104,19 +114,21 @@ def test_rev16_postselection_rejects_absent_anchor(tmp_path):
     with pytest.raises(RuntimeError, match="no training-qualified"):
         prepare.build_config(
             candidate_config_path=config, candidate_aggregate_path=aggregate,
+            confirmation_audit_path=confirm,
             artifact_root=artifact, repository_root=repository,
             figure2_field_path=figure2,
         )
 
 
 def test_rev16_postselection_rejects_kmeans_in_candidate_ranking(tmp_path):
-    repository, artifact, config, aggregate, figure2 = _inputs(tmp_path)
+    repository, artifact, config, aggregate, confirm, figure2 = _inputs(tmp_path)
     data = json.loads(aggregate.read_text())
     data["ranking_contract"]["natural_kmeans_used"] = True
     _write(aggregate, data)
     with pytest.raises(RuntimeError, match="forbidden boundary"):
         prepare.build_config(
             candidate_config_path=config, candidate_aggregate_path=aggregate,
+            confirmation_audit_path=confirm,
             artifact_root=artifact, repository_root=repository,
             figure2_field_path=figure2,
         )

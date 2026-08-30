@@ -14,7 +14,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from scripts import audit_topic4_rev15_node_final_science as base  # noqa: E402
-from scripts import run_topic4_rev16_joint_m3_m4_candidate_worker as worker  # noqa: E402
+from scripts import run_topic4_rev16_node_confirmation_worker as worker  # noqa: E402
 from scripts.prepare_topic4_rev16_node_final_science_config import (  # noqa: E402
     OUTPUT_SCHEMA as EXPECTED_CONFIG_SCHEMA,
 )

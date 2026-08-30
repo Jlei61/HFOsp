@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from scripts import run_topic4_rev16_joint_m3_m4_candidate_worker as worker  # noqa: E402
+from scripts import run_topic4_rev16_node_confirmation_worker as worker  # noqa: E402
 from scripts.paper_figures import plot_topic4_rev15_node_postselection_fig4 as base  # noqa: E402
 
 
@@ -24,7 +24,7 @@ DEFAULT_AUDIT = ARTIFACT_ROOT / (
     "joint_m3_m4_candidates/postselection/analysis/node_postselection_audit.json"
 )
 REVISION_ID = "rev16"
-NODE_DESCRIPTION = "rev16 joint M3+M4 Node"
+NODE_DESCRIPTION = "rev16 joint M3+M4 Node, unseen-network confirmation"
 SCIENTIFIC_ROLE = "development_only_rev16_node_postselection"
 RENDER_STATUS = "REV16_NODE_POSTSELECTION_FIG4_RENDERED"
 

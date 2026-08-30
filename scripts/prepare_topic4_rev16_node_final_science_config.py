@@ -18,7 +18,7 @@ from scripts import prepare_topic4_rev16_node_postselection_config as post  # no
 
 
 ARTIFACT_ROOT = Path("/home/honglab/leijiaxin/HFOsp")
-DEFAULT_CANDIDATE_CONFIG = ROOT / "config/topic4_rev16_joint_m3_m4_candidates.json"
+DEFAULT_CANDIDATE_CONFIG = ROOT / "config/topic4_rev16_node_confirmation.json"
 DEFAULT_CANDIDATE_AGGREGATE = ARTIFACT_ROOT / (
     "results/topic4_sef_hfo/data_driven_node_dualmode_rev16/"
     "joint_m3_m4_candidates/analysis/joint_candidates_aggregate.json"
