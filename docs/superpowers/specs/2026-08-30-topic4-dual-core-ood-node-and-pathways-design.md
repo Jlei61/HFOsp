@@ -31,8 +31,9 @@ results have already been inspected.
 - The patient classifier assigns every readable model event to A or B and uses
   the frozen mode-specific Mahalanobis q99 thresholds for OOD.
 - No patient ictal data, Z/M trajectory or Fig.5 endpoint is read in this round.
-- The frozen E1146 shared-plane geometry file used to place virtual contacts is
-  an explicit hash-checked input; it is not an implicit worktree-relative file.
+- The frozen E1146 shared-plane geometry and both TA/TB template-geometry files
+  used to place virtual contacts are explicit hash-checked inputs; none is an
+  implicit worktree-relative file.
 
 ## Two-core Node family
 
