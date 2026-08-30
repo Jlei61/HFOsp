@@ -165,13 +165,31 @@ def test_waiter_requires_complete_validated_response_tensor():
         "status": "COMPLETE",
         "inventory": {
             "complete_cartesian_product": True,
-            "present_validated": 116, "missing": [], "invalid_artifact": [],
+            "expected_runs": 174, "present_validated": 174,
+            "missing": [], "invalid_artifact": [],
+            "by_source": {
+                "seed2331_raw_workers": {
+                    "complete_cartesian_product": True,
+                    "expected_runs": 58, "present_validated": 58,
+                    "missing": [], "invalid_artifact": [],
+                },
+                "seeds2332_2333_raw_workers": {
+                    "complete_cartesian_product": True,
+                    "expected_runs": 116, "present_validated": 116,
+                    "missing": [], "invalid_artifact": [],
+                },
+            },
         },
         "response_tensor": {"metrics": []},
         "robust_directions": {"mean_a": {}},
     }
     assert waiter.classify(complete) == "complete"
     incomplete = json.loads(json.dumps(complete))
-    incomplete["inventory"]["present_validated"] = 115
+    incomplete["inventory"]["by_source"][
+        "seeds2332_2333_raw_workers"
+    ]["present_validated"] = 115
     assert waiter.classify(incomplete) == "failed"
+    wrong_total = json.loads(json.dumps(complete))
+    wrong_total["inventory"]["present_validated"] = 116
+    assert waiter.classify(wrong_total) == "failed"
     assert waiter.classify({"status": "INCOMPLETE"}) == "wait"

@@ -35,12 +35,26 @@ def _require_clean_commit(expected_commit: str) -> None:
 def classify(payload: dict) -> str:
     status = payload.get("status")
     inventory = payload.get("inventory", {})
+    by_source = inventory.get("by_source", {})
+    seed2331 = by_source.get("seed2331_raw_workers", {})
+    fresh = by_source.get("seeds2332_2333_raw_workers", {})
     if status == "COMPLETE":
         if (
             inventory.get("complete_cartesian_product") is True
-            and int(inventory.get("present_validated", -1)) == 116
+            and int(inventory.get("expected_runs", -1)) == 174
+            and int(inventory.get("present_validated", -1)) == 174
             and not inventory.get("missing")
             and not inventory.get("invalid_artifact")
+            and seed2331.get("complete_cartesian_product") is True
+            and int(seed2331.get("expected_runs", -1)) == 58
+            and int(seed2331.get("present_validated", -1)) == 58
+            and not seed2331.get("missing")
+            and not seed2331.get("invalid_artifact")
+            and fresh.get("complete_cartesian_product") is True
+            and int(fresh.get("expected_runs", -1)) == 116
+            and int(fresh.get("present_validated", -1)) == 116
+            and not fresh.get("missing")
+            and not fresh.get("invalid_artifact")
             and payload.get("response_tensor") is not None
             and payload.get("robust_directions") is not None
         ):
