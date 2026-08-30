@@ -20,6 +20,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import sys
 from pathlib import Path
 from typing import Mapping, Sequence
@@ -62,9 +63,16 @@ from src.topic5_tspectral_field_concordance import (  # noqa: E402
 )
 
 
-GAMMA30_CACHE = ROOT / "results/topic5_ictal_recruitment/v2_band_scan/cache"
-OUT = ROOT / "results/topic5_ictal_recruitment/tspectral_field_concordance"
-PAPER = ROOT / "results/paper-ready-figure/fig3-sup-tspectral-field-concordance"
+ARTIFACT_ROOT = Path(os.environ.get("HFOSP_ARTIFACT_ROOT", ROOT)).resolve()
+GAMMA30_CACHE = ARTIFACT_ROOT / "results/topic5_ictal_recruitment/v2_band_scan/cache"
+OUT = Path(os.environ.get(
+    "HFOSP_FIG3D_ANALYSIS_DIR",
+    ROOT / "results/topic5_ictal_recruitment/tspectral_field_concordance",
+)).resolve()
+PAPER = Path(os.environ.get(
+    "HFOSP_FIG3D_PAPER_DIR",
+    ROOT / "results/paper-ready-figure/fig3-sup-tspectral-field-concordance",
+)).resolve()
 PAPER_FIGURES = PAPER / "figures"
 
 CONTRACT = "topic5_onset_0_10_gradient_shared_else_own_channel_null_v2_gamma30"
@@ -102,6 +110,13 @@ GROUPS: dict[str, dict[str, object]] = {
 
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _display_path(path: Path) -> str:
+    try:
+        return str(path.relative_to(ROOT))
+    except ValueError:
+        return str(path)
 
 
 def load_phenotype_selector_map() -> dict[str, dict[str, set[int]]]:
@@ -238,6 +253,8 @@ def _fold_subject(
     score_key: str,
     events: list[dict[str, object]],
     n_perm: int,
+    field_fingerprint_sha256: str,
+    field_record_path: str,
 ) -> dict[str, object] | None:
     if not events:
         return None
@@ -261,6 +278,8 @@ def _fold_subject(
         "band": contract["band"],
         "field_plane": plane,
         "score_key": score_key,
+        "field_fingerprint_sha256": field_fingerprint_sha256,
+        "field_record_path": field_record_path,
         "data": data,
         "channel_null_median": null,
         "channel_null_p95": float(np.percentile(folded, 95)),
@@ -338,6 +357,11 @@ def _run_scoring(n_perm: int, seed: int):
                           "drop_reason": "missing_required_cache_or_field"})
             continue
         field_record = json.loads(field_path.read_text())
+        field_fingerprint = str(
+            (field_record.get("interictal_field") or {}).get(
+                "fingerprint_sha256", ""
+            )
+        )
         try:
             all_scorers = scorers_from_interictal_record(field_record)
             scorers, plane, score_key = select_shared_else_own_scorers(all_scorers)
@@ -430,6 +454,8 @@ def _run_scoring(n_perm: int, seed: int):
                         "window_start_sec": 0.0, "window_end_sec": 10.0,
                         "band": readout["band"], "field_plane": plane,
                         "score_key": score_key,
+                        "field_fingerprint_sha256": field_fingerprint,
+                        "field_record_path": _display_path(field_path),
                         "observed": score["observed"],
                         "null": score["null"],
                         "null_median": score["null_median"],
@@ -448,7 +474,15 @@ def _run_scoring(n_perm: int, seed: int):
 
         for group_id, events in events_by_group.items():
             row = _fold_subject(
-                subject, dataset, group_id, plane, score_key, events, n_perm
+                subject,
+                dataset,
+                group_id,
+                plane,
+                score_key,
+                events,
+                n_perm,
+                field_fingerprint,
+                _display_path(field_path),
             )
             if row is not None:
                 subject_rows.append(row)
@@ -500,7 +534,7 @@ def run(args: argparse.Namespace) -> dict[str, object]:
     PAPER.mkdir(parents=True, exist_ok=True)
     PAPER_FIGURES.mkdir(parents=True, exist_ok=True)
     source_npz = sorted(BB150_CACHE.glob("*.npz")) + sorted(GAMMA30_CACHE.glob("*.npz"))
-    hashes_before = {str(path.relative_to(ROOT)): _sha256(path) for path in source_npz}
+    hashes_before = {_display_path(path): _sha256(path) for path in source_npz}
 
     subjects, events, drops = _run_scoring(args.n_perm, args.seed)
     if subjects.empty:
@@ -520,7 +554,7 @@ def run(args: argparse.Namespace) -> dict[str, object]:
     cohort.to_csv(paths["cohort"], index=False)
     drops.to_csv(paths["drops"], index=False)
 
-    hashes_after = {str(path.relative_to(ROOT)): _sha256(path) for path in source_npz}
+    hashes_after = {_display_path(path): _sha256(path) for path in source_npz}
     if hashes_before != hashes_after:
         raise RuntimeError("historical onset cache NPZ changed")
 
@@ -542,6 +576,11 @@ def run(args: argparse.Namespace) -> dict[str, object]:
         },
         "window_sec": [0.0, 10.0],
         "field_routing": "shared_a/shared_b if complete else own_a/own_b",
+        "field_root": _display_path(FIELD_ROOT),
+        "field_fingerprints": {
+            str(row.subject): str(row.field_fingerprint_sha256)
+            for row in subjects.drop_duplicates("subject").itertuples()
+        },
         "routing_is_outcome_independent": True,
         "readout_groups": GROUPS,
         "broadband_cache_contract": (
@@ -570,10 +609,10 @@ def run(args: argparse.Namespace) -> dict[str, object]:
         "cohort_statistics": cohort.to_dict("records"),
         "source_cache_npz_unchanged": True,
         "outputs": {
-            key: str(path.relative_to(ROOT)) for key, path in paths.items()
+            key: _display_path(path) for key, path in paths.items()
         } | {
-            "figure_png": str(png.relative_to(ROOT)),
-            "figure_pdf": str(pdf.relative_to(ROOT)),
+            "figure_png": _display_path(png),
+            "figure_pdf": _display_path(pdf),
         },
     }
     summary_path = OUT / f"{STEM}_summary.json"

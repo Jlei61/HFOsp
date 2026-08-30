@@ -20,9 +20,11 @@ spatial-presence gate is retained only as a sensitivity analysis.
 from __future__ import annotations
 
 import argparse
+import concurrent.futures
 import csv
 import hashlib
 import json
+import os
 import sys
 import time
 from pathlib import Path
@@ -78,10 +80,15 @@ from src.topic5_template_axis_field import (  # noqa: E402
 )
 
 
-COHORT_SOURCE = (
-    ROOT / "results/topic5_ictal_recruitment/template_axis_field/cohort_summary.json"
-)
-OUT_DIR = ROOT / "results/paper-ready-figure/fig3f_ab_dominance_cohort"
+ARTIFACT_ROOT = Path(os.environ.get("HFOSP_ARTIFACT_ROOT", ROOT)).resolve()
+COHORT_SOURCE = Path(os.environ.get(
+    "HFOSP_FIG3F_COHORT_SOURCE",
+    ARTIFACT_ROOT / "results/topic5_ictal_recruitment/template_axis_field/cohort_summary.json",
+)).resolve()
+OUT_DIR = Path(os.environ.get(
+    "HFOSP_FIG3F_OUT_DIR",
+    ROOT / "results/paper-ready-figure/fig3f_ab_dominance_cohort",
+)).resolve()
 SUB_DIR = OUT_DIR / "per_subject"
 COHORT_CSV = OUT_DIR / "fig3f_ab_dominance_cohort.csv"
 COHORT_JSON = OUT_DIR / "fig3f_ab_dominance_cohort.json"
@@ -103,6 +110,13 @@ N_VALID_SHIFT_MIN = 40
 N_PERM_SUBJECT = 1000
 N_PERM_COHORT = 10000
 MIN_FINITE_FRACTION = 0.90
+
+
+def _display_path(path: Path) -> str:
+    try:
+        return str(path.relative_to(ROOT))
+    except ValueError:
+        return str(path)
 
 
 def _json_scalar(value):
@@ -190,6 +204,7 @@ def _extract_frozen_values(args: SimpleNamespace, record: dict) -> dict:
         pre_sec=pre_sec,
         post_sec=post_sec,
         reference=ICTAL_REFERENCE[dataset],
+        results_root=ARTIFACT_ROOT / "results",
     )
     if window.fs / 2.0 <= args.band_hi:
         raise RuntimeError(
@@ -581,7 +596,7 @@ def compute_subject(
     summary = {
         "subject": subject,
         "status": "ok",
-        "cohort_source": str(COHORT_SOURCE.relative_to(ROOT)),
+        "cohort_source": _display_path(COHORT_SOURCE),
         "n_requested_seizures": int(n_requested),
         "n_successful_seizures": int(len(seizures)),
         "coverage_fraction": float(len(seizures) / n_requested),
@@ -823,7 +838,7 @@ def _write_cohort(records: list[dict], gate_nperm: int, seed: int) -> dict:
     payload = {
         "contract": ALGORITHM_VERSION,
         "generated_by": "scripts/run_fig3f_ab_dominance_cohort.py",
-        "cohort_source": str(COHORT_SOURCE.relative_to(ROOT)),
+        "cohort_source": _display_path(COHORT_SOURCE),
         "cohort_source_sha256": hashlib.sha256(COHORT_SOURCE.read_bytes()).hexdigest(),
         "scientific_question": (
             "Does relative A/B-template dominance become stronger near clinical onset "
@@ -881,36 +896,59 @@ def run_subject(subject: str, gate_nperm: int, seed: int) -> dict:
     return summary
 
 
-def run_all(gate_nperm: int, seed: int) -> dict:
+def _run_subject_safe(subject: str, gate_nperm: int, seed: int) -> dict:
+    try:
+        summary, rows, arrays = compute_subject(subject, gate_nperm, seed)
+        _write_subject(summary, rows, arrays)
+    except Exception as exc:
+        summary = {
+            "subject": subject,
+            "status": "drop",
+            "drop_reason": f"{type(exc).__name__}: {exc}",
+            "primary": {"eligible": False, "subject_locked": False},
+            "within_shaft_sensitivity": {
+                "eligible": False, "subject_locked": False
+            },
+        }
+        _write_subject(summary, [], None)
+    return summary
+
+
+def run_all(gate_nperm: int, seed: int, workers: int = 1) -> dict:
     subjects = _cohort_subjects()
-    records: list[dict] = []
-    print(f"processing canonical {len(subjects)}-subject cohort", flush=True)
-    for index, subject in enumerate(subjects, 1):
-        started = time.time()
-        print(f"[{index}/{len(subjects)}] {subject}", flush=True)
-        try:
-            summary, rows, arrays = compute_subject(subject, gate_nperm, seed)
-            _write_subject(summary, rows, arrays)
-        except Exception as exc:
-            summary = {
-                "subject": subject,
-                "status": "drop",
-                "drop_reason": f"{type(exc).__name__}: {exc}",
-                "primary": {"eligible": False, "subject_locked": False},
-                "within_shaft_sensitivity": {
-                    "eligible": False, "subject_locked": False
-                },
+    workers = max(1, min(int(workers), 2, len(subjects)))
+    print(
+        f"processing canonical {len(subjects)}-subject cohort with {workers} worker(s)",
+        flush=True,
+    )
+    records_by_subject: dict[str, dict] = {}
+    if workers == 1:
+        for index, subject in enumerate(subjects, 1):
+            started = time.time()
+            summary = _run_subject_safe(subject, gate_nperm, seed)
+            records_by_subject[subject] = summary
+            print(
+                f"[{index}/{len(subjects)}] {subject}: {summary['status']} "
+                f"({time.time()-started:.1f}s)",
+                flush=True,
+            )
+    else:
+        with concurrent.futures.ProcessPoolExecutor(max_workers=workers) as pool:
+            futures = {
+                pool.submit(_run_subject_safe, subject, gate_nperm, seed): subject
+                for subject in subjects
             }
-            _write_subject(summary, [], None)
-        records.append(summary)
-        primary = summary["primary"]
-        print(
-            f"    {summary['status']} relation={summary.get('axis_relation')} "
-            f"successful={summary.get('n_successful_seizures')} "
-            f"eligible={primary.get('eligible')} delta={primary.get('delta')} "
-            f"locked={primary.get('subject_locked')} ({time.time()-started:.1f}s)",
-            flush=True,
-        )
+            for index, future in enumerate(
+                concurrent.futures.as_completed(futures), 1
+            ):
+                subject = futures[future]
+                summary = future.result()
+                records_by_subject[subject] = summary
+                print(
+                    f"[{index}/{len(subjects)}] {subject}: {summary['status']}",
+                    flush=True,
+                )
+    records = [records_by_subject[subject] for subject in subjects]
     payload = _write_cohort(records, gate_nperm, seed)
     print(
         json.dumps(payload["primary_cohort_hierarchical_time_null"], indent=2),
@@ -943,6 +981,7 @@ def main() -> None:
     parser.add_argument("--rebuild-cohort", action="store_true")
     parser.add_argument("--gate-nperm", type=int, default=1000)
     parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument("--workers", type=int, default=1)
     args = parser.parse_args()
     if args.gate_nperm < 19:
         raise ValueError("gate_nperm must be >=19 so p<0.05 is attainable")
@@ -952,7 +991,7 @@ def main() -> None:
         payload = rebuild_cohort(args.gate_nperm, args.seed)
         print(json.dumps(payload["primary_cohort_hierarchical_time_null"], indent=2))
     elif args.all:
-        run_all(args.gate_nperm, args.seed)
+        run_all(args.gate_nperm, args.seed, workers=args.workers)
     else:
         print(
             json.dumps(

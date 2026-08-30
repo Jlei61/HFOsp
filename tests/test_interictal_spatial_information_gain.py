@@ -6,6 +6,8 @@ from src.interictal_spatial_information_gain import (
     compute_crossfit_spatial_information_gain,
     equal_view_spatial_scale,
     fit_evaluate_crossfit_fold,
+    fit_full_spatial_template_model,
+    fit_full_temporal_template_model,
 )
 from src.topic5_interictal_direction_rose import fit_event_directions_3d
 
@@ -128,3 +130,46 @@ def test_crossfit_uses_rank_only_heldout_assignment_and_returns_null():
         result["folds"][0]["timing_plus_space_train_cluster_counts"],
         changed["folds"][0]["timing_plus_space_train_cluster_counts"],
     )
+
+
+def test_full_spatial_fit_orders_template_a_by_event_prevalence():
+    coords = np.array([
+        [-2.0, 0.0, 0.0],
+        [-1.0, 1.0, 0.0],
+        [0.0, -1.0, 0.0],
+        [1.0, 1.0, 0.0],
+        [2.0, 0.0, 0.0],
+        [0.0, 2.0, 0.0],
+    ])
+    forward = np.argsort(np.argsort(coords[:, 0])).astype(float)
+    reverse = np.argsort(np.argsort(-coords[:, 0])).astype(float)
+    rng = np.random.default_rng(29)
+    events = [forward + rng.normal(0, 0.02, 6) for _ in range(42)]
+    events += [reverse + rng.normal(0, 0.02, 6) for _ in range(18)]
+    ranks = np.asarray(events).T
+    bools = np.ones_like(ranks, dtype=bool)
+    directions = fit_event_directions_3d(ranks, coords, min_contacts=3)[
+        "directions"
+    ]
+
+    fitted = fit_full_spatial_template_model(
+        ranks,
+        bools,
+        directions,
+        coords,
+        min_cluster_events=5,
+    )
+    assert fitted["cluster_counts"].tolist() == [42, 18]
+    assert np.sum(fitted["labels"] == 0) == 42
+    assert np.sum(fitted["labels"] == 1) == 18
+    assert fitted["supports"].shape == (2, 6)
+    assert fitted["template_label_rule"].startswith("A=more events")
+
+    timing = fit_full_temporal_template_model(
+        ranks,
+        bools,
+        coords,
+        min_cluster_events=5,
+    )
+    assert timing["cluster_counts"].tolist() == [42, 18]
+    assert timing["templates"].shape == (2, 6)

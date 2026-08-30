@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -55,8 +56,9 @@ from src import topic5_ictal_recruitment as recruit  # noqa: E402
 from src.ictal_onset_extraction import extract_seizure_window, resolve_baseline_window  # noqa: E402
 
 
-REAL_DIR = _ROOT / "results/spatial_modulation/propagation_geometry/observation_readout/real_subjects"
-LONG_CACHE = _ROOT / "results/topic5_ictal_recruitment/ictal_field_long_cache"
+ARTIFACT_ROOT = Path(os.environ.get("HFOSP_ARTIFACT_ROOT", _ROOT)).resolve()
+REAL_DIR = ARTIFACT_ROOT / "results/spatial_modulation/propagation_geometry/observation_readout/real_subjects"
+LONG_CACHE = ARTIFACT_ROOT / "results/topic5_ictal_recruitment/ictal_field_long_cache"
 OUT = _ROOT / "results/topic5_ictal_recruitment/field_dynamics_signed/figures"
 
 

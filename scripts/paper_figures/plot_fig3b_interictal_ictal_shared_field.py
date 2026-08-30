@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 from typing import Mapping, Sequence
@@ -63,11 +64,13 @@ from src.topic5_tspectral_field_concordance import (  # noqa: E402
 )
 
 
-FROZEN_ROOT = (
-    ROOT / "results/interictal_propagation_masked/template_gradient_fields/per_subject"
-)
+ARTIFACT_ROOT = Path(os.environ.get("HFOSP_ARTIFACT_ROOT", ROOT)).resolve()
+FROZEN_ROOT = Path(os.environ.get(
+    "HFOSP_INTERICTAL_FIELD_DIR",
+    ARTIFACT_ROOT / "results/interictal_propagation_masked/template_gradient_fields/per_subject",
+)).resolve()
 CHECKPOINT_ROOT = (
-    ROOT
+    ARTIFACT_ROOT
     / "results/topic5_ictal_recruitment/tspectral_field_concordance/per_subject"
     / "clinical_onset_shared_field"
 )
@@ -113,6 +116,13 @@ def _load_record(ds_sid: str) -> tuple[dict, Path]:
     return record, path
 
 
+def _display_path(path: Path) -> str:
+    try:
+        return str(path.relative_to(ROOT))
+    except ValueError:
+        return str(path)
+
+
 def _extract_clinical_activation(
     ds_sid: str,
     seizure_idx: int,
@@ -134,6 +144,7 @@ def _extract_clinical_activation(
         pre_sec=pre_sec,
         post_sec=post_sec,
         reference=ICTAL_REFERENCE[dataset],
+        results_root=ARTIFACT_ROOT / "results",
     )
 
     target_names = [
@@ -207,11 +218,22 @@ def _extract_clinical_activation(
     }
 
 
-def _checkpoint_event(ds_sid: str, seizure_idx: int) -> tuple[dict | None, Path]:
+def _checkpoint_event(
+    ds_sid: str,
+    seizure_idx: int,
+    expected_fingerprint: str | None = None,
+) -> tuple[dict | None, Path]:
     path = CHECKPOINT_ROOT / ds_sid / f"seizure_{int(seizure_idx):03d}.json"
     if not path.exists():
         return None, path
     payload = json.loads(path.read_text(encoding="utf-8"))
+    checkpoint_fingerprint = payload.get("field_sha256") or payload.get("field_fingerprint_sha256")
+    if (
+        expected_fingerprint is not None
+        and checkpoint_fingerprint is not None
+        and checkpoint_fingerprint != expected_fingerprint
+    ):
+        return None, path
     return payload.get("event"), path
 
 
@@ -520,7 +542,11 @@ def main() -> None:
     activation, extraction = _extract_clinical_activation(
         ds_sid, seizure_idx, record
     )
-    checkpoint, checkpoint_path = _checkpoint_event(ds_sid, seizure_idx)
+    checkpoint, checkpoint_path = _checkpoint_event(
+        ds_sid,
+        seizure_idx,
+        expected_fingerprint=record["interictal_field"]["fingerprint_sha256"],
+    )
     audit = _score_audit(record, activation, checkpoint)
     template = "A"
     rank = np.asarray(fz["rank_a"], dtype=float)
@@ -563,7 +589,7 @@ def main() -> None:
         "canonical_producer": "scripts/paper_figures/plot_fig3b_interictal_ictal_shared_field.py",
         "subject": ds_sid,
         "seizure_idx": seizure_idx,
-        "frozen_record": str(frozen_path.relative_to(ROOT)),
+        "frozen_record": _display_path(frozen_path),
         "frozen_contract": record.get("contract"),
         "frozen_fingerprint": record["interictal_field"]["fingerprint_sha256"],
         "axis_definition": record.get("axis_definition"),
@@ -600,7 +626,7 @@ def main() -> None:
         "ictal_display_values": _normalize_minmax(activation).tolist(),
         "ictal_extraction": extraction,
         "score_audit": audit,
-        "checkpoint": str(checkpoint_path.relative_to(ROOT)),
+        "checkpoint": _display_path(checkpoint_path),
         "checkpoint_present": checkpoint is not None,
         "checkpoint_max_abs_score_error": float(max_score_error),
         "display": display,

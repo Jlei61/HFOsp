@@ -36,6 +36,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -73,9 +74,13 @@ from src.propagation_skeleton_geometry import assign_events_to_templates
 from src.topic5_template_axis_field import scorers_from_interictal_record
 from src.utils.bqk_utils import band_filt, notch_filt, return_hil_enve
 
-FROZEN = _ROOT / "results/interictal_propagation_masked/template_gradient_fields/per_subject"
+ARTIFACT_ROOT = Path(os.environ.get("HFOSP_ARTIFACT_ROOT", _ROOT)).resolve()
+FROZEN = Path(os.environ.get(
+    "HFOSP_INTERICTAL_FIELD_DIR",
+    ARTIFACT_ROOT / "results/interictal_propagation_masked/template_gradient_fields/per_subject",
+)).resolve()
 LAGPAT_ROOT = Path("/mnt/epilepsia_data/interilca_inter_results/all_data_lns")
-INVENTORY = _ROOT / "results/epilepsiae_block_inventory.csv"
+INVENTORY = ARTIFACT_ROOT / "results/epilepsiae_block_inventory.csv"
 OUT = _ROOT / "results/interictal_propagation_masked/event_envelope_fields"
 
 BAND = (80.0, 250.0)

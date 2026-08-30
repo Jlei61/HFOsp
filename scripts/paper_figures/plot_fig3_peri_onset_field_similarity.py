@@ -5,8 +5,11 @@ This is a compact companion figure for the Topic 5 ictal field-dynamics
 exploration. It uses the same per-seizure table as the diagnostic plots, but
 renders only the paper-facing readouts:
 
-  a. shared-gradient maxAB scaffold similarity, max(|r_A|, |r_B|)
-  b. signed shared-gradient similarity to template A and template B separately
+  a. amplitude-aware maxAB template expression, max(|q_A|, |q_B|)
+  b. signed amplitude-aware expression of template A and template B separately
+
+The legacy scale-free correlation view remains available through
+``--readout similarity`` for audit comparisons.
 
 The lower diagnostic variance / n-seizure panel is intentionally omitted.
 Those values are written to the sidecar JSON and README instead.
@@ -54,6 +57,9 @@ COL_INDIV = "#B5B5B5"
 DESIGN_STANDARD = "standard"
 DESIGN_JOURNAL_CLEAN = "journal_clean"
 DESIGN_VARIANTS = (DESIGN_STANDARD, DESIGN_JOURNAL_CLEAN)
+READOUT_PROJECTION = "template_projection"
+READOUT_SIMILARITY = "similarity"
+READOUTS = (READOUT_PROJECTION, READOUT_SIMILARITY)
 
 
 def _subject_label(ds_sid: str) -> str:
@@ -115,7 +121,14 @@ def _validate_window_grid(df: pd.DataFrame, src: Path) -> None:
             raise RuntimeError(f"{src}: seizure {seizure_idx} window_center mismatch")
 
 
-def _load_peri_onset(src: Path, ds_sid: str | None = None) -> pd.DataFrame:
+def _load_peri_onset(
+    src: Path,
+    ds_sid: str | None = None,
+    *,
+    readout: str = READOUT_SIMILARITY,
+) -> pd.DataFrame:
+    if readout not in READOUTS:
+        raise ValueError(f"unknown readout={readout!r}")
     df = pd.read_csv(src)
     required = {
         "subject", "seizure_idx", "window_start_sec", "window_end_sec",
@@ -126,6 +139,14 @@ def _load_peri_onset(src: Path, ds_sid: str | None = None) -> pd.DataFrame:
         "geometry_2d_supported", "geometry_quality_tier",
         "minimum_axis_n_shafts", "minimum_axis_effective_rank",
     }
+    if readout == READOUT_PROJECTION:
+        required.update({
+            "maxAB_abs_projection_z",
+            "A_abs_projection_z",
+            "B_abs_projection_z",
+            "A_signed_projection_z",
+            "B_signed_projection_z",
+        })
     missing = sorted(required.difference(df.columns))
     if missing:
         raise RuntimeError(f"{src}: missing required columns {missing}")
@@ -175,6 +196,14 @@ def _load_peri_onset(src: Path, ds_sid: str | None = None) -> pd.DataFrame:
         "seizure_idx", "window_start_sec", "window_end_sec", "window_center_sec",
         "maxAB_abs_corr", "A_abs_corr", "B_abs_corr", "A_signed_corr", "B_signed_corr",
     ]
+    if readout == READOUT_PROJECTION:
+        numeric.extend([
+            "maxAB_abs_projection_z",
+            "A_abs_projection_z",
+            "B_abs_projection_z",
+            "A_signed_projection_z",
+            "B_signed_projection_z",
+        ])
     for column in numeric:
         values = pd.to_numeric(df[column], errors="coerce").to_numpy(float)
         if not np.isfinite(values).all():
@@ -190,6 +219,18 @@ def _load_peri_onset(src: Path, ds_sid: str | None = None) -> pd.DataFrame:
         rtol=0,
     ):
         raise RuntimeError(f"{src}: maxAB arithmetic mismatch")
+    if readout == READOUT_PROJECTION:
+        expected_projection = np.maximum(
+            pd.to_numeric(df["A_abs_projection_z"]).to_numpy(float),
+            pd.to_numeric(df["B_abs_projection_z"]).to_numpy(float),
+        )
+        if not np.allclose(
+            expected_projection,
+            pd.to_numeric(df["maxAB_abs_projection_z"]).to_numpy(float),
+            atol=1e-12,
+            rtol=0,
+        ):
+            raise RuntimeError(f"{src}: maxAB projection arithmetic mismatch")
 
     keep = (df["window_start_sec"] >= LO_SEC) & (df["window_end_sec"] <= HI_SEC)
     out = df.loc[keep].copy()
@@ -213,7 +254,23 @@ def _temporary_sibling(path: Path) -> Path:
     return Path(handle.name)
 
 
-def _agg(df: pd.DataFrame) -> pd.DataFrame:
+def _readout_columns(readout: str) -> dict[str, str]:
+    if readout == READOUT_PROJECTION:
+        return {
+            "maxAB": "maxAB_abs_projection_z",
+            "A": "A_signed_projection_z",
+            "B": "B_signed_projection_z",
+        }
+    if readout == READOUT_SIMILARITY:
+        return {
+            "maxAB": "maxAB_abs_corr",
+            "A": "A_signed_corr",
+            "B": "B_signed_corr",
+        }
+    raise ValueError(f"unknown readout={readout!r}")
+
+
+def _agg(df: pd.DataFrame, *, readout: str = READOUT_SIMILARITY) -> pd.DataFrame:
     rows = []
     for (lo, hi, cen), g in df.groupby(["window_start_sec", "window_end_sec", "window_center_sec"], sort=True):
         row = {
@@ -222,11 +279,7 @@ def _agg(df: pd.DataFrame) -> pd.DataFrame:
             "window_center_sec": float(cen),
             "n_seizures": int(g["seizure_idx"].nunique()),
         }
-        specs = {
-            "maxAB": "maxAB_abs_corr",
-            "A": "A_signed_corr",
-            "B": "B_signed_corr",
-        }
+        specs = _readout_columns(readout)
         for prefix, col in specs.items():
             vals = pd.to_numeric(g[col], errors="coerce").dropna().to_numpy(float)
             row[f"{prefix}_mean"] = float(np.mean(vals))
@@ -284,6 +337,7 @@ def _make_figure(
     *,
     subject_label: str,
     design_variant: str = DESIGN_STANDARD,
+    readout: str = READOUT_SIMILARITY,
 ) -> plt.Figure:
     if design_variant not in DESIGN_VARIANTS:
         raise ValueError(f"unknown design_variant={design_variant!r}")
@@ -292,10 +346,11 @@ def _make_figure(
     figsize = (7.4, 2.55) if journal_clean else (7.4, 3.25)
     fig, axes = plt.subplots(1, 2, figsize=figsize, sharex=True)
     ax0, ax1 = axes
+    columns = _readout_columns(readout)
     xlo = float(agg["window_center_sec"].min())
     xhi = float(agg["window_center_sec"].max())
 
-    _draw_individual(ax0, df, "maxAB_abs_corr")
+    _draw_individual(ax0, df, columns["maxAB"])
     _draw_band_line(
         ax0,
         agg,
@@ -305,25 +360,35 @@ def _make_figure(
         band_label="IQR",
     )
     ax0.axvline(0, color="0.30", ls="--", lw=0.9, zorder=0)
-    ax0.set_ylim(0.0, 1.0)
+    if readout == READOUT_SIMILARITY:
+        ax0.set_ylim(0.0, 1.0)
+    else:
+        upper = float(np.nanmax(pd.to_numeric(df[columns["maxAB"]])))
+        ax0.set_ylim(0.0, max(0.25, upper * 1.05))
     ax0.set_xlim(xlo, xhi)
     if journal_clean:
-        ax0.set_ylabel(
-            "Field similarity\n" + r"$\max(|r_A|, |r_B|)$",
-            fontsize=FS_LABEL - 2,
+        ylabel = (
+            "Expression |q|\n(baseline z)"
+            if readout == READOUT_PROJECTION
+            else "Field similarity\n" + r"$\max(|r_A|, |r_B|)$"
         )
+        ax0.set_ylabel(ylabel, fontsize=FS_LABEL - 2)
         ax0.set_xlabel("Time (s)", fontsize=FS_LABEL - 2)
     else:
         ax0.set_title("shared-gradient maxAB", fontsize=FS_LABEL, pad=8)
-        ax0.set_ylabel("field similarity |r|", fontsize=FS_LABEL)
+        ax0.set_ylabel(
+            "template expression |q| (baseline z)"
+            if readout == READOUT_PROJECTION else "field similarity |r|",
+            fontsize=FS_LABEL,
+        )
         ax0.set_xlabel("window center from onset (s)", fontsize=FS_LABEL)
     ax0.set_xticks([-100, -80, -60, -40, -20, 0])
     ax0.legend(frameon=False, loc="lower right", fontsize=9, handlelength=1.7)
 
     for _idx, g in df.groupby("seizure_idx"):
         g = g.sort_values("window_center_sec")
-        ax1.plot(g["window_center_sec"], g["A_signed_corr"], color=COL_A, lw=0.4, alpha=0.075, zorder=1)
-        ax1.plot(g["window_center_sec"], g["B_signed_corr"], color=COL_B, lw=0.4, alpha=0.075, zorder=1)
+        ax1.plot(g["window_center_sec"], g[columns["A"]], color=COL_A, lw=0.4, alpha=0.075, zorder=1)
+        ax1.plot(g["window_center_sec"], g[columns["B"]], color=COL_B, lw=0.4, alpha=0.075, zorder=1)
     ax1.axhline(0, color="0.35", lw=0.9, zorder=0)
     ax1.axvline(0, color="0.30", ls="--", lw=0.9, zorder=0)
     _draw_band_line(
@@ -340,14 +405,30 @@ def _make_figure(
         color=COL_B,
         label="TB" if journal_clean else "template B",
     )
-    ax1.set_ylim(-1.0, 1.0)
+    if readout == READOUT_SIMILARITY:
+        ax1.set_ylim(-1.0, 1.0)
+    else:
+        signed_values = np.concatenate([
+            pd.to_numeric(df[columns["A"]]).to_numpy(float),
+            pd.to_numeric(df[columns["B"]]).to_numpy(float),
+        ])
+        limit = float(np.nanmax(np.abs(signed_values)))
+        ax1.set_ylim(-max(0.25, limit * 1.05), max(0.25, limit * 1.05))
     ax1.set_xlim(xlo, xhi)
     if journal_clean:
-        ax1.set_ylabel("Signed field similarity, r", fontsize=FS_LABEL - 2)
+        ax1.set_ylabel(
+            "Signed q\n(baseline z)"
+            if readout == READOUT_PROJECTION else "Signed field similarity, r",
+            fontsize=FS_LABEL - 2,
+        )
         ax1.set_xlabel("Time (s)", fontsize=FS_LABEL - 2)
     else:
         ax1.set_title("signed shared-gradient A/B", fontsize=FS_LABEL, pad=8)
-        ax1.set_ylabel("signed field similarity r", fontsize=FS_LABEL)
+        ax1.set_ylabel(
+            "signed template expression q (baseline z)"
+            if readout == READOUT_PROJECTION else "signed field similarity r",
+            fontsize=FS_LABEL,
+        )
         ax1.set_xlabel("window center from onset (s)", fontsize=FS_LABEL)
     ax1.set_xticks([-100, -80, -60, -40, -20, 0])
     ax1.legend(frameon=False, loc="lower left", fontsize=9, handlelength=1.7)
@@ -382,6 +463,7 @@ def _plot(
     *,
     subject_label: str,
     design_variant: str = DESIGN_STANDARD,
+    readout: str = READOUT_SIMILARITY,
 ) -> None:
     savefig_pub(
         _make_figure(
@@ -389,6 +471,7 @@ def _plot(
             agg,
             subject_label=subject_label,
             design_variant=design_variant,
+            readout=readout,
         ),
         out_png,
         dpi=300,
@@ -399,6 +482,7 @@ def _plot(
             agg,
             subject_label=subject_label,
             design_variant=design_variant,
+            readout=readout,
         ),
         out_pdf,
         dpi=300,
@@ -414,6 +498,7 @@ def _build_summary(
     out_pdf: Path,
     *,
     design_variant: str = DESIGN_STANDARD,
+    readout: str = READOUT_SIMILARITY,
 ) -> dict:
     source_summary_path = src.with_name(src.name.replace("_per_seizure.csv", "_summary.json"))
     if not source_summary_path.exists():
@@ -428,6 +513,7 @@ def _build_summary(
     return {
         "subject": ds_sid,
         "design_variant": design_variant,
+        "readout": readout,
         "manuscript_panel": "Fig3E" if design_variant == DESIGN_JOURNAL_CLEAN else None,
         "source_csv": str(src.relative_to(ROOT)),
         "time_range_sec": [LO_SEC, HI_SEC],
@@ -454,17 +540,27 @@ def _build_summary(
         "n_windows": int(agg.shape[0]),
         "readouts": {
             "maxAB_abs": {
-                "definition": "max(|r_A|, |r_B|)",
+                "definition": (
+                    "max(|q_A|, |q_B|), q=mean(zscore(frozen template) * "
+                    "smoothed ictal baseline-robust-z field)"
+                    if readout == READOUT_PROJECTION else "max(|r_A|, |r_B|)"
+                ),
                 "median_of_window_medians": float(np.nanmedian(agg["maxAB_median"])),
                 "median_of_window_variances": float(np.nanmedian(agg["maxAB_var"])),
             },
             "signed_A": {
-                "definition": "signed r against template A",
+                "definition": (
+                    "signed q against template A"
+                    if readout == READOUT_PROJECTION else "signed r against template A"
+                ),
                 "median_of_window_medians": float(np.nanmedian(agg["A_median"])),
                 "median_of_window_variances": float(np.nanmedian(agg["A_var"])),
             },
             "signed_B": {
-                "definition": "signed r against template B",
+                "definition": (
+                    "signed q against template B"
+                    if readout == READOUT_PROJECTION else "signed r against template B"
+                ),
                 "median_of_window_medians": float(np.nanmedian(agg["B_median"])),
                 "median_of_window_variances": float(np.nanmedian(agg["B_var"])),
             },
@@ -482,18 +578,22 @@ def run(
     source_csv: Path | None = None,
     out_dir: Path | None = None,
     design_variant: str = DESIGN_STANDARD,
+    readout: str = READOUT_PROJECTION,
 ) -> tuple[Path, Path, Path]:
     if design_variant not in DESIGN_VARIANTS:
         raise ValueError(f"unknown design_variant={design_variant!r}")
+    if readout not in READOUTS:
+        raise ValueError(f"unknown readout={readout!r}")
     output_dir = Path(out_dir).resolve() if out_dir is not None else OUT_DIR
     output_dir.mkdir(parents=True, exist_ok=True)
     src = Path(source_csv).resolve() if source_csv is not None else _source_csv(ds_sid)
     if not src.exists():
         raise FileNotFoundError(src)
-    df = _load_peri_onset(src, ds_sid)
-    agg = _agg(df)
+    df = _load_peri_onset(src, ds_sid, readout=readout)
+    agg = _agg(df, readout=readout)
     suffix = "_journal_clean" if design_variant == DESIGN_JOURNAL_CLEAN else ""
-    stem = f"{ds_sid}_peri_onset_field_similarity_paper_ready{suffix}"
+    metric_tag = "_template_expression" if readout == READOUT_PROJECTION else "_field_similarity"
+    stem = f"{ds_sid}_peri_onset{metric_tag}_paper_ready{suffix}"
     out_png = output_dir / f"{stem}.png"
     out_pdf = output_dir / f"{stem}.pdf"
     meta = output_dir / f"{stem}_summary.json"
@@ -505,6 +605,7 @@ def run(
         out_png,
         out_pdf,
         design_variant=design_variant,
+        readout=readout,
     )
     tmp_png = _temporary_sibling(out_png)
     tmp_pdf = _temporary_sibling(out_pdf)
@@ -517,6 +618,7 @@ def run(
             tmp_pdf,
             subject_label=_subject_label(ds_sid),
             design_variant=design_variant,
+            readout=readout,
         )
         tmp_meta.write_text(json.dumps(summary, indent=2, ensure_ascii=False) + "\n")
         if not tmp_png.stat().st_size or not tmp_pdf.stat().st_size:
@@ -539,12 +641,14 @@ def main() -> None:
     ap.add_argument("--source-csv", type=Path, default=None)
     ap.add_argument("--out-dir", type=Path, default=None)
     ap.add_argument("--design-variant", choices=DESIGN_VARIANTS, default=DESIGN_STANDARD)
+    ap.add_argument("--readout", choices=READOUTS, default=READOUT_PROJECTION)
     args = ap.parse_args()
     run(
         args.subject,
         source_csv=args.source_csv,
         out_dir=args.out_dir,
         design_variant=args.design_variant,
+        readout=args.readout,
     )
 
 

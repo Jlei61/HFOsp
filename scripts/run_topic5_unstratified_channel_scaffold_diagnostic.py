@@ -19,6 +19,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import shutil
 import sys
 from pathlib import Path
@@ -60,9 +61,10 @@ from src.topic5_tspectral_field_concordance import (  # noqa: E402
 )
 
 
+ARTIFACT_ROOT = Path(os.environ.get("HFOSP_ARTIFACT_ROOT", ROOT)).resolve()
 OUT = ROOT / "results/topic5_ictal_recruitment/tspectral_field_concordance"
-OLD_CACHE = ROOT / "results/topic5_ictal_recruitment/t0_feature_cache_bb150_1_150"
-OLD_RESULT = (ROOT / "results/topic5_ictal_recruitment/axis_alignment/"
+OLD_CACHE = ARTIFACT_ROOT / "results/topic5_ictal_recruitment/t0_feature_cache_bb150_1_150"
+OLD_RESULT = (ARTIFACT_ROOT / "results/topic5_ictal_recruitment/axis_alignment/"
               "axis_alignment_broadband150_max_ab_B1000.json")
 CHECKPOINT_DIR = OUT / "per_subject/unstratified_channel_scaffold"
 WINDOW_LABEL = {

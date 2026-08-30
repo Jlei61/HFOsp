@@ -27,6 +27,143 @@ METHOD_TEMPORAL = "timing_only"
 METHOD_HYBRID = "timing_plus_space"
 
 
+def _canonicalize_full_fit(
+    ranks: np.ndarray,
+    bools: np.ndarray,
+    raw_labels: np.ndarray,
+    coords: np.ndarray,
+) -> Dict[str, Any]:
+    """Order a deterministic K=2 fit by prevalence and build its templates."""
+    raw_counts = np.bincount(np.asarray(raw_labels, int), minlength=2)
+    order = np.asarray(
+        sorted(range(2), key=lambda cluster: (-int(raw_counts[cluster]), cluster)),
+        int,
+    )
+    inverse = np.empty(2, int)
+    inverse[order] = np.arange(2)
+    labels = inverse[np.asarray(raw_labels, int)]
+    counts = raw_counts[order]
+    templates = build_cluster_templates(ranks, bools, labels, n_clusters=2)
+    axes = fit_event_directions_3d(
+        templates.T, np.asarray(coords, float), min_contacts=3
+    )["directions"]
+    if not np.isfinite(axes).all():
+        raise ValueError("a full-fit template axis is not estimable")
+    supports = np.vstack([
+        np.mean(np.asarray(bools, bool)[:, labels == cluster], axis=1)
+        for cluster in (0, 1)
+    ])
+    return {
+        "labels": labels,
+        "templates": templates,
+        "axes": axes,
+        "cluster_counts": counts,
+        "supports": supports,
+        "cluster_order_from_raw_kmeans": order,
+        "template_label_rule": "A=more events; B=fewer events",
+    }
+
+
+def fit_full_temporal_template_model(
+    ranks: np.ndarray,
+    bools: np.ndarray,
+    coords: np.ndarray,
+    *,
+    min_cluster_events: int = 20,
+    random_state: int = 0,
+) -> Dict[str, Any]:
+    """Fit the same-sample Timing-only audit comparator for a full hybrid fit."""
+    rank_values = np.asarray(ranks, float)
+    bool_values = np.asarray(bools, bool)
+    xyz = np.asarray(coords, float)
+    if rank_values.ndim != 2 or bool_values.shape != rank_values.shape:
+        raise ValueError("ranks and bools must align as contacts x events")
+    if xyz.shape != (rank_values.shape[0], 3):
+        raise ValueError("coords must align with contacts")
+    temporal = build_masked_kmeans_features(
+        rank_values, bool_values, impute="event_median"
+    )
+    raw_labels = KMeans(
+        n_clusters=2,
+        n_init=10,
+        random_state=int(random_state),
+    ).fit_predict(temporal)
+    raw_counts = np.bincount(raw_labels, minlength=2)
+    if int(raw_counts.min()) < int(min_cluster_events):
+        raise ValueError(
+            "timing_only full fit: cluster support below "
+            f"{min_cluster_events}: {raw_counts.tolist()}"
+        )
+    return {
+        "method": METHOD_TEMPORAL,
+        **_canonicalize_full_fit(
+            rank_values, bool_values, raw_labels, xyz
+        ),
+        "fit_role": "same-sample audit comparator for timing_plus_space full fit",
+    }
+
+
+def fit_full_spatial_template_model(
+    ranks: np.ndarray,
+    bools: np.ndarray,
+    directions: np.ndarray,
+    coords: np.ndarray,
+    *,
+    min_cluster_events: int = 20,
+    random_state: int = 0,
+) -> Dict[str, Any]:
+    """Fit the publication-facing Timing+Space templates on all input events.
+
+    This is the full-data counterpart of the training-side hybrid arm used by
+    :func:`compute_crossfit_spatial_information_gain`.  It is intentionally not
+    a held-out estimate: cross-fit establishes that space adds information,
+    whereas this function freezes the final interictal templates for downstream
+    projection.  Cluster A is defined as the more prevalent event class, matching
+    the manuscript label contract; ties retain deterministic KMeans order.
+    """
+    rank_values = np.asarray(ranks, float)
+    bool_values = np.asarray(bools, bool)
+    direction_values = np.asarray(directions, float)
+    xyz = np.asarray(coords, float)
+    if rank_values.ndim != 2 or bool_values.shape != rank_values.shape:
+        raise ValueError("ranks and bools must align as contacts x events")
+    n_contacts, n_events = rank_values.shape
+    if direction_values.shape != (n_events, 3):
+        raise ValueError("directions must align with events")
+    if xyz.shape != (n_contacts, 3):
+        raise ValueError("coords must align with contacts")
+    if not np.isfinite(direction_values).all():
+        raise ValueError("full-fit directions must be finite")
+
+    temporal = build_masked_kmeans_features(
+        rank_values, bool_values, impute="event_median"
+    )
+    hybrid, spatial_scale = build_hybrid_training_features(
+        temporal, direction_values
+    )
+    raw_labels = KMeans(
+        n_clusters=2,
+        n_init=10,
+        random_state=int(random_state),
+    ).fit_predict(hybrid)
+    raw_counts = np.bincount(raw_labels, minlength=2)
+    if int(raw_counts.min()) < int(min_cluster_events):
+        raise ValueError(
+            "timing_plus_space full fit: cluster support below "
+            f"{min_cluster_events}: {raw_counts.tolist()}"
+        )
+
+    canonical = _canonicalize_full_fit(
+        rank_values, bool_values, raw_labels, xyz
+    )
+    return {
+        "method": METHOD_HYBRID,
+        **canonical,
+        "spatial_scale": float(spatial_scale),
+        "fit_role": "full interictal fit after independent cross-fit validation",
+    }
+
+
 def equal_view_spatial_scale(
     temporal_features: np.ndarray,
     directions: np.ndarray,
