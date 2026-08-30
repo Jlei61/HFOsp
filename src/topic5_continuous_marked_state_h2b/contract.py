@@ -17,6 +17,7 @@ from typing import Any, Iterable, Mapping
 
 
 H2B_REVISION = "continuous_marked_state_h2b_cross_task_v0_1"
+H2B_V0_2_REVISION = "continuous_marked_state_h2b_cross_task_v0_2"
 LEAD_MINUTES = (5, 15, 30, 60, 120)
 PRIMARY_LEAD_MINUTES = 30
 POSTICTAL_GUARD_MINUTES = 120
@@ -28,6 +29,14 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 RESULT_ROOT = (
     REPO_ROOT
     / "results/epi_prssm/continuous_marked_state/h2b_cross_task/v0_1"
+)
+V0_2_RESULT_ROOT = (
+    REPO_ROOT
+    / "results/epi_prssm/continuous_marked_state/h2b_cross_task/v0_2"
+)
+CANONICAL_V0_2_RESULT_ROOT = Path(
+    "/home/honglab/leijiaxin/HFOsp/results/epi_prssm/continuous_marked_state/"
+    "h2b_cross_task/v0_2"
 )
 R1_6_ROOT = Path(
     "/home/honglab/leijiaxin/HFOsp/results/epi_prssm/continuous_marked_state/"
@@ -87,10 +96,13 @@ def sha256_file(path: Path | str) -> str:
 
 
 def assert_safe_output_path(path: Path | str) -> Path:
-    """Reject writes outside the isolated H2b result root."""
+    """Reject writes outside an explicitly versioned H2b result root."""
     target = Path(path).resolve()
-    root = RESULT_ROOT.resolve()
-    if target != root and root not in target.parents:
+    roots = (
+        RESULT_ROOT.resolve(), V0_2_RESULT_ROOT.resolve(),
+        CANONICAL_V0_2_RESULT_ROOT.resolve(),
+    )
+    if not any(target == root or root in target.parents for root in roots):
         raise ValueError(f"H2b output escapes isolated result root: {target}")
     if R1_7_WORKTREE.resolve() == target or R1_7_WORKTREE.resolve() in target.parents:
         raise ValueError("H2b must never write into the R1.7 worktree")

@@ -33,6 +33,12 @@ def test_support_tier_boundaries(n_seizures: int, tier: str) -> None:
 
 def test_output_path_cannot_escape_or_enter_r1_7() -> None:
     assert contract.assert_safe_output_path(contract.RESULT_ROOT / "manifests/x.json")
+    assert contract.assert_safe_output_path(
+        contract.V0_2_RESULT_ROOT / "manifests/x.json"
+    )
+    assert contract.assert_safe_output_path(
+        contract.CANONICAL_V0_2_RESULT_ROOT / "reports/machine_audit.json"
+    )
     with pytest.raises(ValueError):
         contract.assert_safe_output_path(Path("/tmp/hfosp_r17_20260827/x.json"))
     with pytest.raises(ValueError):

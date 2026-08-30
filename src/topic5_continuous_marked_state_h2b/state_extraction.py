@@ -38,9 +38,11 @@ from src.topic5_continuous_marked_state_r1.raw_observation import (
 from . import contract as h2b_contract
 
 
-H2B_STATE_EXTRACTION_REVISION = "h2b_cross_task_causal_state_extraction_v0_1"
+H2B_STATE_EXTRACTION_REVISION = "h2b_cross_task_causal_state_extraction_v0_2"
 SUPPORTED_CHECKPOINT_REVISIONS = {
     "r1_6_optimizer_identifiability_nested_selection_v1",
+    "r1_7a_prospective_state_replication_v1",
+    "r1_7b_extended_development_cohort_v1",
 }
 INTERICTAL_SOURCE_TASK = "continuous_background_and_ied_timing_mark"
 INFERENCE_OBSERVATION_REVISION = (
@@ -78,6 +80,7 @@ def load_frozen_r16_checkpoint(
         expected_seed: int | None = None,
         device: str | torch.device = "cpu",
         require_stable_result: bool = True,
+        require_complete_result: bool = True,
         ) -> tuple[FullTargetObserverStateModel, dict]:
     """Reconstruct one audited R1.6 explicit-observer checkpoint, fail closed.
 
@@ -106,12 +109,14 @@ def load_frozen_r16_checkpoint(
 
     result_path = path.with_name("result.json")
     result_hash = None
-    if require_stable_result:
+    if require_complete_result or require_stable_result:
         if not result_path.exists():
             raise ValueError(f"checkpoint has no adjacent result.json: {path}")
         result = json.loads(result_path.read_text())
-        if result.get("status") != "COMPLETE" or result.get("stable_checkpoint") is not True:
-            raise ValueError("R1.6 result does not declare a stable COMPLETE checkpoint")
+        if result.get("status") != "COMPLETE":
+            raise ValueError("interictal result is not COMPLETE")
+        if require_stable_result and result.get("stable_checkpoint") is not True:
+            raise ValueError("interictal result does not declare a stable checkpoint")
         if result.get("formal_test_partition_opened") is not False:
             raise ValueError("R1.6 result opened the formal test partition")
         if result.get("sealed_opened") is not False:
@@ -184,6 +189,10 @@ def load_frozen_r16_checkpoint(
         "checkpoint_seed": seed,
         "checkpoint_result": str(result_path) if result_path.exists() else None,
         "checkpoint_result_sha256": result_hash,
+        "checkpoint_result_stable": (
+            result.get("stable_checkpoint") is True
+            if (require_complete_result or require_stable_result) else None
+        ),
         "state_frozen": True,
         "all_parameters_require_grad_false": True,
         "seizure_gradient_path": False,
@@ -470,10 +479,11 @@ def _sha256_arrays(*arrays: np.ndarray) -> str:
     return digest.hexdigest()
 
 
-def load_frozen_explicit_scaler(source_repo_root: str | Path, subject: str
+def load_frozen_explicit_scaler(source_repo_root: str | Path, subject: str,
+                                *, result_path: str | Path | None = None
                                 ) -> tuple[np.ndarray, np.ndarray, dict]:
     """Load the bridge-selected TRAIN scaler without refitting on H2b time."""
-    path = (
+    path = Path(result_path).resolve() if result_path is not None else (
         Path(source_repo_root).resolve()
         / "results/epi_prssm/continuous_marked_state/r1/r1_2/bridge_e1"
         / subject / "seed_0/result.json"
@@ -660,6 +670,54 @@ def load_frozen_design(source_repo_root: str | Path, subject: str
     if sha256_file(design_path) != manifest["design_sha256"]:
         raise ValueError(f"{subject}: frozen design hash mismatch")
     return load_full_design(design_path), manifest, manifest_path
+
+
+def load_frozen_design_artifact(
+        design_path: str | Path, *, expected_sha256: str,
+        expected_subject: str,
+        manifest_path: str | Path | None = None,
+        ) -> tuple[FullAnchorDesign, dict, Path | None]:
+    """Load an explicitly named, hash-locked full design.
+
+    R1.7 was produced in an isolated worktree and some manifests retain the
+    now-deleted producer path.  H2b therefore resolves the canonical copied
+    artifact itself, verifies its frozen digest, and treats a supplied manifest
+    as provenance rather than as a path redirect.
+    """
+    path = Path(design_path).resolve()
+    observed = sha256_file(path)
+    if observed != str(expected_sha256):
+        raise ValueError(
+            f"{expected_subject}: frozen design SHA256 mismatch: "
+            f"expected {expected_sha256}, got {observed}"
+        )
+    design = load_full_design(path)
+    if design.subject != str(expected_subject):
+        raise ValueError(
+            f"frozen design subject mismatch: {design.subject} != {expected_subject}"
+        )
+    resolved_manifest: Path | None = None
+    if manifest_path is not None:
+        resolved_manifest = Path(manifest_path).resolve()
+        manifest = json.loads(resolved_manifest.read_text())
+        if manifest.get("status") != "COMPLETE":
+            raise ValueError(f"{expected_subject}: design manifest is not COMPLETE")
+        if manifest.get("sealed_opened") is not False:
+            raise ValueError(f"{expected_subject}: design manifest opened sealed data")
+        if str(manifest.get("subject")) != str(expected_subject):
+            raise ValueError(f"{expected_subject}: design manifest subject mismatch")
+        if manifest.get("design_sha256") != observed:
+            raise ValueError(f"{expected_subject}: design manifest hash mismatch")
+    else:
+        manifest = {
+            "status": "COMPLETE",
+            "sealed_opened": False,
+            "subject": str(expected_subject),
+            "design": str(path),
+            "design_sha256": observed,
+            "manifest_absent_but_artifact_hash_locked": True,
+        }
+    return design, manifest, resolved_manifest
 
 
 def materialize_observation_embeddings(

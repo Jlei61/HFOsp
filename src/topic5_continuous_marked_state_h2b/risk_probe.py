@@ -269,8 +269,12 @@ def build_risk_sets(
             supported_any, columns=["seizure_id", "onset_time"]
         )
         tier = support_tier(len(primary_frame))
+        # The 30-min primary support set fixes the patient denominator and the
+        # seizure identities for every lead.  Sensitivity leads may become
+        # non-estimable, but may not recruit extra seizures that lack the
+        # primary anchor and thereby change the scientific population.
         if tier == "primary_chronological":
-            split_map, _ = chronological_split_map(support_frame)
+            split_map, _ = chronological_split_map(primary_frame)
         else:
             split_label = {
                 "sensitivity_loso": "LOSO",
@@ -279,7 +283,7 @@ def build_risk_sets(
             }[tier]
             split_map = {
                 str(row.seizure_id): split_label
-                for row in support_frame.itertuples(index=False)
+                for row in primary_frame.itertuples(index=False)
             }
         split_audit[str(patient_id)] = {
             "evaluation_tier": tier,

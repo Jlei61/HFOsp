@@ -29,6 +29,7 @@ from src.topic5_continuous_marked_state_h2b.state_extraction import (
     extract_causal_state_features,
     explicit_observation_summary,
     load_frozen_design,
+    load_frozen_design_artifact,
     load_frozen_explicit_scaler,
     load_frozen_r16_checkpoint,
     materialize_inference_observation_embeddings,
@@ -88,6 +89,24 @@ def _git_commit(repo: Path) -> str:
     ).stdout.strip()
 
 
+def _verified_artifact(
+        explicit_path: Path | None, expected_sha256: str | None,
+        default_path: Path, label: str,
+        ) -> Path:
+    """Resolve one upstream artifact and enforce a supplied frozen digest."""
+    path = (explicit_path or default_path).resolve()
+    if not path.exists():
+        raise FileNotFoundError(f"{label} is missing: {path}")
+    observed = sha256_file(path)
+    if explicit_path is not None and not expected_sha256:
+        raise ValueError(f"{label} requires its frozen SHA256 when overridden")
+    if expected_sha256 and observed != str(expected_sha256):
+        raise ValueError(
+            f"{label} SHA256 mismatch: expected {expected_sha256}, got {observed}"
+        )
+    return path
+
+
 def run(args: argparse.Namespace) -> Path:
     if str(args.device) != "cpu":
         raise ValueError("H2b Phase 1 is currently CPU-only while R1.7 owns the GPU")
@@ -110,15 +129,31 @@ def run(args: argparse.Namespace) -> Path:
     model, checkpoint_provenance = load_frozen_r16_checkpoint(
         checkpoint, expected_sha256=args.checkpoint_sha256,
         expected_subject=args.subject, expected_seed=args.seed,
-        device="cpu", require_stable_result=True,
+        device="cpu",
+        require_stable_result=not bool(args.allow_unstable_complete),
+        require_complete_result=True,
     )
-    design, design_manifest, design_manifest_path = load_frozen_design(
-        source_repo, args.subject
-    )
-    coverage_path = (
+    if args.design_path is None:
+        design, design_manifest, design_manifest_path = load_frozen_design(
+            source_repo, args.subject
+        )
+        design_path = Path(design_manifest["design"])
+        if not design_path.is_absolute():
+            design_path = source_repo / design_path
+    else:
+        if not args.design_sha256:
+            raise ValueError("--design-path requires --design-sha256")
+        design_path = Path(args.design_path).resolve()
+        design, design_manifest, design_manifest_path = load_frozen_design_artifact(
+            design_path, expected_sha256=args.design_sha256,
+            expected_subject=args.subject, manifest_path=args.design_manifest,
+        )
+    coverage_path = _verified_artifact(
+        args.coverage_path, args.coverage_sha256,
         source_repo
         / "results/epi_prssm/continuous_marked_state/r1/r1_2/coverage"
-        / f"{args.subject}.npz"
+        / f"{args.subject}.npz",
+        "coverage",
     )
     coverage, inferred_segment, query_continuity_session, segment_start = (
         _coverage_segments(coverage_path, query_time)
@@ -135,10 +170,12 @@ def run(args: argparse.Namespace) -> Path:
         if not np.array_equal(declared_session, query_continuity_session):
             raise ValueError("query continuity session disagrees with frozen coverage")
 
-    baseline_path = (
+    baseline_path = _verified_artifact(
+        args.history_baseline_path, args.history_baseline_sha256,
         source_repo
         / "results/epi_prssm/continuous_marked_state/r1/r1_2/baselines"
-        / args.subject / "seed_0/models.pt"
+        / args.subject / "seed_0/models.pt",
+        "history baseline",
     )
     baseline = torch.load(baseline_path, map_location="cpu", weights_only=False)
     scaler = baseline["history_scaler"]
@@ -152,8 +189,15 @@ def run(args: argparse.Namespace) -> Path:
         query_time_epoch=query_time,
         query_continuity_session=query_continuity_session, scaled=True,
     )
+    scaler_path = _verified_artifact(
+        args.explicit_scaler_result, args.explicit_scaler_result_sha256,
+        source_repo
+        / "results/epi_prssm/continuous_marked_state/r1/r1_2/bridge_e1"
+        / args.subject / "seed_0/result.json",
+        "explicit scaler result",
+    )
     explicit_mean, explicit_scale, scaler_provenance = load_frozen_explicit_scaler(
-        source_repo, args.subject
+        source_repo, args.subject, result_path=scaler_path,
     )
     reader = InferenceRawAnchorReader(
         args.subject, design.event_time, source_repo_root=source_repo
@@ -259,11 +303,9 @@ def run(args: argparse.Namespace) -> Path:
         "r1_r1_2.py": sha256_file(REPO_ROOT / "src/topic5_continuous_marked_state_r1/r1_2.py"),
         "r1_r1_3.py": sha256_file(REPO_ROOT / "src/topic5_continuous_marked_state_r1/r1_3.py"),
         "r1_history.py": sha256_file(REPO_ROOT / "src/topic5_continuous_marked_state_r1/history.py"),
-        "r1_6_machine_audit": sha256_file(contract.R1_6_MACHINE_AUDIT),
         "query_csv": sha256_file(query_path),
         "global_exclusions": sha256_file(Path(args.global_exclusions).resolve()),
-        "design_manifest": sha256_file(design_manifest_path),
-        "observation_design": design_manifest["design_sha256"],
+        "observation_design": sha256_file(design_path),
         "frozen_explicit_scaler": scaler_provenance[
             "explicit_scaler_result_sha256"
         ],
@@ -273,6 +315,19 @@ def run(args: argparse.Namespace) -> Path:
         "coverage": sha256_file(coverage_path),
         "history_baseline": sha256_file(baseline_path),
     }
+    if design_manifest_path is not None:
+        source_hashes["design_manifest"] = sha256_file(design_manifest_path)
+    checkpoint_revision = checkpoint_provenance["checkpoint_revision"]
+    if checkpoint_revision == "r1_6_optimizer_identifiability_nested_selection_v1":
+        source_hashes["r1_6_machine_audit"] = sha256_file(
+            contract.R1_6_MACHINE_AUDIT
+        )
+    if args.checkpoint_inventory is not None:
+        inventory_path = _verified_artifact(
+            args.checkpoint_inventory, args.checkpoint_inventory_sha256,
+            Path(args.checkpoint_inventory), "R1.7 checkpoint inventory",
+        )
+        source_hashes["checkpoint_inventory"] = sha256_file(inventory_path)
     source_hashes.update({
         f"raw_cache_{name}": digest for name, digest in
         inference_inputs.provenance["raw_cache_source_hashes"].items()
@@ -285,7 +340,7 @@ def run(args: argparse.Namespace) -> Path:
         **checkpoint_provenance,
         **scaler_provenance,
         **inference_inputs.provenance,
-        "h2b_revision": contract.H2B_REVISION,
+        "h2b_revision": str(args.h2b_revision),
         "state_extraction_revision": H2B_STATE_EXTRACTION_REVISION,
         "source_repo_root": str(source_repo),
         "artifact_source_repo_commit_at_extraction": _git_commit(source_repo),
@@ -322,9 +377,28 @@ def parser() -> argparse.ArgumentParser:
     value.add_argument("--seed", required=True, type=int)
     value.add_argument("--checkpoint", required=True, type=Path)
     value.add_argument("--checkpoint-sha256", required=True)
+    value.add_argument(
+        "--allow-unstable-complete", action="store_true",
+        help="Accept every COMPLETE R1.7 checkpoint; H1 stability is stratification only.",
+    )
     value.add_argument("--queries", required=True, type=Path)
     value.add_argument("--global-exclusions", required=True, type=Path)
     value.add_argument("--source-repo-root", type=Path, default=DEFAULT_SOURCE_REPO)
+    value.add_argument("--design-path", type=Path)
+    value.add_argument("--design-sha256")
+    value.add_argument("--design-manifest", type=Path)
+    value.add_argument("--coverage-path", type=Path)
+    value.add_argument("--coverage-sha256")
+    value.add_argument("--history-baseline-path", type=Path)
+    value.add_argument("--history-baseline-sha256")
+    value.add_argument("--explicit-scaler-result", type=Path)
+    value.add_argument("--explicit-scaler-result-sha256")
+    value.add_argument("--checkpoint-inventory", type=Path)
+    value.add_argument("--checkpoint-inventory-sha256")
+    value.add_argument(
+        "--h2b-revision", default=contract.H2B_REVISION,
+        choices=(contract.H2B_REVISION, contract.H2B_V0_2_REVISION),
+    )
     value.add_argument("--output", type=Path)
     value.add_argument("--device", default="cpu", choices=("cpu",))
     value.add_argument("--embedding-batch-size", type=int, default=256)

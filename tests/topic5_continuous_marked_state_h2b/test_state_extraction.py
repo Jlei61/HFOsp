@@ -19,6 +19,7 @@ from src.topic5_continuous_marked_state_h2b.state_extraction import (
     extract_causal_state_features,
     freeze_and_assert,
     load_frozen_design,
+    load_frozen_design_artifact,
     load_frozen_explicit_scaler,
     load_frozen_r16_checkpoint,
     materialize_inference_observation_embeddings,
@@ -53,6 +54,9 @@ E384_RAW_REQUIRED = (
     E384_RAW_CACHE / "cache_index.parquet",
 )
 E384_PREICTAL_QUERY = 1107877528.382813
+R17A_E1073_ROOT = SOURCE_REPO / (
+    "results/epi_prssm/continuous_marked_state/r1/r1_7a"
+)
 
 
 class ToyFrozenModel(nn.Module):
@@ -85,6 +89,44 @@ def test_real_e384_stable_checkpoint_reconstructs_frozen_on_cpu(seed):
     assert provenance["state_frozen"] is True
     assert provenance["seizure_gradient_path"] is False
     assert all(not value.requires_grad for value in model.parameters())
+
+
+def test_r17_complete_unstable_checkpoint_is_allowed_only_when_explicit():
+    checkpoint = R17A_E1073_ROOT / "fits/epilepsiae_1073/seed_0/model.pt"
+    if not checkpoint.exists():
+        pytest.skip("canonical ignored R1.7A checkpoint is unavailable")
+    digest = contract.sha256_file(checkpoint)
+    with pytest.raises(ValueError, match="stable checkpoint"):
+        load_frozen_r16_checkpoint(
+            checkpoint, expected_sha256=digest,
+            expected_subject="epilepsiae_1073", expected_seed=0,
+            require_stable_result=True,
+        )
+    model, provenance = load_frozen_r16_checkpoint(
+        checkpoint, expected_sha256=digest,
+        expected_subject="epilepsiae_1073", expected_seed=0,
+        require_stable_result=False, require_complete_result=True,
+    )
+    assert provenance["checkpoint_result_stable"] is False
+    assert provenance["checkpoint_revision"] == (
+        "r1_7a_prospective_state_replication_v1"
+    )
+    assert all(not value.requires_grad for value in model.parameters())
+
+
+def test_r17_design_resolves_canonical_copy_not_deleted_manifest_path():
+    cache = R17A_E1073_ROOT / "upstream_r1_2/cache/epilepsiae_1073"
+    design_path = cache / "full_design.npz"
+    manifest_path = cache / "manifest.json"
+    if not design_path.exists() or not manifest_path.exists():
+        pytest.skip("canonical ignored R1.7A design is unavailable")
+    design, manifest, observed_manifest = load_frozen_design_artifact(
+        design_path, expected_sha256=contract.sha256_file(design_path),
+        expected_subject="epilepsiae_1073", manifest_path=manifest_path,
+    )
+    assert design.subject == "epilepsiae_1073"
+    assert manifest["status"] == "COMPLETE"
+    assert observed_manifest == manifest_path.resolve()
 
 
 @pytest.fixture(scope="module")

@@ -19,7 +19,8 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from src.topic5_continuous_marked_state_h2b.contract import (  # noqa: E402
-    RESULT_ROOT, RunBoundary, assert_safe_output_path, atomic_csv, atomic_json,
+    H2B_REVISION, H2B_V0_2_REVISION, RESULT_ROOT, RunBoundary,
+    assert_safe_output_path, atomic_csv, atomic_json,
     sha256_file, utc_now,
 )
 from src.topic5_continuous_marked_state_h2b.phenotype_transfer import (  # noqa: E402
@@ -53,6 +54,7 @@ def run(
     regularization_grid: tuple[float, ...],
     synthetic_only: bool,
     overwrite: bool,
+    h2b_revision: str = H2B_REVISION,
 ) -> dict:
     output_dir = assert_safe_output_path(output_dir)
     targets = {
@@ -100,7 +102,7 @@ def run(
     audit = {
         "status": result.audit["status"],
         "created_utc": utc_now(),
-        "boundary": asdict(RunBoundary()),
+        "boundary": asdict(RunBoundary(revision=str(h2b_revision))),
         "input": provenance,
         "target_reclustered": False,
         "target_table_hash": (
@@ -150,6 +152,10 @@ def main() -> None:
     )
     parser.add_argument("--synthetic-only", action="store_true")
     parser.add_argument("--overwrite", action="store_true")
+    parser.add_argument(
+        "--h2b-revision", default=H2B_REVISION,
+        choices=(H2B_REVISION, H2B_V0_2_REVISION),
+    )
     args = parser.parse_args()
     audit = run(
         input_path=args.input,
@@ -157,6 +163,7 @@ def main() -> None:
         regularization_grid=tuple(args.regularization_grid),
         synthetic_only=args.synthetic_only,
         overwrite=args.overwrite,
+        h2b_revision=args.h2b_revision,
     )
     print(json.dumps({
         "status": audit["status"], "output": str(args.output_dir),

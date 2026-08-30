@@ -20,7 +20,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from src.topic5_continuous_marked_state_h2b.contract import (  # noqa: E402
-    PROBE_ARMS,
+    H2B_REVISION, H2B_V0_2_REVISION, PROBE_ARMS,
     RESULT_ROOT,
     RunBoundary,
     assert_safe_output_path,
@@ -119,6 +119,7 @@ def run(
     synthetic_only: bool,
     overwrite: bool,
     arms: tuple[str, ...] = PROBE_ARMS,
+    h2b_revision: str = H2B_REVISION,
 ) -> dict:
     output_dir = assert_safe_output_path(output_dir)
     targets = {
@@ -181,7 +182,7 @@ def run(
     machine_audit = {
         "status": "COMPLETE",
         "created_utc": utc_now(),
-        "boundary": asdict(RunBoundary()),
+        "boundary": asdict(RunBoundary(revision=str(h2b_revision))),
         "input": input_provenance,
         "risk_set_hash": risk_set_hash(frame),
         "identical_risk_sets_across_arms": True,
@@ -243,6 +244,10 @@ def main() -> None:
         "--arms", nargs="+", choices=PROBE_ARMS, default=list(PROBE_ARMS),
     )
     parser.add_argument("--overwrite", action="store_true")
+    parser.add_argument(
+        "--h2b-revision", default=H2B_REVISION,
+        choices=(H2B_REVISION, H2B_V0_2_REVISION),
+    )
     args = parser.parse_args()
     payload = run(
         risk_table_path=args.risk_table,
@@ -253,6 +258,7 @@ def main() -> None:
         synthetic_only=args.synthetic_only,
         overwrite=args.overwrite,
         arms=tuple(args.arms),
+        h2b_revision=args.h2b_revision,
     )
     print(json.dumps({
         "status": payload["status"],

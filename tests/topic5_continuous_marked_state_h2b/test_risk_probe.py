@@ -80,7 +80,7 @@ def test_build_risk_sets_enforces_same_segment_horizon_and_split_contract():
     assert len(audit["risk_set_hash"]) == 64
 
 
-def test_lead_sensitivity_keeps_nonprimary_seizure_without_promoting_tier():
+def test_lead_sensitivity_uses_the_fixed_primary_seizure_population():
     anchors, seizures = _anchor_table(n_seizures=4)
     seizures["primary_30min_supported"] = True
     seizures.loc[seizures["seizure_id"] == "sz03", "primary_30min_supported"] = False
@@ -89,9 +89,10 @@ def test_lead_sensitivity_keeps_nonprimary_seizure_without_promoting_tier():
         anchors, seizures, controls_per_case=3, random_seed=17,
     )
     per_lead = frame.groupby("lead_minutes")["seizure_id"].nunique().to_dict()
-    assert per_lead[5] == 4
-    assert per_lead[15] == 4
+    assert per_lead[5] == 3
+    assert per_lead[15] == 3
     assert per_lead[30] == 3
+    assert set(frame["seizure_id"]) == {"sz00", "sz01", "sz02"}
     assert audit["split_by_patient"]["p1"]["evaluation_tier"] == (
         "descriptive_case_series"
     )

@@ -157,17 +157,22 @@ def raw_cache_status(subject: str) -> tuple[bool, list[str], Path]:
     return not missing, missing, root
 
 
-def upstream_design(subject: str) -> tuple[Path | None, Path | None]:
+def upstream_design(
+        subject: str,
+        ) -> tuple[Path | None, Path | None, Path | None, Path | None]:
     candidates = [
+        RESULT_ROOT / "upstream_r1_2",
         R1_ROOT / "r1_7b_cohort_extension/upstream_r1_2",
         R1_ROOT / "r1_7a/upstream_r1_2",
     ]
     for root in candidates:
         design = root / "cache" / subject / "full_design.npz"
+        manifest = root / "cache" / subject / "manifest.json"
         baseline = root / "baselines" / subject / "seed_0/models.pt"
-        if design.is_file() and baseline.is_file():
-            return design, baseline
-    return None, None
+        scaler = root / "bridge_e1" / subject / "seed_0/result.json"
+        if all(path.is_file() for path in (design, manifest, baseline, scaler)):
+            return design, baseline, scaler, manifest
+    return None, None, None, None
 
 
 def main() -> None:
@@ -190,15 +195,25 @@ def main() -> None:
     for subject in inventory["subjects"]:
         cells = by_subject[subject]
         checkpoints = [row for row in cells if row["checkpoint_available"]]
-        seizures, seizure_path, seizure_truth = seizure_rows(subject)
-        crosswalk_rows.extend(seizures)
+        inventory_seizures, seizure_path, seizure_truth = seizure_rows(subject)
         coverage_path = R1_ROOT / "r1_2/coverage" / f"{subject}.npz"
         coverage_available = coverage_path.is_file()
-        design, baseline = upstream_design(subject)
+        if coverage_available:
+            coverage = CoverageTable.load(coverage_path)
+            # Persist only development seizure identifiers/onsets.  The source
+            # inventory may contain later seizures, but H2b v0.2 must not carry
+            # them into any query, exclusion, risk-set, or report artifact.
+            seizures = [
+                row for row in inventory_seizures
+                if float(row["onset_epoch"]) < float(coverage.dev_end_epoch)
+            ]
+        else:
+            seizures = []
+        crosswalk_rows.extend(seizures)
+        design, baseline, scaler, design_manifest = upstream_design(subject)
         raw_available, raw_missing, raw_root = raw_cache_status(subject)
         primary_complete = 0
         if coverage_available:
-            coverage = CoverageTable.load(coverage_path)
             for lead in LEADS:
                 complete = 0
                 development = 0
@@ -252,14 +267,23 @@ def main() -> None:
             "h1_stable_subject": any(bool(row["h1_stable_subject"]) for row in cells),
             "h1_is_stratification_not_h2b_gate": True,
             "n_seizures_in_frozen_inventory": len(seizures),
+            "n_source_inventory_seizures": len(inventory_seizures),
+            "post_development_seizure_identifiers_persisted": False,
             "primary_complete_coverage_seizures": primary_complete,
             "coverage_path": str(coverage_path),
             "coverage_available": coverage_available,
             "upstream_design_path": str(design) if design else None,
             "upstream_baseline_path": str(baseline) if baseline else None,
+            "upstream_explicit_scaler_result_path": str(scaler) if scaler else None,
+            "upstream_design_manifest_path": (
+                str(design_manifest) if design_manifest else None
+            ),
             "upstream_design_available": design is not None,
             "raw_cache_root": str(raw_root),
             "raw_inference_cache_available": raw_available,
+            "raw_cache_required_for_primary_h2b": bool(
+                checkpoints and primary_complete > 0 and coverage_available
+            ),
             "raw_missing_count": len(raw_missing),
             "raw_missing_paths": "|".join(raw_missing),
             "seizure_inventory_path": str(seizure_path),
@@ -278,9 +302,12 @@ def main() -> None:
 
     output_root = args.output_root.resolve()
     manifest_root = output_root / "manifests"
-    atomic_csv(manifest_root / "patient_support_census.csv", patient_rows)
-    atomic_csv(manifest_root / "support_by_lead_provisional.csv", support_rows)
-    atomic_csv(manifest_root / "seizure_crosswalk.csv", crosswalk_rows)
+    patient_path = manifest_root / "patient_support_census.csv"
+    support_path = manifest_root / "support_by_lead_provisional.csv"
+    crosswalk_path = manifest_root / "seizure_crosswalk.csv"
+    atomic_csv(patient_path, patient_rows)
+    atomic_csv(support_path, support_rows)
+    atomic_csv(crosswalk_path, crosswalk_rows)
     payload = {
         "status": "COMPLETE",
         "revision": "h2b_v0_2_support_census_v1",
@@ -291,6 +318,13 @@ def main() -> None:
         "n_subjects_with_primary_complete_coverage": sum(row["primary_complete_coverage_seizures"] > 0 for row in patient_rows),
         "n_subjects_with_upstream_design_synced": sum(row["upstream_design_available"] for row in patient_rows),
         "n_subjects_with_raw_inference_cache_mounted": sum(row["raw_inference_cache_available"] for row in patient_rows),
+        "n_subjects_requiring_raw_for_primary_h2b": sum(
+            row["raw_cache_required_for_primary_h2b"] for row in patient_rows
+        ),
+        "n_required_subjects_with_raw_cache": sum(
+            row["raw_cache_required_for_primary_h2b"]
+            and row["raw_inference_cache_available"] for row in patient_rows
+        ),
         "n_subjects_runnable_now": sum(row["runnable_now"] for row in patient_rows),
         "raw_mounts_present": {
             "/mnt/yuquan_data": any(Path("/mnt/yuquan_data").iterdir()),
@@ -299,6 +333,14 @@ def main() -> None:
         "formal_test_partition_opened": False,
         "sealed_opened": False,
         "h3_or_t2_run": False,
+        "post_development_seizure_identifiers_persisted": False,
+        "checkpoint_inventory_path": str(args.inventory.resolve()),
+        "checkpoint_inventory_sha256": sha256_file(args.inventory.resolve()),
+        "output_sha256": {
+            "patient_support_census": sha256_file(patient_path),
+            "support_by_lead_provisional": sha256_file(support_path),
+            "seizure_crosswalk": sha256_file(crosswalk_path),
+        },
         "patient_rows": patient_rows,
     }
     atomic_json(manifest_root / "support_census.json", payload)

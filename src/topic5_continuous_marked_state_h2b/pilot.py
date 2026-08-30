@@ -242,6 +242,7 @@ def state_cache_to_anchor_frame(
     coverage: CoverageTable,
     global_exclusion_path: Path,
     seed: int,
+    patient_id: str = E384_SUBJECT,
 ) -> pd.DataFrame:
     """Convert one frozen state cache to the arm-neutral anchor table."""
     cache_path = Path(cache_path).resolve()
@@ -299,7 +300,7 @@ def state_cache_to_anchor_frame(
                 float(source.exclusion_stop_epoch),
             ))
         row: dict[str, Any] = {
-            "patient_id": E384_SUBJECT,
+            "patient_id": str(patient_id),
             "seed": int(seed),
             "anchor_id": str(source.query_id),
             "anchor_time": np.float64(anchor_time[index]),
@@ -313,7 +314,12 @@ def state_cache_to_anchor_frame(
             # case/control matching gate.
             "observation_signature": "fresh_current_observation_le_30s",
             "contact_mask_signature": _mask_signature(mask[index]),
-            "in_ictal_or_postictal": False,
+            # Controls come from an event-independent observation grid.  They
+            # therefore need an explicit frozen seizure/postictal screen;
+            # hard-coding False would silently admit postictal controls.
+            "in_ictal_or_postictal": bool(
+                not _outside_intervals(float(anchor_time[index]), global_intervals)
+            ),
             "wrong_time_donor_valid": wrong_valid,
             "wrong_time_same_segment": bool(
                 wrong_valid and wrong_segment == int(segment[index])
@@ -363,7 +369,7 @@ def state_cache_to_anchor_frame(
     return pd.DataFrame(rows)
 
 
-def build_e384_risk_table(
+def build_cohort_risk_table(
     *, anchor_frames: Iterable[pd.DataFrame],
     seizure_path: Path,
     output_path: Path,
@@ -406,11 +412,11 @@ def build_e384_risk_table(
         require_wrong_time=require_wrong_time,
     )
     if risk.empty:
-        raise ValueError("E384 pilot produced no estimable risk set")
+        raise ValueError("H2b cohort input produced no estimable risk set")
     atomic_csv(output_path, risk.replace({np.nan: None}).to_dict(orient="records"))
     audit = {
         **audit,
-        "pilot_revision": PILOT_REVISION,
+        "integration_revision": "h2b_cross_task_risk_table_v0_2",
         "risk_table": str(output_path),
         "risk_table_sha256": sha256_file(output_path),
         "n_anchor_rows_before_contract_filter": int(len(eligible)),
@@ -432,5 +438,29 @@ def build_e384_risk_table(
             ),
         },
     }
+    atomic_json(output_path.with_suffix(".manifest.json"), audit)
+    return risk, audit
+
+
+def build_e384_risk_table(
+    *, anchor_frames: Iterable[pd.DataFrame],
+    seizure_path: Path,
+    output_path: Path,
+    controls_per_case: int = 5,
+    arms: tuple[str, ...] = (
+        "B_history", "B_observation", "B_state", "memoryless",
+    ),
+    require_wrong_time: bool = False,
+) -> tuple[pd.DataFrame, dict[str, Any]]:
+    """Backward-compatible v0.1 wrapper around the cohort-neutral builder."""
+    risk, audit = build_cohort_risk_table(
+        anchor_frames=anchor_frames,
+        seizure_path=seizure_path,
+        output_path=output_path,
+        controls_per_case=controls_per_case,
+        arms=arms,
+        require_wrong_time=require_wrong_time,
+    )
+    audit = {**audit, "pilot_revision": PILOT_REVISION}
     atomic_json(output_path.with_suffix(".manifest.json"), audit)
     return risk, audit
