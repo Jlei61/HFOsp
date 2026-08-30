@@ -257,6 +257,7 @@ def test_complete_legacy_null_gets_metadata_only_denominator_migration(tmp_path)
     permutation_path = output / "time_label_permutation.json"
     permutation_path.write_text(json.dumps({
         "status": "COMPLETE", "n_permutations": 3,
+        "observed_state_minus_observation": -0.2,
         "null_values": [-0.1, 0.0, 0.1],
     }), encoding="utf-8")
     audit_path = output / "risk_probe_machine_audit.json"
@@ -275,6 +276,8 @@ def test_complete_legacy_null_gets_metadata_only_denominator_migration(tmp_path)
     assert permutation["n_finite_permutations"] == 3
     audit = json.loads(audit_path.read_text())
     assert audit["time_label_permutation"]["n_permutations_run"] == 3
+    assert audit["execution_status"] == "COMPLETE"
+    assert audit["scientific_estimability"] == "ESTIMABLE"
     assert audit["permutation_denominator_schema_migration"][
         "scientific_values_changed"
     ] is False

@@ -298,6 +298,9 @@ def _upgrade_permutation_denominator_metadata(
         )
     if not all(math.isfinite(float(value)) for value in null_values):
         raise ValueError(f"{label}: cannot migrate non-finite permutation draws")
+    observed = permutation.get("observed_state_minus_observation")
+    if observed is None or not math.isfinite(float(observed)):
+        raise ValueError(f"{label}: COMPLETE permutation lacks a finite observed effect")
     audit = _json(audit_path)
     if audit.get("status") != "COMPLETE":
         return None
@@ -311,7 +314,9 @@ def _upgrade_permutation_denominator_metadata(
         "n_finite_permutations": requested,
     }
     if (all(int(permutation.get(key, -1)) == value for key, value in desired.items())
-            and all(int(compact.get(key, -1)) == value for key, value in desired.items())):
+            and all(int(compact.get(key, -1)) == value for key, value in desired.items())
+            and audit.get("execution_status") == "COMPLETE"
+            and audit.get("scientific_estimability") == "ESTIMABLE"):
         return None
     before = {
         "time_label_permutation_sha256": sha256_file(permutation_path),
@@ -320,7 +325,7 @@ def _upgrade_permutation_denominator_metadata(
     permutation.update(desired)
     compact.update({"status": "COMPLETE", **desired})
     migration = {
-        "kind": "complete_null_denominator_metadata_only",
+        "kind": "complete_null_denominator_and_estimability_metadata_only",
         "source_of_counts": "verified finite null_values vector length",
         "n_null_values": requested,
         "scientific_values_changed": False,
@@ -328,6 +333,8 @@ def _upgrade_permutation_denominator_metadata(
         "migrated_utc": utc_now(),
     }
     audit["time_label_permutation"] = compact
+    audit["execution_status"] = "COMPLETE"
+    audit["scientific_estimability"] = "ESTIMABLE"
     audit["permutation_denominator_schema_migration"] = migration
     _atomic_write_json(permutation_path, permutation)
     _atomic_write_json(audit_path, audit)

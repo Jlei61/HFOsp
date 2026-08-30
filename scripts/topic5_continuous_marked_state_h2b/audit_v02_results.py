@@ -221,6 +221,8 @@ def _audit_probe_task(root: Path, label: str) -> dict[str, Any]:
         _require(estimability == "NOT_ESTIMABLE",
                  f"{label}: permutation is unestimable but the audit says {estimability!r}")
     else:
+        _require(estimability == "ESTIMABLE",
+                 f"{label}: COMPLETE permutation lacks explicit ESTIMABLE status")
         _require(int(permutation.get("n_permutations_run", 0)) > 0,
                  f"{label}: a completed permutation ran no permutations")
     receipt_path = output / ".task_complete.json"
