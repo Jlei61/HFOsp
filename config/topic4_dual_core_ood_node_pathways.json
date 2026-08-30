@@ -61,7 +61,7 @@
     "contact_readout": {"participation_margin_fraction": 0.1, "timing_fraction": 0.5},
     "selection": {"n_screen_shortlist": 6, "n_confirmation_candidates": 1},
     "primary_metric": "equal_network_ood_all_returned",
-    "secondary_metrics": ["both_frozen_modes", "weakest_mode_distribution_error", "returned_event_support", "natural_kmeans_alignment"],
+    "secondary_metrics": ["both_frozen_modes", "weakest_mode_normalized_support_distance", "returned_event_support", "natural_kmeans_alignment"],
     "paired_network_bootstrap": {"draws": 4096, "seed": 20260830},
     "activity_grid": {"enabled_for_confirmation": true, "bin_ms": 5.0, "spatial_bins": 64},
     "hard_invalid_only": ["nonfinite", "late_runaway", "structural_contract_violation", "stale_provenance"]

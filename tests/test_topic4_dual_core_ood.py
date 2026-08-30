@@ -4,6 +4,10 @@ import numpy as np
 import pytest
 
 from scripts.run_topic4_rev10_r_edge_flow_worker import active_network_seeds
+from scripts.run_topic4_dual_core_ood_controller import (
+    launch_capacity,
+    _unit_token,
+)
 from src.topic4_dual_core_ood import (
     candidate_field_sha256,
     candidate_sort_key,
@@ -125,3 +129,21 @@ def test_new_config_exposes_all_phase_seeds_without_changing_old_behavior():
     }
     assert active_network_seeds(new) == [1, 2, 3, 4]
     assert active_network_seeds(old) == [2]
+
+
+def test_controller_capacity_reserves_memory_and_counts_active_workers():
+    assert launch_capacity(
+        100.0, reserve_gib=32.0, peak_gib=16.0,
+        worker_cap=8, active_workers=2,
+    ) == 4
+    assert launch_capacity(
+        45.0, reserve_gib=32.0, peak_gib=16.0,
+        worker_cap=8, active_workers=0,
+    ) == 0
+
+
+def test_controller_unit_name_is_candidate_safe_and_distinct():
+    left = _unit_token("fit", "candidate/with unsafe name", 2401, "abcdef1234")
+    right = _unit_token("fit", "another candidate", 2401, "abcdef1234")
+    assert "/" not in left and " " not in left
+    assert left != right
