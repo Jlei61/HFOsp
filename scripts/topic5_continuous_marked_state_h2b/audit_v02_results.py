@@ -109,6 +109,51 @@ def _boundary_false(payload: dict[str, Any], label: str) -> None:
             _require(boundary[key] is False, f"{label}.boundary: {key} is not false")
 
 
+def _audit_probe_permutation_semantics(output: Path, label: str) -> str:
+    """Require inferential status to agree with finite primary-lead support."""
+    audit = _json(output / "risk_probe_machine_audit.json")
+    patient = pd.read_csv(output / "patient_median_probe_metrics.csv")
+    permutation = _json(output / "time_label_permutation.json")
+    metric = "state_minus_observation_conditional_log_loss"
+    primary = patient[patient["lead_minutes"].astype(int) == 30]
+    values = (
+        primary[metric].to_numpy(dtype=float)
+        if metric in primary.columns else np.asarray([], dtype=float)
+    )
+    values = values[np.isfinite(values)]
+    summary = audit.get("time_label_permutation") or {}
+    _require(summary.get("status") == permutation.get("status"),
+             f"{label}: compact/full permutation status drift")
+    if len(values):
+        observed = float(np.median(values))
+        _require(permutation.get("status") == "COMPLETE",
+                 f"{label}: finite primary effect lacks COMPLETE permutation")
+        _require(np.isfinite(float(permutation.get(
+            "observed_state_minus_observation", np.nan
+        ))), f"{label}: observed permutation effect is non-finite")
+        _require(np.isclose(
+            float(permutation["observed_state_minus_observation"]), observed,
+            rtol=1e-10, atol=1e-12,
+        ), f"{label}: permutation observed effect differs from patient median")
+        null = np.asarray(permutation.get("null_values") or [], dtype=float)
+        requested = int(permutation.get("n_permutations", -1))
+        _require(len(null) == requested and np.isfinite(null).all(),
+                 f"{label}: COMPLETE permutation has missing/non-finite nulls")
+        if "n_finite_permutations" in permutation:
+            _require(int(permutation["n_finite_permutations"]) == requested,
+                     f"{label}: finite permutation denominator drift")
+        return "COMPLETE"
+    _require(permutation.get("status") == "NOT_ESTIMABLE_AT_PRIMARY_LEAD",
+             f"{label}: non-finite primary effect was presented as inferential")
+    _require(permutation.get("observed_state_minus_observation") is None,
+             f"{label}: non-estimable permutation retained observed effect")
+    _require(int(permutation.get("n_finite_permutations", -1)) == 0,
+             f"{label}: non-estimable permutation has a finite denominator")
+    _require((permutation.get("null_values") or []) == [],
+             f"{label}: non-estimable permutation retained null draws")
+    return "NOT_ESTIMABLE_AT_PRIMARY_LEAD"
+
+
 def _audit_inventory(root: Path) -> tuple[dict, dict[tuple[str, int], dict]]:
     path = root / "manifests/r1_7_checkpoint_inventory.json"
     inventory = _json(path)
@@ -269,6 +314,8 @@ def _audit_complete(root: Path, inventory: dict,
              f"state cache cells differ from expected: missing={sorted(expected_cache_keys-observed_cache_keys)}, extra={sorted(observed_cache_keys-expected_cache_keys)}")
 
     probe_subjects = []
+    n_probe_analyses = 0
+    permutation_status_counts: dict[str, int] = {}
     for subject, input_manifest in support_by_subject.items():
         summary_path = root / "risk_sets" / subject / "risk_table_summary.json"
         if int(input_manifest["n_primary_eligible_seizures"]) < 1:
@@ -310,6 +357,22 @@ def _audit_complete(root: Path, inventory: dict,
             _require(audit.get("seed_aggregation") ==
                      "median_within_patient_before_cohort_inference",
                      f"{subject}: optimizer seeds treated as patients")
+            status = _audit_probe_permutation_semantics(
+                audit_path.parent, f"{subject}/primary",
+            )
+            permutation_status_counts[status] = (
+                permutation_status_counts.get(status, 0) + 1
+            )
+            n_probe_analyses += 1
+            wrong_output = root / "fits/by_subject" / subject / "matched_wrong_time"
+            if (wrong_output / "risk_probe_machine_audit.json").is_file():
+                status = _audit_probe_permutation_semantics(
+                    wrong_output, f"{subject}/matched_wrong_time",
+                )
+                permutation_status_counts[status] = (
+                    permutation_status_counts.get(status, 0) + 1
+                )
+                n_probe_analyses += 1
 
     primary_index = _json(root / "fits/primary/cohort_probe_index.json")
     _require(primary_index.get("heterogeneous_patient_feature_dimensions_never_pooled") is True,
@@ -338,6 +401,8 @@ def _audit_complete(root: Path, inventory: dict,
         "n_subjects_with_input_manifest": len(input_manifests),
         "n_state_cache_cells": len(observed_cache_keys),
         "n_probe_subjects": len(probe_subjects),
+        "n_probe_analyses": n_probe_analyses,
+        "permutation_status_counts": permutation_status_counts,
         "n_patient_first_rows": len(per_patient),
         "n_phenotype_subject_tables": len(phenotype.get("subject_tables") or {}),
     }

@@ -179,6 +179,23 @@ def test_time_label_permutation_returns_state_increment_to_near_zero():
     assert audit["observed_state_minus_observation"] < -0.25
     assert abs(audit["null_median"]) < 0.15
     assert audit["null_q025"] < 0 < audit["null_q975"]
+    assert audit["n_finite_permutations"] == 16
+
+
+def test_time_label_permutation_marks_nonestimable_primary_lead_without_nan_summary():
+    frame = make_positive_synthetic_risk_table(n_seizures=12, random_seed=45)
+    frame = frame[frame["seizure_id"] == "sz000"].copy()
+    frame["evaluation_tier"] = "not_estimable"
+    frame["split"] = "NOT_ESTIMABLE"
+    audit = time_label_permutation_audit(
+        frame, n_permutations=4, random_seed=46,
+    )
+    assert audit["status"] == "NOT_ESTIMABLE_AT_PRIMARY_LEAD"
+    assert audit["n_permutations"] == 4
+    assert audit["n_finite_permutations"] == 0
+    assert audit["observed_state_minus_observation"] is None
+    assert audit["null_median"] is None
+    assert audit["null_values"] == []
 
 
 @pytest.mark.parametrize(

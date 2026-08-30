@@ -997,18 +997,42 @@ def time_label_permutation_audit(
     primary_lead_minutes: int = PRIMARY_LEAD_MINUTES,
 ) -> dict[str, Any]:
     """Shuffle the case time inside each patient risk set and refit the probe."""
+    metric = "state_minus_observation_conditional_log_loss"
+
+    def primary_effect(result: ProbeRunResult) -> float | None:
+        rows = result.patient_medians[
+            result.patient_medians["lead_minutes"] == int(primary_lead_minutes)
+        ]
+        if metric not in rows.columns:
+            return None
+        values = rows[metric].to_numpy(dtype=float)
+        values = values[np.isfinite(values)]
+        return float(np.median(values)) if len(values) else None
+
     validate_risk_table(
         frame, arms=("B_observation", "B_state"), require_wrong_time=False,
     )
     observed_run = run_probe_table(
         frame, ridge_grid=ridge_grid, arms=("B_observation", "B_state"), validate=False,
     )
-    observed_rows = observed_run.patient_medians[
-        observed_run.patient_medians["lead_minutes"] == int(primary_lead_minutes)
-    ]
-    observed = float(np.nanmedian(
-        observed_rows["state_minus_observation_conditional_log_loss"].to_numpy(dtype=float)
-    ))
+    observed = primary_effect(observed_run)
+    if observed is None:
+        return {
+            "status": "NOT_ESTIMABLE_AT_PRIMARY_LEAD",
+            "reason": (
+                "state-minus-observation is absent or non-finite at the "
+                f"{int(primary_lead_minutes)}-min primary lead"
+            ),
+            "permutation_unit": "case label within patient-specific risk set",
+            "n_permutations": int(n_permutations),
+            "n_finite_permutations": 0,
+            "observed_state_minus_observation": None,
+            "null_median": None,
+            "null_mean": None,
+            "null_q025": None,
+            "null_q975": None,
+            "null_values": [],
+        }
     rng = np.random.default_rng(int(random_seed))
     null = []
     for _ in range(int(n_permutations)):
@@ -1024,22 +1048,38 @@ def time_label_permutation_audit(
             shuffled, ridge_grid=ridge_grid,
             arms=("B_observation", "B_state"), validate=False,
         )
-        selected = result.patient_medians[
-            result.patient_medians["lead_minutes"] == int(primary_lead_minutes)
-        ]
-        null.append(float(np.nanmedian(
-            selected["state_minus_observation_conditional_log_loss"].to_numpy(dtype=float)
-        )))
+        value = primary_effect(result)
+        null.append(float(value) if value is not None else np.nan)
     values = np.asarray(null, dtype=float)
+    finite = values[np.isfinite(values)]
+    if len(finite) != int(n_permutations):
+        return {
+            "status": "NOT_ESTIMABLE_NULL_DISTRIBUTION",
+            "reason": (
+                "one or more permuted case-label fits had no finite primary-lead effect"
+            ),
+            "permutation_unit": "case label within patient-specific risk set",
+            "n_permutations": int(n_permutations),
+            "n_finite_permutations": int(len(finite)),
+            "observed_state_minus_observation": float(observed),
+            "null_median": float(np.median(finite)) if len(finite) else None,
+            "null_mean": float(np.mean(finite)) if len(finite) else None,
+            "null_q025": float(np.quantile(finite, 0.025)) if len(finite) else None,
+            "null_q975": float(np.quantile(finite, 0.975)) if len(finite) else None,
+            "null_values": [
+                float(value) if np.isfinite(value) else None for value in values
+            ],
+        }
     return {
         "status": "COMPLETE",
         "permutation_unit": "case label within patient-specific risk set",
         "n_permutations": int(n_permutations),
-        "observed_state_minus_observation": observed,
-        "null_median": float(np.nanmedian(values)),
-        "null_mean": float(np.nanmean(values)),
-        "null_q025": float(np.nanquantile(values, 0.025)),
-        "null_q975": float(np.nanquantile(values, 0.975)),
+        "n_finite_permutations": int(len(finite)),
+        "observed_state_minus_observation": float(observed),
+        "null_median": float(np.median(finite)),
+        "null_mean": float(np.mean(finite)),
+        "null_q025": float(np.quantile(finite, 0.025)),
+        "null_q975": float(np.quantile(finite, 0.975)),
         "null_values": [float(value) for value in values],
     }
 
