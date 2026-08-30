@@ -83,6 +83,54 @@ def _effect_table(frame: pd.DataFrame) -> str:
     return "\n".join(lines)
 
 
+def _primary_scoring_table(root: Path, support: list[dict]) -> tuple[str, str]:
+    """Expose eligible versus actually held-out denominators for primary patients."""
+    primary = [row for row in support if row["tier"] == "primary_chronological"]
+    if not primary:
+        return "当前没有主层患者。", "当前没有达到 ≥10 次合格发作的主层患者。"
+    lines = [
+        "|患者|30 min 合格发作|最终 held-out risk sets|state−observation|persistent−memoryless|置换 95% 区间|",
+        "|---|---:|---:|---:|---:|---:|",
+    ]
+    sentences = []
+    for item in primary:
+        subject = str(item["subject"])
+        output = root / "fits/by_subject" / subject / "primary"
+        frame = pd.read_csv(output / "patient_median_probe_metrics.csv")
+        selected = frame[frame.lead_minutes.astype(int) == 30]
+        if selected.empty:
+            lines.append(f"|{subject}|{item['n']}|0|不可估计|不可估计|不可估计|")
+            sentences.append(f"{subject} 的 30 分钟主评分不可估计")
+            continue
+        row = selected.iloc[0]
+        heldout_value = row.get("B_state__n_risk_sets", 0)
+        heldout = int(heldout_value) if pd.notna(heldout_value) else 0
+        state = row.get("state_minus_observation_conditional_log_loss")
+        memory = row.get("persistent_minus_memoryless_conditional_log_loss")
+        permutation = _json(output / "time_label_permutation.json")
+        lo, hi = permutation.get("null_q025"), permutation.get("null_q975")
+        interval = (
+            f"[{_fmt(lo)}, {_fmt(hi)}]"
+            if lo is not None and hi is not None else "不可估计"
+        )
+        lines.append(
+            f"|{subject}|{item['n']}|{heldout}|{_fmt(state)}|"
+            f"{_fmt(memory)}|{interval}|"
+        )
+        inside = False
+        try:
+            inside = float(lo) <= float(state) <= float(hi)
+        except (TypeError, ValueError):
+            pass
+        sentences.append(
+            f"{subject} 虽有 {item['n']} 次合格发作，但最终评分只有 {heldout} 个 "
+            f"held-out risk sets；state−observation={_fmt(state)}"
+            + ("，仍在置换范围内" if inside else "")
+            + f"，persistent−memoryless={_fmt(memory)}"
+        )
+    return "\n".join(lines), "；".join(sentences) + "。"
+
+
 def _e384_sentence() -> str:
     path = V01 / "fits/e384_instrument/patient_median_probe_metrics.csv"
     if not path.is_file():
@@ -160,6 +208,9 @@ def build_complete(root: Path) -> dict:
     tier_text = "、".join(f"{key} {value} 人" for key, value in sorted(tiers.items()))
     effect_markdown = _effect_table(summary)
     interpretations = "\n".join(_interpret_primary(summary))
+    primary_scoring_markdown, primary_scoring_sentence = _primary_scoring_table(
+        root, support,
+    )
     e384 = _e384_sentence()
     phenotype = _phenotype_text(root)
 
@@ -182,6 +233,7 @@ def build_complete(root: Path) -> dict:
 - R1.7 清单共有 {int(inventory['n_subjects'])} 位患者、{int(inventory['n_checkpoint_available_cells'])} 个可读冻结 checkpoint cell。
 - 最终完成原始背景读取和发作支持审查的患者：{len(support)} 位。
 - 30 分钟支持层级：{tier_text or '无'}。
+- crosswalk 共 {int(pd.read_csv(root / 'manifests/seizure_crosswalk.csv').shape[0])} 条 development 发作记录；冻结状态缓存 {int(audit['details']['n_state_cache_cells'])} 个 checkpoint cells。
 - H1 是否稳定只用于分层查看，没有决定某位患者能不能进入 H2b。
 
 ## 旧的单患者结果如何收口
@@ -193,6 +245,12 @@ def build_complete(root: Path) -> dict:
 差值均定义为“前一个模型减后一个对照”，负数表示冻结状态更好。患者内先合并 optimizer seeds，再以患者为统计单位。
 
 {effect_markdown}
+
+主层必须同时公开“合格发作数”和真正进入最终评分的 held-out 分母：
+
+{primary_scoring_markdown}
+
+{primary_scoring_sentence}
 
 30 分钟主读数的白话解释：
 
@@ -218,14 +276,22 @@ def build_complete(root: Path) -> dict:
 """
 
     support_lines = [
-        "|患者|30 min 合格发作|层级|5/15/30/60/120 min 合格数|",
-        "|---|---:|---|---|",
+        "|患者|30 min 合格发作|30 min held-out risk sets|层级|5/15/30/60/120 min 合格数|",
+        "|---|---:|---:|---|---|",
     ]
     for row in support:
         counts = "/".join(str(row["by_lead"].get(str(lead), 0))
                           for lead in (5, 15, 30, 60, 120))
+        patient_path = root / "fits/by_subject" / row["subject"] / "primary/patient_median_probe_metrics.csv"
+        heldout = 0
+        if patient_path.is_file():
+            patient = pd.read_csv(patient_path)
+            selected = patient[patient.lead_minutes.astype(int) == 30]
+            if not selected.empty:
+                value = selected.iloc[0].get("B_state__n_risk_sets")
+                heldout = int(value) if pd.notna(value) else 0
         support_lines.append(
-            f"|{row['subject']}|{row['n']}|{row['tier']}|{counts}|"
+            f"|{row['subject']}|{row['n']}|{heldout}|{row['tier']}|{counts}|"
         )
     technical = f"""# H2b Cross-task Transfer v0.2 技术报告
 
@@ -260,6 +326,12 @@ def build_complete(root: Path) -> dict:
 ## 6. Results
 
 {effect_markdown}
+
+### 6.1 Primary eligible vs held-out denominator
+
+{primary_scoring_markdown}
+
+{primary_scoring_sentence}
 
 30 min primary interpretation:
 
