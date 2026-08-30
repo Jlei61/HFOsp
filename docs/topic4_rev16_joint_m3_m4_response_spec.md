@@ -147,8 +147,12 @@ LSE; and improved total loss for A, B and the weakest-mode objective. The cloud
 calculation uses every held-out recruitment/rank event vector, so a repeated
 mean prototype cannot pass by itself.
 
-Mode-specific early-source topology is evaluated on complete returned,
-source-evaluable causal families. The continuous endpoint is weakest-mode
+Mode-specific early-source topology is evaluated only on complete returned,
+source-evaluable causal families that also pass the frozen Fig.4 patient-mode
+support contract: both shafts participate and the event is not classifier OOD.
+An event that merely receives a forced A/B label is not eligible to define a
+source template or an intervention representative. The continuous endpoint is
+weakest-mode
 cross-network cosine similarity multiplied by between-mode topology distance;
 the null permutes mode labels within each network while preserving occupancy
 for 4096 draws. Passing this zero-simulation audit permits the intervention but
@@ -161,6 +165,11 @@ native mode algorithmically. Branch the identical checkpoint and random stream
 into sham, the two mode hotspots and their matched off-template controls. A
 strong local E-threshold pulse begins 5 ms after the checkpoint; intervention
 interpretation is limited to model-internal regional necessity.
+
+The native representative event and all leave-one-network-out hotspot
+templates use the same returned, source-evaluable, dual-shaft and in-support
+event set as the source-topology audit. OOD or single-shaft events cannot enter
+the hotspot definition even when the classifier assigns them an A/B label.
 
 The target for one network is computed from the other two networks only. For
 each mode, the hotspot maximizes that mode's early-source probability relative

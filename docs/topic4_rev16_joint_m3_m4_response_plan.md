@@ -70,13 +70,17 @@
    mode-conditioned sliced-Wasserstein event-cloud losses. Require A, B and
    weakest-cloud improvement as well as both total mode losses and the
    weakest-mode loss. Run the predeclared 4096-draw within-network label null
-   for mode-specific source topology.
+   for mode-specific source topology. Source templates are restricted to
+   returned, source-evaluable events that are dual-shaft and inside the frozen
+   patient classifier support; forced labels on OOD/single-shaft events are
+   excluded.
 4. If that audit advances, reconstruct the candidate and require exact array
    parity with its worker. Build each network's mode-contrast hotspots from the
    other two networks, require spatially distinct mode hotspots, and match
    controls on Node `h`, targeted E count and baseline rate over the actual
-   pulse disk. Run sham, crossed hotspots and controls from identical
-   checkpoints and random streams on all three networks.
+   pulse disk. Representative native events and LOO templates use the same
+   formal-clean source event set. Run sham, crossed hotspots and controls from
+   identical checkpoints and random streams on all three networks.
 5. Freeze Node only if at least two networks show mode-selective event
    survival/onset-latency effects relative to both opposite-mode and matched
    controls. EE, E-to-I and Z/M remain off until this freeze manifest exists.

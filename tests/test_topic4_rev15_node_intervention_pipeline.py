@@ -164,13 +164,79 @@ def test_source_bundle_excludes_every_overlap_connected_episode_member(
         npz_path, {
             "labels": np.asarray([0, 1, 0, 1]),
             "ranks": ranks,
+            "formal_clean": np.ones(4, dtype=bool),
         },
     )
     np.testing.assert_array_equal(maps, source_maps[[2, 3]])
     np.testing.assert_array_equal(labels, [0, 1])
     assert intervention._event_contract(
-        npz_path, {"labels": np.asarray([0, 1, 0, 1]), "ranks": ranks}, 0,
+        npz_path, {
+            "labels": np.asarray([0, 1, 0, 1]), "ranks": ranks,
+            "formal_clean": np.ones(4, dtype=bool),
+        }, 0,
     )["detected_event_index"] == 2
     assert intervention._event_contract(
-        npz_path, {"labels": np.asarray([0, 1, 0, 1]), "ranks": ranks}, 1,
+        npz_path, {
+            "labels": np.asarray([0, 1, 0, 1]), "ranks": ranks,
+            "formal_clean": np.ones(4, dtype=bool),
+        }, 1,
     )["detected_event_index"] == 3
+
+
+def test_source_templates_exclude_ood_or_single_shaft_forced_labels(
+    tmp_path, monkeypatch,
+):
+    npz_path = tmp_path / "worker.npz"
+    ranks = np.asarray([
+        [0.0, 1.0, 2.0],
+        [0.0, 2.0, 1.0],
+        [2.0, 0.0, 1.0],
+        [2.0, 1.0, 0.0],
+    ])
+    source_maps = np.stack([
+        np.full((2, 2), 1.0),
+        np.full((2, 2), 2.0),
+        np.full((2, 2), 3.0),
+        np.full((2, 2), 4.0),
+    ])
+    np.savez(
+        npz_path,
+        event_returned=np.ones(4, dtype=bool),
+        source_onset_evaluable=np.ones(4, dtype=bool),
+        event_t_on_ms=np.asarray([100.0, 300.0, 500.0, 700.0]),
+        event_trigger_t_on_ms=np.asarray([100.0, 300.0, 500.0, 700.0]),
+        event_t_off_ms=np.asarray([150.0, 350.0, 550.0, 750.0]),
+        event_fragment_count=np.ones(4, dtype=int),
+        event_directed_root_id=np.arange(4),
+        event_root_count=np.ones(4, dtype=int),
+        onsets=ranks,
+        ranks=ranks,
+        source_onset_maps_ms=source_maps,
+        positions_E=np.zeros((4, 2)),
+        delta_vtheta=np.ones(4),
+        source_bin_mm=np.asarray(1.0),
+    )
+    monkeypatch.setattr(
+        intervention.historical.exact,
+        "substrate_pca_axis",
+        lambda *_args, **_kwargs: np.asarray([1.0, 0.0]),
+    )
+    monkeypatch.setattr(
+        intervention.historical.exact,
+        "event_axis_displacements",
+        lambda maps, **_kwargs: np.ones(len(maps), dtype=float),
+    )
+    worker_contract = {
+        "labels": np.asarray([0, 0, 1, 1]),
+        "ranks": ranks,
+        "formal_clean": np.asarray([False, True, True, False]),
+    }
+    maps, labels = intervention._source_bundle(npz_path, worker_contract)
+    np.testing.assert_array_equal(maps, source_maps[[1, 2]])
+    np.testing.assert_array_equal(labels, [0, 1])
+    assert intervention._event_contract(
+        npz_path, worker_contract, 0,
+    )["detected_event_index"] == 1
+    assert intervention._event_contract(
+        npz_path, worker_contract, 1,
+    )["detected_event_index"] == 2

@@ -116,6 +116,34 @@ def _atomic_npz(path: Path, **arrays) -> None:
             os.unlink(temporary)
 
 
+def _formal_clean_source_rows(
+    arrays: dict[str, np.ndarray], worker: dict, detected: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Align source-evaluable families to returned, patient-supported events."""
+    required = ("labels", "ranks", "formal_clean")
+    if any(key not in worker for key in required):
+        raise RuntimeError("source worker lacks the formal-clean event contract")
+    returned_indices = np.flatnonzero(np.asarray(arrays["event_returned"], bool))
+    detected = np.asarray(detected, dtype=int)
+    positions = np.searchsorted(returned_indices, detected)
+    labels = np.asarray(worker.get("labels"), dtype=int)
+    ranks = np.asarray(worker.get("ranks"), dtype=float)
+    formal_clean = np.asarray(worker.get("formal_clean"), dtype=bool)
+    if (
+        np.any(positions >= len(returned_indices))
+        or not np.array_equal(returned_indices[positions], detected)
+        or labels.shape != (len(returned_indices),)
+        or ranks.ndim != 2
+        or ranks.shape[0] != len(returned_indices)
+        or formal_clean.shape != (len(returned_indices),)
+    ):
+        raise RuntimeError(
+            "source families, returned labels and formal-clean support differ"
+        )
+    keep = formal_clean[positions]
+    return detected[keep], positions[keep]
+
+
 def _source_bundle(npz_path: Path, worker: dict) -> tuple[np.ndarray, np.ndarray]:
     with np.load(npz_path, allow_pickle=False) as loaded:
         keys = (
@@ -128,13 +156,10 @@ def _source_bundle(npz_path: Path, worker: dict) -> tuple[np.ndarray, np.ndarray
     selection = historical.three_layer_event_selection(
         arrays, minimum_readable_contacts=3,
     )
-    detected = np.asarray(selection["topology_primary_indices"], dtype=int)
-    returned_indices = np.flatnonzero(np.asarray(arrays["event_returned"], bool))
-    positions = np.searchsorted(returned_indices, detected)
-    if (np.any(positions >= len(returned_indices))
-            or not np.array_equal(returned_indices[positions], detected)
-            or len(worker["labels"]) != len(returned_indices)):
-        raise RuntimeError("complete source families and returned labels differ")
+    detected, positions = _formal_clean_source_rows(
+        arrays, worker,
+        np.asarray(selection["topology_primary_indices"], dtype=int),
+    )
     return (
         np.asarray(arrays["source_onset_maps_ms"], float)[detected],
         np.asarray(worker["labels"], int)[positions],
@@ -153,19 +178,10 @@ def _event_contract(npz_path: Path, worker: dict, mode: int) -> dict:
         selection = historical.three_layer_event_selection(
             arrays, minimum_readable_contacts=3,
         )
-        detected_indices = np.asarray(
-            selection["topology_primary_indices"], dtype=int,
+        detected_indices, returned_positions = _formal_clean_source_rows(
+            arrays, worker,
+            np.asarray(selection["topology_primary_indices"], dtype=int),
         )
-        returned_indices = np.flatnonzero(
-            np.asarray(arrays["event_returned"], bool),
-        )
-        returned_positions = np.searchsorted(returned_indices, detected_indices)
-        if (np.any(returned_positions >= len(returned_indices))
-                or not np.array_equal(
-                    returned_indices[returned_positions], detected_indices,
-                )
-                or len(worker["labels"]) != len(returned_indices)):
-            raise RuntimeError("complete intervention families do not align")
         maps = np.asarray(arrays["source_onset_maps_ms"], float)[detected_indices]
         ranks = np.asarray(worker["ranks"], float)[returned_positions]
         labels = np.asarray(worker["labels"], int)[returned_positions]
