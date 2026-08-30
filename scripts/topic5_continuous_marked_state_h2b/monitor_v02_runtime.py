@@ -105,6 +105,8 @@ def main() -> None:
                 else "WAITING_FOR_ALL_DATA_MOUNTS"
             ),
             "updated_utc": datetime.now(timezone.utc).isoformat(),
+            "monitor_pid": int(os.getpid()),
+            "tmux_session": os.environ.get("H2B_MONITOR_SESSION"),
             "check_started_utc": started,
             "check_index": index + 1,
             "max_checks": int(args.max_checks),

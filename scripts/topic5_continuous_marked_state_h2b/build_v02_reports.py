@@ -318,11 +318,14 @@ def build_handoff(root: Path, *, outputs: dict | None = None) -> Path:
     census = _json(census_path) if census_path.is_file() else {}
     audit_path = root / "reports/machine_audit.json"
     audit = _json(audit_path) if audit_path.is_file() else {}
+    runtime_path = root / "RUNTIME_MONITOR_STATUS.json"
+    runtime = _json(runtime_path) if runtime_path.is_file() else {}
     text = f"""# H2b v0.2 CURRENT HANDOFF
 
 - updated UTC: {utc_now()}
 - queue status: `{queue.get('status')}` / stage `{queue.get('stage', 'unknown')}`
 - machine audit: `{audit.get('status', 'not run')}`
+- runtime monitor: PID `{runtime.get('monitor_pid', 'unknown')}`, tmux `{runtime.get('tmux_session', 'unknown')}`
 - raw mounts: `{json.dumps(census.get('raw_mounts_present'), ensure_ascii=False)}`
 - checkpoint inventory: {census.get('n_checkpoint_available_subjects', 'NA')} subjects
 - subjects requiring raw primary support: {census.get('n_subjects_requiring_raw_for_primary_h2b', 'NA')}
@@ -341,6 +344,7 @@ The runtime monitor waits for both transient mounts and every required raw cache
 
 - result root: `{root}`
 - queue status: `{queue_path}`
+- runtime status: `{runtime_path}`
 - machine audit: `{audit_path}`
 - plain report: `{(outputs or {}).get('plain', {}).get('path', 'pending')}`
 - technical report: `{(outputs or {}).get('technical', {}).get('path', 'pending')}`
