@@ -137,3 +137,36 @@ held-out data and figures remain unavailable during construction. Failure of
 the full coordinate tensor to yield a common A-improving/B-protecting direction
 will close this local M3 response strategy; it must not be rescued by relaxing
 the support threshold or activating EE, E-to-I or Z/M.
+
+## 8. Post-selection and one-time final Node audit
+
+Any response-derived direction is frozen before simulation on seeds
+2341--2343. Training-only progression requires, on all three paired networks,
+lower A loss than `exact_off`, B loss no greater than 110% of `exact_off`, and
+equal-network effective support of at least six events for each mode. The field
+is not yet frozen as the final Node substrate at this point.
+
+The same complete, returned and temporally isolated causal families are then
+used for the post-selection figures. Every network must contain both supervised
+patient modes. Natural KMeans is fit to masked normalized ranks, independently
+of the full-onset classifier; acceptance requires AMI at least 0.8 in all three
+networks and a pooled patient-profile matrix with positive diagonal and
+negative crossed cells. Natural KMeans cannot re-rank fields.
+
+Only after this acceptance may the developmental held-out endpoint be opened
+once. The frozen candidate is compared with same-seed `exact_off` using:
+
+1. positive complete-event-cloud held-out `R2` that improves on `exact_off`;
+2. lower held-out weakest-mode loss;
+3. lower held-out A and B losses separately;
+4. mode-conditioned source topology whose weakest-mode cross-network
+   reproducibility times between-mode separation exceeds the 95th percentile
+   of a within-network label-permutation null preserving network identity and
+   mode occupancy.
+
+Training-target losses remain diagnostics and cannot satisfy these held-out
+clauses. Passing all four clauses permits a same-checkpoint hotspot
+intervention; it does not itself freeze Node. Node is frozen only if an
+algorithmically defined mode hotspot has a selective effect relative to sham,
+the secondary hotspot and a matched off-template location. EE, E-to-I and Z/M
+remain off throughout.

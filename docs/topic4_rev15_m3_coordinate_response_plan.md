@@ -72,3 +72,46 @@ This phase replaces direct progression to post-freeze acceptance because Phase
 6. Freeze any robust direction before fresh selection-network simulation. If no
    common direction exists, close the local M3 response strategy rather than
    relaxing the mode-support requirement.
+
+## Phase 5a: fresh Node-only post-selection
+
+1. Run every frozen robust candidate and paired `exact_off` on seeds
+   2341--2343 for 20 s with common random numbers.
+2. Select only from the frozen training objective: A improves on 3/3, B is
+   protected on 3/3, and equal-network A/B effective support is at least six.
+3. For the single selected candidate, use complete returned non-overlapping
+   causal families to audit supervised A/B support and independent masked-rank
+   natural KMeans.
+4. Require both modes in every network, natural-KMeans AMI at least 0.8 in every
+   network, and positive-diagonal/negative-crossed pooled patient-profile
+   geometry.
+5. Render the two Fig.4-style figures only after the numerical audit. Figures
+   cannot change the candidate.
+
+## Phase 5b: one-time held-out and source-topology audit
+
+1. Freeze the accepted candidate, the exact worker hashes and the paired
+   `exact_off` workers before opening held-out.
+2. Compute complete-event-cloud held-out `R2` and held-out weakest/A/B mode
+   losses. Training-target losses are reported separately and cannot satisfy
+   the final clauses.
+3. Compute mode-conditioned source-topology quality on each network and compare
+   it with 4096 within-network label permutations preserving each network's
+   mode occupancy.
+4. Advance only when held-out `R2` is positive and better than `exact_off`, the
+   weakest and both individual modes improve, and topology exceeds the matched
+   null q95.
+5. Do not re-rank or resume fitting after held-out is opened.
+
+## Phase 6: same-checkpoint hotspot intervention
+
+1. Select a representative seed and one event per mode algorithmically from
+   the frozen three-network source maps.
+2. Branch from checkpoints 40 ms before native onset with identical state and
+   random streams: sham, dominant mode hotspot suppression, secondary hotspot
+   suppression and matched off-template suppression.
+3. Require exact sham replay and pre-pulse spike parity. Report event survival,
+   latency, mode identity, rank displacement and source-topology displacement.
+4. Freeze Node only if at least one predicted hotspot shows a mode-selective
+   effect not reproduced by the matched controls. Otherwise retain the field as
+   an exploratory Node candidate and keep EE, E-to-I and Z/M closed.
