@@ -224,3 +224,76 @@ def representative_event_index(onset_maps: np.ndarray, ranks: np.ndarray,
     centroid = np.mean(joint, axis=0)
     distance = np.linalg.norm(joint - centroid, axis=1)
     return int(selected[int(np.argmin(distance))])
+
+
+def ordered_suppression_effect(sham: dict, branch: dict) -> tuple[int, float]:
+    """Prioritize event abolition, then a positive onset delay."""
+    if not bool(sham.get("event_occurred")):
+        raise ValueError("same-checkpoint sham must reproduce the native event")
+    if not bool(branch.get("event_occurred")):
+        return 1, 0.0
+    sham_latency = float(sham["latency_from_checkpoint_ms"])
+    branch_latency = float(branch["latency_from_checkpoint_ms"])
+    if not np.isfinite(sham_latency) or not np.isfinite(branch_latency):
+        raise ValueError("surviving intervention events require finite latencies")
+    return 0, max(0.0, branch_latency - sham_latency)
+
+
+def crossed_hotspot_selectivity(
+    records_by_network: list[dict], *, required_networks: int = 2,
+) -> dict:
+    """Audit whether a mode hotspot has a crossed, spatially specific effect.
+
+    Each network record contains native modes ``0`` and ``1``. Each native-mode
+    branch dictionary must contain ``sham``, ``mode0_hotspot``,
+    ``mode0_matched_off_template``, ``mode1_hotspot`` and
+    ``mode1_matched_off_template``.
+    """
+    if int(required_networks) < 1:
+        raise ValueError("required selective networks must be positive")
+    if len(records_by_network) < int(required_networks):
+        raise ValueError("fewer networks than the selective-effect requirement")
+    results = {}
+    for hotspot_mode in (0, 1):
+        per_network = []
+        for network in records_by_network:
+            native = network["native_modes"]
+            own = native[str(hotspot_mode)]
+            opposite = native[str(1 - hotspot_mode)]
+            own_effect = ordered_suppression_effect(
+                own["sham"], own[f"mode{hotspot_mode}_hotspot"],
+            )
+            opposite_effect = ordered_suppression_effect(
+                opposite["sham"], opposite[f"mode{hotspot_mode}_hotspot"],
+            )
+            matched_effect = ordered_suppression_effect(
+                own["sham"],
+                own[f"mode{hotspot_mode}_matched_off_template"],
+            )
+            selective = bool(
+                own_effect > opposite_effect and own_effect > matched_effect
+            )
+            per_network.append({
+                "network_seed": int(network["network_seed"]),
+                "own_mode_effect_event_abolished_then_delay": list(own_effect),
+                "opposite_mode_effect_event_abolished_then_delay": list(opposite_effect),
+                "matched_control_effect_event_abolished_then_delay": list(matched_effect),
+                "selective": selective,
+            })
+        count = int(sum(row["selective"] for row in per_network))
+        results[str(hotspot_mode)] = {
+            "selective_network_count": count,
+            "required_network_count": int(required_networks),
+            "pass": bool(count >= int(required_networks)),
+            "per_network": per_network,
+        }
+    passed = [int(mode) for mode, row in results.items() if row["pass"]]
+    return {
+        "node_freeze_permitted": bool(passed),
+        "selective_hotspot_modes": passed,
+        "modes": results,
+        "primary_ordered_effect": (
+            "event abolition first, then nonnegative onset delay"
+        ),
+        "continuous_endpoints_are_explanatory_not_additional_gates": True,
+    }

@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 
 from src.topic4_node_intervention import (
+    crossed_hotspot_selectivity,
     early_support_probability,
     grid_covariates,
     network_balanced_early_support,
@@ -112,3 +113,57 @@ def test_representative_event_is_joint_medoid():
 def test_empty_source_maps_are_not_silently_treated_as_controls():
     with pytest.raises(ValueError, match="no evaluable event"):
         early_support_probability(np.full((2, 4, 4), np.nan))
+
+
+def _branch(event_occurred=True, latency=40.0):
+    return {
+        "event_occurred": event_occurred,
+        "latency_from_checkpoint_ms": None if not event_occurred else latency,
+    }
+
+
+def _crossed_network(seed, *, mode0_selective=True, mode1_selective=False):
+    mode0_hot_on_0 = _branch(False) if mode0_selective else _branch(True, 40.0)
+    mode1_hot_on_1 = _branch(False) if mode1_selective else _branch(True, 40.0)
+    return {
+        "network_seed": seed,
+        "native_modes": {
+            "0": {
+                "sham": _branch(True, 40.0),
+                "mode0_hotspot": mode0_hot_on_0,
+                "mode0_matched_off_template": _branch(True, 42.0),
+                "mode1_hotspot": _branch(True, 40.0),
+                "mode1_matched_off_template": _branch(True, 40.0),
+            },
+            "1": {
+                "sham": _branch(True, 40.0),
+                "mode0_hotspot": _branch(True, 43.0),
+                "mode0_matched_off_template": _branch(True, 40.0),
+                "mode1_hotspot": mode1_hot_on_1,
+                "mode1_matched_off_template": _branch(True, 42.0),
+            },
+        },
+    }
+
+
+def test_crossed_hotspot_requires_own_mode_effect_beyond_cross_and_control():
+    records = [
+        _crossed_network(1, mode0_selective=True),
+        _crossed_network(2, mode0_selective=True),
+        _crossed_network(3, mode0_selective=False),
+    ]
+    result = crossed_hotspot_selectivity(records, required_networks=2)
+    assert result["node_freeze_permitted"] is True
+    assert result["selective_hotspot_modes"] == [0]
+    assert result["modes"]["0"]["selective_network_count"] == 2
+    assert result["modes"]["1"]["selective_network_count"] == 0
+
+
+def test_crossed_hotspot_rejects_general_suppression():
+    records = []
+    for seed in (1, 2, 3):
+        row = _crossed_network(seed, mode0_selective=True)
+        row["native_modes"]["1"]["mode0_hotspot"] = _branch(False)
+        records.append(row)
+    result = crossed_hotspot_selectivity(records, required_networks=2)
+    assert result["node_freeze_permitted"] is False
