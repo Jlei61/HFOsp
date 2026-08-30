@@ -140,8 +140,12 @@ def build_config(
         "patient_endpoint": {
             "role": "one_time_development_heldout_evaluation_after_field_freeze",
             "primary_event_set": "complete_returned_causal_families",
-            "complete_event_cloud_r2_must_be_positive": True,
-            "candidate_must_improve_paired_exact_off": True,
+            "eventwise_prototype_r2_must_be_positive": True,
+            "eventwise_prototype_r2_must_improve_paired_exact_off": True,
+            "mode_conditioned_event_cloud_metric": (
+                "shaft_balanced_sliced_wasserstein_over_all_heldout_events"
+            ),
+            "both_mode_cloud_losses_and_weakest_cloud_must_improve": True,
             "both_mode_losses_and_weakest_mode_must_improve": True,
         },
         "source_topology": {

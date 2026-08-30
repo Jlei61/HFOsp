@@ -77,6 +77,12 @@ def test_preparer_freezes_one_selected_candidate_without_opening_heldout(tmp_pat
     assert config["selected_candidate"]["paired_reference_candidate_id"] == "exact_off"
     assert config["network_seeds"] == [2341, 2342, 2343]
     assert "transition_config" not in config["inputs"]
+    assert config["patient_endpoint"][
+        "both_mode_cloud_losses_and_weakest_cloud_must_improve"
+    ] is True
+    assert "complete_event_cloud_r2_must_be_positive" not in config[
+        "patient_endpoint"
+    ]
     assert config["boundaries"]["field_reranking_allowed"] is False
     assert config["boundaries"]["SNN_simulation_run"] is False
 
@@ -103,9 +109,16 @@ def test_paired_deltas_keep_network_identity_and_both_modes():
             "network_scores": [{
                 "seed": seed,
                 "weakest_mode_lse": seed + offset,
+                "weakest_mode_cloud_lse": 0.2 * seed + offset,
                 "modes": {
-                    "0": {"mean": 0.5 * seed + offset},
-                    "1": {"mean": 0.25 * seed + offset},
+                    "0": {
+                        "mean": 0.5 * seed + offset,
+                        "cloud": 0.1 * seed + offset,
+                    },
+                    "1": {
+                        "mean": 0.25 * seed + offset,
+                        "cloud": 0.05 * seed + offset,
+                    },
                 },
                 "mode_counts": [3, 4],
             } for seed in (2341, 2342, 2343)]

@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+import pytest
+
 from scripts import aggregate_topic4_rev15_node_intervention as rev15_aggregate
 from scripts import aggregate_topic4_rev16_node_intervention as aggregate
 from scripts import prepare_topic4_rev15_node_intervention_config as rev15_prepare
 from scripts import prepare_topic4_rev16_node_intervention_config as prepare
+from scripts import audit_topic4_rev16_node_final_science as final_audit
+from scripts import prepare_topic4_rev16_node_final_science_config as final_config
 from scripts import run_topic4_rev15_node_intervention_worker as rev15_worker
 from scripts import run_topic4_rev16_node_intervention_worker as worker
 from scripts import topic4_rev16_node_substrate_adapter as adapter
@@ -23,6 +27,12 @@ def test_rev16_intervention_config_uses_fresh_pool(monkeypatch, tmp_path):
 
     old = rev15_prepare.EXPECTED_NETWORK_SEEDS
     monkeypatch.setattr(rev15_prepare, "build_config", fake_build)
+    (tmp_path / "final.json").write_text(
+        '{"schema_id":"' + final_config.OUTPUT_SCHEMA + '"}\n'
+    )
+    (tmp_path / "audit.json").write_text(
+        '{"schema_id":"' + final_audit.OUTPUT_SCHEMA + '"}\n'
+    )
     payload = prepare.build_config(
         final_config_path=tmp_path / "final.json",
         final_audit_path=tmp_path / "audit.json",
@@ -41,6 +51,21 @@ def test_rev16_intervention_config_uses_fresh_pool(monkeypatch, tmp_path):
         "minimum_free_disk_gib": 40.0, "monitor_interval_seconds": 600,
         "long_run_launcher": "systemd-run --user plus nohup",
     }
+
+
+def test_rev16_intervention_rejects_old_final_audit_schema(tmp_path):
+    (tmp_path / "final.json").write_text(
+        '{"schema_id":"' + final_config.OUTPUT_SCHEMA + '"}\n'
+    )
+    (tmp_path / "audit.json").write_text(
+        '{"schema_id":"topic4_rev16_node_final_science_audit_v1"}\n'
+    )
+    with pytest.raises(RuntimeError, match="audit schema"):
+        prepare.build_config(
+            final_config_path=tmp_path / "final.json",
+            final_audit_path=tmp_path / "audit.json",
+            repository_root=tmp_path, artifact_root=tmp_path,
+        )
 
 
 def test_rev16_worker_wraps_schema_status_and_projection_adapter(monkeypatch):

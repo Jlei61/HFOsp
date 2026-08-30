@@ -56,7 +56,9 @@
 3. Produce the registered direct-readout and KMeans Fig.4 views only after the
    same audit accepts. KMeans cannot rerank candidate fields.
 4. Open patient held-out once and compare the frozen candidate with paired
-   same-seed `exact_off` on the complete event cloud, both mode losses and the
+   same-seed `exact_off`. Report eventwise prototype R2 separately from the
+   mode-conditioned sliced-Wasserstein event-cloud losses. Require A, B and
+   weakest-cloud improvement as well as both total mode losses and the
    weakest-mode loss. Run the predeclared 4096-draw within-network label null
    for mode-specific source topology.
 5. If that audit advances, reconstruct the candidate and require exact array

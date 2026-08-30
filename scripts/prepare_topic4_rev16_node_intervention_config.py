@@ -15,6 +15,8 @@ if str(ROOT) not in sys.path:
 
 from scripts import prepare_topic4_rev15_node_intervention_config as base  # noqa: E402
 from scripts import prepare_topic4_rev16_node_postselection_config as post  # noqa: E402
+from scripts import audit_topic4_rev16_node_final_science as final_audit_contract  # noqa: E402
+from scripts import prepare_topic4_rev16_node_final_science_config as final_config_contract  # noqa: E402
 
 
 ARTIFACT_ROOT = Path("/home/honglab/leijiaxin/HFOsp")
@@ -31,6 +33,12 @@ def build_config(
     *, final_config_path: Path, final_audit_path: Path,
     repository_root: Path = ROOT, artifact_root: Path = ARTIFACT_ROOT,
 ) -> dict[str, Any]:
+    final_config = json.loads(final_config_path.read_text())
+    final_audit = json.loads(final_audit_path.read_text())
+    if final_config.get("schema_id") != final_config_contract.OUTPUT_SCHEMA:
+        raise RuntimeError("rev16 final-science config schema changed")
+    if final_audit.get("schema_id") != final_audit_contract.OUTPUT_SCHEMA:
+        raise RuntimeError("rev16 final-science audit schema changed")
     previous_seeds = base.EXPECTED_NETWORK_SEEDS
     base.EXPECTED_NETWORK_SEEDS = post.NETWORK_SEEDS
     try:

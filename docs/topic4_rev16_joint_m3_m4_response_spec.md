@@ -120,8 +120,14 @@ pipeline.
 
 Only a post-selection-accepted field opens the frozen patient held-out event
 set once. It is compared with paired same-seed `exact_off`, with no field
-reranking. Progress requires positive complete-event-cloud held-out R2 and
-paired improvement of both mode losses and the weakest-mode objective.
+reranking. The eventwise prototype R2 is retained but named explicitly: it asks
+whether the two model mean prototypes explain held-out patient event variance
+and does not measure model event-cloud dispersion. Progress therefore requires
+positive and improved eventwise prototype R2; improved mode-conditioned,
+shaft-balanced sliced-Wasserstein cloud loss for A, B and their weakest-mode
+LSE; and improved total loss for A, B and the weakest-mode objective. The cloud
+calculation uses every held-out recruitment/rank event vector, so a repeated
+mean prototype cannot pass by itself.
 
 Mode-specific early-source topology is evaluated on complete returned,
 source-evaluable causal families. The continuous endpoint is weakest-mode

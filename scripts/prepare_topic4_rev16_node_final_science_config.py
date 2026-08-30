@@ -29,7 +29,7 @@ DEFAULT_POSTSELECTION_AUDIT = ARTIFACT_ROOT / (
     "joint_m3_m4_candidates/postselection/analysis/node_postselection_audit.json"
 )
 DEFAULT_OUTPUT = ROOT / "config/topic4_rev16_node_final_science.json"
-OUTPUT_SCHEMA = "topic4_rev16_node_final_science_v1"
+OUTPUT_SCHEMA = "topic4_rev16_node_final_science_v2"
 
 
 def build_config(

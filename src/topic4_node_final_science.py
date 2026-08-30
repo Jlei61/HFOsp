@@ -7,7 +7,7 @@ from itertools import combinations
 import numpy as np
 
 from src.topic4_node_dualmode import cosine_similarity, source_topology_features
-from src.topic4_node_dualmode import dual_mode_objective
+from src.topic4_node_dualmode import dual_mode_objective, lse_max
 
 
 def _topology_summary_from_features(
@@ -107,6 +107,9 @@ def score_workers_against_patient_endpoint(
             "mode_counts": np.bincount(
                 np.asarray(worker["labels"], dtype=int), minlength=2,
             ),
+            "weakest_mode_cloud_lse": lse_max(np.asarray([
+                score["modes"][str(mode)]["cloud"] for mode in (0, 1)
+            ], dtype=float), tau=0.25),
         })
         rows.append(score)
     if not rows:
@@ -130,6 +133,9 @@ def score_workers_against_patient_endpoint(
         "mean_weakest_mode_lse": mean(("weakest_mode_lse",)),
         "mean_mode_0_loss": mean(("modes", "0", "mean")),
         "mean_mode_1_loss": mean(("modes", "1", "mean")),
+        "mean_weakest_mode_cloud_lse": mean(("weakest_mode_cloud_lse",)),
+        "mean_mode_0_cloud_loss": mean(("modes", "0", "cloud")),
+        "mean_mode_1_cloud_loss": mean(("modes", "1", "cloud")),
         "network_scores": rows,
     }
 
@@ -204,11 +210,23 @@ def final_zero_simulation_decision(
     reference_score: dict,
     topology_test: dict,
 ) -> dict:
-    """Apply the three pre-intervention rev15 scientific clauses."""
+    """Apply the pre-intervention Node scientific clauses."""
     metrics = {
-        "complete_heldout_event_cloud_r2": (
-            float(candidate_score["model_prototype_r2_on_heldout"]),
-            float(reference_score["model_prototype_r2_on_heldout"]),
+        "heldout_eventwise_prototype_r2": (
+            float(candidate_score["heldout_eventwise_prototype_r2"]),
+            float(reference_score["heldout_eventwise_prototype_r2"]),
+        ),
+        "weakest_mode_cloud_loss": (
+            float(candidate_score["mean_weakest_mode_cloud_lse"]),
+            float(reference_score["mean_weakest_mode_cloud_lse"]),
+        ),
+        "mode_0_cloud_loss": (
+            float(candidate_score["mean_mode_0_cloud_loss"]),
+            float(reference_score["mean_mode_0_cloud_loss"]),
+        ),
+        "mode_1_cloud_loss": (
+            float(candidate_score["mean_mode_1_cloud_loss"]),
+            float(reference_score["mean_mode_1_cloud_loss"]),
         ),
         "weakest_mode_loss": (
             float(candidate_score["mean_weakest_mode_lse"]),
@@ -225,13 +243,37 @@ def final_zero_simulation_decision(
     }
     if not np.isfinite(np.asarray(list(metrics.values()), dtype=float)).all():
         raise ValueError("held-out final-science metrics must be finite")
-    r2, reference_r2 = metrics["complete_heldout_event_cloud_r2"]
+    r2, reference_r2 = metrics["heldout_eventwise_prototype_r2"]
     clauses = {
-        "positive_complete_heldout_event_cloud_r2_and_improves_reference": {
+        "positive_heldout_eventwise_prototype_r2_and_improves_reference": {
             "candidate": r2,
             "reference": reference_r2,
             "delta_candidate_minus_reference": r2 - reference_r2,
             "pass": bool(r2 > 0.0 and r2 > reference_r2),
+        },
+        "complete_heldout_event_distribution_improves_reference": {
+            "weakest_mode_candidate": metrics["weakest_mode_cloud_loss"][0],
+            "weakest_mode_reference": metrics["weakest_mode_cloud_loss"][1],
+            "mode_0_delta_candidate_minus_reference": (
+                metrics["mode_0_cloud_loss"][0]
+                - metrics["mode_0_cloud_loss"][1]
+            ),
+            "mode_1_delta_candidate_minus_reference": (
+                metrics["mode_1_cloud_loss"][0]
+                - metrics["mode_1_cloud_loss"][1]
+            ),
+            "pass": bool(
+                metrics["weakest_mode_cloud_loss"][0]
+                < metrics["weakest_mode_cloud_loss"][1]
+                and metrics["mode_0_cloud_loss"][0]
+                < metrics["mode_0_cloud_loss"][1]
+                and metrics["mode_1_cloud_loss"][0]
+                < metrics["mode_1_cloud_loss"][1]
+            ),
+            "metric_contract": (
+                "mode-conditioned shaft-balanced sliced-Wasserstein distance "
+                "over every held-out recruitment/rank event vector"
+            ),
         },
         "weakest_mode_loss_improves_reference": {
             "candidate": metrics["weakest_mode_loss"][0],

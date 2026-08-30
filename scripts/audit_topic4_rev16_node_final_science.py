@@ -22,7 +22,7 @@ from scripts.prepare_topic4_rev16_node_final_science_config import (  # noqa: E4
 
 ARTIFACT_ROOT = Path("/home/honglab/leijiaxin/HFOsp")
 DEFAULT_CONFIG = ROOT / "config/topic4_rev16_node_final_science.json"
-OUTPUT_SCHEMA = "topic4_rev16_node_final_science_audit_v1"
+OUTPUT_SCHEMA = "topic4_rev16_node_final_science_audit_v2"
 
 
 def audit(

@@ -177,6 +177,15 @@ def _paired_deltas(candidate: Mapping[str, Any], reference: Mapping[str, Any]) -
             "delta_weakest_mode_loss": float(left["weakest_mode_lse"] - right["weakest_mode_lse"]),
             "delta_mode_0_loss": float(left["modes"]["0"]["mean"] - right["modes"]["0"]["mean"]),
             "delta_mode_1_loss": float(left["modes"]["1"]["mean"] - right["modes"]["1"]["mean"]),
+            "delta_weakest_mode_cloud_loss": float(
+                left["weakest_mode_cloud_lse"] - right["weakest_mode_cloud_lse"]
+            ),
+            "delta_mode_0_cloud_loss": float(
+                left["modes"]["0"]["cloud"] - right["modes"]["0"]["cloud"]
+            ),
+            "delta_mode_1_cloud_loss": float(
+                left["modes"]["1"]["cloud"] - right["modes"]["1"]["cloud"]
+            ),
             "candidate_mode_counts": np.asarray(left["mode_counts"], int).tolist(),
             "reference_mode_counts": np.asarray(right["mode_counts"], int).tolist(),
         })
@@ -294,24 +303,28 @@ def audit(config_path: Path = DEFAULT_CONFIG,
         calibration=calibration,
     )
     candidate_endpoint = {
-        "model_prototype_r2_on_heldout": candidate_training_score[
+        "heldout_eventwise_prototype_r2": candidate_training_score[
             "model_prototype_r2_on_heldout"
         ],
         **{
             key: candidate_heldout_score[key]
             for key in (
                 "mean_weakest_mode_lse", "mean_mode_0_loss", "mean_mode_1_loss",
+                "mean_weakest_mode_cloud_lse", "mean_mode_0_cloud_loss",
+                "mean_mode_1_cloud_loss",
             )
         },
     }
     reference_endpoint = {
-        "model_prototype_r2_on_heldout": reference_training_score[
+        "heldout_eventwise_prototype_r2": reference_training_score[
             "model_prototype_r2_on_heldout"
         ],
         **{
             key: reference_heldout_score[key]
             for key in (
                 "mean_weakest_mode_lse", "mean_mode_0_loss", "mean_mode_1_loss",
+                "mean_weakest_mode_cloud_lse", "mean_mode_0_cloud_loss",
+                "mean_mode_1_cloud_loss",
             )
         },
     }

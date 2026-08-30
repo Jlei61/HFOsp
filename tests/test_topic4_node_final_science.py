@@ -85,8 +85,8 @@ def test_patient_endpoint_scoring_uses_supplied_heldout_distribution(monkeypatch
         return {
             "weakest_mode_lse": offset,
             "modes": {
-                "0": {"mean": offset + 1.0},
-                "1": {"mean": offset + 2.0},
+                "0": {"mean": offset + 1.0, "cloud": offset + 0.1},
+                "1": {"mean": offset + 2.0, "cloud": offset + 0.2},
             },
         }
 
@@ -105,6 +105,8 @@ def test_patient_endpoint_scoring_uses_supplied_heldout_distribution(monkeypatch
     assert result["mean_weakest_mode_lse"] == 7.0
     assert result["mean_mode_0_loss"] == 8.0
     assert result["mean_mode_1_loss"] == 9.0
+    assert result["mean_mode_0_cloud_loss"] == pytest.approx(7.1)
+    assert result["mean_mode_1_cloud_loss"] == pytest.approx(7.2)
 
 
 def test_topology_null_requires_both_modes_in_every_network():
@@ -117,13 +119,19 @@ def test_topology_null_requires_both_modes_in_every_network():
 
 def test_final_decision_requires_both_modes_and_positive_heldout_r2():
     reference = {
-        "model_prototype_r2_on_heldout": -0.2,
+        "heldout_eventwise_prototype_r2": -0.2,
+        "mean_weakest_mode_cloud_lse": 0.7,
+        "mean_mode_0_cloud_loss": 0.5,
+        "mean_mode_1_cloud_loss": 0.6,
         "mean_weakest_mode_lse": 1.0,
         "mean_mode_0_loss": 0.8,
         "mean_mode_1_loss": 0.9,
     }
     candidate = {
-        "model_prototype_r2_on_heldout": 0.1,
+        "heldout_eventwise_prototype_r2": 0.1,
+        "mean_weakest_mode_cloud_lse": 0.5,
+        "mean_mode_0_cloud_loss": 0.3,
+        "mean_mode_1_cloud_loss": 0.4,
         "mean_weakest_mode_lse": 0.7,
         "mean_mode_0_loss": 0.6,
         "mean_mode_1_loss": 0.7,
@@ -143,4 +151,36 @@ def test_final_decision_requires_both_modes_and_positive_heldout_r2():
     assert rejected["accepted_for_same_checkpoint_intervention"] is False
     assert rejected["clauses"][
         "both_patient_mode_losses_improve_reference"
+    ]["pass"] is False
+
+
+def test_prototype_r2_cannot_mask_a_worse_heldout_event_cloud():
+    reference = {
+        "heldout_eventwise_prototype_r2": -0.2,
+        "mean_weakest_mode_cloud_lse": 0.7,
+        "mean_mode_0_cloud_loss": 0.5,
+        "mean_mode_1_cloud_loss": 0.6,
+        "mean_weakest_mode_lse": 1.0,
+        "mean_mode_0_loss": 0.8,
+        "mean_mode_1_loss": 0.9,
+    }
+    candidate = {
+        "heldout_eventwise_prototype_r2": 0.8,
+        "mean_weakest_mode_cloud_lse": 0.8,
+        "mean_mode_0_cloud_loss": 0.4,
+        "mean_mode_1_cloud_loss": 0.7,
+        "mean_weakest_mode_lse": 0.7,
+        "mean_mode_0_loss": 0.6,
+        "mean_mode_1_loss": 0.7,
+    }
+    topology = {
+        "observed_weakest_mode_quality": 0.3,
+        "null_q95": 0.2,
+        "upper_tail_p": 0.01,
+        "above_null_q95": True,
+    }
+    result = final_zero_simulation_decision(candidate, reference, topology)
+    assert result["accepted_for_same_checkpoint_intervention"] is False
+    assert result["clauses"][
+        "complete_heldout_event_distribution_improves_reference"
     ]["pass"] is False
