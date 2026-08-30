@@ -7,6 +7,7 @@ from scripts import prepare_topic4_rev16_node_intervention_config as prepare
 from scripts import run_topic4_rev15_node_intervention_worker as rev15_worker
 from scripts import run_topic4_rev16_node_intervention_worker as worker
 from scripts import topic4_rev16_node_substrate_adapter as adapter
+from scripts import monitor_topic4_rev16_node_intervention as monitor
 
 
 def test_rev16_intervention_config_uses_fresh_pool(monkeypatch, tmp_path):
@@ -32,6 +33,13 @@ def test_rev16_intervention_config_uses_fresh_pool(monkeypatch, tmp_path):
     assert payload["schema_id"] == prepare.OUTPUT_SCHEMA
     assert payload["mechanism_freeze"] == {
         "EE": "off", "E_to_I": "off", "Z_M": "off",
+    }
+    assert payload["resources"] == {
+        "maximum_workers": 3, "numerical_threads_per_worker": 1,
+        "safe_peak_rss_gib_per_worker": 16.0,
+        "stop_launching_below_available_memory_gib": 80.0,
+        "minimum_free_disk_gib": 40.0, "monitor_interval_seconds": 600,
+        "long_run_launcher": "systemd-run --user plus nohup",
     }
 
 
@@ -103,3 +111,103 @@ def test_rev16_aggregate_wraps_freeze_identity(monkeypatch, tmp_path):
         rev15_aggregate.FREEZE_SCHEMA, rev15_aggregate.FROZEN_STATUS,
         rev15_aggregate.NOT_SELECTIVE_STATUS, rev15_aggregate.WORKER_STATUS,
     ) == old
+
+
+def _monitor_config(tmp_path):
+    return {
+        "schema_id": worker.EXPECTED_CONFIG_SCHEMA,
+        "output_root": "results/intervention", "candidate_id": "joint",
+        "network_seeds": [2351, 2352, 2353],
+        "mechanism_freeze": {"EE": "off", "E_to_I": "off", "Z_M": "off"},
+        "resources": {
+            "maximum_workers": 3, "numerical_threads_per_worker": 1,
+            "safe_peak_rss_gib_per_worker": 16.0,
+            "stop_launching_below_available_memory_gib": 80.0,
+            "minimum_free_disk_gib": 40.0, "monitor_interval_seconds": 600,
+            "long_run_launcher": "systemd-run --user plus nohup",
+        },
+    }
+
+
+def test_intervention_monitor_preserves_memory_reserve(monkeypatch, tmp_path):
+    config = _monitor_config(tmp_path)
+    monkeypatch.setattr(monitor, "load_contract", lambda *args, **kwargs: config)
+    monkeypatch.setattr(monitor, "classify", lambda **kwargs: {
+        "states": {"2351": "pending", "2352": "pending", "2353": "pending"},
+        "invalid": [],
+    })
+    monkeypatch.setattr(
+        monitor.psutil, "virtual_memory",
+        lambda: type("M", (), {"available": 90 * 2**30})(),
+    )
+    monkeypatch.setattr(
+        monitor.shutil, "disk_usage",
+        lambda path: type("D", (), {"free": 100 * 2**30})(),
+    )
+    monkeypatch.setattr(monitor, "_atomic_json", lambda *args, **kwargs: None)
+    monkeypatch.setattr(
+        monitor, "_launch",
+        lambda **kwargs: (_ for _ in ()).throw(AssertionError("must not launch")),
+    )
+    result = monitor.tick(
+        config_path=tmp_path / "x.json", artifact_root=tmp_path,
+        expected_commit="a" * 40, unit_prefix=monitor.DEFAULT_UNIT_PREFIX,
+        worker_cap=3, execute=True,
+    )
+    assert result["status"] == monitor.RESOURCE_WAIT
+    assert result["n_active"] == 0
+
+
+def test_intervention_monitor_launches_only_frozen_three(monkeypatch, tmp_path):
+    config = _monitor_config(tmp_path)
+    launched = []
+    monkeypatch.setattr(monitor, "load_contract", lambda *args, **kwargs: config)
+    monkeypatch.setattr(monitor, "classify", lambda **kwargs: {
+        "states": {"2351": "pending", "2352": "pending", "2353": "pending"},
+        "invalid": [],
+    })
+    monkeypatch.setattr(
+        monitor.psutil, "virtual_memory",
+        lambda: type("M", (), {"available": 200 * 2**30})(),
+    )
+    monkeypatch.setattr(
+        monitor.shutil, "disk_usage",
+        lambda path: type("D", (), {"free": 100 * 2**30})(),
+    )
+    monkeypatch.setattr(monitor, "_atomic_json", lambda *args, **kwargs: None)
+
+    def fake_launch(**kwargs):
+        launched.append(kwargs["seed"])
+        return f"unit-{kwargs['seed']}"
+
+    monkeypatch.setattr(monitor, "_launch", fake_launch)
+    result = monitor.tick(
+        config_path=tmp_path / "x.json", artifact_root=tmp_path,
+        expected_commit="a" * 40, unit_prefix=monitor.DEFAULT_UNIT_PREFIX,
+        worker_cap=3, execute=True,
+    )
+    assert launched == [2351, 2352, 2353]
+    assert result["n_active"] == 3
+    assert result["status"] == monitor.RUNNING
+
+
+def test_intervention_monitor_rejects_success_status_without_artifact(
+    monkeypatch, tmp_path,
+):
+    config = _monitor_config(tmp_path)
+    status = (
+        tmp_path / config["output_root"]
+        / "run_logs/workers/intervention_seed_2351.status"
+    )
+    status.parent.mkdir(parents=True)
+    status.write_text("SUCCESS exit_code=0\n")
+    config_path = tmp_path / "config.json"
+    config_path.write_text("{}\n")
+    monkeypatch.setattr(monitor, "_is_active", lambda unit: False)
+    snapshot = monitor.classify(
+        config=config, config_path=config_path,
+        artifact_root=tmp_path, expected_commit="a" * 40,
+        unit_prefix=monitor.DEFAULT_UNIT_PREFIX,
+    )
+    assert snapshot["states"]["2351"] == "invalid"
+    assert "stale status" in snapshot["invalid"][0]

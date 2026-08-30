@@ -50,6 +50,15 @@ def build_config(
             "results/topic4_sef_hfo/data_driven_node_dualmode_rev16/"
             "joint_m3_m4_candidates/final_science/intervention"
         ),
+        "resources": {
+            "maximum_workers": 3,
+            "numerical_threads_per_worker": 1,
+            "safe_peak_rss_gib_per_worker": 16.0,
+            "stop_launching_below_available_memory_gib": 80.0,
+            "minimum_free_disk_gib": 40.0,
+            "monitor_interval_seconds": 600,
+            "long_run_launcher": "systemd-run --user plus nohup",
+        },
     })
     payload["claim_boundary"] = (
         "A strong local E-threshold pulse tests rev16 model-internal regional "
