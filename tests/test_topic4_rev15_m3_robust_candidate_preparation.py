@@ -95,6 +95,9 @@ def test_worker_and_monitor_wrappers_keep_node_only_contract():
             "learned_E_to_E_redistribution": "off",
             "learned_E_to_I_redistribution": "off", "Z_M": "off",
         }
+        assert len(worker.base._canonical_sha256({
+            "field": np.asarray([0.0, 1.0], dtype=np.float64),
+        })) == 64
         assert monitor.base.WORKER.name == (
             "run_topic4_rev15_m3_robust_candidate_worker.py"
         )

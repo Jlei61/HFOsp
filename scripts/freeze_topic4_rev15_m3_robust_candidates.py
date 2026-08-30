@@ -43,6 +43,7 @@ FORMAL_RUNTIME_PATHS = (
 )
 
 _atomic_json = base._atomic_json
+_jsonable = base._jsonable
 _sha256 = base._sha256
 
 
