@@ -143,9 +143,11 @@ def _launch_job(
     job["json"].parent.mkdir(parents=True, exist_ok=True)
     command = [
         "systemd-run", "--user", "--collect", "--unit", job["unit"],
+        "--working-directory", str(ROOT),
         "--property=OOMPolicy=stop",
         "--setenv=OMP_NUM_THREADS=1", "--setenv=OPENBLAS_NUM_THREADS=1",
         "--setenv=MKL_NUM_THREADS=1", "--setenv=NUMEXPR_NUM_THREADS=1",
+        f"--setenv=REV10R_SYSTEMD_UNIT={job['unit']}.service",
         "/usr/bin/nohup", str(ROOT / "scripts/run_topic4_rev10_sa_managed_command.sh"),
         str(job["status"]), str(job["log"]),
         f"dual-core {job['phase']} {job['candidate_id']} seed={job['seed']}",
