@@ -91,3 +91,57 @@ two Fig.4 figures remain unavailable until one candidate passes this gate.
   generations, a relaxed gate, Gaussian cores, EE/E-to-I or Z/M.
 - Held-out, source-topology intervention and final Node freeze retain the rev15
   post-selection contract and open only after natural KMeans acceptance.
+
+## 7. Frozen post-selection contract
+
+The fresh-network aggregate chooses at most one `best_usable_anchor` before
+natural KMeans, figures or held-out events are opened. Post-selection reuses
+the exact seed-2351--2353 worker arrays; it does not run another SNN or rerank
+the candidate inventory.
+
+For each network, formal events are complete, non-overlapping returned causal
+families that are readable on at least three contacts, recruit both shafts and
+lie inside the frozen patient-training classifier support. Masked normalized
+event ranks are clustered with K=2 without patient labels. Cluster identities
+are mapped to frozen A/B labels only after fitting.
+
+The selected Node progresses only if all three networks have at least three
+events in each supervised mode and each natural cluster, all three have
+natural-versus-supervised AMI at least 0.8, and the pooled patient-training
+prototype matrix has positive diagonal and negative crossed cells. KMeans may
+reject the selected field but cannot select another one.
+
+The two canonical Fig.4 outputs use exactly this event set: direct continuous
+electrode readout and masked-rank KMeans consistency. Diagnostic figures from
+a rejected field must be explicitly marked diagnostic and cannot advance the
+pipeline.
+
+## 8. One-time held-out and source-topology audit
+
+Only a post-selection-accepted field opens the frozen patient held-out event
+set once. It is compared with paired same-seed `exact_off`, with no field
+reranking. Progress requires positive complete-event-cloud held-out R2 and
+paired improvement of both mode losses and the weakest-mode objective.
+
+Mode-specific early-source topology is evaluated on complete returned,
+source-evaluable causal families. The continuous endpoint is weakest-mode
+cross-network cosine similarity multiplied by between-mode topology distance;
+the null permutes mode labels within each network while preserving occupancy
+for 4096 draws. Passing this zero-simulation audit permits the intervention but
+does not yet freeze Node.
+
+## 9. Same-checkpoint mode-selective intervention
+
+For each of the three frozen networks, choose one complete event per native
+mode algorithmically. Branch the identical checkpoint and random stream into
+sham, the two mode hotspots and their matched off-template controls. A strong
+local E-threshold pulse begins 5 ms after the checkpoint; intervention
+interpretation is limited to model-internal regional necessity.
+
+The primary ordered endpoints are event survival and onset latency. A mode
+hotspot is selective only when its effect on the predicted native mode exceeds
+both its effect on the opposite mode and its matched control. At least two of
+three networks must show the crossed selective pattern. The reconstructed
+`h`, `Vtheta` and `delta-Vtheta` arrays must be exactly equal to the frozen
+worker before any branch runs. Only this result may write the Node freeze
+manifest; EE, E-to-I and Z/M remain off throughout.

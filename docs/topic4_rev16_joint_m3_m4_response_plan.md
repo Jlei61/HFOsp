@@ -48,7 +48,20 @@
 
 ## Phase 5: Fig.4 acceptance and final science
 
-Only after Phase 4 passes, run natural masked-rank KMeans and produce the two
-registered Fig.4 views from the same complete returned causal families. Then
-open held-out once and perform the crossed same-checkpoint hotspot
-intervention. Node is frozen only under the unchanged rev15 acceptance rules.
+1. Generate a post-selection config only when the complete Phase-4 aggregate
+   exposes one `best_usable_anchor`; otherwise stop without KMeans or figures.
+2. Reuse seeds 2351--2353 and the exact selected worker arrays. Require both
+   modes and both KMeans clusters in each network, AMI at least 0.8 in all
+   three networks, and the pooled patient-training matrix sign contract.
+3. Produce the registered direct-readout and KMeans Fig.4 views only after the
+   same audit accepts. KMeans cannot rerank candidate fields.
+4. Open patient held-out once and compare the frozen candidate with paired
+   same-seed `exact_off` on the complete event cloud, both mode losses and the
+   weakest-mode loss. Run the predeclared 4096-draw within-network label null
+   for mode-specific source topology.
+5. If that audit advances, reconstruct the candidate and require exact array
+   parity with its worker. Run sham, crossed mode hotspots and matched controls
+   from identical checkpoints and random streams on all three networks.
+6. Freeze Node only if at least two networks show mode-selective event
+   survival/onset-latency effects relative to both opposite-mode and matched
+   controls. EE, E-to-I and Z/M remain off until this freeze manifest exists.
