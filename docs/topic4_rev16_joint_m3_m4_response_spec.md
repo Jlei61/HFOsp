@@ -103,15 +103,24 @@ single mode while worsening the complete training target from being selected.
 ## 7. Frozen post-selection contract
 
 The fresh-network aggregate chooses at most one `best_usable_anchor` before
-natural KMeans, figures or held-out events are opened. Post-selection reuses
-the exact seed-2351--2353 worker arrays; it does not run another SNN or rerank
-the candidate inventory.
+natural KMeans, figures or held-out events are opened. Seeds 2351--2353 are
+selection networks only. After one field is frozen, run only that field and
+paired `exact_off` on unseen seeds 2361--2363, six 20-s Node-only simulations
+in total. The field must repeat lower complete `J14_v1`, lower A loss, B loss
+within 110% of paired exact, and effective support of at least six for both
+modes on all three confirmation networks. Failure stops this field and does
+not promote or rerank another candidate.
 
-For each network, formal events are complete, non-overlapping returned causal
-families that are readable on at least three contacts, recruit both shafts and
-lie inside the frozen patient-training classifier support. Masked normalized
-event ranks are clustered with K=2 without patient labels. Cluster identities
-are mapped to frozen A/B labels only after fitting.
+Natural KMeans and every later analysis reuse the exact seed-2361--2363
+confirmation arrays. They never reopen the selection-network arrays. This
+separates field choice from final same-network repertoire, held-out and
+intervention evidence without adding another field search.
+
+For each confirmation network, formal events are complete, non-overlapping
+returned causal families that are readable on at least three contacts, recruit
+both shafts and lie inside the frozen patient-training classifier support.
+Masked normalized event ranks are clustered with K=2 without patient labels.
+Cluster identities are mapped to frozen A/B labels only after fitting.
 
 The selected Node progresses only if all three networks have at least three
 events in each supervised mode and each natural cluster, all three have
@@ -126,9 +135,10 @@ pipeline.
 
 ## 8. One-time held-out and source-topology audit
 
-Only a post-selection-accepted field opens the frozen patient held-out event
-set once. It is compared with paired same-seed `exact_off`, with no field
-reranking. The eventwise prototype R2 is retained but named explicitly: it asks
+Only a confirmation- and post-selection-accepted field opens the frozen
+patient held-out event set once. It is compared with paired same-seed
+`exact_off`, with no field reranking. The eventwise prototype R2 is retained
+but named explicitly: it asks
 whether the two model mean prototypes explain held-out patient event variance
 and does not measure model event-cloud dispersion. Progress therefore requires
 positive and improved eventwise prototype R2; improved mode-conditioned,
@@ -146,10 +156,10 @@ does not yet freeze Node.
 
 ## 9. Same-checkpoint mode-selective intervention
 
-For each of the three frozen networks, choose one complete event per native
-mode algorithmically. Branch the identical checkpoint and random stream into
-sham, the two mode hotspots and their matched off-template controls. A strong
-local E-threshold pulse begins 5 ms after the checkpoint; intervention
+For each of the three confirmation networks, choose one complete event per
+native mode algorithmically. Branch the identical checkpoint and random stream
+into sham, the two mode hotspots and their matched off-template controls. A
+strong local E-threshold pulse begins 5 ms after the checkpoint; intervention
 interpretation is limited to model-internal regional necessity.
 
 The target for one network is computed from the other two networks only. For

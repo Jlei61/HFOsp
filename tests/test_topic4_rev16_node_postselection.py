@@ -83,6 +83,7 @@ def _inputs(tmp_path):
         "status": confirmation_audit.COMPLETE_STATUS,
         "candidate_id": "joint", "network_seeds": prepare.NETWORK_SEEDS,
         "inventory": {"complete_cartesian_product": True},
+        "scientific_confirmation": {"accepted": True},
     })
     figure2 = artifact / "inputs/figure2.json"
     _write(figure2, {"interictal_field": {}})
@@ -126,6 +127,20 @@ def test_rev16_postselection_rejects_kmeans_in_candidate_ranking(tmp_path):
     data["ranking_contract"]["natural_kmeans_used"] = True
     _write(aggregate, data)
     with pytest.raises(RuntimeError, match="forbidden boundary"):
+        prepare.build_config(
+            candidate_config_path=config, candidate_aggregate_path=aggregate,
+            confirmation_audit_path=confirm,
+            artifact_root=artifact, repository_root=repository,
+            figure2_field_path=figure2,
+        )
+
+
+def test_rev16_postselection_rejects_failed_unseen_network_confirmation(tmp_path):
+    repository, artifact, config, aggregate, confirm, figure2 = _inputs(tmp_path)
+    data = json.loads(confirm.read_text())
+    data["scientific_confirmation"]["accepted"] = False
+    _write(confirm, data)
+    with pytest.raises(RuntimeError, match="scientific confirmation"):
         prepare.build_config(
             candidate_config_path=config, candidate_aggregate_path=aggregate,
             confirmation_audit_path=confirm,

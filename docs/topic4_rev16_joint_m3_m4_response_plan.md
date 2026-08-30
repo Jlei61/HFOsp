@@ -48,27 +48,35 @@
 3. If no candidate passes, close the bounded joint local-gradient strategy and
    audit the residual/objective before changing the field family.
 
-## Phase 5: Fig.4 acceptance and final science
+## Phase 5: unseen-network confirmation
 
 1. Generate a post-selection config only when the complete Phase-4 aggregate
-   exposes one `best_usable_anchor`; otherwise stop without KMeans or figures.
-2. Reuse seeds 2351--2353 and the exact selected worker arrays. Require both
+   exposes one `best_usable_anchor`; otherwise stop without confirmation,
+   KMeans or figures.
+2. Freeze only the selected field and paired `exact_off`; run six Node-only
+   simulations on unseen seeds 2361--2363. Do not rerank or promote a fallback.
+3. Require J14 and A improvement, B protection and A/B effective support on
+   all three confirmation networks. A failed confirmation closes this field.
+
+## Phase 6: Fig.4 acceptance and final science
+
+1. Reuse the exact seed-2361--2363 confirmation arrays. Require both
    modes and both KMeans clusters in each network, AMI at least 0.8 in all
    three networks, and the pooled patient-training matrix sign contract.
-3. Produce the registered direct-readout and KMeans Fig.4 views only after the
+2. Produce the registered direct-readout and KMeans Fig.4 views only after the
    same audit accepts. KMeans cannot rerank candidate fields.
-4. Open patient held-out once and compare the frozen candidate with paired
+3. Open patient held-out once and compare the frozen candidate with paired
    same-seed `exact_off`. Report eventwise prototype R2 separately from the
    mode-conditioned sliced-Wasserstein event-cloud losses. Require A, B and
    weakest-cloud improvement as well as both total mode losses and the
    weakest-mode loss. Run the predeclared 4096-draw within-network label null
    for mode-specific source topology.
-5. If that audit advances, reconstruct the candidate and require exact array
+4. If that audit advances, reconstruct the candidate and require exact array
    parity with its worker. Build each network's mode-contrast hotspots from the
    other two networks, require spatially distinct mode hotspots, and match
    controls on Node `h`, targeted E count and baseline rate over the actual
    pulse disk. Run sham, crossed hotspots and controls from identical
    checkpoints and random streams on all three networks.
-6. Freeze Node only if at least two networks show mode-selective event
+5. Freeze Node only if at least two networks show mode-selective event
    survival/onset-latency effects relative to both opposite-mode and matched
    controls. EE, E-to-I and Z/M remain off until this freeze manifest exists.

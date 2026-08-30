@@ -52,7 +52,8 @@ def _selected_summary(aggregate: dict[str, Any]) -> dict[str, Any]:
     row = rows[0]
     if any(int(row.get(key, -1)) != 3 for key in (
         "fresh_J14_improvement_count", "fresh_A_improvement_count",
-        "fresh_B_protection_count",
+        "fresh_B_protection_count", "fresh_A_support_count",
+        "fresh_B_support_count",
     )):
         raise RuntimeError("rev16 selected anchor lost its 3/3 training clauses")
     return row
@@ -159,6 +160,13 @@ def build_config(
                 "late_runaway_is_invalid": True,
             },
         },
+        "confirmation_acceptance": {
+            "J14_improvement_required_networks": 3,
+            "A_improvement_required_networks": 3,
+            "B_protection_required_networks": 3,
+            "B_protection_ratio": 1.10,
+            "equal_network_effective_support_minimum_per_mode": 6.0,
+        },
         "pathways": selection_config["pathways"],
         "resources": {
             "numerical_threads_per_worker": 1,
@@ -179,8 +187,10 @@ def build_config(
         },
         "claim_boundary": (
             "Only the training-selected field and paired exact_off are copied to "
-            "three unseen network seeds. This stage cannot rerank fields, access "
-            "KMeans or patient held-out events, or activate EE, E-to-I or Z/M."
+            "three unseen network seeds. The selected field must repeat the frozen "
+            "J14, A, B and support clauses on all three networks, but failure cannot "
+            "promote another field. This stage cannot rerank fields, access KMeans "
+            "or patient held-out events, or activate EE, E-to-I or Z/M."
         ),
     }
 

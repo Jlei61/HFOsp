@@ -66,8 +66,13 @@ def build_config(
         or not confirmation_result.get("inventory", {}).get(
             "complete_cartesian_product"
         )
+        or confirmation_result.get("scientific_confirmation", {}).get(
+            "accepted"
+        ) is not True
     ):
-        raise RuntimeError("rev16 unseen-network confirmation is incomplete")
+        raise RuntimeError(
+            "rev16 unseen-network scientific confirmation is incomplete or failed"
+        )
 
     payload = base.build_config(
         robust_config_path=candidate_config_path,

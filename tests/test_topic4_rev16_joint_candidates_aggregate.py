@@ -42,6 +42,8 @@ def test_fresh_summary_requires_same_candidate_to_pass_all_clauses():
     assert result[0]["fresh_J14_improvement_count"] == 3
     assert result[0]["fresh_A_improvement_count"] == 3
     assert result[0]["fresh_B_protection_count"] == 3
+    assert result[0]["fresh_A_support_count"] == 3
+    assert result[0]["fresh_B_support_count"] == 3
 
 
 def test_fresh_summary_rejects_one_network_b_failure():
@@ -111,6 +113,43 @@ def test_fresh_summary_rejects_j14_worsening_despite_a_b_passing():
     assert result["fresh_A_improvement_count"] == 3
     assert result["fresh_B_protection_count"] == 3
     assert result["fresh_J14_improvement_count"] == 0
+    assert result["usable_two_mode_anchor"] is False
+
+
+def test_fresh_summary_rejects_mean_support_that_hides_one_network_failure():
+    manifest = {
+        "selection": {
+            "fresh_J14_improvement_required_networks": 3,
+            "fresh_A_improvement_required_networks": 3,
+            "fresh_B_protection_required_networks": 3,
+            "B_protection_ratio": 1.10,
+            "equal_network_effective_support_minimum_per_mode": 6.0,
+        },
+        "candidates": [
+            {"candidate_id": "exact_off"}, {"candidate_id": "joint"},
+        ],
+    }
+    rows = []
+    for seed in (2351, 2352, 2353):
+        rows.extend([
+            {
+                "candidate_id": "exact_off", "seed": seed,
+                "mode_0_mean": 1.0, "mode_1_mean": 1.0, "j14": 2.0,
+                "mode_0_effective_events": 8.0,
+                "mode_1_effective_events": 8.0,
+            },
+            {
+                "candidate_id": "joint", "seed": seed,
+                "mode_0_mean": 0.8, "mode_1_mean": 1.05, "j14": 1.8,
+                "mode_0_effective_events": 4.0 if seed == 2353 else 8.0,
+                "mode_1_effective_events": 7.0,
+                "family": "mean_a", "target_rms": 0.6,
+                "m3_l2_fraction": 0.8, "m4_shell_l2_fraction": 0.6,
+            },
+        ])
+    result = aggregate.summaries(rows, manifest)[0]
+    assert result["equal_network_A_effective_support"] > 6.0
+    assert result["fresh_A_support_count"] == 2
     assert result["usable_two_mode_anchor"] is False
 
 

@@ -191,12 +191,21 @@ def summaries(
         j14_count = sum(row["J14_improves"] for row in paired)
         a_count = sum(row["A_improves"] for row in paired)
         b_count = sum(row["B_within_ratio"] for row in paired)
+        support_a_count = sum(
+            float(row["mode_0_effective_events"]) >= support_minimum
+            for row in paired
+        )
+        support_b_count = sum(
+            float(row["mode_1_effective_events"]) >= support_minimum
+            for row in paired
+        )
         support_a = float(np.mean([row["mode_0_effective_events"] for row in paired]))
         support_b = float(np.mean([row["mode_1_effective_events"] for row in paired]))
         usable = bool(
             j14_count >= required_j14
             and a_count >= required_a and b_count >= required_b
-            and support_a >= support_minimum and support_b >= support_minimum
+            and support_a_count == len(paired)
+            and support_b_count == len(paired)
         )
         output.append({
             "candidate_id": candidate_id, "family": paired[0]["family"],
@@ -207,6 +216,8 @@ def summaries(
             "fresh_J14_improvement_count": j14_count,
             "fresh_A_improvement_count": a_count,
             "fresh_B_protection_count": b_count,
+            "fresh_A_support_count": support_a_count,
+            "fresh_B_support_count": support_b_count,
             "mean_delta_A": float(np.mean([row["delta_A_vs_exact"] for row in paired])),
             "worst_delta_A": float(np.max([row["delta_A_vs_exact"] for row in paired])),
             "mean_delta_B": float(np.mean([row["delta_B_vs_exact"] for row in paired])),
@@ -215,6 +226,12 @@ def summaries(
             "worst_delta_J14": float(np.max([row["delta_J14_vs_exact"] for row in paired])),
             "equal_network_A_effective_support": support_a,
             "equal_network_B_effective_support": support_b,
+            "minimum_network_A_effective_support": float(min(
+                row["mode_0_effective_events"] for row in paired
+            )),
+            "minimum_network_B_effective_support": float(min(
+                row["mode_1_effective_events"] for row in paired
+            )),
             "usable_two_mode_anchor": usable, "per_network": paired,
         })
     output.sort(key=lambda row: (
@@ -269,7 +286,7 @@ def aggregate(
             "J14_improvement": "3/3 fresh networks",
             "A_improvement": "3/3 fresh networks",
             "B_protection": "3/3 fresh networks at <=110% paired exact",
-            "equal_network_effective_support": "A>=6 and B>=6",
+            "per_network_effective_support": "A>=6 and B>=6 on 3/3 networks",
             "natural_kmeans_used": False, "patient_heldout_used": False,
             "ictal_data_used": False, "figure_used": False,
             "EE_EtoI_ZM": "off",

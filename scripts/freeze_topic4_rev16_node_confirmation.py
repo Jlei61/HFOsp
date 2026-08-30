@@ -76,6 +76,16 @@ def _validate_config(config: Mapping[str, Any]) -> None:
         "figure_used",
     )) or config["boundaries"].get("EE_EtoI_ZM") != "off":
         raise RuntimeError("rev16 confirmation crossed a scientific boundary")
+    acceptance = config.get("confirmation_acceptance", {})
+    expected_acceptance = {
+        "J14_improvement_required_networks": 3,
+        "A_improvement_required_networks": 3,
+        "B_protection_required_networks": 3,
+        "B_protection_ratio": 1.10,
+        "equal_network_effective_support_minimum_per_mode": 6.0,
+    }
+    if acceptance != expected_acceptance:
+        raise RuntimeError("rev16 confirmation acceptance contract changed")
     expected_inputs = {
         "selection_config", "selection_manifest", "selection_aggregate",
         "rev13_config", "rev13_exact_off_manifest", "j14_config",
@@ -162,6 +172,9 @@ def build_manifest_payload(
         "event_unit": copy.deepcopy(selection_manifest["event_unit"]),
         "source_topology": copy.deepcopy(selection_manifest["source_topology"]),
         "search": copy.deepcopy(config["search"]),
+        "confirmation_acceptance": copy.deepcopy(
+            config["confirmation_acceptance"]
+        ),
         "pathways": copy.deepcopy(config["pathways"]),
         "inputs": {
             name: {"path": str(_load_hashed(config, name, artifact_root)[0]),
