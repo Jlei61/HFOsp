@@ -166,7 +166,11 @@ once. The frozen candidate is compared with same-seed `exact_off` using:
 
 Training-target losses remain diagnostics and cannot satisfy these held-out
 clauses. Passing all four clauses permits a same-checkpoint hotspot
-intervention; it does not itself freeze Node. Node is frozen only if an
-algorithmically defined mode hotspot has a selective effect relative to sham,
-the secondary hotspot and a matched off-template location. EE, E-to-I and Z/M
-remain off throughout.
+intervention; it does not itself freeze Node. The intervention is crossed:
+each mode-derived hotspot is applied from identical checkpoints to both A and
+B events, together with sham and its matched off-template location. Node is
+frozen only if a mode hotspot affects its predicted event more than the
+opposite-mode event and the matched spatial control on at least two of three
+networks. Event survival and latency are primary ordered endpoints; rank and
+source-topology displacement explain surviving events without adding separate
+claim gates. EE, E-to-I and Z/M remain off throughout.

@@ -105,13 +105,18 @@ This phase replaces direct progression to post-freeze acceptance because Phase
 
 ## Phase 6: same-checkpoint hotspot intervention
 
-1. Select a representative seed and one event per mode algorithmically from
-   the frozen three-network source maps.
-2. Branch from checkpoints 40 ms before native onset with identical state and
-   random streams: sham, dominant mode hotspot suppression, secondary hotspot
-   suppression and matched off-template suppression.
-3. Require exact sham replay and pre-pulse spike parity. Report event survival,
-   latency, mode identity, rank displacement and source-topology displacement.
-4. Freeze Node only if at least one predicted hotspot shows a mode-selective
-   effect not reproduced by the matched controls. Otherwise retain the field as
-   an exploratory Node candidate and keep EE, E-to-I and Z/M closed.
+1. In each of seeds 2341--2343, select one complete source-evaluable event per
+   mode algorithmically from the frozen source maps.
+2. Derive one dominant hotspot and one matched off-template location per mode
+   from equal-network training topology. Apply every mode's hotspot and matched
+   control to both native event modes; this crossed design distinguishes
+   mode-selective effects from general local suppression.
+3. Branch from checkpoints 40 ms before native onset with identical state and
+   random streams. Require exact sham replay and pre-pulse spike parity.
+4. Use event survival and latency as the ordered primary readout. Report mode
+   identity, rank displacement and source-topology displacement for surviving
+   events as explanatory continuous endpoints.
+5. Freeze Node only if at least one mode hotspot affects its predicted event
+   more than the opposite-mode event and its matched off-template control on at
+   least two of three networks. Otherwise retain the field as exploratory and
+   keep EE, E-to-I and Z/M closed.
