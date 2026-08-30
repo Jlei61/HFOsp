@@ -17,6 +17,8 @@ if str(REPO) not in sys.path:
     sys.path.insert(0, str(REPO))
 
 from src.topic5_continuous_marked_state_h2b.contract import (  # noqa: E402
+    PRIMARY_LEAD_MINUTES,
+    SUPPORT_TIERS,
     V0_2_RESULT_ROOT,
     atomic_csv,
     atomic_json,
@@ -25,15 +27,47 @@ from src.topic5_continuous_marked_state_h2b.contract import (  # noqa: E402
 )
 
 
+WRONG_TIME_EFFECT = "correct_minus_wrong_time_conditional_log_loss"
 EFFECTS = (
     "state_minus_observation_conditional_log_loss",
     "persistent_minus_memoryless_conditional_log_loss",
-    "correct_minus_wrong_time_conditional_log_loss",
+    WRONG_TIME_EFFECT,
 )
+# Each effect is summarised under the tier of the table it was actually
+# estimated on.  The wrong-time comparison is fitted on a strictly smaller
+# donor-valid seizure population, so reporting it under the primary tier would
+# re-hide the very downgrade this alignment was fixed to expose (v0.2 §4).
+EFFECT_TIER_COLUMN = {
+    EFFECTS[0]: "evaluation_tier",
+    EFFECTS[1]: "evaluation_tier",
+    WRONG_TIME_EFFECT: "wrong_time_evaluation_tier",
+}
+ALIGNMENT_KEY = ["patient_id", "lead_minutes"]
 
 
 def _records(frame: pd.DataFrame) -> list[dict]:
     return frame.where(pd.notna(frame), None).to_dict(orient="records")
+
+
+def _require_unique(frame: pd.DataFrame, label: str) -> None:
+    """Prove one row per patient/lead before aligning two tables by that key."""
+    missing = [name for name in ALIGNMENT_KEY if name not in frame]
+    if missing:
+        raise ValueError(f"{label} table lacks alignment columns {missing}")
+    duplicated = frame.duplicated(ALIGNMENT_KEY, keep=False)
+    if bool(duplicated.any()):
+        offenders = (
+            frame.loc[duplicated, ALIGNMENT_KEY]
+            .drop_duplicates().to_dict(orient="records")
+        )
+        raise ValueError(
+            f"{label} table is not unique per patient/lead; cannot align: {offenders}"
+        )
+
+
+def _tier_rank(value) -> int:
+    text = str(value)
+    return SUPPORT_TIERS.index(text) if text in SUPPORT_TIERS else len(SUPPORT_TIERS)
 
 
 def _summary_rows(frame: pd.DataFrame) -> list[dict]:
@@ -43,11 +77,17 @@ def _summary_rows(frame: pd.DataFrame) -> list[dict]:
         groupings.append(("h1_stable_stratum", frame[frame.h1_stable_subject]))
         groupings.append(("h1_unstable_stratum", frame[~frame.h1_stable_subject]))
     for stratum, subset in groupings:
-        for (tier, lead), group in subset.groupby(
-                ["evaluation_tier", "lead_minutes"], sort=True):
-            for effect in EFFECTS:
-                if effect not in group:
-                    continue
+        for effect in EFFECTS:
+            if effect not in subset:
+                continue
+            tier_column = EFFECT_TIER_COLUMN[effect]
+            if tier_column not in subset:
+                continue
+            scoped = subset[subset[tier_column].notna() & subset[effect].notna()]
+            if scoped.empty:
+                continue
+            for (tier, lead), group in scoped.groupby(
+                    [tier_column, "lead_minutes"], sort=True):
                 values = group[effect].dropna().to_numpy(dtype=float)
                 if not len(values):
                     continue
@@ -55,8 +95,9 @@ def _summary_rows(frame: pd.DataFrame) -> list[dict]:
                 rows.append({
                     "stratum": stratum,
                     "evaluation_tier": str(tier),
+                    "tier_column": tier_column,
                     "lead_minutes": int(lead),
-                    "primary_lead": int(lead) == 30,
+                    "primary_lead": int(lead) == int(PRIMARY_LEAD_MINUTES),
                     "effect": effect,
                     "n_patients": int(len(values)),
                     "n_favourable": favourable,
@@ -69,7 +110,51 @@ def _summary_rows(frame: pd.DataFrame) -> list[dict]:
                     "favourable_direction": "negative",
                     "development_only": True,
                 })
-    return rows
+    return sorted(
+        rows,
+        key=lambda row: (
+            row["stratum"], row["effect"], row["lead_minutes"],
+            row["evaluation_tier"],
+        ),
+    )
+
+
+def _wrong_time_evidence(merged: pd.DataFrame, *, table_present: bool) -> dict:
+    """State plainly whether correct-vs-wrong-time evidence exists, and at which tier."""
+    primary_lead = merged[merged["lead_minutes"].astype(int)
+                          == int(PRIMARY_LEAD_MINUTES)]
+    estimated = primary_lead[primary_lead[WRONG_TIME_EFFECT].notna()]
+    at_primary_tier = estimated[
+        estimated["wrong_time_evaluation_tier"].astype(str) == "primary_chronological"
+    ]
+    downgraded = merged[merged["wrong_time_tier_downgraded"].fillna(False).astype(bool)]
+    tiers = sorted(
+        merged.loc[merged["wrong_time_evaluation_tier"].notna(),
+                   "wrong_time_evaluation_tier"].astype(str).unique().tolist()
+    )
+    return {
+        "wrong_time_table_present": bool(table_present),
+        "alignment_key": list(ALIGNMENT_KEY),
+        "aligned_on_evaluation_tier": False,
+        "n_patients_with_wrong_time_effect_at_primary_lead": int(
+            estimated["patient_id"].nunique()
+        ),
+        "primary_chronological_wrong_time_evidence_exists": bool(
+            not at_primary_tier.empty
+        ),
+        "n_patients_primary_chronological_wrong_time": int(
+            at_primary_tier["patient_id"].nunique()
+        ),
+        "n_patients_wrong_time_tier_downgraded": int(
+            downgraded["patient_id"].nunique()
+        ),
+        "wrong_time_tiers_present": tiers,
+        "note": (
+            "the wrong-time comparison is estimated on the donor-valid seizure "
+            "subset, so it carries its own support tier; a downgrade relative to "
+            "the primary table is recorded, never dropped"
+        ),
+    }
 
 
 def run(root: Path) -> dict:
@@ -78,20 +163,42 @@ def run(root: Path) -> dict:
     wrong_path = root / "fits/matched_wrong_time/patient_median_probe_metrics.csv"
     inventory_path = root / "manifests/r1_7_checkpoint_inventory.json"
     primary = pd.read_csv(primary_path)
-    if wrong_path.is_file():
+    _require_unique(primary, "primary")
+    wrong_present = wrong_path.is_file()
+    if wrong_present:
         wrong = pd.read_csv(wrong_path)
-        keep = [
-            "patient_id", "lead_minutes", "evaluation_tier",
-            "correct_minus_wrong_time_conditional_log_loss",
-        ]
+        _require_unique(wrong, "wrong-time")
+        keep = [*ALIGNMENT_KEY, "evaluation_tier", WRONG_TIME_EFFECT]
         wrong = wrong[[name for name in keep if name in wrong]].copy()
+        # The wrong-time table keeps its own tier under its own name.  Aligning on
+        # evaluation_tier would drop every patient whose donor-valid subset fell a
+        # tier below its primary table -- in this cohort that is the only patient
+        # with a primary chronological split.
+        wrong = wrong.rename(
+            columns={"evaluation_tier": "wrong_time_evaluation_tier"}
+        )
         merged = primary.merge(
-            wrong, on=["patient_id", "lead_minutes", "evaluation_tier"],
-            how="left", validate="one_to_one",
+            wrong, on=ALIGNMENT_KEY, how="left", validate="one_to_one",
         )
     else:
         merged = primary.copy()
-        merged["correct_minus_wrong_time_conditional_log_loss"] = np.nan
+        merged[WRONG_TIME_EFFECT] = np.nan
+        merged["wrong_time_evaluation_tier"] = pd.Series(
+            [None] * len(merged), dtype=object,
+        )
+    if WRONG_TIME_EFFECT not in merged:
+        merged[WRONG_TIME_EFFECT] = np.nan
+    if "wrong_time_evaluation_tier" not in merged:
+        merged["wrong_time_evaluation_tier"] = pd.Series(
+            [None] * len(merged), dtype=object,
+        )
+    merged["wrong_time_tier_downgraded"] = [
+        bool(pd.notna(wrong_tier)
+             and _tier_rank(wrong_tier) > _tier_rank(primary_tier))
+        for primary_tier, wrong_tier in zip(
+            merged["evaluation_tier"], merged["wrong_time_evaluation_tier"],
+        )
+    ]
     inventory = json.loads(inventory_path.read_text())
     stable = set(map(str, inventory.get("h1_stable_subjects") or []))
     merged["h1_stable_subject"] = merged["patient_id"].astype(str).isin(stable)
@@ -126,7 +233,7 @@ def run(root: Path) -> dict:
 
     primary_rows = summary[
         (summary["stratum"] == "all_checkpoint_available")
-        & (summary["lead_minutes"] == 30)
+        & (summary["lead_minutes"] == int(PRIMARY_LEAD_MINUTES))
     ].to_dict(orient="records") if not summary.empty else []
     payload = {
         "status": "COMPLETE",
@@ -144,6 +251,10 @@ def run(root: Path) -> dict:
             EFFECTS[1]: "persistent state minus memoryless current-window code; negative favours carry",
             EFFECTS[2]: "correct-time state minus matched wrong-time state; negative favours time specificity",
         },
+        "correct_vs_wrong_time_evidence": _wrong_time_evidence(
+            merged, table_present=wrong_present,
+        ),
+        "effect_tier_columns": dict(EFFECT_TIER_COLUMN),
         "patient_first": True,
         "seed_aggregation": "median_within_patient_before_cohort_summary",
         "h1_stability_used_as_gate": False,

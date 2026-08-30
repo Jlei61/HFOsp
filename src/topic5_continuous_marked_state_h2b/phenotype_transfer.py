@@ -26,6 +26,11 @@ ARMS: Mapping[str, tuple[str, ...]] = {
     "state": ("baseline__", "observation__", "state__"),
     "wrong_time": ("baseline__", "observation__", "wrong_time__"),
 }
+# The frozen-phenotype question is only whether the interictal state adds to the
+# current observation.  Matched wrong-time is a state-validity contrast for the
+# primary risk-set task, not an entry condition for this secondary task.  Real
+# phenotype tables therefore legitimately contain NaN wrong-time donors.
+PHENOTYPE_ARMS = ("baseline", "observation", "state")
 TIERS = {
     "primary_chronological",
     "sensitivity_loso",
@@ -105,7 +110,7 @@ def validate_phenotype_table(frame: pd.DataFrame) -> dict[str, Any]:
 
     available = frame[frame["target_value"].notna()].copy()
     if not available.empty:
-        for arm in ARMS:
+        for arm in PHENOTYPE_ARMS:
             columns = arm_columns(available, arm)
             if not np.isfinite(available[columns].to_numpy(dtype=float)).all():
                 raise ValueError(f"non-finite features in {arm}")
@@ -429,7 +434,7 @@ def run_phenotype_table(
             continue
         arm_results = {
             arm: _evaluate_arm(available, arm, str(kind), str(tier), grid)
-            for arm in ARMS
+            for arm in PHENOTYPE_ARMS
         }
         row["status"] = (
             "ok" if all(value["status"] == "ok" for value in arm_results.values())
@@ -445,9 +450,6 @@ def run_phenotype_table(
             )
             row["state_minus_baseline_loss"] = (
                 arm_results["state"]["loss"] - arm_results["baseline"]["loss"]
-            )
-            row["correct_minus_wrong_time_loss"] = (
-                arm_results["state"]["loss"] - arm_results["wrong_time"]["loss"]
             )
         rows.append(row)
     per_seed = pd.DataFrame(rows)
@@ -467,6 +469,8 @@ def run_phenotype_table(
         "seed_aggregation": "median_within_patient_before_cohort_inference",
         "continuous_estimator": "ridge_regression",
         "classification_estimator": "ridge_logistic_regression",
+        "phenotype_arms": list(PHENOTYPE_ARMS),
+        "matched_wrong_time_is_not_a_phenotype_gate": True,
         "primary_secondary_effect": (
             "held-out state-minus-observation loss; negative favours phenotype transfer"
         ),

@@ -14,6 +14,10 @@ import shutil
 import subprocess
 import sys
 
+import socket
+import threading
+import time
+
 import torch as _torch  # noqa: F401; load compatible native runtime first
 import pandas as pd
 
@@ -39,6 +43,298 @@ CANONICAL_RESULT_ROOT = SOURCE / (
 R1_ROOT = SOURCE / "results/epi_prssm/continuous_marked_state/r1"
 PRIMARY_ARMS = ("B_history", "B_observation", "B_state", "memoryless")
 WRONG_ARMS = (*PRIMARY_ARMS, "wrong_time")
+PROBE_PRODUCTS = (
+    "per_seed_probe_metrics.csv",
+    "patient_median_probe_metrics.csv",
+    "lead_curve.csv",
+    "time_label_permutation.json",
+    "positive_synthetic.json",
+    "risk_probe_machine_audit.json",
+)
+CLAIM_FILENAME = ".task_claim.json"
+COMPLETION_FILENAME = ".task_complete.json"
+HEARTBEAT_SECONDS = 60
+HEARTBEAT_STALE_SECONDS = 900
+
+
+def _source_commit() -> str:
+    try:
+        return subprocess.run(
+            ["git", "rev-parse", "HEAD"], cwd=REPO, capture_output=True,
+            text=True, check=True,
+        ).stdout.strip()
+    except Exception:
+        return "unknown"
+
+
+def _task_output_dir(root: Path, label: str) -> Path:
+    subject, analysis = label.split("/", maxsplit=1)
+    return root / "fits/by_subject" / subject / analysis
+
+
+def _claim_path(root: Path, label: str) -> Path:
+    return _task_output_dir(root, label) / CLAIM_FILENAME
+
+
+def _completion_path(root: Path, label: str) -> Path:
+    return _task_output_dir(root, label) / COMPLETION_FILENAME
+
+
+def _pid_alive(pid: int) -> bool:
+    try:
+        os.kill(int(pid), 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    except (TypeError, ValueError, OverflowError):
+        return False
+    return True
+
+
+def _atomic_write_json(path: Path, payload: dict) -> None:
+    """Write beside the target and rename, so a reader never sees a half file."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(f"{path.name}.{os.getpid()}.tmp")
+    with temporary.open("w", encoding="utf-8") as handle:
+        json.dump(payload, handle, ensure_ascii=False, indent=2, sort_keys=True)
+        handle.flush()
+        os.fsync(handle.fileno())
+    os.replace(temporary, path)
+
+
+def _foreign_writer_pids(root: Path, label: str) -> list[int]:
+    """Find live probe processes already writing this task's output directory.
+
+    The v0.2 run left three probes running with no claim at all -- two orphaned
+    from a SIGSTOPped orchestrator, one started by hand outside the queue.  A
+    claim file cannot see them, so ownership also asks the process table whether
+    somebody is already writing here before taking the task.
+    """
+    target = str(_task_output_dir(root, label).resolve())
+    found = []
+    for entry in Path("/proc").iterdir():
+        if not entry.name.isdigit():
+            continue
+        pid = int(entry.name)
+        if pid == os.getpid():
+            continue
+        try:
+            argv = (entry / "cmdline").read_bytes().split(b"\0")
+        except (FileNotFoundError, ProcessLookupError, PermissionError, OSError):
+            continue
+        parts = [chunk.decode("utf-8", "replace") for chunk in argv if chunk]
+        if not any(chunk.endswith("run_risk_probe.py") for chunk in parts):
+            continue
+        if "--output-dir" not in parts:
+            continue
+        value = parts[parts.index("--output-dir") + 1]
+        try:
+            resolved = str(Path(value).resolve())
+        except OSError:
+            continue
+        if resolved == target:
+            found.append(pid)
+    return sorted(found)
+
+
+def _claim_probe_task(
+        root: Path, label: str, risk_table: Path, *, command: list[str],
+        ) -> dict | None:
+    """Take exclusive ownership of one patient/arm, or decline.
+
+    The claim is created with ``O_CREAT | O_EXCL`` so two workers racing on the
+    same task cannot both believe they won -- a check-then-write would let both
+    through.  A claim whose holder is still alive is never preempted, however old
+    its heartbeat: the queue's own children were SIGSTOPped once while they kept
+    computing, and stealing their task would have produced two writers for one
+    output directory.
+    """
+    subject, analysis = label.split("/", maxsplit=1)
+    foreign = _foreign_writer_pids(root, label)
+    if foreign:
+        return None
+    path = _claim_path(root, label)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    digest = sha256_file(risk_table)
+    now = time.time()
+    claim = {
+        "patient_id": subject,
+        "analysis": analysis,
+        "task": label,
+        "pid": os.getpid(),
+        "pgid": os.getpgid(0),
+        "hostname": socket.gethostname(),
+        "source_commit": _source_commit(),
+        "revision": H2B_V0_2_REVISION,
+        "risk_table_path": str(Path(risk_table).resolve()),
+        "risk_table_sha256": digest,
+        "command": list(command),
+        "claimed_at_utc": utc_now(),
+        "heartbeat_utc": utc_now(),
+        "heartbeat_epoch": now,
+        "output_dir": str(_task_output_dir(root, label)),
+    }
+    try:
+        descriptor = os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o644)
+    except FileExistsError:
+        try:
+            held = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            held = {}
+        if _pid_alive(held.get("pid", -1)):
+            return None
+        if float(now - float(held.get("heartbeat_epoch", 0.0))) < HEARTBEAT_STALE_SECONDS:
+            return None
+        if str(held.get("risk_table_sha256")) != digest:
+            raise ValueError(
+                f"{label}: stale claim was taken on a different input "
+                f"({held.get('risk_table_sha256')} != {digest}); refusing to "
+                "reclaim it blindly"
+            )
+        claim["reclaimed_from"] = {
+            "pid": held.get("pid"), "pgid": held.get("pgid"),
+            "hostname": held.get("hostname"),
+            "heartbeat_utc": held.get("heartbeat_utc"),
+        }
+        _atomic_write_json(path, claim)
+        return claim
+    with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
+        json.dump(claim, handle, ensure_ascii=False, indent=2, sort_keys=True)
+        handle.flush()
+        os.fsync(handle.fileno())
+    return claim
+
+
+def _write_heartbeat(root: Path, label: str) -> None:
+    path = _claim_path(root, label)
+    try:
+        claim = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return
+    if int(claim.get("pid", -1)) != os.getpid():
+        return
+    claim["heartbeat_utc"] = utc_now()
+    claim["heartbeat_epoch"] = time.time()
+    _atomic_write_json(path, claim)
+
+
+def _release_claim(root: Path, label: str) -> None:
+    path = _claim_path(root, label)
+    try:
+        claim = json.loads(path.read_text(encoding="utf-8"))
+        if int(claim.get("pid", -1)) not in (os.getpid(), -1):
+            return
+    except FileNotFoundError:
+        return
+    except Exception:
+        pass
+    try:
+        path.unlink()
+    except FileNotFoundError:
+        pass
+
+
+def _output_digests(root: Path, label: str) -> dict[str, str]:
+    output = _task_output_dir(root, label)
+    return {
+        name: sha256_file(output / name)
+        for name in PROBE_PRODUCTS if (output / name).is_file()
+    }
+
+
+def _record_task_completion(
+        root: Path, label: str, risk_table: Path, *,
+        adopted: bool = False,
+        metadata_migration: dict | None = None,
+        ) -> dict:
+    """Bind the finished products to their digests so a resume can verify them."""
+    output = _task_output_dir(root, label)
+    audit = _json(output / "risk_probe_machine_audit.json")
+    receipt = {
+        "status": "COMPLETE",
+        "task": label,
+        "revision": H2B_V0_2_REVISION,
+        "recorded_utc": utc_now(),
+        "risk_table_path": str(Path(risk_table).resolve()),
+        "risk_table_sha256": sha256_file(risk_table),
+        "execution_status": audit.get("execution_status", audit.get("status")),
+        "scientific_estimability": audit.get("scientific_estimability"),
+        "source_commit": _source_commit(),
+        "output_sha256": _output_digests(root, label),
+        "hash_baseline_adopted_from_existing_output": bool(adopted),
+        "metadata_migration": metadata_migration,
+    }
+    _atomic_write_json(_completion_path(root, label), receipt)
+    return receipt
+
+
+def _upgrade_permutation_denominator_metadata(
+        root: Path, label: str, risk_table: Path,
+        ) -> dict | None:
+    """Add explicit attempted/finite counts to intact legacy null products.
+
+    Thirteen v0.2 probes finished before these two denominator fields were added.
+    Their complete finite ``null_values`` vectors are the source of truth, so
+    re-fitting for hours would change no scientific quantity.  This idempotent
+    migration verifies that the vector length equals the pre-registered request,
+    writes only the two counts into the full and compact audit payloads, and then
+    re-binds every product hash in the task receipt.
+    """
+    output = _task_output_dir(root, label)
+    permutation_path = output / "time_label_permutation.json"
+    audit_path = output / "risk_probe_machine_audit.json"
+    if not permutation_path.is_file() or not audit_path.is_file():
+        return None
+    permutation = _json(permutation_path)
+    if permutation.get("status") != "COMPLETE":
+        return None
+    requested = int(permutation.get("n_permutations", -1))
+    null_values = permutation.get("null_values") or []
+    if requested < 1 or len(null_values) != requested:
+        raise ValueError(
+            f"{label}: cannot migrate permutation denominators because "
+            f"{len(null_values)} null draws do not match request {requested}"
+        )
+    if not all(math.isfinite(float(value)) for value in null_values):
+        raise ValueError(f"{label}: cannot migrate non-finite permutation draws")
+    audit = _json(audit_path)
+    if audit.get("status") != "COMPLETE":
+        return None
+    if (audit.get("input") or {}).get("risk_table_sha256") != sha256_file(risk_table):
+        return None
+    compact = dict(audit.get("time_label_permutation") or {})
+    if compact.get("status") not in (None, "COMPLETE"):
+        raise ValueError(f"{label}: compact permutation status drift")
+    desired = {
+        "n_permutations_run": requested,
+        "n_finite_permutations": requested,
+    }
+    if (all(int(permutation.get(key, -1)) == value for key, value in desired.items())
+            and all(int(compact.get(key, -1)) == value for key, value in desired.items())):
+        return None
+    before = {
+        "time_label_permutation_sha256": sha256_file(permutation_path),
+        "risk_probe_machine_audit_sha256": sha256_file(audit_path),
+    }
+    permutation.update(desired)
+    compact.update({"status": "COMPLETE", **desired})
+    migration = {
+        "kind": "complete_null_denominator_metadata_only",
+        "source_of_counts": "verified finite null_values vector length",
+        "n_null_values": requested,
+        "scientific_values_changed": False,
+        "previous_sha256": before,
+        "migrated_utc": utc_now(),
+    }
+    audit["time_label_permutation"] = compact
+    audit["permutation_denominator_schema_migration"] = migration
+    _atomic_write_json(permutation_path, permutation)
+    _atomic_write_json(audit_path, audit)
+    _record_task_completion(
+        root, label, risk_table, metadata_migration=migration,
+    )
+    return migration
 
 
 def _environment() -> dict[str, str]:
@@ -147,6 +443,133 @@ def _run_parallel(
                 rows.append({
                     "task": futures[future], "returncode": 1,
                     "error": repr(exc),
+                })
+    return sorted(rows, key=lambda row: row["task"])
+
+
+def _completed_probe_task(
+        root: Path, label: str, risk_table: Path,
+        ) -> dict | None:
+    """Return a resumable success row only for a complete, input-bound probe.
+
+    Probe fitting is the slowest CPU stage, so a durable restart must not refit a
+    finished patient -- but the mere presence of an output directory is not
+    enough.  Every declared product must exist, the risk-table digest recorded in
+    the audit must still match the file on disk, and each product must still hash
+    to the value bound at completion.
+
+    A structurally unestimable patient counts as finished: the v0.2 contract §4
+    keeps "not estimable" in the support denominator rather than treating it as a
+    failure to retry.
+    """
+    output = _task_output_dir(root, label)
+    required = tuple(output / name for name in PROBE_PRODUCTS)
+    if not all(path.is_file() and path.stat().st_size > 0 for path in required):
+        return None
+    migration = _upgrade_permutation_denominator_metadata(
+        root, label, risk_table,
+    )
+    try:
+        audit = _json(output / "risk_probe_machine_audit.json")
+        if audit.get("status") != "COMPLETE":
+            return None
+        if audit.get("execution_status", "COMPLETE") != "COMPLETE":
+            return None
+        if (audit.get("boundary") or {}).get("revision") != H2B_V0_2_REVISION:
+            return None
+        if (audit.get("input") or {}).get("risk_table_sha256") != sha256_file(risk_table):
+            return None
+        if (audit.get("positive_synthetic") or {}).get("status") != "PASS":
+            return None
+    except Exception:
+        return None
+
+    receipt_path = _completion_path(root, label)
+    if receipt_path.is_file():
+        try:
+            receipt = _json(receipt_path)
+        except Exception:
+            return None
+        if receipt.get("risk_table_sha256") != sha256_file(risk_table):
+            return None
+        recorded = receipt.get("output_sha256") or {}
+        observed = _output_digests(root, label)
+        if not recorded or recorded != observed:
+            return None
+    else:
+        # The probes finished before this receipt existed.  Adopt their digests
+        # once, flagged as adopted rather than verified from birth, and enforce
+        # them from here on.  Re-running an intact task would only burn hours.
+        receipt = _record_task_completion(root, label, risk_table, adopted=True)
+    return {
+        "task": label,
+        "returncode": 0,
+        "status": "SKIPPED_COMPLETE_INPUT_BOUND",
+        "scientific_estimability": receipt.get("scientific_estimability")
+            or audit.get("scientific_estimability"),
+        "hash_baseline_adopted_from_existing_output": bool(
+            receipt.get("hash_baseline_adopted_from_existing_output")
+        ),
+        "permutation_denominator_metadata_migrated": migration is not None,
+        "audit": str(output / "risk_probe_machine_audit.json"),
+    }
+
+
+def _execute_probe_task(
+        root: Path, label: str, command: list[str], log: Path,
+        ) -> dict:
+    """Run one claimed probe, keeping its heartbeat alive for the whole fit."""
+    risk_table = Path(command[command.index("--risk-table") + 1])
+    already = _completed_probe_task(root, label, risk_table)
+    if already is not None:
+        return already
+    claim = _claim_probe_task(root, label, risk_table, command=command)
+    if claim is None:
+        return {
+            "task": label,
+            "returncode": 0,
+            "status": "SKIPPED_OWNED_BY_ANOTHER_LIVE_WRITER",
+            "foreign_writer_pids": _foreign_writer_pids(root, label),
+        }
+    stop = threading.Event()
+
+    def beat() -> None:
+        while not stop.wait(HEARTBEAT_SECONDS):
+            _write_heartbeat(root, label)
+
+    heart = threading.Thread(target=beat, daemon=True)
+    heart.start()
+    try:
+        code = _run_logged(command, log)
+        row = {"task": label, "returncode": code, "log": str(log)}
+        if code == 0:
+            receipt = _record_task_completion(root, label, risk_table)
+            row["status"] = "COMPLETE"
+            row["scientific_estimability"] = receipt.get("scientific_estimability")
+        else:
+            row["status"] = "FAILED"
+        return row
+    finally:
+        stop.set()
+        _release_claim(root, label)
+
+
+def _run_probe_tasks(
+        root: Path, tasks: list[tuple[str, list[str], Path]], *, workers: int,
+        ) -> list[dict]:
+    rows: list[dict] = []
+    with ThreadPoolExecutor(max_workers=max(1, int(workers))) as pool:
+        futures = {
+            pool.submit(_execute_probe_task, root, label, command, log): label
+            for label, command, log in tasks
+        }
+        for future in as_completed(futures):
+            try:
+                rows.append(future.result())
+            except Exception as exc:
+                rows.append({
+                    "task": futures[future], "returncode": 1,
+                    "status": "FAILED", "error": repr(exc),
                 })
     return sorted(rows, key=lambda row: row["task"])
 
@@ -566,10 +989,43 @@ def run(args: argparse.Namespace) -> dict:
                  "--n-permutations", str(args.n_permutations), "--overwrite"],
                 root / "logs/probes" / f"{subject}_matched_wrong_time.log",
             ))
-    probe_rows = _run_parallel(probe_tasks, workers=min(2, len(probe_tasks)))
-    _status(root, "FIT_LOW_CAPACITY_PROBES", rows=probe_rows)
+    pending_probe_tasks = []
+    skipped_probe_rows = []
+    for label, command, log in probe_tasks:
+        risk_table = Path(command[command.index("--risk-table") + 1])
+        completed = _completed_probe_task(root, label, risk_table)
+        if completed is None:
+            pending_probe_tasks.append((label, command, log))
+        else:
+            skipped_probe_rows.append(completed)
+    probe_workers = min(int(args.cpu_workers), max(1, len(pending_probe_tasks)))
+    probe_rows = sorted(
+        skipped_probe_rows + _run_probe_tasks(
+            root, pending_probe_tasks, workers=probe_workers,
+        ),
+        key=lambda row: row["task"],
+    )
+    _status(root, "FIT_LOW_CAPACITY_PROBES", rows=probe_rows, extra={
+        "workers": int(probe_workers),
+        "n_expected_probe_tasks": len(probe_tasks),
+        "n_skipped_complete_input_bound": len(skipped_probe_rows),
+        "n_submitted": len(pending_probe_tasks),
+        "n_not_estimable": sum(
+            1 for row in probe_rows
+            if row.get("scientific_estimability") == "NOT_ESTIMABLE"
+        ),
+    })
     if any(row["returncode"] != 0 for row in probe_rows):
         raise RuntimeError("one or more cohort probes failed")
+    unowned = [
+        row["task"] for row in probe_rows
+        if row.get("status") == "SKIPPED_OWNED_BY_ANOTHER_LIVE_WRITER"
+    ]
+    if unowned:
+        raise RuntimeError(
+            "another live writer still owns these probe tasks; rerun after it "
+            f"finishes rather than producing a second writer: {unowned}"
+        )
     primary_index = _combine_probe_outputs(
         root, probe_subjects, analysis="primary",
     )
@@ -630,6 +1086,22 @@ def run(args: argparse.Namespace) -> dict:
         aggregate_command, root / "logs/aggregate_patient_first.log"
     ) != 0:
         raise RuntimeError("patient-first aggregation failed")
+
+    _status(root, "AUDIT_R1_7B_SOURCE")
+    upstream_audit_command = [
+        str(PYTHON),
+        "scripts/topic5_continuous_marked_state_h2b/audit_r1_7b_release.py",
+        "--result-root", str(root),
+    ]
+    if _run_logged(
+        upstream_audit_command, root / "logs/r1_7b_consumer_audit.log"
+    ) != 0:
+        raise RuntimeError("R1.7B consumer-side source audit failed")
+    upstream_audit = _json(
+        root / "reports/r1_7b_consumer_acceptance_audit.json"
+    )
+    if upstream_audit.get("status") != "PASS_EXPLORATORY_DEVELOPMENT_SOURCE":
+        raise RuntimeError("R1.7B was not accepted as an exploratory source")
 
     _status(root, "AUDIT_RESULTS")
     audit_command = [

@@ -31,6 +31,7 @@ from src.topic5_continuous_marked_state_h2b.contract import (  # noqa: E402
 )
 from src.topic5_continuous_marked_state_h2b.risk_probe import (  # noqa: E402
     make_positive_synthetic_risk_table,
+    primary_lead_estimability,
     risk_set_hash,
     run_probe_table,
     time_label_permutation_audit,
@@ -153,6 +154,10 @@ def run(
         }
 
     fitted = run_probe_table(frame, ridge_grid=ridge_grid, arms=arms)
+    # Engineering completion and scientific estimability are separate facts: a
+    # patient whose primary lead carries no estimable effect still finishes, and
+    # must be recorded as finished rather than retried (v0.2 contract §4).
+    estimability = primary_lead_estimability(fitted.patient_medians)
     permutation = time_label_permutation_audit(
         frame,
         n_permutations=int(n_permutations),
@@ -181,6 +186,12 @@ def run(
     script_path = Path(__file__).resolve()
     machine_audit = {
         "status": "COMPLETE",
+        "execution_status": "COMPLETE",
+        "scientific_estimability": (
+            "ESTIMABLE" if estimability["estimable"] else "NOT_ESTIMABLE"
+        ),
+        "primary_lead_estimability": estimability,
+        "not_estimable_is_a_support_denominator_not_a_negative_result": True,
         "created_utc": utc_now(),
         "boundary": asdict(RunBoundary(revision=str(h2b_revision))),
         "input": input_provenance,
@@ -218,9 +229,12 @@ def run(
         },
         "outputs": {key: str(value) for key, value in targets.items()},
     }
-    atomic_csv(targets["per_seed"], _records(fitted.per_seed))
-    atomic_csv(targets["patient"], _records(fitted.patient_medians))
-    atomic_csv(targets["lead"], _records(lead_curve))
+    atomic_csv(targets["per_seed"], _records(fitted.per_seed),
+               fieldnames=list(fitted.per_seed.columns))
+    atomic_csv(targets["patient"], _records(fitted.patient_medians),
+               fieldnames=list(fitted.patient_medians.columns))
+    atomic_csv(targets["lead"], _records(lead_curve),
+               fieldnames=list(lead_curve.columns))
     atomic_json(targets["permutation"], permutation)
     atomic_json(targets["synthetic"], synthetic_payload)
     atomic_json(targets["audit"], machine_audit)
@@ -262,6 +276,8 @@ def main() -> None:
     )
     print(json.dumps({
         "status": payload["status"],
+        "execution_status": payload["execution_status"],
+        "scientific_estimability": payload["scientific_estimability"],
         "risk_set_hash": payload["risk_set_hash"],
         "output": str(args.output_dir),
     }, ensure_ascii=False))

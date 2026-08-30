@@ -359,3 +359,10 @@
   **仪器失败增至 10 cells / 3 患者**，其中 `epilepsiae_590` 为**整位患者 5/5 非有限梯度**——
   按修复前的行为这一位会让整个 17 位队列中止，验证了窄口径记录改动的必要性。
   探索性扩展，**不改写 R1.7A 预注册结果**；正式/封存分区、发作探针、成稿图未触碰。
+
+- **2026-08-31 H2b Cross-task Transfer v0.2 closeout**：
+  - 白话版：`continuous_marked_state_h2b_cross_task_v0_2_plain_2026-08-31.md`
+  - 技术版：`continuous_marked_state_h2b_cross_task_v0_2_technical_2026-08-31.md`
+  - 机器产物：`results/epi_prssm/continuous_marked_state/h2b_cross_task/v0_2/`
+  - 冻结 R1.7 interictal state 跨任务预测发作接近的 development 证据**未建立**：唯一 primary 患者的增量在置换零带内，persistent carry 与 correct-time specificity 均不支持；描述层 4/4 有利仅作低分母探索线索。
+  - 10 位完成支持审查、46 个 state-cache cells、15 个 probe analyses（13 COMPLETE、2 明确不可估计）；secondary phenotype 仅 2/18 个患者×目标单元有限，不构成跨患者亚型迁移证据。final machine audit `PASS_COMPLETE`，formal/sealed/H3/T2/paper-ready 均未触碰。

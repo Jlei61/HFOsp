@@ -59,6 +59,19 @@ def test_missing_target_columns_are_machine_readable_not_estimable():
     assert result.audit["missing_columns"] == ["target_value"]
 
 
+def test_missing_wrong_time_donor_does_not_gate_frozen_phenotype_transfer():
+    """Secondary phenotype uses primary risk-table support, not donor support."""
+    frame = make_synthetic_phenotype_table(n_seizures=30, random_seed=9)
+    frame["wrong_time__state_0"] = np.nan
+
+    result = run_phenotype_table(frame)
+
+    assert result.audit["status"] == "COMPLETE"
+    assert result.audit["matched_wrong_time_is_not_a_phenotype_gate"] is True
+    assert result.patient_medians["state_minus_observation_loss"].notna().all()
+    assert "correct_minus_wrong_time_loss" not in result.patient_medians
+
+
 @pytest.mark.parametrize(
     ("count", "tier", "split", "expected_status"),
     [

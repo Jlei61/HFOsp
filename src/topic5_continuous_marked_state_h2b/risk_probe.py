@@ -988,6 +988,67 @@ def patient_seed_medians(per_seed: pd.DataFrame) -> pd.DataFrame:
     return output
 
 
+PRIMARY_EFFECT_COLUMN = "state_minus_observation_conditional_log_loss"
+CONTRACT_EFFECT_COLUMNS = (
+    PRIMARY_EFFECT_COLUMN,
+    "persistent_minus_memoryless_conditional_log_loss",
+    "correct_minus_wrong_time_conditional_log_loss",
+)
+
+
+def primary_lead_estimability(
+    patient_medians: pd.DataFrame,
+    *,
+    primary_lead_minutes: int = PRIMARY_LEAD_MINUTES,
+) -> dict[str, Any]:
+    """Report whether the fixed primary-lead effect exists at all.
+
+    The v0.2 contract §3 pins the primary lead at 30 min and forbids replacing it
+    with whichever lead happens to fit, so estimability is judged **at that lead
+    only**: a table can fit happily at 5 min and still carry no primary endpoint.
+
+    All three contract effects are reported together -- §3 names
+    ``persistent - memoryless`` and ``correct-time - wrong-time`` as necessary
+    explanatory quantities alongside the main one -- so no caller has to
+    re-derive support for the secondary comparisons.
+    """
+    lead = int(primary_lead_minutes)
+    if patient_medians.empty or "lead_minutes" not in patient_medians:
+        rows = patient_medians.iloc[:0]
+    else:
+        rows = patient_medians[patient_medians["lead_minutes"].astype(int) == lead]
+    effects: dict[str, dict[str, Any]] = {}
+    for column in CONTRACT_EFFECT_COLUMNS:
+        if column in rows:
+            values = rows[column].to_numpy(dtype=float)
+            n_finite = int(np.count_nonzero(np.isfinite(values)))
+        else:
+            n_finite = 0
+        effects[column] = {
+            "column_present": bool(column in patient_medians),
+            "n_finite_patients": n_finite,
+        }
+    n_primary_finite = effects[PRIMARY_EFFECT_COLUMN]["n_finite_patients"]
+    if len(rows) == 0:
+        reason = f"no patient-median row at the {lead} min primary lead"
+    elif PRIMARY_EFFECT_COLUMN not in patient_medians:
+        reason = "primary lead has insufficient eligible seizures"
+    elif n_primary_finite == 0:
+        reason = (
+            "primary lead has insufficient eligible seizures; the primary effect "
+            "is non-finite for every patient at this lead"
+        )
+    else:
+        reason = None
+    return {
+        "estimable": reason is None,
+        "primary_lead_minutes": lead,
+        "n_primary_lead_rows": int(len(rows)),
+        "reason": reason,
+        "effects": effects,
+    }
+
+
 def time_label_permutation_audit(
     frame: pd.DataFrame,
     *,
@@ -996,16 +1057,24 @@ def time_label_permutation_audit(
     random_seed: int = 9917,
     primary_lead_minutes: int = PRIMARY_LEAD_MINUTES,
 ) -> dict[str, Any]:
-    """Shuffle the case time inside each patient risk set and refit the probe."""
-    metric = "state_minus_observation_conditional_log_loss"
+    """Shuffle the case time inside each patient risk set and refit the probe.
 
+    When the primary lead carries no estimable effect the null cannot be built at
+    all.  That is reported as a structured
+    ``NOT_ESTIMABLE_AT_PRIMARY_LEAD`` record carrying zero attempted/finite
+    permutations and explicit null-valued summaries:
+    a bearing instrument check that could not run must never be reported as one
+    that passed (v0.2 contract §8.2), and neither a zero effect nor a p-value may
+    be invented in its place (§8.5 fail closed).
+    """
     def primary_effect(result: ProbeRunResult) -> float | None:
         rows = result.patient_medians[
-            result.patient_medians["lead_minutes"] == int(primary_lead_minutes)
+            result.patient_medians["lead_minutes"].astype(int)
+            == int(primary_lead_minutes)
         ]
-        if metric not in rows.columns:
+        if PRIMARY_EFFECT_COLUMN not in rows.columns:
             return None
-        values = rows[metric].to_numpy(dtype=float)
+        values = rows[PRIMARY_EFFECT_COLUMN].to_numpy(dtype=float)
         values = values[np.isfinite(values)]
         return float(np.median(values)) if len(values) else None
 
@@ -1015,17 +1084,19 @@ def time_label_permutation_audit(
     observed_run = run_probe_table(
         frame, ridge_grid=ridge_grid, arms=("B_observation", "B_state"), validate=False,
     )
-    observed = primary_effect(observed_run)
-    if observed is None:
+    estimability = primary_lead_estimability(
+        observed_run.patient_medians, primary_lead_minutes=primary_lead_minutes,
+    )
+    if not estimability["estimable"]:
         return {
             "status": "NOT_ESTIMABLE_AT_PRIMARY_LEAD",
-            "reason": (
-                "state-minus-observation is absent or non-finite at the "
-                f"{int(primary_lead_minutes)}-min primary lead"
-            ),
-            "permutation_unit": "case label within patient-specific risk set",
+            "reason": estimability["reason"],
+            "primary_lead_minutes": int(primary_lead_minutes),
             "n_permutations": int(n_permutations),
+            "n_permutations_run": 0,
             "n_finite_permutations": 0,
+            "permutation_unit": "case label within patient-specific risk set",
+            "primary_lead_estimability": estimability,
             "observed_state_minus_observation": None,
             "null_median": None,
             "null_mean": None,
@@ -1033,6 +1104,9 @@ def time_label_permutation_audit(
             "null_q975": None,
             "null_values": [],
         }
+    observed = primary_effect(observed_run)
+    if observed is None:  # Defensive consistency check for the helper above.
+        raise RuntimeError("estimability audit disagrees with primary-effect extraction")
     rng = np.random.default_rng(int(random_seed))
     null = []
     for _ in range(int(n_permutations)):
@@ -1059,7 +1133,10 @@ def time_label_permutation_audit(
                 "one or more permuted case-label fits had no finite primary-lead effect"
             ),
             "permutation_unit": "case label within patient-specific risk set",
+            "primary_lead_minutes": int(primary_lead_minutes),
+            "primary_lead_estimability": estimability,
             "n_permutations": int(n_permutations),
+            "n_permutations_run": int(len(values)),
             "n_finite_permutations": int(len(finite)),
             "observed_state_minus_observation": float(observed),
             "null_median": float(np.median(finite)) if len(finite) else None,
@@ -1073,7 +1150,10 @@ def time_label_permutation_audit(
     return {
         "status": "COMPLETE",
         "permutation_unit": "case label within patient-specific risk set",
+        "primary_lead_minutes": int(primary_lead_minutes),
+        "primary_lead_estimability": estimability,
         "n_permutations": int(n_permutations),
+        "n_permutations_run": int(len(values)),
         "n_finite_permutations": int(len(finite)),
         "observed_state_minus_observation": float(observed),
         "null_median": float(np.median(finite)),

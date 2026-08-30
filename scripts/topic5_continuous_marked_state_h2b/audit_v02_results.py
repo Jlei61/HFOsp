@@ -39,6 +39,20 @@ from src.topic5_continuous_marked_state_r1.coverage import (  # noqa: E402
 )
 
 
+PROBE_PRODUCTS = (
+    "per_seed_probe_metrics.csv",
+    "patient_median_probe_metrics.csv",
+    "lead_curve.csv",
+    "time_label_permutation.json",
+    "positive_synthetic.json",
+    "risk_probe_machine_audit.json",
+)
+# A permutation null that could not be built must carry explicit nulls rather
+# than a number that could be mistaken for a biological negative.
+NULL_PERMUTATION_SCALARS = (
+    "observed_state_minus_observation",
+    "null_median", "null_mean", "null_q025", "null_q975",
+)
 FALSE_BOUNDARY_KEYS = (
     "formal_test_partition_opened", "sealed_opened", "h3_or_t2_run",
     "paper_ready_figures_modified",
@@ -154,6 +168,80 @@ def _audit_probe_permutation_semantics(output: Path, label: str) -> str:
     return "NOT_ESTIMABLE_AT_PRIMARY_LEAD"
 
 
+def _expected_probe_tasks(root: Path, support: dict[str, dict]) -> list[str]:
+    """Every patient/arm the queue is obliged to produce, derived from the inputs.
+
+    Deriving the denominator from the risk tables rather than from whatever
+    happens to exist under ``fits/`` is what turns "the queue stopped" into a
+    detectable state instead of a silently short cohort.
+    """
+    tasks = []
+    for subject, manifest in sorted(support.items()):
+        if int(manifest["n_primary_eligible_seizures"]) < 2:
+            continue
+        tasks.append(f"{subject}/primary")
+        if (root / "risk_sets" / subject
+                / "matched_wrong_time_risk_sets.csv").is_file():
+            tasks.append(f"{subject}/matched_wrong_time")
+    return tasks
+
+
+def _audit_probe_task(root: Path, label: str) -> dict[str, Any]:
+    """Accept COMPLETE or structured primary-lead non-estimability."""
+    subject, analysis = label.split("/", maxsplit=1)
+    output = root / "fits/by_subject" / subject / analysis
+    for name in PROBE_PRODUCTS:
+        _require((output / name).is_file() and (output / name).stat().st_size > 0,
+                 f"{label}: probe product {name} is missing or empty")
+    audit = _json(output / "risk_probe_machine_audit.json")
+    _boundary_false(audit, f"{label}: probe")
+    _require(audit.get("status") == "COMPLETE", f"{label}: probe did not complete")
+    _require(audit.get("execution_status", "COMPLETE") == "COMPLETE",
+             f"{label}: probe execution did not complete")
+    estimability = audit.get("scientific_estimability")
+    _require(estimability in {"ESTIMABLE", "NOT_ESTIMABLE", None},
+             f"{label}: unknown scientific estimability {estimability!r}")
+    _require(audit.get("positive_synthetic", {}).get("status") == "PASS",
+             f"{label}: positive synthetic recovery failed")
+    _require(audit.get("seed_aggregation")
+             == "median_within_patient_before_cohort_inference",
+             f"{label}: optimizer seeds were treated as patients")
+    permutation = _json(output / "time_label_permutation.json")
+    permutation_status = _audit_probe_permutation_semantics(output, label)
+    if permutation_status == "NOT_ESTIMABLE_AT_PRIMARY_LEAD":
+        _require(int(permutation.get("n_permutations_run", -1)) == 0,
+                 f"{label}: an unestimable permutation reports permutations run")
+        _require(int(permutation.get("n_finite_permutations", -1)) == 0,
+                 f"{label}: an unestimable permutation has finite null draws")
+        for key in NULL_PERMUTATION_SCALARS:
+            _require(permutation.get(key) is None,
+                     f"{label}: unestimable permutation fabricated {key}")
+        _require((permutation.get("null_values") or []) == [],
+                 f"{label}: unestimable permutation retained null draws")
+        _require(estimability == "NOT_ESTIMABLE",
+                 f"{label}: permutation is unestimable but the audit says {estimability!r}")
+    else:
+        _require(int(permutation.get("n_permutations_run", 0)) > 0,
+                 f"{label}: a completed permutation ran no permutations")
+    receipt_path = output / ".task_complete.json"
+    receipt: dict[str, Any] = {}
+    if receipt_path.is_file():
+        receipt = _json(receipt_path)
+        for name, digest in (receipt.get("output_sha256") or {}).items():
+            observed = sha256_file(output / name)
+            _require(observed == digest,
+                     f"{label}: {name} changed after completion ({observed})")
+    return {
+        "task": label,
+        "execution_status": audit.get("execution_status", audit.get("status")),
+        "scientific_estimability": estimability,
+        "permutation_status": permutation_status,
+        "hash_baseline_adopted_from_existing_output": bool(
+            receipt.get("hash_baseline_adopted_from_existing_output")
+        ),
+    }
+
+
 def _audit_inventory(root: Path) -> tuple[dict, dict[tuple[str, int], dict]]:
     path = root / "manifests/r1_7_checkpoint_inventory.json"
     inventory = _json(path)
@@ -245,6 +333,21 @@ def _audit_complete(root: Path, inventory: dict,
         _boundary_false(complete, "cohort completion")
     _boundary_false(queue, "queue completion")
 
+    upstream_audit_path = root / "reports/r1_7b_consumer_acceptance_audit.json"
+    upstream_audit = _json(upstream_audit_path)
+    _boundary_false(upstream_audit, "R1.7B consumer acceptance")
+    _require(
+        upstream_audit.get("status") == "PASS_EXPLORATORY_DEVELOPMENT_SOURCE",
+        "R1.7B source was not accepted by the consumer-side audit",
+    )
+    upstream_gate = upstream_audit.get("v0_1_stage2_release_gate") or {}
+    _require(upstream_gate.get("gate_met_by_consumed_release") is False,
+             "R1.7B was silently promoted to the formal v0.1 release gate")
+    _require(upstream_gate.get("weakening_is_declared_not_silent") is True,
+             "R1.7B exploratory release weakening was not declared")
+    _require(upstream_audit.get("development_only") is True,
+             "R1.7B consumer audit did not preserve development-only scope")
+
     input_manifests = sorted((root / "risk_sets").glob("*/input_manifest.json"))
     _require(bool(input_manifests), "no completed subject input manifest")
     expected_cache_keys: set[tuple[str, int]] = set()
@@ -273,6 +376,11 @@ def _audit_complete(root: Path, inventory: dict,
                 key for key, entry in inventory_by_key.items()
                 if key[0] == subject and entry.get("checkpoint_available")
             )
+
+    expected_probe_tasks = _expected_probe_tasks(root, support_by_subject)
+    probe_task_audits = [
+        _audit_probe_task(root, label) for label in expected_probe_tasks
+    ]
 
     observed_cache_keys: set[tuple[str, int]] = set()
     for cache in sorted((root / "state_cache").glob("*/seed_*/states.npz")):
@@ -373,6 +481,8 @@ def _audit_complete(root: Path, inventory: dict,
                     permutation_status_counts.get(status, 0) + 1
                 )
                 n_probe_analyses += 1
+    _require(n_probe_analyses == len(expected_probe_tasks),
+             "completed probe denominator differs from the risk-table task list")
 
     primary_index = _json(root / "fits/primary/cohort_probe_index.json")
     _require(primary_index.get("heterogeneous_patient_feature_dimensions_never_pooled") is True,
@@ -397,14 +507,93 @@ def _audit_complete(root: Path, inventory: dict,
     for subject, table in (phenotype.get("subject_tables") or {}).items():
         _hash_bound(Path(table["path"]), table.get("sha256"),
                     f"{subject}: frozen phenotype table")
+    available_phenotype_subjects = {
+        str(subject): table
+        for subject, table in (phenotype.get("subject_tables") or {}).items()
+        if int(table.get("n_available_target_rows", 0)) > 0
+    }
+    n_estimable_phenotype_cells = 0
+    if available_phenotype_subjects:
+        phenotype_index = _json(root / "fits/phenotype/cohort_phenotype_index.json")
+        _boundary_false(phenotype_index, "phenotype cohort index")
+        _require(phenotype_index.get("status") == "COMPLETE",
+                 "phenotype cohort index is not COMPLETE")
+        _require(phenotype_index.get("target_reclustered") is False,
+                 "phenotype cohort index reports target reclustering")
+        _require(
+            phenotype_index.get("heterogeneous_patient_feature_dimensions_never_pooled")
+            is True,
+            "phenotype features were pooled across heterogeneous patients",
+        )
+        patient_audits = phenotype_index.get("patient_audits") or {}
+        _require(set(patient_audits) == set(available_phenotype_subjects),
+                 "phenotype execution denominator differs from frozen target availability")
+        _require(int(phenotype_index.get("n_patients_run", -1)) ==
+                 len(available_phenotype_subjects),
+                 "phenotype patient execution count drift")
+        for subject, entry in patient_audits.items():
+            audit_path = Path(entry["path"])
+            _hash_bound(audit_path, entry.get("sha256"),
+                        f"{subject}: phenotype audit")
+            patient_audit = _json(audit_path)
+            _boundary_false(patient_audit, f"{subject}: phenotype probe")
+            target_path = Path(available_phenotype_subjects[subject]["path"])
+            _require(Path(patient_audit["input"]["input_path"]).resolve() ==
+                     target_path.resolve(),
+                     f"{subject}: phenotype probe points to another target table")
+            _hash_bound(target_path, patient_audit["input"].get("input_sha256"),
+                        f"{subject}: phenotype probe input")
+            _require(patient_audit.get("target_reclustered") is False,
+                     f"{subject}: phenotype target was reclustered")
+            _require(patient_audit.get("target_frozen_before_probe") is True,
+                     f"{subject}: phenotype target was not frozen before fitting")
+            _require(patient_audit.get("positive_synthetic", {}).get("status") == "PASS",
+                     f"{subject}: phenotype positive synthetic failed")
+            probe_audit = patient_audit.get("probe_audit") or {}
+            _require(probe_audit.get("matched_wrong_time_is_not_a_phenotype_gate")
+                     is True,
+                     f"{subject}: wrong-time donor availability gated phenotype fitting")
+            _require(probe_audit.get("phenotype_arms") ==
+                     ["baseline", "observation", "state"],
+                     f"{subject}: unexpected phenotype comparison arms")
+        for label, output in (phenotype_index.get("outputs") or {}).items():
+            _hash_bound(Path(output["path"]), output.get("sha256"),
+                        f"phenotype cohort {label} output")
+        per_seed_path = Path(phenotype_index["outputs"]["per_seed"]["path"])
+        per_seed_phenotype = pd.read_csv(per_seed_path)
+        _require("status" in per_seed_phenotype,
+                 "phenotype per-seed output has no estimability status")
+        status_counts = per_seed_phenotype.groupby(
+            ["patient_id", "target_name"], dropna=False,
+        )["status"].nunique()
+        _require(bool((status_counts == 1).all()),
+                 "phenotype estimability changes across optimizer seeds")
+        n_estimable_phenotype_cells = int(
+            per_seed_phenotype.loc[
+                per_seed_phenotype["status"].astype(str) == "ok",
+                ["patient_id", "target_name"],
+            ].drop_duplicates().shape[0]
+        )
+        _require("correct_minus_wrong_time_loss" not in per_seed_phenotype,
+                 "secondary phenotype silently reintroduced wrong-time as a gate")
     return {
         "n_subjects_with_input_manifest": len(input_manifests),
+        "r1_7b_consumer_acceptance_audit": {
+            "path": str(upstream_audit_path),
+            "sha256": sha256_file(upstream_audit_path),
+            "status": upstream_audit.get("status"),
+            "formal_v0_1_release_gate_met": False,
+        },
         "n_state_cache_cells": len(observed_cache_keys),
         "n_probe_subjects": len(probe_subjects),
         "n_probe_analyses": n_probe_analyses,
+        "n_expected_probe_tasks": len(expected_probe_tasks),
+        "probe_task_audits": probe_task_audits,
         "permutation_status_counts": permutation_status_counts,
         "n_patient_first_rows": len(per_patient),
         "n_phenotype_subject_tables": len(phenotype.get("subject_tables") or {}),
+        "n_phenotype_patients_run": len(available_phenotype_subjects),
+        "n_estimable_phenotype_patient_targets": n_estimable_phenotype_cells,
     }
 
 
