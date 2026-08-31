@@ -4,6 +4,7 @@ import json
 
 from scripts.topic5_continuous_marked_state_h2b.run_v03_full_grid_followup import (
     _claim_route_status,
+    _reject_diagnostic_override,
 )
 
 
@@ -32,3 +33,13 @@ def test_followup_claim_route_requires_final_acceptance_receipt(tmp_path) -> Non
     qualified, assay_pass = _claim_route_status(root)
     assert qualified == {"epilepsiae_1125"}
     assert assay_pass is True
+
+
+def test_followup_hard_rejects_diagnostic_override_after_failed_gates() -> None:
+    try:
+        _reject_diagnostic_override(True)
+    except ValueError as error:
+        assert "forbids downstream" in str(error)
+    else:
+        raise AssertionError("diagnostic downstream override must fail closed")
+    _reject_diagnostic_override(False)
