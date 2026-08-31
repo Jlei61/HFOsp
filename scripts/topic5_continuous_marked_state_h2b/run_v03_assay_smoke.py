@@ -75,47 +75,87 @@ def _mem_available_bytes() -> int:
     raise RuntimeError("MemAvailable is unavailable")
 
 
-def _count_supported_seizures(path: Path) -> int:
-    values = set()
+def _supported_seizure_onsets(path: Path) -> np.ndarray:
+    values: dict[str, float] = {}
     with path.open(newline="", encoding="utf-8") as handle:
         for row in csv.DictReader(handle):
             if str(row.get("primary_30min_supported", "")).lower() not in {
                 "true", "1",
             }:
                 continue
-            values.add(str(row["seizure_id"]))
-    return len(values)
+            values[str(row["seizure_id"])] = float(row["onset_time"])
+    return np.asarray(sorted(values.values()), dtype=np.float64)
 
 
-def _load_template(v02: Path, subject: str, seed: int) -> tuple[AssayTemplate, dict]:
-    root = v02 / "state_cache" / subject / f"seed_{seed}"
-    manifest_path = root / "states.manifest.json"
-    cache_path = root / "states.npz"
+def _load_template(
+    v02: Path, v03: Path, subject: str, seed: int,
+) -> tuple[AssayTemplate, dict]:
+    root = v03 / "instrument/by_cell" / subject / f"seed_{seed}"
+    manifest_path = root / "instrument_manifest.json"
+    cache_path = root / "interictal_d_state_trace.npz"
     supported_seizure_path = v02 / "risk_sets" / subject / "seizures.csv"
     manifest = _json(manifest_path)
-    if manifest.get("all_parameters_frozen") is not True:
-        raise ValueError("assay template state was not frozen")
-    if manifest.get("cache_sha256") != sha256_file(cache_path):
-        raise ValueError("assay template state cache SHA256 drift")
-    with np.load(cache_path, allow_pickle=False) as data:
-        available = np.asarray(data["observation_available"], dtype=bool)
+    if (
+        manifest.get("status") != "COMPLETE"
+        or manifest.get("seizure_risk_outcome_read") is not False
+        or manifest.get("source", {}).get("checkpoint", {}).get("state_frozen")
+        is not True
+    ):
+        raise ValueError("assay template is not a frozen interictal-only trace")
+    if manifest.get("trace_sha256") != sha256_file(cache_path):
+        raise ValueError("assay template trace SHA256 drift")
+    design_path = Path(manifest["source"]["design_path"])
+    embedding_path = Path(manifest["source"]["embedding_path"])
+    if manifest["source"]["design_sha256"] != sha256_file(design_path):
+        raise ValueError("assay design SHA256 drift")
+    if manifest["source"]["embedding_sha256"] != sha256_file(embedding_path):
+        raise ValueError("assay observation embedding SHA256 drift")
+    onsets = _supported_seizure_onsets(supported_seizure_path)
+    with (
+        np.load(cache_path, allow_pickle=False) as data,
+        np.load(design_path, allow_pickle=False) as design,
+    ):
+        design_keys = {
+            (int(session), float(time)): index
+            for index, (session, time) in enumerate(zip(
+                design["anchor_session"], design["anchor_time"],
+            ))
+        }
+        trace_keys = list(zip(data["anchor_session"], data["anchor_time"]))
+        if len(design_keys) != len(design["anchor_time"]):
+            raise ValueError("assay design anchor key is not unique")
+        try:
+            row = np.asarray([
+                design_keys[(int(session), float(time))]
+                for session, time in trace_keys
+            ], dtype=np.int64)
+        except KeyError as error:
+            raise ValueError("interictal trace/design anchor mismatch") from error
+        observation = np.load(embedding_path, allow_pickle=False)
         template = build_template(
-            time_epoch=np.asarray(data["anchor_time_epoch"], dtype=np.float64)[available],
-            segment=np.asarray(data["coverage_segment_index"], dtype=np.int64)[available],
+            time_epoch=np.asarray(data["anchor_time"], dtype=np.float64),
+            segment=np.asarray(data["anchor_session"], dtype=np.int64),
             deterministic_history=np.asarray(
-                data["deterministic_history"], dtype=np.float64,
-            )[available],
-            persistent_state=np.asarray(data["persistent_state"], dtype=np.float64)[available],
-            memoryless_state=np.asarray(
-                data["memoryless_observation_code"], dtype=np.float64,
-            )[available],
-            n_seizures=_count_supported_seizures(supported_seizure_path),
+                design["anchor_history"], dtype=np.float64,
+            )[row],
+            current_observation=np.asarray(observation, dtype=np.float64)[row],
+            persistent_decoder=np.asarray(
+                data["persistent_decoder"], dtype=np.float64,
+            ),
+            memoryless_decoder=np.asarray(
+                data["memoryless_decoder"], dtype=np.float64,
+            ),
+            n_seizures=len(onsets), observed_seizure_onsets=onsets,
         )
     return template, {
         "subject": subject, "seed": int(seed),
-        "state_cache": str(cache_path), "state_cache_sha256": sha256_file(cache_path),
-        "state_manifest": str(manifest_path),
-        "state_manifest_sha256": sha256_file(manifest_path),
+        "interictal_decoder_trace": str(cache_path),
+        "interictal_decoder_trace_sha256": sha256_file(cache_path),
+        "instrument_manifest": str(manifest_path),
+        "instrument_manifest_sha256": sha256_file(manifest_path),
+        "design": str(design_path), "design_sha256": sha256_file(design_path),
+        "observation_embedding": str(embedding_path),
+        "observation_embedding_sha256": sha256_file(embedding_path),
         "seizure_crosswalk": str(v02 / "manifests/seizure_crosswalk.csv"),
         "seizure_crosswalk_sha256": sha256_file(
             v02 / "manifests/seizure_crosswalk.csv"
@@ -135,11 +175,16 @@ def _compact(result: dict[str, Any]) -> dict[str, Any]:
         "n_positive_grid_rows": result["n_positive_grid_rows"],
         "status": transfer["status"],
         "n_oof_seizures": transfer.get("n_oof_seizures", 0),
-        "relative_logloss_improvement": transfer.get(
-            "relative_logloss_improvement"
+        "T_relative_logloss_improvement": transfer.get(
+            "T_relative_logloss_improvement"
         ),
-        "T_detected_at_5_percent": transfer.get("T_detected_at_5_percent", False),
-        "M_detected_at_5_percent": transfer.get("M_detected_at_5_percent", False),
+        "M_relative_logloss_improvement": transfer.get(
+            "M_relative_logloss_improvement"
+        ),
+        "persistent_vs_memoryless_relative_improvement": transfer.get(
+            "persistent_vs_memoryless_relative_improvement"
+        ),
+        "lag_degradation": transfer.get("lag_degradation"),
         "geometry_winner": geometry.get("winning_family"),
         "geometry_basin_score": geometry.get("scores", {}).get("basin_gating"),
         "geometry_approach_score": geometry.get("scores", {}).get(
@@ -178,6 +223,29 @@ def _rate(rows: list[dict], key: str) -> dict[str, Any]:
     }
 
 
+def _threshold(rows: list[dict], key: str) -> float:
+    values = np.asarray([
+        row[key] for row in rows
+        if row["status"] == "COMPLETE" and row.get(key) is not None
+    ], dtype=np.float64)
+    if not len(values):
+        return float("inf")
+    return float(np.quantile(values, 0.95, method="higher"))
+
+
+def _detect(rows: list[dict], key: str, threshold: float) -> list[dict]:
+    result = []
+    for row in rows:
+        value = row.get(key)
+        copy = dict(row)
+        copy[f"{key}_detected"] = bool(
+            row["status"] == "COMPLETE" and value is not None
+            and float(value) > float(threshold)
+        )
+        result.append(copy)
+    return result
+
+
 def _atomic_jsonl(path: Path, rows: list[dict]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     descriptor, temporary = tempfile.mkstemp(
@@ -209,7 +277,7 @@ def main() -> None:
     assert_frozen_contract_matches(_json(root / "analysis_contract.json"))
     assert_frozen_exploration_policy_matches(_json(root / "exploration_policy.json"))
     template, provenance = _load_template(
-        v02, str(args.template_subject), int(args.template_seed),
+        v02, root, str(args.template_subject), int(args.template_seed),
     )
     available = _mem_available_bytes()
     memory_workers = max(1, int(0.70 * available // int(0.25 * 1024 ** 3)))
@@ -230,11 +298,34 @@ def main() -> None:
                      if row["initial_k"] == initial_k and row["world"] == "null"]
         persistent_rows = [row for row in k_rows if row["initial_k"] == initial_k
                            and row["world"] == "persistent_state"]
-        false_positive = _rate(null_rows, "T_detected_at_5_percent")
-        power = _rate(persistent_rows, "T_detected_at_5_percent")
+        null_rows = sorted(null_rows, key=lambda row: int(row["seed"]))
+        split = max(1, len(null_rows) // 2)
+        calibration, null_evaluation = null_rows[:split], null_rows[split:]
+        t_threshold = _threshold(calibration, "T_relative_logloss_improvement")
+        m_threshold = _threshold(calibration, "M_relative_logloss_improvement")
+        lag_threshold = _threshold(calibration, "lag_degradation")
+        null_evaluation = _detect(
+            null_evaluation, "T_relative_logloss_improvement", t_threshold,
+        )
+        persistent_rows = _detect(
+            persistent_rows, "T_relative_logloss_improvement", t_threshold,
+        )
+        false_positive = _rate(
+            null_evaluation, "T_relative_logloss_improvement_detected",
+        )
+        power = _rate(
+            persistent_rows, "T_relative_logloss_improvement_detected",
+        )
         k_summary.append({
             "initial_k": initial_k, "null_false_positive": false_positive,
             "persistent_power": power,
+            "null_calibration_replicates": len(calibration),
+            "null_evaluation_replicates": len(null_evaluation),
+            "thresholds": {
+                "T_relative_logloss_improvement": t_threshold,
+                "M_relative_logloss_improvement": m_threshold,
+                "lag_degradation": lag_threshold,
+            },
         })
     admissible = [row for row in k_summary
                   if (row["null_false_positive"]["rate"] or 1.0) <= 0.10]
@@ -247,16 +338,23 @@ def main() -> None:
             row["initial_k"],
         ),
     )[0]["initial_k"]
+    selected_summary = next(row for row in k_summary
+                            if row["initial_k"] == selected)
+    thresholds = selected_summary["thresholds"]
     main_tasks = [
         (world, 100_000 + 10_000 * WORLDS.index(world) + seed,
          int(selected), effect)
         for world in WORLDS for seed in range(n)
     ]
     main_rows = _run_tasks(main_tasks, template, workers)
+    for key, threshold in thresholds.items():
+        main_rows = _detect(main_rows, key, float(threshold))
     world_summary = []
     for world in WORLDS:
         rows = [row for row in main_rows if row["world"] == world]
-        transfer = _rate(rows, "T_detected_at_5_percent")
+        transfer = _rate(rows, "T_relative_logloss_improvement_detected")
+        memory = _rate(rows, "M_relative_logloss_improvement_detected")
+        lag = _rate(rows, "lag_degradation_detected")
         expected_geometry = world if world in {
             "basin_gating", "directed_approach", "abrupt_transition",
         } else None
@@ -266,6 +364,8 @@ def main() -> None:
         geometry_lower, geometry_upper = wilson_interval(geometry_success, len(rows))
         world_summary.append({
             "world": world, "transfer_detection": transfer,
+            "persistent_memory_detection": memory,
+            "lag_degradation_detection": lag,
             "geometry_expected_family": expected_geometry,
             "geometry_recovery": {
                 "successes": geometry_success, "total": len(rows),
@@ -274,6 +374,32 @@ def main() -> None:
                 "wilson_95_upper": geometry_upper,
             },
         })
+    by_world = {row["world"]: row for row in world_summary}
+    nuisance_false_positive = max(
+        float(by_world[world]["transfer_detection"]["rate"] or 0.0)
+        for world in ("null", "observation_only", "clock_confounded")
+    )
+    persistent_power = float(
+        by_world["persistent_state"]["transfer_detection"]["rate"] or 0.0
+    )
+    minimum_geometry = min(
+        float(by_world[world]["geometry_recovery"]["rate"] or 0.0)
+        for world in ("basin_gating", "directed_approach", "abrupt_transition")
+    )
+    smoke_track_status = {
+        "transfer": (
+            "SMOKE_SENSITIVE" if nuisance_false_positive <= 0.10
+            and persistent_power >= 0.70 else "ASSAY_NOT_SENSITIVE"
+        ),
+        "geometry": (
+            "SMOKE_SENSITIVE" if minimum_geometry >= 0.75
+            else "ASSAY_NOT_SENSITIVE"
+        ),
+        "maximum_null_observation_clock_false_positive": nuisance_false_positive,
+        "persistent_world_power": persistent_power,
+        "minimum_geometry_family_recovery": minimum_geometry,
+        "not_final_acceptance": True,
+    }
     output = root / "assay"
     created = utc_now()
     frozen_config = {
@@ -291,11 +417,13 @@ def main() -> None:
             "then lowest false-positive, then smallest K"
         ),
         "effect_scale": effect, "alpha_grid": list(ALPHA_GRID),
+        "selected_null_calibrated_thresholds": thresholds,
         "minimum_relevant_relative_logloss_improvement": 0.05,
         "horizon_minutes": float(template.horizon_minutes),
         "worlds": list(WORLDS), "smoke_replicates_per_world": n,
         "final_replicates_per_world": 1000,
-        "empirical_query_and_control_sampling_preserved": True,
+        "empirical_interictal_coverage_clock_and_state_autocorrelation_preserved": True,
+        "real_supported_seizure_count_and_clock_distribution_preserved": True,
         "additional_control_subsampling": False,
         "producer_script_sha256": sha256_file(PRODUCER_SCRIPT),
         "assay_module_sha256": sha256_file(ASSAY_MODULE),
@@ -309,6 +437,7 @@ def main() -> None:
         ),
         "created_utc": created, "selected_initial_k": int(selected),
         "k_selection": k_summary, "worlds": world_summary,
+        "smoke_track_status": smoke_track_status,
         "n_k_selection_replicates": len(k_rows),
         "n_main_replicates": len(main_rows), "cpu_workers": workers,
         "mem_available_bytes_at_start": available,
@@ -318,6 +447,8 @@ def main() -> None:
             "acceptance requires the frozen 1000-replicate run"
         ),
         "negative_result_is_not_global_blocker": True,
+        "real_seizure_probe_outcome_fitted": False,
+        "real_seizure_structure_used_for_simulation": True,
         "formal_test_partition_opened": False, "sealed_opened": False,
         "h3_or_t2_run": False,
     }
@@ -333,7 +464,8 @@ def main() -> None:
             "basin/approach/abrupt worlds on real coverage and state autocorrelation"
         ),
         "answer_source": str(output / "type1_power_summary_smoke.json"),
-        "route_drift": False, "real_seizure_outcome_fitted": False,
+        "route_drift": False, "real_seizure_probe_outcome_fitted": False,
+        "real_seizure_structure_used_for_simulation": True,
         "negative_result_is_not_global_blocker": True,
     })
     print(f"COMPLETE selected_K={selected} rows={len(k_rows) + len(main_rows)} workers={workers}")
