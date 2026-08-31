@@ -2,7 +2,7 @@
 
 **日期**：2026-08-31
 
-**状态**：`DUAL_CORE_NODE_REPERTOIRE_PARTIAL_SUPPORT / FULL_DISTRIBUTION_NOT_RECOVERED / EE_OOD_FILTER_WITH_YIELD_COST / ETOI_MODE_OCCUPANCY_MODULATOR / TRANSFERRED_PATHWAYS_NONADDITIVE / RAW_CARRIER_NOT_AUDITED`
+**状态**：`DUAL_CORE_NODE_REPERTOIRE_PARTIAL_SUPPORT / FULL_DISTRIBUTION_NOT_RECOVERED / EE_OOD_FILTER_WITH_YIELD_COST / ETOI_MODE_OCCUPANCY_MODULATOR / TRANSFERRED_PATHWAYS_NONADDITIVE / LOCAL_TRANSIENT_CONCENTRATED / NATIVE_HF_CARRIER_NOT_RECOVERED`
 
 **范围**：development-only；不作 patient-blind、解剖 core、临床波形、发作或患者因果机制主张。
 
@@ -116,9 +116,37 @@ E->I 主要把模式占用推向 Mode 2，并略微增加事件产率；
 
 零仿真重读现有轨迹显示，患者两模式的触点招募跨度中位数为 42.6 和 48.0 ms，5--95% 区间分别为 17.8--111.1 和 20.2--104.3 ms。四臂的 equal-network 中位跨度为 Node 36、EE 47.5、E->I 32、联合 41 ms。因此当前 GIF 看起来缓慢主要来自 5 ms 模型帧以 8 fps 播放，即 25 倍慢放；绝对传播跨度并未明显慢于患者。
 
-原始快载波目前不能裁定。存档中的 virtual-contact firing-density envelope 已经经过 2 ms 分箱、标准差 5 ms 的高斯时间平滑和 0.25 mm 空间采样；四臂在这个**平滑后、未额外带通**的观察量上主峰均为最低可分辨的 23.4 Hz。5 ms 高斯在 60 Hz 理论上只保留约 17% 振幅和 3% 功率，因此这个结果不能用于排除原始 spike-rate 或突触电流中的 60 Hz。现有 OOD 特征又把每个事件独立归一化到 0--1 时间，所以它同样看不到绝对时长和载波。Fig.4 的 30--80 Hz 波形是在这份平滑包络上再带通得到，只是统一的显示语法，不能证明模型本身产生了原生 60 Hz 节律。
+为关闭这一读出缺口，固定 `dualcore_s39`、seed 2430 和 Node-only 动力学，新增了不做时间平滑的 1 ms 区域 E/I population rate，以及 core 中心和 15 个触点的 1 ms 突触电流 proxy。新 worker 与原 confirmation 产物对 event onset、rank、event time、return、active fraction 和 contact envelope 做逐数组 parity；七项完全一致，因此新增记录没有改变原仿真。
 
-可复现产物：`results/topic4_sef_hfo/data_driven_dual_core_ood/temporal_carrier_audit.json`。
+50 个完整、returned、患者支持内事件的原始结果一致：两种模式、两个 core 的中位 raw peak count 都是 1，出现至少三个规则周期的比例均为 0；core-center current proxy 也是单个宽脉冲。core 1 相对 annulus 的瞬时峰值比约 2.73--2.77，30--80 Hz 绝对功率比约 4.13--7.38；core 2 对应约 1.36--1.44 和 1.95--2.06。这说明局部瞬时活动和宽频高频能量确实集中，但**高频能量来自陡峭单脉冲，不是原生多周期 HFO carrier**。Welch 主峰固定在 23.4 Hz 只是 256 ms 事件窗的最低有效频率格点附近，不应解释成一个 23 Hz 生理振荡。
+
+因此 Fig.4 的 30--80 Hz 波形仍只能作为统一的 band-limited model-current 显示语法，不能作为模型已产生原生 60 Hz 局部节律的证据。
+
+可复现产物：
+
+- `results/topic4_sef_hfo/data_driven_dual_core_ood/temporal_carrier_audit.json`
+- `results/topic4_sef_hfo/data_driven_dual_core_ood/carrier_canary/raw_carrier_analysis.json`
+- `results/topic4_sef_hfo/data_driven_dual_core_ood/carrier_canary/figures/dual_core_raw_carrier_canary.png`
+
+### 4.3 冻结 Node 的最小 AMPA/GABA kinetics canary
+
+在 Node、空间 OU、网络拓扑、外部 Poisson 均值和零 pathway redistribution 全部冻结的条件下，只扫描 `tau_d_AMPA={2.0,3.5} ms` 与 `tau_d_GABA={8,12,18} ms`。每格使用相同的 3 个 network seeds 和 8 s 轨迹；该轮是机制可行性 canary，不是正式参数拟合。
+
+| AMPA/GABA (ms) | both modes | OOD | natural KMeans | returned/network | 原生三周期事件 |
+|---|---:|---:|---:|---:|---:|
+| 2.0/8 | 3/3 | 0.458 | 不可评价 | 13.7 | 0% |
+| 2.0/12 | 3/3 | 0.531 | 0.831 (3/3) | 37.0 | 0% |
+| **2.0/18** | **3/3** | **0.339** | **0.925 (3/3)** | **38.3** | **0%** |
+| 3.5/8 | 1/3 | 0.700 | 不可评价 | 4.0 | 0% |
+| 3.5/12 | 3/3 | 0.579 | 0.733 (2/3) | 23.7 | 0% |
+| 3.5/18 | 3/3 | 0.542 | 0.768 (3/3) | 39.0 | 0% |
+
+两个结论需要分开：
+
+1. 将 AMPA 衰减从 3.5 ms 缩短到 2.0 ms、保留 GABA 18 ms，在这三个开发 seeds 上同时改善 OOD 和自然 KMeans，且没有明显牺牲事件产率。这是值得做独立 20 s confirmation 的**间期 repertoire 候选**，不是已冻结的新工作点。
+2. 六个组合的原生三周期比例全部为 0。单独调快 AMPA/GABA 衰减不足以把当前单脉冲事件变成局部高频振荡；继续扩大纯时间常数网格缺少科学依据。
+
+可复现产物：`results/topic4_sef_hfo/data_driven_dual_core_ood/carrier_kinetics/aggregate.json` 和 `figures/dual_core_carrier_kinetics.png`。
 
 通路图：
 
@@ -144,8 +172,9 @@ FULL_PATIENT_EVENT_DISTRIBUTION_NOT_RECOVERED
 1. 保持两个 Node core 冻结，先审计两种模式是否由不同 core 优先起核；不要把模式标签直接当 core 标签。
 2. 在该双 core 上重新拟合 EE/E->I 的表达剂量，而不是再次迁移旧连续场系数；目标同时保护 OOD、患者 31/69 模式比例、KMeans 和事件产率。
 3. 将绝对招募跨度加入正式端点；原有 0--1 onset 特征继续负责顺序，不再单独代表时间尺度。
-4. 单独验证和校准快载波。必须保存未做 5 ms 平滑的 1 ms population E/I rate 或突触电流；只有这个原始读出仍缺少快载波时，才开放最小的 AMPA/GABA 快时间常数网格。禁止用平滑后再 bandpass 的图制造“60 Hz 复现”。
-5. 每个候选继续用新网络确认，并保留 Fig.2C-style 全神经元 GIF；禁止只展示最像的事件而不报告总体 OOD。
+4. 原始读出与最小 AMPA/GABA 网格均已完成，并共同裁定为 `NATIVE_HF_CARRIER_NOT_RECOVERED`。下一步不再扩大纯 kinetics 网格，而是在冻结 Node 上拟合局部 EE/E->I expression；连续目标必须同时保护 OOD、自然 KMeans、事件产率，并增加原始 1 ms 三周期比例，不能用 bandpass 后振铃作为优化量。
+5. `AMPA=2.0/GABA=18 ms` 只作为 repertoire 候选进入新网络、20 s confirmation；只有独立确认仍改善 OOD/KMeans，才允许替换原 kinetics。载波阴性不因 repertoire 改善而撤回。
+6. 每个候选继续保留 Fig.2C-style 全神经元 GIF；禁止只展示最像的事件而不报告总体 OOD。
 
 ## 7. 产物与复现
 
@@ -154,5 +183,7 @@ FULL_PATIENT_EVENT_DISTRIBUTION_NOT_RECOVERED
 - per-network 表：`results/topic4_sef_hfo/data_driven_dual_core_ood/pathway_per_network.csv`
 - confirmation 图与 GIF：`results/topic4_sef_hfo/data_driven_dual_core_ood/confirmation/figures/`
 - pathway 图：`results/topic4_sef_hfo/data_driven_dual_core_ood/pathway/figures/`
+- raw carrier：`results/topic4_sef_hfo/data_driven_dual_core_ood/carrier_canary/`
+- kinetics canary：`results/topic4_sef_hfo/data_driven_dual_core_ood/carrier_kinetics/`
 
 正式运行共 176 个 worker 单元：fit 98、selection 18、confirmation 12、pathway 48；全部完成，无失败单元。所有长跑均由后台 service/nohup controller 管理，阶段完成后退出；最终分析按 network seed 做配对 bootstrap。

@@ -48,6 +48,14 @@ def _jsonable(value):
     return value
 
 
+def _finite_summary(values, reducer=np.mean):
+    array = np.asarray([
+        np.nan if value is None else float(value) for value in values
+    ], float)
+    finite = array[np.isfinite(array)]
+    return float(reducer(finite)) if len(finite) else None
+
+
 def _carrier_metrics(npz_path: Path, events: list[dict]) -> dict:
     with np.load(npz_path, allow_pickle=False) as loaded:
         time_ms = np.asarray(loaded["carrier_time_ms"], float)
@@ -184,11 +192,27 @@ def aggregate(config_path: Path) -> dict:
         selected = [
             row for row in rows if row["candidate_id"] == candidate["candidate_id"]
         ]
+        kmeans_values = [
+            row["natural_kmeans"].get("direction_balanced_alignment")
+            for row in selected
+        ]
+        carrier_values = [
+            row["carrier"]["native_three_cycle_event_fraction"]
+            for row in selected
+        ]
         summaries.append({
             **candidate,
             "n_networks": len(selected),
             "networks_with_both_modes": int(sum(
                 row["both_modes_in_support"] for row in selected
+            )),
+            "n_networks_kmeans_evaluable": int(sum(
+                value is not None and np.isfinite(float(value))
+                for value in kmeans_values
+            )),
+            "n_networks_carrier_evaluable": int(sum(
+                value is not None and np.isfinite(float(value))
+                for value in carrier_values
             )),
             "equal_network_ood_all_returned": float(np.mean([
                 row["ood_all_returned"] for row in selected
@@ -196,17 +220,11 @@ def aggregate(config_path: Path) -> dict:
             "equal_network_returned_events": float(np.mean([
                 row["n_returned"] for row in selected
             ])),
-            "natural_kmeans_alignment": float(np.nanmean([
-                row["natural_kmeans"].get("direction_balanced_alignment", np.nan)
-                for row in selected
-            ])),
-            "native_three_cycle_event_fraction": float(np.nanmean([
-                row["carrier"]["native_three_cycle_event_fraction"]
-                for row in selected
-            ])),
-            "median_fourier_peak_hz": float(np.nanmedian([
+            "natural_kmeans_alignment": _finite_summary(kmeans_values),
+            "native_three_cycle_event_fraction": _finite_summary(carrier_values),
+            "median_fourier_peak_hz": _finite_summary([
                 row["carrier"]["median_fourier_peak_hz"] for row in selected
-            ])),
+            ], reducer=np.median),
             "per_network": selected,
         })
     output = {
@@ -216,6 +234,13 @@ def aggregate(config_path: Path) -> dict:
         "n_candidates": len(summaries),
         "n_networks_per_candidate": len(config["simulation"]["network_seeds"]),
         "summaries": summaries,
+        "exploratory_verdict": (
+            "NATIVE_LOCAL_MULTICYCLE_CARRIER_NOT_RECOVERED"
+            if not any(
+                (row["native_three_cycle_event_fraction"] or 0.0) > 0.0
+                for row in summaries
+            ) else "NATIVE_LOCAL_MULTICYCLE_CARRIER_OBSERVED"
+        ),
         "claim_boundary": config["claim_boundary"],
         "config": {"path": str(config_path.relative_to(ROOT)), "sha256": _sha256(config_path)},
     }
@@ -251,7 +276,8 @@ def aggregate(config_path: Path) -> dict:
         "### dual_core_carrier_kinetics.png\n\n"
         "在冻结双 core Node、空间 OU、拓扑和零连接重分配下，仅比较 AMPA/GABA 衰减时间。"
         "A/B 检查患者支持和自然双模式是否保留，C 检查原始 1 ms 群体率是否出现至少三个规则周期，D 报告返回事件产率。\n\n"
-        "**关注点**：频率或周期改善只有在 OOD、KMeans 和事件产率没有明显恶化时才可继续。\n"
+        "**关注点**：六个组合均未产生原生三周期振荡；NA 表示该组合的支持内事件不足以评价自然 KMeans，"
+        "不是零分。频率或周期改善只有在 OOD、KMeans 和事件产率没有明显恶化时才可继续。\n"
     )
     return output
 

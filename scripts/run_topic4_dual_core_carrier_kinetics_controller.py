@@ -154,13 +154,13 @@ def run(config_path: Path, commit: str) -> dict:
             _atomic_json(status_path, payload)
             return payload
         if states.count("complete") == len(jobs):
-            payload["status"] = COMPLETE
-            _atomic_json(status_path, payload)
             subprocess.run([
                 sys.executable,
                 str(ROOT / "scripts/aggregate_topic4_dual_core_carrier_kinetics.py"),
                 "--config", str(config_path),
             ], cwd=ROOT, check=True)
+            payload["status"] = COMPLETE
+            _atomic_json(status_path, payload)
             subprocess.run(
                 ["notify-send", "Topic 4 carrier kinetics", "canary complete"],
                 check=False,

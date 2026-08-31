@@ -1,4 +1,7 @@
 import numpy as np
+import pytest
+
+from scripts.aggregate_topic4_dual_core_carrier_kinetics import _finite_summary
 
 from src.topic4_dual_core_carrier import (
     arrays_equal_with_nan,
@@ -9,6 +12,12 @@ from src.topic4_dual_core_carrier import (
     event_window_indices,
     raw_population_burst_summary,
 )
+
+
+def test_finite_summary_ignores_missing_values_without_emitting_nan():
+    assert _finite_summary([None, np.nan]) is None
+    assert _finite_summary([None, 0.2, np.nan, 0.4]) == pytest.approx(0.3)
+    assert _finite_summary([None, 20.0, 10.0], reducer=np.median) == 15.0
 
 
 def test_exact_parity_accepts_aligned_nan_but_not_finite_drift():
