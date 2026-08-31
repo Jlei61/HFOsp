@@ -7,6 +7,20 @@ import numpy as np
 from scipy.signal import find_peaks, welch
 
 
+def arrays_equal_with_nan(left: np.ndarray, right: np.ndarray) -> bool:
+    """Exact array equality while treating aligned missing values as equal."""
+    a = np.asarray(left)
+    b = np.asarray(right)
+    if a.shape != b.shape or a.dtype != b.dtype:
+        return False
+    if np.issubdtype(a.dtype, np.inexact):
+        return bool(
+            np.array_equal(np.isnan(a), np.isnan(b))
+            and np.array_equal(a[~np.isnan(a)], b[~np.isnan(b)])
+        )
+    return bool(np.array_equal(a, b))
+
+
 def dual_core_region_masks(
     positions: np.ndarray,
     centers_mm: np.ndarray,
@@ -161,7 +175,11 @@ def raw_population_burst_summary(
     baseline = np.asarray(baseline_values, float)
     if values.ndim != 1 or baseline.ndim != 1:
         raise ValueError("signal and baseline_values must be one-dimensional")
-    floor = float(np.quantile(baseline, 0.99)) if len(baseline) else 0.0
+    baseline_center = float(np.median(baseline)) if len(baseline) else 0.0
+    floor = (
+        float(np.quantile(np.abs(baseline - baseline_center), 0.99))
+        if len(baseline) else 0.0
+    )
     event_peak = float(np.max(values, initial=0.0))
     prominence = max(floor, 0.15 * event_peak, np.finfo(float).eps)
     distance = max(1, int(round(minimum_peak_distance_ms / bin_ms)))
@@ -187,8 +205,8 @@ def raw_population_burst_summary(
         ).tolist(),
         "raw_peak_interval_frequency_hz": interval_frequency_hz,
         "regular_three_cycle_burst": regular_cycles,
-        "baseline_q99_hz": floor,
-        "event_peak_hz": event_peak,
+        "baseline_variation_q99": floor,
+        "event_peak_value": event_peak,
         **_spectral_summary(values, fs_hz=1000.0 / bin_ms),
     }
 

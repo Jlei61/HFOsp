@@ -1,6 +1,7 @@
 import numpy as np
 
 from src.topic4_dual_core_carrier import (
+    arrays_equal_with_nan,
     baseline_mask_from_events,
     bin_continuous_trace,
     binned_group_rates_hz,
@@ -8,6 +9,14 @@ from src.topic4_dual_core_carrier import (
     event_window_indices,
     raw_population_burst_summary,
 )
+
+
+def test_exact_parity_accepts_aligned_nan_but_not_finite_drift():
+    left = np.array([1.0, np.nan, 2.0], dtype=np.float32)
+    right = np.array([1.0, np.nan, 2.0], dtype=np.float32)
+    assert arrays_equal_with_nan(left, right)
+    right[-1] = np.nextafter(right[-1], np.float32(np.inf))
+    assert not arrays_equal_with_nan(left, right)
 
 
 def test_dual_core_region_masks_form_disjoint_partition():

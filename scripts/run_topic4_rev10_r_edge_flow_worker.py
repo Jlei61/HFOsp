@@ -35,6 +35,7 @@ from src.topic4_dynamic_accessibility import (  # noqa: E402
 )
 from src.topic4_dual_core_ood import spatial_event_activity_grid  # noqa: E402
 from src.topic4_dual_core_carrier import (  # noqa: E402
+    arrays_equal_with_nan,
     bin_continuous_trace,
     binned_group_rates_hz,
     dual_core_region_masks,
@@ -736,7 +737,7 @@ def main():
         with np.load(parity_path, allow_pickle=False) as frozen:
             mismatches = [
                 key for key in parity_keys
-                if not np.array_equal(current_arrays[key], frozen[key])
+                if not arrays_equal_with_nan(current_arrays[key], frozen[key])
             ]
         if mismatches:
             raise RuntimeError(
