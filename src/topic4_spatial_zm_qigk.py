@@ -39,6 +39,10 @@ source-to-sink axis); the support coordinates are inputs and are not inferred
 from simulated activity.  ``gk_support_sigma_mm`` may give that recovery field
 a wider footprint than the endpoint q field; zero inherits
 ``q_endpoint_sigma_mm`` exactly for backward compatibility.
+``q_support_gain`` optionally applies mild q disinhibition on that same declared
+support.  This is the explicit spatial Z/qI--gK compromise: q and gK may coexist
+locally while remaining two state processes, and zero recovers the previous
+initial q field exactly.
 For the fast-subsystem atlas only, ``q_init_h_gain`` can also seed a deterministic
 nonuniform resource state from the same frozen ``h(x)`` field (positive gain =
 lower initial q in high-h tissue).  ``q_endpoint_gain`` adds a second,
@@ -107,6 +111,7 @@ class SpatialZMQIGKConfig:
     eta_m_sink_add: float = 0.0
     eta_m_gk_add: float = 0.0
     gk_support_sigma_mm: float = 0.0
+    q_support_gain: float = 0.0
     h_smooth_sigma_mm: float = 1.0
     trace_stride_steps: int = 10
     # Duck-typed by kick_probe.  This hybrid never changes recurrent E weights.
@@ -162,6 +167,7 @@ class SpatialZMQIGKConfig:
                 or abs(self.q_endpoint_gain) >= 1.0
                 or abs(self.q_source_gain) >= 1.0
                 or abs(self.q_sink_gain) >= 1.0
+                or abs(self.q_support_gain) >= 1.0
                 or abs(self.k_q_h_gain) >= 1.0
                 or abs(self.eta_m_h_gain) >= 1.0):
             raise ValueError("patient-field gains must have absolute value below one")
@@ -311,6 +317,8 @@ class SpatialZMQIGKSlowVars:
             raise ValueError("q_sink_gain requires frozen sink_centers_xy")
         if self.cfg.eta_m_gk_add != 0.0 and self.gk_centers_xy is None:
             raise ValueError("eta_m_gk_add requires frozen gk_centers_xy")
+        if self.cfg.q_support_gain != 0.0 and self.gk_centers_xy is None:
+            raise ValueError("q_support_gain requires frozen gk_centers_xy")
 
         qcfg = SpatialSlowFieldConfig(
             n_grid=int(self.cfg.n_grid),
@@ -393,6 +401,7 @@ class SpatialZMQIGKSlowVars:
                 self.sink_field, -float(self.cfg.q_sink_gain))
         if self.gk_centers_xy is None:
             self.gk_field = np.zeros_like(self.h_grid)
+            support_multiplier = np.ones_like(self.h_grid)
         else:
             gk_sigma_mm = (
                 float(self.cfg.gk_support_sigma_mm)
@@ -402,6 +411,8 @@ class SpatialZMQIGKSlowVars:
             self.gk_field = periodic_endpoint_field(
                 int(self.cfg.n_grid), self.L, self.gk_centers_xy,
                 gk_sigma_mm)
+            support_multiplier = _mean_one_bounded_modulation(
+                self.gk_field, -float(self.cfg.q_support_gain))
         q_init_grid = (
             float(self.cfg.q_init)
             * _mean_one_bounded_modulation(
@@ -409,6 +420,7 @@ class SpatialZMQIGKSlowVars:
             * endpoint_multiplier
             * source_multiplier
             * sink_multiplier
+            * support_multiplier
         )
         q_init_grid *= float(self.cfg.q_init) / float(np.mean(q_init_grid))
         np.clip(q_init_grid, float(self.cfg.q_min), 1.0, out=q_init_grid)

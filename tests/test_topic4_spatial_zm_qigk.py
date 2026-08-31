@@ -438,6 +438,48 @@ def test_zero_gk_support_width_exactly_inherits_q_endpoint_width():
     np.testing.assert_array_equal(inherited.eta_m_E, explicit.eta_m_E)
 
 
+def test_q_and_gk_can_share_one_frozen_support_without_extra_state():
+    pos_e, pos_i = _positions()
+    centers = np.asarray([[0.25, 0.25], [0.25, 1.25]])
+    baseline = SpatialZMQIGKSlowVars(
+        6, 18.0, pos_e, pos_i, 2.0, np.ones(4),
+        gk_centers_xy=centers,
+        cfg=SpatialZMQIGKConfig(
+            n_grid=4, sigma_q_mm=0.7, h_smooth_sigma_mm=0.5,
+            q_min=0.1, q_init=0.7, q_endpoint_sigma_mm=0.3,
+            gk_support_sigma_mm=0.6, eta_m_gk_add=10.0,
+        ),
+    )
+    hybrid = SpatialZMQIGKSlowVars(
+        6, 18.0, pos_e, pos_i, 2.0, np.ones(4),
+        gk_centers_xy=centers,
+        cfg=SpatialZMQIGKConfig(
+            n_grid=4, sigma_q_mm=0.7, h_smooth_sigma_mm=0.5,
+            q_min=0.1, q_init=0.7, q_endpoint_sigma_mm=0.3,
+            gk_support_sigma_mm=0.6, eta_m_gk_add=10.0,
+            q_support_gain=0.2,
+        ),
+    )
+    support = np.unravel_index(np.argmax(hybrid.gk_field), hybrid.gk_field.shape)
+    remote = np.unravel_index(np.argmin(hybrid.gk_field), hybrid.gk_field.shape)
+    assert hybrid.q_init_grid[support] < baseline.q_init_grid[support]
+    assert hybrid.q_init_grid[remote] > baseline.q_init_grid[remote]
+    np.testing.assert_array_equal(hybrid.eta_m_E, baseline.eta_m_E)
+    assert len(hybrid.TRACE_NAMES) == len(baseline.TRACE_NAMES)
+
+
+def test_nonzero_q_support_gain_requires_frozen_support_centres():
+    pos_e, pos_i = _positions()
+    with pytest.raises(ValueError, match="q_support_gain requires"):
+        SpatialZMQIGKSlowVars(
+            6, 18.0, pos_e, pos_i, 2.0, np.ones(4),
+            cfg=SpatialZMQIGKConfig(
+                n_grid=4, sigma_q_mm=0.7, h_smooth_sigma_mm=0.5,
+                q_support_gain=0.2,
+            ),
+        )
+
+
 def test_runner_selects_frozen_source_or_sink_contacts_without_refitting():
     substrate = SimpleNamespace(
         contact_names=["S2", "K1", "S1", "K2"],

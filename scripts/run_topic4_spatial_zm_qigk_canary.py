@@ -161,6 +161,10 @@ def main():
               "for exact backward compatibility."),
     )
     parser.add_argument(
+        "--q-support-gain", type=float, default=0.0,
+        help="q disinhibition gain on the same frozen support used by gK.",
+    )
+    parser.add_argument(
         "--gk-support", choices=("source", "sink", "downstream"),
         default="downstream",
     )
@@ -233,6 +237,7 @@ def main():
         eta_m_sink_add=float(args.eta_m_sink_add),
         eta_m_gk_add=float(args.eta_m_gk_add),
         gk_support_sigma_mm=float(args.gk_support_sigma),
+        q_support_gain=float(args.q_support_gain),
         trace_stride_steps=max(1, int(round(1.0 / dt))),
     )
     slow = None
@@ -300,6 +305,7 @@ def main():
             "legacy_endpoint_gain": float(args.q_endpoint_gain),
             "source_gain": float(args.q_source_gain),
             "sink_gain": float(args.q_sink_gain),
+            "support_gain": float(args.q_support_gain),
         },
         "gk_support": {
             "rule": args.gk_support,
@@ -310,6 +316,7 @@ def main():
                 if float(args.gk_support_sigma) > 0.0
                 else float(args.q_endpoint_sigma)
             ),
+            "q_support_gain": float(args.q_support_gain),
             "selection_uses_simulation_result": False,
         },
         "endpoint_field_rule": (

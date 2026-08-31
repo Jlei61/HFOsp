@@ -55,6 +55,7 @@ def _compact(path):
         "q_endpoint_gain": config.get("q_endpoint_gain", 0.0),
         "q_source_gain": config.get("q_source_gain", 0.0),
         "q_sink_gain": config.get("q_sink_gain", 0.0),
+        "q_support_gain": config.get("q_support_gain", 0.0),
         "q_endpoint_sigma_mm": config.get("q_endpoint_sigma_mm", 2.0),
         "q_endpoint_side": spatial_basis.get("active_endpoint_side", "union"),
         "freeze_q": config.get("freeze_q", False),
