@@ -166,6 +166,7 @@ def raw_population_burst_summary(
     bin_ms: float,
     baseline_values: np.ndarray,
     minimum_peak_distance_ms: float = 6.0,
+    minimum_population_peak_hz: float = 50.0,
 ) -> dict:
     """Describe raw population peaks before any band-pass filtering.
 
@@ -199,14 +200,22 @@ def raw_population_burst_summary(
             1000.0 / 150.0 <= mean_interval <= 1000.0 / 30.0
             and float(np.std(intervals) / mean_interval) <= 0.35
         )
+    peak_values = values[peaks]
+    population_cycles = bool(
+        regular_cycles
+        and np.sum(peak_values >= float(minimum_population_peak_hz)) >= 3
+    )
     return {
         "raw_peak_count": int(len(peaks)),
         "raw_peak_indices": peaks.astype(int).tolist(),
         "raw_peak_prominences": np.asarray(
             properties.get("prominences", []), float,
         ).tolist(),
+        "raw_peak_values": np.asarray(peak_values, float).tolist(),
         "raw_peak_interval_frequency_hz": interval_frequency_hz,
         "regular_three_cycle_burst": regular_cycles,
+        "population_three_cycle_burst": population_cycles,
+        "minimum_population_peak_hz": float(minimum_population_peak_hz),
         "baseline_variation_q99": floor,
         "event_peak_value": event_peak,
         **_spectral_summary(values, fs_hz=1000.0 / bin_ms),

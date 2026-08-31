@@ -84,6 +84,27 @@ def nondominated_mask(matrix: np.ndarray) -> np.ndarray:
     return output
 
 
+def paired_bootstrap_difference(
+    reference: np.ndarray, candidate: np.ndarray, *, draws: int, seed: int,
+) -> dict:
+    left = np.asarray(reference, float)
+    right = np.asarray(candidate, float)
+    finite = np.isfinite(left) & np.isfinite(right)
+    difference = right[finite] - left[finite]
+    if not len(difference):
+        return {"n_pairs": 0, "mean_difference": None, "ci90": [None, None]}
+    rng = np.random.default_rng(int(seed))
+    indices = rng.integers(0, len(difference), size=(int(draws), len(difference)))
+    samples = np.mean(difference[indices], axis=1)
+    return {
+        "n_pairs": int(len(difference)),
+        "mean_difference": float(np.mean(difference)),
+        "ci90": np.quantile(samples, [0.05, 0.95]).tolist(),
+        "candidate_lower_pairs": int(np.sum(difference < 0.0)),
+        "candidate_higher_pairs": int(np.sum(difference > 0.0)),
+    }
+
+
 def _patient_timing(target_path: Path) -> tuple[np.ndarray, float]:
     with np.load(target_path, allow_pickle=False) as loaded:
         onsets = np.asarray(loaded["patient_train_onsets"], float) * 1000.0
@@ -130,6 +151,7 @@ def _network_row(
             carrier.pop("ranks", None)
     return {
         **score,
+        "events": events,
         "mode_counts_in_support": counts,
         "mode_2_fraction": float(counts[1] / counts.sum()) if counts.sum() else 0.0,
         "natural_kmeans": {
@@ -295,6 +317,11 @@ def aggregate(config_path: Path, phase: str = "screen") -> dict:
                 row["carrier"]["native_three_cycle_event_fraction"]
                 for row in rows
             ]),
+            "native_population_three_cycle_event_fraction": _finite_mean([
+                None if row["carrier"] is None else
+                row["carrier"]["native_population_three_cycle_event_fraction"]
+                for row in rows
+            ]),
             "per_network": rows,
         })
     component_matrix = np.asarray([
@@ -322,6 +349,53 @@ def aggregate(config_path: Path, phase: str = "screen") -> dict:
     else:
         shortlist = [row["candidate_id"] for row in ranking[:4]]
         frozen_work_point = None
+    paired_confirmation = None
+    if phase == "confirmation":
+        node_summary = next(
+            row for row in summaries if row["candidate_id"] == "gee000_getoi000"
+        )
+        work_summary = next(
+            row for row in summaries if row["candidate_id"] == frozen_work_point
+        )
+        node_by_seed = {row["seed"]: row for row in node_summary["per_network"]}
+        work_by_seed = {row["seed"]: row for row in work_summary["per_network"]}
+        common = sorted(set(node_by_seed) & set(work_by_seed))
+        draws = int(config["search"]["paired_network_bootstrap"]["draws"])
+        seed0 = int(config["search"]["paired_network_bootstrap"]["seed"])
+
+        def paired(metric):
+            return paired_bootstrap_difference(
+                [metric(node_by_seed[seed]) for seed in common],
+                [metric(work_by_seed[seed]) for seed in common],
+                draws=draws, seed=seed0,
+            )
+
+        paired_confirmation = {
+            "candidate_minus_node": {
+                "OOD_all_returned": paired(lambda row: row["ood_all_returned"]),
+                "mode_2_fraction": paired(lambda row: row["mode_2_fraction"]),
+                "natural_kmeans_alignment": paired(lambda row: row["natural_kmeans"].get(
+                    "direction_balanced_alignment", np.nan
+                )),
+                "returned_events": paired(lambda row: row["n_returned"]),
+                "native_three_cycle_event_fraction": paired(lambda row: (
+                    np.nan if row["carrier"] is None else
+                    row["carrier"]["native_three_cycle_event_fraction"]
+                )),
+                "native_population_three_cycle_event_fraction": paired(lambda row: (
+                    np.nan if row["carrier"] is None else
+                    row["carrier"]["native_population_three_cycle_event_fraction"]
+                )),
+                "mode_1_recruitment_span_ms": paired(lambda row: (
+                    row["median_recruitment_span_ms_by_mode"][0]
+                )),
+                "mode_2_recruitment_span_ms": paired(lambda row: (
+                    row["median_recruitment_span_ms_by_mode"][1]
+                )),
+            },
+            "bootstrap_draws": draws,
+            "bootstrap_seed": seed0,
+        }
     output = {
         "status": f"DUAL_CORE_PATHWAY_REFIT_{phase.upper()}_AGGREGATED",
         "scientific_role": config["scientific_role"],
@@ -335,6 +409,7 @@ def aggregate(config_path: Path, phase: str = "screen") -> dict:
         "ranking": [row["candidate_id"] for row in ranking],
         "selection_shortlist": shortlist,
         "frozen_work_point": frozen_work_point,
+        "paired_confirmation": paired_confirmation,
         "claim_boundary": config["claim_boundary"],
         "config": {"path": str(config_path.relative_to(ROOT)), "sha256": _sha256(config_path)},
         "manifest": {"path": str(manifest_path.relative_to(ROOT)), "sha256": _sha256(manifest_path)},

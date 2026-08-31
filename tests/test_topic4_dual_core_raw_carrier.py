@@ -79,6 +79,7 @@ def test_raw_three_cycle_detector_rejects_one_pulse_and_accepts_native_cycles():
     )
     assert rejected["raw_peak_count"] == 1
     assert not rejected["regular_three_cycle_burst"]
+    assert not rejected["population_three_cycle_burst"]
 
     cycles = np.zeros(256)
     cycles[[80, 96, 112, 128]] = 50.0
@@ -87,7 +88,18 @@ def test_raw_three_cycle_detector_rejects_one_pulse_and_accepts_native_cycles():
     )
     assert accepted["raw_peak_count"] == 4
     assert accepted["regular_three_cycle_burst"]
+    assert accepted["population_three_cycle_burst"]
     assert accepted["raw_peak_interval_frequency_hz"] == 62.5
+
+
+def test_timing_only_cycles_do_not_count_as_population_carrier():
+    signal = np.zeros(256)
+    signal[[80, 96, 112, 128]] = 4.0
+    result = raw_population_burst_summary(
+        signal, bin_ms=1.0, baseline_values=np.zeros(512),
+    )
+    assert result["regular_three_cycle_burst"]
+    assert not result["population_three_cycle_burst"]
 
 
 def test_baseline_mask_excludes_event_and_guard_intervals():

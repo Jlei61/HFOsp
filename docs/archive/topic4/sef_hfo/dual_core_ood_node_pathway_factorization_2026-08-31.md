@@ -2,7 +2,7 @@
 
 **日期**：2026-08-31
 
-**状态**：`DUAL_CORE_NODE_REPERTOIRE_PARTIAL_SUPPORT / FULL_DISTRIBUTION_NOT_RECOVERED / EE_OOD_FILTER_WITH_YIELD_COST / ETOI_MODE_OCCUPANCY_MODULATOR / TRANSFERRED_PATHWAYS_NONADDITIVE / LOCAL_TRANSIENT_CONCENTRATED / NATIVE_HF_CARRIER_NOT_RECOVERED`
+**状态**：`DUAL_CORE_NODE_REPERTOIRE_PARTIAL_SUPPORT / PATHWAY_REFIT_OOD_IMPROVEMENT_CONFIRMED / MODE_OCCUPANCY_PARTIAL / NATURAL_KMEANS_NOT_IMPROVED / FULL_DISTRIBUTION_NOT_RECOVERED / NATIVE_HF_CARRIER_NOT_RECOVERED`
 
 **范围**：development-only；不作 patient-blind、解剖 core、临床波形、发作或患者因果机制主张。
 
@@ -148,6 +148,32 @@ E->I 主要把模式占用推向 Mode 2，并略微增加事件产率；
 
 可复现产物：`results/topic4_sef_hfo/data_driven_dual_core_ood/carrier_kinetics/aggregate.json` 和 `figures/dual_core_carrier_kinetics.png`。
 
+### 4.4 双 core 上的 EE/E->I 表达剂量重标定
+
+在 Node、Z/M、AMPA/GABA kinetics、拓扑、延迟和每个 target 的入射预算全部冻结后，仅缩放已经学得的 EE 与 E->I coefficient row。开发 screen 为 5 个 `g_EE` × 4 个 `g_EtoI` × 3 个共同 network seeds，共 60/60 完成；随后 4 个候选加 paired Node 进入 12 s selection，最终按冻结连续目标选择 `g_EE=0.5, g_EtoI=1.0`。这不是重新学习连接图，只是重新标定两条 learned redistribution 的表达强度。
+
+正式 confirmation 使用 12 个全新 paired network seeds、20 s/seed，共 24/24 完成：
+
+| 指标 | paired Node | `g_EE=0.5, g_EtoI=1.0` |
+|---|---:|---:|
+| OOD，越低越好 | 0.466 | 0.373 |
+| Mode 2 share | 0.188 | 0.358 |
+| natural KMeans alignment | 0.693 | 0.645 |
+| returned events/network | 93.8 | 95.1 |
+| Mode 1/2 招募跨度 | 55.1 / 38.4 ms | 52.0 / 50.7 ms |
+| timing-only 三周期事件 | 1.67% | 2.10% |
+| 群体同步三周期事件 | 0% | 0% |
+
+以 network seed 为独立单位的 paired bootstrap 显示：OOD 改变为 -0.092，90% CI -0.129 至 -0.054，12 张网络中 11 张降低；Mode 2 share 改变为 +0.170，90% CI 0.110--0.229，11/12 升高。returned event 数改变 +1.33，90% CI -2.25--5.00，说明 OOD 改善不是靠删掉一半事件得到的。相反，natural KMeans 改变为 -0.048，90% CI -0.153--0.067，未改善且方向略差；患者 Mode 2 比例为 0.691，模型仍只有 0.358。因此这是**患者支持范围和模式占用的部分改善**，不是完整间期分布恢复。
+
+原生载波审计还发现旧 timing-only 判据的漏洞：它只要求三个间隔规则的局部峰，没有要求峰代表群体同步；在基线接近零时，单神经元量化脉冲也会入选。保留旧字段作历史诊断后，新增每个周期至少对应 1 ms 内 5% core 神经元同步的幅度条件。两臂在新指标上均为 0%；峰值最大的旧阳性也只达到 48.3 Hz，未越过 50 Hz 群体线，未滤波电流表现为宽脉冲而非多周期振荡。故通路剂量重标定没有恢复原生 HFO carrier。
+
+可复现产物：
+
+- `results/topic4_sef_hfo/data_driven_dual_core_ood/pathway_refit/confirmation/aggregate.json`
+- `results/topic4_sef_hfo/data_driven_dual_core_ood/pathway_refit/confirmation/figures/dual_core_pathway_confirmation.png`
+- `results/topic4_sef_hfo/data_driven_dual_core_ood/pathway_refit/confirmation/figures/dual_core_pathway_refit_fig2c_mode_check.gif`
+
 通路图：
 
 - `results/topic4_sef_hfo/data_driven_dual_core_ood/pathway/figures/dual_core_node_pathway_factorization.png`
@@ -170,9 +196,9 @@ FULL_PATIENT_EVENT_DISTRIBUTION_NOT_RECOVERED
 下一轮若继续降低 weakest-mode error，不应先增加 core 数或再次放开无约束自由场。最小修正应针对当前 residual：
 
 1. 保持两个 Node core 冻结，先审计两种模式是否由不同 core 优先起核；不要把模式标签直接当 core 标签。
-2. 在该双 core 上重新拟合 EE/E->I 的表达剂量，而不是再次迁移旧连续场系数；目标同时保护 OOD、患者 31/69 模式比例、KMeans 和事件产率。
+2. EE/E->I 表达剂量重标定已经完成：它稳定改善 OOD 和 Mode 2 占用，但没有改善 natural KMeans，也没有达到患者 31/69 比例。继续扩大同一二维剂量网格的边际价值低。
 3. 将绝对招募跨度加入正式端点；原有 0--1 onset 特征继续负责顺序，不再单独代表时间尺度。
-4. 原始读出与最小 AMPA/GABA 网格均已完成，并共同裁定为 `NATIVE_HF_CARRIER_NOT_RECOVERED`。下一步不再扩大纯 kinetics 网格，而是在冻结 Node 上拟合局部 EE/E->I expression；连续目标必须同时保护 OOD、自然 KMeans、事件产率，并增加原始 1 ms 三周期比例，不能用 bandpass 后振铃作为优化量。
+4. 原始读出、最小 AMPA/GABA 网格和 EE/E->I expression refit 均已完成，并共同裁定为 `NATIVE_HF_CARRIER_NOT_RECOVERED`。下一步若仍要求局部 HFO carrier，应增加明确能形成 fast E/I recurrent oscillation 的机制自由度；不能继续用 bandpass 后振铃或 timing-only 单神经元峰作为优化量。
 5. `AMPA=2.0/GABA=18 ms` 只作为 repertoire 候选进入新网络、20 s confirmation；只有独立确认仍改善 OOD/KMeans，才允许替换原 kinetics。载波阴性不因 repertoire 改善而撤回。
 6. 每个候选继续保留 Fig.2C-style 全神经元 GIF；禁止只展示最像的事件而不报告总体 OOD。
 
@@ -185,5 +211,6 @@ FULL_PATIENT_EVENT_DISTRIBUTION_NOT_RECOVERED
 - pathway 图：`results/topic4_sef_hfo/data_driven_dual_core_ood/pathway/figures/`
 - raw carrier：`results/topic4_sef_hfo/data_driven_dual_core_ood/carrier_canary/`
 - kinetics canary：`results/topic4_sef_hfo/data_driven_dual_core_ood/carrier_kinetics/`
+- pathway refit：`results/topic4_sef_hfo/data_driven_dual_core_ood/pathway_refit/`
 
-正式运行共 176 个 worker 单元：fit 98、selection 18、confirmation 12、pathway 48；全部完成，无失败单元。所有长跑均由后台 service/nohup controller 管理，阶段完成后退出；最终分析按 network seed 做配对 bootstrap。
+初始双 core 与四臂运行共 176 个 worker 单元：fit 98、selection 18、confirmation 12、pathway 48；后续 pathway refit 另有 99 个单元：screen 60、selection 15、paired confirmation 24。全部完成，无失败单元。所有长跑均由后台 service/nohup controller 管理，阶段完成后退出；最终分析按 network seed 做配对 bootstrap。

@@ -186,9 +186,20 @@ def render(config_path: Path, output_dir: Path, *, fps: float = 8.0) -> dict:
     root = ROOT / config["output_root"] / "confirmation"
     aggregate_path = root / "aggregate.json"
     aggregate = json.loads(aggregate_path.read_text())
-    if aggregate.get("status") != "DUAL_CORE_OOD_PHASE_COMPLETE":
+    aggregate_status = aggregate.get("status")
+    if aggregate_status == "DUAL_CORE_OOD_PHASE_COMPLETE":
+        candidate_summary = aggregate["ranking"][0]
+        refit = False
+    elif aggregate_status == "DUAL_CORE_PATHWAY_REFIT_CONFIRMATION_AGGREGATED":
+        candidate_id = aggregate["frozen_work_point"]
+        candidate_summary = next(
+            row for row in aggregate["summaries"]
+            if row["candidate_id"] == candidate_id
+        )
+        refit = True
+    else:
         raise RuntimeError("confirmation aggregate is not complete")
-    selected = select_representative_pair(aggregate["ranking"][0])
+    selected = select_representative_pair(candidate_summary)
     json_path = ROOT / selected["worker_json"]
     npz_path = ROOT / selected["worker_npz"]
     worker = json.loads(json_path.read_text())
@@ -309,7 +320,11 @@ def render(config_path: Path, output_dir: Path, *, fps: float = 8.0) -> dict:
         0.5, 0.945, "", ha="center", va="top", fontsize=7.2, fontweight="bold",
     )
     fig.suptitle(
-        "Fitted dual-core Node: model activity versus frozen patient mode order",
+        (
+            "Dual-core Node + refit pathways: model versus patient mode order"
+            if refit else
+            "Fitted dual-core Node: model activity versus frozen patient mode order"
+        ),
         y=0.995, fontsize=9.0, fontweight="bold",
     )
     fig.subplots_adjust(left=0.095, right=0.985, bottom=0.075, top=0.87)
@@ -331,7 +346,11 @@ def render(config_path: Path, output_dir: Path, *, fps: float = 8.0) -> dict:
         return [*images, *cursors, time_label]
 
     output_dir.mkdir(parents=True, exist_ok=True)
-    stem = output_dir / "dual_core_node_fig2c_mode_check"
+    stem_name = (
+        "dual_core_pathway_refit_fig2c_mode_check"
+        if refit else "dual_core_node_fig2c_mode_check"
+    )
+    stem = output_dir / stem_name
     animation = FuncAnimation(
         fig, update, frames=len(relative_time), interval=1000.0 / fps, blit=False,
     )
@@ -343,12 +362,15 @@ def render(config_path: Path, output_dir: Path, *, fps: float = 8.0) -> dict:
     for name, index in frame_indices.items():
         update(index)
         fig.savefig(
-            output_dir / f"dual_core_node_fig2c_mode_check_{name}.png",
+            output_dir / f"{stem_name}_{name}.png",
             dpi=300, facecolor="white", bbox_inches="tight", pad_inches=0.03,
         )
     plt.close(fig)
     metadata = {
-        "status": "DUAL_CORE_NODE_FIG2C_MODE_CHECK_RENDERED",
+        "status": (
+            "DUAL_CORE_PATHWAY_REFIT_FIG2C_MODE_CHECK_RENDERED"
+            if refit else "DUAL_CORE_NODE_FIG2C_MODE_CHECK_RENDERED"
+        ),
         "candidate_id": selected["candidate_id"],
         "seed": selected["seed"],
         "network_ood_all_returned": selected["network_ood_all_returned"],
@@ -382,18 +404,23 @@ def render(config_path: Path, output_dir: Path, *, fps: float = 8.0) -> dict:
         "outputs": [
             str(stem.with_suffix(".gif").relative_to(ROOT)),
             *[
-                str((output_dir / f"dual_core_node_fig2c_mode_check_{name}.png").relative_to(ROOT))
+                str((output_dir / f"{stem_name}_{name}.png").relative_to(ROOT))
                 for name in frame_indices
             ],
         ],
     }
-    metadata_path = output_dir / "dual_core_node_fig2c_mode_check_metadata.json"
+    metadata_path = output_dir / f"{stem_name}_metadata.json"
     metadata_path.write_text(json.dumps(metadata, indent=2) + "\n")
     readme = output_dir / "README.md"
     existing = readme.read_text() if readme.exists() else ""
     entry = (
-        "### dual_core_node_fig2c_mode_check.gif\n"
-        "严格双 core Node 候选在同一 confirmation 网络中的两类代表事件。上排是 "
+        f"### {stem_name}.gif\n"
+        + (
+            "冻结双 core Node 与重新标定局部通路在同一 confirmation 网络中的两类代表事件。"
+            if refit else
+            "严格双 core Node 候选在同一 confirmation 网络中的两类代表事件。"
+        )
+        + "上排是 "
         "5 ms 兴奋神经元活动场；实线和白色虚线分别在每根杆内连接模型事件与患者冻结原型的"
         "触点招募顺序，避免把跨杆跳转误画成空间传播边；"
         "下排复用 Fig.4 的 30–80 Hz virtual-contact 处理链和共同幅度尺度，但这里是两个事件的"
@@ -403,7 +430,7 @@ def render(config_path: Path, output_dir: Path, *, fps: float = 8.0) -> dict:
         "未形成完整传播的情况。\n"
     )
     readme.write_text(_upsert_readme_entry(
-        existing, "### dual_core_node_fig2c_mode_check.gif", entry,
+        existing, f"### {stem_name}.gif", entry,
     ))
     return metadata
 

@@ -7,6 +7,7 @@ import pytest
 from scripts.aggregate_topic4_dual_core_pathway_refit import (
     _event_spans_ms,
     nondominated_mask,
+    paired_bootstrap_difference,
     pathway_objective,
 )
 from scripts.freeze_topic4_dual_core_pathway_refit import _candidate_id
@@ -95,3 +96,15 @@ def test_confirmation_manifest_freezes_one_candidate_plus_node_reference():
     assert manifest["fixed_contract"]["selection_candidate_ids"] == [
         selectable[0]["candidate_id"]
     ]
+
+
+def test_paired_bootstrap_uses_network_difference_as_unit():
+    result = paired_bootstrap_difference(
+        np.array([1.0, 2.0, 3.0]),
+        np.array([0.5, 1.5, 2.5]),
+        draws=128, seed=7,
+    )
+    assert result["n_pairs"] == 3
+    assert result["mean_difference"] == -0.5
+    assert result["ci90"] == [-0.5, -0.5]
+    assert result["candidate_lower_pairs"] == 3

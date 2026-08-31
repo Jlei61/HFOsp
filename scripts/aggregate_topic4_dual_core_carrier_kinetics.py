@@ -94,6 +94,9 @@ def _carrier_metrics(npz_path: Path, events: list[dict]) -> dict:
             "any_core_regular_three_cycle": bool(any(
                 row["regular_three_cycle_burst"] for row in core_rows
             )),
+            "any_core_population_three_cycle": bool(any(
+                row["population_three_cycle_burst"] for row in core_rows
+            )),
             "core_metrics": core_rows,
         })
     peak_values = [
@@ -110,6 +113,11 @@ def _carrier_metrics(npz_path: Path, events: list[dict]) -> dict:
         "native_three_cycle_event_fraction": (
             float(np.mean([
                 row["any_core_regular_three_cycle"] for row in per_event
+            ])) if per_event else None
+        ),
+        "native_population_three_cycle_event_fraction": (
+            float(np.mean([
+                row["any_core_population_three_cycle"] for row in per_event
             ])) if per_event else None
         ),
         "median_fourier_peak_hz": float(np.median(peak_values)) if peak_values else None,
