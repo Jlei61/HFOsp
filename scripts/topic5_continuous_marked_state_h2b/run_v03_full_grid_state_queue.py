@@ -32,7 +32,9 @@ EXTRACTOR = REPO / "scripts/topic5_continuous_marked_state_h2b/extract_states.py
 INVENTORY = CANONICAL_V0_2_RESULT_ROOT / "manifests/r1_7_checkpoint_inventory.json"
 DEFAULT_SUBJECTS = (
     "epilepsiae_1073", "epilepsiae_1077", "epilepsiae_1125",
-    "epilepsiae_253", "epilepsiae_442", "epilepsiae_548",
+    "epilepsiae_1146", "epilepsiae_1150", "epilepsiae_253",
+    "epilepsiae_442", "epilepsiae_548", "epilepsiae_635",
+    "yuquan_xuxinyi",
 )
 
 

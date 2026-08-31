@@ -30,7 +30,9 @@ from src.topic5_continuous_marked_state_r1.r1_2 import load_full_design  # noqa:
 
 DEFAULT_SUBJECTS = (
     "epilepsiae_1073", "epilepsiae_1077", "epilepsiae_1125",
-    "epilepsiae_253", "epilepsiae_442", "epilepsiae_548",
+    "epilepsiae_1146", "epilepsiae_1150", "epilepsiae_253",
+    "epilepsiae_442", "epilepsiae_548", "epilepsiae_635",
+    "yuquan_xuxinyi",
 )
 
 
