@@ -1,0 +1,571 @@
+{
+  "status": "DUAL_CORE_TEMPORAL_CARRIER_AUDIT_COMPLETE",
+  "no_new_simulation": true,
+  "patient_absolute_onset_span_ms": {
+    "mode_0": {
+      "n": 9275,
+      "quantiles": {
+        "0.05": 17.760944366455078,
+        "0.5": 42.55270957946777,
+        "0.95": 111.10029220581055
+      }
+    },
+    "mode_1": {
+      "n": 20774,
+      "quantiles": {
+        "0.05": 20.22223472595215,
+        "0.5": 47.9583740234375,
+        "0.95": 104.26654815673828
+      }
+    }
+  },
+  "model_pathway_arms": {
+    "Node": {
+      "summary_across_network_medians": {
+        "median_onset_span_ms": {
+          "n": 12,
+          "quantiles": {
+            "0.1": 28.2,
+            "0.5": 36.0,
+            "0.9": 50.0
+          }
+        },
+        "median_peak_hz": {
+          "n": 12,
+          "quantiles": {
+            "0.1": 23.4375,
+            "0.5": 23.4375,
+            "0.9": 23.4375
+          }
+        },
+        "median_centroid_20_150_hz": {
+          "n": 12,
+          "quantiles": {
+            "0.1": 29.319922990576263,
+            "0.5": 29.442088393525417,
+            "0.9": 29.559058783326986
+          }
+        },
+        "median_power_ratio_30_80_over_5_30": {
+          "n": 12,
+          "quantiles": {
+            "0.1": 0.1203438133967037,
+            "0.5": 0.12439835807621868,
+            "0.9": 0.1293149300297114
+          }
+        }
+      },
+      "per_network": [
+        {
+          "seed": 2441,
+          "n_returned_readable": 83,
+          "median_onset_span_ms": 34.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 29.451315203373156,
+          "median_power_ratio_30_80_over_5_30": 0.12634652426600468
+        },
+        {
+          "seed": 2442,
+          "n_returned_readable": 73,
+          "median_onset_span_ms": 42.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 29.535076639091407,
+          "median_power_ratio_30_80_over_5_30": 0.1285760772322865
+        },
+        {
+          "seed": 2443,
+          "n_returned_readable": 78,
+          "median_onset_span_ms": 33.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 29.447814132807682,
+          "median_power_ratio_30_80_over_5_30": 0.12508903318840145
+        },
+        {
+          "seed": 2444,
+          "n_returned_readable": 74,
+          "median_onset_span_ms": 38.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 29.315160383860164,
+          "median_power_ratio_30_80_over_5_30": 0.12025403940512519
+        },
+        {
+          "seed": 2445,
+          "n_returned_readable": 72,
+          "median_onset_span_ms": 50.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 29.436362654243148,
+          "median_power_ratio_30_80_over_5_30": 0.12275265781192923
+        },
+        {
+          "seed": 2446,
+          "n_returned_readable": 76,
+          "median_onset_span_ms": 38.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 29.397915718710742,
+          "median_power_ratio_30_80_over_5_30": 0.1228317669718791
+        },
+        {
+          "seed": 2447,
+          "n_returned_readable": 77,
+          "median_onset_span_ms": 52.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 29.561723466019828,
+          "median_power_ratio_30_80_over_5_30": 0.12991508707307806
+        },
+        {
+          "seed": 2448,
+          "n_returned_readable": 78,
+          "median_onset_span_ms": 32.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 29.36278645102116,
+          "median_power_ratio_30_80_over_5_30": 0.12115177932091031
+        },
+        {
+          "seed": 2449,
+          "n_returned_readable": 85,
+          "median_onset_span_ms": 28.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 29.41854691528378,
+          "median_power_ratio_30_80_over_5_30": 0.12370768296403593
+        },
+        {
+          "seed": 2450,
+          "n_returned_readable": 77,
+          "median_onset_span_ms": 30.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 29.598733677999327,
+          "median_power_ratio_30_80_over_5_30": 0.12939702478498083
+        },
+        {
+          "seed": 2451,
+          "n_returned_readable": 81,
+          "median_onset_span_ms": 26.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 29.489354171098576,
+          "median_power_ratio_30_80_over_5_30": 0.12813410290407268
+        },
+        {
+          "seed": 2452,
+          "n_returned_readable": 83,
+          "median_onset_span_ms": 50.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 29.30067950026445,
+          "median_power_ratio_30_80_over_5_30": 0.11994017645644499
+        }
+      ]
+    },
+    "Node+EE": {
+      "summary_across_network_medians": {
+        "median_onset_span_ms": {
+          "n": 12,
+          "quantiles": {
+            "0.1": 38.1,
+            "0.5": 47.5,
+            "0.9": 59.400000000000006
+          }
+        },
+        "median_peak_hz": {
+          "n": 12,
+          "quantiles": {
+            "0.1": 23.4375,
+            "0.5": 23.4375,
+            "0.9": 23.4375
+          }
+        },
+        "median_centroid_20_150_hz": {
+          "n": 12,
+          "quantiles": {
+            "0.1": 29.190309967303143,
+            "0.5": 29.294511747945748,
+            "0.9": 29.4412329858661
+          }
+        },
+        "median_power_ratio_30_80_over_5_30": {
+          "n": 12,
+          "quantiles": {
+            "0.1": 0.11160553845955642,
+            "0.5": 0.11387431528332172,
+            "0.9": 0.12143173462108042
+          }
+        }
+      },
+      "per_network": [
+        {
+          "seed": 2441,
+          "n_returned_readable": 11,
+          "median_onset_span_ms": 52.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 29.248477662819866,
+          "median_power_ratio_30_80_over_5_30": 0.11301964631277664
+        },
+        {
+          "seed": 2442,
+          "n_returned_readable": 69,
+          "median_onset_span_ms": 36.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 29.336839835619575,
+          "median_power_ratio_30_80_over_5_30": 0.11563410222911626
+        },
+        {
+          "seed": 2443,
+          "n_returned_readable": 6,
+          "median_onset_span_ms": 60.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 29.499905687454323,
+          "median_power_ratio_30_80_over_5_30": 0.1272861923463232
+        },
+        {
+          "seed": 2444,
+          "n_returned_readable": 8,
+          "median_onset_span_ms": 49.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 29.133018963469645,
+          "median_power_ratio_30_80_over_5_30": 0.11342506093220206
+        },
+        {
+          "seed": 2445,
+          "n_returned_readable": 61,
+          "median_onset_span_ms": 44.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 29.183846890023506,
+          "median_power_ratio_30_80_over_5_30": 0.11132228937652747
+        },
+        {
+          "seed": 2446,
+          "n_returned_readable": 65,
+          "median_onset_span_ms": 38.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 29.26330077276771,
+          "median_power_ratio_30_80_over_5_30": 0.1132278113491094
+        },
+        {
+          "seed": 2447,
+          "n_returned_readable": 68,
+          "median_onset_span_ms": 42.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 29.4001902253814,
+          "median_power_ratio_30_80_over_5_30": 0.11432356963444137
+        },
+        {
+          "seed": 2448,
+          "n_returned_readable": 19,
+          "median_onset_span_ms": 60.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 29.283752765484547,
+          "median_power_ratio_30_80_over_5_30": 0.11930574136780567
+        },
+        {
+          "seed": 2449,
+          "n_returned_readable": 53,
+          "median_onset_span_ms": 46.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 29.44579329258662,
+          "median_power_ratio_30_80_over_5_30": 0.12166795609366651
+        },
+        {
+          "seed": 2450,
+          "n_returned_readable": 13,
+          "median_onset_span_ms": 54.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 29.399936677838813,
+          "median_power_ratio_30_80_over_5_30": 0.11144841536475418
+        },
+        {
+          "seed": 2451,
+          "n_returned_readable": 29,
+          "median_onset_span_ms": 54.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 29.305270730406946,
+          "median_power_ratio_30_80_over_5_30": 0.11335587076977767
+        },
+        {
+          "seed": 2452,
+          "n_returned_readable": 62,
+          "median_onset_span_ms": 39.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 29.262047460216806,
+          "median_power_ratio_30_80_over_5_30": 0.11712967388944004
+        }
+      ]
+    },
+    "Node+EtoI": {
+      "summary_across_network_medians": {
+        "median_onset_span_ms": {
+          "n": 12,
+          "quantiles": {
+            "0.1": 26.2,
+            "0.5": 32.0,
+            "0.9": 35.7
+          }
+        },
+        "median_peak_hz": {
+          "n": 12,
+          "quantiles": {
+            "0.1": 23.4375,
+            "0.5": 23.4375,
+            "0.9": 23.4375
+          }
+        },
+        "median_centroid_20_150_hz": {
+          "n": 12,
+          "quantiles": {
+            "0.1": 28.892264044679486,
+            "0.5": 28.976358907121913,
+            "0.9": 29.13231971655329
+          }
+        },
+        "median_power_ratio_30_80_over_5_30": {
+          "n": 12,
+          "quantiles": {
+            "0.1": 0.10104897648908973,
+            "0.5": 0.10374601311831927,
+            "0.9": 0.11223699329517958
+          }
+        }
+      },
+      "per_network": [
+        {
+          "seed": 2441,
+          "n_returned_readable": 86,
+          "median_onset_span_ms": 25.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 28.996635940739615,
+          "median_power_ratio_30_80_over_5_30": 0.10643995378405932
+        },
+        {
+          "seed": 2442,
+          "n_returned_readable": 76,
+          "median_onset_span_ms": 32.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 28.9046850820658,
+          "median_power_ratio_30_80_over_5_30": 0.10381473053452493
+        },
+        {
+          "seed": 2443,
+          "n_returned_readable": 75,
+          "median_onset_span_ms": 36.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 28.97859423101714,
+          "median_power_ratio_30_80_over_5_30": 0.10289394553688758
+        },
+        {
+          "seed": 2444,
+          "n_returned_readable": 75,
+          "median_onset_span_ms": 26.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 28.89088392941434,
+          "median_power_ratio_30_80_over_5_30": 0.10188203421564448
+        },
+        {
+          "seed": 2445,
+          "n_returned_readable": 76,
+          "median_onset_span_ms": 32.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 29.08929553793159,
+          "median_power_ratio_30_80_over_5_30": 0.10900969983751435
+        },
+        {
+          "seed": 2446,
+          "n_returned_readable": 78,
+          "median_onset_span_ms": 32.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 29.044892398743688,
+          "median_power_ratio_30_80_over_5_30": 0.10835533470934403
+        },
+        {
+          "seed": 2447,
+          "n_returned_readable": 79,
+          "median_onset_span_ms": 36.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 28.974123583226685,
+          "median_power_ratio_30_80_over_5_30": 0.1036772957021136
+        },
+        {
+          "seed": 2448,
+          "n_returned_readable": 82,
+          "median_onset_span_ms": 30.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 28.92665405524822,
+          "median_power_ratio_30_80_over_5_30": 0.10095641451947253
+        },
+        {
+          "seed": 2449,
+          "n_returned_readable": 77,
+          "median_onset_span_ms": 28.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 29.13710018084459,
+          "median_power_ratio_30_80_over_5_30": 0.11259558145714238
+        },
+        {
+          "seed": 2450,
+          "n_returned_readable": 84,
+          "median_onset_span_ms": 29.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 28.851279441515636,
+          "median_power_ratio_30_80_over_5_30": 0.09833316397520614
+        },
+        {
+          "seed": 2451,
+          "n_returned_readable": 80,
+          "median_onset_span_ms": 33.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 28.919888128306805,
+          "median_power_ratio_30_80_over_5_30": 0.1029985818608996
+        },
+        {
+          "seed": 2452,
+          "n_returned_readable": 87,
+          "median_onset_span_ms": 32.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 29.18054044536988,
+          "median_power_ratio_30_80_over_5_30": 0.11282347734133047
+        }
+      ]
+    },
+    "Node+EE+EtoI": {
+      "summary_across_network_medians": {
+        "median_onset_span_ms": {
+          "n": 12,
+          "quantiles": {
+            "0.1": 40.0,
+            "0.5": 41.0,
+            "0.9": 45.8
+          }
+        },
+        "median_peak_hz": {
+          "n": 12,
+          "quantiles": {
+            "0.1": 23.4375,
+            "0.5": 23.4375,
+            "0.9": 23.4375
+          }
+        },
+        "median_centroid_20_150_hz": {
+          "n": 12,
+          "quantiles": {
+            "0.1": 28.626948202749375,
+            "0.5": 28.69767337916274,
+            "0.9": 28.801945855077214
+          }
+        },
+        "median_power_ratio_30_80_over_5_30": {
+          "n": 12,
+          "quantiles": {
+            "0.1": 0.08749328433166671,
+            "0.5": 0.09145561161837801,
+            "0.9": 0.09620938435823331
+          }
+        }
+      },
+      "per_network": [
+        {
+          "seed": 2441,
+          "n_returned_readable": 82,
+          "median_onset_span_ms": 40.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 28.71182863796131,
+          "median_power_ratio_30_80_over_5_30": 0.09219295889866602
+        },
+        {
+          "seed": 2442,
+          "n_returned_readable": 72,
+          "median_onset_span_ms": 39.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 28.723784124172276,
+          "median_power_ratio_30_80_over_5_30": 0.09058198171986975
+        },
+        {
+          "seed": 2443,
+          "n_returned_readable": 71,
+          "median_onset_span_ms": 40.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 28.625609354407985,
+          "median_power_ratio_30_80_over_5_30": 0.08720661007985456
+        },
+        {
+          "seed": 2444,
+          "n_returned_readable": 75,
+          "median_onset_span_ms": 40.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 28.54795718327051,
+          "median_power_ratio_30_80_over_5_30": 0.08544848100397932
+        },
+        {
+          "seed": 2445,
+          "n_returned_readable": 69,
+          "median_onset_span_ms": 50.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 28.68351812036417,
+          "median_power_ratio_30_80_over_5_30": 0.09222326505442058
+        },
+        {
+          "seed": 2446,
+          "n_returned_readable": 83,
+          "median_onset_span_ms": 40.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 28.648071548104884,
+          "median_power_ratio_30_80_over_5_30": 0.09007335259797615
+        },
+        {
+          "seed": 2447,
+          "n_returned_readable": 77,
+          "median_onset_span_ms": 44.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 28.919627114079372,
+          "median_power_ratio_30_80_over_5_30": 0.10472880697235475
+        },
+        {
+          "seed": 2448,
+          "n_returned_readable": 91,
+          "median_onset_span_ms": 42.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 28.638997837821883,
+          "median_power_ratio_30_80_over_5_30": 0.09056592630704652
+        },
+        {
+          "seed": 2449,
+          "n_returned_readable": 79,
+          "median_onset_span_ms": 44.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 28.7186093674578,
+          "median_power_ratio_30_80_over_5_30": 0.09237347548674144
+        },
+        {
+          "seed": 2450,
+          "n_returned_readable": 82,
+          "median_onset_span_ms": 46.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 28.810567737763236,
+          "median_power_ratio_30_80_over_5_30": 0.09271070460725393
+        },
+        {
+          "seed": 2451,
+          "n_returned_readable": 87,
+          "median_onset_span_ms": 42.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 28.724348910903,
+          "median_power_ratio_30_80_over_5_30": 0.09659812655278657
+        },
+        {
+          "seed": 2452,
+          "n_returned_readable": 87,
+          "median_onset_span_ms": 40.0,
+          "median_peak_hz": 23.4375,
+          "median_centroid_20_150_hz": 28.678989664264535,
+          "median_power_ratio_30_80_over_5_30": 0.09071826433809
+        }
+      ]
+    }
+  },
+  "spectral_contract": {
+    "readout": "unfiltered virtual-contact firing-density envelope",
+    "not_lfp_or_seeg": true,
+    "sampling_ms": 2.0,
+    "smoothing_ms": 5.0,
+    "window_ms": 256.0,
+    "window_alignment": "64 ms before to 192 ms after detector onset",
+    "frequency_resolution_hz": 3.90625,
+    "interpretation": "diagnostic of the stored observation envelope; a plotted 30-80 Hz bandpass cannot establish an intrinsic HFO carrier"
+  },
+  "claim_boundary": "absolute recruitment timing and unfiltered model-envelope spectrum only; no clinical waveform or HFO reproduction claim"
+}

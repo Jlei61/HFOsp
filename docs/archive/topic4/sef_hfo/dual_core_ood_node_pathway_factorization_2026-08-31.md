@@ -2,7 +2,7 @@
 
 **日期**：2026-08-31
 
-**状态**：`DUAL_CORE_NODE_REPERTOIRE_PARTIAL_SUPPORT / FULL_DISTRIBUTION_NOT_RECOVERED / EE_OOD_FILTER_WITH_YIELD_COST / ETOI_MODE_OCCUPANCY_MODULATOR / JOINT_NONADDITIVE`
+**状态**：`DUAL_CORE_NODE_REPERTOIRE_PARTIAL_SUPPORT / FULL_DISTRIBUTION_NOT_RECOVERED / EE_OOD_FILTER_WITH_YIELD_COST / ETOI_MODE_OCCUPANCY_MODULATOR / TRANSFERRED_PATHWAYS_NONADDITIVE / NATIVE_CARRIER_NOT_RECOVERED`
 
 **范围**：development-only；不作 patient-blind、解剖 core、临床波形、发作或患者因果机制主张。
 
@@ -79,6 +79,8 @@ GIF 从同一个 confirmation network 中按算法各选一个 support distance 
 
 四臂使用同一组 12 个 paired network seeds：Node、Node+EE、Node+E->I、Node+EE+E->I。
 
+必须强调：这一轮不是在双 core 上联合优化两条通路。EE 与 E->I 的六维系数行来自旧连续场，四臂只做原样迁移和开关消融；四个 manifest 都明确记录 `pathway_refit=false`。因此联合臂只能检验旧系数在新 Node 上是否可加，不能裁定双 core 上重新学习的联合连接是否有容量。
+
 | arm | OOD，越低越好 | returned/network | Mode 1/2 share | KMeans alignment | weakest-mode error |
 |---|---:|---:|---:|---:|---:|
 | Node | 0.479 | 94.6 | 76.6% / 23.4% | 0.768 | 3.470 (8/12) |
@@ -104,6 +106,20 @@ E->I 主要把模式占用推向 Mode 2，并略微增加事件产率；
 
 这是冻结 SNN 内部的通路效应，不是患者 SEEG 对 EE 或 E->I 因果机制的识别。
 
+### 4.1 两个 core 是否同时存在
+
+两个 Node core 在每次仿真从第 0 ms 起同时写入同一个二值 `h` 场。代表 confirmation 网络中 1,499 个低阈值 E 节点按最近中心分为 752/747，未发生只加载一个 core 的工程错误。事件中两个区域不同时点火来自空间噪声、背景状态和递归传播的竞争，属于当前机制的预期结果。
+
+但这还不等于“一个 core 因果地产生一个模式”。当前模式标签来自患者分类器，不是 core 标签；在完成 first-core onset、单 core lesion 和 matched relocation 前，只能说两个静态起核区支持了两种传播事件，不能声称两者一一对应。
+
+### 4.2 绝对时间尺度和原生载波审计
+
+零仿真重读现有轨迹显示，患者两模式的触点招募跨度中位数为 42.6 和 48.0 ms，5--95% 区间分别为 17.8--111.1 和 20.2--104.3 ms。四臂的 equal-network 中位跨度为 Node 36、EE 47.5、E->I 32、联合 41 ms。因此当前 GIF 看起来缓慢主要来自 5 ms 模型帧以 8 fps 播放，即 25 倍慢放；绝对传播跨度并未明显慢于患者。
+
+真正未恢复的是原生快载波。未滤波 virtual-contact firing-density envelope 在四臂中的事件窗主峰都为最低可分辨的 23.4 Hz；30--80/5--30 Hz 功率比从 Node 的 0.124 下降到联合臂的 0.091。现有 OOD 特征又会把每个事件独立归一化到 0--1 时间，所以它对绝对时长和载波完全不敏感。30--80 Hz bandpass 图只能显示被筛出的分量，不能证明模型本身产生了 60 Hz 节律。
+
+可复现产物：`results/topic4_sef_hfo/data_driven_dual_core_ood/temporal_carrier_audit.json`。
+
 通路图：
 
 - `results/topic4_sef_hfo/data_driven_dual_core_ood/pathway/figures/dual_core_node_pathway_factorization.png`
@@ -125,10 +141,11 @@ FULL_PATIENT_EVENT_DISTRIBUTION_NOT_RECOVERED
 
 下一轮若继续降低 weakest-mode error，不应先增加 core 数或再次放开无约束自由场。最小修正应针对当前 residual：
 
-1. 保持两个 Node core 冻结，单独校准 Mode 2 occupancy，而不牺牲 Mode 1 OOD。
-2. 将 EE 的“降低 OOD”和“压低事件产率”拆开，寻找 matched-yield 的连接表达强度。
-3. 将 E->I 作为 mode-occupancy lever 做低维剂量曲线，再与 EE 做小型二维响应面；目标同时包含 OOD、患者 31/69 模式比例和最低事件产率。
-4. 每个候选继续用新网络确认，并保留 Fig.2C-style 全神经元 GIF；禁止只展示最像的事件而不报告总体 OOD。
+1. 保持两个 Node core 冻结，先审计两种模式是否由不同 core 优先起核；不要把模式标签直接当 core 标签。
+2. 在该双 core 上重新拟合 EE/E->I 的表达剂量，而不是再次迁移旧连续场系数；目标同时保护 OOD、患者 31/69 模式比例、KMeans 和事件产率。
+3. 将绝对招募跨度加入正式端点；原有 0--1 onset 特征继续负责顺序，不再单独代表时间尺度。
+4. 单独验证和校准快载波。若当前 readout 能通过已知 60 Hz 正控但模型仍停在约 23 Hz，再开放最小的 AMPA/GABA 快时间常数网格；禁止靠 bandpass 图制造“60 Hz 复现”。
+5. 每个候选继续用新网络确认，并保留 Fig.2C-style 全神经元 GIF；禁止只展示最像的事件而不报告总体 OOD。
 
 ## 7. 产物与复现
 

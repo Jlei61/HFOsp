@@ -142,6 +142,15 @@ def _style() -> None:
     })
 
 
+def _upsert_readme_entry(existing: str, heading: str, entry: str) -> str:
+    start = existing.find(heading)
+    if start < 0:
+        return existing + ("\n" if existing else "") + entry
+    next_heading = existing.find("\n### ", start + len(heading))
+    stop = len(existing) if next_heading < 0 else next_heading + 1
+    return existing[:start] + entry + existing[stop:]
+
+
 def render(config_path: Path, output_dir: Path, *, fps: float = 8.0) -> dict:
     config_path = config_path.resolve()
     config = json.loads(config_path.read_text())
@@ -187,6 +196,8 @@ def render(config_path: Path, output_dir: Path, *, fps: float = 8.0) -> dict:
             })
     relative_stop = max(row["grid_relative_ms"].max() for row in event_payload)
     relative_time = np.arange(-20.0, relative_stop + 2.5, 5.0)
+    activity_frame_ms = 5.0
+    playback_slowdown = 1000.0 / (float(fps) * activity_frame_ms)
     positive = np.concatenate([
         row["grid"].ravel()[row["grid"].ravel() > 0] for row in event_payload
     ])
@@ -255,16 +266,18 @@ def render(config_path: Path, output_dir: Path, *, fps: float = 8.0) -> dict:
         trace_axis.set_xlim(relative_time[0], relative_time[-1])
         trace_axis.set_ylim(-1.2, offsets[0] + 1.2)
         trace_axis.set_xlabel("time from model event onset (ms)")
-        trace_axis.set_ylabel("virtual-contact activity" if mode == 0 else "")
+        trace_axis.set_ylabel(
+            "unfiltered firing-density envelope" if mode == 0 else ""
+        )
         trace_axis.tick_params(axis="y", length=0, pad=1.5)
     time_label = fig.text(
-        0.5, 0.965, "", ha="center", va="top", fontsize=8.0, fontweight="bold",
+        0.5, 0.945, "", ha="center", va="top", fontsize=7.2, fontweight="bold",
     )
     fig.suptitle(
         "Fitted dual-core Node: model activity versus frozen patient mode order",
         y=0.995, fontsize=9.0, fontweight="bold",
     )
-    fig.subplots_adjust(left=0.095, right=0.985, bottom=0.075, top=0.925)
+    fig.subplots_adjust(left=0.095, right=0.985, bottom=0.075, top=0.87)
 
     def update(frame_index: int):
         query = relative_time[frame_index]
@@ -277,7 +290,9 @@ def render(config_path: Path, output_dir: Path, *, fps: float = 8.0) -> dict:
             else:
                 image.set_data(row["grid"][nearest])
             cursor.set_xdata([query, query])
-        time_label.set_text(f"{query:+.0f} ms")
+        time_label.set_text(
+            f"{query:+.0f} ms model time  |  {playback_slowdown:.0f}x slow motion"
+        )
         return [*images, *cursors, time_label]
 
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -309,7 +324,14 @@ def render(config_path: Path, output_dir: Path, *, fps: float = 8.0) -> dict:
             "support; >=6 ICL and >=2 SCL contacts; minimum normalized support distance"
         ),
         "activity_readout": "5 ms E-neuron spike-count grid; viridis",
-        "trace_readout": "virtual-contact model-current envelope; normalized per contact for display",
+        "activity_frame_ms": activity_frame_ms,
+        "gif_fps": float(fps),
+        "playback_slowdown": playback_slowdown,
+        "trace_readout": (
+            "unfiltered virtual-contact firing-density envelope; 2 ms sampling; "
+            "5 ms Gaussian smoothing; normalized per contact for display"
+        ),
+        "carrier_frequency_not_encoded_by_playback": True,
         "patient_reference": "mean normalized rank profile from frozen patient training modes",
         "not_clinical_seeg": True,
         "aggregate": str(aggregate_path.relative_to(ROOT)),
@@ -332,12 +354,14 @@ def render(config_path: Path, output_dir: Path, *, fps: float = 8.0) -> dict:
         "严格双 core Node 候选在同一 confirmation 网络中的两类代表事件。上排是 "
         "5 ms 兴奋神经元活动场；实线和白色虚线分别在每根杆内连接模型事件与患者冻结原型的"
         "触点招募顺序，避免把跨杆跳转误画成空间传播边；"
-        "下排为同步虚拟触点读出。该图只用于检查 Fig.2C 双向传播形态，不能替代 OOD 统计。\n\n"
+        "下排为未滤波 firing-density envelope。动画按 8 fps 播放 5 ms 模型帧，即 25 倍慢放；"
+        "播放速度不表示模型载波频率。该图只用于检查 Fig.2C 双向传播形态，不能替代 OOD 或频谱统计。\n\n"
         "**关注点**：两类事件是否都跨杆招募、传播方向是否与患者原型一致，以及是否存在局部点亮但"
         "未形成完整传播的情况。\n"
     )
-    if "### dual_core_node_fig2c_mode_check.gif" not in existing:
-        readme.write_text(existing + ("\n" if existing else "") + entry)
+    readme.write_text(_upsert_readme_entry(
+        existing, "### dual_core_node_fig2c_mode_check.gif", entry,
+    ))
     return metadata
 
 

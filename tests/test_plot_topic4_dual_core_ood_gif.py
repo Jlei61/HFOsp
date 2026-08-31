@@ -3,6 +3,7 @@ import pytest
 import numpy as np
 
 from scripts.plot_topic4_dual_core_ood_gif import (
+    _upsert_readme_entry,
     ordered_shaft_segments,
     select_representative_pair,
 )
@@ -57,3 +58,9 @@ def test_ordered_shaft_segments_never_connect_different_shafts():
     shafts = np.asarray(["ICL", "SCL", "ICL", "SCL"])
     segments = ordered_shaft_segments(order, shafts)
     assert [segment.tolist() for segment in segments] == [[0, 2], [1, 3]]
+
+
+def test_readme_entry_is_replaced_without_dropping_other_entries():
+    existing = "### target\nold\n\n### retained\nkeep\n"
+    updated = _upsert_readme_entry(existing, "### target", "### target\nnew\n")
+    assert updated == "### target\nnew\n### retained\nkeep\n"
