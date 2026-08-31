@@ -952,16 +952,22 @@ def train_one(
     for k in TRUNCATION_PROBES:
         if model.baseline_only:
             break
+        if k == 0:
+            # truncate_every=0 disables truncation, which is bit-for-bit the main
+            # test pass that has already run.  Recomputing it costs a full warm-up
+            # plus a full test pass for a number we already hold.
+            truncation["full_session"] = test_means
+            continue
         with torch.no_grad():
             # A warm pass only matters when the state is allowed to survive longer
             # than the first chunk; with a reset every k <= chunk events the model
             # cannot carry anything across the split anyway.
-            if k == 0 or k > cfg.chunk_events:
+            if k > cfg.chunk_events:
                 run_sequence(model, seq, eval_warm_lo, val_hi, device, cfg, train=False, truncate_every=k)
             means, _ = run_sequence(
                 model, seq, test_lo, test_hi, device, cfg, train=False, truncate_every=k
             )
-        truncation[f"reset_every_{k}" if k else "full_session"] = means
+        truncation[f"reset_every_{k}"] = means
     results["history_truncation"] = truncation
 
     # --- H1 probe 2: correct-time state vs a matched wrong-time state ---
@@ -977,7 +983,10 @@ def train_one(
             else None
         )
         with torch.no_grad():
-            run_sequence(model, seq, eval_warm_lo, val_hi, device, cfg, train=False)
+            if permuted_timing is None:
+                # Only the timing state would still come from the live recurrence,
+                # so only then does warming it up change anything.
+                run_sequence(model, seq, eval_warm_lo, val_hi, device, cfg, train=False)
             wrong, _ = run_sequence(
                 model, seq, test_lo, test_hi, device, cfg, train=False,
                 state_override=permuted, timing_override=permuted_timing,
