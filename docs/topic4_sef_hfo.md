@@ -899,6 +899,13 @@ scripts/run_sef_itp_phase1.py --dataset <epilepsiae|yuquan> --subject <sid> \
 
 ## 13. 历史文档索引
 
+- **严格双 core Node 的 OOD 拟合与通路分解（2026-08-31）**：
+  `docs/archive/topic4/sef_hfo/dual_core_ood_node_pathway_factorization_2026-08-31.md`
+  —— 两个固定预算 Node core 在 12/12 独立网络内都产生两种患者支持模式，
+  但全部 returned events 的 OOD 仍为 0.462（90% CI 0.426-0.500），模型模式占比
+  77/23 也未恢复患者的 31/69，故裁定为 **repertoire partial support**，不是完整分布恢复。
+  冻结 Node 的四臂结果显示 EE 以显著降低事件产率为代价降低 OOD，E->I 主要把占用推向
+  Mode 2，联合臂存在非加性交互；均为模型内部机制，不作患者因果解释。
 - **数据驱动静态底物线（rev10-D → rev11-NLC，当前状态见复审报告）**：
   `docs/archive/topic4/sef_hfo/rev11_nlc_frozen_substrate_review_2026-08-15.md`
   —— 患者数据约束出来的连续兴奋度地形 + 在同一地形上按数据重分配的局部兴奋连接，

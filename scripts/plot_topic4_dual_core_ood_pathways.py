@@ -100,7 +100,7 @@ def _metric_arrays(analysis: dict) -> dict[str, np.ndarray]:
             ]
             for seed in seeds
         ], float)
-    output["KMeans match (%; in-support)"] = np.asarray([
+    output["KMeans match (%)"] = np.asarray([
         [
             100.0 * arms[arm]["per_network"][str(seed)]["natural_kmeans"].get(
                 "direction_balanced_alignment", np.nan,
@@ -109,7 +109,7 @@ def _metric_arrays(analysis: dict) -> dict[str, np.ndarray]:
         ]
         for seed in seeds
     ], float)
-    output["OOD (%; primary)"] = np.asarray([
+    output["OOD (%)"] = np.asarray([
         [
             100.0 * arms[arm]["per_network"][str(seed)]["ood_all_returned"]
             for arm in ARM_IDS
@@ -192,6 +192,7 @@ def render(config_path: Path, output_dir: Path) -> dict:
         "statistics": statistics,
         "star_rule": "paired network bootstrap 90% interval excludes zero",
         "primary_endpoint": "OOD_all_returned",
+        "kmeans_population": "formal-clean events inside frozen patient support",
         "mode_labels_have_no_pathological_meaning": True,
         "analysis": str(analysis_path.relative_to(ROOT)),
         "outputs": [

@@ -1,0 +1,85 @@
+{
+  "status": "DUAL_CORE_NODE_OOD_KMEANS_FIGURE_RENDERED",
+  "candidate_id": "dualcore_s39",
+  "node_field": {
+    "candidate_id": "dualcore_s39",
+    "center_separation_mm": 17.110399669301547,
+    "centers_mm": [
+      [
+        1.5377342579886317,
+        1.2264179880730808
+      ],
+      [
+        18.606612137053162,
+        2.417713414411992
+      ]
+    ],
+    "component_count": 2,
+    "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+    "field_type": "manual_dual_core_budget_matched",
+    "peak_count_constraint": 2,
+    "reference_budget_fraction_per_core": [
+      0.4778982485404504,
+      0.5221017514595496
+    ],
+    "role": "strict binary two-core Node field",
+    "sobol_accepted_index": 39,
+    "sobol_draw_index": 45,
+    "target_count": 1499
+  },
+  "n_confirmation_networks": 12,
+  "networks_with_both_modes": 12,
+  "ood_percent": {
+    "equal_network_mean": 46.156053279206425,
+    "network_bootstrap_q05": 42.639703647005035,
+    "network_bootstrap_q95": 50.03722321568902
+  },
+  "pooled_natural_kmeans": {
+    "status": "OK",
+    "n_events": 609,
+    "cluster_counts": [
+      212,
+      397
+    ],
+    "direction_purity": 0.8669950738916257,
+    "direction_balanced_alignment": 0.9064239762464432,
+    "direction_contingency": [
+      [
+        78,
+        134
+      ],
+      [
+        394,
+        3
+      ]
+    ],
+    "n_crossfit_direction_labeled": 609,
+    "crossfit_direction_fraction": 1.0,
+    "kmeans_seed_ami_median": 1.0,
+    "silhouette": 0.32617678232438657,
+    "heldout_gmm_k2_minus_k1_loglik_per_event": 3.4744860443921417,
+    "centroid_axis_valley_gap_sd": 0.44722095180247784,
+    "absolute_cluster_extent_correlation": 0.48946171771625835
+  },
+  "natural_kmeans_population": "returned, readable, cross-shaft events inside frozen patient support",
+  "pooled_alignment": {
+    "purity": 0.8669950738916257,
+    "balanced_alignment": 0.9064239762464432,
+    "contingency": [
+      [
+        78,
+        134
+      ],
+      [
+        394,
+        3
+      ]
+    ],
+    "n_direction_labeled": 609
+  },
+  "aggregate": "results/topic4_sef_hfo/data_driven_dual_core_ood/confirmation/aggregate.json",
+  "outputs": [
+    "results/topic4_sef_hfo/data_driven_dual_core_ood/confirmation/figures/dual_core_node_ood_kmeans_confirmation.png",
+    "results/topic4_sef_hfo/data_driven_dual_core_ood/confirmation/figures/dual_core_node_ood_kmeans_confirmation.pdf"
+  ]
+}

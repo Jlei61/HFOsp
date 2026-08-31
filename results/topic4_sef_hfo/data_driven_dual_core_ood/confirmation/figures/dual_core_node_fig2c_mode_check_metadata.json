@@ -1,0 +1,48 @@
+{
+  "status": "DUAL_CORE_NODE_FIG2C_MODE_CHECK_RENDERED",
+  "candidate_id": "dualcore_s39",
+  "seed": 2430,
+  "network_ood_all_returned": 0.4505494505494505,
+  "selected_events": {
+    "0": {
+      "ICL_recruited": 11,
+      "SCL_recruited": 4,
+      "event_index": 64,
+      "in_support": true,
+      "mode": 0,
+      "normalized_support_distance": 0.2265408449490923,
+      "ood": false,
+      "readable": true,
+      "returned": true
+    },
+    "1": {
+      "ICL_recruited": 9,
+      "SCL_recruited": 4,
+      "event_index": 6,
+      "in_support": true,
+      "mode": 1,
+      "normalized_support_distance": 0.23183223246204349,
+      "ood": false,
+      "readable": true,
+      "returned": true
+    }
+  },
+  "patient_mode_event_counts": [
+    9275,
+    20774
+  ],
+  "selection_rule": "same confirmation network; both events returned and within frozen patient support; >=6 ICL and >=2 SCL contacts; minimum normalized support distance",
+  "activity_readout": "5 ms E-neuron spike-count grid; viridis",
+  "trace_readout": "virtual-contact model-current envelope; normalized per contact for display",
+  "patient_reference": "mean normalized rank profile from frozen patient training modes",
+  "not_clinical_seeg": true,
+  "aggregate": "results/topic4_sef_hfo/data_driven_dual_core_ood/confirmation/aggregate.json",
+  "worker_json": "results/topic4_sef_hfo/data_driven_dual_core_ood/confirmation/workers/dualcore_s39_seed_2430.json",
+  "worker_npz": "results/topic4_sef_hfo/data_driven_dual_core_ood/confirmation/workers/dualcore_s39_seed_2430.npz",
+  "outputs": [
+    "results/topic4_sef_hfo/data_driven_dual_core_ood/confirmation/figures/dual_core_node_fig2c_mode_check.gif",
+    "results/topic4_sef_hfo/data_driven_dual_core_ood/confirmation/figures/dual_core_node_fig2c_mode_check_first.png",
+    "results/topic4_sef_hfo/data_driven_dual_core_ood/confirmation/figures/dual_core_node_fig2c_mode_check_middle.png",
+    "results/topic4_sef_hfo/data_driven_dual_core_ood/confirmation/figures/dual_core_node_fig2c_mode_check_last.png"
+  ]
+}

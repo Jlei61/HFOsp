@@ -11,6 +11,9 @@
 **SEF-HFO**（Spatial Excitability Field model for interictal HFO propagation）：
 
 - 主文档：`docs/topic4_sef_hfo.md`
+- 2026-08-31 双 core Node OOD 拟合与 EE/E->I 四臂分解：
+  `docs/archive/topic4/sef_hfo/dual_core_ood_node_pathway_factorization_2026-08-31.md`
+  （12/12 独立网络有双模式，但 OOD 0.462，完整患者事件分布未恢复；EE 为带事件产率代价的 OOD 过滤候选，E->I 为模式占用调节候选，联合效应非加性）
 - v0.2 plan：`docs/archive/topic4/sef_hfo_topic4_v2_plan_2026-06-01.md`
 - 核心断言：间期群体 HFO = 局部低异质性、各向异性连接、近临界但仍亚阈值的 E-I 易激斑块，在噪声触发下产生的自限性瞬态传播事件；低异质性必须通过 effective gain 实际进入稳定性分析
 - 保留 v1 真实数据验收合同（H1–H6）：endpoint compactness / source-sink reversal / mark independence + stable geometry / rate-geometry decoupling / pre-post-ictal endpoint shift / participation-field segregation
