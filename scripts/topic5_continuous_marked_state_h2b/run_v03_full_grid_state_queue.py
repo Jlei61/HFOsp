@@ -36,6 +36,14 @@ DEFAULT_SUBJECTS = (
     "epilepsiae_442", "epilepsiae_548", "epilepsiae_635",
     "yuquan_xuxinyi",
 )
+GIB = 1024 ** 3
+MIB = 1024 ** 2
+MEMORY_SAFETY_FRACTION = 0.65
+# This hash is the v3 scheduler.  It produced scientifically identical state
+# caches; v4 changes dispatch accounting only, so those caches remain valid.
+COMPATIBLE_QUEUE_PRODUCER_SHA256S = {
+    "8bd2cd2fcc0e950dd12a90bac57bf76fbfd4bbb6dc148a82ed7d553835dae3f7",
+}
 
 
 def _json(path: Path) -> dict:
@@ -47,6 +55,45 @@ def _available_memory() -> int:
         if line.startswith("MemAvailable:"):
             return int(line.split()[1]) * 1024
     raise RuntimeError("MemAvailable unavailable")
+
+
+def _query_rows(query: Path) -> int:
+    manifest = _json(query.with_suffix(".manifest.json"))
+    rows = int(manifest["n_queries"])
+    if rows < 1:
+        raise ValueError(f"query manifest has no rows: {query}")
+    return rows
+
+
+def _per_worker_memory_budget(max_query_rows: int) -> int:
+    """Conservative RSS envelope calibrated from the interrupted v3 run."""
+    if max_query_rows < 0:
+        raise ValueError("max_query_rows must be non-negative")
+    # E1077 (1,786 rows) exceeded 50 GiB live RSS.  12 GiB fixed overhead plus
+    # 32 MiB/query row budgets 67.8 GiB for that cell and 98.5 GiB for E253.
+    return int(12 * GIB + max_query_rows * 32 * MIB)
+
+
+def _safe_worker_count(
+    *, configured: int, pending_count: int, available: int,
+    max_query_rows: int, cpu_count: int | None = None,
+) -> tuple[int, int]:
+    if configured < 1:
+        raise ValueError("configured workers must be positive")
+    budget = _per_worker_memory_budget(max_query_rows)
+    processors = os.cpu_count() if cpu_count is None else cpu_count
+    workers = max(1, min(
+        configured, pending_count or 1,
+        max(1, int(MEMORY_SAFETY_FRACTION * available // budget)),
+        max(1, (processors or 1) // 2),
+    ))
+    return workers, budget
+
+
+def _accepted_queue_hashes() -> set[str]:
+    return COMPATIBLE_QUEUE_PRODUCER_SHA256S | {
+        sha256_file(Path(__file__).resolve()),
+    }
 
 
 def _task_metadata(
@@ -137,7 +184,7 @@ def _complete(output: Path, query: Path) -> bool:
             and manifest.get("cache_sha256") == sha256_file(output)
             and manifest.get("source_hashes", {}).get("query_csv") == sha256_file(query)
             and manifest.get("full_grid_queue_producer_sha256")
-            == sha256_file(Path(__file__).resolve())
+            in _accepted_queue_hashes()
         )
     except Exception:
         return False
@@ -203,28 +250,33 @@ def main() -> None:
         tasks.append((subject, seed, command, query, output))
     pending = [task for task in tasks if not _complete(task[4], task[3])]
     available = _available_memory()
-    # A single epilepsiae_442/seed_0 smoke peaked at 9.27 GiB RSS, while the
-    # first mixed-patient 8-worker batch showed a 22.5 GiB live high-water
-    # process.  Schedule at 28 GiB/cell so the resumable follow-up batch keeps
-    # headroom for larger contact sets and loader transients.
-    measured_budget = int(28.0 * 1024 ** 3)
-    workers = max(1, min(
-        int(args.cpu_workers), len(pending) or 1,
-        max(1, int(0.70 * available // measured_budget)),
-        max(1, (os.cpu_count() or 1) // 2),
-    ))
+    pending_query_rows = [_query_rows(task[3]) for task in pending]
+    max_pending_query_rows = max(pending_query_rows, default=0)
+    workers, measured_budget = _safe_worker_count(
+        configured=int(args.cpu_workers), pending_count=len(pending),
+        available=available, max_query_rows=max_pending_query_rows,
+    )
     status_path = root / "full_grid/STATE_QUEUE_STATUS.json"
     status = {
         "status": "RUNNING", "created_utc": utc_now(),
-        "revision": "h2b_v0_3_full_grid_state_queue_v3",
+        "revision": "h2b_v0_3_full_grid_state_queue_v4",
         "requested_tasks": len(tasks), "pending_tasks": len(pending),
         "already_complete": len(tasks) - len(pending), "cpu_workers": workers,
         "configured_cpu_workers": int(args.cpu_workers),
         "mem_available_bytes_at_start": available,
         "per_worker_memory_budget_bytes": measured_budget,
+        "memory_safety_fraction": MEMORY_SAFETY_FRACTION,
+        "memory_budget_formula": "12_GiB_plus_32_MiB_per_max_pending_query_row",
+        "max_pending_query_rows": max_pending_query_rows,
         "resource_smoke_peak_rss_bytes": 9_274_196 * 1024,
         "resource_smoke_subject_seed": "epilepsiae_442/seed_0",
         "mixed_batch_observed_live_high_water_rss_bytes": int(22.5 * 1024 ** 3),
+        "observed_epilepsiae_1077_live_rss_lower_bound_bytes": int(50 * GIB),
+        "prior_runs_stopped_before_kernel_oom": 2,
+        "kernel_oom_observed": False,
+        "compatible_prior_queue_producer_sha256": sorted(
+            COMPATIBLE_QUEUE_PRODUCER_SHA256S
+        ),
         "thread_limits": 1, "formal_test_partition_opened": False,
         "sealed_opened": False, "h3_or_t2_run": False,
     }
