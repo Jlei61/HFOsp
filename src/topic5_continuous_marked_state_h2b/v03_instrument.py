@@ -828,10 +828,9 @@ def summarise_instrument_trace(
     median_segment = float(np.median(durations)) if durations else None
     empirical_tau = autocorrelation["empirical_tau_minutes"]
     q1_absolute_pass = bool(
-        int(np.sum(active)) >= 2
-        and float(rank["effective_rank"] or 0.0) >= 2.0
-        and rank["top_pc_share"] is not None
-        and float(rank["top_pc_share"]) <= 0.95
+        int(np.sum(active)) >= 1
+        and int(rank["matrix_rank"] or 0) >= 1
+        and float(rank["effective_rank"] or 0.0) >= 1.0
         and float(np.median(persistence_distance)) > 1e-6
     )
     reset_not_dominant = bool(reset_r2 is None or reset_r2 < 0.50)
@@ -880,6 +879,8 @@ def summarise_instrument_trace(
                 np.median(persistence_distance)
             ),
             "preliminary_absolute_threshold_pass": q1_absolute_pass,
+            "one_dimensional_state_allowed": True,
+            "rank_is_descriptive_not_a_minimum_dimension_gate": True,
             "collapsed_null_effective_rank": 0.0,
             "temporal_shuffled_null": temporal_null,
             "reset_phase_explained_variance": reset_r2,

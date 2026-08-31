@@ -23,6 +23,15 @@ from src.topic5_continuous_marked_state_h2b.v03_seed_stability import (  # noqa:
     load_cell_manifest,
     load_trace,
 )
+from src.topic5_continuous_marked_state_h2b.v03_exploration_policy import (  # noqa: E402
+    assert_frozen_exploration_policy_matches,
+)
+
+
+PRODUCER_SCRIPT = Path(__file__).resolve()
+SEED_STABILITY_MODULE = (
+    REPO / "src/topic5_continuous_marked_state_h2b/v03_seed_stability.py"
+)
 
 
 def main() -> None:
@@ -33,6 +42,9 @@ def main() -> None:
     parser.add_argument("--n-permutations", type=int, default=100)
     args = parser.parse_args()
     root = args.result_root.resolve()
+    policy_path = root / "exploration_policy.json"
+    policy = json.loads(policy_path.read_text(encoding="utf-8"))
+    assert_frozen_exploration_policy_matches(policy)
     patient_rows = []
     pair_rows = []
     cell_rows = []
@@ -47,7 +59,7 @@ def main() -> None:
         for path, cell in zip(manifests, cells):
             if cell.get("status") != "COMPLETE" or cell.get("seizure_risk_outcome_read") is not False:
                 raise ValueError(f"inadmissible instrument cell: {path}")
-            if cell.get("revision") != "h2b_v0_3_interictal_instrument_cell_v2":
+            if cell.get("revision") != "h2b_v0_3_interictal_instrument_cell_v3":
                 raise ValueError(f"superseded instrument cell: {path}")
             source_hashes[str(path)] = sha256_file(path)
             diagnostics = cell["diagnostics"]
@@ -123,16 +135,21 @@ def main() -> None:
         })
     payload = {
         "status": "COMPLETE_SMOKE_DIAGNOSTIC",
-        "revision": "h2b_v0_3_interictal_instrument_smoke_aggregate_v1",
+        "revision": "h2b_v0_3_interictal_instrument_smoke_aggregate_v2",
+        "supersedes_revision": "h2b_v0_3_interictal_instrument_smoke_aggregate_v1",
         "created_utc": utc_now(),
         "subjects": list(map(str, args.subjects)),
         "n_cells": len(cell_rows),
         "n_patients": len(patient_rows),
         "patient_rows": patient_rows,
         "source_manifest_sha256": source_hashes,
+        "producer_script_sha256": sha256_file(PRODUCER_SCRIPT),
+        "seed_stability_module_sha256": sha256_file(SEED_STABILITY_MODULE),
+        "exploration_policy_receipt_sha256": sha256_file(policy_path),
         "seizure_risk_outcome_read": False,
         "state_qualified_population_released": False,
-        "remaining_gate": "Q6 nuisance and final patient-level qualification rule",
+        "remaining_evidence": "Q6 nuisance and final patient-level qualification rule",
+        "claim_specific_policy": True,
         "formal_test_partition_opened": False,
         "sealed_opened": False,
         "h3_or_t2_run": False,
