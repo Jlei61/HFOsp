@@ -183,6 +183,64 @@ def paired_comparison(
     }
 
 
+# Endpoints where a HIGHER value is better, so the delta sign flips.
+HIGHER_IS_BETTER = ("participation_auc", "recruitment_order_spearman", "tied_group_agreement")
+
+
+def _extract_scalar(run: Mapping[str, Any], name: str) -> float:
+    if name == "participation_auc":
+        return float(run.get("participation_auc_sampled", float("nan")))
+    entry = run.get(name)
+    if isinstance(entry, Mapping):
+        return float(entry.get("median", float("nan")))
+    return float("nan")
+
+
+def derived_comparison(
+    runs: Sequence[Mapping[str, Any]], arm_a: str, arm_b: str, name: str
+) -> dict[str, Any]:
+    """Patient-first comparison on a derived endpoint where higher is better."""
+
+    per_patient: dict[str, dict[str, list[float]]] = defaultdict(lambda: defaultdict(list))
+    for run in runs:
+        value = _extract_scalar(run, name)
+        if math.isfinite(value):
+            per_patient[run["subject"]][run["arm"]].append(value)
+    deltas, spreads, rows = [], [], []
+    for subject, arms in sorted(per_patient.items()):
+        if arm_a not in arms or arm_b not in arms:
+            continue
+        a = float(np.median(arms[arm_a]))
+        b = float(np.median(arms[arm_b]))
+        noise = max(
+            float(np.max(arms[arm_a]) - np.min(arms[arm_a])) if len(arms[arm_a]) > 1 else 0.0,
+            float(np.max(arms[arm_b]) - np.min(arms[arm_b])) if len(arms[arm_b]) > 1 else 0.0,
+        )
+        deltas.append(a - b)
+        spreads.append(noise)
+        rows.append({"subject": subject, arm_a: a, arm_b: b, "delta": a - b,
+                     "seed_spread": noise, "beats_seed_noise": bool(abs(a - b) > noise)})
+    arr = np.asarray(deltas, dtype=float)
+    if arr.size == 0:
+        return {"arm_a": arm_a, "arm_b": arm_b, "endpoint": name, "n_patients": 0}
+    sp = np.asarray(spreads, dtype=float)
+    return {
+        "arm_a": arm_a, "arm_b": arm_b, "endpoint": name,
+        "higher_is_better": True,
+        "n_patients": int(arr.size),
+        "n_patients_arm_a_better": int((arr > 0).sum()),
+        "median_delta": float(np.median(arr)),
+        "median_seed_spread": float(np.median(sp)),
+        "effect_over_seed_noise": (
+            float(abs(np.median(arr)) / np.median(sp)) if np.median(sp) > 0 else float("inf")
+        ),
+        "n_patients_beating_seed_noise": int((np.abs(arr) > sp).sum()),
+        "wilcoxon_p": _wilcoxon(arr),
+        "sign_test_p": _sign_test(-arr),  # _sign_test counts negatives as wins
+        "per_patient": rows,
+    }
+
+
 def truncation_curve(runs: Sequence[Mapping[str, Any]], arm: str, endpoint: str) -> dict[str, Any]:
     """H1 probe: does letting the state live longer than K events help?"""
 

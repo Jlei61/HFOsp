@@ -21,6 +21,8 @@ if str(ROOT) not in sys.path:
 
 from src.topic5_group_event_state.analysis import (  # noqa: E402
     ENDPOINTS,
+    HIGHER_IS_BETTER,
+    derived_comparison,
     load_runs,
     paired_comparison,
     patient_arm_table,
@@ -89,6 +91,27 @@ def main() -> None:
                 comparison["meaning"] = meaning
                 contrasts.append(comparison)
 
+    derived = []
+    for arm_a, arm_b, meaning in KEY_CONTRASTS:
+        for name in HIGHER_IS_BETTER:
+            comparison = derived_comparison(runs, arm_a, arm_b, name)
+            if comparison.get("n_patients"):
+                comparison["meaning"] = meaning
+                derived.append(comparison)
+
+    budget = {
+        "n_runs_stopped_on_time_budget": int(
+            sum(1 for r in runs if r["stop_reason"] == "time_budget")
+        ),
+        "epochs_by_arm": {
+            arm: sorted({int(r["n_epochs_run"]) for r in runs if r["arm"] == arm})
+            for arm in sorted({r["arm"] for r in runs})
+        },
+        "note": "an arm that stops on the time budget while still improving is undertrained "
+                "relative to arms that finished their epochs; that asymmetry must not be read "
+                "as a scientific difference",
+    }
+
     h1 = {
         "truncation": {
             endpoint: truncation_curve(runs, "a4_full_multimodal_state", endpoint)
@@ -135,6 +158,8 @@ def main() -> None:
         "seed_payload_identity": identity,
         "resource": resource,
         "contrasts": contrasts,
+        "derived_contrasts": derived,
+        "training_budget": budget,
         "h1": h1,
     }
     write_json_atomic(payload, args.out_dir / f"summary_{args.tag}.json")
@@ -143,6 +168,8 @@ def main() -> None:
     print(f"duplicate-payload seed groups: {identity['n_groups_with_duplicate_payloads']}"
           f"/{identity['n_groups']}")
     print(f"median param update: {resource['param_update_magnitude_median']}")
+    print(f"runs stopped on time budget: {budget['n_runs_stopped_on_time_budget']}")
+    print(f"epochs run by arm: {budget['epochs_by_arm']}")
     print()
     print(f"{'contrast':58s} {'endpoint':16s} {'n':>3s} {'A wins':>7s} {'median Δ':>10s} "
           f"{'seedspread':>10s} {'Δ/noise':>8s} {'sign p':>8s}")
@@ -152,6 +179,14 @@ def main() -> None:
         name = f"{c['arm_a'].split('_',1)[0]} vs {c['arm_b'].split('_',1)[0]}: {c['meaning']}"
         print(f"{name[:58]:58s} {c['endpoint']:16s} {c['n_patients']:3d} "
               f"{c['n_patients_arm_a_better']:7d} {c['median_delta']:10.5f} "
+              f"{c['median_seed_spread']:10.5f} {c['effect_over_seed_noise']:8.2f} "
+              f"{c['sign_test_p']:8.4f}")
+    print()
+    print("--- derived endpoints (HIGHER is better) ---")
+    for c in derived:
+        name = f"{c['arm_a'].split('_',1)[0]} vs {c['arm_b'].split('_',1)[0]}: {c['meaning']}"
+        print(f"{name[:58]:58s} {c['endpoint']:24s} {c['n_patients']:3d} "
+              f"{c['n_patients_arm_a_better']:7d} {c['median_delta']:+10.5f} "
               f"{c['median_seed_spread']:10.5f} {c['effect_over_seed_noise']:8.2f} "
               f"{c['sign_test_p']:8.4f}")
 
