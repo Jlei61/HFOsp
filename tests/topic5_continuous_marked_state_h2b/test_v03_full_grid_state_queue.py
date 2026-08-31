@@ -9,6 +9,7 @@ from scripts.topic5_continuous_marked_state_h2b.run_v03_full_grid_state_queue im
     _complete,
     _per_worker_memory_budget,
     _safe_worker_count,
+    _set_embedding_batch_size,
 )
 
 
@@ -16,13 +17,13 @@ def _sha256(path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def test_query_scaled_memory_budget_caps_large_patient_to_one_worker() -> None:
+def test_query_scaled_memory_budget_uses_all_large_patient_seeds_when_safe() -> None:
     workers, budget = _safe_worker_count(
         configured=8, pending_count=5, available=243 * GIB,
         max_query_rows=2768, cpu_count=64,
     )
-    assert 98 * GIB < budget < 99 * GIB
-    assert workers == 1
+    assert 14 * GIB < budget < 15 * GIB
+    assert workers == 5
 
 
 def test_query_scaled_memory_budget_uses_more_workers_when_safe() -> None:
@@ -30,8 +31,15 @@ def test_query_scaled_memory_budget_uses_more_workers_when_safe() -> None:
         configured=8, pending_count=20, available=243 * GIB,
         max_query_rows=912, cpu_count=64,
     )
-    assert 40 * GIB < budget < 42 * GIB
-    assert workers == 3
+    assert 7 * GIB < budget < 8 * GIB
+    assert workers == 8
+
+
+def test_embedding_batch_retry_only_changes_batch_argument() -> None:
+    original = ["python", "extract.py", "--embedding-batch-size", "128", "--x", "y"]
+    updated = _set_embedding_batch_size(original, 32)
+    assert updated == ["python", "extract.py", "--embedding-batch-size", "32", "--x", "y"]
+    assert original[3] == "128"
 
 
 def test_complete_accepts_scheduler_only_v3_hash_but_rejects_unknown(tmp_path) -> None:

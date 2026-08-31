@@ -28,6 +28,7 @@ from src.topic5_continuous_marked_state_h2b.contract import (  # noqa: E402
 
 
 PYTHON = Path("/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python")
+GNU_TIME = Path("/usr/bin/time")
 EXTRACTOR = REPO / "scripts/topic5_continuous_marked_state_h2b/extract_states.py"
 INVENTORY = CANONICAL_V0_2_RESULT_ROOT / "manifests/r1_7_checkpoint_inventory.json"
 DEFAULT_SUBJECTS = (
@@ -69,9 +70,12 @@ def _per_worker_memory_budget(max_query_rows: int) -> int:
     """Conservative RSS envelope calibrated from the interrupted v3 run."""
     if max_query_rows < 0:
         raise ValueError("max_query_rows must be non-negative")
-    # E1077 (1,786 rows) exceeded 50 GiB live RSS.  12 GiB fixed overhead plus
-    # 32 MiB/query row budgets 67.8 GiB for that cell and 98.5 GiB for E253.
-    return int(12 * GIB + max_query_rows * 32 * MIB)
+    # Before streaming, E1077 (1,786 rows) exceeded 50 GiB because every raw
+    # waveform remained resident.  After the input-streaming fix, the largest
+    # E253 preprocessing smoke stayed below 0.61 GiB through 2,768 anchors.
+    # This envelope still reserves >20x that observed preprocessing HWM for
+    # the later frozen-model rollout and per-contact variation.
+    return int(4 * GIB + max_query_rows * 4 * MIB)
 
 
 def _safe_worker_count(
@@ -190,6 +194,13 @@ def _complete(output: Path, query: Path) -> bool:
         return False
 
 
+def _set_embedding_batch_size(command: list[str], value: int) -> list[str]:
+    updated = list(command)
+    index = updated.index("--embedding-batch-size") + 1
+    updated[index] = str(value)
+    return updated
+
+
 def _run(task: tuple[str, int, list[str], Path, Path], *, log_root: Path) -> dict:
     subject, seed, command, query, output = task
     log = log_root / f"{subject}_seed_{seed}.log"
@@ -201,16 +212,56 @@ def _run(task: tuple[str, int, list[str], Path, Path], *, log_root: Path) -> dic
     })
     started = time.time()
     log.parent.mkdir(parents=True, exist_ok=True)
+    attempts: list[dict] = []
+    completed = None
     with log.open("a", encoding="utf-8") as handle:
-        handle.write(f"\n[{utc_now()}] {' '.join(command)}\n")
-        handle.flush()
-        completed = subprocess.run(
-            command, cwd=REPO, env=environment, stdin=subprocess.DEVNULL,
-            stdout=handle, stderr=subprocess.STDOUT, text=True,
-        )
+        for attempt, batch_size in enumerate((128, 64, 32), start=1):
+            attempt_command = _set_embedding_batch_size(command, batch_size)
+            resource_path = log.with_name(
+                f"{log.stem}.attempt_{attempt}.maxrss_kib.txt"
+            )
+            timed_command = [
+                str(GNU_TIME), "-f", "%M", "-o", str(resource_path),
+                *attempt_command,
+            ]
+            handle.write(f"\n[{utc_now()}] {' '.join(attempt_command)}\n")
+            handle.flush()
+            completed = subprocess.run(
+                timed_command, cwd=REPO, env=environment,
+                stdin=subprocess.DEVNULL, stdout=handle,
+                stderr=subprocess.STDOUT, text=True,
+            )
+            peak_kib = None
+            if resource_path.is_file():
+                try:
+                    peak_kib = int(resource_path.read_text().strip().splitlines()[-1])
+                except (IndexError, ValueError):
+                    peak_kib = None
+            attempts.append({
+                "attempt": attempt, "embedding_batch_size": batch_size,
+                "returncode": completed.returncode,
+                "peak_rss_bytes": None if peak_kib is None else peak_kib * 1024,
+                "resource_receipt": str(resource_path),
+            })
+            if completed.returncode == 0:
+                break
+            if completed.returncode not in {-9, 9, 137}:
+                break
+            handle.write(
+                f"[{utc_now()}] probable OOM; retrying with smaller embedding batch\n"
+            )
+            handle.flush()
+    assert completed is not None
     row = {
         "subject": subject, "seed": seed, "returncode": completed.returncode,
         "elapsed_seconds": time.time() - started, "log": str(log),
+        "attempts": attempts,
+        "oom_retries": max(0, len(attempts) - 1),
+        "peak_rss_bytes": max(
+            (int(item["peak_rss_bytes"]) for item in attempts
+             if item["peak_rss_bytes"] is not None),
+            default=None,
+        ),
     }
     if completed.returncode == 0:
         row.update(_augment_and_audit(output, query))
@@ -259,21 +310,23 @@ def main() -> None:
     status_path = root / "full_grid/STATE_QUEUE_STATUS.json"
     status = {
         "status": "RUNNING", "created_utc": utc_now(),
-        "revision": "h2b_v0_3_full_grid_state_queue_v4",
+        "revision": "h2b_v0_3_full_grid_state_queue_v5",
         "requested_tasks": len(tasks), "pending_tasks": len(pending),
         "already_complete": len(tasks) - len(pending), "cpu_workers": workers,
         "configured_cpu_workers": int(args.cpu_workers),
         "mem_available_bytes_at_start": available,
         "per_worker_memory_budget_bytes": measured_budget,
         "memory_safety_fraction": MEMORY_SAFETY_FRACTION,
-        "memory_budget_formula": "12_GiB_plus_32_MiB_per_max_pending_query_row",
+        "memory_budget_formula": "4_GiB_plus_4_MiB_per_max_pending_query_row",
         "max_pending_query_rows": max_pending_query_rows,
         "resource_smoke_peak_rss_bytes": 9_274_196 * 1024,
         "resource_smoke_subject_seed": "epilepsiae_442/seed_0",
         "mixed_batch_observed_live_high_water_rss_bytes": int(22.5 * 1024 ** 3),
         "observed_epilepsiae_1077_live_rss_lower_bound_bytes": int(50 * GIB),
+        "post_streaming_e253_preprocessing_hwm_bytes": 614_236 * 1024,
         "prior_runs_stopped_before_kernel_oom": 2,
         "kernel_oom_observed": False,
+        "oom_retry_embedding_batch_sizes": [128, 64, 32],
         "compatible_prior_queue_producer_sha256": sorted(
             COMPATIBLE_QUEUE_PRODUCER_SHA256S
         ),
