@@ -2,7 +2,9 @@
 
 ## 一句话
 
-**本轮没有建立 H2b 跨任务状态证据。**唯一达到主层支持的患者中，冻结状态相对当前背景的增量很小、落在置换零带内，而且持续记忆没有胜过只看当前窗口；低支持患者有一些方向有利的读数，但正确时刻状态没有优于匹配的错误时刻。
+**本轮没有建立 H2b 跨任务状态证据。**唯一按总发作数进入 nominal primary 的患者，最终只有 2 个真正由过去预测未来的测试事件；冻结状态相对当前背景的增量很小、落在置换零带内，而且持续记忆没有胜过只看当前窗口。低支持患者有一些方向有利的读数，但正确时刻状态没有优于匹配的错误时刻。
+
+本轮应定位为“冻结表示的低容量探针试验”：它只问状态表示是否可能迁移到发作风险，尚未完整检验跨窗口动力学和发作组织。
 
 ## 这一步真正问了什么
 
@@ -10,18 +12,20 @@
 
 问题是：这个从间期任务中学到的冻结状态，能否在“近期 IED 历史”和“当前背景观察”之外，帮助区分真正的发作前时刻和同患者、同记录段中的普通时刻。
 
+实现中这个“之外”已经核实为真正的嵌套比较：`observation` 臂使用 `history + observation`，`state` 臂使用 `history + observation + persistent state`。
+
 ## 数据规模
 
 - R1.7 冻结清单：17 位患者、85 个训练单元，其中 75 个 checkpoint 可读。
 - R1.7B 是 exploratory development extension：consumer-side audit 已逐单元重算哈希，但它不满足旧 v0.1 的 50-fit formal release gate，因此本轮不能升级为正式 H2b confirmation。
 - 124 条 development 发作进入 crosswalk；正式和 sealed 分区没有打开。
 - 10 位患者完成原始背景读取和发作支持审查，生成 46 个 checkpoint-seed 状态缓存。
-- 30 分钟支持：1 位 primary、3 位 LOSO sensitivity、5 位 descriptive、1 位 not estimable。
+- 30 分钟软件支持分层：1 位按总数 primary-eligible、3 位 LOSO sensitivity、5 位 descriptive、1 位 not estimable。前者最终只有 2 个 OOF 测试事件，科学上仍是 chronological case series。
 - 9 位患者进入主 risk probe；15 个 primary/wrong-time 分析中，13 个完成 100 次置换，2 个在 30 分钟主端点明确记为不可估计。
 
 ## 核心结果
 
-唯一 primary 患者 `epilepsiae_548` 有 10 次合格发作，但 chronological TEST 最终只有 2 个 held-out risk sets：
+唯一 nominal primary 患者 `epilepsiae_548` 有 10 次合格发作，但 chronological TEST 最终只有 2 个 held-out risk sets：
 
 - `state - observation = -0.0212`，表面上方向有利，但在置换零带 `[-0.0862, +0.0501]` 内；
 - `persistent - memoryless = +0.0071`，不支持跨窗口持续记忆；
@@ -57,6 +61,8 @@ v0.1 的 E384 产物在 30 分钟实际只有 4 次而不是旧文字中的 5 �
 > 在 development 数据中，当前冻结 R1.7 间期状态尚未显示可靠的跨任务发作前增量。一个低支持描述层出现方向一致的探索性信号，但唯一主层患者未通过置换、持续性和时刻专属性三项解释检验。因此 H2b 未建立，也未被证明不存在。
 
 不能写成发作因果机制、临床预测性能、cohort confirmation 或 H3 的 IED→state 证据。
+
+post-review 权威验收见 `continuous_marked_state_h2b_cross_task_v0_2_acceptance_2026-08-31.md`；若与本报告早期命名冲突，以验收裁决为准。
 
 ## 权威产物
 

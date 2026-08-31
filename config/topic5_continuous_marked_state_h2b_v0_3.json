@@ -4,6 +4,25 @@
   "frozen_date": "2026-08-31",
   "v0_2_informed_redesign": true,
   "independent_confirmation": false,
+  "scientific_core": {
+    "one_sentence": "Does a state learned only from continuous background and interictal events retain cross-window history that transfers to seizure susceptibility and seizure-entry organisation after the state is frozen?",
+    "nested_levels": [
+      "susceptibility_transfer",
+      "dynamical_continuity",
+      "organisational_continuity"
+    ],
+    "not_answered_by": [
+      "seizure_label_prediction_alone",
+      "state_only_versus_observation_only_model_comparison",
+      "in_sample_latent_embedding_separation",
+      "seizure_supervised_state_finetuning"
+    ]
+  },
+  "hypotheses": {
+    "H2b_T": "persistent state adds held-out seizure-risk information beyond nuisance, event history and current observation",
+    "H2b_M": "the cross-window persistent-history residual outperforms a same-window memoryless code",
+    "H2b_D": "the frozen state shows time-scale-matched basin occupancy, directed approach or abrupt seizure-entry geometry out of sample"
+  },
   "source": {
     "state_task": "continuous_background_and_ied_timing_exact_mark",
     "state_source_revision": "r1_7b_extended_development_cohort_v1",
@@ -199,5 +218,18 @@
     "T_positive_M_positive_D_positive": "persistent interictal-to-seizure state transfer",
     "ied_ablation_positive": "IED learning contributed transferable seizure-relevant state information",
     "phenotype_bridge_positive": "state also predicts ictal recruitment organisation; still not H3 causality"
+  },
+  "drift_audit": {
+    "run_before_and_after_every_phase": true,
+    "questions": [
+      "Was the tested state learned without seizure labels and frozen before this analysis?",
+      "Does the primary contrast add state to the same nuisance-history-observation design matrix?",
+      "Is cross-window memory tested separately from current-window observation filtering?",
+      "Are time specificity and geometry evaluated out of sample on the states own interictal time scale?",
+      "Are patients and out-of-fold lead seizures, rather than seeds or anchors, the scientific support units?",
+      "Would the planned result distinguish transferable representation, persistent state and ictal organisation?",
+      "Is any IED-specific or causal wording supported by its own ablation or intervention rather than prediction alone?"
+    ],
+    "failure_action": "record SCIENTIFIC_ROUTE_DRIFT and stop only the affected claim branch; do not reinterpret an engineering PASS as scientific support"
   }
 }

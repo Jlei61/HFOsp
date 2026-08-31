@@ -45,11 +45,11 @@ results/epi_prssm/continuous_marked_state/h2b_cross_task/v0_3/
 1. Q1 non-collapse：有效秩、方差与 decoder-distance 超过 collapsed/shuffled null；
 2. Q2 cross-window information：persistent 在 held-out interictal future IED/background 上胜 memoryless；
 3. Q3 generator contribution：分开记录 generator drift、observation correction、open-loop horizon 和 reset recovery；
-4. Q4 tau：在 decoder-output metric 中估计 `tau_z`，要求长于两个 observation windows 且短于合格连续段中位长度的四分之一；
+4. Q4 tau：在 decoder-output metric 中估计 `tau_z`，要求长于 current observation window，并能在合格连续段内观察到衰减；近似常数或区间删失记为不可辨识，不写成生理失败；
 5. Q5 seed stability：比较 decoder outputs、距离矩阵或对齐轨迹，不直接比较不可识别的 raw latent 坐标；
 6. Q6 not-only-clock：加入 time-of-day、合法 sleep、recording day、time since previous seizure 和 segment 后，interictal 增量仍存在。
 
-输出 `all_frozen` 与 `state_qualified`。后者至少三 seed 通过所有可估计 Q1–Q6；任何不可用组件 fail closed，但患者仍留在 all-frozen 分母并列明原因。
+输出 `all_frozen` 与 `state_qualified`。后者至少三 seed 通过承重 Q1–Q5，并在所有已验证可用 nuisance 上通过 Q6。缺少真实 sleep/medication metadata 只作限制和分层，不自动判 state 失败；缺少承重 instrument 证据时仍 fail closed，并留在 all-frozen 分母说明原因。
 
 若 state-qualified 为空，停止 downstream seizure probe，转向上游 instrument 修复。
 
@@ -58,7 +58,7 @@ results/epi_prssm/continuous_marked_state/h2b_cross_task/v0_3/
 在真实 coverage、缺失、seizure count、聚集性、时钟分布、state autocorrelation 和 control sampling 上构造 null、observation-only、persistent-state、clock-confounded、basin、approach、abrupt worlds。
 
 - 最小相关效应固定为相对 held-out log loss 改善 5%。
-- 1000 次 Monte Carlo。
+- 先用 100 次 Monte Carlo 做实现 smoke；冻结全部设置后，只用最终 1000 次批次验收。
 - type-I error ≤0.05，95% 上界 ≤0.075。
 - power ≥0.80，95% 下界 ≥0.75。
 - prequential 初始 K 只从 2/3/4/5 中由该 assay 一次性选择，不看 v0.3 真实 outcome performance。
@@ -67,7 +67,7 @@ results/epi_prssm/continuous_marked_state/h2b_cross_task/v0_3/
 
 ## 7. A3–A5：嵌套 hazard、prequential 与时间尺度
 
-完整记录覆盖以 5 min grid 建 anchor，主 outcome 为未来 30 min 是否有 lead seizure。主模型：
+完整记录覆盖以 5 min grid 建 anchor，主 outcome 为未来 30 min 是否有 lead seizure，主指标为 full-grid held-out discrete-time hazard log loss。旧 exact onset-minus-lead risk set 仅作 v0.2 bridge sensitivity。主模型：
 
 ```text
 M0 = C + H
@@ -91,7 +91,7 @@ M4 = C + H + O + Z_memoryless + R_persistent_history
 
 MARBLE 只有在连续采样足够密、局部邻域含多个独立 segment、flow bootstrap 稳定且半合成 dynamics 可恢复时才解锁。
 
-流形模块不得替代 T/M。若 T 在有充分 assay power 时失败，则停止当前 checkpoint 的 downstream heads。
+流形模块不得替代 T/M。若 T 在有充分 assay power 时失败，则停止当前 checkpoint 的 claim-bearing downstream heads；all-frozen 几何只可作为明确标注的 instrument diagnostic。
 
 ## 9. A7–A8：条件解锁扩展
 
@@ -112,3 +112,11 @@ phenotype 只使用不看 state 冻结的连续 seizure-level target：IED–ict
 - 再有 phenotype bridge：状态预测 ictal recruitment 组织；仍不能称 H3 因果。
 
 v0.3 完成前不得打开 sealed partition。
+
+## 11. 科学路线偏移审计
+
+每阶段开始和结束都必须机器记录：上游是否仍由间期任务学习并冻结；主比较是否在相同 `C+H+O` 上增量加入 state；memoryless 与 persistent 是否分开；时间/几何是否按纯间期时间尺度 OOS 评价；分母是否为患者与 OOF lead seizure；当前结果能否区分 representation、persistent state 与 ictal organisation；IED-specific/因果措辞是否有独立证据。
+
+任一项失败写 `SCIENTIFIC_ROUTE_DRIFT`，只停止受影响的 claim branch 并回到最近有效模块。工程 PASS 不得替代科学支持，单一探索阴性也不得成为整个项目的总 gate。
+
+Scientific Spec：`continuous_marked_state_h2b_cross_task_v0_3_spec_2026-08-31.md`。执行计划：`continuous_marked_state_h2b_cross_task_v0_3_plan_2026-08-31.md`。

@@ -4,24 +4,28 @@
 
 Primary estimand：held-out 30-min conditional risk-set log loss 的 `B_state - B_observation`，负值有利。必要解释量为 `persistent - memoryless` 和 `correct-time - matched-wrong-time`。
 
+实际 design matrix 已按代码核实：`B_history=[history]`、`B_observation=[history, observation]`、`B_state=[history, observation, persistent state]`、`memoryless=[history, observation, memoryless code]`、`wrong_time=[history, observation, wrong-time state]`。因此主量是嵌套 state increment；不是 state-only 与 observation-only 的替代模型比较。
+
 R1.7B interictal timing+exact-mark checkpoints 只读接入；consumer-side audit 对 85 cells 与 75 个可读 checkpoint/result 重算哈希并通过，但 R1.7B 本身不满足旧 v0.1 的 50-fit formal release gate，故仅作为 exploratory development source。observer、state update、generator、timing/mark decoder 全冻结；seizure loss 仅训练患者内低容量 ridge conditional-risk probe。H1 stability 只作事前分层，不作纳入 gate。formal/sealed、H3/T2、paper-ready figures 全程未触碰。
 
 ## 2. Cohort and denominators
 
 |层级|患者数|规则|
 |---|---:|---|
-|primary chronological|1|30 min 合格发作 ≥10|
+|primary-eligible by total support|1|30 min 合格发作 ≥10；最终 TEST 仅 n=2，科学表述为 chronological case series|
 |nested LOSO sensitivity|3|5–9|
 |descriptive case series|5|2–4|
 |not estimable|1|<2|
 
 上游 17 位、85 cells 中 75 checkpoints 可读；13/17 位有 development seizure inventory，10 位完成 raw/background 支持审查，46 个 checkpoint-seed 状态缓存完成。crosswalk 为 124 条 development 发作，绝对时间为 float64，状态按 recorded coverage segment 重置，不跨 gap carry。
 
+`primary-eligible` 是软件支持标签，不是科学证据等级。后续所有主层判断使用实际 OOF lead seizure 数、独立患者数和 assay power；本轮不得用“10 次合格”掩盖最终只有 2 个 TEST risk sets。
+
 主风险表严格固定 5/15/30/60/120 min；30 min 合格发作 ID 固定所有 sensitivity lead 的患者内人群。case/control 同患者、同 coverage segment；ictal 与 120 min postictal 排除。患者 feature width 不同，未跨患者拼接矩阵。
 
 ## 3. Main results
 
-### 3.1 Primary chronological
+### 3.1 Primary-eligible / chronological case series test n=2
 
 `epilepsiae_548`：10 次 30-min eligible seizures，但最终 TEST 只有 2 risk sets。
 
@@ -93,7 +97,9 @@ R1.7B interictal timing+exact-mark checkpoints 只读接入；consumer-side audi
 
 ## 8. Safe claim
 
-当前结果是 development closeout，结论为 **H2b not established**。它既不是跨任务阳性，也不是“生理状态不存在”的证明。后续若继续，应优先增加具有足够 chronological held-out seizures 的新患者，而不是在当前低分母上继续扩展 lead、亚型或模型复杂度。
+当前结果是 development closeout，结论为 **H2b not established**。它既不是跨任务阳性，也不是“生理状态不存在”的证明。后续若继续，应先验证候选量是否真有跨窗口状态性质并校准 assay，再用 prequential evaluation 回收可用发作；不能只在当前低分母上扩展 lead、亚型或模型复杂度。
+
+本轮正式定位为 `Module 1: frozen low-capacity probe falsification`。post-review 权威裁决为 `continuous_marked_state_h2b_cross_task_v0_2_acceptance_2026-08-31.md`。
 
 ## 9. Reproduction anchors
 

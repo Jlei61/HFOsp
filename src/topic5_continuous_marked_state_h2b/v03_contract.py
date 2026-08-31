@@ -36,6 +36,14 @@ def load_and_validate_contract(path: Path | str = DEFAULT_CONTRACT) -> dict[str,
              "v0.3 must disclose that v0.2 outcomes informed the redesign")
     _require(payload.get("independent_confirmation") is False,
              "v0.3 cannot be labelled independent confirmation")
+    core = payload.get("scientific_core") or {}
+    _require(core.get("nested_levels") == [
+        "susceptibility_transfer", "dynamical_continuity",
+        "organisational_continuity",
+    ], "v0.3 scientific core levels drifted")
+    hypotheses = payload.get("hypotheses") or {}
+    _require(set(hypotheses) == {"H2b_T", "H2b_M", "H2b_D"},
+             "v0.3 must keep the frozen T/M/D hypotheses")
 
     boundary = payload.get("boundaries") or {}
     _require(boundary.get("development_only") is True,
@@ -73,6 +81,16 @@ def load_and_validate_contract(path: Path | str = DEFAULT_CONTRACT) -> dict[str,
              "M2 is not a strict state increment over M1")
     _require(matrices["M4"][:-1] == matrices["M3"],
              "M4 is not a strict history-residual increment over M3")
+    nuisance = payload.get("nuisance") or {}
+    _require(nuisance.get("O") == [
+        "current_explicit_observation",
+        "current_window_memoryless_observer_code_computed_after_state_reset",
+    ], "current observation comparator is not explicitly memoryless")
+
+    evaluation = payload.get("evaluation") or {}
+    _require(evaluation.get("primary_metric")
+             == "held-out full-grid discrete-time hazard log loss",
+             "v0.3 primary metric is ambiguous or drifted")
 
     qualification = payload.get("state_qualification") or {}
     _require(qualification.get("outcome_blind") is True,
@@ -88,6 +106,11 @@ def load_and_validate_contract(path: Path | str = DEFAULT_CONTRACT) -> dict[str,
     gates = payload.get("gates") or {}
     _require(gates.get("sealed_unlock") == "forbidden in v0.3",
              "sealed partition is not fail-closed")
+    drift = payload.get("drift_audit") or {}
+    _require(drift.get("run_before_and_after_every_phase") is True,
+             "scientific route drift audit is not phase-bound")
+    _require(len(drift.get("questions") or []) >= 7,
+             "scientific route drift audit is incomplete")
     return payload
 
 

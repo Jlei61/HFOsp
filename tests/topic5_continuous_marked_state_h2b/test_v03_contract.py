@@ -20,6 +20,11 @@ def test_v03_contract_is_nested_outcome_blind_and_development_only() -> None:
     assert contract["boundaries"]["formal_test_partition_opened"] is False
     assert contract["boundaries"]["sealed_opened"] is False
     assert contract["geometry"]["umap_role"] == "visualisation_only"
+    assert contract["evaluation"]["primary_metric"] == (
+        "held-out full-grid discrete-time hazard log loss"
+    )
+    assert set(contract["hypotheses"]) == {"H2b_T", "H2b_M", "H2b_D"}
+    assert contract["drift_audit"]["run_before_and_after_every_phase"] is True
 
 
 def test_v03_contract_freeze_is_hash_bound(tmp_path, monkeypatch) -> None:
