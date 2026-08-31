@@ -307,7 +307,21 @@ def evaluate_oos_geometry_fold_full_grid(
     # scientific requirement of the projection estimator (minimum 20 rows).
     if len(train) < 40:
         return {"status": "NOT_ESTIMABLE", "reason": "insufficient_past_full_grid_rows"}
-    projection = fit_decoder_projection(decoder[train])
+    # A collapsed frozen decoder is a scientific non-estimability condition,
+    # not a queue/runtime failure. Keep the cell in the denominator and let
+    # the patient-first aggregate report why no geometry could be measured.
+    try:
+        projection = fit_decoder_projection(decoder[train])
+    except ValueError as error:
+        if str(error) in {
+            "decoder projection has no active dimensions",
+            "decoder projection is rank zero",
+        }:
+            return {
+                "status": "NOT_ESTIMABLE",
+                "reason": "collapsed_decoder_geometry",
+            }
+        raise
     all_score = projection.transform(decoder)
     train_score = all_score[train]
     centres = fit_two_basins(train_score)

@@ -101,3 +101,18 @@ def test_full_grid_geometry_uses_one_extraction_domain() -> None:
     assert observed["projection_fit_clean_interictal_only"] is True
     assert observed["clean_interictal_exclusion_minutes"] == 120.0
     assert abs(observed["family_scores"]["abrupt_transition"]) < 100.0
+
+
+def test_full_grid_geometry_marks_collapsed_decoder_not_estimable() -> None:
+    time = np.arange(400, dtype=np.float64) * 300.0
+    observed = evaluate_oos_geometry_fold_full_grid(
+        grid_time=time,
+        grid_segment=np.zeros(len(time), dtype=np.int64),
+        grid_decoder=np.ones((len(time), 4), dtype=np.float64),
+        onset_time=np.asarray([50_000.0, 70_000.0, 90_000.0]),
+        onset_segment=np.zeros(3, dtype=np.int64),
+        heldout_position=2,
+    )
+    assert observed == {
+        "status": "NOT_ESTIMABLE", "reason": "collapsed_decoder_geometry",
+    }
