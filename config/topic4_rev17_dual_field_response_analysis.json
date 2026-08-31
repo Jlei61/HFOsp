@@ -1,0 +1,39 @@
+{
+  "schema_id": "topic4_rev17_dual_field_response_analysis_v1",
+  "atlas_config_sha256": "8425d2ed03b66683b9bd74f2bb29d380f28aad8b4904e63581ce541a7a9db3ab",
+  "atlas_manifest_sha256": "3274f67aa5f6f3f1d7557376c238d7ec0ae36fdfb02e4a8a154df0fa685f9776",
+  "response_tensor": {
+    "network_seeds": [2361, 2362, 2363],
+    "channels": ["mean", "dispersion"],
+    "maximum_mode_index": 14,
+    "coordinate_count": 30,
+    "maximum_nonlinearity_ratio": 1.0,
+    "derivative_floor_fraction": 0.1,
+    "network_weighting": "equal"
+  },
+  "direction_construction": {
+    "families": [
+      "mean_a",
+      "mean_j14",
+      "maximin_bprotected",
+      "maximin_supportprotected",
+      "maximin_j14_abprotected",
+      "consensus_sparse"
+    ],
+    "maximum_sparse_coordinates": 8,
+    "candidate_radii": [0.1, 0.15, 0.2],
+    "fresh_selection_network_seeds": [2371, 2372, 2373],
+    "predicted_J14_improvement_required_networks": 3,
+    "predicted_A_improvement_required_networks": 3,
+    "predicted_B_protection_ratio": 1.1,
+    "predicted_minimum_support_per_mode": 6.0
+  },
+  "boundaries": {
+    "natural_kmeans_used": false,
+    "patient_heldout_used": false,
+    "ictal_data_used": false,
+    "figure_used": false,
+    "EE_EtoI_ZM": "off"
+  },
+  "claim_boundary": "Training-target response directions only. A direction is nominated from equal-network central differences around the exact accepted dual field, then must be tested on disjoint selection networks before any natural KMeans, held-out, source-topology or intervention analysis."
+}

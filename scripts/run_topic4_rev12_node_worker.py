@@ -71,6 +71,7 @@ ALLOWED_SCIENTIFIC_ROLES = {
     "development_only_scalar_node_gain_canary",
     "development_only_dual_continuous_node_channel_canary",
     "development_only_dual_continuous_node_residual_atlas",
+    "development_only_dual_continuous_node_residual_selection",
 }
 
 

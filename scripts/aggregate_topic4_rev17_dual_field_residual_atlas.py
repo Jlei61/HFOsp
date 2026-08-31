@@ -19,6 +19,7 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 ARTIFACT_ROOT = Path("/home/honglab/leijiaxin/HFOsp")
 DEFAULT_CONFIG = ROOT / "config/topic4_rev17_dual_field_residual_atlas.json"
+DEFAULT_ANALYSIS_CONFIG = ROOT / "config/topic4_rev17_dual_field_response_analysis.json"
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -27,6 +28,10 @@ from scripts import aggregate_topic4_rev15_m3_coordinate_atlas as flat  # noqa: 
 from scripts import rescore_topic4_rev14_static_node_historical_libraries as historical  # noqa: E402
 from src.topic4_continuous_field import continuous_field_h  # noqa: E402
 from src.topic4_core_field_rev9 import reconstruct_node_from_dual_fields  # noqa: E402
+from src.topic4_rev17_dual_field_direction import (  # noqa: E402
+    construct_directions,
+    response_tensor,
+)
 from src.topic4_zm_ictal_transition import build_substrate, load_round_config  # noqa: E402
 
 
@@ -317,8 +322,16 @@ def summarize_differences(rows: list[dict[str, Any]], amplitude: float) -> list[
 
 
 def aggregate(config_path: Path = DEFAULT_CONFIG,
+              analysis_config_path: Path = DEFAULT_ANALYSIS_CONFIG,
               root: Path = ARTIFACT_ROOT) -> dict[str, Any]:
     config, manifest, manifest_path = _load_contract(config_path.resolve(), root.resolve())
+    analysis = json.loads(analysis_config_path.resolve().read_text())
+    if analysis.get("schema_id") != "topic4_rev17_dual_field_response_analysis_v1":
+        raise RuntimeError("rev17 response-analysis schema changed")
+    if analysis.get("atlas_config_sha256") != _sha256(config_path.resolve()):
+        raise RuntimeError("rev17 response analysis points to a different atlas config")
+    if analysis.get("atlas_manifest_sha256") != _sha256(manifest_path):
+        raise RuntimeError("rev17 response analysis points to a different atlas manifest")
     provenance = _analysis_provenance(manifest)
     candidates = {row["candidate_id"]: row for row in manifest["candidates"]}
     seeds = [int(seed) for seed in config["search"]["fit_network_seeds"]]
@@ -343,6 +356,7 @@ def aggregate(config_path: Path = DEFAULT_CONFIG,
                     invalid.append(f"{candidate_id}:{seed}:{error}")
     status, input_error = "INCOMPLETE", None
     differences, response_summary = [], []
+    tensor, robust_directions = None, None
     if not provenance["analysis_worktree_clean"]:
         status, input_error = "INVALID_PROVENANCE", "analysis worktree is dirty"
     elif not missing and not invalid and len(validated) == expected:
@@ -363,6 +377,23 @@ def aggregate(config_path: Path = DEFAULT_CONFIG,
             amplitude = float(config["dual_field_residual"]["amplitude"])
             differences = finite_differences(scored_rows, amplitude)
             response_summary = summarize_differences(differences, amplitude)
+            tensor = response_tensor(
+                differences, amplitude=amplitude,
+                maximum_mode_index=int(
+                    analysis["response_tensor"]["maximum_mode_index"]
+                ),
+                maximum_nonlinearity_ratio=float(
+                    analysis["response_tensor"]["maximum_nonlinearity_ratio"]
+                ),
+                derivative_floor_fraction=float(
+                    analysis["response_tensor"]["derivative_floor_fraction"]
+                ),
+            )
+            robust_directions = construct_directions(
+                tensor, maximum_sparse_coordinates=int(
+                    analysis["direction_construction"]["maximum_sparse_coordinates"]
+                ),
+            )
             status = STATUS
         except Exception as error:
             status, input_error = "INVALID_INPUT", str(error)
@@ -382,6 +413,9 @@ def aggregate(config_path: Path = DEFAULT_CONFIG,
         "scored_runs": scored_rows,
         "finite_differences": differences,
         "response_summary": response_summary,
+        "response_tensor": tensor,
+        "robust_directions": robust_directions,
+        "response_analysis_contract": analysis,
         "boundaries": {
             "natural_kmeans_used": False, "patient_heldout_used": False,
             "ictal_data_used": False, "figure_used": False,
@@ -400,9 +434,12 @@ def aggregate(config_path: Path = DEFAULT_CONFIG,
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
+    parser.add_argument(
+        "--analysis-config", type=Path, default=DEFAULT_ANALYSIS_CONFIG,
+    )
     parser.add_argument("--artifact-root", type=Path, default=ARTIFACT_ROOT)
     args = parser.parse_args()
-    payload = aggregate(args.config, args.artifact_root)
+    payload = aggregate(args.config, args.analysis_config, args.artifact_root)
     print(json.dumps({
         "status": payload["status"],
         "present_validated": payload["inventory"]["present_validated"],
