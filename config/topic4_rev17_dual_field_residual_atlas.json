@@ -1,0 +1,108 @@
+{
+  "schema_id": "topic4_rev17_dual_field_residual_atlas_v1",
+  "scientific_role": "development_only_dual_continuous_node_residual_atlas",
+  "output_root": "results/topic4_sef_hfo/data_driven_node_dualmode_rev17/dual_field_residual_atlas",
+  "candidate_manifest": "results/topic4_sef_hfo/data_driven_node_dualmode_rev17/dual_field_residual_atlas/candidate_manifest.json",
+  "network_cache": "results/topic4_sef_hfo/data_driven_core_field_rev9/network_cache",
+  "inputs": {
+    "transition_config": {
+      "path": "config/topic4_data_driven_zm_ictal_transition_v1.json",
+      "sha256": "2ce70caf70ca1225ba9a95721692cf7fc9ce0f8fa9b977c85d0370c78941b20f"
+    },
+    "source_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev16/joint_m3_m4_candidates/candidate_manifest.json",
+      "sha256": "597a50e50fff2817582669122f9c165d507b8b8fbfc5c22c68721091df5f43bf"
+    },
+    "exact_off_seed_2351": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev16/joint_m3_m4_candidates/workers/exact_off_seed_2351.npz",
+      "sha256": "85eb498b4928efe3294ea237e8f9d56f30666030c5b89a07c99777e325bafed5"
+    },
+    "exact_off_seed_2352": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev16/joint_m3_m4_candidates/workers/exact_off_seed_2352.npz",
+      "sha256": "db9a474d62038f586b87e32cea4b29e46ab7d0a51ae5da358a24e16916aa5e1e"
+    },
+    "exact_off_seed_2353": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev16/joint_m3_m4_candidates/workers/exact_off_seed_2353.npz",
+      "sha256": "64dc04880afdf3bf256abff071d8e45719f771084ce59216f426330bd32fdbe2"
+    },
+    "j14_config": {
+      "path": "config/topic4_rev14_static_node_historical_rescore.json",
+      "sha256": "af3116d4a56feb077d17893196eee1f2ebcc42fd77688d56e15f2a5b89631ed2"
+    },
+    "patient_support_config": {
+      "path": "config/topic4_rev14_patient_support_acceptance.json",
+      "sha256": "5dec1ff3277294697515d701e82246c242fb627348751571a5a6fe86e008940e"
+    }
+  },
+  "dual_field_residual": {
+    "maximum_frequency": 3,
+    "amplitude": 0.15,
+    "target_n_basis": 18,
+    "degree": 3,
+    "sheet_mm": 20.0,
+    "projection_grid_per_axis": 61,
+    "expected_candidate_count": 61,
+    "observation_coordinates_used": false,
+    "zero_residual_exact": true
+  },
+  "parity": {
+    "reference_seeds": [2351, 2352, 2353],
+    "output": "results/topic4_sef_hfo/data_driven_node_dualmode_rev17/dual_field_residual_atlas/audit/zero_residual_parity.json"
+  },
+  "search": {
+    "canary_network_seeds": [],
+    "fit_network_seeds": [2361, 2362, 2363],
+    "selection_network_seeds": [],
+    "confirmation_network_seeds": [],
+    "edge": "off",
+    "beta": "closed",
+    "simulation": {
+      "duration_ms": 20000.0,
+      "early_stop_runaway": true,
+      "late_runaway_is_invalid": true
+    },
+    "contact_readout": {
+      "source": "lineage_restricted_neuron_activity",
+      "kernel_width_mm": 0.25,
+      "smooth_ms": 5.0,
+      "participation_margin_fraction": 0.1,
+      "timing_fraction": 0.5
+    }
+  },
+  "event_unit": {
+    "name": "edge_supported_causal_family_observation",
+    "minimum_active_neurons": 2,
+    "minimum_dominance": 0.7,
+    "sensitivity_minimum_dominances": [0.6, 0.7, 0.8],
+    "movie_frame_ms": 2.0,
+    "movie_bin_mm": 1.0,
+    "causal_memory_method": "local_ee_psp_tail",
+    "psp_tail_fraction": 0.5,
+    "sensitivity_psp_tail_fractions": [0.8, 0.5, 0.2],
+    "local_ee_delay_quantile": 1.0,
+    "forward_parent_neighborhood_bins": 1,
+    "minimum_parent_support": 0.001,
+    "sensitivity_minimum_parent_supports": [0.0003, 0.001, 0.003],
+    "minimum_parent_dominance": 0.7,
+    "edge_delay_rounding": "nearest",
+    "sensitivity_edge_delay_roundings": ["floor", "nearest", "ceil"],
+    "contact_geometry_used_for_boundary": false
+  },
+  "source_topology": {
+    "bin_mm": 1.0,
+    "event_window_ms": [-20.0, 180.0],
+    "baseline_window_ms": [-120.0, -20.0],
+    "frame_step_ms": 2.0,
+    "frame_width_ms": 3.0,
+    "minimum_active_neurons": 2,
+    "persistence_frames": 2,
+    "full_sheet_movie": {"enabled": true, "frame_ms": 2.0}
+  },
+  "resources": {
+    "maximum_workers": 8,
+    "estimated_worker_gib": 14.0,
+    "reserved_available_memory_gib": 48.0,
+    "monitor_interval_seconds": 600
+  },
+  "claim_boundary": "Development-only Node response atlas. Candidate generation uses no contact, shaft, patient-mode, held-out, ictal, figure, EE, E-to-I, or Z/M information. No residual is eligible unless zero-residual dual-field parity passes first."
+}
