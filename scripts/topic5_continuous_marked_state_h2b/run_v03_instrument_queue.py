@@ -23,6 +23,9 @@ from src.topic5_continuous_marked_state_h2b.contract import (  # noqa: E402
     sha256_file,
     utc_now,
 )
+from scripts.topic5_continuous_marked_state_h2b.run_v03_instrument_cell import (  # noqa: E402
+    _resolve_interictal_design,
+)
 
 
 PYTHON = Path("/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python")
@@ -51,7 +54,7 @@ def _complete(root: Path, subject: str, seed: int, checkpoint_sha256: str,
         trace = Path(payload["trace_path"])
         return bool(
             payload.get("status") == "COMPLETE"
-            and payload.get("revision") == "h2b_v0_3_interictal_instrument_cell_v2"
+            and payload.get("revision") == "h2b_v0_3_interictal_instrument_cell_v3"
             and payload.get("subject") == subject
             and int(payload.get("seed", -1)) == seed
             and payload.get("source", {}).get("checkpoint", {}).get("checkpoint_sha256")
@@ -117,24 +120,28 @@ def main() -> None:
         raise RuntimeError("another v0.3 instrument queue owns the lock") from error
 
     inventory = _json(v02 / "manifests/r1_7_checkpoint_inventory.json")
-    support = _json(v02 / "manifests/support_census.json")
-    design_subjects = {
-        str(row["subject"]) for row in support["patient_rows"]
-        if bool(row.get("upstream_design_available"))
-    }
     requested = set(map(str, args.subjects or []))
-    tasks = []
+    candidate_tasks = []
     entry_by_task = {}
     for entry in inventory["entries"]:
         subject, seed = str(entry["subject"]), int(entry["seed"])
-        if not bool(entry.get("checkpoint_available")) or subject not in design_subjects:
+        if not bool(entry.get("checkpoint_available")):
             continue
         if requested and subject not in requested:
             continue
         key = (subject, seed)
-        tasks.append(key)
+        candidate_tasks.append(key)
         entry_by_task[key] = entry
-    tasks = sorted(set(tasks))
+    candidate_tasks = sorted(set(candidate_tasks))
+    unavailable_designs = {}
+    for subject in sorted({task[0] for task in candidate_tasks}):
+        try:
+            _resolve_interictal_design(
+                subject, v02_root=v02, result_root=result,
+            )
+        except FileNotFoundError as error:
+            unavailable_designs[subject] = str(error)
+    tasks = [task for task in candidate_tasks if task[0] not in unavailable_designs]
     pending = [task for task in tasks if not _complete(
         result, task[0], task[1], entry_by_task[task]["checkpoint_sha256"],
         int(args.n_null_permutations),
@@ -149,9 +156,12 @@ def main() -> None:
     ))
     status_path = result / "instrument/QUEUE_STATUS.json"
     status = {
-        "status": "RUNNING", "revision": "h2b_v0_3_instrument_queue_v2",
+        "status": "RUNNING", "revision": "h2b_v0_3_instrument_queue_v3",
         "created_utc": utc_now(), "pid": os.getpid(), "pgid": os.getpgid(0),
-        "requested_tasks": len(tasks), "already_complete": len(tasks) - len(pending),
+        "requested_tasks": len(candidate_tasks), "eligible_tasks": len(tasks),
+        "excluded_design_unavailable_tasks": len(candidate_tasks) - len(tasks),
+        "design_unavailable_subjects": unavailable_designs,
+        "already_complete": len(tasks) - len(pending),
         "pending_tasks": len(pending), "cpu_workers": workers,
         "configured_cpu_workers": int(args.cpu_workers),
         "mem_available_bytes_at_start": available,

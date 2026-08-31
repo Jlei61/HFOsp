@@ -46,6 +46,80 @@ def _json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def _resolve_interictal_design(
+    subject: str, *, v02_root: Path, result_root: Path,
+) -> tuple[Path, Path, Path, dict]:
+    r1_root = Path(
+        "/home/honglab/leijiaxin/HFOsp/results/epi_prssm/"
+        "continuous_marked_state/r1"
+    )
+    candidates = (
+        ("v0_3_hash_verified_rebuild", result_root / "upstream_r1_2",
+         result_root / "manifests/upstream_rebuild" / f"{subject}.json"),
+        ("v0_2_hash_verified_rebuild", v02_root / "upstream_r1_2",
+         v02_root / "manifests/upstream_rebuild" / f"{subject}.json"),
+        ("frozen_r1_7a_upstream", r1_root / "r1_7a/upstream_r1_2", None),
+    )
+    frozen_r17b_manifest = (
+        r1_root / "r1_7b_cohort_extension/cache" / subject / "manifest.json"
+    )
+    for route, root, audit_path in candidates:
+        design_path = root / "cache" / subject / "full_design.npz"
+        manifest_path = root / "cache" / subject / "manifest.json"
+        embedding_path = root / "cache" / subject / "explicit_embedding.npy"
+        if not all(path.is_file() for path in (
+            design_path, manifest_path, embedding_path,
+        )):
+            continue
+        manifest = _json(manifest_path)
+        if manifest.get("status") != "COMPLETE":
+            continue
+        if sha256_file(design_path) != str(manifest.get("design_sha256")):
+            raise ValueError(f"{subject}: interictal design SHA256 drift")
+        if sha256_file(embedding_path) != str(
+            manifest.get("explicit_embedding_sha256")
+        ):
+            raise ValueError(f"{subject}: interictal embedding SHA256 drift")
+        audit = None
+        if audit_path is not None:
+            if not audit_path.is_file():
+                continue
+            audit = _json(audit_path)
+            if audit.get("status") != "COMPLETE" or not all(
+                bool(value) for value in audit.get("checks", {}).values()
+            ):
+                raise ValueError(f"{subject}: upstream rebuild equivalence failed")
+            artifact = audit.get("artifacts", {})
+            if str(Path(artifact.get("design", "")).resolve()) != str(
+                design_path.resolve()
+            ) or artifact.get("design_sha256") != sha256_file(design_path):
+                raise ValueError(f"{subject}: rebuild audit/design disagreement")
+        if frozen_r17b_manifest.is_file():
+            expected = _json(frozen_r17b_manifest)
+            if expected.get("design_sha256") != sha256_file(design_path):
+                raise ValueError(f"{subject}: design differs from frozen R1.7 source")
+        provenance = {
+            "route": route,
+            "design_manifest": str(manifest_path),
+            "design_manifest_sha256": sha256_file(manifest_path),
+            "rebuild_audit": str(audit_path) if audit_path is not None else None,
+            "rebuild_audit_sha256": (
+                sha256_file(audit_path) if audit_path is not None else None
+            ),
+            "frozen_r1_7b_cache_manifest": (
+                str(frozen_r17b_manifest) if frozen_r17b_manifest.is_file() else None
+            ),
+            "frozen_r1_7b_cache_manifest_sha256": (
+                sha256_file(frozen_r17b_manifest)
+                if frozen_r17b_manifest.is_file() else None
+            ),
+        }
+        return design_path, manifest_path, embedding_path, provenance
+    raise FileNotFoundError(
+        f"{subject}: no hash-verified interictal design independent of seizure support"
+    )
+
+
 def _atomic_npz(path: Path, **arrays: np.ndarray) -> None:
     target = assert_safe_output_path(path)
     target.parent.mkdir(parents=True, exist_ok=True)
@@ -68,9 +142,7 @@ def run(subject: str, seed: int, *, v02_root: Path, result_root: Path,
     contract_path = result_root / "analysis_contract.json"
     assert_frozen_contract_matches(_json(contract_path))
     inventory_path = v02_root / "manifests/r1_7_checkpoint_inventory.json"
-    support_path = v02_root / "manifests/support_census.json"
     inventory = _json(inventory_path)
-    support = _json(support_path)
     selected = [entry for entry in inventory["entries"]
                 if str(entry["subject"]) == str(subject)
                 and int(entry["seed"]) == int(seed)]
@@ -79,19 +151,11 @@ def run(subject: str, seed: int, *, v02_root: Path, result_root: Path,
     entry = selected[0]
     if not bool(entry.get("checkpoint_available")):
         raise ValueError(f"checkpoint unavailable: {subject}/seed_{seed}")
-    support_rows = [row for row in support["patient_rows"]
-                    if str(row["subject"]) == str(subject)]
-    if len(support_rows) != 1:
-        raise ValueError(f"support identity is not unique: {subject}")
-    support_row = support_rows[0]
-    design_path = Path(support_row["upstream_design_path"]).resolve()
-    manifest_path = Path(support_row["upstream_design_manifest_path"]).resolve()
-    design_manifest = _json(manifest_path)
-    embedding_path = design_path.with_name("explicit_embedding.npy")
-    if sha256_file(design_path) != str(design_manifest["design_sha256"]):
-        raise ValueError("frozen interictal design SHA256 drift")
-    if sha256_file(embedding_path) != str(design_manifest["explicit_embedding_sha256"]):
-        raise ValueError("frozen interictal embedding SHA256 drift")
+    design_path, manifest_path, embedding_path, design_provenance = (
+        _resolve_interictal_design(
+            subject, v02_root=v02_root, result_root=result_root,
+        )
+    )
     model, provenance = load_frozen_r16_checkpoint(
         entry["checkpoint_path"],
         expected_sha256=entry["checkpoint_sha256"],
@@ -131,8 +195,8 @@ def run(subject: str, seed: int, *, v02_root: Path, result_root: Path,
     )
     payload = {
         "status": "COMPLETE",
-        "revision": "h2b_v0_3_interictal_instrument_cell_v2",
-        "supersedes_revision": "h2b_v0_3_interictal_instrument_cell_v1",
+        "revision": "h2b_v0_3_interictal_instrument_cell_v3",
+        "supersedes_revision": "h2b_v0_3_interictal_instrument_cell_v2",
         "h2b_revision": H2B_V0_3_REVISION,
         "created_utc": utc_now(),
         "subject": subject,
@@ -156,8 +220,8 @@ def run(subject: str, seed: int, *, v02_root: Path, result_root: Path,
             "design_manifest_sha256": sha256_file(manifest_path),
             "embedding_path": str(embedding_path),
             "embedding_sha256": sha256_file(embedding_path),
+            "design_resolution": design_provenance,
             "v0_2_inventory_sha256": sha256_file(inventory_path),
-            "v0_2_support_sha256": sha256_file(support_path),
         },
         "data_scope": "interictal TRAIN and D_state only",
         "seizure_risk_outcome_read": False,
