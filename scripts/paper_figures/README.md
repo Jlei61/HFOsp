@@ -377,6 +377,38 @@ Current accepted visual contract:
 - readout event windows are shaded by direction: forward and reverse propagation events use different colors
 - the compatibility path `results/topic4_sef_hfo/observation_layer/snn_cm_spontaneous/figures/core_model_s3_brakeoff.png` is also regenerated
 
+## Fig5-A Pure Z/M High-Recruitment Diagnostic
+
+Formal entry point:
+
+```bash
+python scripts/paper_figures/plot_fig5a_pure_zm_dynamics.py
+```
+
+Default output:
+
+```text
+results/paper-ready-figure/fig5_pure_zm_dynamics/figures/
+```
+
+The producer selects from `primary_zm_only` candidates with the full learned
+EE/EI substrate, using the frozen model-internal qualification table rather
+than image appearance or the patient energy target. The current selected
+trajectory demonstrates operational runaway and a one-second broad high-rate
+recruitment state, but it remains a diagnostic Fig5A candidate because the
+virtual-contact frequency does not increase and no recovery or multi-seed
+confirmation is established.
+
+## Fig5-A Spatial Z/qI--M/gK Global-Oscillation Producer (blocked)
+
+Entry point: `plot_fig5a_spatial_zm_qigk_dynamics.py`. It intentionally fails
+closed unless `aggregate_topic4_spatial_zm_qigk.py` identifies one full-edge
+hybrid parameter family with at least three unique confirmation seeds and every
+completed seed passing the frozen global-oscillation gate. The 2026-08-31
+discovery screen found no eligible family (best spatial-q state: 9/15 rhythmic
+contacts; required: 12/15), so no formal output directory is generated. Do not
+invoke the renderer on a discovery trajectory or replace the aggregate by hand.
+
 ## M3A-v2 Step4 Dynamics Diagnostics
 
 Formal entry point:

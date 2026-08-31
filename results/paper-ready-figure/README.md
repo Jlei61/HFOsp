@@ -101,6 +101,13 @@
 
 - `fig5_core_model_s3_brakeoff/` — **Fig5**：模型底物可产生自发双向传播、虚拟 SEEG 可读出方向
   （只支持"能产生 + 可读方向"，不单独证明真实病人机制）。脚本 `plot_fig5_core_model_s3_brakeoff.py`。
+- `fig5_pure_zm_dynamics/` — **Fig5A 纯 Z/M 诊断候选**：完整保留 learned EE/EI，按冻结资格表选择
+  1 秒广泛招募 duty 最高的 full-edge 候选。它显示操作性 runaway 与广泛高率态，但触点频率未升，
+  因而不等于完整 Fig5 高频形态复现；脚本 `plot_fig5a_pure_zm_dynamics.py`。
+
+`fig5a_spatial_zm_qigk_dynamics/` 当前**没有正式输出目录**：2026-08-31 的 23 个 frozen-q 与
+17 个 gK 状态没有任何参数通过“30–80 Hz、≥80% 触点持续节律”的冻结门。producer 会在没有
+至少 3 个全通过 confirmation seed 的同参家族时 fail closed；不得手工挑选 9/15 的局部节律轨迹出图。
 
 ## Fig6 — RNN / contact-field computational supplements
 

@@ -34,6 +34,7 @@
   - **M3A-v2.2 criticality M1/M2（2026-07-12 有界验收）**：M1 `unresolved_operating_point` 保持；M2 支持 `core_localized` 起燃，但 nonlinear spread 因 epsilon/polarity sensitivity 保持 `undetermined`。结果入口 `results/topic4_criticality{,_m2}/`，主口径见 `docs/topic4_m3_stage.md §6.1`。这是 M4 上游诊断，当前主动设计层为 M4，不用这条历史结果覆盖 M4 恢复/终止设计。
 
 - 2026-08-19 **data-driven Z/M 间期→持续高活动转变（阶段 1 = Fig5 基础版，preliminary）**：`docs/archive/topic4/data_driven_zm_ictal_transition/stage1_fig5_2026-08-19.md`。把按患者摆位的冻结底物（节点场 + E→E + E→I 全开）配上逐细胞两个慢变量（抑制松劲 z + 细胞疲劳 m），不给外部刺激只留背景噪声，看它自己滑进持续高活动。**慢变量开 12/12 进入、同种子关掉 0/3**；图严格复刻旧 qI/gK runaway 三列连续轨迹语法（慢变量空间场｜同时刻二维活动｜一条不断的 15 触点读出），重放与被分析轨迹逐位一致。⚠️ 先前记的"慢电流累积主要在病灶核周边"**已撤回**（量的是瞬时项不是累积；改用 1 秒时间平均后低活动态核内/非核基本相等、发作前差 2.2 倍）。**未做**：阶段 2 状态×扰动、阶段 3 连接性 2×2 因子（12 对种子）、阶段 4 特异性对照 —— 因此**任何数字都不得进 `docs/topic4_sef_hfo.md` 主文档**。⚠️ 五条已撤回说法（2 秒点不是安静基线 / 四臂非严格单调 / 曲目闸门原实现什么都没测到 / 发作前存档点必然漏存 / "等长间期窗"在爬升里）见该文档表格。⚠️ "进入时刻"是操作口径（20ms 平滑群体率 ≥120Hz 持续 100ms），**不是临床发作**。
+- 2026-08-31 **空间 Z/qI–M/gK 持续全局振荡筛选（closed negative）**：`docs/archive/topic4/data_driven_zm_ictal_transition/spatial_zm_qigk_global_oscillation_screen_2026-08-31.md`。合作者指出原 Z/M 高率态不是持续全局节律，此复审确认。完整 learned E→E/E→I 上，23 个 frozen-q 状态显示空间异质性可把 40–46 Hz 节律覆盖从 4/15 提到 9/15，但不能达到冻结 12/15 门；17 个 gK 状态要么把共同频率拖到 20–26 Hz、要么门控后回到 9/15。**0 个合格参数家族，Fig5A formal render 保持关闭**；不得用局部节律冒充全局。
 
 ## 数据侧（paper-A）：rate vs 传播几何（探索性，与上面的模型侧并行）
 

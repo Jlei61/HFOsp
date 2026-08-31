@@ -25,6 +25,11 @@ from src.topic4_runaway_morphology import (  # noqa: E402
     rolling_full_field_recruitment,
     summarize_runaway_morphology,
 )
+from src.topic4_global_recruited_oscillation import (  # noqa: E402
+    contact_rhythm_metrics,
+    recruitment_duty_metrics,
+    state_rate_metrics,
+)
 
 
 OUT_DIR = (
@@ -42,7 +47,7 @@ def main():
     started = time.time()
     config = ProtocolConfig(
         seed=1,
-        T=2200.0,
+        T=2700.0,
         layout="subject1146",
         k_q=0.10,
         q_min=0.05,
@@ -66,6 +71,27 @@ def main():
         recruitment, oscillation, onset_ms=float(onset_ms),
         population_frequency=population_frequency)
     morphology["classification"] = classify_sustained_runaway(morphology)
+    rhythmic_recruitment = recruitment_duty_metrics(
+        recruitment, onset_ms=float(onset_ms))
+    rhythm = contact_rhythm_metrics(
+        result["lfp_trace"], dt_ms=dt_ms, onset_ms=float(onset_ms))
+    rhythm_rate = state_rate_metrics(
+        result["rate_E"], dt_ms=dt_ms, onset_ms=float(onset_ms))
+    positive_control_checks = {
+        "post_state_high": (
+            float(rhythm_rate["median_post_hz"]) >= 120.0
+            and float(rhythm_rate["median_ratio_post_over_pre"]) >= 2.0),
+        "global_recruitment_duty": (
+            float(rhythmic_recruitment["joint_global_recruitment_duty"]) >= 0.75),
+        "rhythm_is_global": (
+            float(rhythm["contact_fraction_consistently_rhythmic"]) >= 0.80),
+        "rhythm_is_frequency_locked": (
+            30.0 <= float(rhythm["median_contact_peak_hz"]) <= 80.0
+            and float(rhythm["contact_peak_mad_hz"]) <= 8.0),
+        "rhythm_is_not_broadband_tonic": (
+            float(rhythm["median_peak_power_fraction"]) >= 0.20
+            and float(rhythm["median_band_power_ratio_post_over_pre"]) >= 2.0),
+    }
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     stem = OUT_DIR / "qigk_e1146_reference"
@@ -89,11 +115,27 @@ def main():
         "frozen_command_contract": (
             "subject1146, k_q=0.10, q_min=0.05, kick_boost=5.0, "
             "r_kick=0.6, seed=1; the frozen T=1500 ms figure trajectory is "
-            "extended deterministically to T=2200 ms only to provide a complete "
-            "500 ms post-onset morphology window"),
+            "extended deterministically to T=2700 ms only to provide four complete "
+            "250 ms post-onset rhythm windows after a 300 ms settling interval"),
         "config": asdict(config),
         "legacy_rate_detector": legacy_metrics,
         "runaway_morphology": morphology,
+        "global_recruited_oscillation_positive_control": {
+            "status": ("QIGK_GLOBAL_OSCILLATION_INSTRUMENT_PASS"
+                       if all(positive_control_checks.values())
+                       else "QIGK_GLOBAL_OSCILLATION_INSTRUMENT_FAIL"),
+            "all_checks_pass": bool(all(positive_control_checks.values())),
+            "checks": positive_control_checks,
+            "state_rate": rhythm_rate,
+            "global_recruitment": rhythmic_recruitment,
+            "contact_rhythm": {
+                key: value for key, value in rhythm.items()
+                if not isinstance(value, np.ndarray)
+            },
+            "dwell_boundary": (
+                "the forced-pulse qI trajectory is a morphology positive control; "
+                "its onset latency is not a dwell criterion for the data-driven hybrid"),
+        },
         "provenance": {
             "git_commit": _git(["rev-parse", "HEAD"]),
             "git_dirty": bool(_git(["status", "--porcelain"])),
