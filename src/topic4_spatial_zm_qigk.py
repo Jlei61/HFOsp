@@ -36,7 +36,9 @@ fast edges nor endpoint geometry.
 ``eta_m_gk_add`` applies the same construction to an externally declared frozen
 support set (for example, contacts in the sinkward half-space of the frozen
 source-to-sink axis); the support coordinates are inputs and are not inferred
-from simulated activity.
+from simulated activity.  ``gk_support_sigma_mm`` may give that recovery field
+a wider footprint than the endpoint q field; zero inherits
+``q_endpoint_sigma_mm`` exactly for backward compatibility.
 For the fast-subsystem atlas only, ``q_init_h_gain`` can also seed a deterministic
 nonuniform resource state from the same frozen ``h(x)`` field (positive gain =
 lower initial q in high-h tissue).  ``q_endpoint_gain`` adds a second,
@@ -104,6 +106,7 @@ class SpatialZMQIGKConfig:
     eta_m_source_add: float = 0.0
     eta_m_sink_add: float = 0.0
     eta_m_gk_add: float = 0.0
+    gk_support_sigma_mm: float = 0.0
     h_smooth_sigma_mm: float = 1.0
     trace_stride_steps: int = 10
     # Duck-typed by kick_probe.  This hybrid never changes recurrent E weights.
@@ -141,6 +144,8 @@ class SpatialZMQIGKConfig:
         if (self.eta_m_source_add < 0.0 or self.eta_m_sink_add < 0.0
                 or self.eta_m_gk_add < 0.0):
             raise ValueError("endpoint M/gK current additions must be non-negative")
+        if self.gk_support_sigma_mm < 0.0:
+            raise ValueError("gk_support_sigma_mm must be non-negative")
         if self.m_build_gain < 0.0:
             raise ValueError("m_build_gain must be non-negative")
         if self.m_current_threshold < 0.0:
@@ -389,9 +394,14 @@ class SpatialZMQIGKSlowVars:
         if self.gk_centers_xy is None:
             self.gk_field = np.zeros_like(self.h_grid)
         else:
+            gk_sigma_mm = (
+                float(self.cfg.gk_support_sigma_mm)
+                if float(self.cfg.gk_support_sigma_mm) > 0.0
+                else float(self.cfg.q_endpoint_sigma_mm)
+            )
             self.gk_field = periodic_endpoint_field(
                 int(self.cfg.n_grid), self.L, self.gk_centers_xy,
-                float(self.cfg.q_endpoint_sigma_mm))
+                gk_sigma_mm)
         q_init_grid = (
             float(self.cfg.q_init)
             * _mean_one_bounded_modulation(

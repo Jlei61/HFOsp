@@ -382,6 +382,62 @@ def test_endpoint_local_gk_addition_is_spatial_and_zero_outside_field():
     assert np.all(slow.eta_m_E >= 0.0)
 
 
+def test_gk_support_width_can_exceed_q_endpoint_width_without_moving_centres():
+    pos_e, pos_i = _positions()
+    centers = np.asarray([[0.25, 0.25], [0.25, 1.25]])
+    narrow_cfg = SpatialZMQIGKConfig(
+        n_grid=4,
+        sigma_q_mm=0.7,
+        h_smooth_sigma_mm=0.5,
+        q_endpoint_sigma_mm=0.2,
+        eta_m=0.0,
+        eta_m_gk_add=10.0,
+    )
+    broad_cfg = SpatialZMQIGKConfig(
+        n_grid=4,
+        sigma_q_mm=0.7,
+        h_smooth_sigma_mm=0.5,
+        q_endpoint_sigma_mm=0.2,
+        gk_support_sigma_mm=0.6,
+        eta_m=0.0,
+        eta_m_gk_add=10.0,
+    )
+    narrow = SpatialZMQIGKSlowVars(
+        6, 18.0, pos_e, pos_i, 2.0, np.ones(4),
+        gk_centers_xy=centers, cfg=narrow_cfg)
+    broad = SpatialZMQIGKSlowVars(
+        6, 18.0, pos_e, pos_i, 2.0, np.ones(4),
+        gk_centers_xy=centers, cfg=broad_cfg)
+    assert broad.gk_field[1, 1] > narrow.gk_field[1, 1]
+    assert broad.eta_m_E[1] > narrow.eta_m_E[1]
+    assert broad.gk_field[0, 0] == pytest.approx(narrow.gk_field[0, 0])
+
+
+def test_zero_gk_support_width_exactly_inherits_q_endpoint_width():
+    pos_e, pos_i = _positions()
+    centers = np.asarray([[0.25, 0.25], [0.25, 1.25]])
+    inherited = SpatialZMQIGKSlowVars(
+        6, 18.0, pos_e, pos_i, 2.0, np.ones(4),
+        gk_centers_xy=centers,
+        cfg=SpatialZMQIGKConfig(
+            n_grid=4, sigma_q_mm=0.7, h_smooth_sigma_mm=0.5,
+            q_endpoint_sigma_mm=0.3, gk_support_sigma_mm=0.0,
+            eta_m_gk_add=10.0,
+        ),
+    )
+    explicit = SpatialZMQIGKSlowVars(
+        6, 18.0, pos_e, pos_i, 2.0, np.ones(4),
+        gk_centers_xy=centers,
+        cfg=SpatialZMQIGKConfig(
+            n_grid=4, sigma_q_mm=0.7, h_smooth_sigma_mm=0.5,
+            q_endpoint_sigma_mm=0.3, gk_support_sigma_mm=0.3,
+            eta_m_gk_add=10.0,
+        ),
+    )
+    np.testing.assert_array_equal(inherited.gk_field, explicit.gk_field)
+    np.testing.assert_array_equal(inherited.eta_m_E, explicit.eta_m_E)
+
+
 def test_runner_selects_frozen_source_or_sink_contacts_without_refitting():
     substrate = SimpleNamespace(
         contact_names=["S2", "K1", "S1", "K2"],

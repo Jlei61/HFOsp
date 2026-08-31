@@ -156,6 +156,11 @@ def main():
     parser.add_argument("--eta-m-sink-add", type=float, default=0.0)
     parser.add_argument("--eta-m-gk-add", type=float, default=0.0)
     parser.add_argument(
+        "--gk-support-sigma", type=float, default=0.0,
+        help=("Recovery-field width in mm; zero inherits --q-endpoint-sigma "
+              "for exact backward compatibility."),
+    )
+    parser.add_argument(
         "--gk-support", choices=("source", "sink", "downstream"),
         default="downstream",
     )
@@ -227,6 +232,7 @@ def main():
         eta_m_source_add=float(args.eta_m_source_add),
         eta_m_sink_add=float(args.eta_m_sink_add),
         eta_m_gk_add=float(args.eta_m_gk_add),
+        gk_support_sigma_mm=float(args.gk_support_sigma),
         trace_stride_steps=max(1, int(round(1.0 / dt))),
     )
     slow = None
@@ -299,12 +305,18 @@ def main():
             "rule": args.gk_support,
             "contact_order": gk_names,
             "centers_xy_mm": gk_centers_xy.tolist(),
+            "sigma_mm": (
+                float(args.gk_support_sigma)
+                if float(args.gk_support_sigma) > 0.0
+                else float(args.q_endpoint_sigma)
+            ),
             "selection_uses_simulation_result": False,
         },
         "endpoint_field_rule": (
             "maximum of periodic Gaussian fields centred on the declared "
-            "active endpoint contact set; sigma is declared in "
-            "hybrid_config.q_endpoint_sigma_mm"
+            "active contact set; q sigma is hybrid_config.q_endpoint_sigma_mm "
+            "and gK sigma is hybrid_config.gk_support_sigma_mm (zero inherits "
+            "the q sigma)"
         ),
         "fitted_to_current_dynamics_result": False,
         "per_neuron_random_parameter_field": False,
