@@ -253,6 +253,22 @@ def run(*, v02: Path, root: Path, target_source: Path,
             "state_cache": str(cache_path), "state_cache_sha256": sha256_file(cache_path),
         })
     table = pd.DataFrame(table_rows)
+    feature_columns = [
+        column for column in table.columns
+        if column.startswith(("baseline__", "observation__", "state__"))
+    ]
+    # Feature widths are patient-specific.  Pandas' union schema creates NaN
+    # only in columns that belong to another patient's feature block.  The
+    # probe is fitted patient-by-patient, so zero-padding these structurally
+    # absent cross-patient columns adds constant columns and cannot carry an
+    # outcome.  Actual generated features must already be finite.
+    finite_or_schema_missing = np.isfinite(
+        table[feature_columns].fillna(0.0).to_numpy(dtype=np.float64)
+    ).all()
+    if not bool(finite_or_schema_missing):
+        raise ValueError("phenotype table contains a non-finite generated feature")
+    n_schema_padding = int(table[feature_columns].isna().sum().sum())
+    table.loc[:, feature_columns] = table[feature_columns].fillna(0.0)
     result = run_phenotype_table(table)
     output = root / "phenotype_continuous"
     atomic_csv(output / "probe_input_table.csv", table.to_dict(orient="records"))
@@ -265,7 +281,7 @@ def run(*, v02: Path, root: Path, target_source: Path,
     atomic_csv(output / "target_attrition.csv", attrition)
     payload = {
         "status": result.audit.get("status"),
-        "revision": "h2b_v0_3_continuous_phenotype_v1",
+        "revision": "h2b_v0_3_continuous_phenotype_v2",
         "created_utc": utc_now(), "lead_minutes": float(lead_minutes),
         "target_source": str(target_source),
         "target_source_sha256": sha256_file(target_source),
@@ -273,6 +289,8 @@ def run(*, v02: Path, root: Path, target_source: Path,
         "target_index_mapping": "chronological_prefix_only; later indices excluded",
         "n_full_grid_cells": len(caches), "n_subjects": len(subjects),
         "n_probe_rows": len(table), "n_attrition_rows": len(attrition),
+        "cross_patient_schema_padding_zero_only": True,
+        "n_cross_patient_schema_padding_cells": n_schema_padding,
         "phenotype_audit": result.audit,
         "patient_rows": result.patient_medians.to_dict(orient="records"),
         "cell_availability": cell_rows,
