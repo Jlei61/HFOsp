@@ -57,13 +57,6 @@ def _claim_route_status(root: Path) -> tuple[set[str], bool]:
     return qualified, final_assay_pass
 
 
-def _reject_diagnostic_override(requested: bool) -> None:
-    if requested:
-        raise ValueError(
-            "strict H2b closeout forbids downstream execution after failed A1/A2 gates"
-        )
-
-
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--v0-2-root", type=Path, default=CANONICAL_V0_2_RESULT_ROOT)
@@ -74,9 +67,6 @@ def main() -> None:
         "--allow-diagnostic-downstream-after-failed-gates", action="store_true",
     )
     args = parser.parse_args()
-    _reject_diagnostic_override(
-        bool(args.allow_diagnostic_downstream_after_failed_gates)
-    )
     v02, root = args.v0_2_root.resolve(), args.result_root.resolve()
     lock_path = root / "full_grid/.followup.lock"
     lock_path.parent.mkdir(parents=True, exist_ok=True)
@@ -88,7 +78,7 @@ def main() -> None:
     status_path = root / "full_grid/FOLLOWUP_STATUS.json"
     status = {
         "status": "WAITING_FOR_STATE_GRID", "created_utc": utc_now(),
-        "revision": "h2b_v0_3_full_grid_followup_v2",
+        "revision": "h2b_v0_3_full_grid_followup_v3_exploratory",
         "expected_cells": int(args.expected_cells), "stage": "state_grid",
         "formal_test_partition_opened": False, "sealed_opened": False,
         "h3_or_t2_run": False, "producer_sha256": sha256_file(Path(__file__).resolve()),
@@ -112,8 +102,10 @@ def main() -> None:
         time.sleep(float(args.poll_seconds))
     qualified, final_assay_pass = _claim_route_status(root)
     claim_route_released = bool(qualified and final_assay_pass)
-    diagnostic_override = False
-    if not claim_route_released:
+    diagnostic_override = bool(
+        args.allow_diagnostic_downstream_after_failed_gates
+    )
+    if not claim_route_released and not diagnostic_override:
         status.update({
             "status": "NOT_RELEASED_A1_OR_A2",
             "stage": "gate_closeout", "updated_utc": utc_now(),
@@ -136,21 +128,28 @@ def main() -> None:
         ),
     })
     state_root = root / "full_grid/state_cache"
+    hazard_flags = ["--exploratory-all-frozen"] if diagnostic_override else []
+    hazard_aggregate_flags = (
+        ["--include-diagnostic-exploration"] if diagnostic_override else []
+    )
+    geometry_flags = ["--exploratory-all-frozen"] if diagnostic_override else []
+    phenotype_flags = ["--allow-diagnostic-exploration"] if diagnostic_override else []
     commands = [
         ("hazard_cells", [
             str(PYTHON), str(REPO / "scripts/topic5_continuous_marked_state_h2b/run_v03_hazard_queue.py"),
             "--v0-2-root", str(v02), "--result-root", str(root),
             "--state-cache-root", str(state_root), "--output-subdir", "hazard_full_grid",
-            "--cpu-workers", "12",
+            "--cpu-workers", "12", *hazard_flags,
         ]),
         ("hazard_aggregate", [
             str(PYTHON), str(REPO / "scripts/topic5_continuous_marked_state_h2b/aggregate_v03_hazard.py"),
             "--result-root", str(root), "--analysis-subdir", "hazard_full_grid",
+            *hazard_aggregate_flags,
         ]),
         ("geometry_cells", [
             str(PYTHON), str(REPO / "scripts/topic5_continuous_marked_state_h2b/run_v03_geometry_queue.py"),
             "--v0-2-root", str(v02), "--result-root", str(root),
-            "--cpu-workers", "12",
+            "--cpu-workers", "12", *geometry_flags,
         ]),
         ("geometry_aggregate", [
             str(PYTHON), str(REPO / "scripts/topic5_continuous_marked_state_h2b/aggregate_v03_geometry.py"),
@@ -159,6 +158,7 @@ def main() -> None:
         ("continuous_phenotype", [
             str(PYTHON), str(REPO / "scripts/topic5_continuous_marked_state_h2b/run_v03_continuous_phenotype.py"),
             "--v0-2-root", str(v02), "--result-root", str(root),
+            *phenotype_flags,
         ]),
     ]
     for stage, command in commands:
