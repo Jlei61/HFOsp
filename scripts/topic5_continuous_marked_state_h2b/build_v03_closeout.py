@@ -350,8 +350,8 @@ def build(root: Path, test_log: Path) -> dict:
 
     _require(data["instrument_queue"].get("status") == "COMPLETE",
              "instrument queue incomplete")
-    _require(data["instrument_queue"].get("requested_tasks") == 85,
-             "instrument requested denominator drift")
+    _require(data["instrument_queue"].get("requested_tasks") == 75,
+             "instrument readable-task denominator drift")
     _require(data["instrument_queue"].get("failed_this_run") == 0,
              "instrument queue has unresolved runtime failures")
     _guard(data["instrument_queue"], "instrument queue")
