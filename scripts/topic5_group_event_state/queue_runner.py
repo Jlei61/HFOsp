@@ -36,6 +36,7 @@ def main() -> None:
     parser.add_argument("--tag", default="main")
     parser.add_argument("--max-train-seconds", type=float, default=2400.0)
     parser.add_argument("--max-epochs", type=int, default=24)
+    parser.add_argument("--patience", type=int, default=5)
     parser.add_argument("--chunk-events", type=int, default=128)
     parser.add_argument("--state-file", type=Path, default=None)
     parser.add_argument("--extra", nargs="*", default=[])
@@ -78,7 +79,8 @@ def main() -> None:
                 PYBIN, str(ROOT / "scripts/topic5_group_event_state/run_experiment.py"),
                 "--subject", job["subject"], "--arm", job["arm"], "--seed", str(job["seed"]),
                 "--tag", args.tag, "--max-train-seconds", str(args.max_train_seconds),
-                "--max-epochs", str(args.max_epochs), "--chunk-events", str(args.chunk_events),
+                "--max-epochs", str(args.max_epochs), "--patience", str(args.patience),
+                "--chunk-events", str(args.chunk_events),
                 *args.extra,
             ]
             t0 = time.time()

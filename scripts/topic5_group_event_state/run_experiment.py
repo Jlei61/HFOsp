@@ -43,6 +43,8 @@ def main() -> None:
     parser.add_argument("--out-root", type=Path, default=V0_1 / "runs")
     parser.add_argument("--chunk-events", type=int, default=128)
     parser.add_argument("--max-epochs", type=int, default=24)
+    parser.add_argument("--patience", type=int, default=5)
+    parser.add_argument("--min-epochs", type=int, default=3)
     parser.add_argument("--max-train-seconds", type=float, default=2400.0)
     parser.add_argument("--lr-encoder", type=float, default=3e-4)
     parser.add_argument("--lr-state", type=float, default=1e-3)
@@ -66,6 +68,8 @@ def main() -> None:
     cfg = TrainConfig(
         chunk_events=args.chunk_events,
         max_epochs=args.max_epochs,
+        patience=args.patience,
+        min_epochs=args.min_epochs,
         max_train_seconds=args.max_train_seconds,
         lr_encoder=args.lr_encoder,
         lr_state=args.lr_state,
