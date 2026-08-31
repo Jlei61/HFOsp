@@ -37,6 +37,9 @@ the frozen source- and sink-side endpoint contacts (positive gain = lower q at
 the two propagation endpoint sets).  The contact centres are inputs, never
 fitted to the simulated trajectory.  Zero gains exactly recover the homogeneous
 initial condition; no per-neuron random parameter field is introduced.
+Independent ``q_source_gain`` and ``q_sink_gain`` expose the minimum asymmetric
+extension of this basis; they share one declared spatial width and cannot move
+either frozen endpoint set.
 
 The implementation intentionally composes the already tested qI field driver in
 ``src.snn_engine.slow_field``.  It is a development mechanism screen, not a
@@ -68,6 +71,8 @@ class SpatialZMQIGKConfig:
     q_init: float = 1.0
     q_init_h_gain: float = 0.0
     q_endpoint_gain: float = 0.0
+    q_source_gain: float = 0.0
+    q_sink_gain: float = 0.0
     q_endpoint_sigma_mm: float = 2.0
     freeze_q: bool = False
     sigma_q_mm: float = 1.5
@@ -136,6 +141,8 @@ class SpatialZMQIGKConfig:
             raise ValueError("spatial M/gK footprint must be narrower than qI")
         if (abs(self.q_init_h_gain) >= 1.0
                 or abs(self.q_endpoint_gain) >= 1.0
+                or abs(self.q_source_gain) >= 1.0
+                or abs(self.q_sink_gain) >= 1.0
                 or abs(self.k_q_h_gain) >= 1.0
                 or abs(self.eta_m_h_gain) >= 1.0):
             raise ValueError("patient-field gains must have absolute value below one")
@@ -237,7 +244,8 @@ class SpatialZMQIGKSlowVars:
     )
 
     def __init__(self, N, V_th0, posE, posI, L, h_e, *,
-                 core_mask_E=None, endpoint_centers_xy=None, cfg=None):
+                 core_mask_E=None, endpoint_centers_xy=None,
+                 source_centers_xy=None, sink_centers_xy=None, cfg=None):
         self.cfg = cfg or SpatialZMQIGKConfig()
         self.cfg.validate()
         self.N = int(N)
@@ -262,6 +270,23 @@ class SpatialZMQIGKSlowVars:
         if self.cfg.q_endpoint_gain != 0.0 and self.endpoint_centers_xy is None:
             raise ValueError(
                 "q_endpoint_gain requires frozen endpoint_centers_xy")
+
+        def _validate_centers(values, name):
+            if values is None:
+                return None
+            centers = np.asarray(values, float)
+            if centers.ndim != 2 or centers.shape[1] != 2 or len(centers) < 2:
+                raise ValueError(f"{name} must have shape (n>=2, 2)")
+            return centers
+
+        self.source_centers_xy = _validate_centers(
+            source_centers_xy, "source_centers_xy")
+        self.sink_centers_xy = _validate_centers(
+            sink_centers_xy, "sink_centers_xy")
+        if self.cfg.q_source_gain != 0.0 and self.source_centers_xy is None:
+            raise ValueError("q_source_gain requires frozen source_centers_xy")
+        if self.cfg.q_sink_gain != 0.0 and self.sink_centers_xy is None:
+            raise ValueError("q_sink_gain requires frozen sink_centers_xy")
 
         qcfg = SpatialSlowFieldConfig(
             n_grid=int(self.cfg.n_grid),
@@ -324,11 +349,31 @@ class SpatialZMQIGKSlowVars:
                 float(self.cfg.q_endpoint_sigma_mm))
             endpoint_multiplier = _mean_one_bounded_modulation(
                 self.endpoint_field, -float(self.cfg.q_endpoint_gain))
+        if self.source_centers_xy is None:
+            self.source_field = np.zeros_like(self.h_grid)
+            source_multiplier = np.ones_like(self.h_grid)
+        else:
+            self.source_field = periodic_endpoint_field(
+                int(self.cfg.n_grid), self.L, self.source_centers_xy,
+                float(self.cfg.q_endpoint_sigma_mm))
+            source_multiplier = _mean_one_bounded_modulation(
+                self.source_field, -float(self.cfg.q_source_gain))
+        if self.sink_centers_xy is None:
+            self.sink_field = np.zeros_like(self.h_grid)
+            sink_multiplier = np.ones_like(self.h_grid)
+        else:
+            self.sink_field = periodic_endpoint_field(
+                int(self.cfg.n_grid), self.L, self.sink_centers_xy,
+                float(self.cfg.q_endpoint_sigma_mm))
+            sink_multiplier = _mean_one_bounded_modulation(
+                self.sink_field, -float(self.cfg.q_sink_gain))
         q_init_grid = (
             float(self.cfg.q_init)
             * _mean_one_bounded_modulation(
                 self.h_grid, -float(self.cfg.q_init_h_gain))
             * endpoint_multiplier
+            * source_multiplier
+            * sink_multiplier
         )
         q_init_grid *= float(self.cfg.q_init) / float(np.mean(q_init_grid))
         np.clip(q_init_grid, float(self.cfg.q_min), 1.0, out=q_init_grid)

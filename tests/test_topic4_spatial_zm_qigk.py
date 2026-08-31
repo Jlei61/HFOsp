@@ -337,6 +337,30 @@ def test_nonzero_endpoint_gain_requires_frozen_centers():
             6, 18.0, pos_e, pos_i, 2.0, np.ones(4), cfg=cfg)
 
 
+def test_source_and_sink_q_gains_can_differ_on_frozen_contact_sets():
+    pos_e, pos_i = _positions()
+    cfg = SpatialZMQIGKConfig(
+        n_grid=4,
+        sigma_q_mm=0.7,
+        h_smooth_sigma_mm=0.5,
+        q_min=0.1,
+        q_init=0.7,
+        q_source_gain=0.3,
+        q_sink_gain=0.1,
+        q_endpoint_sigma_mm=0.2,
+        freeze_q=True,
+    )
+    slow = SpatialZMQIGKSlowVars(
+        6, 18.0, pos_e, pos_i, 2.0, np.ones(4),
+        source_centers_xy=np.asarray([[0.25, 0.25], [0.25, 0.75]]),
+        sink_centers_xy=np.asarray([[1.25, 1.25], [1.25, 1.75]]),
+        cfg=cfg)
+    source_q = np.mean([slow.q_init_grid[0, 0], slow.q_init_grid[1, 0]])
+    sink_q = np.mean([slow.q_init_grid[2, 2], slow.q_init_grid[3, 2]])
+    assert source_q < sink_q
+    assert np.isclose(np.mean(slow.q_init_grid), cfg.q_init)
+
+
 def test_runner_selects_frozen_source_or_sink_contacts_without_refitting():
     substrate = SimpleNamespace(
         contact_names=["S2", "K1", "S1", "K2"],

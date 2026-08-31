@@ -109,6 +109,8 @@ def main():
     parser.add_argument("--q-init", type=float, default=1.0)
     parser.add_argument("--q-init-h-gain", type=float, default=0.0)
     parser.add_argument("--q-endpoint-gain", type=float, default=0.0)
+    parser.add_argument("--q-source-gain", type=float, default=0.0)
+    parser.add_argument("--q-sink-gain", type=float, default=0.0)
     parser.add_argument("--q-endpoint-sigma", type=float, default=2.0)
     parser.add_argument(
         "--q-endpoint-side", choices=("union", "source", "sink"),
@@ -157,6 +159,10 @@ def main():
     dt = float(substrate.engine["dt"])
     endpoint_names, endpoint_centers_xy = _frozen_endpoint_contact_centers(
         substrate, side=args.q_endpoint_side)
+    source_names, source_centers_xy = _frozen_endpoint_contact_centers(
+        substrate, side="source")
+    sink_names, sink_centers_xy = _frozen_endpoint_contact_centers(
+        substrate, side="sink")
     hybrid_config = SpatialZMQIGKConfig(
         n_grid=int(args.n_grid),
         sigma_r_mm=0.5,
@@ -169,6 +175,8 @@ def main():
         q_init=float(args.q_init),
         q_init_h_gain=float(args.q_init_h_gain),
         q_endpoint_gain=float(args.q_endpoint_gain),
+        q_source_gain=float(args.q_source_gain),
+        q_sink_gain=float(args.q_sink_gain),
         q_endpoint_sigma_mm=float(args.q_endpoint_sigma),
         freeze_q=bool(args.freeze_q),
         sigma_q_mm=float(args.sigma_q),
@@ -201,6 +209,8 @@ def main():
             substrate.h_e,
             core_mask_E=np.asarray(substrate.h_e >= 0.5, bool),
             endpoint_centers_xy=endpoint_centers_xy,
+            source_centers_xy=source_centers_xy,
+            sink_centers_xy=sink_centers_xy,
             cfg=hybrid_config,
         )
     drive = make_external_drive(substrate, round_config["spatial_ou"], args.seed)
@@ -245,6 +255,14 @@ def main():
         "active_endpoint_side": args.q_endpoint_side,
         "endpoint_contact_order": endpoint_names,
         "endpoint_centers_xy_mm": endpoint_centers_xy.tolist(),
+        "source_centers_xy_mm": source_centers_xy.tolist(),
+        "sink_centers_xy_mm": sink_centers_xy.tolist(),
+        "q_field_components": {
+            "legacy_endpoint_side": args.q_endpoint_side,
+            "legacy_endpoint_gain": float(args.q_endpoint_gain),
+            "source_gain": float(args.q_source_gain),
+            "sink_gain": float(args.q_sink_gain),
+        },
         "endpoint_field_rule": (
             "maximum of periodic Gaussian fields centred on the declared "
             "active endpoint contact set; sigma is declared in "
@@ -359,6 +377,12 @@ def main():
             "endpoint_field": np.asarray(slow.endpoint_field, np.float32),
             "endpoint_centers_xy_mm": np.asarray(
                 slow.endpoint_centers_xy, np.float32),
+            "source_field": np.asarray(slow.source_field, np.float32),
+            "sink_field": np.asarray(slow.sink_field, np.float32),
+            "source_centers_xy_mm": np.asarray(
+                slow.source_centers_xy, np.float32),
+            "sink_centers_xy_mm": np.asarray(
+                slow.sink_centers_xy, np.float32),
         })
     _atomic_npz(out.with_suffix(".npz"), **arrays)
     payload["wall_seconds"] = time.time() - started
