@@ -50,7 +50,7 @@ def confirmation_decision(
         ),
     }
     summaries = joint.summaries(
-        scored_rows, {"selection": selection, "candidates": manifest["candidates"]},
+        scored_rows, {"candidates": manifest["candidates"]}, selection,
     )
     if len(summaries) != 1:
         raise RuntimeError("confirmation must score exactly one selected field")

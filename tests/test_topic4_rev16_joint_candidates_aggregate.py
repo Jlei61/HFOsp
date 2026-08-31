@@ -4,6 +4,10 @@ from scripts import aggregate_topic4_rev16_joint_candidates as aggregate
 from scripts import wait_topic4_rev16_m4_shell_then_prepare_joint as waiter
 
 
+def _selection(manifest):
+    return manifest.pop("selection")
+
+
 def test_fresh_summary_requires_same_candidate_to_pass_all_clauses():
     manifest = {
         "selection": {
@@ -36,7 +40,7 @@ def test_fresh_summary_requires_same_candidate_to_pass_all_clauses():
                 "m3_l2_fraction": 0.8, "m4_shell_l2_fraction": 0.6,
             },
         ])
-    result = aggregate.summaries(rows, manifest)
+    result = aggregate.summaries(rows, manifest, _selection(manifest))
     assert len(result) == 1
     assert result[0]["usable_two_mode_anchor"] is True
     assert result[0]["fresh_J14_improvement_count"] == 3
@@ -75,7 +79,9 @@ def test_fresh_summary_rejects_one_network_b_failure():
             "target_rms": 0.6, "m3_l2_fraction": 0.8,
             "m4_shell_l2_fraction": 0.6,
         })
-    assert aggregate.summaries(rows, manifest)[0]["usable_two_mode_anchor"] is False
+    assert aggregate.summaries(
+        rows, manifest, _selection(manifest),
+    )[0]["usable_two_mode_anchor"] is False
 
 
 def test_fresh_summary_rejects_j14_worsening_despite_a_b_passing():
@@ -109,7 +115,7 @@ def test_fresh_summary_rejects_j14_worsening_despite_a_b_passing():
                 "m3_l2_fraction": 0.8, "m4_shell_l2_fraction": 0.6,
             },
         ])
-    result = aggregate.summaries(rows, manifest)[0]
+    result = aggregate.summaries(rows, manifest, _selection(manifest))[0]
     assert result["fresh_A_improvement_count"] == 3
     assert result["fresh_B_protection_count"] == 3
     assert result["fresh_J14_improvement_count"] == 0
@@ -147,10 +153,27 @@ def test_fresh_summary_rejects_mean_support_that_hides_one_network_failure():
                 "m3_l2_fraction": 0.8, "m4_shell_l2_fraction": 0.6,
             },
         ])
-    result = aggregate.summaries(rows, manifest)[0]
+    result = aggregate.summaries(rows, manifest, _selection(manifest))[0]
     assert result["equal_network_A_effective_support"] > 6.0
     assert result["fresh_A_support_count"] == 2
     assert result["usable_two_mode_anchor"] is False
+
+
+def test_clean_analysis_commit_can_differ_from_worker_commit(monkeypatch):
+    def fake_check_output(command, **_kwargs):
+        if command[1:3] == ["rev-parse", "HEAD"]:
+            return "analysis-commit\n"
+        if command[1:3] == ["status", "--porcelain"]:
+            return ""
+        raise AssertionError(command)
+
+    monkeypatch.setattr(aggregate.subprocess, "check_output", fake_check_output)
+    result = aggregate._provenance({
+        "provenance": {"git_commit": "worker-freeze-commit"},
+    })
+    assert result["same_commit_as_worker"] is False
+    assert result["analysis_worktree_clean"] is True
+    assert result["formal_ready"] is True
 
 
 def test_waiter_requires_exact_complete_inventory():

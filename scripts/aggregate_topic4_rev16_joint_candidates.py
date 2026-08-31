@@ -99,7 +99,8 @@ def _provenance(manifest: Mapping[str, Any]) -> dict[str, Any]:
     return {
         "worker_freeze_commit": worker_commit, "analysis_commit": head,
         "worktree_status": status, "same_commit_as_worker": head == worker_commit,
-        "formal_ready": bool(head == worker_commit and not status),
+        "analysis_worktree_clean": not status,
+        "formal_ready": not status,
         "snn_simulation_run": False,
     }
 
@@ -157,12 +158,12 @@ def _flat(scored: Mapping[str, Any], candidate: Mapping[str, Any]) -> dict[str, 
 
 def summaries(
     rows: list[dict[str, Any]], manifest: Mapping[str, Any],
+    selection: Mapping[str, Any],
 ) -> list[dict[str, Any]]:
     by_id: dict[str, list[dict[str, Any]]] = {}
     for row in rows:
         by_id.setdefault(row["candidate_id"], []).append(row)
     exact = {int(row["seed"]): row for row in by_id["exact_off"]}
-    selection = manifest["selection"]
     required_j14 = int(selection["fresh_J14_improvement_required_networks"])
     required_a = int(selection["fresh_A_improvement_required_networks"])
     required_b = int(selection["fresh_B_protection_required_networks"])
@@ -271,7 +272,7 @@ def aggregate(
                       candidates[record["candidate_id"]])
                 for record in records
             ]
-            summary = summaries(rows, manifest)
+            summary = summaries(rows, manifest, config["selection"])
             status = "COMPLETE"
         except Exception as caught:
             status, error = "INVALID_INPUT", str(caught)
