@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 import json
 import math
 from pathlib import Path
@@ -67,6 +68,9 @@ def main() -> None:
             "A1_exploration_stratum": payload["A1_patient_stratum"].get(
                 "exploration_stratum"
             ),
+            "primary_not_estimable_reasons": payload.get(
+                "primary_not_estimable_reasons", {}
+            ),
         }
         for family in FAMILIES:
             values = [row["family_scores"].get(family) for row in folds
@@ -94,6 +98,15 @@ def main() -> None:
             patient[f"n_{family}_favourable_seeds"] = int(sum(value > 0 for value in values))
         patients.append(patient)
     estimable = [row for row in patients if row["status"] == "COMPLETE_EXPLORATORY"]
+    not_estimable_fold_reasons: Counter[str] = Counter()
+    not_estimable_cell_reasons: Counter[str] = Counter()
+    for row in cells:
+        reasons = row.get("primary_not_estimable_reasons", {})
+        for reason, count in reasons.items():
+            not_estimable_fold_reasons[str(reason)] += int(count)
+        if row["status"] == "NOT_ESTIMABLE":
+            for reason in reasons:
+                not_estimable_cell_reasons[str(reason)] += 1
     direction = {}
     for family in FAMILIES:
         values = [row[f"median_{family}"] for row in estimable
@@ -110,6 +123,8 @@ def main() -> None:
         "created_utc": utc_now(), "n_cells": len(cells),
         "n_patients": len(patients), "n_estimable_patients": len(estimable),
         "patient_rows": patients, "cohort_direction": direction,
+        "not_estimable_fold_reason_counts": dict(not_estimable_fold_reasons),
+        "not_estimable_cell_reason_counts": dict(not_estimable_cell_reasons),
         "family_score_scale": "matched_control_signed_percentile_in_minus1_plus1",
         "common_extraction_domain": True,
         "old_cross_domain_abrupt_result_invalid": True,
