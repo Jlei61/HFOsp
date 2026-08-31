@@ -1,8 +1,58 @@
 # 空间 Z/qI–M/gK 持续全局振荡筛选：当前两变量线未通过
 
 **Date:** 2026-08-31  
-**Status:** `CLOSED_NEGATIVE_WITH_PARTIAL_SPATIAL_RHYTHM`  
+**Status:** `REOPENED_AND_CLOSED_NEGATIVE_AFTER_SPATIAL_EXTENSION`
 **Figure decision:** Fig5A formal render **blocked**；没有生成或登记“通过版”图片。
+
+## 2026-09-01 复开补充：冻结 source/sink/axis 空间场仍未通过
+
+用户提出 Z 与 qI、M 与 gK 是同类过程，允许患者约束的非均匀空间参数。复开后保留同一冻结
+E1146 learned E→E/E→I 全开底物、同一 15 接触读出和同一 7 项门，只增加不看仿真结果定义的
+空间基：top-3 source、top-3 sink，以及冻结 source→sink 轴下游半空间。代码提交依次为
+`95a0c502`、`7025119b`、`fe94d61d`、`502ef10d`、`2044de5d`、`2c0dd181`、
+`f322ad17`、`e38e2945`；43 项相关测试通过。
+
+### A. frozen-q 快子系统：所有扩展仍卡在同一空间边界
+
+| 扩展 | 最佳节律接触 | 末端率 | 峰频 | 全局 duty | 结论 |
+|---|---:|---:|---:|---:|---|
+| source q + sink/downstream gK，eta=120 | 10/15 | 323 Hz | 48 Hz | 1.00 | ICL6 新通过，ICL5–1 仍失败 |
+| gK 强度 eta=180/240 | 9/15 | 330–331 Hz | 48 Hz | 1.00 | 加强电流不救 |
+| gK 支撑 sigma=1.5/2.0 mm | 9/15 | 330–331 Hz | 48 Hz | 1.00 | 扩宽连续支撑不救 |
+| 同域 downstream q+gK，q gain=0.04/0.08 | 9/15、8/15 | 402–404 Hz | 48 Hz | 1.00 | 去抑制更强反而退化 |
+
+三个最终 atlas SHA256 分别为
+`2ce4ac7b36ba7ca59baf2a108413db96b8d90ad64aa65f86c178f9866a770738`、
+`3931be4f0dd44324e8e7aa2f009fa942b15b4253c220d377f77c429adfad8055`、
+`baec42f44dc53571b72e6ba416e8d37d68644e2cf09e2d22a3ed38201aa593f5`。
+
+读出诊断排除了“q=1 参考功率过大导致假失败”：候选后段的绝对 20–100 Hz 功率沿 ICL7→ICL1
+下降约两个数量级；ICL6–1 虽有 48 Hz 峰位置，却在多数 250 ms 窗中几乎没有对应窄带能量。
+这批组织是持续招募的局部 tonic/弱突触电流态，不是被归一化门槛误杀的真实节律。
+
+### B. q(0)=1 的动态空间耗竭：能调 onset，不能形成目标高态
+
+为避免 frozen-q 诊断漏掉巡回慢波，进一步让 source/downstream 冻结场只调制 q 耗竭率；初始
+`q(0)=1`、全片平均 kq 不变，M/gK 仍在下游半空间动态建立。
+
+| Z/qI 非线性 | onset | pre / post rate | q 末态 | 全局 duty | 节律接触 | 失败形态 |
+|---|---:|---:|---:|---:|---:|---|
+| hard-Z，n=8，kq=0.001，down gain=0.2/0.4 | 1300/1040 ms | 85/60 → 457/450 Hz | 全片 0.4 | 1.00/0.865 | 0/15 | 过早硬塌陷、tonic |
+| smooth qI，n=1，kq=0.0005 | 5340 ms | 97 → 174 Hz | mean 0.695 | 0.445 | 0/15 | 20 Hz 部分招募 |
+| 折衷 Hill，n=4，kq=0.0004 | 3980 ms | 69 → 217 Hz | mean 0.579 | 0.620 | 0/15 | 34 Hz 部分招募、频率不锁定 |
+
+三个动态 aggregate SHA256 分别为
+`ef523fee4e50814b8821d4e13000f19d8e05f5d491b351cb326789f13510dc47`、
+`2f3dfd66c45fd1910de6a55a531fe421bb2861ab43843b0b10caf7a13487c49a`、
+`035d897452446c79a487e10b472cf033b863f7fa4e9e6b4f7b59f18597a5299c`。
+
+### 复开后的安全结论
+
+空间异质性是合理且已被实现的机制假设，但在这块冻结 fast substrate 上，它没有消除核心二选一：
+q 耗竭足够强时进入高率 tonic；耗竭变慢时只出现 20–34 Hz 部分招募。改变 gK 强度、支撑宽度、
+q/gK 共定位和 Z→qI 非线性均未得到 ≥12/15 接触持续 30–80 Hz。因此 Fig5A 仍不得生成。
+若继续，需要另立合同并修改快重置环节（例如 E–I kinetics/delay 或短时突触恢复），这超出本轮
+“冻结 fast substrate 上纯 Z/M–qI/gK 两变量线”的授权范围。
 
 ## 一句话结论
 
