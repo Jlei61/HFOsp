@@ -117,6 +117,8 @@ def _candidate_workers(
     seeds: list[int], patient: Mapping[str, Any], classifier: Mapping[str, Any],
     label_map: np.ndarray, artifact_root: Path,
     expected_coefficients_sha256: str | None,
+    expected_mapping_sha256: str | None = None,
+    expected_worker_status: str | None = None,
 ) -> tuple[list[dict], list[np.ndarray], list[np.ndarray], list[dict]]:
     worker_root = artifact_root / robust_config["output_root"] / "workers"
     workers, maps, labels, inputs = [], [], [], []
@@ -126,7 +128,8 @@ def _candidate_workers(
         if not npz_path.is_file() or not json_path.is_file():
             raise RuntimeError(f"final-science worker is missing: {candidate_id}:{seed}")
         payload = json.loads(json_path.read_text())
-        if payload.get("status") != EXPECTED_WORKER_STATUS:
+        worker_status = expected_worker_status or EXPECTED_WORKER_STATUS
+        if payload.get("status") != worker_status:
             raise RuntimeError(f"final-science worker is incomplete: {candidate_id}:{seed}")
         if payload.get("candidate_id") != candidate_id or int(payload.get("seed")) != seed:
             raise RuntimeError("final-science worker identity changed")
@@ -149,8 +152,18 @@ def _candidate_workers(
         observed_coefficients = (
             None if coordinate is None else coordinate.get("coefficients_sha256")
         )
-        if observed_coefficients != expected_coefficients_sha256:
-            raise RuntimeError("final-science worker field coordinate changed")
+        if expected_mapping_sha256 is None:
+            if observed_coefficients != expected_coefficients_sha256:
+                raise RuntimeError("final-science worker field coordinate changed")
+        else:
+            if expected_coefficients_sha256 is not None:
+                raise ValueError(
+                    "final-science worker identity must use one field contract"
+                )
+            if payload.get("node_mapping", {}).get(
+                "mapping_sha256"
+            ) != expected_mapping_sha256:
+                raise RuntimeError("final-science worker dual mapping changed")
         worker = _load_network_worker(
             npz_path, patient["contact_names"], classifier, label_map,
         )

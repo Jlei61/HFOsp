@@ -184,3 +184,53 @@ def test_prototype_r2_cannot_mask_a_worse_heldout_event_cloud():
     assert result["clauses"][
         "complete_heldout_event_distribution_improves_reference"
     ]["pass"] is False
+
+
+def test_rev17_topology_must_improve_exact_anchor_as_well_as_null():
+    reference = {
+        "heldout_eventwise_prototype_r2": -0.2,
+        "mean_weakest_mode_cloud_lse": 0.7,
+        "mean_mode_0_cloud_loss": 0.5,
+        "mean_mode_1_cloud_loss": 0.6,
+        "mean_weakest_mode_lse": 1.0,
+        "mean_mode_0_loss": 0.8,
+        "mean_mode_1_loss": 0.9,
+    }
+    candidate = {
+        "heldout_eventwise_prototype_r2": 0.2,
+        "mean_weakest_mode_cloud_lse": 0.5,
+        "mean_mode_0_cloud_loss": 0.3,
+        "mean_mode_1_cloud_loss": 0.4,
+        "mean_weakest_mode_lse": 0.7,
+        "mean_mode_0_loss": 0.6,
+        "mean_mode_1_loss": 0.7,
+    }
+    candidate_topology = {
+        "observed_weakest_mode_quality": 0.30,
+        "null_q95": 0.20,
+        "upper_tail_p": 0.01,
+        "above_null_q95": True,
+    }
+    stronger_reference_topology = {
+        "observed_weakest_mode_quality": 0.35,
+    }
+    rejected = final_zero_simulation_decision(
+        candidate, reference, candidate_topology,
+        reference_topology_test=stronger_reference_topology,
+    )
+    assert rejected["accepted_for_same_checkpoint_intervention"] is False
+    assert rejected["clauses"][
+        "mode_specific_source_topology_above_matched_null"
+    ]["pass"] is True
+    assert rejected["clauses"][
+        "mode_specific_source_topology_improves_reference"
+    ]["pass"] is False
+
+    weaker_reference_topology = {
+        "observed_weakest_mode_quality": 0.25,
+    }
+    accepted = final_zero_simulation_decision(
+        candidate, reference, candidate_topology,
+        reference_topology_test=weaker_reference_topology,
+    )
+    assert accepted["accepted_for_same_checkpoint_intervention"] is True

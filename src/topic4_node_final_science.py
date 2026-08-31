@@ -209,6 +209,7 @@ def final_zero_simulation_decision(
     candidate_score: dict,
     reference_score: dict,
     topology_test: dict,
+    reference_topology_test: dict | None = None,
 ) -> dict:
     """Apply the pre-intervention Node scientific clauses."""
     metrics = {
@@ -306,6 +307,25 @@ def final_zero_simulation_decision(
             "pass": bool(topology_test["above_null_q95"]),
         },
     }
+    if reference_topology_test is not None:
+        candidate_topology = float(
+            topology_test["observed_weakest_mode_quality"]
+        )
+        reference_topology = float(
+            reference_topology_test["observed_weakest_mode_quality"]
+        )
+        if not np.isfinite(candidate_topology) or not np.isfinite(
+            reference_topology
+        ):
+            raise ValueError("source-topology comparison must be finite")
+        clauses["mode_specific_source_topology_improves_reference"] = {
+            "candidate": candidate_topology,
+            "reference": reference_topology,
+            "delta_candidate_minus_reference": (
+                candidate_topology - reference_topology
+            ),
+            "pass": bool(candidate_topology > reference_topology),
+        }
     return {
         "accepted_for_same_checkpoint_intervention": bool(
             all(row["pass"] for row in clauses.values())
