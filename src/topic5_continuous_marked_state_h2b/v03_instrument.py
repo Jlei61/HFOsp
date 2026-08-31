@@ -206,6 +206,22 @@ def effective_rank(values: np.ndarray) -> dict[str, float | int | None]:
     }
 
 
+def passes_noncollapse_threshold(
+    rank: Mapping[str, float | int | None],
+    *,
+    active_decoder_dimensions: int,
+    median_persistent_memoryless_distance: float,
+) -> bool:
+    """Frozen v2 rule: a single decoder axis is descriptive, not qualified."""
+    return bool(
+        int(active_decoder_dimensions) >= 2
+        and float(rank.get("effective_rank") or 0.0) >= 2.0
+        and rank.get("top_pc_share") is not None
+        and float(rank["top_pc_share"]) <= 0.95
+        and float(median_persistent_memoryless_distance) > 1e-6
+    )
+
+
 def lagged_decoder_autocorrelation(
     time_epoch: np.ndarray,
     session: np.ndarray,
@@ -827,11 +843,10 @@ def summarise_instrument_trace(
             durations.append(float((np.max(local) - np.min(local)) / 60.0))
     median_segment = float(np.median(durations)) if durations else None
     empirical_tau = autocorrelation["empirical_tau_minutes"]
-    q1_absolute_pass = bool(
-        int(np.sum(active)) >= 1
-        and int(rank["matrix_rank"] or 0) >= 1
-        and float(rank["effective_rank"] or 0.0) >= 1.0
-        and float(np.median(persistence_distance)) > 1e-6
+    q1_absolute_pass = passes_noncollapse_threshold(
+        rank,
+        active_decoder_dimensions=int(np.sum(active)),
+        median_persistent_memoryless_distance=float(np.median(persistence_distance)),
     )
     reset_not_dominant = bool(reset_r2 is None or reset_r2 < 0.50)
     q1_pass = bool(
@@ -879,8 +894,8 @@ def summarise_instrument_trace(
                 np.median(persistence_distance)
             ),
             "preliminary_absolute_threshold_pass": q1_absolute_pass,
-            "one_dimensional_state_allowed": True,
-            "rank_is_descriptive_not_a_minimum_dimension_gate": True,
+            "one_dimensional_state_allowed": False,
+            "rank_rule_source": "restored pre-smoke instrument_cell_v2 threshold",
             "collapsed_null_effective_rank": 0.0,
             "temporal_shuffled_null": temporal_null,
             "reset_phase_explained_variance": reset_r2,

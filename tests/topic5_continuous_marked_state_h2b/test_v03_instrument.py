@@ -5,6 +5,7 @@ import numpy as np
 from src.topic5_continuous_marked_state_h2b.v03_instrument import (
     effective_rank,
     lagged_decoder_autocorrelation,
+    passes_noncollapse_threshold,
     standardise_decoder,
     reset_phase_explained_variance,
     shuffled_temporal_structure_null,
@@ -19,6 +20,19 @@ def test_effective_rank_distinguishes_collapsed_and_two_dimensional_signal() -> 
     observed = effective_rank(signal)
     assert observed["effective_rank"] > 1.9
     assert observed["top_pc_share"] < 0.55
+
+
+def test_one_dimensional_decoder_is_not_state_qualified() -> None:
+    assert passes_noncollapse_threshold(
+        {"effective_rank": 1.0, "top_pc_share": 1.0, "matrix_rank": 1},
+        active_decoder_dimensions=1,
+        median_persistent_memoryless_distance=4.0,
+    ) is False
+    assert passes_noncollapse_threshold(
+        {"effective_rank": 2.1, "top_pc_share": 0.60, "matrix_rank": 3},
+        active_decoder_dimensions=3,
+        median_persistent_memoryless_distance=4.0,
+    ) is True
 
 
 def test_standardise_decoder_drops_constant_dimensions() -> None:
