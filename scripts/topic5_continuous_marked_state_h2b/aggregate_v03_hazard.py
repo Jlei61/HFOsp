@@ -41,6 +41,9 @@ def _sign_p(successes: int, total: int) -> float | None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--result-root", type=Path, default=CANONICAL_V0_3_RESULT_ROOT)
+    parser.add_argument(
+        "--include-support-conditioned-exploration", action="store_true",
+    )
     args = parser.parse_args()
     root = args.result_root.resolve()
     manifests = sorted((root / "hazard/by_cell").glob("*/seed_*/result.json"))
@@ -49,8 +52,24 @@ def main() -> None:
     rows, hashes = [], {}
     for path in manifests:
         payload = _json(path)
-        if payload.get("status") != "COMPLETE_EXPLORATORY":
-            raise ValueError(f"incomplete hazard cell: {path}")
+        strict_valid = (
+            payload.get("status") != "COMPLETE_EXPLORATORY"
+            or payload.get("claim_status")
+            != "CLAIM_ROUTE_RELEASED_DEVELOPMENT_ONLY"
+            or payload.get("A1_patient_stratum", {}).get("state_qualified")
+            is not True
+            or payload.get("A2_transfer_assay_sensitive") is not True
+        )
+        exploratory_valid = bool(
+            args.include_support_conditioned_exploration
+            and payload.get("status") == "COMPLETE_EXPLORATORY"
+            and payload.get("claim_status")
+            == "EXPLORATORY_A1_EMPTY_ASSAY_NOT_SENSITIVE_SUPPORT_CONDITIONED"
+            and payload.get("analysis_scope")
+            == "seizure_support_conditioned_control_grid_exploratory"
+        )
+        if strict_valid and not exploratory_valid:
+            raise ValueError(f"unreleased or incomplete hazard cell: {path}")
         hashes[str(path)] = sha256_file(path)
         primary = payload["primary_selected_k"]
         wrong = payload["matched_wrong_time"]["result"]

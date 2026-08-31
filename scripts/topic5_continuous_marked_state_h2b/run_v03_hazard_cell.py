@@ -107,10 +107,30 @@ class MappingLike:
         raise NotImplementedError
 
 
-def run(subject: str, seed: int, *, v02_root: Path, result_root: Path) -> dict:
+def run(subject: str, seed: int, *, v02_root: Path, result_root: Path,
+        allow_support_conditioned_exploration: bool = False) -> dict:
     assert_frozen_contract_matches(_json(result_root / "analysis_contract.json"))
     assert_frozen_exploration_policy_matches(_json(result_root / "exploration_policy.json"))
-    assay = _json(result_root / "assay/type1_power_summary_smoke.json")
+    a1 = _a1_row(result_root, subject)
+    if (a1.get("state_qualified") is not True
+            and not allow_support_conditioned_exploration):
+        raise ValueError(
+            f"{subject}: A3--A5 not released because A1 state qualification failed"
+        )
+    final_assay_path = result_root / "assay/type1_power_summary.json"
+    diagnostic_assay_path = result_root / "assay/type1_power_summary_smoke.json"
+    assay_path = (
+        diagnostic_assay_path if allow_support_conditioned_exploration
+        else final_assay_path
+    )
+    if not assay_path.is_file():
+        raise ValueError("the selected A2 assay receipt is missing")
+    assay = _json(assay_path)
+    if not allow_support_conditioned_exploration and (
+        assay.get("status") != "PASS_FINAL_ASSAY_ACCEPTANCE"
+        or assay.get("claim_bearing_route_released") is not True
+    ):
+        raise ValueError("A3--A5 not released because A2 assay did not pass")
     selected_k = int(assay["selected_initial_k"])
     cache_root = v02_root / "state_cache" / subject / f"seed_{seed}"
     cache_path = cache_root / "states.npz"
@@ -120,6 +140,14 @@ def run(subject: str, seed: int, *, v02_root: Path, result_root: Path) -> dict:
         raise ValueError(f"{subject}/seed_{seed}: state cache SHA256 drift")
     if state_manifest.get("all_parameters_frozen") is not True:
         raise ValueError("hazard input is not a frozen state cache")
+    full_recorded_grid = (
+        state_manifest.get("full_recorded_five_minute_grid") is True
+    )
+    if not full_recorded_grid and not allow_support_conditioned_exploration:
+        raise ValueError(
+            "A3 requires a full recorded-coverage state grid; v0.2 risk-set "
+            "query caches are not admissible"
+        )
     seizure_path = v02_root / "risk_sets" / subject / "seizures.csv"
     onset_time, onset_segment, n_inventory_seizures = _onsets(seizure_path)
     with np.load(cache_path, allow_pickle=False) as data:
@@ -188,9 +216,16 @@ def run(subject: str, seed: int, *, v02_root: Path, result_root: Path) -> dict:
             "tau_minutes": tau, "tau_source": tau_source,
             "rows": lag_rows,
         },
-        "A1_patient_stratum": _a1_row(result_root, subject),
+        "A1_patient_stratum": a1,
         "A2_assay_status": assay["status"],
-        "A2_transfer_assay_sensitive": False,
+        "A2_transfer_assay_sensitive": bool(
+            assay.get("status") == "PASS_FINAL_ASSAY_ACCEPTANCE"
+            and assay.get("claim_bearing_route_released") is True
+        ),
+        "analysis_scope": (
+            "full_recorded_grid" if full_recorded_grid else
+            "seizure_support_conditioned_control_grid_exploratory"
+        ),
         "n_grid_rows": len(design.time_epoch),
         "n_mapped_seizures": len(onset_time),
         "n_inventory_seizures": n_inventory_seizures,
@@ -203,15 +238,17 @@ def run(subject: str, seed: int, *, v02_root: Path, result_root: Path) -> dict:
             "seizure_table_sha256": sha256_file(seizure_path),
             "producer_sha256": sha256_file(PRODUCER),
             "hazard_module_sha256": sha256_file(HAZARD_MODULE),
-            "assay_summary_sha256": sha256_file(
-                result_root / "assay/type1_power_summary_smoke.json"
-            ),
+            "assay_summary_sha256": sha256_file(assay_path),
         },
         "real_seizure_outcome_read": True,
         "development_only": True,
         "formal_test_partition_opened": False, "sealed_opened": False,
         "h3_or_t2_run": False,
-        "claim_status": "EXPLORATORY_ASSAY_NOT_SENSITIVE",
+        "claim_status": (
+            "CLAIM_ROUTE_RELEASED_DEVELOPMENT_ONLY"
+            if not allow_support_conditioned_exploration else
+            "EXPLORATORY_A1_EMPTY_ASSAY_NOT_SENSITIVE_SUPPORT_CONDITIONED"
+        ),
         "omp_num_threads": int(os.environ.get("OMP_NUM_THREADS", "1")),
     }
     atomic_json(output / "result.json", payload)
@@ -224,10 +261,14 @@ def main() -> None:
     parser.add_argument("--seed", type=int, required=True)
     parser.add_argument("--v0-2-root", type=Path, default=CANONICAL_V0_2_RESULT_ROOT)
     parser.add_argument("--result-root", type=Path, default=CANONICAL_V0_3_RESULT_ROOT)
+    parser.add_argument("--allow-support-conditioned-exploration", action="store_true")
     args = parser.parse_args()
     payload = run(
         str(args.subject), int(args.seed),
         v02_root=args.v0_2_root.resolve(), result_root=args.result_root.resolve(),
+        allow_support_conditioned_exploration=bool(
+            args.allow_support_conditioned_exploration
+        ),
     )
     print(payload["status"], payload["subject"], payload["seed"])
 
