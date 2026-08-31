@@ -301,7 +301,11 @@ def evaluate_oos_geometry_fold_full_grid(
     for event in onset[:position]:
         clean &= np.abs(time - float(event)) > exclusion_seconds
     train = np.flatnonzero(clean)
-    if len(train) < 100:
+    # Forty five-minute rows provide at least ~3.3 recorded hours while still
+    # allowing early development seizures to contribute.  The old 100-row
+    # threshold silently discarded most chronological folds and was not a
+    # scientific requirement of the projection estimator (minimum 20 rows).
+    if len(train) < 40:
         return {"status": "NOT_ESTIMABLE", "reason": "insufficient_past_full_grid_rows"}
     projection = fit_decoder_projection(decoder[train])
     all_score = projection.transform(decoder)

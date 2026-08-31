@@ -50,7 +50,7 @@ def main() -> None:
     for path in paths:
         payload = _json(path)
         if (
-            payload.get("revision") != "h2b_v0_3_oos_geometry_cell_v2"
+            payload.get("revision") != "h2b_v0_3_oos_geometry_cell_v3"
             or payload.get("claim_status")
             != "EXPLORATORY_A1_EMPTY_ASSAY_NOT_SENSITIVE_FULL_GRID"
             or payload.get("common_extraction_domain") is not True

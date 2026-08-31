@@ -50,7 +50,7 @@ def _complete(root: Path, subject: str, seed: int, cache: Path,
             else "type1_power_summary.json"
         )
         return bool(
-            payload.get("revision") == "h2b_v0_3_oos_geometry_cell_v2"
+            payload.get("revision") == "h2b_v0_3_oos_geometry_cell_v3"
             and payload.get("subject") == subject
             and int(payload.get("seed")) == seed
             and payload.get("claim_status") == expected

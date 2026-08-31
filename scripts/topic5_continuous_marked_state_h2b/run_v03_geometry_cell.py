@@ -166,7 +166,7 @@ def run(subject: str, seed: int, *, v02_root: Path, result_root: Path,
     complete = [row for row in primary if row["status"] == "COMPLETE_EXPLORATORY"]
     payload = {
         "status": "COMPLETE_EXPLORATORY" if complete else "NOT_ESTIMABLE",
-        "revision": "h2b_v0_3_oos_geometry_cell_v2",
+        "revision": "h2b_v0_3_oos_geometry_cell_v3",
         "created_utc": utc_now(), "subject": subject, "seed": int(seed),
         "initial_k": initial_k, "primary_lookback_minutes": 30.0,
         "by_lookback_minutes": by_lookback,
