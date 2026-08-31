@@ -147,18 +147,28 @@ def analyse_run(run_dir: Path, scales=SCALES, seed: int = 0) -> dict | None:
         )
         current = np.stack([size_excess[:-1], timing_excess[:-1]], axis=1)
 
-        # state-matched placebo: nearest state at least 2k events away
+        # State-matched placebo: the exposure of the most state-similar event that
+        # is at least 2k events away.  Scanning every candidate for every row is
+        # O(n^2) and does not finish on a 47k-event test split, so the match is
+        # made against a fixed random pool of candidates.
+        m = exposure.shape[0]
         placebo = np.zeros_like(exposure)
-        sample = np.arange(0, exposure.shape[0])
-        if sample.size:
+        if m:
             zc = (z_pred - z_pred.mean(0)) / (z_pred.std(0) + 1e-9)
-            for i in range(exposure.shape[0]):
-                far = np.abs(sample - i) >= 2 * k
-                if not far.any():
-                    continue
-                idx = np.flatnonzero(far)
-                d = np.einsum("ij,ij->i", zc[idx] - zc[i], zc[idx] - zc[i])
-                placebo[i] = exposure[idx[int(np.argmin(d))]]
+            pool_rng = np.random.default_rng(seed + 4242)
+            pool = pool_rng.choice(m, size=min(m, 1024), replace=False)
+            pool = pool[np.isfinite(exposure[pool]).all(1)]
+            if pool.size:
+                d2 = (
+                    np.einsum("ij,ij->i", zc, zc)[:, None]
+                    - 2.0 * zc @ zc[pool].T
+                    + np.einsum("ij,ij->i", zc[pool], zc[pool])[None, :]
+                )
+                too_close = np.abs(np.arange(m)[:, None] - pool[None, :]) < 2 * k
+                d2 = np.where(too_close, np.inf, d2)
+                best = np.argmin(d2, axis=1)
+                usable = np.isfinite(d2[np.arange(m), best])
+                placebo[usable] = exposure[pool[best[usable]]]
 
         valid = np.isfinite(exposure).all(1) & np.isfinite(delayed).all(1) & np.isfinite(y)
         if valid.sum() < 200:
