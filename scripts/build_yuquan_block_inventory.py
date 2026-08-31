@@ -98,11 +98,13 @@ def probe_one_edf(subject: str, edf_path: Path) -> BlockProbeResult:
 def write_block_inventory_csv(rows: Iterable[BlockProbeResult], out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
     fieldnames = list(BlockProbeResult.__dataclass_fields__.keys())
-    with open(out_path, "w", newline="") as f:
+    tmp = out_path.with_suffix(out_path.suffix + ".tmp")
+    with open(tmp, "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
         for r in rows:
             writer.writerow(asdict(r))
+    tmp.replace(out_path)
 
 
 def collect_subject_edfs(subject: str, root: Path = YUQUAN_DATA_ROOT) -> List[Path]:
@@ -195,11 +197,13 @@ def write_seizure_inventory_csv(rows: List[Dict[str, object]], out_path: Path) -
         "record_start_epoch", "record_end_epoch",
     ]
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(out_path, "w", newline="") as f:
+    tmp = out_path.with_suffix(out_path.suffix + ".tmp")
+    with open(tmp, "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
         for row in rows:
             writer.writerow(row)
+    tmp.replace(out_path)
 
 
 def main() -> int:
@@ -216,12 +220,30 @@ def main() -> int:
         default=INVENTORY_OUT_DIR,
         help="Output directory for inventory CSVs.",
     )
+    parser.add_argument(
+        "--pr1-dir",
+        type=Path,
+        default=PR1_SEIZURE_DIR,
+        help="Directory holding pr1_seizure_<subject>.json (untracked, so a "
+             "git worktree needs the main checkout's path here).",
+    )
+    parser.add_argument(
+        "--all-subjects",
+        action="store_true",
+        help="Probe every subject directory holding EDFs under the data root.",
+    )
     args = parser.parse_args()
 
-    subjects = args.subjects or [
-        "gaolan", "huanghanwen", "litengsheng", "pengzihang", "sunyuanxin",
-        "xuxinyi", "zhangjinhan", "zhangkexuan", "zhaojinrui",
-    ]
+    if args.all_subjects:
+        subjects = sorted(
+            d.name for d in YUQUAN_DATA_ROOT.iterdir()
+            if d.is_dir() and any(d.glob("*.edf"))
+        )
+    else:
+        subjects = args.subjects or [
+            "gaolan", "huanghanwen", "litengsheng", "pengzihang", "sunyuanxin",
+            "xuxinyi", "zhangjinhan", "zhangkexuan", "zhaojinrui",
+        ]
     print(f"Probing {len(subjects)} yuquan subjects under {YUQUAN_DATA_ROOT}", flush=True)
 
     block_rows = build_block_inventory(subjects)
@@ -229,7 +251,9 @@ def main() -> int:
     write_block_inventory_csv(block_rows, block_csv)
     print(f"Wrote {len(block_rows)} block rows -> {block_csv}", flush=True)
 
-    seizure_rows = rebuild_seizure_inventory_with_record_epochs(block_rows)
+    seizure_rows = rebuild_seizure_inventory_with_record_epochs(
+        block_rows, pr1_dir=args.pr1_dir
+    )
     seizure_csv = args.out_dir / "yuquan_seizure_inventory.csv"
     write_seizure_inventory_csv(seizure_rows, seizure_csv)
     print(f"Wrote {len(seizure_rows)} seizure rows -> {seizure_csv}", flush=True)
