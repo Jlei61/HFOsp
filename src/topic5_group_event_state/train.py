@@ -58,6 +58,10 @@ ENDPOINTS = (
 # same trained model into a K-event-memory model at evaluation time.
 TRUNCATION_PROBES = (1, 20, 100, 0)  # 0 = full session history
 
+# How many of the event's actual first contacts are excluded from scoring by the
+# same-prefix continuation endpoint.
+PREFIX_GIVEN = 2
+
 
 def build_arms() -> dict[str, ArmSpec]:
     """The five core arms plus the ablations the plan names."""
@@ -364,6 +368,8 @@ def endpoint_predictions(
     valid = part & torch.isfinite(delay)
     order_rho: list[float] = []
     tie_agree: list[float] = []
+    prefix_rho: list[float] = []
+    prefix_next_hit: list[float] = []
     for i in range(part.shape[0]):
         idx = torch.nonzero(valid[i], as_tuple=False).flatten()
         if idx.numel() < 3:
@@ -380,11 +386,38 @@ def endpoint_predictions(
         same_pred = (np.abs(pred_d[:, None] - pred_d[None, :]) <= tol)
         iu = np.triu_indices(idx.numel(), k=1)
         tie_agree.append(float((same_true[iu] == same_pred[iu]).mean()))
+
+        # Same-prefix continuation: score only the part of the sequence after the
+        # two contacts that actually went first.
+        #
+        # This is NOT a prefix-conditional prediction. The delay head is
+        # deliberately unconditional -- it emits every contact's delay without
+        # seeing the participation mask, which is what keeps it leak-free -- so
+        # excluding the observed prefix from scoring does not make the remaining
+        # prediction depend on it. On synthetic data a model that knows only a
+        # fixed per-contact habit still scores 0.771 here (next-contact hit 0.545
+        # against a 0.167 chance rate). Read it only as an arm contrast: the
+        # static-history baseline IS the fixed habit, so the difference against it
+        # is what the state adds beyond habit. An absolute value means little.
+        if idx.numel() >= 4:
+            order_true = np.argsort(truth_d)
+            rest = order_true[PREFIX_GIVEN:]
+            rest_truth, rest_pred = truth_d[rest], pred_d[rest]
+            if np.std(rest_truth) > 0 and np.std(rest_pred) > 0:
+                prefix_rho.append(
+                    float(np.corrcoef(
+                        np.argsort(np.argsort(rest_truth)).astype(float),
+                        np.argsort(np.argsort(rest_pred)).astype(float),
+                    )[0, 1])
+                )
+            prefix_next_hit.append(float(int(np.argmin(rest_pred)) == int(np.argmin(rest_truth))))
     prob = torch.sigmoid(pred["participation_logit"].float()).detach().cpu().numpy()
     ok = truth["contact_ok"].float()
     return {
         "order_spearman": np.asarray(order_rho, dtype=np.float64),
         "tied_group_agreement": np.asarray(tie_agree, dtype=np.float64),
+        "prefix_continuation_spearman": np.asarray(prefix_rho, dtype=np.float64),
+        "prefix_next_contact_hit": np.asarray(prefix_next_hit, dtype=np.float64),
         "participation_prob": prob,
         "participation_true": part.cpu().numpy(),
         # Per-event series H3 needs: the part of each observed event the model did
@@ -675,6 +708,8 @@ def run_sequence(
         extra["tied_group_agreement"] = np.concatenate(
             [d["tied_group_agreement"] for d in derived]
         )
+        for key in ("prefix_continuation_spearman", "prefix_next_contact_hit"):
+            extra[key] = np.concatenate([d[key] for d in derived])
         extra["participation_prob"] = np.concatenate([d["participation_prob"] for d in derived])
         extra["participation_true"] = np.concatenate([d["participation_true"] for d in derived])
         for key in ("size_pred", "size_true", "timing_mu", "delay_span_true"):
@@ -910,6 +945,14 @@ def train_one(
     results["test"] = test_means
     results["test_state_norm"] = test_extra["state_norm"]
 
+    for key in ("prefix_continuation_spearman", "prefix_next_contact_hit"):
+        values = test_extra.get(key)
+        if values is not None and values.size:
+            results[key] = {
+                "median": float(np.median(values)),
+                "mean": float(np.mean(values)),
+                "n_events": int(values.size),
+            }
     rho = test_extra.get("order_spearman")
     tie = test_extra.get("tied_group_agreement")
     if rho is not None and rho.size:

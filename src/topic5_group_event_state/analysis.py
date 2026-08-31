@@ -184,7 +184,13 @@ def paired_comparison(
 
 
 # Endpoints where a HIGHER value is better, so the delta sign flips.
-HIGHER_IS_BETTER = ("participation_auc", "recruitment_order_spearman", "tied_group_agreement")
+HIGHER_IS_BETTER = (
+    "participation_auc",
+    "recruitment_order_spearman",
+    "tied_group_agreement",
+    "prefix_continuation_spearman",
+    "prefix_next_contact_hit",
+)
 
 
 def _extract_scalar(run: Mapping[str, Any], name: str) -> float:
