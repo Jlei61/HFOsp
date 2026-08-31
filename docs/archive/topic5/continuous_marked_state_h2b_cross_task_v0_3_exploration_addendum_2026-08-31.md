@@ -1,10 +1,5 @@
 # H2b v0.3 少 gate、多探索执行附录
 
-> **状态：SUPERSEDED。** 当前用户指定的 H2b 验收意见恢复严格串行
-> gate：A1 没有足够 `state_qualified` checkpoint 时立即停止 downstream；
-> A2 power 不足时不得解释真实阴性。本文仅保留为历史执行记录，不再授权
-> `all_frozen` hazard、geometry 或 phenotype override。
-
 ## 决定
 
 本附录响应 2026-08-31 的用户指令，优先于原合同中“某一科学层阴性就停止全部 downstream”的执行措辞，但不修改冻结数据、估计量、30 min 主 endpoint、因果时间边界或 claim ladder。
