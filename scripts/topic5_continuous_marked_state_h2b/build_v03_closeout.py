@@ -42,6 +42,9 @@ QUARANTINE_DIRS = (
     "post_gate_hazard_full_grid_exploratory_v1",
     "post_gate_geometry_exploratory_v1",
     "post_gate_phenotype_continuous_exploratory_v1",
+    "post_gate_hazard_full_grid_exploratory_v2",
+    "post_gate_geometry_exploratory_v2",
+    "post_gate_phenotype_continuous_exploratory_v2",
 )
 
 
