@@ -27,6 +27,7 @@ def _compact(path):
         "mode": payload.get("mode"),
         "full_edge_contract": full_edge,
         "hybrid_config": config,
+        "spatial_basis_contract": payload.get("spatial_basis_contract") or {},
         "protocol_contract": payload.get("protocol_contract") or {},
     }
     parameter_contract_sha256 = hashlib.sha256(
@@ -50,6 +51,8 @@ def _compact(path):
         "q_min": config.get("q_min"),
         "q_init": config.get("q_init", 1.0),
         "q_init_h_gain": config.get("q_init_h_gain", 0.0),
+        "q_endpoint_gain": config.get("q_endpoint_gain", 0.0),
+        "q_endpoint_sigma_mm": config.get("q_endpoint_sigma_mm", 2.0),
         "freeze_q": config.get("freeze_q", False),
         "q_a0": config.get("q_a0"),
         "q_a50": config.get("q_a50"),

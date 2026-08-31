@@ -1,9 +1,11 @@
 import numpy as np
+import pytest
 
 from src.snn_engine.slow_field import SpatialSlowField, SpatialSlowFieldConfig
 from src.topic4_spatial_zm_qigk import (
     SpatialZMQIGKConfig,
     SpatialZMQIGKSlowVars,
+    periodic_endpoint_field,
     thresholded_hill_saturation,
 )
 
@@ -264,6 +266,70 @@ def test_patient_field_can_seed_nonhomogeneous_frozen_q_without_randomness():
     high_h = np.unravel_index(np.argmax(slow_a.h_grid), slow_a.h_grid.shape)
     low_h = np.unravel_index(np.argmin(slow_a.h_grid), slow_a.h_grid.shape)
     assert slow_a.q_I[high_h] < slow_a.q_I[low_h]
+
+
+def test_periodic_endpoint_field_has_all_declared_foci():
+    field = periodic_endpoint_field(
+        4, 2.0, np.asarray([[0.25, 0.25], [1.25, 1.25]]), 0.2)
+    assert field.shape == (4, 4)
+    assert field[0, 0] == pytest.approx(1.0)
+    assert field[2, 2] == pytest.approx(1.0)
+    assert field[1, 1] < field[0, 0]
+
+
+def test_zero_endpoint_gain_exactly_recovers_previous_q_initialization():
+    pos_e, pos_i = _positions()
+    cfg = SpatialZMQIGKConfig(
+        n_grid=4,
+        sigma_q_mm=0.7,
+        h_smooth_sigma_mm=0.5,
+        q_min=0.4,
+        q_init=0.7,
+        q_endpoint_gain=0.0,
+        freeze_q=True,
+    )
+    without_centers = SpatialZMQIGKSlowVars(
+        6, 18.0, pos_e, pos_i, 2.0, np.ones(4), cfg=cfg)
+    with_centers = SpatialZMQIGKSlowVars(
+        6, 18.0, pos_e, pos_i, 2.0, np.ones(4),
+        endpoint_centers_xy=np.asarray([[0.25, 0.25], [1.25, 1.25]]),
+        cfg=cfg)
+    np.testing.assert_array_equal(
+        without_centers.q_init_grid, with_centers.q_init_grid)
+
+
+def test_positive_endpoint_gain_lowers_q_at_both_frozen_endpoints():
+    pos_e, pos_i = _positions()
+    cfg = SpatialZMQIGKConfig(
+        n_grid=4,
+        sigma_q_mm=0.7,
+        h_smooth_sigma_mm=0.5,
+        q_min=0.1,
+        q_init=0.7,
+        q_endpoint_gain=0.4,
+        q_endpoint_sigma_mm=0.2,
+        freeze_q=True,
+    )
+    slow = SpatialZMQIGKSlowVars(
+        6, 18.0, pos_e, pos_i, 2.0, np.ones(4),
+        endpoint_centers_xy=np.asarray([[0.25, 0.25], [1.25, 1.25]]),
+        cfg=cfg)
+    assert slow.q_init_grid[0, 0] < slow.q_init_grid[1, 1]
+    assert slow.q_init_grid[2, 2] < slow.q_init_grid[1, 1]
+    assert np.isclose(np.mean(slow.q_init_grid), cfg.q_init)
+
+
+def test_nonzero_endpoint_gain_requires_frozen_centers():
+    pos_e, pos_i = _positions()
+    cfg = SpatialZMQIGKConfig(
+        n_grid=4,
+        sigma_q_mm=0.7,
+        h_smooth_sigma_mm=0.5,
+        q_endpoint_gain=0.2,
+    )
+    with pytest.raises(ValueError, match="requires frozen endpoint"):
+        SpatialZMQIGKSlowVars(
+            6, 18.0, pos_e, pos_i, 2.0, np.ones(4), cfg=cfg)
 
 
 def test_spatial_q_initialization_never_starts_below_local_floor():

@@ -57,6 +57,25 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _frozen_endpoint_contact_centers(substrate):
+    """Return the declared source-then-sink contact centres without refitting."""
+    placement = substrate.extras["placement"]
+    endpoint_names = [
+        *[str(name) for name in placement["source_names"]],
+        *[str(name) for name in placement["sink_names"]],
+    ]
+    contact_map = {
+        str(name): np.asarray(xy, float)
+        for name, xy in zip(substrate.contact_names, substrate.contact_xy)
+    }
+    if len(contact_map) != len(substrate.contact_names):
+        raise RuntimeError("frozen contact contract contains duplicate names")
+    missing = [name for name in endpoint_names if name not in contact_map]
+    if missing:
+        raise RuntimeError(f"frozen endpoint contacts missing: {missing}")
+    return endpoint_names, np.stack([contact_map[name] for name in endpoint_names])
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True)
@@ -83,6 +102,8 @@ def main():
     parser.add_argument("--q-min", type=float, default=0.05)
     parser.add_argument("--q-init", type=float, default=1.0)
     parser.add_argument("--q-init-h-gain", type=float, default=0.0)
+    parser.add_argument("--q-endpoint-gain", type=float, default=0.0)
+    parser.add_argument("--q-endpoint-sigma", type=float, default=2.0)
     parser.add_argument("--freeze-q", action="store_true")
     parser.add_argument("--q-a0", type=float, default=0.0)
     parser.add_argument("--q-a50", type=float, default=1.0)
@@ -124,6 +145,8 @@ def main():
         etoi_dose=1.0,
     )
     dt = float(substrate.engine["dt"])
+    endpoint_names, endpoint_centers_xy = _frozen_endpoint_contact_centers(
+        substrate)
     hybrid_config = SpatialZMQIGKConfig(
         n_grid=int(args.n_grid),
         sigma_r_mm=0.5,
@@ -135,6 +158,8 @@ def main():
         q_min=float(args.q_min),
         q_init=float(args.q_init),
         q_init_h_gain=float(args.q_init_h_gain),
+        q_endpoint_gain=float(args.q_endpoint_gain),
+        q_endpoint_sigma_mm=float(args.q_endpoint_sigma),
         freeze_q=bool(args.freeze_q),
         sigma_q_mm=float(args.sigma_q),
         q_a0=float(args.q_a0),
@@ -165,6 +190,7 @@ def main():
             float(substrate.engine["L"]),
             substrate.h_e,
             core_mask_E=np.asarray(substrate.h_e >= 0.5, bool),
+            endpoint_centers_xy=endpoint_centers_xy,
             cfg=hybrid_config,
         )
     drive = make_external_drive(substrate, round_config["spatial_ou"], args.seed)
@@ -197,6 +223,25 @@ def main():
     operational = result["runaway_early_stop_ms"]
     scientific_onset = detect_sustained_high_state_onset(
         result["rate_E"], dt_ms=dt)
+    placement = substrate.extras["placement"]
+    spatial_basis_contract = {
+        "version": "frozen_patient_propagation_endpoints_v1",
+        "source": (
+            "stage-config narrow top-3 template source/sink contact sets, "
+            "registered once to the frozen shared SNN plane"
+        ),
+        "source_contact_names": list(placement["source_names"]),
+        "sink_contact_names": list(placement["sink_names"]),
+        "endpoint_contact_order": endpoint_names,
+        "endpoint_centers_xy_mm": endpoint_centers_xy.tolist(),
+        "endpoint_field_rule": (
+            "maximum of periodic Gaussian fields centred on the six frozen "
+            "endpoint contacts; sigma is declared in "
+            "hybrid_config.q_endpoint_sigma_mm"
+        ),
+        "fitted_to_current_dynamics_result": False,
+        "per_neuron_random_parameter_field": False,
+    }
     payload = {
         "status": "SPATIAL_ZQIM_HYBRID_CANARY_COMPLETE",
         "candidate_id": candidate,
@@ -210,6 +255,7 @@ def main():
             "learned_edges_modified": False,
         },
         "hybrid_config": asdict(hybrid_config),
+        "spatial_basis_contract": spatial_basis_contract,
         "protocol_contract": {
             "round_config_path": str(config_path.relative_to(ROOT)),
             "round_config_sha256": _sha256(config_path),
@@ -299,6 +345,9 @@ def main():
             "q_floor_grid": np.asarray(slow.q_floor_grid, np.float32),
             "k_q_grid": np.asarray(slow.k_q_grid, np.float32),
             "h_grid": np.asarray(slow.h_grid, np.float32),
+            "endpoint_field": np.asarray(slow.endpoint_field, np.float32),
+            "endpoint_centers_xy_mm": np.asarray(
+                slow.endpoint_centers_xy, np.float32),
         })
     _atomic_npz(out.with_suffix(".npz"), **arrays)
     payload["wall_seconds"] = time.time() - started

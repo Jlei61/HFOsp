@@ -108,6 +108,8 @@ def analyze_atlas(input_dir: Path, reference_json: Path | None = None):
         loaded.append((
             float(config["q_init"]),
             float(config.get("q_init_h_gain", 0.0)),
+            float(config.get("q_endpoint_gain", 0.0)),
+            float(config.get("q_endpoint_sigma_mm", 2.0)),
             json_path,
             payload,
             npz_path,
@@ -120,7 +122,7 @@ def analyze_atlas(input_dir: Path, reference_json: Path | None = None):
                       and np.isclose(item[1], 0.0)]
         if len(references) != 1:
             raise RuntimeError("atlas must contain exactly one q_init=1 reference")
-        _, _, reference_json, reference_payload, reference_path = references[0]
+        _, _, _, _, reference_json, reference_payload, reference_path = references[0]
     else:
         reference_payload = json.loads(reference_json.read_text())
         reference_path = reference_json.with_suffix(".npz")
@@ -137,7 +139,8 @@ def analyze_atlas(input_dir: Path, reference_json: Path | None = None):
     if reference_start_ms < 0.0:
         raise RuntimeError("q_init=1 reference is shorter than 1000 ms")
 
-    for q_init, q_init_h_gain, json_path, payload, npz_path in sorted(
+    for (q_init, q_init_h_gain, q_endpoint_gain, q_endpoint_sigma_mm,
+         json_path, payload, npz_path) in sorted(
             loaded, reverse=True):
         with np.load(npz_path) as artifact:
             dt_ms = float(artifact["lfp_dt_ms"])
@@ -178,6 +181,8 @@ def analyze_atlas(input_dir: Path, reference_json: Path | None = None):
         records.append({
             "q_init": q_init,
             "q_init_h_gain": q_init_h_gain,
+            "q_endpoint_gain": q_endpoint_gain,
+            "q_endpoint_sigma_mm": q_endpoint_sigma_mm,
             "q_min": float((payload.get("hybrid_config") or {}).get(
                 "q_min", 0.0)),
             "q_initial_grid_range": q_initial_range,
@@ -227,6 +232,8 @@ def analyze_atlas(input_dir: Path, reference_json: Path | None = None):
             {
                 "q_init": record["q_init"],
                 "q_init_h_gain": record["q_init_h_gain"],
+                "q_endpoint_gain": record["q_endpoint_gain"],
+                "q_endpoint_sigma_mm": record["q_endpoint_sigma_mm"],
             }
             for record in supporting
         ],
@@ -263,7 +270,8 @@ def main():
     atomic_write_json(_json_safe(payload), str(out))
     csv_path = out.with_suffix(".csv")
     fieldnames = [
-        "q_init", "q_init_h_gain", "q_min", "q_initial_grid_mean",
+        "q_init", "q_init_h_gain", "q_endpoint_gain",
+        "q_endpoint_sigma_mm", "q_min", "q_initial_grid_mean",
         "q_initial_grid_min",
         "q_initial_grid_max", "m_build_gain", "eta_m", "tau_m_ms",
         "m_state_ceiling", "m_spatial_mix", "sigma_m_mm",
@@ -282,6 +290,8 @@ def main():
             writer.writerow({
                 "q_init": record["q_init"],
                 "q_init_h_gain": record["q_init_h_gain"],
+                "q_endpoint_gain": record["q_endpoint_gain"],
+                "q_endpoint_sigma_mm": record["q_endpoint_sigma_mm"],
                 "q_min": record["q_min"],
                 "q_initial_grid_mean": record["q_initial_grid_mean"],
                 "q_initial_grid_min": record["q_initial_grid_range"][0],

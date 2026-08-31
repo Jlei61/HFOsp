@@ -31,7 +31,11 @@ original unbounded M accumulator exactly.
 while ``eta_m`` remains the membrane-current coupling.
 For the fast-subsystem atlas only, ``q_init_h_gain`` can also seed a deterministic
 nonuniform resource state from the same frozen ``h(x)`` field (positive gain =
-lower initial q in high-h tissue).  A zero gain is exactly the homogeneous
+lower initial q in high-h tissue).  ``q_endpoint_gain`` adds a second,
+patient-constrained basis: the maximum of periodic Gaussian fields centred on
+the frozen source- and sink-side endpoint contacts (positive gain = lower q at
+the two propagation endpoint sets).  The contact centres are inputs, never
+fitted to the simulated trajectory.  Zero gains exactly recover the homogeneous
 initial condition; no per-neuron random parameter field is introduced.
 
 The implementation intentionally composes the already tested qI field driver in
@@ -63,6 +67,8 @@ class SpatialZMQIGKConfig:
     q_min: float = 0.05
     q_init: float = 1.0
     q_init_h_gain: float = 0.0
+    q_endpoint_gain: float = 0.0
+    q_endpoint_sigma_mm: float = 2.0
     freeze_q: bool = False
     sigma_q_mm: float = 1.5
     q_a0: float = 0.0
@@ -96,6 +102,7 @@ class SpatialZMQIGKConfig:
             ("field_update_ms", self.field_update_ms),
             ("tau_q_ms", self.tau_q_ms),
             ("sigma_q_mm", self.sigma_q_mm),
+            ("q_endpoint_sigma_mm", self.q_endpoint_sigma_mm),
             ("q_a50", self.q_a50),
             ("q_hill_n", self.q_hill_n),
             ("tau_m_ms", self.tau_m_ms),
@@ -128,6 +135,7 @@ class SpatialZMQIGKConfig:
         if self.m_spatial_mix > 0.0 and self.sigma_m_mm >= self.sigma_q_mm:
             raise ValueError("spatial M/gK footprint must be narrower than qI")
         if (abs(self.q_init_h_gain) >= 1.0
+                or abs(self.q_endpoint_gain) >= 1.0
                 or abs(self.k_q_h_gain) >= 1.0
                 or abs(self.eta_m_h_gain) >= 1.0):
             raise ValueError("patient-field gains must have absolute value below one")
@@ -163,6 +171,33 @@ def _mean_one_bounded_modulation(field, gain):
     z = (values - float(np.mean(values))) / float(np.std(values))
     multiplier = 1.0 + float(gain) * np.tanh(z)
     return multiplier / float(np.mean(multiplier))
+
+
+def periodic_endpoint_field(n_grid, sheet_l_mm, centers_xy, sigma_mm):
+    """Endpoint-union field on the periodic sheet from frozen patient contacts.
+
+    The field is deterministic and contains no fitted amplitude or centre.  A
+    maximum combines the Gaussian foci so overlap does not create an artificial
+    deeper basin between neighbouring endpoint contacts.
+    """
+    centers = np.asarray(centers_xy, float)
+    if centers.ndim != 2 or centers.shape[1] != 2 or len(centers) < 2:
+        raise ValueError("endpoint_centers_xy must have shape (n>=2, 2)")
+    n = int(n_grid)
+    length = float(sheet_l_mm)
+    coord = (np.arange(n, dtype=float) + 0.5) * length / n
+    xx, yy = np.meshgrid(coord, coord, indexing="xy")
+    fields = []
+    for center_x, center_y in centers:
+        dx = np.abs(xx - float(center_x))
+        dy = np.abs(yy - float(center_y))
+        dx = np.minimum(dx, length - dx)
+        dy = np.minimum(dy, length - dy)
+        fields.append(np.exp(
+            -(dx * dx + dy * dy) / (2.0 * float(sigma_mm) ** 2)))
+    # max, rather than sum, preserves two distinct endpoint basins when their
+    # tails overlap along the propagation axis.
+    return np.maximum.reduce(fields)
 
 
 def thresholded_hill_saturation(a, a0, a50, exponent):
@@ -202,7 +237,7 @@ class SpatialZMQIGKSlowVars:
     )
 
     def __init__(self, N, V_th0, posE, posI, L, h_e, *,
-                 core_mask_E=None, cfg=None):
+                 core_mask_E=None, endpoint_centers_xy=None, cfg=None):
         self.cfg = cfg or SpatialZMQIGKConfig()
         self.cfg.validate()
         self.N = int(N)
@@ -217,6 +252,16 @@ class SpatialZMQIGKSlowVars:
             raise ValueError(f"h_e must have shape ({self.nE},)")
         if self.N != self.nE + len(self.posI):
             raise ValueError("N must equal nE+nI")
+        if endpoint_centers_xy is None:
+            self.endpoint_centers_xy = None
+        else:
+            centers = np.asarray(endpoint_centers_xy, float)
+            if centers.ndim != 2 or centers.shape[1] != 2 or len(centers) < 2:
+                raise ValueError("endpoint_centers_xy must have shape (n>=2, 2)")
+            self.endpoint_centers_xy = centers
+        if self.cfg.q_endpoint_gain != 0.0 and self.endpoint_centers_xy is None:
+            raise ValueError(
+                "q_endpoint_gain requires frozen endpoint_centers_xy")
 
         qcfg = SpatialSlowFieldConfig(
             n_grid=int(self.cfg.n_grid),
@@ -270,11 +315,22 @@ class SpatialZMQIGKSlowVars:
             h01 = np.zeros_like(self.h_grid)
         else:
             h01 = (self.h_grid - h_lo) / (h_hi - h_lo)
+        if self.endpoint_centers_xy is None:
+            self.endpoint_field = np.zeros_like(self.h_grid)
+            endpoint_multiplier = np.ones_like(self.h_grid)
+        else:
+            self.endpoint_field = periodic_endpoint_field(
+                int(self.cfg.n_grid), self.L, self.endpoint_centers_xy,
+                float(self.cfg.q_endpoint_sigma_mm))
+            endpoint_multiplier = _mean_one_bounded_modulation(
+                self.endpoint_field, -float(self.cfg.q_endpoint_gain))
         q_init_grid = (
             float(self.cfg.q_init)
             * _mean_one_bounded_modulation(
                 self.h_grid, -float(self.cfg.q_init_h_gain))
+            * endpoint_multiplier
         )
+        q_init_grid *= float(self.cfg.q_init) / float(np.mean(q_init_grid))
         np.clip(q_init_grid, float(self.cfg.q_min), 1.0, out=q_init_grid)
         self.k_q_grid = (
             float(self.cfg.k_q_per_ms)
