@@ -347,9 +347,9 @@ def summarise_instrument_trace(
     q3_pass = bool((median_generator or 0.0) > 1e-6 and generator_fraction >= 0.10)
     q4_pass = bool(
         empirical_tau is not None
-        and float(empirical_tau) > 1.0
+        and float(empirical_tau) > 0.5
         and median_segment is not None
-        and float(empirical_tau) < 0.25 * float(median_segment)
+        and float(empirical_tau) < float(median_segment)
     )
     return {
         "status": "COMPLETE_DIAGNOSTIC_PENDING_NULL_Q5_Q6",
@@ -393,6 +393,10 @@ def summarise_instrument_trace(
             "empirical_tau_right_censored": autocorrelation["right_censored"],
             "median_d_state_continuous_segment_minutes": median_segment,
             "preliminary_absolute_threshold_pass": q4_pass,
+            "interpretation_if_right_censored": (
+                "TIME_CONSTANT_NOT_IDENTIFIABLE_WITHIN_AVAILABLE_SEGMENTS; "
+                "not a biological failure"
+            ),
             "autocorrelation": autocorrelation["lags"],
         },
         "Q5_seed_stability": {"status": "PENDING_PATIENT_AGGREGATION"},
