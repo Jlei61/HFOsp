@@ -139,7 +139,11 @@ def build_candidates(
     _validate_config(config)
     _, aggregate = _load_hashed(config, "joint_response_aggregate", artifact_root)
     rows, audit = prepare.candidate_blueprint(
-        aggregate, n_per_axis=int(config["field_design"]["quadrature_per_axis"]),
+        aggregate,
+        n_per_axis=int(config["field_design"]["quadrature_per_axis"]),
+        decimal_places=int(
+            config["field_design"]["coordinate_decimal_places"]
+        ),
     )
     if json.dumps(rows, sort_keys=True) != json.dumps(
         config["field_design"]["candidate_blueprint"], sort_keys=True,

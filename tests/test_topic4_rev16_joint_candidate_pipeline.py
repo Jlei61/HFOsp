@@ -47,6 +47,25 @@ def test_blueprint_contains_joint_m3_and_m4_coefficients():
         assert row["m4_shell_l2_fraction"] > 0.0
 
 
+def test_blueprint_hashes_the_frozen_quantized_coordinates():
+    rows, _ = prepare.candidate_blueprint(synthetic_aggregate())
+    modes = prepare.mode_inventory(4)
+    for row in rows:
+        candidate = prepare.base._coordinate_record(
+            candidate_id=row["candidate_id"],
+            field_kind="absolute_paired_phase_fourier_joint_m3_m4",
+            selectable=True,
+            modes=modes,
+            coefficients=np.asarray(row["coefficients"], dtype=float),
+            target_rms=float(row["target_rms"]),
+            decimal_places=prepare.COORDINATE_DECIMAL_PLACES,
+        )
+        assert (
+            candidate["fourier_coordinate"]["coefficients_sha256"]
+            == row["coefficients_sha256"]
+        )
+
+
 def test_incomplete_aggregate_cannot_prepare_candidates():
     aggregate = synthetic_aggregate()
     aggregate["status"] = "INCOMPLETE"

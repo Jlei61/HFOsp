@@ -33,6 +33,7 @@ FAMILY_ORDER = (
     "consensus_sparse",
 )
 RMS_LEVELS = (0.4, 0.6, 0.8)
+COORDINATE_DECIMAL_PLACES = 13
 
 
 def _sha256(path: Path) -> str:
@@ -77,6 +78,7 @@ def feasible_directions(aggregate: Mapping[str, Any]) -> dict[str, np.ndarray]:
 
 def candidate_blueprint(
     aggregate: Mapping[str, Any], *, n_per_axis: int = 128,
+    decimal_places: int = COORDINATE_DECIMAL_PLACES,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     directions = feasible_directions(aggregate)
     modes = mode_inventory(4)
@@ -89,8 +91,11 @@ def candidate_blueprint(
             continue
         raw = directions[family]
         for target_rms in RMS_LEVELS:
-            coefficients = base._deterministic_normalize_shell_rms(
-                raw.reshape(len(modes), 2), basis, target_rms=target_rms,
+            coefficients = np.round(
+                base._deterministic_normalize_shell_rms(
+                    raw.reshape(len(modes), 2), basis, target_rms=target_rms,
+                ),
+                decimals=int(decimal_places),
             )
             digest = array_sha256(coefficients)
             opposite = array_sha256(-coefficients)
@@ -171,7 +176,7 @@ def build_config(
             "maximum_order": 4, "expected_modes": 24,
             "expected_real_coefficients": 48,
             "sheet_length_mm": 20.0, "quadrature_per_axis": 128,
-            "coordinate_decimal_places": 13,
+            "coordinate_decimal_places": COORDINATE_DECIMAL_PLACES,
             "robust_direction_ids": audit["feasible_direction_ids"],
             "candidate_rms_levels": list(RMS_LEVELS),
             "candidate_ids": audit["candidate_ids"],
