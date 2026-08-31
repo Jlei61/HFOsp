@@ -366,3 +366,9 @@
   - 机器产物：`results/epi_prssm/continuous_marked_state/h2b_cross_task/v0_2/`
   - 冻结 R1.7 interictal state 跨任务预测发作接近的 development 证据**未建立**：唯一 primary 患者的增量在置换零带内，persistent carry 与 correct-time specificity 均不支持；描述层 4/4 有利仅作低分母探索线索。
   - 10 位完成支持审查、46 个 state-cache cells、15 个 probe analyses（13 COMPLETE、2 明确不可估计）；secondary phenotype 仅 2/18 个患者×目标单元有限，不构成跨患者亚型迁移证据。final machine audit `PASS_COMPLETE`，formal/sealed/H3/T2/paper-ready 均未触碰。
+  - 验收裁决：`continuous_marked_state_h2b_cross_task_v0_2_acceptance_2026-08-31.md`。工程与防泄漏通过，嵌套 estimand 已核实；科学定位为合格 negative pilot，H2b 未建立。
+
+- **2026-08-31 H2b Cross-task Transfer v0.3 冻结重设计**：
+  - 合同：`continuous_marked_state_h2b_cross_task_v0_3_contract_2026-08-31.md`；机器合同：`config/topic5_continuous_marked_state_h2b_v0_3.json`。
+  - 顺序固定为 state instrument qualification → 半合成 assay/power → nested prequential hazard → `tau_z` lag-response → decoder-metric OOS 流形—流场；不以 UMAP 或更多 checkpoint 替代前置 gate。
+  - v0.3 明确是看过 v0.2 development 结果后的重设计，不是独立 confirmation；formal/sealed/H3/T2 继续关闭。

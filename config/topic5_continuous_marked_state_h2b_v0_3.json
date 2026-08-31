@@ -1,0 +1,203 @@
+{
+  "schema_revision": "h2b_v0_3_analysis_contract_v1",
+  "status": "FROZEN_DEVELOPMENT",
+  "frozen_date": "2026-08-31",
+  "v0_2_informed_redesign": true,
+  "independent_confirmation": false,
+  "source": {
+    "state_task": "continuous_background_and_ied_timing_exact_mark",
+    "state_source_revision": "r1_7b_extended_development_cohort_v1",
+    "v0_2_closeout_commit": "ca03c7ba55eabc61e7c45e7cdb75947d737b8d1b",
+    "v0_2_result_root": "/home/honglab/leijiaxin/HFOsp/results/epi_prssm/continuous_marked_state/h2b_cross_task/v0_2",
+    "seizure_supervision_updates_state": false,
+    "all_state_components_frozen_before_seizure_analysis": true
+  },
+  "output": {
+    "result_root": "/home/honglab/leijiaxin/HFOsp/results/epi_prssm/continuous_marked_state/h2b_cross_task/v0_3",
+    "paper_ready_figures_modified": false
+  },
+  "boundaries": {
+    "development_only": true,
+    "formal_test_partition_opened": false,
+    "sealed_opened": false,
+    "h3_or_t2_run": false,
+    "physical_clock_run": false,
+    "clinical_predictor_claim_allowed": false,
+    "mechanism_or_causality_claim_allowed": false
+  },
+  "populations": {
+    "all_frozen": "all checkpoint-available cells with seizure support, without H2b-outcome selection",
+    "preexisting_h1_stable_stratum": "R1.7B H1 stability fixed before H2b and used only as a named stratum",
+    "state_qualified": "checkpoints passing Q1-Q6 using interictal-only development data; no seizure outcome may enter this gate"
+  },
+  "time_axis": {
+    "anchor_grid_minutes": 5,
+    "primary_horizon_minutes": 30,
+    "secondary_horizons_minutes": [5, 15, 60],
+    "descriptive_horizons_minutes": [120],
+    "postictal_exclusion_minutes": 120,
+    "causal_cutoff": "t <= anchor_time",
+    "gap_policy": "reset at every recorded coverage segment"
+  },
+  "nuisance": {
+    "C": [
+      "time_of_day_sin",
+      "time_of_day_cos",
+      "validated_sleep_wake_if_available",
+      "recording_day",
+      "time_since_previous_seizure",
+      "coverage_segment",
+      "validated_medication_or_stimulation_if_available"
+    ],
+    "H": [
+      "time_since_last_ied",
+      "recent_ied_counts",
+      "recent_ied_rate_trend",
+      "recent_or_last_load",
+      "previous_stop_or_extent",
+      "frozen_propagation_summary_if_available"
+    ],
+    "O": [
+      "current_explicit_observation",
+      "current_window_memoryless_observer_code_computed_after_state_reset"
+    ],
+    "sleep_contract": "never infer sleep from vigilance; unavailable validated sleep labels remain explicitly unavailable"
+  },
+  "design_matrices": {
+    "M0": ["C", "H"],
+    "M1": ["C", "H", "O"],
+    "M2": ["C", "H", "O", "Z_persistent"],
+    "M3": ["C", "H", "O", "Z_memoryless"],
+    "M4": ["C", "H", "O", "Z_memoryless", "R_persistent_history"]
+  },
+  "estimands": {
+    "T": "held-out 30-min log_loss(M2) - log_loss(M1); negative favours persistent-state increment",
+    "M": "held-out 30-min log_loss(M4) - log_loss(M3); negative favours residual persistent-history increment",
+    "D": "pre-registered lag-response and held-out seizure-entry geometry; not a replacement for T or M",
+    "minimum_relevant_relative_log_loss_improvement": 0.05
+  },
+  "evaluation": {
+    "scheme": "patient-internal rolling-origin prequential",
+    "initial_k_candidates": [2, 3, 4, 5],
+    "initial_k_selection": "chosen once by the semi-synthetic assay without inspecting v0.3 real-outcome performance",
+    "outer_test_rule": "each predicted lead seizure is strictly later than every seizure used to fit or select the probe",
+    "inner_regularisation_rule": "past-only inner validation",
+    "patient_first": true,
+    "seed_is_patient_replicate": false,
+    "primary_metric": "held-out full-grid discrete-time hazard log loss",
+    "v0_2_bridge_metric": "exact onset-minus-lead conditional risk-set log loss; sensitivity only",
+    "secondary_metrics": [
+      "integrated_brier_skill_on_full_grid_or_known_sampling_weights",
+      "calibration_slope_intercept_on_full_grid_or_known_sampling_weights",
+      "resolution",
+      "time_dependent_auc"
+    ]
+  },
+  "state_qualification": {
+    "outcome_blind": true,
+    "Q1_noncollapse": "decoder-standardised effective rank and variance structure must exceed collapsed/shuffled interictal null",
+    "Q2_cross_window_information": "persistent must improve held-out interictal future-IED/background prediction over memoryless/current-window-only",
+    "Q3_generator_contribution": "generator drift and open-loop information must exceed reset/memoryless interictal null; observation correction cannot explain essentially all state motion",
+    "Q4_time_constant": "decoder-metric tau_z must exceed the current observation window and show identifiable decay within eligible continuous segments; a near-constant or interval-censored estimate is not treated as biological failure",
+    "Q5_seed_stability": "decoder outputs or decoder-distance geometry must exceed seed-permuted stability null in at least three seeds",
+    "Q6_not_only_clock": "interictal state increment must remain after validated clock, sleep, recording-day, prior-seizure and segment adjustment",
+    "patient_gate": "at least three checkpoint seeds pass mandatory Q1-Q5 and Q6 with every validated available nuisance; seizure outcomes are forbidden",
+    "unavailable_component_policy": "missing optional validated sleep or medication metadata is reported and stratified, not converted into state failure; missing mandatory instrument evidence fails state_qualified but remains in all_frozen"
+  },
+  "semi_synthetic_assay": {
+    "worlds": [
+      "null",
+      "observation_only",
+      "persistent_state",
+      "clock_confounded",
+      "basin_gating",
+      "directed_approach",
+      "abrupt_transition"
+    ],
+    "preserve": [
+      "recorded_coverage",
+      "missingness",
+      "seizure_count",
+      "seizure_clustering",
+      "time_of_day_distribution",
+      "state_autocorrelation",
+      "control_sampling"
+    ],
+    "smoke_monte_carlo_replicates": 100,
+    "frozen_monte_carlo_replicates": 1000,
+    "maximum_type_i_error": 0.05,
+    "maximum_type_i_upper_95_bound": 0.075,
+    "minimum_power": 0.8,
+    "minimum_power_lower_95_bound": 0.75,
+    "failure_status": "ASSAY_NOT_SENSITIVE"
+  },
+  "probe_ladder": {
+    "primary": "ridge pooled logistic or discrete-time hazard",
+    "sensitivity": "low-degree monotone spline or GAM with degrees of freedom frozen by assay",
+    "oracle_ceiling": "development-only nonlinear ceiling; never a primary claim"
+  },
+  "time_specificity": {
+    "tau_source": "interictal-only decoder-metric state autocorrelation",
+    "past_lag_multipliers": [0.0, 0.5, 1.0, 2.0, 4.0],
+    "future_state_use": "acausal falsification only",
+    "multiple_donors_per_case": true,
+    "donor_matching": [
+      "same_patient",
+      "same_coverage_segment",
+      "validated_sleep_wake_if_available",
+      "time_of_day",
+      "recording_day",
+      "time_since_previous_seizure",
+      "observation_availability"
+    ]
+  },
+  "geometry": {
+    "fit_population": "outer-training clean interictal continuous trajectories only",
+    "clean_interictal_exclusions": ["preictal", "ictal", "postictal"],
+    "heldout_projection": "all preictal and ictal evaluation states are out-of-sample projections",
+    "metric_priority": [
+      "physiological_parameter_decoder",
+      "ied_spatiotemporal_decoder_outputs",
+      "decoder_induced_metric",
+      "robust_whitened_diffusion_or_knn_geodesic"
+    ],
+    "registered_families": ["basin_gating", "directed_approach", "abrupt_exit"],
+    "umap_role": "visualisation_only",
+    "seizure_label_supervised_embedding_forbidden": true,
+    "marble_unlock": [
+      "dense_continuous_state_sampling",
+      "multiple_independent_segments_per_local_neighbourhood",
+      "bootstrap_stable_local_flow",
+      "semi_synthetic_dynamics_recovered"
+    ]
+  },
+  "gates": {
+    "A0_before_all": ["analysis_contract", "attrition_audit"],
+    "A1_before_seizure_probe": "state instrument qualification passes for a non-empty predeclared population",
+    "A2_before_real_outcome_interpretation": "type-I error and power criteria pass",
+    "A3_before_geometry_claim": "a positive T signal is recovered by an assay with adequate power; all-frozen geometry may still be generated as explicitly non-claim diagnostic",
+    "A6_before_ied_ablation": "a stable positive T signal and at least one pre-registered M or D component exist",
+    "sealed_unlock": "forbidden in v0.3"
+  },
+  "phenotype": {
+    "reclustering_forbidden": true,
+    "targets_must_be_frozen_without_state": true,
+    "preferred_continuous_targets": [
+      "ied_ictal_reuse_score",
+      "early_recruitment_extent",
+      "early_recruitment_spatial_entropy",
+      "propagation_speed",
+      "laterality_balance"
+    ]
+  },
+  "claim_ladder": {
+    "T_negative_assay_underpowered": "not estimable",
+    "T_negative_assay_powered": "current checkpoint transfer utility rejected",
+    "T_positive_M_negative_D_negative": "transferable representation only",
+    "T_positive_M_negative_D_positive_at_5min": "acute preictal encoder, not slow state",
+    "T_positive_M_positive_D_negative": "slow contextual state without seizure-time specificity",
+    "T_positive_M_positive_D_positive": "persistent interictal-to-seizure state transfer",
+    "ied_ablation_positive": "IED learning contributed transferable seizure-relevant state information",
+    "phenotype_bridge_positive": "state also predicts ictal recruitment organisation; still not H3 causality"
+  }
+}
