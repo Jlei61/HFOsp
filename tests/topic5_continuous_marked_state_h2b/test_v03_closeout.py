@@ -1,49 +1,28 @@
 from __future__ import annotations
 
+import pytest
+
 from scripts.topic5_continuous_marked_state_h2b.build_v03_closeout import (
-    _direction_fraction,
-    _phenotype_direction,
+    _assert_no_active_downstream,
+    _strict_route_payload,
 )
 
 
-def test_direction_fraction_uses_patients_not_seeds() -> None:
-    summary = {
-        "cohort_direction": {
-            "T": {"favourable": 3, "total": 5},
-        },
-    }
-    assert _direction_fraction(summary, "T") == 0.6
-    assert _direction_fraction(summary, "missing") is None
+def test_strict_route_closes_every_downstream_branch() -> None:
+    route = _strict_route_payload("2026-08-31T00:00:00+00:00")
+    assert route["status"] == "NOT_RELEASED_A1_AND_A2_FAILED"
+    assert route["A3_A5_hazard_lag"] == "NOT_RUN_GATE_CLOSED"
+    assert route["A6_OOS_manifold_flow"] == "NOT_RUN_GATE_CLOSED"
+    assert route["A7_IED_objective_ablation"] == "NOT_RUN_GATE_CLOSED"
+    assert route["A8_frozen_phenotype_bridge"] == "NOT_RUN_GATE_CLOSED"
+    assert route["biological_negative_allowed"] is False
 
 
-def test_phenotype_direction_uses_finite_observed_target_rows() -> None:
-    summary = {
-        "patient_rows": [
-            {
-                "target_name": "ied_ictal_reuse_observed",
-                "state_minus_observation_loss": -0.1,
-                "evaluation_tier": "primary_chronological",
-            },
-            {
-                "target_name": "ied_ictal_reuse_observed",
-                "state_minus_observation_loss": 0.2,
-                "evaluation_tier": "sensitivity_loso",
-            },
-            {
-                "target_name": "ied_ictal_reuse_observed",
-                "state_minus_observation_loss": float("nan"),
-                "evaluation_tier": "sensitivity_loso",
-            },
-            {
-                "target_name": "ied_ictal_reuse_margin",
-                "state_minus_observation_loss": -1.0,
-                "evaluation_tier": "primary_chronological",
-            },
-            {
-                "target_name": "ied_ictal_reuse_observed",
-                "state_minus_observation_loss": -1.0,
-                "evaluation_tier": "descriptive_case_series",
-            },
-        ],
-    }
-    assert _phenotype_direction(summary) == (1, 2)
+def test_active_downstream_guard_allows_only_geometry_route_receipt(tmp_path) -> None:
+    geometry = tmp_path / "geometry"
+    geometry.mkdir()
+    (geometry / "ROUTE_STATUS.json").write_text("{}", encoding="utf-8")
+    _assert_no_active_downstream(tmp_path)
+    (tmp_path / "hazard_full_grid").mkdir()
+    with pytest.raises(ValueError, match="hazard"):
+        _assert_no_active_downstream(tmp_path)
