@@ -311,8 +311,12 @@ def aggregate(config_path: Path, phase: str = "screen") -> dict:
         selectable = [
             row for row in ranking if row["candidate_id"] in registered_selection
         ]
-        if len(selectable) != 4:
-            raise RuntimeError("selection manifest candidates are incomplete")
+        expected_selectable = 4 if phase == "selection" else 1
+        if len(selectable) != expected_selectable:
+            raise RuntimeError(
+                f"{phase} manifest candidates are incomplete: "
+                f"expected {expected_selectable}, found {len(selectable)}"
+            )
         shortlist = [row["candidate_id"] for row in selectable]
         frozen_work_point = shortlist[0]
     else:

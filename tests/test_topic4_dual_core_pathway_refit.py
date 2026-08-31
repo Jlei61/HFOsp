@@ -72,3 +72,26 @@ def test_event_spans_ignore_missing_contacts_without_normalizing_time():
     assert spans[0] == 12.0
     assert np.isnan(spans[1])
     assert spans[2] == 15.0
+
+
+def test_confirmation_manifest_freezes_one_candidate_plus_node_reference():
+    path = (
+        ROOT / "results/topic4_sef_hfo/data_driven_dual_core_ood/"
+        "pathway_refit/confirmation/candidate_manifest.json"
+    )
+    if not path.is_file():
+        pytest.skip("confirmation manifest is generated after selection")
+    manifest = json.loads(path.read_text())
+    selectable = [
+        row for row in manifest["candidate_set"]["candidates"]
+        if row["selection_role"] == "selectable_candidate"
+    ]
+    references = [
+        row for row in manifest["candidate_set"]["candidates"]
+        if row["selection_role"] == "paired_node_reference"
+    ]
+    assert len(selectable) == 1
+    assert len(references) == 1
+    assert manifest["fixed_contract"]["selection_candidate_ids"] == [
+        selectable[0]["candidate_id"]
+    ]
