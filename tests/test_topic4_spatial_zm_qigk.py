@@ -5,6 +5,7 @@ import pytest
 
 from scripts.run_topic4_spatial_zm_qigk_canary import (
     _frozen_endpoint_contact_centers,
+    _frozen_gk_support_centers,
 )
 from src.snn_engine.slow_field import SpatialSlowField, SpatialSlowFieldConfig
 from src.topic4_spatial_zm_qigk import (
@@ -399,6 +400,21 @@ def test_runner_selects_frozen_source_or_sink_contacts_without_refitting():
     assert sink_names == ["K1", "K2"]
     np.testing.assert_array_equal(source_xy[:, 0], [1.0, 2.0])
     np.testing.assert_array_equal(sink_xy[:, 0], [3.0, 4.0])
+
+
+def test_runner_downstream_gk_support_uses_frozen_axis_halfspace():
+    substrate = SimpleNamespace(
+        contact_names=["A", "B", "C", "D"],
+        contact_xy=np.asarray([[-2.0, 0.0], [-0.1, 0.0],
+                               [0.1, 0.0], [2.0, 0.0]]),
+        axis_source_xy=np.asarray([-1.0, 0.0]),
+        axis_sink_xy=np.asarray([1.0, 0.0]),
+        axis_unit=np.asarray([1.0, 0.0]),
+    )
+    names, centers = _frozen_gk_support_centers(
+        substrate, support="downstream")
+    assert names == ["C", "D"]
+    np.testing.assert_array_equal(centers[:, 0], [0.1, 2.0])
 
 
 def test_spatial_q_initialization_never_starts_below_local_floor():

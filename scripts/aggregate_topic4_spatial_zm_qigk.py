@@ -76,6 +76,8 @@ def _compact(path):
         "eta_m_h_gain": config.get("eta_m_h_gain"),
         "eta_m_source_add": config.get("eta_m_source_add", 0.0),
         "eta_m_sink_add": config.get("eta_m_sink_add", 0.0),
+        "eta_m_gk_add": config.get("eta_m_gk_add", 0.0),
+        "gk_support": (spatial_basis.get("gk_support") or {}).get("rule"),
         "full_edge": bool(
             full_edge.get("E_to_E_dose") == 1.0
             and full_edge.get("E_to_I_dose") == 1.0

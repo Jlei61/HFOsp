@@ -209,6 +209,10 @@ def analyze_atlas(input_dir: Path, reference_json: Path | None = None):
                 "eta_m_source_add", 0.0)),
             "eta_m_sink_add": float(hybrid_config.get(
                 "eta_m_sink_add", 0.0)),
+            "eta_m_gk_add": float(hybrid_config.get(
+                "eta_m_gk_add", 0.0)),
+            "gk_support": (spatial_basis.get("gk_support") or {}).get(
+                "rule"),
             "m_current_threshold": float(hybrid_config.get(
                 "m_current_threshold", 0.0)),
             "hybrid_config": hybrid_config,
@@ -291,6 +295,7 @@ def main():
         "m_state_ceiling", "m_spatial_mix", "sigma_m_mm",
         "eta_m_h_gain",
         "eta_m_source_add", "eta_m_sink_add",
+        "eta_m_gk_add", "gk_support",
         "m_current_threshold",
         "all_checks_pass", "median_rate_hz",
         "minimum_subwindow_median_rate_hz", "joint_global_recruitment_duty",
@@ -323,6 +328,8 @@ def main():
                 "eta_m_h_gain": record["eta_m_h_gain"],
                 "eta_m_source_add": record["eta_m_source_add"],
                 "eta_m_sink_add": record["eta_m_sink_add"],
+                "eta_m_gk_add": record["eta_m_gk_add"],
+                "gk_support": record["gk_support"],
                 "m_current_threshold": record["m_current_threshold"],
                 "all_checks_pass": record["classification"]["all_checks_pass"],
                 "median_rate_hz": record["rate"]["median_rate_hz"],

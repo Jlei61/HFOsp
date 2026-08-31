@@ -82,6 +82,25 @@ def _frozen_endpoint_contact_centers(substrate, side="union"):
     return endpoint_names, np.stack([contact_map[name] for name in endpoint_names])
 
 
+def _frozen_gk_support_centers(substrate, support="downstream"):
+    """Select a declared M/gK support from frozen geometry only."""
+    if support in {"source", "sink"}:
+        return _frozen_endpoint_contact_centers(substrate, side=support)
+    if support != "downstream":
+        raise ValueError("gK support must be source, sink, or downstream")
+    names = [str(name) for name in substrate.contact_names]
+    xy = np.asarray(substrate.contact_xy, float)
+    midpoint = 0.5 * (
+        np.asarray(substrate.axis_source_xy, float)
+        + np.asarray(substrate.axis_sink_xy, float)
+    )
+    projection = (xy - midpoint) @ np.asarray(substrate.axis_unit, float)
+    selected = projection >= 0.0
+    if int(np.sum(selected)) < 2:
+        raise RuntimeError("frozen downstream half contains fewer than two contacts")
+    return [names[index] for index in np.flatnonzero(selected)], xy[selected]
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True)
@@ -135,6 +154,11 @@ def main():
     parser.add_argument("--eta-m-h-gain", type=float, default=0.0)
     parser.add_argument("--eta-m-source-add", type=float, default=0.0)
     parser.add_argument("--eta-m-sink-add", type=float, default=0.0)
+    parser.add_argument("--eta-m-gk-add", type=float, default=0.0)
+    parser.add_argument(
+        "--gk-support", choices=("source", "sink", "downstream"),
+        default="downstream",
+    )
     parser.add_argument("--out", required=True)
     args = parser.parse_args()
     if args.run_role == "confirmation" and not args.parameter_set_id:
@@ -165,6 +189,8 @@ def main():
         substrate, side="source")
     sink_names, sink_centers_xy = _frozen_endpoint_contact_centers(
         substrate, side="sink")
+    gk_names, gk_centers_xy = _frozen_gk_support_centers(
+        substrate, support=args.gk_support)
     hybrid_config = SpatialZMQIGKConfig(
         n_grid=int(args.n_grid),
         sigma_r_mm=0.5,
@@ -200,6 +226,7 @@ def main():
         eta_m_h_gain=float(args.eta_m_h_gain),
         eta_m_source_add=float(args.eta_m_source_add),
         eta_m_sink_add=float(args.eta_m_sink_add),
+        eta_m_gk_add=float(args.eta_m_gk_add),
         trace_stride_steps=max(1, int(round(1.0 / dt))),
     )
     slow = None
@@ -215,6 +242,7 @@ def main():
             endpoint_centers_xy=endpoint_centers_xy,
             source_centers_xy=source_centers_xy,
             sink_centers_xy=sink_centers_xy,
+            gk_centers_xy=gk_centers_xy,
             cfg=hybrid_config,
         )
     drive = make_external_drive(substrate, round_config["spatial_ou"], args.seed)
@@ -266,6 +294,12 @@ def main():
             "legacy_endpoint_gain": float(args.q_endpoint_gain),
             "source_gain": float(args.q_source_gain),
             "sink_gain": float(args.q_sink_gain),
+        },
+        "gk_support": {
+            "rule": args.gk_support,
+            "contact_order": gk_names,
+            "centers_xy_mm": gk_centers_xy.tolist(),
+            "selection_uses_simulation_result": False,
         },
         "endpoint_field_rule": (
             "maximum of periodic Gaussian fields centred on the declared "
@@ -387,6 +421,9 @@ def main():
                 slow.source_centers_xy, np.float32),
             "sink_centers_xy_mm": np.asarray(
                 slow.sink_centers_xy, np.float32),
+            "gk_field": np.asarray(slow.gk_field, np.float32),
+            "gk_centers_xy_mm": np.asarray(
+                slow.gk_centers_xy, np.float32),
             "eta_m_E": np.asarray(slow.eta_m_E, np.float32),
         })
     _atomic_npz(out.with_suffix(".npz"), **arrays)
