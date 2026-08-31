@@ -35,6 +35,10 @@ from src.topic5_continuous_marked_state_h2b.v03_instrument import (  # noqa: E40
     summarise_instrument_trace,
     trace_npz_payload,
 )
+
+
+PRODUCER_SCRIPT = Path(__file__).resolve()
+INSTRUMENT_MODULE = REPO / "src/topic5_continuous_marked_state_h2b/v03_instrument.py"
 from src.topic5_continuous_marked_state_r1.r1_2 import load_full_design  # noqa: E402
 
 
@@ -133,10 +137,17 @@ def run(subject: str, seed: int, *, v02_root: Path, result_root: Path,
         "created_utc": utc_now(),
         "subject": subject,
         "seed": int(seed),
+        "instrument_config": {
+            "n_null_permutations": int(n_null_permutations),
+        },
         "diagnostics": summary,
         "trace_path": str(trace_path),
         "trace_sha256": sha256_file(trace_path),
         "source": {
+            "producer_script": str(PRODUCER_SCRIPT),
+            "producer_script_sha256": sha256_file(PRODUCER_SCRIPT),
+            "instrument_module": str(INSTRUMENT_MODULE),
+            "instrument_module_sha256": sha256_file(INSTRUMENT_MODULE),
             "checkpoint": provenance,
             "checkpoint_result_sha256": sha256_file(entry["result_path"]),
             "design_path": str(design_path),

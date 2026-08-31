@@ -27,6 +27,7 @@ from src.topic5_continuous_marked_state_h2b.contract import (  # noqa: E402
 
 PYTHON = Path("/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python")
 CELL_SCRIPT = REPO / "scripts/topic5_continuous_marked_state_h2b/run_v03_instrument_cell.py"
+INSTRUMENT_MODULE = REPO / "src/topic5_continuous_marked_state_h2b/v03_instrument.py"
 
 
 def _json(path: Path) -> dict:
@@ -40,7 +41,8 @@ def _mem_available_bytes() -> int:
     raise RuntimeError("MemAvailable is unavailable")
 
 
-def _complete(root: Path, subject: str, seed: int, checkpoint_sha256: str) -> bool:
+def _complete(root: Path, subject: str, seed: int, checkpoint_sha256: str,
+              n_null_permutations: int) -> bool:
     path = root / "instrument/by_cell" / subject / f"seed_{seed}" / "instrument_manifest.json"
     if not path.is_file():
         return False
@@ -54,6 +56,13 @@ def _complete(root: Path, subject: str, seed: int, checkpoint_sha256: str) -> bo
             and int(payload.get("seed", -1)) == seed
             and payload.get("source", {}).get("checkpoint", {}).get("checkpoint_sha256")
             == checkpoint_sha256
+            and int(payload.get("instrument_config", {}).get(
+                "n_null_permutations", -1
+            )) == int(n_null_permutations)
+            and payload.get("source", {}).get("producer_script_sha256")
+            == sha256_file(CELL_SCRIPT)
+            and payload.get("source", {}).get("instrument_module_sha256")
+            == sha256_file(INSTRUMENT_MODULE)
             and trace.is_file()
             and payload.get("trace_sha256") == sha256_file(trace)
         )
@@ -61,12 +70,14 @@ def _complete(root: Path, subject: str, seed: int, checkpoint_sha256: str) -> bo
         return False
 
 
-def _run(task: tuple[str, int], *, v02: Path, result: Path, log_root: Path) -> dict:
+def _run(task: tuple[str, int], *, v02: Path, result: Path, log_root: Path,
+         n_null_permutations: int) -> dict:
     subject, seed = task
     log = log_root / f"{subject}_seed_{seed}.log"
     command = [
         str(PYTHON), str(CELL_SCRIPT), "--subject", subject, "--seed", str(seed),
         "--v0-2-root", str(v02), "--result-root", str(result),
+        "--n-null-permutations", str(int(n_null_permutations)),
     ]
     env = os.environ.copy()
     env.update({
@@ -94,6 +105,7 @@ def main() -> None:
     parser.add_argument("--result-root", type=Path, default=CANONICAL_V0_3_RESULT_ROOT)
     parser.add_argument("--subjects", nargs="*")
     parser.add_argument("--cpu-workers", type=int, default=8)
+    parser.add_argument("--n-null-permutations", type=int, default=100)
     args = parser.parse_args()
     v02, result = args.v0_2_root.resolve(), args.result_root.resolve()
     lock_path = result / "instrument/.queue.lock"
@@ -124,7 +136,8 @@ def main() -> None:
         entry_by_task[key] = entry
     tasks = sorted(set(tasks))
     pending = [task for task in tasks if not _complete(
-        result, task[0], task[1], entry_by_task[task]["checkpoint_sha256"]
+        result, task[0], task[1], entry_by_task[task]["checkpoint_sha256"],
+        int(args.n_null_permutations),
     )]
     available = _mem_available_bytes()
     # One measured cell peaked below 0.5 GiB; budget 1.25 GiB per worker and
@@ -143,6 +156,7 @@ def main() -> None:
         "configured_cpu_workers": int(args.cpu_workers),
         "mem_available_bytes_at_start": available,
         "per_worker_memory_budget_bytes": int(1.25 * 1024 ** 3),
+        "n_null_permutations": int(args.n_null_permutations),
         "thread_limits": 1, "cuda_visible_devices": "",
         "formal_test_partition_opened": False, "sealed_opened": False,
         "h3_or_t2_run": False,
@@ -154,7 +168,10 @@ def main() -> None:
     failures = []
     with ThreadPoolExecutor(max_workers=workers) as pool:
         future = {
-            pool.submit(_run, task, v02=v02, result=result, log_root=log_root): task
+            pool.submit(
+                _run, task, v02=v02, result=result, log_root=log_root,
+                n_null_permutations=int(args.n_null_permutations),
+            ): task
             for task in pending
         }
         for item in as_completed(future):
