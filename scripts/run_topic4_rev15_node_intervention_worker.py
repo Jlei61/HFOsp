@@ -57,6 +57,7 @@ ARTIFACT_ROOT = Path("/home/honglab/leijiaxin/HFOsp")
 EXPECTED_CONFIG_SCHEMA = "topic4_rev15_node_crossed_intervention_v1"
 OUTPUT_SCHEMA = "topic4_rev15_node_crossed_intervention_worker_v1"
 WORKER_STATUS = "REV15_NODE_CROSSED_INTERVENTION_WORKER_COMPLETE"
+FINAL_AUDIT_ADVANCE_STATUS = "NODE_FINAL_SCIENCE_ADVANCES_TO_INTERVENTION"
 
 
 def _sha256(path: Path) -> str:
@@ -179,7 +180,7 @@ def run_worker(
         for key, record in config["inputs"].items()
     }
     final_audit = json.loads(paths["final_science_audit"].read_text())
-    if final_audit.get("status") != "NODE_FINAL_SCIENCE_ADVANCES_TO_INTERVENTION":
+    if final_audit.get("status") != FINAL_AUDIT_ADVANCE_STATUS:
         raise RuntimeError("final science audit no longer advances")
     if final_audit.get("candidate_id") != config["candidate_id"]:
         raise RuntimeError("intervention candidate changed")
@@ -250,6 +251,7 @@ def run_worker(
         mode: network_balanced_early_support(
             [maps_by_network[index] for index in peer_indices],
             [labels_by_network[index] for index in peer_indices], mode,
+            fraction=float(hotspot_contract.get("early_support_fraction", 0.10)),
         ) for mode in (0, 1)
     }
 
@@ -258,6 +260,12 @@ def run_worker(
             substrate.positions_e, substrate.h_e, full_spikes[low:high],
             dt_ms=dt_ms, sheet_mm=float(substrate.engine["L"]), bin_mm=1.0,
             target_radius_mm=float(protocol["target_radius_mm"]),
+            additional_node_covariates=(
+                {"delta_vtheta_mean": np.asarray(substrate.delta_vtheta, float)}
+                if "delta_vtheta_mean" in hotspot_contract.get(
+                    "matching_covariate_keys", []
+                ) else None
+            ),
         )
     else:
         covariates = grid_covariates(
@@ -279,6 +287,7 @@ def run_worker(
             maximum_standardized_component=hotspot_contract.get(
                 "maximum_control_standardized_component"
             ),
+            covariate_keys=hotspot_contract.get("matching_covariate_keys"),
         ) for mode in (0, 1)
     }
     hotspot_distance = float(np.linalg.norm(

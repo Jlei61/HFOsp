@@ -25,6 +25,7 @@ OUTPUT_SCHEMA = "topic4_rev15_node_crossed_intervention_aggregate_v1"
 FREEZE_SCHEMA = "topic4_rev15_frozen_node_field_v1"
 FROZEN_STATUS = "REV15_NODE_FIELD_FROZEN"
 NOT_SELECTIVE_STATUS = "REV15_NODE_INTERVENTION_NOT_SELECTIVE"
+EXPECTED_PROJECTION_PARITY_KEYS = {"h", "vtheta", "delta_vtheta"}
 
 
 def _sha256(path: Path) -> str:
@@ -94,7 +95,7 @@ def _validate_worker(path: Path, *, seed: int, candidate_id: str,
     if provenance.get("formal_ready") is not True:
         raise RuntimeError("intervention worker provenance is invalid")
     parity = payload.get("projection_parity", {}).get("exact_array_parity", {})
-    if set(parity) != {"h", "vtheta", "delta_vtheta"} or not all(parity.values()):
+    if set(parity) != EXPECTED_PROJECTION_PARITY_KEYS or not all(parity.values()):
         raise RuntimeError("intervention worker field reconstruction lacks parity")
     native = payload.get("native_modes", {})
     for mode in (0, 1):

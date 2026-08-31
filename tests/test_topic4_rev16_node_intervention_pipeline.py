@@ -242,3 +242,33 @@ def test_intervention_monitor_rejects_success_status_without_artifact(
     )
     assert snapshot["states"]["2361"] == "invalid"
     assert "stale status" in snapshot["invalid"][0]
+
+
+def test_monitor_validation_switches_worker_schema_and_restores(monkeypatch, tmp_path):
+    seen = {}
+    old = (
+        rev15_aggregate.WORKER_STATUS,
+        rev15_aggregate.EXPECTED_WORKER_SCHEMA,
+        rev15_aggregate.EXPECTED_PROJECTION_PARITY_KEYS,
+    )
+
+    def fake_validate(*args, **kwargs):
+        seen["status"] = rev15_aggregate.WORKER_STATUS
+        seen["schema"] = rev15_aggregate.EXPECTED_WORKER_SCHEMA
+        seen["parity"] = rev15_aggregate.EXPECTED_PROJECTION_PARITY_KEYS
+
+    monkeypatch.setattr(rev15_aggregate, "_validate_worker", fake_validate)
+    monitor._validate_worker(
+        tmp_path / "worker.json", seed=2361, candidate_id="joint",
+        config_sha256="a" * 64,
+    )
+    assert seen == {
+        "status": worker.WORKER_STATUS,
+        "schema": worker.OUTPUT_SCHEMA,
+        "parity": {"h", "vtheta", "delta_vtheta"},
+    }
+    assert (
+        rev15_aggregate.WORKER_STATUS,
+        rev15_aggregate.EXPECTED_WORKER_SCHEMA,
+        rev15_aggregate.EXPECTED_PROJECTION_PARITY_KEYS,
+    ) == old

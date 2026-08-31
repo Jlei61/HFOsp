@@ -38,6 +38,10 @@ COMPLETE = "REV16_NODE_INTERVENTION_QUEUE_COMPLETE"
 FAILED = "REV16_NODE_INTERVENTION_QUEUE_FAILED"
 RUNNING = "REV16_NODE_INTERVENTION_QUEUE_RUNNING"
 RESOURCE_WAIT = "REV16_NODE_INTERVENTION_RESOURCE_WAIT"
+EXPECTED_NETWORK_SEEDS = post.NETWORK_SEEDS
+FINAL_AUDIT_ADVANCE_STATUS = "NODE_FINAL_SCIENCE_ADVANCES_TO_INTERVENTION"
+EXPECTED_PROJECTION_PARITY_KEYS = {"h", "vtheta", "delta_vtheta"}
+REVISION_LABEL = "rev16"
 NUMERIC_ENV = (
     "BLIS_NUM_THREADS", "OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS",
     "MKL_NUM_THREADS", "NUMEXPR_NUM_THREADS", "VECLIB_MAXIMUM_THREADS",
@@ -102,7 +106,7 @@ def load_contract(
     config = json.loads(config_path.read_text())
     if config.get("schema_id") != worker.EXPECTED_CONFIG_SCHEMA:
         raise RuntimeError("rev16 intervention config schema changed")
-    if config.get("network_seeds") != post.NETWORK_SEEDS:
+    if config.get("network_seeds") != EXPECTED_NETWORK_SEEDS:
         raise RuntimeError("rev16 intervention network pool changed")
     if config.get("mechanism_freeze") != {
         "EE": "off", "E_to_I": "off", "Z_M": "off",
@@ -122,7 +126,7 @@ def load_contract(
     final_audit = json.loads(
         _resolve(config["inputs"]["final_science_audit"], artifact_root).read_text()
     )
-    if final_audit.get("status") != "NODE_FINAL_SCIENCE_ADVANCES_TO_INTERVENTION":
+    if final_audit.get("status") != FINAL_AUDIT_ADVANCE_STATUS:
         raise RuntimeError("rev16 final audit does not permit intervention")
     decision = final_audit.get("decision", {})
     if decision.get("accepted_for_same_checkpoint_intervention") is not True:
@@ -154,15 +158,23 @@ def _is_active(unit: str) -> bool:
 def _validate_worker(
     path: Path, *, seed: int, candidate_id: str, config_sha256: str,
 ) -> None:
-    previous = validation.WORKER_STATUS
+    previous = (
+        validation.WORKER_STATUS, validation.EXPECTED_WORKER_SCHEMA,
+        validation.EXPECTED_PROJECTION_PARITY_KEYS,
+    )
     validation.WORKER_STATUS = worker.WORKER_STATUS
+    validation.EXPECTED_WORKER_SCHEMA = worker.OUTPUT_SCHEMA
+    validation.EXPECTED_PROJECTION_PARITY_KEYS = EXPECTED_PROJECTION_PARITY_KEYS
     try:
         validation._validate_worker(
             path, seed=seed, candidate_id=candidate_id,
             config_sha256=config_sha256,
         )
     finally:
-        validation.WORKER_STATUS = previous
+        (
+            validation.WORKER_STATUS, validation.EXPECTED_WORKER_SCHEMA,
+            validation.EXPECTED_PROJECTION_PARITY_KEYS,
+        ) = previous
 
 
 def classify(
@@ -215,7 +227,7 @@ def _launch(
         f"--working-directory={ROOT}",
         *[f"--setenv={name}=1" for name in NUMERIC_ENV],
         "/usr/bin/nohup", str(MANAGED), str(status), str(log),
-        f"rev16 Node intervention seed={seed}", expected_commit,
+        f"{REVISION_LABEL} Node intervention seed={seed}", expected_commit,
         "/usr/bin/time", "-v", str(PYTHON), str(WORKER),
         "--config", str(config_path), "--seed", str(seed),
         "--expected-commit", expected_commit,
@@ -250,7 +262,7 @@ def tick(
         )
         status = COMPLETE
         subprocess.run([
-            "notify-send", "Topic 4 rev16",
+            "notify-send", f"Topic 4 {REVISION_LABEL}",
             f"Node intervention complete: {result['status']}",
         ], check=False)
     else:

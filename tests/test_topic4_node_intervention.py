@@ -116,6 +116,31 @@ def test_intervention_covariates_match_the_actual_circular_target():
     assert result["covariate_footprint"] == "circular_intervention_target"
 
 
+def test_dual_field_control_matches_actual_delta_vtheta_footprint():
+    positions = np.asarray([[0.2, 0.2], [0.8, 0.7], [1.2, 1.4]])
+    h = np.asarray([0.2, 0.6, 0.9])
+    delta = np.asarray([-0.4, 0.2, 0.8])
+    spikes = np.zeros((1000, 3), bool)
+    result = intervention_footprint_covariates(
+        positions, h, spikes, dt_ms=1.0, sheet_mm=2.0, bin_mm=1.0,
+        target_radius_mm=0.8,
+        additional_node_covariates={"delta_vtheta_mean": delta},
+    )
+    assert result["delta_vtheta_mean"][0, 0] == pytest.approx(-0.1)
+    probability = np.zeros((2, 2)); probability[0, 0] = 1.0
+    probability[1, 1] = 0.5
+    triplet = select_hotspot_triplet(
+        probability, result, bin_mm=1.0, minimum_separation_mm=1.0,
+        off_template_quantile=0.5,
+        covariate_keys=(
+            "h_mean", "delta_vtheta_mean", "e_density", "baseline_rate_hz",
+        ),
+    )
+    assert triplet["match_quality"]["covariates"] == [
+        "h_mean", "delta_vtheta_mean", "e_density", "baseline_rate_hz",
+    ]
+
+
 def test_mode_contrast_avoids_a_shared_absolute_hotspot():
     mode0 = np.zeros((8, 8))
     mode1 = np.zeros((8, 8))

@@ -121,7 +121,8 @@ def grid_covariates(positions_e: np.ndarray, h_e: np.ndarray,
 def intervention_footprint_covariates(
         positions_e: np.ndarray, h_e: np.ndarray,
         baseline_spikes: np.ndarray, *, dt_ms: float,
-        sheet_mm: float, bin_mm: float, target_radius_mm: float) -> dict:
+        sheet_mm: float, bin_mm: float, target_radius_mm: float,
+        additional_node_covariates: dict[str, np.ndarray] | None = None) -> dict:
     """Measure matching covariates over the actual circular pulse footprint."""
     positions = np.asarray(positions_e, float)
     h = np.asarray(h_e, float)
@@ -141,9 +142,18 @@ def intervention_footprint_covariates(
 
     centers = _grid_centers((size, size), bin_mm)
     neuron_rates = np.sum(spikes, axis=0) / duration_seconds
+    additional = {
+        str(key): np.asarray(value, float)
+        for key, value in (additional_node_covariates or {}).items()
+    }
+    if any(value.shape != (len(positions),) for value in additional.values()):
+        raise ValueError("additional node covariates do not align to E neurons")
     counts = np.zeros(len(centers), float)
     h_mean = np.full(len(centers), np.nan)
     rate = np.full(len(centers), np.nan)
+    additional_means = {
+        key: np.full(len(centers), np.nan) for key in additional
+    }
     for index, center in enumerate(centers):
         selected = np.linalg.norm(positions - center[None, :], axis=1) <= float(
             target_radius_mm
@@ -152,6 +162,8 @@ def intervention_footprint_covariates(
         if np.any(selected):
             h_mean[index] = float(np.mean(h[selected]))
             rate[index] = float(np.mean(neuron_rates[selected]))
+            for key, value in additional.items():
+                additional_means[key][index] = float(np.mean(value[selected]))
     return {
         "h_mean": h_mean.reshape(size, size),
         # Kept under the established key so the matcher remains reusable. Here
@@ -160,6 +172,10 @@ def intervention_footprint_covariates(
         "baseline_rate_hz": rate.reshape(size, size),
         "covariate_footprint": "circular_intervention_target",
         "target_radius_mm": float(target_radius_mm),
+        **{
+            key: value.reshape(size, size)
+            for key, value in additional_means.items()
+        },
     }
 
 
@@ -178,7 +194,8 @@ def select_hotspot_triplet(
         competing_probability: np.ndarray | None = None,
         require_positive_contrast: bool = False,
         maximum_standardized_l1: float | None = None,
-        maximum_standardized_component: float | None = None) -> dict:
+        maximum_standardized_component: float | None = None,
+        covariate_keys: tuple[str, ...] | list[str] | None = None) -> dict:
     """Select dominant, separated secondary and covariate-matched control bins."""
     probability = np.asarray(early_probability, float)
     if probability.ndim != 2 or not np.all(np.isfinite(probability)):
@@ -188,7 +205,11 @@ def select_hotspot_triplet(
         competing = np.asarray(competing_probability, float)
         if competing.shape != probability.shape or not np.all(np.isfinite(competing)):
             raise ValueError("competing probability must align and be finite")
-    required = ("h_mean", "e_density", "baseline_rate_hz")
+    required = tuple(covariate_keys or (
+        "h_mean", "e_density", "baseline_rate_hz",
+    ))
+    if "e_density" not in required or len(set(required)) != len(required):
+        raise ValueError("matching covariates must uniquely include e_density")
     arrays = {key: np.asarray(covariates[key], float) for key in required}
     if any(value.shape != probability.shape for value in arrays.values()):
         raise ValueError("covariate maps must align to the early-probability map")
@@ -262,7 +283,7 @@ def select_hotspot_triplet(
 
     def record(index: int) -> dict:
         row, column = np.unravel_index(index, probability.shape)
-        return {
+        record = {
             "flat_index": index,
             "row": int(row),
             "column": int(column),
@@ -270,10 +291,12 @@ def select_hotspot_triplet(
             "early_probability": float(p[index]),
             "competing_mode_early_probability": float(other[index]),
             "mode_probability_contrast": float(p[index] - other[index]),
-            "h_mean": float(covariate_matrix[index, 0]),
-            "e_density": float(covariate_matrix[index, 1]),
-            "baseline_rate_hz": float(covariate_matrix[index, 2]),
         }
+        record.update({
+            key: float(covariate_matrix[index, position])
+            for position, key in enumerate(required)
+        })
+        return record
 
     return {
         "dominant": record(dominant),
