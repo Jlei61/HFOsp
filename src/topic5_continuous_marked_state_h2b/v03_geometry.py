@@ -274,6 +274,7 @@ def evaluate_oos_geometry_fold_full_grid(
     lookback_minutes: float = 30.0,
     maximum_controls: int = 20,
     grid_spacing_seconds: float = 300.0,
+    clean_interictal_exclusion_minutes: float = 120.0,
 ) -> dict[str, Any]:
     """Evaluate one fold entirely in a common full-grid extraction domain.
 
@@ -295,7 +296,11 @@ def evaluate_oos_geometry_fold_full_grid(
     cutoff = float(onset[position - 1])
     heldout = float(onset[position])
     heldout_segment = int(onset_group[position])
-    train = np.flatnonzero(time <= cutoff)
+    clean = time <= cutoff
+    exclusion_seconds = float(clean_interictal_exclusion_minutes) * 60.0
+    for event in onset[:position]:
+        clean &= np.abs(time - float(event)) > exclusion_seconds
+    train = np.flatnonzero(clean)
     if len(train) < 100:
         return {"status": "NOT_ESTIMABLE", "reason": "insufficient_past_full_grid_rows"}
     projection = fit_decoder_projection(decoder[train])
@@ -342,7 +347,7 @@ def evaluate_oos_geometry_fold_full_grid(
         time, segment, case_onset=heldout,
         lookback_minutes=float(lookback_minutes),
         maximum_controls=int(maximum_controls), maximum_endpoint=cutoff,
-        forbidden_onsets=onset[:position], maximum_gap_seconds=maximum_gap,
+        forbidden_onsets=onset[:position + 1], maximum_gap_seconds=maximum_gap,
         minimum_coverage_fraction=minimum_coverage,
     )
     if len(controls) < 5:
@@ -397,6 +402,10 @@ def evaluate_oos_geometry_fold_full_grid(
         "fit_read_heldout_seizure": False,
         "fit_and_case_extraction_domain_identical": True,
         "control_endpoints_no_later_than_previous_seizure": True,
+        "projection_fit_clean_interictal_only": True,
+        "clean_interictal_exclusion_minutes": float(
+            clean_interictal_exclusion_minutes
+        ),
     }
 
 

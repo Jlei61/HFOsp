@@ -51,6 +51,10 @@ def test_prequential_hazard_uses_strictly_later_seizures() -> None:
         row["train_cutoff_epoch"] < row["heldout_onset_epoch"]
         for row in observed["folds"]
     )
+    assert all(row["training_labels_known_by_cutoff"] for row in observed["folds"])
+    assert all(row["M4_residual_fit_outer_training_only"] for row in observed["folds"])
+    assert observed["M4_residual_fit_outer_training_only"] is True
+    assert observed["model_definition"]["M1"] != observed["model_definition"]["M3"]
 
 
 def test_lagged_state_never_uses_future_or_crosses_segment() -> None:

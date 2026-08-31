@@ -12,6 +12,7 @@ from .v03_assay import (
     _logistic_predict,
     _logloss,
     _standardise_train_test,
+    residualise_train_test,
 )
 
 
@@ -155,6 +156,54 @@ def _fit_score(
     return _logloss(test_y, _logistic_predict(score_x, beta)), float(alpha)
 
 
+def _causal_context(design: HazardDesign) -> np.ndarray:
+    """Low-capacity context with seizure information strictly before each row."""
+    time = np.asarray(design.time_epoch, dtype=np.float64)
+    onset = np.sort(np.asarray(design.onset_time, dtype=np.float64))
+    previous_position = np.searchsorted(onset, time, side="left") - 1
+    has_previous = previous_position >= 0
+    safe = np.maximum(previous_position, 0)
+    age_minutes = np.zeros(len(time), dtype=np.float64)
+    if len(onset):
+        age_minutes[has_previous] = (
+            time[has_previous] - onset[safe[has_previous]]
+        ) / 60.0
+    labels = np.unique(design.segment)
+    segment_rank = np.searchsorted(labels, design.segment).astype(np.float64)
+    segment_scale = max(float(len(labels) - 1), 1.0)
+    return np.column_stack([
+        has_previous.astype(np.float64),
+        np.log1p(np.maximum(age_minutes, 0.0)),
+        (time - float(np.min(time))) / 86400.0,
+        segment_rank / segment_scale,
+    ])
+
+
+def _labels_known_by(
+    design: HazardDesign, outcome: np.ndarray, *, horizon_seconds: float,
+    cutoff: float,
+) -> np.ndarray:
+    """Rows whose binary horizon outcome is observable at ``cutoff``."""
+    time = np.asarray(design.time_epoch, dtype=np.float64)
+    known_positive = np.zeros(len(time), dtype=bool)
+    for label in np.unique(design.segment):
+        rows = np.flatnonzero(design.segment == label)
+        onsets = np.sort(design.onset_time[
+            (design.onset_segment == label) & (design.onset_time <= float(cutoff) + 1e-9)
+        ])
+        if not len(onsets):
+            continue
+        next_position = np.searchsorted(onsets, time[rows], side="right")
+        has_next = next_position < len(onsets)
+        next_onset = np.full(len(rows), np.inf, dtype=np.float64)
+        next_onset[has_next] = onsets[next_position[has_next]]
+        known_positive[rows] = (
+            has_next & (next_onset <= time[rows] + float(horizon_seconds) + 1e-9)
+        )
+    fully_observed_negative = time + float(horizon_seconds) <= float(cutoff) + 1e-9
+    return known_positive | (fully_observed_negative & (outcome == 0))
+
+
 def prequential_nested_hazard(
     design: HazardDesign,
     *,
@@ -171,18 +220,18 @@ def prequential_nested_hazard(
     )
     if persistent.shape != design.persistent_state.shape:
         raise ValueError("persistent override shape mismatch")
-    ch = np.asarray(design.history[:, :min(11, design.history.shape[1])], dtype=np.float64)
-    observation = np.column_stack([
-        np.asarray(design.current_observation, dtype=np.float64),
-        np.asarray(design.memoryless_state, dtype=np.float64),
+    ch = np.column_stack([
+        np.asarray(design.history[:, :min(11, design.history.shape[1])], dtype=np.float64),
+        _causal_context(design),
     ])
+    observation = np.asarray(design.current_observation, dtype=np.float64)
     base = np.column_stack([ch, observation])
+    memoryless_base = np.column_stack([base, design.memoryless_state])
     matrices = {
         "M0": ch,
         "M1": base,
         "M2": np.column_stack([base, persistent]),
-        "M3": base,
-        "M4": np.column_stack([base, persistent - design.memoryless_state]),
+        "M3": memoryless_base,
     }
     onset_order = np.argsort(design.onset_time, kind="stable")
     onset_time = design.onset_time[onset_order]
@@ -196,12 +245,21 @@ def prequential_nested_hazard(
         ):
             supported.append((float(time), int(segment)))
     fold_rows: list[dict[str, Any]] = []
+    horizon_seconds = float(horizon_minutes) * 60.0
     for position in range(int(initial_k), len(supported)):
         cutoff = float(supported[position - 1][0])
         heldout_time, heldout_segment = supported[position]
-        train = np.flatnonzero(eligible & (design.time_epoch <= cutoff + 1e-9))
+        train_known = _labels_known_by(
+            design, outcome, horizon_seconds=horizon_seconds, cutoff=cutoff,
+        )
+        test_known = _labels_known_by(
+            design, outcome, horizon_seconds=horizon_seconds, cutoff=heldout_time,
+        )
+        train = np.flatnonzero(
+            eligible & train_known & (design.time_epoch <= cutoff + 1e-9)
+        )
         test = np.flatnonzero(
-            eligible & (design.time_epoch > cutoff + 1e-9)
+            eligible & test_known & (design.time_epoch > cutoff + 1e-9)
             & (design.time_epoch <= heldout_time + 1e-9)
         )
         if len(train) < 30 or len(test) < 1 or len(np.unique(outcome[train])) < 2:
@@ -226,6 +284,15 @@ def prequential_nested_hazard(
                 alpha_grid,
             )
             losses[name], alphas[name] = loss, alpha
+        residual_train, residual_test = residualise_train_test(
+            persistent[train], persistent[test],
+            memoryless_base[train], memoryless_base[test],
+        )
+        m4_train = np.column_stack([memoryless_base[train], residual_train])
+        m4_test = np.column_stack([memoryless_base[test], residual_test])
+        losses["M4"], alphas["M4"] = _fit_score(
+            m4_train, m4_test, outcome[train], outcome[test], alpha_grid,
+        )
         fold_rows.append({
             "heldout_seizure_rank": int(position + 1),
             "heldout_onset_epoch": heldout_time,
@@ -234,6 +301,9 @@ def prequential_nested_hazard(
             "n_train_rows": int(len(train)), "n_test_rows": int(len(test)),
             "n_train_positive_rows": int(np.sum(outcome[train])),
             "n_test_positive_rows": int(np.sum(outcome[test])),
+            "training_labels_known_by_cutoff": True,
+            "test_labels_known_by_heldout_onset": True,
+            "M4_residual_fit_outer_training_only": True,
             **{f"logloss_{name}": value for name, value in losses.items()},
             **{f"alpha_{name}": value for name, value in alphas.items()},
         })
@@ -261,6 +331,15 @@ def prequential_nested_hazard(
         "M_relative_improvement": float((m3 - m4) / m3) if m3 > 0 else None,
         "T_direction_favourable": bool(m2 < m1),
         "M_direction_favourable": bool(m4 < m3),
+        "model_definition": {
+            "M0": "causal clinical/time context plus explicit IED history",
+            "M1": "M0 plus current explicit observation",
+            "M2": "M1 plus frozen persistent state",
+            "M3": "M1 plus frozen memoryless state",
+            "M4": "M3 plus outer-training residualized persistent history",
+        },
+        "past_seizure_nuisance_is_strictly_causal": True,
+        "M4_residual_fit_outer_training_only": True,
         "patient_is_inference_unit": True,
         "seed_is_not_patient_replicate": True,
         "claim_status": "EXPLORATORY_ASSAY_NOT_SENSITIVE",

@@ -98,4 +98,6 @@ def test_full_grid_geometry_uses_one_extraction_domain() -> None:
     assert observed["status"] == "COMPLETE_EXPLORATORY"
     assert observed["fit_and_case_extraction_domain_identical"] is True
     assert observed["fit_read_heldout_seizure"] is False
+    assert observed["projection_fit_clean_interictal_only"] is True
+    assert observed["clean_interictal_exclusion_minutes"] == 120.0
     assert abs(observed["family_scores"]["abrupt_transition"]) < 100.0
