@@ -42,8 +42,8 @@ def _mem_available_bytes() -> int:
 
 
 def _complete(root: Path, subject: str, seed: int, cache_path: Path, *,
-              exploratory: bool) -> bool:
-    path = root / "hazard/by_cell" / subject / f"seed_{seed}/result.json"
+              exploratory: bool, output_subdir: str) -> bool:
+    path = root / output_subdir / "by_cell" / subject / f"seed_{seed}/result.json"
     if not path.is_file():
         return False
     try:
@@ -53,13 +53,18 @@ def _complete(root: Path, subject: str, seed: int, cache_path: Path, *,
             "type1_power_summary_smoke.json" if exploratory
             else "type1_power_summary.json"
         )
-        expected_claim = (
-            "EXPLORATORY_A1_EMPTY_ASSAY_NOT_SENSITIVE_SUPPORT_CONDITIONED"
-            if exploratory else "CLAIM_ROUTE_RELEASED_DEVELOPMENT_ONLY"
-        )
+        state_manifest = _json(cache_path.with_suffix(".manifest.json"))
+        full_grid = state_manifest.get("full_recorded_five_minute_grid") is True
+        expected_claim = "CLAIM_ROUTE_RELEASED_DEVELOPMENT_ONLY"
+        if exploratory:
+            expected_claim = (
+                "EXPLORATORY_A1_EMPTY_ASSAY_NOT_SENSITIVE_FULL_GRID"
+                if full_grid else
+                "EXPLORATORY_A1_EMPTY_ASSAY_NOT_SENSITIVE_SUPPORT_CONDITIONED"
+            )
         return bool(
             payload.get("status") == "COMPLETE_EXPLORATORY"
-            and payload.get("revision") == "h2b_v0_3_hazard_cell_v1"
+            and payload.get("revision") == "h2b_v0_3_hazard_cell_v2"
             and payload.get("claim_status") == expected_claim
             and payload.get("subject") == subject and int(payload.get("seed")) == seed
             and source.get("state_cache_sha256") == sha256_file(cache_path)
@@ -73,15 +78,18 @@ def _complete(root: Path, subject: str, seed: int, cache_path: Path, *,
 
 
 def _run(task: tuple[str, int, Path], *, v02: Path, root: Path,
+         state_cache_root: Path, output_subdir: str,
          log_root: Path, exploratory: bool) -> dict:
     subject, seed, _ = task
     log = log_root / f"{subject}_seed_{seed}.log"
     command = [
         str(PYTHON), str(CELL_SCRIPT), "--subject", subject, "--seed", str(seed),
         "--v0-2-root", str(v02), "--result-root", str(root),
+        "--state-cache-root", str(state_cache_root),
+        "--output-subdir", str(output_subdir),
     ]
     if exploratory:
-        command.append("--allow-support-conditioned-exploration")
+        command.append("--allow-diagnostic-exploration")
     env = os.environ.copy()
     env.update({
         "OMP_NUM_THREADS": "1", "MKL_NUM_THREADS": "1",
@@ -106,16 +114,23 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--v0-2-root", type=Path, default=CANONICAL_V0_2_RESULT_ROOT)
     parser.add_argument("--result-root", type=Path, default=CANONICAL_V0_3_RESULT_ROOT)
+    parser.add_argument("--state-cache-root", type=Path, default=None)
+    parser.add_argument("--output-subdir", default="hazard")
     parser.add_argument("--cpu-workers", type=int, default=8)
     parser.add_argument("--exploratory-all-frozen", action="store_true")
     args = parser.parse_args()
     v02, root = args.v0_2_root.resolve(), args.result_root.resolve()
+    state_cache_root = (
+        args.state_cache_root.resolve() if args.state_cache_root is not None
+        else v02 / "state_cache"
+    )
+    output_subdir = str(args.output_subdir)
     qualification = _json(root / "qualification/state_qualified_manifest.json")
     qualified = set(map(str, qualification.get("subjects", [])))
     final_assay_path = root / "assay/type1_power_summary.json"
     exploratory = bool(args.exploratory_all_frozen)
     if not exploratory and (not qualified or not final_assay_path.is_file()):
-        atomic_json(root / "hazard/QUEUE_STATUS.json", {
+        atomic_json(root / output_subdir / "QUEUE_STATUS.json", {
             "status": "NOT_RELEASED_A1_OR_A2",
             "created_utc": utc_now(),
             "n_state_qualified_patients": len(qualified),
@@ -127,7 +142,7 @@ def main() -> None:
         })
         print("NOT_RELEASED_A1_OR_A2 tasks=0")
         return
-    lock_path = root / "hazard/.queue.lock"
+    lock_path = root / output_subdir / ".queue.lock"
     lock_path.parent.mkdir(parents=True, exist_ok=True)
     lock = lock_path.open("w")
     try:
@@ -135,7 +150,7 @@ def main() -> None:
     except BlockingIOError as error:
         raise RuntimeError("another v0.3 hazard queue owns the lock") from error
     tasks = []
-    for manifest in sorted((v02 / "state_cache").glob(
+    for manifest in sorted(state_cache_root.glob(
         "*/seed_*/states.manifest.json"
     )):
         subject = manifest.parents[1].name
@@ -146,6 +161,7 @@ def main() -> None:
         tasks.append((subject, seed, cache))
     pending = [task for task in tasks if not _complete(
         root, task[0], task[1], task[2], exploratory=exploratory,
+        output_subdir=output_subdir,
     )]
     available = _mem_available_bytes()
     memory_workers = max(1, int(0.70 * available // int(0.25 * 1024 ** 3)))
@@ -153,10 +169,10 @@ def main() -> None:
         int(args.cpu_workers), len(pending) or 1, memory_workers,
         max(1, (os.cpu_count() or 1) // 2),
     ))
-    status_path = root / "hazard/QUEUE_STATUS.json"
+    status_path = root / output_subdir / "QUEUE_STATUS.json"
     status = {
         "status": "RUNNING", "created_utc": utc_now(),
-        "revision": "h2b_v0_3_hazard_queue_v1",
+        "revision": "h2b_v0_3_hazard_queue_v2",
         "requested_tasks": len(tasks), "already_complete": len(tasks) - len(pending),
         "pending_tasks": len(pending), "cpu_workers": workers,
         "configured_cpu_workers": int(args.cpu_workers),
@@ -165,15 +181,19 @@ def main() -> None:
         "thread_limits": 1, "formal_test_partition_opened": False,
         "sealed_opened": False, "h3_or_t2_run": False,
         "support_conditioned_exploration": exploratory,
+        "state_cache_root": str(state_cache_root),
+        "output_subdir": output_subdir,
     }
     atomic_json(status_path, status)
-    log_root = root / "logs/hazard"
+    log_root = root / "logs" / output_subdir
     log_root.mkdir(parents=True, exist_ok=True)
     completed_rows, failures = [], []
     with ThreadPoolExecutor(max_workers=workers) as pool:
         future = {
             pool.submit(
-                _run, task, v02=v02, root=root, log_root=log_root,
+                _run, task, v02=v02, root=root,
+                state_cache_root=state_cache_root, output_subdir=output_subdir,
+                log_root=log_root,
                 exploratory=exploratory,
             ): task
             for task in pending

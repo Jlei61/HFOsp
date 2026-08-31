@@ -41,12 +41,17 @@ def _sign_p(successes: int, total: int) -> float | None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--result-root", type=Path, default=CANONICAL_V0_3_RESULT_ROOT)
+    parser.add_argument("--analysis-subdir", default="hazard")
     parser.add_argument(
         "--include-support-conditioned-exploration", action="store_true",
     )
+    parser.add_argument("--include-diagnostic-exploration", action="store_true")
     args = parser.parse_args()
     root = args.result_root.resolve()
-    manifests = sorted((root / "hazard/by_cell").glob("*/seed_*/result.json"))
+    analysis_subdir = str(args.analysis_subdir)
+    manifests = sorted((root / analysis_subdir / "by_cell").glob(
+        "*/seed_*/result.json"
+    ))
     if not manifests:
         raise FileNotFoundError("no v0.3 hazard cells")
     rows, hashes = [], {}
@@ -60,13 +65,21 @@ def main() -> None:
             is not True
             or payload.get("A2_transfer_assay_sensitive") is not True
         )
-        exploratory_valid = bool(
+        allow_exploration = bool(
             args.include_support_conditioned_exploration
+            or args.include_diagnostic_exploration
+        )
+        exploratory_valid = bool(
+            allow_exploration
             and payload.get("status") == "COMPLETE_EXPLORATORY"
-            and payload.get("claim_status")
-            == "EXPLORATORY_A1_EMPTY_ASSAY_NOT_SENSITIVE_SUPPORT_CONDITIONED"
-            and payload.get("analysis_scope")
-            == "seizure_support_conditioned_control_grid_exploratory"
+            and payload.get("claim_status") in {
+                "EXPLORATORY_A1_EMPTY_ASSAY_NOT_SENSITIVE_SUPPORT_CONDITIONED",
+                "EXPLORATORY_A1_EMPTY_ASSAY_NOT_SENSITIVE_FULL_GRID",
+            }
+            and payload.get("analysis_scope") in {
+                "seizure_support_conditioned_control_grid_exploratory",
+                "full_recorded_development_grid_exploratory",
+            }
         )
         if strict_valid and not exploratory_valid:
             raise ValueError(f"unreleased or incomplete hazard cell: {path}")
@@ -165,10 +178,14 @@ def main() -> None:
                     for row in d_values)
     payload = {
         "status": "COMPLETE_EXPLORATORY_ASSAY_NOT_SENSITIVE",
-        "revision": "h2b_v0_3_hazard_patient_first_v1",
+        "revision": "h2b_v0_3_hazard_patient_first_v2",
         "created_utc": utc_now(), "n_cells": len(rows),
         "n_patients": len(patient_rows), "n_estimable_patients": len(estimable),
         "patient_rows": patient_rows,
+        "analysis_subdir": analysis_subdir,
+        "analysis_scopes": sorted({
+            _json(path).get("analysis_scope") for path in manifests
+        }),
         "cohort_direction": {
             "T": {"favourable": t_success, "total": len(estimable),
                   "two_sided_sign_p": _sign_p(t_success, len(estimable))},
@@ -184,15 +201,19 @@ def main() -> None:
         "patient_is_inference_unit": True,
         "seed_is_not_patient_replicate": True,
         "negative_result_biological_interpretation_allowed": False,
-        "reason": "A2 transfer assay has high false-positive rate and inadequate power",
+        "reason": "A2 transfer assay has calibrated null but inadequate transfer power",
         "formal_test_partition_opened": False, "sealed_opened": False,
         "h3_or_t2_run": False,
     }
-    output = root / "hazard"
+    output = root / analysis_subdir
     atomic_json(output / "patient_first_summary.json", payload)
     atomic_csv(output / "per_cell_metrics.csv", rows)
     atomic_csv(output / "per_patient_metrics.csv", patient_rows)
-    atomic_json(root / "reports/scientific_route_audit_A3_A5.json", {
+    audit_name = (
+        "scientific_route_audit_A3_A5.json" if analysis_subdir == "hazard"
+        else f"scientific_route_audit_A3_A5_{analysis_subdir}.json"
+    )
+    atomic_json(root / "reports" / audit_name, {
         "status": payload["status"], "created_utc": payload["created_utc"],
         "core_question": (
             "does an interictal-only frozen state add later seizure-risk information, "

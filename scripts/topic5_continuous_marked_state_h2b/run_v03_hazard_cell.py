@@ -108,31 +108,33 @@ class MappingLike:
 
 
 def run(subject: str, seed: int, *, v02_root: Path, result_root: Path,
-        allow_support_conditioned_exploration: bool = False) -> dict:
+        state_cache_root: Path | None = None, output_subdir: str = "hazard",
+        allow_diagnostic_exploration: bool = False) -> dict:
     assert_frozen_contract_matches(_json(result_root / "analysis_contract.json"))
     assert_frozen_exploration_policy_matches(_json(result_root / "exploration_policy.json"))
     a1 = _a1_row(result_root, subject)
     if (a1.get("state_qualified") is not True
-            and not allow_support_conditioned_exploration):
+            and not allow_diagnostic_exploration):
         raise ValueError(
             f"{subject}: A3--A5 not released because A1 state qualification failed"
         )
     final_assay_path = result_root / "assay/type1_power_summary.json"
     diagnostic_assay_path = result_root / "assay/type1_power_summary_smoke.json"
     assay_path = (
-        diagnostic_assay_path if allow_support_conditioned_exploration
+        diagnostic_assay_path if allow_diagnostic_exploration
         else final_assay_path
     )
     if not assay_path.is_file():
         raise ValueError("the selected A2 assay receipt is missing")
     assay = _json(assay_path)
-    if not allow_support_conditioned_exploration and (
+    if not allow_diagnostic_exploration and (
         assay.get("status") != "PASS_FINAL_ASSAY_ACCEPTANCE"
         or assay.get("claim_bearing_route_released") is not True
     ):
         raise ValueError("A3--A5 not released because A2 assay did not pass")
     selected_k = int(assay["selected_initial_k"])
-    cache_root = v02_root / "state_cache" / subject / f"seed_{seed}"
+    cache_base = state_cache_root or (v02_root / "state_cache")
+    cache_root = cache_base / subject / f"seed_{seed}"
     cache_path = cache_root / "states.npz"
     state_manifest_path = cache_root / "states.manifest.json"
     state_manifest = _json(state_manifest_path)
@@ -143,7 +145,7 @@ def run(subject: str, seed: int, *, v02_root: Path, result_root: Path,
     full_recorded_grid = (
         state_manifest.get("full_recorded_five_minute_grid") is True
     )
-    if not full_recorded_grid and not allow_support_conditioned_exploration:
+    if not full_recorded_grid and not allow_diagnostic_exploration:
         raise ValueError(
             "A3 requires a full recorded-coverage state grid; v0.2 risk-set "
             "query caches are not admissible"
@@ -194,10 +196,10 @@ def run(subject: str, seed: int, *, v02_root: Path, result_root: Path,
                 "invalid_donor_policy": "replace_with_same_anchor_memoryless_code",
                 "result": result,
             })
-    output = result_root / "hazard/by_cell" / subject / f"seed_{seed}"
+    output = result_root / output_subdir / "by_cell" / subject / f"seed_{seed}"
     payload = {
         "status": "COMPLETE_EXPLORATORY",
-        "revision": "h2b_v0_3_hazard_cell_v1",
+        "revision": "h2b_v0_3_hazard_cell_v2",
         "created_utc": utc_now(), "subject": subject, "seed": int(seed),
         "selected_initial_k": selected_k,
         "primary_30min_by_initial_k": by_k,
@@ -223,7 +225,7 @@ def run(subject: str, seed: int, *, v02_root: Path, result_root: Path,
             and assay.get("claim_bearing_route_released") is True
         ),
         "analysis_scope": (
-            "full_recorded_grid" if full_recorded_grid else
+            "full_recorded_development_grid_exploratory" if full_recorded_grid else
             "seizure_support_conditioned_control_grid_exploratory"
         ),
         "n_grid_rows": len(design.time_epoch),
@@ -246,8 +248,12 @@ def run(subject: str, seed: int, *, v02_root: Path, result_root: Path,
         "h3_or_t2_run": False,
         "claim_status": (
             "CLAIM_ROUTE_RELEASED_DEVELOPMENT_ONLY"
-            if not allow_support_conditioned_exploration else
-            "EXPLORATORY_A1_EMPTY_ASSAY_NOT_SENSITIVE_SUPPORT_CONDITIONED"
+            if not allow_diagnostic_exploration else
+            (
+                "EXPLORATORY_A1_EMPTY_ASSAY_NOT_SENSITIVE_FULL_GRID"
+                if full_recorded_grid else
+                "EXPLORATORY_A1_EMPTY_ASSAY_NOT_SENSITIVE_SUPPORT_CONDITIONED"
+            )
         ),
         "omp_num_threads": int(os.environ.get("OMP_NUM_THREADS", "1")),
     }
@@ -261,13 +267,21 @@ def main() -> None:
     parser.add_argument("--seed", type=int, required=True)
     parser.add_argument("--v0-2-root", type=Path, default=CANONICAL_V0_2_RESULT_ROOT)
     parser.add_argument("--result-root", type=Path, default=CANONICAL_V0_3_RESULT_ROOT)
+    parser.add_argument("--state-cache-root", type=Path, default=None)
+    parser.add_argument("--output-subdir", default="hazard")
+    parser.add_argument("--allow-diagnostic-exploration", action="store_true")
     parser.add_argument("--allow-support-conditioned-exploration", action="store_true")
     args = parser.parse_args()
     payload = run(
         str(args.subject), int(args.seed),
         v02_root=args.v0_2_root.resolve(), result_root=args.result_root.resolve(),
-        allow_support_conditioned_exploration=bool(
-            args.allow_support_conditioned_exploration
+        state_cache_root=(
+            args.state_cache_root.resolve() if args.state_cache_root is not None else None
+        ),
+        output_subdir=str(args.output_subdir),
+        allow_diagnostic_exploration=bool(
+            args.allow_diagnostic_exploration
+            or args.allow_support_conditioned_exploration
         ),
     )
     print(payload["status"], payload["subject"], payload["seed"])
