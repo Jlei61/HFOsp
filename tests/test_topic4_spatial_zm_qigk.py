@@ -361,6 +361,26 @@ def test_source_and_sink_q_gains_can_differ_on_frozen_contact_sets():
     assert np.isclose(np.mean(slow.q_init_grid), cfg.q_init)
 
 
+def test_endpoint_local_gk_addition_is_spatial_and_zero_outside_field():
+    pos_e, pos_i = _positions()
+    cfg = SpatialZMQIGKConfig(
+        n_grid=4,
+        sigma_q_mm=0.7,
+        h_smooth_sigma_mm=0.5,
+        q_endpoint_sigma_mm=0.2,
+        eta_m=0.0,
+        eta_m_source_add=10.0,
+    )
+    slow = SpatialZMQIGKSlowVars(
+        6, 18.0, pos_e, pos_i, 2.0, np.ones(4),
+        source_centers_xy=np.asarray([[0.5, 0.5], [0.5, 1.5]]),
+        sink_centers_xy=np.asarray([[1.5, 0.5], [1.5, 1.5]]),
+        cfg=cfg)
+    assert slow.eta_m_E[0] > slow.eta_m_E[1]
+    assert slow.eta_m_E[2] > slow.eta_m_E[3]
+    assert np.all(slow.eta_m_E >= 0.0)
+
+
 def test_runner_selects_frozen_source_or_sink_contacts_without_refitting():
     substrate = SimpleNamespace(
         contact_names=["S2", "K1", "S1", "K2"],

@@ -205,6 +205,10 @@ def analyze_atlas(input_dir: Path, reference_json: Path | None = None):
             "sigma_m_mm": float((payload.get("hybrid_config") or {}).get(
                 "sigma_m_mm", 0.0)),
             "eta_m_h_gain": float(hybrid_config.get("eta_m_h_gain", 0.0)),
+            "eta_m_source_add": float(hybrid_config.get(
+                "eta_m_source_add", 0.0)),
+            "eta_m_sink_add": float(hybrid_config.get(
+                "eta_m_sink_add", 0.0)),
             "m_current_threshold": float(hybrid_config.get(
                 "m_current_threshold", 0.0)),
             "hybrid_config": hybrid_config,
@@ -286,6 +290,7 @@ def main():
         "q_initial_grid_max", "m_build_gain", "eta_m", "tau_m_ms",
         "m_state_ceiling", "m_spatial_mix", "sigma_m_mm",
         "eta_m_h_gain",
+        "eta_m_source_add", "eta_m_sink_add",
         "m_current_threshold",
         "all_checks_pass", "median_rate_hz",
         "minimum_subwindow_median_rate_hz", "joint_global_recruitment_duty",
@@ -316,6 +321,8 @@ def main():
                 "m_spatial_mix": record["m_spatial_mix"],
                 "sigma_m_mm": record["sigma_m_mm"],
                 "eta_m_h_gain": record["eta_m_h_gain"],
+                "eta_m_source_add": record["eta_m_source_add"],
+                "eta_m_sink_add": record["eta_m_sink_add"],
                 "m_current_threshold": record["m_current_threshold"],
                 "all_checks_pass": record["classification"]["all_checks_pass"],
                 "median_rate_hz": record["rate"]["median_rate_hz"],

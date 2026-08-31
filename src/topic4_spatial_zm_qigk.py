@@ -29,6 +29,10 @@ original unbounded M accumulator exactly.
 ``m_build_gain`` independently scales the M/gK build rate (the analogue of
 ``k_K``); its default of one exactly preserves the original per-spike M update,
 while ``eta_m`` remains the membrane-current coupling.
+``eta_m_source_add`` and ``eta_m_sink_add`` are non-negative, spatially local
+gK-current additions sampled from the same frozen endpoint-contact fields.  A
+zero addition preserves the prior M path exactly; the additions change neither
+fast edges nor endpoint geometry.
 For the fast-subsystem atlas only, ``q_init_h_gain`` can also seed a deterministic
 nonuniform resource state from the same frozen ``h(x)`` field (positive gain =
 lower initial q in high-h tissue).  ``q_endpoint_gain`` adds a second,
@@ -93,6 +97,8 @@ class SpatialZMQIGKConfig:
     k_q_h_gain: float = 0.0
     q_floor_h_gain: float = 0.0
     eta_m_h_gain: float = 0.0
+    eta_m_source_add: float = 0.0
+    eta_m_sink_add: float = 0.0
     h_smooth_sigma_mm: float = 1.0
     trace_stride_steps: int = 10
     # Duck-typed by kick_probe.  This hybrid never changes recurrent E weights.
@@ -127,6 +133,8 @@ class SpatialZMQIGKConfig:
             raise ValueError("q_floor_h_gain must keep the q floor in [0, 1]")
         if self.eta_m < 0.0:
             raise ValueError("eta_m must be non-negative")
+        if self.eta_m_source_add < 0.0 or self.eta_m_sink_add < 0.0:
+            raise ValueError("endpoint M/gK current additions must be non-negative")
         if self.m_build_gain < 0.0:
             raise ValueError("m_build_gain must be non-negative")
         if self.m_current_threshold < 0.0:
@@ -390,7 +398,13 @@ class SpatialZMQIGKSlowVars:
         self.q_I[:] = self.q_init_grid
         eta_multiplier = _mean_one_bounded_modulation(
             self.h_e, self.cfg.eta_m_h_gain)
-        self.eta_m_E = float(self.cfg.eta_m) * eta_multiplier
+        source_at_e = self.source_field[self._iyE, self._ixE]
+        sink_at_e = self.sink_field[self._iyE, self._ixE]
+        self.eta_m_E = (
+            float(self.cfg.eta_m) * eta_multiplier
+            + float(self.cfg.eta_m_source_add) * source_at_e
+            + float(self.cfg.eta_m_sink_add) * sink_at_e
+        )
 
         self.z = np.ones(self.N, dtype=float)
         self.m = np.zeros(self.N, dtype=float)

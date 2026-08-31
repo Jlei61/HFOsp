@@ -133,6 +133,8 @@ def main():
     parser.add_argument("--k-q-h-gain", type=float, default=0.0)
     parser.add_argument("--q-floor-h-gain", type=float, default=0.0)
     parser.add_argument("--eta-m-h-gain", type=float, default=0.0)
+    parser.add_argument("--eta-m-source-add", type=float, default=0.0)
+    parser.add_argument("--eta-m-sink-add", type=float, default=0.0)
     parser.add_argument("--out", required=True)
     args = parser.parse_args()
     if args.run_role == "confirmation" and not args.parameter_set_id:
@@ -196,6 +198,8 @@ def main():
         k_q_h_gain=float(args.k_q_h_gain),
         q_floor_h_gain=float(args.q_floor_h_gain),
         eta_m_h_gain=float(args.eta_m_h_gain),
+        eta_m_source_add=float(args.eta_m_source_add),
+        eta_m_sink_add=float(args.eta_m_sink_add),
         trace_stride_steps=max(1, int(round(1.0 / dt))),
     )
     slow = None
@@ -383,6 +387,7 @@ def main():
                 slow.source_centers_xy, np.float32),
             "sink_centers_xy_mm": np.asarray(
                 slow.sink_centers_xy, np.float32),
+            "eta_m_E": np.asarray(slow.eta_m_E, np.float32),
         })
     _atomic_npz(out.with_suffix(".npz"), **arrays)
     payload["wall_seconds"] = time.time() - started
