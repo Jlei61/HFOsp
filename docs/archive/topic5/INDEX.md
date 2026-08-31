@@ -378,3 +378,10 @@
   - A1 在完整 75 readable checkpoint cells / 16 patients 分母上完成 Q1–Q6，`state_qualified=0/16`：常见失败为 decoder state 近一维、generator retention 不足或 Q6 nuisance-adjusted IED increment 不成立。单一 slow axis 与稳定 raw latent 不升级为 persistent state。
   - 修正版 decoder-metric A2 diagnostic smoke（7 worlds ×100）把 T、outer-train residualized M 与 lag 分开；独立 null false-positive 回到约 4–6%，三类 geometry recovery 为 99–100%，但 persistent world 的 joint T+M+lag K-selection power 为 0/100，故 `ASSAY_NOT_SENSITIVE`，未运行 1000-replicate final acceptance。
   - 严格 A3–A8 route 返回 `NOT_RELEASED_A1_OR_A2, tasks_started=0`。两批提前生成的 v0.2 support-conditioned hazard 结果已移入 `quarantine/`，不进入科学结论。最终 machine audit 为 `PASS_GATED_NEGATIVE_CLOSEOUT_H2B_NOT_ESTABLISHED`；下一步回到纯间期 R1.8 slow/fast instrument redesign，而不是增加 seizure heads。
+
+- **2026-09-01 H2b Cross-task Transfer v0.4 患者内异质 entry route**：
+  - 冻结合同：`continuous_marked_state_h2b_cross_task_v0_4_contract_2026-08-31.md`；白话报告：`continuous_marked_state_h2b_cross_task_v0_4_plain_2026-09-01.md`；技术报告：`continuous_marked_state_h2b_cross_task_v0_4_technical_2026-09-01.md`。
+  - 放松 v0.3 “同一患者所有发作共享同一多维状态”的过严 gate，但保留 frozen interictal state、因果 anchor、outer chronological/prequential OOF、patient-first 与 formal/sealed 边界。最多两条 route，完全由更早 TRAIN seizures 定义；不足时退回单 route。
+  - 10 位、46 cells 全部运行，6 位在 30 min 可估计，但仅 1 位达到 primary chronological。主 `state−observation` 患者中位 `−0.0133`（4/6），而直接 `state−history` 为 `+0.2633`（2/6）；persistent−memoryless 与 correct−wrong-time 均仅 3/6 有利。双 route 相对单轴只在 2 位可估计且 2/2 更差。
+  - two-route 半合成正控方向恢复通过，但完整 assay 因 single-route time-specificity 66% 和 strict single-replicate power 未过，状态为 `ASSAY_NOT_DIRECTIONALLY_SENSITIVE_NO_BIOLOGICAL_NEGATIVE`。phenotype 12 个可估计 patient-target rows 仅 1 个有利。
+  - 工程 machine audit `PASS_COMPLETE`，测试 180 passed、8 workers、0 OOM；科学状态为 `H2B_NOT_ESTABLISHED_DEVELOPMENT_ONLY`。放松 gate 未建立 H2b，也不允许解释为生物学阴性；暂不打开正式分区。

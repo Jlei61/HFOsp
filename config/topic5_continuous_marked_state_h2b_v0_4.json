@@ -1,0 +1,151 @@
+{
+  "schema_revision": "h2b_v0_4_heterogeneous_seizure_entry_routes_v10",
+  "status": "FROZEN_DEVELOPMENT",
+  "frozen_date": "2026-08-31",
+  "contract_revision_reason": "pre-final assay audit successively corrected conditional risk sets, non-contractual gating, support-tier training, control hard matching, spurious routes, weak ridge regularisation and an overly strict negative-interpretation gate; v9 added the missing B_history arm, and v10 retains the direct derived B_route_state-minus-B_history contrast so the recent-history question is answered without combining separately aggregated medians; no model, risk set, gate or primary estimand changes",
+  "scientific_question": "Can a frozen interictal state add out-of-fold seizure-risk and seizure-entry information when different seizures from the same patient may use different state-space routes?",
+  "source": {
+    "state_task": "continuous_background_and_ied_timing_exact_mark",
+    "state_source_revision": "r1_7b_extended_development_cohort_v1",
+    "v0_3_machine_audit": "/home/honglab/leijiaxin/HFOsp/results/epi_prssm/continuous_marked_state/h2b_cross_task/v0_3/reports/machine_audit.json",
+    "v0_3_machine_audit_sha256": "08f93685e68e119c71dcc2ca4427a142a3a332862490c8b93546197dc6a9bb2e",
+    "v0_3_contract_sha256": "1053631c1129f5315f6e9eee52635a5ce8ccdc0c875a246770d379b7ba450ed4",
+    "checkpoint_and_state_cache_hashes_must_match_v0_3_audit": true,
+    "state_is_frozen_before_seizure_analysis": true,
+    "seizure_gradient_enters_state_model": false
+  },
+  "output": {
+    "result_root": "/home/honglab/leijiaxin/HFOsp/results/epi_prssm/continuous_marked_state/h2b_cross_task/v0_4",
+    "paper_ready_figures_modified": false
+  },
+  "hard_gates": [
+    "frozen_interictal_state_and_recomputable_hashes",
+    "no_seizure_gradient_into_state",
+    "anchor_uses_only_t_less_than_or_equal_to_anchor",
+    "no_cross_gap_state_propagation",
+    "outer_test_seizure_is_later_than_all_probe_and_route_training_seizures",
+    "route_prototypes_are_fit_on_outer_training_seizures_only",
+    "all_comparison_arms_use_identical_outer_fold_rows",
+    "patient_and_heldout_seizure_are_inference_units",
+    "seeds_and_controls_are_not_patient_replicates"
+  ],
+  "nonblocking_strata": {
+    "all_frozen": "primary development population; no H2b outcome selection",
+    "scalar_slow_axis": "interictal-only A1 diagnostic stratum",
+    "multidimensional_state": "interictal-only A1 diagnostic stratum",
+    "collapsed_or_instrument_weak": "retained as a named negative-control stratum rather than blocking execution",
+    "preexisting_h1_stable": "interpretation stratum fixed before H2b; never an execution gate"
+  },
+  "heterogeneous_route_model": {
+    "maximum_routes": 2,
+    "minimum_prior_seizures_for_two_routes": 4,
+    "minimum_training_seizures_per_route": 2,
+    "minimum_route_separation_in_training_coverage_bandwidths": 1.0,
+    "fallback": "deterministic_single_route",
+    "route_feature_space": "outer-training-only standardisation and PCA retaining 90 percent variance with at most four components",
+    "route_definition": "deterministic two-means on frozen state at prior seizure lead anchors",
+    "heldout_seizure_defines_its_route": false,
+    "route_id_is_compared_across_folds_or_seeds": false,
+    "route_state_features": "fixed-width distances to at most two training route prototypes plus nearest-route distance",
+    "heterogeneity_estimand": "on folds with two TRAIN routes, held-out log_loss(two-route state) - log_loss(single TRAIN-defined directed slow axis)",
+    "interpretation": "negative supports a low-capacity multi-route readout; it does not establish distinct biological causes"
+  },
+  "hazard": {
+    "grid_minutes": 5,
+    "primary_horizon_minutes": 30,
+    "sensitivity_horizons_minutes": [5, 15, 60, 120],
+    "scheme": "patient-internal rolling-origin prequential",
+    "initial_training_rule": "for at least 10 supported seizures use the first floor(60 percent), minimum 2; for 5-9 use first 2 as rolling sensitivity; for 3-4 use first 2 as descriptive; fewer than 3 not estimable",
+    "primary_model": "ridge conditional logistic regression on one case plus five deterministic outcome-blind controls per seizure",
+    "regularisation_selection": "outer-training-only leave-last-prior-seizure selection",
+    "ridge_l2_grid": [1.0, 10.0, 100.0],
+    "controls_per_risk_set": 5,
+    "control_matching": "same patient and valid recorded coverage; same coverage segment preferred but not required; complete seizure-free horizon; outcome-blind deterministic sampling independent of history, observation and state; history, segment and session position explicitly adjusted in every arm",
+    "outer_test_controls": "strictly after the preceding seizure cutoff and no later than the held-out onset; disjoint from outer TRAIN rows",
+    "models": {
+      "B_history": "explicit IED history plus strictly causal seizure/session context",
+      "B_observation": "history plus causal context plus current explicit observation plus training-seizure observation-route distances",
+      "B_linear_state": "B_observation base plus raw frozen persistent state; descriptive direct linear comparator",
+      "B_single_axis_state": "B_observation plus one signed TRAIN-defined persistent-state seizure-entry axis",
+      "B_route_state": "B_observation plus at most two persistent-state route distances",
+      "B_route_memoryless": "B_observation plus memoryless-code route distances",
+      "B_route_wrong_time": "the trained B_route_state probe scored after replacing only test state with matched wrong-time state"
+    },
+    "primary_estimand": "held-out equal-seizure-weight 30-minute conditional risk-set log_loss(B_route_state) - log_loss(B_observation)",
+    "secondary_estimands": [
+      "B_observation_minus_B_history",
+      "B_route_state_minus_B_history",
+      "B_route_state_minus_B_route_memoryless",
+      "B_route_state_minus_B_single_axis_state_on_two_route_folds",
+      "B_route_state_minus_B_linear_state",
+      "correct_time_minus_wrong_time"
+    ],
+    "same_risk_rows_across_arms": true,
+    "patient_first": true,
+    "seed_median_within_patient": true
+  },
+  "time_specificity": {
+    "primary": "matched wrong-time state from the same patient and coverage segment",
+    "null": "coverage-segment-wise circular shifts of the frozen state",
+    "shift_fractions": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
+    "slow_state_caveat": "small temporal offsets inside one autocorrelation basin are not required to degrade performance"
+  },
+  "geometry": {
+    "fit_population": "outer-training clean interictal continuous trajectory",
+    "metric": "frozen IED-decoder output with outer-training-only projection",
+    "maximum_entry_routes": 2,
+    "route_definition": "joint endpoint-position and unit-entry-direction clustering from prior seizures only",
+    "minimum_prior_trajectories_for_two_routes": 4,
+    "minimum_trajectories_per_route": 2,
+    "heldout_projection_is_out_of_sample": true,
+    "registered_families": [
+      "route_specific_basin_gating",
+      "route_specific_directed_approach",
+      "abrupt_off_manifold_transition"
+    ],
+    "single_route_geometry_is_direct_comparator": true,
+    "umap_role": "none",
+    "marble_role": "not unlocked"
+  },
+  "semi_synthetic_assay": {
+    "uses_real_coverage_and_frozen_state_trajectories": true,
+    "worlds": [
+      "null",
+      "observation_only",
+      "persistent_single_route",
+      "persistent_two_route",
+      "clock_confounded"
+    ],
+    "calibration_replicates": 100,
+    "evaluation_replicates": 100,
+    "minimum_target_seizures": 8,
+    "assay_controls_interpretation_not_execution": true,
+    "directional_recovery_gate": "all registered persistent-world contrasts favourable in at least 70 percent of replicates, while null, observation-only and clock primary directional rates remain at most 65 percent and calibrated 5 percent false-positive rates remain at most 10 percent",
+    "strict_single_replicate_power_tier": "at least 80 percent below the independently calibrated null 5th percentile; reported but not required to interpret a concordant positive development direction",
+    "negative_interpretation_rule": "unless strict single-replicate power passes, a real null or adverse effect is not a biological negative",
+    "insensitive_result_wording": "ASSAY_NOT_SENSITIVE_NO_BIOLOGICAL_NEGATIVE"
+  },
+  "claim_ladder": {
+    "route_state_beats_observation_only": "transferable frozen representation",
+    "route_state_also_beats_memoryless": "cross-window persistent component supported",
+    "two_route_beats_single_route": "within-patient seizure-entry heterogeneity improves the low-capacity readout",
+    "correct_beats_wrong_and_geometry_is_oos_consistent": "time-specific seizure-entry state transfer supported",
+    "geometry_without_hazard_increment": "descriptive seizure-entry organisation only",
+    "phenotype_prediction": "interictal-to-ictal phenotype transfer",
+    "forbidden": [
+      "different routes prove different seizure causes",
+      "state causes seizures",
+      "latent attractor identified",
+      "clinical seizure predictor",
+      "formal held-out confirmation"
+    ]
+  },
+  "boundaries": {
+    "development_only": true,
+    "formal_test_partition_opened": false,
+    "sealed_opened": false,
+    "h3_or_t2_run": false,
+    "physical_clock_run": false,
+    "seizure_supervised_state_finetuning": false
+  }
+}
