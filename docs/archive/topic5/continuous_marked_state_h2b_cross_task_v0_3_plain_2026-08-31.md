@@ -79,7 +79,7 @@ v0.3 的 A1 没再用 seizure support 决定谁能做状态体检，而是把全
 
 原因不是模型比较漏跑，而是状态在接触真实 seizure outcome 前就没有通过 A1，assay 又没有恢复 T、M 和 lag 的能力。继续报告一个 hazard 数字会把“不合格 instrument + 无 power”误写成 seizure transfer。
 
-曾有并发进程越过 gate：先生成三批 support-conditioned hazard/geometry 探索，之后又两次运行 full-grid hazard、geometry 和 phenotype。它们共放入 9 个独立 `quarantine/` 目录，均不进入结论、聚合或机器验收。保留这些文件只是为了审计发生过什么，不表示接受其科学路线。
+曾有并发进程越过 gate：先生成三批 support-conditioned hazard/geometry 探索，之后又三次运行 full-grid hazard、geometry 和 phenotype。它们共放入 12 个独立 `quarantine/` 目录，均不进入结论、聚合或机器验收。保留这些文件只是为了审计发生过什么，不表示接受其科学路线。
 
 full-grid 基础设施中的 anchor 和 persistent state 本身不读取 seizure outcome；但同一个序列化文件里的 wrong-time donor 索引会使用既定 ictal/postictal exclusion。这个 donor 部分只作未释放 probe 的准备，不可把整份 cache 笼统称为“完全不接触 seizure metadata”。
 
@@ -132,7 +132,7 @@ full-grid 状态提取本身已完成 46/46 cells、10 位有既定 seizure supp
 - A1 75 cells / 16 patients：完成，0 state-qualified；
 - A2 corrected diagnostic smoke：完成，未通过 power；
 - A3–A8 claim-bearing route：按 gate 未释放；
-- 九个目录中的越 gate 探索结果：已隔离；
+- 十二个目录中的越 gate 探索结果：已隔离；
 - full-grid 状态基础设施：46/46 cells，8 workers，零 OOM；
 - scoped tests：168 passed，5 个 PyTorch warning；
 - machine audit：`PASS_GATED_NEGATIVE_CLOSEOUT_H2B_NOT_ESTABLISHED`。

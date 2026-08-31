@@ -179,7 +179,7 @@ tasks_started = 0
 
 这些产物显式标记为 support-conditioned exploration，使用 v0.2 seizure-support query grid，不是完整 recorded-coverage grid。它们不进入活跃 `hazard/by_cell`、`geometry/by_cell`、patient-first inference、报告结论或 machine audit 的科学证据层。
 
-在 full-grid 完成后，并发旧编排器又两次带 diagnostic override 运行 A3/A6/A8。对应 hazard、geometry、phenotype 各两套，共 6 个目录，分别以 `post_gate_*_exploratory_v1` 和 `post_gate_*_exploratory_v2` 保存于 `quarantine/`。当前活跃结果树只保留严格 `hazard/QUEUE_STATUS.json`、`full_grid/FOLLOWUP_STATUS.json` 和 `geometry/ROUTE_STATUS.json`，均记录 A1/A2 gate 未释放；这 6 套结果不被 closeout 读取为科学证据。
+在 full-grid 完成后，并发旧编排器又三次带 diagnostic override 运行 A3/A6/A8。对应 hazard、geometry、phenotype 各三套，共 9 个目录，分别以 `post_gate_*_exploratory_v1`、`v2` 和 `v3` 保存于 `quarantine/`。当前活跃结果树只保留严格 `hazard/QUEUE_STATUS.json`、`full_grid/FOLLOWUP_STATUS.json` 和 `geometry/ROUTE_STATUS.json`，均记录 A1/A2 gate 未释放；这 9 套结果不被 closeout 读取为科学证据。由于另一个共享任务在文件锁释放后会立即重跑旧编排器，交付时保留一个只持有 `.followup.lock` 的安全守卫；它不运行模型、不占 GPU。
 
 full-grid state queue 为 revision v5：按 `4 GiB + 4 MiB × max_query_rows` 为每个 worker 估算，使用可用内存的 65% 上限，从配置的 8 workers 中选择 8 个；`OMP/MKL/OPENBLAS/NUMEXPR=1`。36 份 GNU-time RSS receipt 的最大峰值为 1.48 GiB；31 个本轮任务与 15 个既有任务合计 46/46，失败、retry 和 kernel OOM 均为 0。更早的非流式测量因单个大患者超过 50 GiB 被主动终止，未等到 kernel OOM；这正是改为流式缓存后再放满 worker 的依据。
 
