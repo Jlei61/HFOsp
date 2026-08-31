@@ -22,12 +22,13 @@ def _compact(path):
     rates = payload.get("state_rate") or {}
     config = payload.get("hybrid_config") or {}
     full_edge = payload.get("full_edge_contract") or {}
+    spatial_basis = payload.get("spatial_basis_contract") or {}
     parameter_contract = {
         "candidate_id": payload.get("candidate_id"),
         "mode": payload.get("mode"),
         "full_edge_contract": full_edge,
         "hybrid_config": config,
-        "spatial_basis_contract": payload.get("spatial_basis_contract") or {},
+        "spatial_basis_contract": spatial_basis,
         "protocol_contract": payload.get("protocol_contract") or {},
     }
     parameter_contract_sha256 = hashlib.sha256(
@@ -53,6 +54,7 @@ def _compact(path):
         "q_init_h_gain": config.get("q_init_h_gain", 0.0),
         "q_endpoint_gain": config.get("q_endpoint_gain", 0.0),
         "q_endpoint_sigma_mm": config.get("q_endpoint_sigma_mm", 2.0),
+        "q_endpoint_side": spatial_basis.get("active_endpoint_side", "union"),
         "freeze_q": config.get("freeze_q", False),
         "q_a0": config.get("q_a0"),
         "q_a50": config.get("q_a50"),

@@ -178,11 +178,14 @@ def analyze_atlas(input_dir: Path, reference_json: Path | None = None):
         classification = _classify_static_mode(
             q_init, rate, recruitment, rhythm)
         hybrid_config = payload.get("hybrid_config") or {}
+        spatial_basis = payload.get("spatial_basis_contract") or {}
         records.append({
             "q_init": q_init,
             "q_init_h_gain": q_init_h_gain,
             "q_endpoint_gain": q_endpoint_gain,
             "q_endpoint_sigma_mm": q_endpoint_sigma_mm,
+            "q_endpoint_side": spatial_basis.get(
+                "active_endpoint_side", "union"),
             "q_min": float((payload.get("hybrid_config") or {}).get(
                 "q_min", 0.0)),
             "q_initial_grid_range": q_initial_range,
@@ -234,6 +237,7 @@ def analyze_atlas(input_dir: Path, reference_json: Path | None = None):
                 "q_init_h_gain": record["q_init_h_gain"],
                 "q_endpoint_gain": record["q_endpoint_gain"],
                 "q_endpoint_sigma_mm": record["q_endpoint_sigma_mm"],
+                "q_endpoint_side": record["q_endpoint_side"],
             }
             for record in supporting
         ],
@@ -271,7 +275,8 @@ def main():
     csv_path = out.with_suffix(".csv")
     fieldnames = [
         "q_init", "q_init_h_gain", "q_endpoint_gain",
-        "q_endpoint_sigma_mm", "q_min", "q_initial_grid_mean",
+        "q_endpoint_sigma_mm", "q_endpoint_side", "q_min",
+        "q_initial_grid_mean",
         "q_initial_grid_min",
         "q_initial_grid_max", "m_build_gain", "eta_m", "tau_m_ms",
         "m_state_ceiling", "m_spatial_mix", "sigma_m_mm",
@@ -292,6 +297,7 @@ def main():
                 "q_init_h_gain": record["q_init_h_gain"],
                 "q_endpoint_gain": record["q_endpoint_gain"],
                 "q_endpoint_sigma_mm": record["q_endpoint_sigma_mm"],
+                "q_endpoint_side": record["q_endpoint_side"],
                 "q_min": record["q_min"],
                 "q_initial_grid_mean": record["q_initial_grid_mean"],
                 "q_initial_grid_min": record["q_initial_grid_range"][0],

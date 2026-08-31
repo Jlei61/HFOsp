@@ -1,6 +1,11 @@
+from types import SimpleNamespace
+
 import numpy as np
 import pytest
 
+from scripts.run_topic4_spatial_zm_qigk_canary import (
+    _frozen_endpoint_contact_centers,
+)
 from src.snn_engine.slow_field import SpatialSlowField, SpatialSlowFieldConfig
 from src.topic4_spatial_zm_qigk import (
     SpatialZMQIGKConfig,
@@ -330,6 +335,26 @@ def test_nonzero_endpoint_gain_requires_frozen_centers():
     with pytest.raises(ValueError, match="requires frozen endpoint"):
         SpatialZMQIGKSlowVars(
             6, 18.0, pos_e, pos_i, 2.0, np.ones(4), cfg=cfg)
+
+
+def test_runner_selects_frozen_source_or_sink_contacts_without_refitting():
+    substrate = SimpleNamespace(
+        contact_names=["S2", "K1", "S1", "K2"],
+        contact_xy=np.asarray([[2.0, 0.0], [3.0, 0.0],
+                               [1.0, 0.0], [4.0, 0.0]]),
+        extras={"placement": {
+            "source_names": ["S1", "S2"],
+            "sink_names": ["K1", "K2"],
+        }},
+    )
+    source_names, source_xy = _frozen_endpoint_contact_centers(
+        substrate, side="source")
+    sink_names, sink_xy = _frozen_endpoint_contact_centers(
+        substrate, side="sink")
+    assert source_names == ["S1", "S2"]
+    assert sink_names == ["K1", "K2"]
+    np.testing.assert_array_equal(source_xy[:, 0], [1.0, 2.0])
+    np.testing.assert_array_equal(sink_xy[:, 0], [3.0, 4.0])
 
 
 def test_spatial_q_initialization_never_starts_below_local_floor():

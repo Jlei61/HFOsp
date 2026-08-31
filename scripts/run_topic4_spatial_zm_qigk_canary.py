@@ -57,13 +57,19 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def _frozen_endpoint_contact_centers(substrate):
+def _frozen_endpoint_contact_centers(substrate, side="union"):
     """Return the declared source-then-sink contact centres without refitting."""
     placement = substrate.extras["placement"]
-    endpoint_names = [
-        *[str(name) for name in placement["source_names"]],
-        *[str(name) for name in placement["sink_names"]],
-    ]
+    source_names = [str(name) for name in placement["source_names"]]
+    sink_names = [str(name) for name in placement["sink_names"]]
+    if side == "source":
+        endpoint_names = source_names
+    elif side == "sink":
+        endpoint_names = sink_names
+    elif side == "union":
+        endpoint_names = [*source_names, *sink_names]
+    else:
+        raise ValueError("endpoint side must be source, sink, or union")
     contact_map = {
         str(name): np.asarray(xy, float)
         for name, xy in zip(substrate.contact_names, substrate.contact_xy)
@@ -104,6 +110,10 @@ def main():
     parser.add_argument("--q-init-h-gain", type=float, default=0.0)
     parser.add_argument("--q-endpoint-gain", type=float, default=0.0)
     parser.add_argument("--q-endpoint-sigma", type=float, default=2.0)
+    parser.add_argument(
+        "--q-endpoint-side", choices=("union", "source", "sink"),
+        default="union",
+    )
     parser.add_argument("--freeze-q", action="store_true")
     parser.add_argument("--q-a0", type=float, default=0.0)
     parser.add_argument("--q-a50", type=float, default=1.0)
@@ -146,7 +156,7 @@ def main():
     )
     dt = float(substrate.engine["dt"])
     endpoint_names, endpoint_centers_xy = _frozen_endpoint_contact_centers(
-        substrate)
+        substrate, side=args.q_endpoint_side)
     hybrid_config = SpatialZMQIGKConfig(
         n_grid=int(args.n_grid),
         sigma_r_mm=0.5,
@@ -232,11 +242,12 @@ def main():
         ),
         "source_contact_names": list(placement["source_names"]),
         "sink_contact_names": list(placement["sink_names"]),
+        "active_endpoint_side": args.q_endpoint_side,
         "endpoint_contact_order": endpoint_names,
         "endpoint_centers_xy_mm": endpoint_centers_xy.tolist(),
         "endpoint_field_rule": (
-            "maximum of periodic Gaussian fields centred on the six frozen "
-            "endpoint contacts; sigma is declared in "
+            "maximum of periodic Gaussian fields centred on the declared "
+            "active endpoint contact set; sigma is declared in "
             "hybrid_config.q_endpoint_sigma_mm"
         ),
         "fitted_to_current_dynamics_result": False,
