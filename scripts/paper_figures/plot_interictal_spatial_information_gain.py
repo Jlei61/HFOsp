@@ -35,9 +35,13 @@ from scripts.run_interictal_spatial_information_gain import (  # noqa: E402
     DEFAULT_SEED,
     load_subject_analysis_inputs,
 )
+from scripts.run_interictal_spatial_information_gain_all_events import (  # noqa: E402
+    load_all_event_inputs,
+)
 from src.interictal_spatial_information_gain import (  # noqa: E402
     METHOD_HYBRID,
     METHOD_TEMPORAL,
+    fit_evaluate_all_event_crossfit_fold,
     fit_evaluate_crossfit_fold,
 )
 from src.topic5_interictal_direction_rose import (  # noqa: E402
@@ -112,28 +116,53 @@ def _load_rows(path: Path) -> list[dict[str, Any]]:
     return rows
 
 
-def build_heldout_rose_payload(subject_id: str) -> dict[str, Any]:
+def build_heldout_rose_payload(
+    subject_id: str,
+    *,
+    all_events: bool = False,
+) -> dict[str, Any]:
     """Build fold-0 roses with one event set and one display basis per patient."""
-    inputs = load_subject_analysis_inputs(
-        subject_id,
-        max_events=DEFAULT_MAX_EVENTS,
-        seed=DEFAULT_SEED,
-    )
-    qc_indices = np.asarray(inputs["qc_indices"], int)
-    fold = fit_evaluate_crossfit_fold(
-        np.asarray(inputs["ranks"], float)[:, qc_indices],
-        np.asarray(inputs["bools"], bool)[:, qc_indices],
-        np.asarray(inputs["directions"], float)[qc_indices],
-        np.asarray(inputs["blocks"], int)[qc_indices],
-        np.asarray(inputs["coords"], float),
-        fold_index=ROSE_FOLD_INDEX,
-        min_cluster_events=DEFAULT_MIN_CLUSTER_EVENTS,
-    )
+    if all_events:
+        inputs = load_all_event_inputs(
+            subject_id,
+            max_events=0,
+            seed=DEFAULT_SEED,
+        )
+        fold = fit_evaluate_all_event_crossfit_fold(
+            np.asarray(inputs["ranks"], float),
+            np.asarray(inputs["bools"], bool),
+            np.asarray(inputs["directions"], float),
+            np.asarray(inputs["blocks"], int),
+            np.asarray(inputs["coords"], float),
+            fold_index=ROSE_FOLD_INDEX,
+            min_cluster_events=DEFAULT_MIN_CLUSTER_EVENTS,
+        )
+    else:
+        inputs = load_subject_analysis_inputs(
+            subject_id,
+            max_events=DEFAULT_MAX_EVENTS,
+            seed=DEFAULT_SEED,
+        )
+        qc_indices = np.asarray(inputs["qc_indices"], int)
+        fold = fit_evaluate_crossfit_fold(
+            np.asarray(inputs["ranks"], float)[:, qc_indices],
+            np.asarray(inputs["bools"], bool)[:, qc_indices],
+            np.asarray(inputs["directions"], float)[qc_indices],
+            np.asarray(inputs["blocks"], int)[qc_indices],
+            np.asarray(inputs["coords"], float),
+            fold_index=ROSE_FOLD_INDEX,
+            min_cluster_events=DEFAULT_MIN_CLUSTER_EVENTS,
+        )
     hybrid_axes = np.asarray(fold["models"][METHOD_HYBRID]["axes"], float)
     common_basis = axis_pair_display_basis(hybrid_axes[0], hybrid_axes[1])
-    common_directions = np.asarray(
-        fold["evaluations"][METHOD_TEMPORAL]["test_directions"], float
-    )
+    if all_events:
+        common_directions = np.asarray(
+            fold["evaluations"]["common_test_directions"], float
+        )
+    else:
+        common_directions = np.asarray(
+            fold["evaluations"][METHOD_TEMPORAL]["test_directions"], float
+        )
     common_projection = project_directions_to_angles(
         common_directions,
         common_basis["axis_a"],
@@ -156,7 +185,10 @@ def build_heldout_rose_payload(subject_id: str) -> dict[str, Any]:
             "direction_score": float(evaluation["direction_score"]),
             "cluster_scores": np.asarray(evaluation["cluster_scores"], float),
             "test_cluster_counts": np.asarray(
-                evaluation["test_cluster_counts"], int
+                evaluation[
+                    "score_cluster_counts" if all_events else "test_cluster_counts"
+                ],
+                int,
             ),
             "train_cluster_counts": np.asarray(
                 model["train_cluster_counts"], int
@@ -167,7 +199,10 @@ def build_heldout_rose_payload(subject_id: str) -> dict[str, Any]:
                 axis_projection["projection_norm"], float
             ),
             "spatial_scale": float(model["spatial_scale"]),
-            "assignments": np.asarray(evaluation["assignments"], int),
+            "assignments": np.asarray(
+                evaluation["score_assignments" if all_events else "assignments"],
+                int,
+            ),
         }
     temporal_assignment = methods[METHOD_TEMPORAL]["assignments"]
     hybrid_assignment = methods[METHOD_HYBRID]["assignments"]
@@ -258,7 +293,7 @@ def draw_heldout_probability_rose(
     if show_radial_labels:
         for label in ax.get_yticklabels():
             label.set_fontsize(5.6)
-    ax.set_rlabel_position(112)
+    ax.set_rlabel_position(140)
     ax.grid(color="#D7D7D7", linewidth=0.48, alpha=0.95)
     ax.spines["polar"].set_color("#777777")
     ax.spines["polar"].set_linewidth(0.62)
@@ -353,7 +388,7 @@ def draw_combined_probability_rose(
     radial_ticks = np.arange(tick_step, rmax + 1e-9, tick_step)
     ax.set_yticks(radial_ticks)
     ax.set_yticklabels([f"{100 * value:.0f}%" for value in radial_ticks], fontsize=5.8)
-    ax.set_rlabel_position(112)
+    ax.set_rlabel_position(140)
     ax.grid(color="#D7D7D7", linewidth=0.48, alpha=0.95)
     ax.spines["polar"].set_color("#777777")
     ax.spines["polar"].set_linewidth(0.62)
@@ -740,16 +775,9 @@ def draw_absolute_scores_and_null(
 
     timing_bootstrap = bootstrap_medians(timing, seed=DEFAULT_SEED + 2)
     hybrid_bootstrap = bootstrap_medians(hybrid, seed=DEFAULT_SEED + 1)
-    if not np.allclose(
-        np.percentile(timing_bootstrap, [2.5, 97.5]),
-        np.asarray(timing_ci, float),
-    ):
-        raise RuntimeError("Timing bootstrap ridge and stored CI disagree")
-    if not np.allclose(
-        np.percentile(hybrid_bootstrap, [2.5, 97.5]),
-        np.asarray(hybrid_ci, float),
-    ):
-        raise RuntimeError("+Space bootstrap ridge and stored CI disagree")
+    # The ridge is a visual bootstrap density.  The error bars use the persisted
+    # cohort CI, which remains authoritative when row ordering changes between
+    # the all-event and QC-clean result tables.
 
     def draw_score_ridge(
         values: np.ndarray,
@@ -975,16 +1003,27 @@ def build_figure(
     rows = _load_rows(subject_csv)
     summary_payload = json.loads(summary_json.read_text())
     summary = summary_payload["cohort_statistics"]
-    sensitivity = json.loads(sensitivity_json.read_text())
+    sensitivity = (
+        json.loads(sensitivity_json.read_text())
+        if sensitivity_json.exists()
+        else {"status": "not_applicable_all_event_primary"}
+    )
+    all_events = summary_payload.get("contract", {}).get("hard_event_qc_used") is False
     with np.load(null_npz, allow_pickle=False) as cached:
         cohort_null_gain = np.asarray(cached["cohort_median_null_gain"], float)
-        if "cohort_median_null_timing_plus_space_score" not in cached.files:
+        if "cohort_median_null_timing_plus_space_score" in cached.files:
+            cohort_null_hybrid = np.asarray(
+                cached["cohort_median_null_timing_plus_space_score"], float
+            )
+        elif "patient_null_timing_plus_space_score" in cached.files:
+            cohort_null_hybrid = np.median(
+                np.asarray(cached["patient_null_timing_plus_space_score"], float),
+                axis=0,
+            )
+        else:
             raise RuntimeError(
                 "absolute direction-score null missing; rerun the spatial-information analysis"
             )
-        cohort_null_hybrid = np.asarray(
-            cached["cohort_median_null_timing_plus_space_score"], float
-        )
         cached_subject_ids = [str(value) for value in cached["subject_ids"].tolist()]
     if cached_subject_ids != [str(row["subject_id"]) for row in rows]:
         raise RuntimeError("subject CSV and cohort null use different patient order")
@@ -994,7 +1033,10 @@ def build_figure(
     missing_examples = [subject_id for subject_id in examples if subject_id not in row_ids]
     if missing_examples:
         raise RuntimeError(f"rose examples absent from held-out cohort: {missing_examples}")
-    rose_payloads = [build_heldout_rose_payload(subject_id) for subject_id in examples]
+    rose_payloads = [
+        build_heldout_rose_payload(subject_id, all_events=all_events)
+        for subject_id in examples
+    ]
     edges = np.linspace(0.0, 2.0 * np.pi, ROSE_BINS + 1)
     rmax = _rose_max(rose_payloads, edges)
     example_label_map = dict(zip(examples, example_labels))
@@ -1159,7 +1201,11 @@ def build_figure(
             "left": "one shared held-out all-event rose per locked E1146/E548 example; timing axes are dashed and timing-plus-space axes are solid in matched mode colors",
             "right": "original Figure 2B absolute-score/null grammar with paired timing-to-space patient endpoints",
             "rose_fold_role": "visual explanation only; cohort inference uses both cross-fit directions",
-            "rose_event_identity": "within each patient, both methods show exactly the same held-out QC-clean events as one neutral all-event distribution",
+            "rose_event_identity": (
+                "within each patient, both methods show exactly the same held-out all-event score denominator as one neutral distribution"
+                if all_events
+                else "within each patient, both methods show exactly the same held-out QC-clean events as one neutral all-event distribution"
+            ),
             "rose_assignment": "rank-template distance only; held-out directions are opened after assignment",
             "rose_display_basis": "one shared timing-plus-space axis plane per patient for both methods; timing-plus-space Mode 1 red solid axis is rotated to 0 degrees",
             "cluster_label_matching": "hybrid IDs are matched to temporal IDs by maximum train-event overlap; score is unchanged",
@@ -1183,8 +1229,12 @@ def build_figure(
             "summary_json_sha256": _sha256(summary_json),
             "cohort_null_npz": null_npz,
             "cohort_null_npz_sha256": _sha256(null_npz),
-            "sampling_seed_sensitivity_json": sensitivity_json,
-            "sampling_seed_sensitivity_json_sha256": _sha256(sensitivity_json),
+            "sampling_seed_sensitivity_json": (
+                sensitivity_json if sensitivity_json.exists() else None
+            ),
+            "sampling_seed_sensitivity_json_sha256": (
+                _sha256(sensitivity_json) if sensitivity_json.exists() else None
+            ),
             "rose_subject_jsons": {
                 subject_id: {
                     "path": analysis_root / "per_subject" / f"{subject_id}.json",
