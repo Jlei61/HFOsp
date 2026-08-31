@@ -34,6 +34,11 @@ from src.topic4_dynamic_accessibility import (  # noqa: E402
     SpikeTriggeredAdaptation,
 )
 from src.topic4_dual_core_ood import spatial_event_activity_grid  # noqa: E402
+from src.topic4_dual_core_carrier import (  # noqa: E402
+    bin_continuous_trace,
+    binned_group_rates_hz,
+    dual_core_region_masks,
+)
 from src.topic4_graph_edge_flow import (  # noqa: E402
     array_sha256,
     graph_spectral_ee_flow,
@@ -106,6 +111,17 @@ def main():
     parser.add_argument("--out-json")
     parser.add_argument("--out-npz")
     parser.add_argument("--cache-dir")
+    parser.add_argument(
+        "--carrier-readout", action="store_true",
+        help=(
+            "record unsmoothed 1-ms regional E/I rates and current-based "
+            "contact/core readout without changing the SNN dynamics"
+        ),
+    )
+    parser.add_argument(
+        "--parity-npz",
+        help="existing worker NPZ whose event/readout arrays must reproduce exactly",
+    )
     args = parser.parse_args()
 
     config_path = Path(args.config).resolve()
@@ -482,6 +498,25 @@ def main():
                 seed=int(args.seed) + int(spatial_ou["seed_offset"]),
             ),
         )
+    carrier_enabled = bool(args.carrier_readout)
+    if carrier_enabled:
+        if node_candidate["field_type"] != "manual_dual_core_budget_matched":
+            raise RuntimeError("raw carrier canary requires the frozen dual-core Node")
+        lfp_recorder_cls = __import__("lfp").LFPRecorder
+        carrier_core_centers = np.asarray(node_candidate["centers_mm"], float)
+        carrier_current_xy = np.vstack([carrier_core_centers, contact_xy])
+        carrier_current_names = np.asarray(
+            ["core_1_center", "core_2_center", *contact_names], dtype="U24",
+        )
+        carrier_recorder = lfp_recorder_cls(
+            params, np.asarray(net["pos"], float), np.asarray(net["labels"]),
+            sites=carrier_current_xy,
+        )
+    else:
+        carrier_core_centers = np.empty((0, 2), float)
+        carrier_current_xy = np.empty((0, 2), float)
+        carrier_current_names = np.empty(0, dtype="U24")
+        carrier_recorder = None
     mechanism_readout = config.get("mechanism_readout", {})
     result = simulate_kick(
         params, mapped_net, KICK_BOOST=0.0, t_kick=1e9,
@@ -496,6 +531,8 @@ def main():
             manifest["status"] == "REV10D3_DYNAMIC_EE_STD_LIBRARY_FROZEN"
         ),
         external_e_rate_drive=external_drive,
+        lfp_recorder=carrier_recorder,
+        dump_i_spikes=carrier_enabled,
         dump_pathway_trace=bool(mechanism_readout.get("enabled", False)),
         pathway_trace_dt_ms=float(mechanism_readout.get("trace_dt_ms", 1.0)),
     )
@@ -551,6 +588,66 @@ def main():
             "activity_grid_event_count": np.empty(0, np.int32),
             "activity_grid_bin_ms": np.asarray(0.0, float),
             "activity_grid_spatial_bins": np.asarray(0, np.int32),
+        }
+    if carrier_enabled:
+        radius = float(node["field_audit"]["distance_cutoff_mm"])
+        e_region_masks, carrier_region_names = dual_core_region_masks(
+            positions, carrier_core_centers, core_radius_mm=radius,
+        )
+        i_region_masks, i_region_names = dual_core_region_masks(
+            np.asarray(net["pos"][n_e:], float), carrier_core_centers,
+            core_radius_mm=radius,
+        )
+        if i_region_names != carrier_region_names:
+            raise RuntimeError("E/I carrier-region contracts disagree")
+        carrier_e_rate, carrier_time_ms, carrier_e_sizes = binned_group_rates_hz(
+            spikes, e_region_masks, dt_ms=float(engine["dt"]), bin_ms=1.0,
+        )
+        carrier_i_rate, carrier_i_time_ms, carrier_i_sizes = binned_group_rates_hz(
+            np.asarray(result["I_spk_bool"], bool), i_region_masks,
+            dt_ms=float(engine["dt"]), bin_ms=1.0,
+        )
+        carrier_current, carrier_current_time_ms = bin_continuous_trace(
+            np.asarray(result["lfp_trace"], float),
+            dt_ms=float(engine["dt"]), bin_ms=1.0,
+        )
+        if not (
+            np.array_equal(carrier_time_ms, carrier_i_time_ms)
+            and np.array_equal(carrier_time_ms, carrier_current_time_ms)
+        ):
+            raise RuntimeError("raw carrier traces are not time aligned")
+        carrier_arrays = {
+            "carrier_readout_enabled": np.asarray(True),
+            "carrier_time_ms": carrier_time_ms,
+            "carrier_region_names": np.asarray(carrier_region_names, dtype="U16"),
+            "carrier_E_rate_hz": carrier_e_rate,
+            "carrier_I_rate_hz": carrier_i_rate,
+            "carrier_E_region_sizes": carrier_e_sizes.astype(np.int32),
+            "carrier_I_region_sizes": carrier_i_sizes.astype(np.int32),
+            "carrier_current_activity": carrier_current,
+            "carrier_current_site_names": carrier_current_names,
+            "carrier_current_xy_mm": carrier_current_xy.astype(np.float32),
+            "carrier_core_radius_mm": np.asarray(radius, float),
+            "carrier_bin_ms": np.asarray(1.0, float),
+            "carrier_temporal_smoothing_ms": np.asarray(0.0, float),
+        }
+    else:
+        carrier_region_names = []
+        carrier_e_sizes = carrier_i_sizes = np.empty(0, np.int32)
+        carrier_arrays = {
+            "carrier_readout_enabled": np.asarray(False),
+            "carrier_time_ms": np.empty(0, np.float32),
+            "carrier_region_names": np.empty(0, dtype="U16"),
+            "carrier_E_rate_hz": np.empty((0, 0), np.float32),
+            "carrier_I_rate_hz": np.empty((0, 0), np.float32),
+            "carrier_E_region_sizes": np.empty(0, np.int32),
+            "carrier_I_region_sizes": np.empty(0, np.int32),
+            "carrier_current_activity": np.empty((0, 0), np.float32),
+            "carrier_current_site_names": np.empty(0, dtype="U24"),
+            "carrier_current_xy_mm": np.empty((0, 2), np.float32),
+            "carrier_core_radius_mm": np.asarray(0.0, float),
+            "carrier_bin_ms": np.asarray(0.0, float),
+            "carrier_temporal_smoothing_ms": np.asarray(0.0, float),
         }
     adaptation_trace = (
         slow.trace_arrays() if adaptation["mode"] != "off" else {
@@ -608,6 +705,51 @@ def main():
     else:
         pathway_rate_E_hz = np.empty(0, dtype=np.float32)
         pathway_rate_I_hz = np.empty(0, dtype=np.float32)
+    parity_audit = {
+        "requested": bool(args.parity_npz),
+        "passed": None,
+        "source_path": None,
+        "source_sha256": None,
+        "keys": [],
+    }
+    if args.parity_npz:
+        parity_path = Path(args.parity_npz).resolve()
+        parity_keys = (
+            "onsets", "ranks", "event_t_on_ms", "event_t_off_ms",
+            "event_returned", "active_fraction", "contact_envelope",
+        )
+        current_arrays = {
+            "onsets": onsets.astype(np.float32),
+            "ranks": ranks.astype(np.float32),
+            "event_t_on_ms": np.asarray(
+                [row["t_on_ms"] for row in event_rows], np.float32,
+            ),
+            "event_t_off_ms": np.asarray(
+                [row["t_off_ms"] for row in event_rows], np.float32,
+            ),
+            "event_returned": np.asarray(
+                [row["returned"] for row in event_rows], bool,
+            ),
+            "active_fraction": np.asarray(active, np.float32),
+            "contact_envelope": np.asarray(envelope, np.float32),
+        }
+        with np.load(parity_path, allow_pickle=False) as frozen:
+            mismatches = [
+                key for key in parity_keys
+                if not np.array_equal(current_arrays[key], frozen[key])
+            ]
+        if mismatches:
+            raise RuntimeError(
+                "carrier recorder changed frozen event/readout arrays: "
+                + ", ".join(mismatches)
+            )
+        parity_audit = {
+            "requested": True,
+            "passed": True,
+            "source_path": str(parity_path),
+            "source_sha256": _sha256(parity_path),
+            "keys": list(parity_keys),
+        }
     _atomic_npz(
         output_npz,
         contact_names=np.asarray(contact_names, dtype="U16"),
@@ -683,6 +825,7 @@ def main():
             pathway_trace["GABA_to_E_mean"], np.float32,
         ),
         **activity_grid,
+        **carrier_arrays,
     )
     payload = {
         "status": "REV10R_EDGE_FLOW_WORKER_COMPLETE",
@@ -788,6 +931,18 @@ def main():
             "trace_samples": int(len(pathway_time_ms)),
             "records_population_rates": bool(len(pathway_time_ms)),
             "records_pathway_mean_currents": bool(len(pathway_time_ms)),
+        },
+        "raw_carrier_readout": {
+            "enabled": carrier_enabled,
+            "bin_ms": 1.0 if carrier_enabled else None,
+            "temporal_smoothing_ms": 0.0 if carrier_enabled else None,
+            "region_names": list(carrier_region_names),
+            "E_region_sizes": carrier_e_sizes.tolist(),
+            "I_region_sizes": carrier_i_sizes.tolist(),
+            "current_site_names": carrier_current_names.tolist(),
+            "current_proxy": "spatially weighted abs(I_AMPA)+abs(I_GABA)",
+            "not_clinical_seeg": True,
+            "parity_audit": parity_audit,
         },
         "network": {
             "n_E": int(n_e), "n_I": int(n_i),
