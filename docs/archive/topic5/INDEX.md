@@ -1,5 +1,19 @@
 # Topic 5 Archive Index
 
+- **2026-08-31 H2b frozen interictal-state cross-task transfer v0.3 探索收口**：
+  [`白话版`](continuous_marked_state_h2b_cross_task_v0_3_plain_2026-08-31.md) ·
+  [`技术版`](continuous_marked_state_h2b_cross_task_v0_3_technical_2026-08-31.md) ·
+  [`冻结合同`](continuous_marked_state_h2b_cross_task_v0_3_contract_2026-08-31.md) ·
+  [`少 gate、多探索附录`](continuous_marked_state_h2b_cross_task_v0_3_exploration_addendum_2026-08-31.md)。
+  16 位患者、75 个可读 checkpoint 的纯间期仪器审计中 strict state-qualified 为 0/16，10/16
+  仅为 scalar slow-axis candidate；半合成 geometry family recovery 为 99–100%，但 persistent
+  T+M+lag joint detection 仅 1/100，因此人体阴性不能作生物学阴性。完整 5-min 时间网格覆盖 10 位、
+  46 cells、10,597 unique anchors；30-min prequential hazard 可估 6 人，T 4/6、M 2/6、
+  correct-time 3/6，未形成一致迁移证据。OOS geometry 可估 4 人，abrupt off-manifold exit 4/4，
+  basin 3/4、directed approach 1/4；这是下一版冻结复现线索，不是队列发现。连续 frozen ictal-reuse
+  target 的有效 LOSO 层为 1/3 有利。最终机器状态
+  `PASS_EXPLORATORY_CLOSEOUT_H2B_NOT_ESTABLISHED`；formal/sealed/H3/T2/physical clock/纸图均未触碰。
+
 - **2026-08-30 H2b frozen interictal-state cross-task transfer v0.2 启动**：
   `continuous_marked_state_h2b_cross_task_v0_2_contract_2026-08-30.md`。
   在看任何 R1.7×seizure transfer 结果前冻结 17 人全 checkpoint-available 队列，H1 标签只分层不 gate；

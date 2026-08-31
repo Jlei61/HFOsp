@@ -89,6 +89,10 @@ def build(root: Path, test_log: Path) -> dict:
         "geometry_queue": root / "geometry/QUEUE_STATUS.json",
         "geometry": root / "geometry/patient_first_summary.json",
         "phenotype": root / "phenotype_continuous/summary.json",
+        "support_conditioned_quarantine": (
+            root / "quarantine/support_conditioned_hazard_v2/hazard/"
+            "patient_first_summary.json"
+        ),
         "test_log": test_log,
     }
     missing = [str(path) for path in required.values() if not path.is_file()]
@@ -182,6 +186,7 @@ def build(root: Path, test_log: Path) -> dict:
     hazard_queue, hazard = data["hazard_queue"], data["hazard"]
     geometry_queue, geometry = data["geometry_queue"], data["geometry"]
     phenotype = data["phenotype"]
+    support_conditioned = data["support_conditioned_quarantine"]
     _require(hazard_queue.get("status") == "COMPLETE"
              and hazard_queue.get("requested_tasks") == 46
              and hazard_queue.get("failed_this_run") == 0,
@@ -208,6 +213,7 @@ def build(root: Path, test_log: Path) -> dict:
         ("hazard queue", hazard_queue), ("hazard", hazard),
         ("geometry queue", geometry_queue), ("geometry", geometry),
         ("phenotype", phenotype),
+        ("support-conditioned quarantine", support_conditioned),
     ):
         _guard(payload, label)
     _require(hazard.get("negative_result_biological_interpretation_allowed")
@@ -217,6 +223,13 @@ def build(root: Path, test_log: Path) -> dict:
     _require(phenotype.get("target_reclustered") is False
              and phenotype.get("target_thresholded_after_state") is False,
              "phenotype target was changed after seeing state")
+    _require(
+        support_conditioned.get("status")
+        == "COMPLETE_EXPLORATORY_ASSAY_NOT_SENSITIVE"
+        and support_conditioned.get("n_cells") == 46
+        and support_conditioned.get("n_patients") == 10,
+        "support-conditioned result is missing from quarantine",
+    )
 
     # A7 is conditional, not a mandatory gate. This is an operational priority
     # rule, not a significance threshold: require broad hazard and correct-time
@@ -334,13 +347,14 @@ def build(root: Path, test_log: Path) -> dict:
         "A6_common_domain_OOS_geometry_complete": True,
         "A7_conditional_decision_recorded": True,
         "A8_frozen_target_not_reclustered": True,
+        "support_conditioned_results_quarantined": True,
         "formal_sealed_H3_T2_untouched": True,
         "negative_not_interpreted_biologically": True,
         "final_scoped_tests_passed": True,
     }
     machine = {
         "status": "PASS_EXPLORATORY_CLOSEOUT_H2B_NOT_ESTABLISHED",
-        "revision": "h2b_v0_3_machine_audit_v2",
+        "revision": "h2b_v0_3_machine_audit_v3_quarantine_audited",
         "created_utc": created,
         "development_only": True,
         "scientific_conclusion": (
