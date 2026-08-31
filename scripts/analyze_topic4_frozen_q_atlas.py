@@ -188,6 +188,12 @@ def analyze_atlas(input_dir: Path, reference_json: Path | None = None):
             "q_sink_gain": float(hybrid_config.get("q_sink_gain", 0.0)),
             "q_support_gain": float(hybrid_config.get(
                 "q_support_gain", 0.0)),
+            "k_q_source_gain": float(hybrid_config.get(
+                "k_q_source_gain", 0.0)),
+            "k_q_sink_gain": float(hybrid_config.get(
+                "k_q_sink_gain", 0.0)),
+            "k_q_support_gain": float(hybrid_config.get(
+                "k_q_support_gain", 0.0)),
             "q_endpoint_side": spatial_basis.get(
                 "active_endpoint_side", "union"),
             "q_min": float((payload.get("hybrid_config") or {}).get(
@@ -294,6 +300,7 @@ def main():
         "q_init", "q_init_h_gain", "q_endpoint_gain",
         "q_endpoint_sigma_mm", "q_endpoint_side", "q_min",
         "q_source_gain", "q_sink_gain", "q_support_gain",
+        "k_q_source_gain", "k_q_sink_gain", "k_q_support_gain",
         "q_initial_grid_mean",
         "q_initial_grid_min",
         "q_initial_grid_max", "m_build_gain", "eta_m", "tau_m_ms",
@@ -321,6 +328,9 @@ def main():
                 "q_source_gain": record["q_source_gain"],
                 "q_sink_gain": record["q_sink_gain"],
                 "q_support_gain": record["q_support_gain"],
+                "k_q_source_gain": record["k_q_source_gain"],
+                "k_q_sink_gain": record["k_q_sink_gain"],
+                "k_q_support_gain": record["k_q_support_gain"],
                 "q_min": record["q_min"],
                 "q_initial_grid_mean": record["q_initial_grid_mean"],
                 "q_initial_grid_min": record["q_initial_grid_range"][0],

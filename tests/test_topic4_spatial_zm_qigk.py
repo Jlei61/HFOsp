@@ -480,6 +480,56 @@ def test_nonzero_q_support_gain_requires_frozen_support_centres():
         )
 
 
+def test_spatial_kq_gains_preserve_q_initial_state_and_mean_rate_scale():
+    pos_e, pos_i = _positions()
+    source = np.asarray([[0.25, 0.25], [0.25, 0.75]])
+    sink = np.asarray([[1.25, 1.25], [1.25, 1.75]])
+    support = np.asarray([[0.25, 1.25], [1.25, 1.25]])
+    baseline = SpatialZMQIGKSlowVars(
+        6, 18.0, pos_e, pos_i, 2.0, np.ones(4),
+        source_centers_xy=source, sink_centers_xy=sink,
+        gk_centers_xy=support,
+        cfg=SpatialZMQIGKConfig(
+            n_grid=4, sigma_q_mm=0.7, h_smooth_sigma_mm=0.5,
+            q_init=1.0, k_q_per_ms=0.002,
+        ),
+    )
+    spatial = SpatialZMQIGKSlowVars(
+        6, 18.0, pos_e, pos_i, 2.0, np.ones(4),
+        source_centers_xy=source, sink_centers_xy=sink,
+        gk_centers_xy=support,
+        cfg=SpatialZMQIGKConfig(
+            n_grid=4, sigma_q_mm=0.7, h_smooth_sigma_mm=0.5,
+            q_init=1.0, k_q_per_ms=0.002,
+            k_q_source_gain=0.4, k_q_support_gain=0.2,
+        ),
+    )
+    np.testing.assert_array_equal(spatial.q_init_grid, baseline.q_init_grid)
+    assert np.mean(spatial.k_q_grid) == pytest.approx(0.002)
+    assert np.ptp(spatial.k_q_grid) > 0.0
+    assert spatial.k_q_grid[0, 0] > spatial.k_q_grid[0, 3]
+
+
+def test_zero_spatial_kq_gains_exactly_preserve_previous_kq_field():
+    pos_e, pos_i = _positions()
+    cfg = SpatialZMQIGKConfig(
+        n_grid=4, sigma_q_mm=0.7, h_smooth_sigma_mm=0.5,
+        k_q_per_ms=0.002, k_q_h_gain=0.3,
+    )
+    plain = SpatialZMQIGKSlowVars(
+        6, 18.0, pos_e, pos_i, 2.0, np.asarray([0.0, 0.2, 0.8, 1.0]),
+        cfg=cfg,
+    )
+    with_unused_centres = SpatialZMQIGKSlowVars(
+        6, 18.0, pos_e, pos_i, 2.0, np.asarray([0.0, 0.2, 0.8, 1.0]),
+        source_centers_xy=np.asarray([[0.25, 0.25], [0.25, 0.75]]),
+        sink_centers_xy=np.asarray([[1.25, 1.25], [1.25, 1.75]]),
+        gk_centers_xy=np.asarray([[0.25, 1.25], [1.25, 1.25]]),
+        cfg=cfg,
+    )
+    np.testing.assert_array_equal(plain.k_q_grid, with_unused_centres.k_q_grid)
+
+
 def test_runner_selects_frozen_source_or_sink_contacts_without_refitting():
     substrate = SimpleNamespace(
         contact_names=["S2", "K1", "S1", "K2"],

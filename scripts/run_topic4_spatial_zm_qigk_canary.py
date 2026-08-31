@@ -150,6 +150,9 @@ def main():
     parser.add_argument("--m-spatial-mix", type=float, default=0.0)
     parser.add_argument("--sigma-m", type=float, default=0.5)
     parser.add_argument("--k-q-h-gain", type=float, default=0.0)
+    parser.add_argument("--k-q-source-gain", type=float, default=0.0)
+    parser.add_argument("--k-q-sink-gain", type=float, default=0.0)
+    parser.add_argument("--k-q-support-gain", type=float, default=0.0)
     parser.add_argument("--q-floor-h-gain", type=float, default=0.0)
     parser.add_argument("--eta-m-h-gain", type=float, default=0.0)
     parser.add_argument("--eta-m-source-add", type=float, default=0.0)
@@ -231,6 +234,9 @@ def main():
         m_spatial_mix=float(args.m_spatial_mix),
         sigma_m_mm=float(args.sigma_m),
         k_q_h_gain=float(args.k_q_h_gain),
+        k_q_source_gain=float(args.k_q_source_gain),
+        k_q_sink_gain=float(args.k_q_sink_gain),
+        k_q_support_gain=float(args.k_q_support_gain),
         q_floor_h_gain=float(args.q_floor_h_gain),
         eta_m_h_gain=float(args.eta_m_h_gain),
         eta_m_source_add=float(args.eta_m_source_add),
@@ -306,6 +312,9 @@ def main():
             "source_gain": float(args.q_source_gain),
             "sink_gain": float(args.q_sink_gain),
             "support_gain": float(args.q_support_gain),
+            "source_depletion_gain": float(args.k_q_source_gain),
+            "sink_depletion_gain": float(args.k_q_sink_gain),
+            "support_depletion_gain": float(args.k_q_support_gain),
         },
         "gk_support": {
             "rule": args.gk_support,

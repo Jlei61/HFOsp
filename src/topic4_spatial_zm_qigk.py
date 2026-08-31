@@ -54,6 +54,10 @@ initial condition; no per-neuron random parameter field is introduced.
 Independent ``q_source_gain`` and ``q_sink_gain`` expose the minimum asymmetric
 extension of this basis; they share one declared spatial width and cannot move
 either frozen endpoint set.
+For genuine transitions from ``q(0)=1``, ``k_q_source_gain``,
+``k_q_sink_gain`` and ``k_q_support_gain`` modulate the local q depletion rate
+on those same frozen fields.  They alter neither the initial q state nor the
+mean depletion-rate scale; zero gains preserve the earlier kq field exactly.
 
 The implementation intentionally composes the already tested qI field driver in
 ``src.snn_engine.slow_field``.  It is a development mechanism screen, not a
@@ -105,6 +109,9 @@ class SpatialZMQIGKConfig:
     m_spatial_mix: float = 0.0
     sigma_m_mm: float = 0.5
     k_q_h_gain: float = 0.0
+    k_q_source_gain: float = 0.0
+    k_q_sink_gain: float = 0.0
+    k_q_support_gain: float = 0.0
     q_floor_h_gain: float = 0.0
     eta_m_h_gain: float = 0.0
     eta_m_source_add: float = 0.0
@@ -169,6 +176,9 @@ class SpatialZMQIGKConfig:
                 or abs(self.q_sink_gain) >= 1.0
                 or abs(self.q_support_gain) >= 1.0
                 or abs(self.k_q_h_gain) >= 1.0
+                or abs(self.k_q_source_gain) >= 1.0
+                or abs(self.k_q_sink_gain) >= 1.0
+                or abs(self.k_q_support_gain) >= 1.0
                 or abs(self.eta_m_h_gain) >= 1.0):
             raise ValueError("patient-field gains must have absolute value below one")
         if self.q_eta_i < self.q_eta_e:
@@ -315,10 +325,18 @@ class SpatialZMQIGKSlowVars:
             raise ValueError("q_source_gain requires frozen source_centers_xy")
         if self.cfg.q_sink_gain != 0.0 and self.sink_centers_xy is None:
             raise ValueError("q_sink_gain requires frozen sink_centers_xy")
+        if (self.cfg.k_q_source_gain != 0.0
+                and self.source_centers_xy is None):
+            raise ValueError("k_q_source_gain requires frozen source_centers_xy")
+        if (self.cfg.k_q_sink_gain != 0.0
+                and self.sink_centers_xy is None):
+            raise ValueError("k_q_sink_gain requires frozen sink_centers_xy")
         if self.cfg.eta_m_gk_add != 0.0 and self.gk_centers_xy is None:
             raise ValueError("eta_m_gk_add requires frozen gk_centers_xy")
         if self.cfg.q_support_gain != 0.0 and self.gk_centers_xy is None:
             raise ValueError("q_support_gain requires frozen gk_centers_xy")
+        if self.cfg.k_q_support_gain != 0.0 and self.gk_centers_xy is None:
+            raise ValueError("k_q_support_gain requires frozen gk_centers_xy")
 
         qcfg = SpatialSlowFieldConfig(
             n_grid=int(self.cfg.n_grid),
@@ -424,10 +442,22 @@ class SpatialZMQIGKSlowVars:
         )
         q_init_grid *= float(self.cfg.q_init) / float(np.mean(q_init_grid))
         np.clip(q_init_grid, float(self.cfg.q_min), 1.0, out=q_init_grid)
-        self.k_q_grid = (
-            float(self.cfg.k_q_per_ms)
-            * _mean_one_bounded_modulation(self.h_grid, self.cfg.k_q_h_gain)
-        )
+        k_q_multiplier = _mean_one_bounded_modulation(
+            self.h_grid, self.cfg.k_q_h_gain)
+        if (self.cfg.k_q_source_gain != 0.0
+                or self.cfg.k_q_sink_gain != 0.0
+                or self.cfg.k_q_support_gain != 0.0):
+            k_q_multiplier = (
+                k_q_multiplier
+                * _mean_one_bounded_modulation(
+                    self.source_field, self.cfg.k_q_source_gain)
+                * _mean_one_bounded_modulation(
+                    self.sink_field, self.cfg.k_q_sink_gain)
+                * _mean_one_bounded_modulation(
+                    self.gk_field, self.cfg.k_q_support_gain)
+            )
+            k_q_multiplier /= float(np.mean(k_q_multiplier))
+        self.k_q_grid = float(self.cfg.k_q_per_ms) * k_q_multiplier
         self.q_floor_grid = np.clip(
             float(self.cfg.q_min)
             + float(self.cfg.q_floor_h_gain) * (1.0 - h01),
