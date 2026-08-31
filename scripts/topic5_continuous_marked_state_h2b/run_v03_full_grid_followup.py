@@ -43,12 +43,29 @@ def _run(command: list[str], *, log: Path, environment: dict[str, str]) -> None:
         raise RuntimeError(f"follow-up command failed ({completed.returncode}): {command}")
 
 
+def _claim_route_status(root: Path) -> tuple[set[str], bool]:
+    qualification = _json(root / "qualification/state_qualified_manifest.json")
+    qualified = set(map(str, qualification.get("subjects", [])))
+    final_assay_path = root / "assay/type1_power_summary.json"
+    final_assay_pass = False
+    if final_assay_path.is_file():
+        assay = _json(final_assay_path)
+        final_assay_pass = bool(
+            assay.get("status") == "PASS_FINAL_ASSAY_ACCEPTANCE"
+            and assay.get("claim_bearing_route_released") is True
+        )
+    return qualified, final_assay_pass
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--v0-2-root", type=Path, default=CANONICAL_V0_2_RESULT_ROOT)
     parser.add_argument("--result-root", type=Path, default=CANONICAL_V0_3_RESULT_ROOT)
     parser.add_argument("--expected-cells", type=int, default=46)
     parser.add_argument("--poll-seconds", type=float, default=30.0)
+    parser.add_argument(
+        "--allow-diagnostic-downstream-after-failed-gates", action="store_true",
+    )
     args = parser.parse_args()
     v02, root = args.v0_2_root.resolve(), args.result_root.resolve()
     lock_path = root / "full_grid/.followup.lock"
@@ -83,6 +100,23 @@ def main() -> None:
         if queue.get("status") == "COMPLETE" and len(cells) == int(args.expected_cells):
             break
         time.sleep(float(args.poll_seconds))
+    qualified, final_assay_pass = _claim_route_status(root)
+    claim_route_released = bool(qualified and final_assay_pass)
+    diagnostic_override = bool(
+        args.allow_diagnostic_downstream_after_failed_gates
+    )
+    if not claim_route_released and not diagnostic_override:
+        status.update({
+            "status": "NOT_RELEASED_A1_OR_A2",
+            "stage": "gate_closeout", "updated_utc": utc_now(),
+            "n_state_qualified_patients": len(qualified),
+            "final_assay_pass": final_assay_pass,
+            "downstream_tasks_started": 0,
+            "diagnostic_override_used": False,
+        })
+        atomic_json(status_path, status)
+        print("NOT_RELEASED_A1_OR_A2 downstream_tasks=0")
+        return
     environment = os.environ.copy()
     environment.update({
         "OMP_NUM_THREADS": "1", "MKL_NUM_THREADS": "1",
@@ -94,22 +128,28 @@ def main() -> None:
         ),
     })
     state_root = root / "full_grid/state_cache"
+    hazard_flags = ["--exploratory-all-frozen"] if diagnostic_override else []
+    hazard_aggregate_flags = (
+        ["--include-diagnostic-exploration"] if diagnostic_override else []
+    )
+    geometry_flags = ["--exploratory-all-frozen"] if diagnostic_override else []
+    phenotype_flags = ["--allow-diagnostic-exploration"] if diagnostic_override else []
     commands = [
         ("hazard_cells", [
             str(PYTHON), str(REPO / "scripts/topic5_continuous_marked_state_h2b/run_v03_hazard_queue.py"),
             "--v0-2-root", str(v02), "--result-root", str(root),
             "--state-cache-root", str(state_root), "--output-subdir", "hazard_full_grid",
-            "--cpu-workers", "12", "--exploratory-all-frozen",
+            "--cpu-workers", "12", *hazard_flags,
         ]),
         ("hazard_aggregate", [
             str(PYTHON), str(REPO / "scripts/topic5_continuous_marked_state_h2b/aggregate_v03_hazard.py"),
             "--result-root", str(root), "--analysis-subdir", "hazard_full_grid",
-            "--include-diagnostic-exploration",
+            *hazard_aggregate_flags,
         ]),
         ("geometry_cells", [
             str(PYTHON), str(REPO / "scripts/topic5_continuous_marked_state_h2b/run_v03_geometry_queue.py"),
             "--v0-2-root", str(v02), "--result-root", str(root),
-            "--cpu-workers", "12", "--exploratory-all-frozen",
+            "--cpu-workers", "12", *geometry_flags,
         ]),
         ("geometry_aggregate", [
             str(PYTHON), str(REPO / "scripts/topic5_continuous_marked_state_h2b/aggregate_v03_geometry.py"),
@@ -118,7 +158,7 @@ def main() -> None:
         ("continuous_phenotype", [
             str(PYTHON), str(REPO / "scripts/topic5_continuous_marked_state_h2b/run_v03_continuous_phenotype.py"),
             "--v0-2-root", str(v02), "--result-root", str(root),
-            "--allow-diagnostic-exploration",
+            *phenotype_flags,
         ]),
     ]
     for stage, command in commands:
@@ -131,6 +171,8 @@ def main() -> None:
         "hazard_summary": str(root / "hazard_full_grid/patient_first_summary.json"),
         "geometry_summary": str(root / "geometry/patient_first_summary.json"),
         "phenotype_summary": str(root / "phenotype_continuous/summary.json"),
+        "claim_route_released": claim_route_released,
+        "diagnostic_override_used": diagnostic_override,
     })
     atomic_json(status_path, status)
     print("COMPLETE full-grid follow-up")
