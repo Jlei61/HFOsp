@@ -799,7 +799,9 @@ def summarise_instrument_trace(
     interictal_persistent_minus_memoryless_joint: float,
     embedding: np.ndarray,
     rng_seed: int,
+    timezone_name: str,
     n_null_permutations: int = 100,
+    past_seizure_onsets: Sequence[float] = (),
 ) -> dict[str, Any]:
     train = trace.anchor_split == 0
     validation = (
@@ -882,8 +884,15 @@ def summarise_instrument_trace(
         and median_segment is not None
         and float(empirical_tau) < float(median_segment)
     )
+    # Imported lazily to keep the pure nuisance helpers independently testable.
+    from .v03_nuisance import interictal_q6_diagnostic
+    q6 = interictal_q6_diagnostic(
+        design, trace, validation,
+        timezone_name=str(timezone_name),
+        past_seizure_onsets=past_seizure_onsets,
+    )
     return {
-        "status": "COMPLETE_DIAGNOSTIC_PENDING_Q5_Q6",
+        "status": "COMPLETE_DIAGNOSTIC_PENDING_Q5",
         "n_train_anchors": int(np.sum(train)),
         "n_d_state_anchors": int(np.sum(validation)),
         "decoder_dimension": int(trace.persistent_decoder.shape[1]),
@@ -940,9 +949,9 @@ def summarise_instrument_trace(
             "autocorrelation": autocorrelation["lags"],
         },
         "Q5_seed_stability": {"status": "PENDING_PATIENT_AGGREGATION"},
-        "Q6_not_only_clock": {"status": "PENDING_NUISANCE_AUDIT"},
+        "Q6_not_only_clock": q6,
         "state_qualified": False,
-        "state_qualified_reason": "Q5 patient aggregation and Q6 are not complete",
+        "state_qualified_reason": "Q5 patient aggregation is not complete",
     }
 
 

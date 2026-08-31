@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import os
 from pathlib import Path
@@ -39,11 +40,29 @@ from src.topic5_continuous_marked_state_h2b.v03_instrument import (  # noqa: E40
 
 PRODUCER_SCRIPT = Path(__file__).resolve()
 INSTRUMENT_MODULE = REPO / "src/topic5_continuous_marked_state_h2b/v03_instrument.py"
+NUISANCE_MODULE = REPO / "src/topic5_continuous_marked_state_h2b/v03_nuisance.py"
 from src.topic5_continuous_marked_state_r1.r1_2 import load_full_design  # noqa: E402
 
 
 def _json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _past_seizure_onsets(path: Path, subject: str) -> np.ndarray:
+    """Read only verified onset times; Q6 uses each onset only after it occurred."""
+    if not path.is_file():
+        return np.empty(0, dtype=np.float64)
+    values = []
+    with path.open(newline="", encoding="utf-8") as handle:
+        for row in csv.DictReader(handle):
+            if str(row.get("subject")) != str(subject):
+                continue
+            if str(row.get("matched", "")).lower() not in {"true", "1"}:
+                continue
+            if str(row.get("ambiguous", "")).lower() in {"true", "1"}:
+                continue
+            values.append(float(row["onset_epoch"]))
+    return np.unique(np.asarray(values, dtype=np.float64))
 
 
 def _resolve_interictal_design(
@@ -171,6 +190,11 @@ def run(subject: str, seed: int, *, v02_root: Path, result_root: Path,
     joint = d_state["persistent_minus_memoryless"]["joint_nll_per_event"]
     design = load_full_design(design_path)
     embedding = np.load(embedding_path, mmap_mode="r")
+    seizure_crosswalk = v02_root / "manifests/seizure_crosswalk.csv"
+    past_onsets = _past_seizure_onsets(seizure_crosswalk, subject)
+    timezone_name = (
+        "Europe/Berlin" if subject.startswith("epilepsiae_") else "Asia/Shanghai"
+    )
     trace = scan_interictal_state(model, design, embedding, device="cpu")
     summary = summarise_instrument_trace(
         model,
@@ -181,7 +205,9 @@ def run(subject: str, seed: int, *, v02_root: Path, result_root: Path,
         interictal_persistent_minus_memoryless_joint=float(joint),
         embedding=embedding,
         rng_seed=int(seed) + int.from_bytes(subject.encode("utf-8"), "little") % 1_000_003,
+        timezone_name=timezone_name,
         n_null_permutations=int(n_null_permutations),
+        past_seizure_onsets=past_onsets,
     )
     output = result_root / "instrument/by_cell" / subject / f"seed_{seed}"
     trace_path = output / "interictal_d_state_trace.npz"
@@ -195,8 +221,8 @@ def run(subject: str, seed: int, *, v02_root: Path, result_root: Path,
     )
     payload = {
         "status": "COMPLETE",
-        "revision": "h2b_v0_3_interictal_instrument_cell_v3",
-        "supersedes_revision": "h2b_v0_3_interictal_instrument_cell_v2",
+        "revision": "h2b_v0_3_interictal_instrument_cell_v4",
+        "supersedes_revision": "h2b_v0_3_interictal_instrument_cell_v3",
         "h2b_revision": H2B_V0_3_REVISION,
         "created_utc": utc_now(),
         "subject": subject,
@@ -212,6 +238,8 @@ def run(subject: str, seed: int, *, v02_root: Path, result_root: Path,
             "producer_script_sha256": sha256_file(PRODUCER_SCRIPT),
             "instrument_module": str(INSTRUMENT_MODULE),
             "instrument_module_sha256": sha256_file(INSTRUMENT_MODULE),
+            "nuisance_module": str(NUISANCE_MODULE),
+            "nuisance_module_sha256": sha256_file(NUISANCE_MODULE),
             "checkpoint": provenance,
             "checkpoint_result_sha256": sha256_file(entry["result_path"]),
             "design_path": str(design_path),
@@ -222,8 +250,13 @@ def run(subject: str, seed: int, *, v02_root: Path, result_root: Path,
             "embedding_sha256": sha256_file(embedding_path),
             "design_resolution": design_provenance,
             "v0_2_inventory_sha256": sha256_file(inventory_path),
+            "past_seizure_crosswalk_path": str(seizure_crosswalk),
+            "past_seizure_crosswalk_sha256": (
+                sha256_file(seizure_crosswalk) if seizure_crosswalk.is_file() else None
+            ),
         },
         "data_scope": "interictal TRAIN and D_state only",
+        "past_seizure_nuisance_read": bool(len(past_onsets)),
         "seizure_risk_outcome_read": False,
         "formal_test_partition_opened": False,
         "sealed_opened": False,

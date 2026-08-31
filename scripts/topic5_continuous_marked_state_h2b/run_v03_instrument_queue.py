@@ -31,6 +31,7 @@ from scripts.topic5_continuous_marked_state_h2b.run_v03_instrument_cell import (
 PYTHON = Path("/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python")
 CELL_SCRIPT = REPO / "scripts/topic5_continuous_marked_state_h2b/run_v03_instrument_cell.py"
 INSTRUMENT_MODULE = REPO / "src/topic5_continuous_marked_state_h2b/v03_instrument.py"
+NUISANCE_MODULE = REPO / "src/topic5_continuous_marked_state_h2b/v03_nuisance.py"
 
 
 def _json(path: Path) -> dict:
@@ -54,7 +55,7 @@ def _complete(root: Path, subject: str, seed: int, checkpoint_sha256: str,
         trace = Path(payload["trace_path"])
         return bool(
             payload.get("status") == "COMPLETE"
-            and payload.get("revision") == "h2b_v0_3_interictal_instrument_cell_v3"
+            and payload.get("revision") == "h2b_v0_3_interictal_instrument_cell_v4"
             and payload.get("subject") == subject
             and int(payload.get("seed", -1)) == seed
             and payload.get("source", {}).get("checkpoint", {}).get("checkpoint_sha256")
@@ -66,6 +67,8 @@ def _complete(root: Path, subject: str, seed: int, checkpoint_sha256: str,
             == sha256_file(CELL_SCRIPT)
             and payload.get("source", {}).get("instrument_module_sha256")
             == sha256_file(INSTRUMENT_MODULE)
+            and payload.get("source", {}).get("nuisance_module_sha256")
+            == sha256_file(NUISANCE_MODULE)
             and trace.is_file()
             and payload.get("trace_sha256") == sha256_file(trace)
         )
