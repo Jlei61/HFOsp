@@ -136,10 +136,15 @@ def _spectral_summary(signal: np.ndarray, *, fs_hz: float) -> dict:
         return {
             "peak_hz": None,
             "centroid_20_150_hz": None,
+            "power_5_30": None,
+            "power_30_80": None,
+            "power_80_150": None,
             "power_30_80_over_5_30": None,
             "power_80_150_over_5_30": None,
         }
     low = float(power[(frequency >= 5.0) & (frequency < 30.0)].sum())
+    middle = float(power[(frequency >= 30.0) & (frequency <= 80.0)].sum())
+    high = float(power[(frequency > 80.0) & (frequency <= 150.0)].sum())
     selected_frequency = frequency[carrier]
     selected_power = power[carrier]
     return {
@@ -147,14 +152,11 @@ def _spectral_summary(signal: np.ndarray, *, fs_hz: float) -> dict:
         "centroid_20_150_hz": float(
             np.sum(selected_frequency * selected_power) / selected_power.sum()
         ),
-        "power_30_80_over_5_30": float(
-            power[(frequency >= 30.0) & (frequency <= 80.0)].sum()
-            / max(low, np.finfo(float).tiny)
-        ),
-        "power_80_150_over_5_30": float(
-            power[(frequency > 80.0) & (frequency <= 150.0)].sum()
-            / max(low, np.finfo(float).tiny)
-        ),
+        "power_5_30": low,
+        "power_30_80": middle,
+        "power_80_150": high,
+        "power_30_80_over_5_30": float(middle / max(low, np.finfo(float).tiny)),
+        "power_80_150_over_5_30": float(high / max(low, np.finfo(float).tiny)),
     }
 
 

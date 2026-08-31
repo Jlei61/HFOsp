@@ -65,6 +65,14 @@ The best four candidates then run on three new 12 s selection seeds. One work po
 
 Carrier calibration starts only after the pathway work point is frozen.
 
+An observation-only pre-canary may be run earlier on the frozen Node to decide
+whether a native local carrier exists at all. It records 1 ms unsmoothed E/I
+regional rates and the current-based model readout, and it must reproduce the
+existing event inventory, ranks and Fig.4 envelope exactly. If this pre-canary
+shows no three-cycle local burst, the 2 x 3 synaptic-decay grid may be run on
+the zero-pathway Node as an isolated kinetics-capacity experiment; it does not
+replace the later pathway-compatible confirmation.
+
 1. Verify the raw-rate readout on a synthetic 62.5 Hz signal and on an archived SNN trajectory previously claimed to show a fast carrier. Failure means the readout must be repaired before simulation.
 2. Record 1 ms population E/I rates and a current-based readout before the existing 5 ms observation smoothing. Also retain the 2 ms/5 ms virtual-contact firing-density envelope for exact Fig.4 display parity. A 30--80 Hz filtered trace remains a visualization, not the primary carrier endpoint.
 3. If the frozen work point remains low-frequency, scan only:
@@ -75,6 +83,8 @@ tau_d_GABA in {8, 12, 18} ms
 ```
 
 on three common seeds. Do not change Node, pathway coefficients or Z/M in this scan.
+The external homogeneous Poisson mean is held at the baseline 3.5/18 ms value,
+so changing AMPA decay does not silently recalibrate the background drive.
 4. Report peak frequency, 20--150 Hz centroid, 30--80/5--30 power ratio, OOD, event yield, mode proportion and absolute timing for every cell. A fast carrier is acceptable only if the interictal repertoire remains comparable; frequency alone cannot rescue a high-OOD work point.
 
 This is a model gamma-like carrier calibration, not a claim that the firing-density envelope is clinical HFO or SEEG.

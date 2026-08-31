@@ -123,6 +123,9 @@ def main():
         "--parity-npz",
         help="existing worker NPZ whose event/readout arrays must reproduce exactly",
     )
+    parser.add_argument("--duration-ms", type=float)
+    parser.add_argument("--tau-d-ampa-ms", type=float)
+    parser.add_argument("--tau-d-gaba-ms", type=float)
     args = parser.parse_args()
 
     config_path = Path(args.config).resolve()
@@ -271,14 +274,37 @@ def main():
     snn_event_envelope = __import__(
         "src.sef_hfo_snn_adapter", fromlist=["snn_event_envelope"]
     ).snn_event_envelope
-    duration_ms = float(candidate.get(
-        "simulation_duration_ms", simulation["duration_ms"],
-    ))
+    duration_ms = float(
+        args.duration_ms if args.duration_ms is not None else candidate.get(
+            "simulation_duration_ms", simulation["duration_ms"],
+        )
+    )
     params = params_cls(
         g=engine["g"], L=engine["L"], density=engine["density"],
         T=duration_ms, dt=engine["dt"],
         nu_ext_ratio=cmrun.DRIVE, seed=int(args.seed),
     )
+    kinetics_override = (
+        args.tau_d_ampa_ms is not None or args.tau_d_gaba_ms is not None
+    )
+    if kinetics_override:
+        compute_nu_theta = __import__("params").compute_nu_theta
+        frozen_external_rate_per_ms = float(
+            cmrun.DRIVE * compute_nu_theta(params)[0]
+        )
+        if args.tau_d_ampa_ms is not None:
+            params.tau_d_AMPA = float(args.tau_d_ampa_ms)
+        if args.tau_d_gaba_ms is not None:
+            params.tau_d_GABA = float(args.tau_d_gaba_ms)
+        if not (
+            params.tau_r_AMPA < params.tau_d_AMPA
+            and params.tau_r_GABA < params.tau_d_GABA
+        ):
+            raise ValueError("synaptic decay must remain slower than rise")
+        nu_signal_fn = lambda _time_ms: frozen_external_rate_per_ms
+    else:
+        frozen_external_rate_per_ms = None
+        nu_signal_fn = None
     net, n_e, n_i, cache_hit, cache_source = _load_network(
         params, stage, _placement(stage), int(args.seed), base, cache_dir,
     )
@@ -521,6 +547,7 @@ def main():
     mechanism_readout = config.get("mechanism_readout", {})
     result = simulate_kick(
         params, mapped_net, KICK_BOOST=0.0, t_kick=1e9,
+        nu_signal_fn=nu_signal_fn,
         V_th_per_neuron=node["vtheta"], slow=slow,
         early_stop_runaway=bool(simulation["early_stop_runaway"]),
         ee_std_u=float(ee_std.get("u", 0.0)),
@@ -945,12 +972,22 @@ def main():
             "not_clinical_seeg": True,
             "parity_audit": parity_audit,
         },
+        "synaptic_kinetics": {
+            "tau_r_AMPA_ms": float(params.tau_r_AMPA),
+            "tau_d_AMPA_ms": float(params.tau_d_AMPA),
+            "tau_r_GABA_ms": float(params.tau_r_GABA),
+            "tau_d_GABA_ms": float(params.tau_d_GABA),
+            "override_enabled": kinetics_override,
+            "external_poisson_mean_frozen_to_baseline": kinetics_override,
+            "frozen_external_rate_per_ms": frozen_external_rate_per_ms,
+        },
         "network": {
             "n_E": int(n_e), "n_I": int(n_i),
             "cache_hit": bool(cache_hit), "cache_source": cache_source,
         },
         "simulation": {
-            **simulation, "common_detector_threshold": detector,
+            **simulation, "actual_duration_ms": duration_ms,
+            "common_detector_threshold": detector,
             "wall_seconds": float(time.time() - started),
         },
         "arrays": {"path": str(output_npz), "sha256": _sha256(output_npz)},

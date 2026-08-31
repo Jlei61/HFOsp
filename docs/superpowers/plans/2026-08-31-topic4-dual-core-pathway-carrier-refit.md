@@ -7,7 +7,7 @@
 5. Aggregate OOD, mode share, KMeans, event yield and absolute timing. Freeze four candidates mechanically from the registered score and Pareto table.
 6. Run the four candidates on three new 12 s seeds and freeze one interictal pathway work point.
 7. Run the minimal core-lesion audit if the zero-simulation core-first association is present.
-8. Validate the unfiltered carrier readout. Only if it passes, run the six-cell AMPA/GABA decay canary on three common seeds.
+8. Validate the unfiltered carrier readout. If the raw Node canary lacks local three-cycle bursts, run the six-cell AMPA/GABA decay capacity canary on three common seeds with the external Poisson mean frozen to baseline; report OOD/KMeans/event yield alongside carrier metrics.
 9. Freeze one carrier-compatible work point and confirm it on 12 fresh 20 s seeds; do not open Z/M during this phase.
 10. Regenerate the Fig.2C-style GIF and KMeans/OOD panels with explicit model-time playback and unfiltered/filtered readout labels.
 

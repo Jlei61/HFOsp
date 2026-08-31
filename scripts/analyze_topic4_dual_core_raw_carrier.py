@@ -5,9 +5,14 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+import sys
 
 import matplotlib.pyplot as plt
 import numpy as np
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from src.topic4_dual_core_carrier import (
     baseline_mask_from_events,
@@ -16,7 +21,6 @@ from src.topic4_dual_core_carrier import (
 )
 
 
-ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_RESULT_ROOT = ROOT / (
     "results/topic4_sef_hfo/data_driven_dual_core_ood/carrier_canary"
 )
@@ -76,6 +80,7 @@ def analyze(npz_path: Path, final_path: Path, gif_meta_path: Path) -> dict:
     region_lookup = {name: index for index, name in enumerate(region_names)}
     current_lookup = {name: index for index, name in enumerate(current_names)}
     core_regions = [region_lookup["core_1"], region_lookup["core_2"]]
+    annulus_regions = [region_lookup["annulus_1"], region_lookup["annulus_2"]]
     core_currents = [
         current_lookup["core_1_center"], current_lookup["core_2_center"],
     ]
@@ -89,15 +94,33 @@ def analyze(npz_path: Path, final_path: Path, gif_meta_path: Path) -> dict:
             continue
         regional = []
         current_sites = []
-        for core_number, (region_index, current_index) in enumerate(
-            zip(core_regions, core_currents), start=1,
+        for core_number, (region_index, annulus_index, current_index) in enumerate(
+            zip(core_regions, annulus_regions, core_currents), start=1,
         ):
+            core_summary = raw_population_burst_summary(
+                e_rate[indices[event_index], region_index],
+                bin_ms=bin_ms,
+                baseline_values=e_rate[baseline_mask, region_index],
+            )
+            annulus_summary = raw_population_burst_summary(
+                e_rate[indices[event_index], annulus_index],
+                bin_ms=bin_ms,
+                baseline_values=e_rate[baseline_mask, annulus_index],
+            )
             regional.append({
                 "core": core_number,
-                **raw_population_burst_summary(
-                    e_rate[indices[event_index], region_index],
-                    bin_ms=bin_ms,
-                    baseline_values=e_rate[baseline_mask, region_index],
+                **core_summary,
+                "matched_annulus": annulus_summary,
+                "core_to_annulus_peak_ratio": float(
+                    core_summary["event_peak_value"]
+                    / max(annulus_summary["event_peak_value"], np.finfo(float).tiny)
+                ),
+                "core_to_annulus_power_30_80_ratio": float(
+                    core_summary["power_30_80"]
+                    / max(
+                        annulus_summary["power_30_80"],
+                        np.finfo(float).tiny,
+                    )
                 ),
             })
             current_sites.append({
@@ -146,6 +169,17 @@ def analyze(npz_path: Path, final_path: Path, gif_meta_path: Path) -> dict:
                             value["peak_hz"] for value in values
                             if value["peak_hz"] is not None
                         ])) if values else None
+                    ),
+                    "median_core_to_annulus_peak_ratio": (
+                        float(np.median([
+                            value["core_to_annulus_peak_ratio"] for value in values
+                        ])) if readout == "E_population" and values else None
+                    ),
+                    "median_core_to_annulus_power_30_80_ratio": (
+                        float(np.median([
+                            value["core_to_annulus_power_30_80_ratio"]
+                            for value in values
+                        ])) if readout == "E_population" and values else None
                     ),
                 }
     representatives = _representative_indices(gif_meta)
@@ -198,8 +232,8 @@ def plot(payload: dict, output: Path) -> None:
     arrays = payload.pop("plot_arrays")
     offset = np.asarray(arrays["offset_ms"], float)
     colors = ["#D1495B", "#177E89"]
-    fig = plt.figure(figsize=(7.2, 5.1), constrained_layout=True)
-    grid = fig.add_gridspec(2, 2, height_ratios=[1.15, 1.0])
+    fig = plt.figure(figsize=(7.2, 4.8), constrained_layout=True)
+    grid = fig.add_gridspec(2, 3, width_ratios=[1.0, 1.0, 0.78])
     for mode in (0, 1):
         ax = fig.add_subplot(grid[0, mode])
         rates = np.asarray(arrays["representative_E_rate"][str(mode)], float)
@@ -217,7 +251,42 @@ def plot(payload: dict, output: Path) -> None:
         ax.spines[["top", "right"]].set_visible(False)
         ax.tick_params(labelsize=7)
 
-    ax = fig.add_subplot(grid[1, 0])
+    ax = fig.add_subplot(grid[0, 2])
+    fractions = []
+    bar_colors = []
+    labels = []
+    counts = []
+    for mode in (0, 1):
+        for core in (1, 2):
+            row = payload["summary"]["E_population"][str(mode)][f"core_{core}"]
+            fractions.append(row["regular_three_cycle_fraction"])
+            bar_colors.append(colors[core - 1])
+            labels.append(f"{'A' if mode == 0 else 'B'}\nC{core}")
+            counts.append(row["n_events"])
+    x_bar = [0, 1, 2.35, 3.35]
+    ax.bar(x_bar, fractions, width=0.75, color=bar_colors, alpha=0.88)
+    for x, value, count in zip(x_bar, fractions, counts):
+        ax.text(x, max(value, 0.015), f"0/{count}", ha="center", va="bottom", fontsize=6.5)
+    ax.set_xticks(x_bar, labels)
+    ax.set_ylim(0, 1)
+    ax.set_ylabel("Fraction with >=3 raw cycles")
+    ax.set_title("Native cycles", fontsize=9, weight="bold")
+    ax.spines[["top", "right"]].set_visible(False)
+    ax.tick_params(labelsize=7)
+
+    for mode in (0, 1):
+        ax = fig.add_subplot(grid[1, mode])
+        trace = np.asarray(arrays["representative_current"][str(mode)], float)
+        for core in (0, 1):
+            ax.plot(offset, trace[:, core], color=colors[core], lw=1.2)
+        ax.axvline(0.0, color="0.25", lw=0.8, ls="--")
+        ax.set_xlabel("Time from event onset (ms)")
+        if mode == 0:
+            ax.set_ylabel("Current proxy (a.u.)")
+        ax.spines[["top", "right"]].set_visible(False)
+        ax.tick_params(labelsize=7)
+
+    ax = fig.add_subplot(grid[1, 2])
     x_positions, values, point_colors = [], [], []
     position = 0
     labels = []
@@ -233,31 +302,14 @@ def plot(payload: dict, output: Path) -> None:
     ax.scatter(x_positions, values, c=point_colors, s=10, alpha=0.55, linewidths=0)
     ax.set_xticks([0, 1, 2.35, 3.35], labels)
     ax.set_ylabel("Raw population peaks per event")
-    ax.set_title("All supported events", fontsize=9, weight="bold")
-    ax.spines[["top", "right"]].set_visible(False)
-    ax.tick_params(labelsize=7)
-
-    ax = fig.add_subplot(grid[1, 1])
-    fractions = []
-    bar_colors = []
-    labels = []
-    for mode in (0, 1):
-        for core in (1, 2):
-            row = payload["summary"]["E_population"][str(mode)][f"core_{core}"]
-            fractions.append(row["regular_three_cycle_fraction"])
-            bar_colors.append(colors[core - 1])
-            labels.append(f"{'A' if mode == 0 else 'B'}\nC{core}")
-    ax.bar([0, 1, 2.35, 3.35], fractions, width=0.75, color=bar_colors, alpha=0.88)
-    ax.set_xticks([0, 1, 2.35, 3.35], labels)
-    ax.set_ylim(0, 1)
-    ax.set_ylabel("Fraction with >=3 regular raw cycles")
-    ax.set_title("Native-cycle diagnostic", fontsize=9, weight="bold")
+    ax.set_title("All events", fontsize=9, weight="bold")
     ax.spines[["top", "right"]].set_visible(False)
     ax.tick_params(labelsize=7)
 
     fig.text(0.01, 0.99, "A", va="top", fontsize=11, weight="bold")
     fig.text(0.01, 0.49, "B", va="top", fontsize=11, weight="bold")
-    fig.text(0.50, 0.49, "C", va="top", fontsize=11, weight="bold")
+    fig.text(0.80, 0.99, "C", va="top", fontsize=11, weight="bold")
+    fig.text(0.80, 0.49, "D", va="top", fontsize=11, weight="bold")
     output.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(output.with_suffix(".png"), dpi=300, bbox_inches="tight")
     fig.savefig(output.with_suffix(".pdf"), bbox_inches="tight")
@@ -294,8 +346,9 @@ def main() -> None:
     readme.write_text(
         "### dual_core_raw_carrier_canary.png\n\n"
         "A 显示与 Fig.4 GIF 相同的两个代表事件，但使用 1 ms、未经时间平滑的 core 群体放电率。"
-        "B 汇总所有落在患者支持内且完整返回的事件中，原始群体峰的数量。"
-        "C 报告满足至少三个近似规则原始周期的事件比例；它不使用带通后的振铃作为周期证据。\n\n"
+        "B 显示同一事件、同一 core 中未经带通的 current-based 模型读出。"
+        "C 报告满足至少三个近似规则原始周期的事件比例，D 汇总所有落在患者支持内且完整返回事件的原始群体峰数。"
+        "所有周期判定都不使用带通后的振铃。\n\n"
         "**关注点**：若 A 仍只有单个宽峰且 C 接近零，当前工作点支持传播顺序，但不支持局部原生高频爆发。\n"
     )
     print(json.dumps({
