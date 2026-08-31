@@ -3,6 +3,7 @@ import pytest
 import numpy as np
 
 from scripts.plot_topic4_dual_core_ood_gif import (
+    _bandpass_contact_activity,
     _upsert_readme_entry,
     ordered_shaft_segments,
     select_representative_pair,
@@ -64,3 +65,15 @@ def test_readme_entry_is_replaced_without_dropping_other_entries():
     existing = "### target\nold\n\n### retained\nkeep\n"
     updated = _upsert_readme_entry(existing, "### target", "### target\nnew\n")
     assert updated == "### target\nnew\n### retained\nkeep\n"
+
+
+def test_bandpass_matches_accepted_fig4_filter():
+    from scripts.paper_figures.plot_fig4_spatial_edge_flow_validation import (
+        _bandpass_contact_activity as accepted_filter,
+    )
+
+    rng = np.random.default_rng(3)
+    envelope = rng.normal(size=(15, 600))
+    observed = _bandpass_contact_activity(envelope, 2.0)
+    expected = accepted_filter(envelope, 2.0)
+    assert np.array_equal(observed, expected)

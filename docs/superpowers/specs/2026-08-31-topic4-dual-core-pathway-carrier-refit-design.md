@@ -4,7 +4,7 @@
 
 Rev16 found a simple two-core Node field that produced both frozen patient propagation modes in 12/12 new networks, but 46% of returned events remained outside patient support. The pathway experiment then transferred EE and E-to-I coefficient rows learned on an older continuous field. It did not optimize either row on the new dual-core field. The transferred EE row reduced OOD mainly by suppressing event yield, the transferred E-to-I row shifted occupancy toward the patient's larger mode without reducing OOD, and their combination was antagonistic rather than additive.
 
-The representative GIF also exposed a separate issue. Its apparent slow motion is a rendering effect: 5 ms simulation frames are shown at 8 fps. Absolute contact recruitment spans overlap the patient distribution. However, the unfiltered stored firing-density envelope is dominated by about 23 Hz rather than an intrinsic 50--70 Hz carrier, while the current OOD embedding normalizes each event to 0--1 and cannot see either absolute duration or carrier frequency.
+The representative GIF also exposed a separate issue. Its apparent slow motion is a rendering effect: 5 ms simulation frames are shown at 8 fps. Absolute contact recruitment spans overlap the patient distribution. The stored firing-density envelope is dominated by about 23 Hz, but it has already undergone 5 ms Gaussian smoothing, which retains only about 17% of a 60 Hz amplitude. Raw spike-rate and synaptic-current carrier content therefore remain unaudited. The current OOD embedding also normalizes each event to 0--1 and cannot see either absolute duration or carrier frequency.
 
 Rev17 therefore keeps the Node substrate fixed and separates three questions:
 
@@ -65,8 +65,8 @@ The best four candidates then run on three new 12 s selection seeds. One work po
 
 Carrier calibration starts only after the pathway work point is frozen.
 
-1. Verify the unfiltered readout on a synthetic 62.5 Hz signal and on an archived SNN trajectory previously claimed to show a fast carrier. Failure means the readout must be repaired before simulation.
-2. Record both 1 ms population E/I rates and the unfiltered 2 ms virtual-contact firing-density envelope. A 30--80 Hz filtered trace remains a visualization, not the primary carrier endpoint.
+1. Verify the raw-rate readout on a synthetic 62.5 Hz signal and on an archived SNN trajectory previously claimed to show a fast carrier. Failure means the readout must be repaired before simulation.
+2. Record 1 ms population E/I rates and a current-based readout before the existing 5 ms observation smoothing. Also retain the 2 ms/5 ms virtual-contact firing-density envelope for exact Fig.4 display parity. A 30--80 Hz filtered trace remains a visualization, not the primary carrier endpoint.
 3. If the frozen work point remains low-frequency, scan only:
 
 ```text
@@ -82,8 +82,8 @@ This is a model gamma-like carrier calibration, not a claim that the firing-dens
 ## Visual contract
 
 - GIF time labels state model milliseconds and playback slowdown.
-- The lower panel names the unfiltered firing-density envelope explicitly.
-- A filtered 30--80 Hz trace, if shown, is labeled as filtered.
+- The formal lower panel uses the accepted Fig.4 fourth-order 30--80 Hz zero-phase filter and common amplitude scale, and is labeled as filtered firing-density activity.
+- The GIF metadata states that its two onset-aligned event windows are not the same as Fig.4's single continuous two-event window.
 - Mode examples remain algorithmically selected, and all-event OOD/KMeans statistics remain adjacent to the GIF.
 
 ## Claim boundary

@@ -13,6 +13,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation, PillowWriter
 import numpy as np
+from scipy.signal import butter, sosfiltfilt
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -25,6 +26,7 @@ from src.topic4_d6_natural_kmeans import normalize_event_ranks  # noqa: E402
 DEFAULT_CONFIG = ROOT / "config/topic4_dual_core_ood_node_pathways.json"
 MODE_COLORS = ("#c43c39", "#277da1")
 SHAFT_COLORS = {"ICL": "#f07c3e", "SCL": "#2aa6b5"}
+TRACE_BAND_HZ = (30.0, 80.0)
 
 
 def select_representative_pair(
@@ -69,7 +71,9 @@ def select_representative_pair(
     }
 
 
-def _patient_profiles(target_path: Path) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+def _patient_profiles(
+    target_path: Path,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     with np.load(target_path, allow_pickle=False) as loaded:
         names = np.asarray(loaded["contact_names"]).astype(str)
         ranks = np.asarray(loaded["patient_train_ranks"], float)
@@ -78,7 +82,32 @@ def _patient_profiles(target_path: Path) -> tuple[np.ndarray, np.ndarray, np.nda
     profiles = np.asarray([
         np.nanmean(normalized[labels == mode], axis=0) for mode in (0, 1)
     ])
-    return names, profiles, np.bincount(labels, minlength=2)
+    valid = np.isfinite(ranks)
+    counts = valid.sum(axis=0)
+    mean_rank = np.full(ranks.shape[1], np.nan, dtype=float)
+    for index in range(ranks.shape[1]):
+        if counts[index]:
+            mean_rank[index] = float(np.mean(ranks[valid[:, index], index]))
+    fill = (
+        float(np.nanmax(mean_rank)) + 1.0 if np.any(np.isfinite(mean_rank)) else 1.0
+    )
+    keys = np.where(np.isfinite(mean_rank), mean_rank, fill)
+    contact_order = np.lexsort((np.arange(len(names)), -counts, keys))
+    return names, profiles, np.bincount(labels, minlength=2), contact_order
+
+
+def _bandpass_contact_activity(
+    envelope: np.ndarray, dt_ms: float, band_hz=TRACE_BAND_HZ,
+) -> np.ndarray:
+    """Match the accepted Fig.4 virtual-contact display filter exactly."""
+    values = np.asarray(envelope, dtype=float)
+    fs_hz = 1000.0 / float(dt_ms)
+    if values.ndim != 2 or values.shape[1] < 20:
+        raise ValueError("contact envelope must be contact x time with >=20 samples")
+    if not (0.0 < band_hz[0] < band_hz[1] < 0.5 * fs_hz):
+        raise ValueError("readout band must lie below the envelope Nyquist frequency")
+    sos = butter(4, band_hz, btype="bandpass", fs=fs_hz, output="sos")
+    return sosfiltfilt(sos, values, axis=1)
 
 
 def _event_grid(loaded, event_index: int) -> tuple[np.ndarray, np.ndarray]:
@@ -164,7 +193,9 @@ def render(config_path: Path, output_dir: Path, *, fps: float = 8.0) -> dict:
     npz_path = ROOT / selected["worker_npz"]
     worker = json.loads(json_path.read_text())
     target_path = ROOT / config["inputs"]["shaft_aware_target_npz"]["path"]
-    patient_names, patient_profiles, patient_counts = _patient_profiles(target_path)
+    patient_names, patient_profiles, patient_counts, trace_order = _patient_profiles(
+        target_path
+    )
     with np.load(npz_path, allow_pickle=False) as loaded:
         contact_names = np.asarray(loaded["contact_names"]).astype(str)
         if not np.array_equal(contact_names, patient_names):
@@ -174,6 +205,7 @@ def render(config_path: Path, output_dir: Path, *, fps: float = 8.0) -> dict:
         onsets = np.asarray(loaded["onsets"], float)
         envelope = np.asarray(loaded["contact_envelope"], float)
         envelope_dt = float(loaded["contact_envelope_dt_ms"])
+        filtered_envelope = _bandpass_contact_activity(envelope, envelope_dt)
         event_payload = []
         for mode in (0, 1):
             event = selected["events"][str(mode)]
@@ -183,7 +215,7 @@ def render(config_path: Path, output_dir: Path, *, fps: float = 8.0) -> dict:
             onset_ms = float(timing["t_on_ms"])
             stop_ms = float(timing["t_off_ms"])
             trace_time, trace = _window_envelope(
-                envelope, envelope_dt, onset_ms - 20.0, stop_ms + 40.0,
+                filtered_envelope, envelope_dt, onset_ms - 20.0, stop_ms + 40.0,
             )
             event_payload.append({
                 "mode": mode, "event_index": event_index,
@@ -203,6 +235,9 @@ def render(config_path: Path, output_dir: Path, *, fps: float = 8.0) -> dict:
     ])
     vmax = float(np.quantile(positive, 0.995)) if len(positive) else 1.0
     vmax = max(vmax, 1.0)
+    trace_scale = max(float(np.quantile(np.abs(np.concatenate([
+        row["trace"][:, trace_order].ravel() for row in event_payload
+    ])), 0.99)), 1e-9)
     _style()
     fig = plt.figure(figsize=(7.2, 5.1))
     layout = fig.add_gridspec(2, 2, height_ratios=(1.08, 1.0), hspace=0.28, wspace=0.22)
@@ -247,14 +282,12 @@ def render(config_path: Path, output_dir: Path, *, fps: float = 8.0) -> dict:
             loc="upper right", frameon=False, fontsize=5.8, handlelength=1.4,
         )
         local = np.asarray(row["trace"], float)
-        scale = np.nanpercentile(np.abs(local), 99, axis=0)
-        scale[~np.isfinite(scale) | (scale <= 1e-12)] = 1.0
-        normalized = local / scale[None, :]
+        normalized = local * 0.72 / trace_scale
         offsets = np.arange(len(contact_names))[::-1] * 1.55
-        for index, name in enumerate(contact_names):
+        for row_index, contact in enumerate(trace_order):
             trace_axis.plot(
-                row["trace_time_ms"], normalized[:, index] + offsets[index],
-                color=SHAFT_COLORS.get(shaft_ids[index], "#555555"), lw=0.65,
+                row["trace_time_ms"], normalized[:, contact] + offsets[row_index],
+                color=SHAFT_COLORS.get(shaft_ids[contact], "#555555"), lw=0.65,
             )
         trace_axis.axvspan(
             0.0, row["duration_ms"], color=MODE_COLORS[mode], alpha=0.08, lw=0,
@@ -262,12 +295,14 @@ def render(config_path: Path, output_dir: Path, *, fps: float = 8.0) -> dict:
         cursor = trace_axis.axvline(relative_time[0], color="#202020", lw=0.85)
         cursors.append(cursor)
         trace_axis.set_yticks(offsets)
-        trace_axis.set_yticklabels(contact_names)
+        trace_axis.set_yticklabels(contact_names[trace_order])
         trace_axis.set_xlim(relative_time[0], relative_time[-1])
         trace_axis.set_ylim(-1.2, offsets[0] + 1.2)
         trace_axis.set_xlabel("time from model event onset (ms)")
-        trace_axis.set_ylabel(
-            "unfiltered firing-density envelope" if mode == 0 else ""
+        trace_axis.set_ylabel("30-80 Hz virtual-contact activity" if mode == 0 else "")
+        trace_axis.text(
+            0.98, 0.98, f"common scale {trace_scale:.2g} a.u.",
+            transform=trace_axis.transAxes, ha="right", va="top", fontsize=5.6,
         )
         trace_axis.tick_params(axis="y", length=0, pad=1.5)
     time_label = fig.text(
@@ -328,10 +363,17 @@ def render(config_path: Path, output_dir: Path, *, fps: float = 8.0) -> dict:
         "gif_fps": float(fps),
         "playback_slowdown": playback_slowdown,
         "trace_readout": (
-            "unfiltered virtual-contact firing-density envelope; 2 ms sampling; "
-            "5 ms Gaussian smoothing; normalized per contact for display"
+            "30-80 Hz fourth-order Butterworth zero-phase bandpass of the virtual-"
+            "contact firing-density envelope; upstream 2 ms bins and 5 ms Gaussian "
+            "smoothing; one common q99 scale across both event windows and all contacts"
         ),
-        "carrier_frequency_not_encoded_by_playback": True,
+        "same_signal_processing_as_accepted_fig4": True,
+        "same_continuous_window_as_accepted_fig4": False,
+        "event_windows_are_onset_aligned": True,
+        "trace_band_hz": list(TRACE_BAND_HZ),
+        "trace_common_scale_au": trace_scale,
+        "trace_contact_order": contact_names[trace_order].tolist(),
+        "filtered_trace_does_not_establish_native_carrier": True,
         "patient_reference": "mean normalized rank profile from frozen patient training modes",
         "not_clinical_seeg": True,
         "aggregate": str(aggregate_path.relative_to(ROOT)),
@@ -354,8 +396,9 @@ def render(config_path: Path, output_dir: Path, *, fps: float = 8.0) -> dict:
         "严格双 core Node 候选在同一 confirmation 网络中的两类代表事件。上排是 "
         "5 ms 兴奋神经元活动场；实线和白色虚线分别在每根杆内连接模型事件与患者冻结原型的"
         "触点招募顺序，避免把跨杆跳转误画成空间传播边；"
-        "下排为未滤波 firing-density envelope。动画按 8 fps 播放 5 ms 模型帧，即 25 倍慢放；"
-        "播放速度不表示模型载波频率。该图只用于检查 Fig.2C 双向传播形态，不能替代 OOD 或频谱统计。\n\n"
+        "下排复用 Fig.4 的 30–80 Hz virtual-contact 处理链和共同幅度尺度，但这里是两个事件的"
+        "onset-aligned 窗口，不是包含两事件的一段连续轨迹。动画按 8 fps 播放 5 ms 模型帧，即 25 倍慢放；"
+        "带通后的振荡外观不能证明模型具有原生 60 Hz 载波。该图只用于检查 Fig.2C 双向传播形态，不能替代 OOD 或原始频谱统计。\n\n"
         "**关注点**：两类事件是否都跨杆招募、传播方向是否与患者原型一致，以及是否存在局部点亮但"
         "未形成完整传播的情况。\n"
     )

@@ -2,7 +2,7 @@
 
 **日期**：2026-08-31
 
-**状态**：`DUAL_CORE_NODE_REPERTOIRE_PARTIAL_SUPPORT / FULL_DISTRIBUTION_NOT_RECOVERED / EE_OOD_FILTER_WITH_YIELD_COST / ETOI_MODE_OCCUPANCY_MODULATOR / TRANSFERRED_PATHWAYS_NONADDITIVE / NATIVE_CARRIER_NOT_RECOVERED`
+**状态**：`DUAL_CORE_NODE_REPERTOIRE_PARTIAL_SUPPORT / FULL_DISTRIBUTION_NOT_RECOVERED / EE_OOD_FILTER_WITH_YIELD_COST / ETOI_MODE_OCCUPANCY_MODULATOR / TRANSFERRED_PATHWAYS_NONADDITIVE / RAW_CARRIER_NOT_AUDITED`
 
 **范围**：development-only；不作 patient-blind、解剖 core、临床波形、发作或患者因果机制主张。
 
@@ -116,7 +116,7 @@ E->I 主要把模式占用推向 Mode 2，并略微增加事件产率；
 
 零仿真重读现有轨迹显示，患者两模式的触点招募跨度中位数为 42.6 和 48.0 ms，5--95% 区间分别为 17.8--111.1 和 20.2--104.3 ms。四臂的 equal-network 中位跨度为 Node 36、EE 47.5、E->I 32、联合 41 ms。因此当前 GIF 看起来缓慢主要来自 5 ms 模型帧以 8 fps 播放，即 25 倍慢放；绝对传播跨度并未明显慢于患者。
 
-真正未恢复的是原生快载波。未滤波 virtual-contact firing-density envelope 在四臂中的事件窗主峰都为最低可分辨的 23.4 Hz；30--80/5--30 Hz 功率比从 Node 的 0.124 下降到联合臂的 0.091。现有 OOD 特征又会把每个事件独立归一化到 0--1 时间，所以它对绝对时长和载波完全不敏感。30--80 Hz bandpass 图只能显示被筛出的分量，不能证明模型本身产生了 60 Hz 节律。
+原始快载波目前不能裁定。存档中的 virtual-contact firing-density envelope 已经经过 2 ms 分箱、标准差 5 ms 的高斯时间平滑和 0.25 mm 空间采样；四臂在这个**平滑后、未额外带通**的观察量上主峰均为最低可分辨的 23.4 Hz。5 ms 高斯在 60 Hz 理论上只保留约 17% 振幅和 3% 功率，因此这个结果不能用于排除原始 spike-rate 或突触电流中的 60 Hz。现有 OOD 特征又把每个事件独立归一化到 0--1 时间，所以它同样看不到绝对时长和载波。Fig.4 的 30--80 Hz 波形是在这份平滑包络上再带通得到，只是统一的显示语法，不能证明模型本身产生了原生 60 Hz 节律。
 
 可复现产物：`results/topic4_sef_hfo/data_driven_dual_core_ood/temporal_carrier_audit.json`。
 
@@ -144,7 +144,7 @@ FULL_PATIENT_EVENT_DISTRIBUTION_NOT_RECOVERED
 1. 保持两个 Node core 冻结，先审计两种模式是否由不同 core 优先起核；不要把模式标签直接当 core 标签。
 2. 在该双 core 上重新拟合 EE/E->I 的表达剂量，而不是再次迁移旧连续场系数；目标同时保护 OOD、患者 31/69 模式比例、KMeans 和事件产率。
 3. 将绝对招募跨度加入正式端点；原有 0--1 onset 特征继续负责顺序，不再单独代表时间尺度。
-4. 单独验证和校准快载波。若当前 readout 能通过已知 60 Hz 正控但模型仍停在约 23 Hz，再开放最小的 AMPA/GABA 快时间常数网格；禁止靠 bandpass 图制造“60 Hz 复现”。
+4. 单独验证和校准快载波。必须保存未做 5 ms 平滑的 1 ms population E/I rate 或突触电流；只有这个原始读出仍缺少快载波时，才开放最小的 AMPA/GABA 快时间常数网格。禁止用平滑后再 bandpass 的图制造“60 Hz 复现”。
 5. 每个候选继续用新网络确认，并保留 Fig.2C-style 全神经元 GIF；禁止只展示最像的事件而不报告总体 OOD。
 
 ## 7. 产物与复现

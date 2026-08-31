@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Audit absolute propagation timing and unfiltered carrier content without SNN reruns."""
+"""Audit timing and the stored smoothed observation spectrum without SNN reruns."""
 from __future__ import annotations
 
 import argparse
@@ -149,21 +149,32 @@ def main() -> None:
             for arm, candidate_id in ARMS.items()
         },
         "spectral_contract": {
-            "readout": "unfiltered virtual-contact firing-density envelope",
+            "readout": (
+                "virtual-contact firing-density envelope without an additional bandpass, "
+                "but after 2 ms binning and 5 ms Gaussian temporal smoothing"
+            ),
             "not_lfp_or_seeg": True,
+            "raw_spike_or_synaptic_current_carrier_evaluable": False,
             "sampling_ms": 2.0,
             "smoothing_ms": 5.0,
+            "spatial_gaussian_footprint_sigma_mm": 0.25,
             "window_ms": 256.0,
             "window_alignment": "64 ms before to 192 ms after detector onset",
             "frequency_resolution_hz": 3.90625,
+            "theoretical_gaussian_amplitude_retention": {
+                "23.4375_hz": 0.7625579441684482,
+                "60_hz": 0.16922454248244995,
+                "80_hz": 0.04249905628536254
+            },
             "interpretation": (
-                "diagnostic of the stored observation envelope; a plotted 30-80 Hz "
-                "bandpass cannot establish an intrinsic HFO carrier"
+                "diagnostic of the stored smoothed observation envelope only; the 5 ms "
+                "Gaussian strongly attenuates 60-80 Hz, so this artifact cannot establish "
+                "or exclude an intrinsic spike-rate or synaptic-current carrier"
             ),
         },
         "claim_boundary": (
-            "absolute recruitment timing and unfiltered model-envelope spectrum only; "
-            "no clinical waveform or HFO reproduction claim"
+            "absolute recruitment timing and smoothed model-envelope spectrum only; "
+            "raw model carrier, clinical waveform and HFO reproduction remain untested"
         ),
     }
     output.parent.mkdir(parents=True, exist_ok=True)
