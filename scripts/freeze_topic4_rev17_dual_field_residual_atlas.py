@@ -50,6 +50,7 @@ def _provenance(config_path: Path, expected_commit: str | None,
     tracked = [
         str(config_path.relative_to(ROOT)),
         str(Path(__file__).resolve().relative_to(ROOT)),
+        "scripts/audit_topic4_rev17_dual_field_parity.py",
         "src/topic4_rev17_dual_field_residual.py",
         "src/topic4_node_field_search.py",
         "src/topic4_observation_invariant_spline.py",

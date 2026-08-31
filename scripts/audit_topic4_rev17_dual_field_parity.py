@@ -81,9 +81,16 @@ def audit(config_path: Path, *, artifact_root: Path) -> dict:
             reference_h = np.asarray(loaded["h"])
             reference_delta = np.asarray(loaded["delta_vtheta"])
         observed_h = np.asarray(substrate.h_e, dtype=reference_h.dtype)
-        observed_delta = np.asarray(
-            substrate.delta_vtheta, dtype=reference_delta.dtype,
-        )
+        # The archived rev14 exact-off worker stored its bypass value as
+        # ``vtheta - v_base``.  Compare through that same arithmetic path: the
+        # SNN consumes vtheta, while the dual-field decomposition is retained
+        # below as a separate internal-consistency diagnostic.
+        v_base = float(substrate.engine["v_base"])
+        vtheta_delta = np.asarray(substrate.vtheta[:substrate.n_e], float) - v_base
+        observed_delta = np.asarray(vtheta_delta, dtype=reference_delta.dtype)
+        decomposition_error = float(np.max(np.abs(
+            np.asarray(substrate.delta_vtheta, float) - vtheta_delta
+        )))
         row = {
             "seed": seed,
             "h_exact": bool(np.array_equal(observed_h, reference_h)),
@@ -92,6 +99,7 @@ def audit(config_path: Path, *, artifact_root: Path) -> dict:
             "delta_vtheta_max_abs_error_mV": float(np.max(
                 np.abs(observed_delta - reference_delta)
             )),
+            "internal_decomposition_max_abs_error_mV": decomposition_error,
             "edge_coefficients_all_zero": bool(np.array_equal(
                 np.asarray(substrate.edge_coefficients),
                 np.zeros_like(np.asarray(substrate.edge_coefficients)),
@@ -101,6 +109,7 @@ def audit(config_path: Path, *, artifact_root: Path) -> dict:
         row["pass"] = bool(
             row["h_exact"] and row["delta_vtheta_exact"]
             and row["edge_coefficients_all_zero"]
+            and row["internal_decomposition_max_abs_error_mV"] <= 1e-14
             and row["mapping_type"] == "dual_continuous_mean_dispersion"
         )
         rows.append(row)
