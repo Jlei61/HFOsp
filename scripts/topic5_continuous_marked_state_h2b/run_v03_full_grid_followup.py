@@ -118,6 +118,7 @@ def main() -> None:
         ("continuous_phenotype", [
             str(PYTHON), str(REPO / "scripts/topic5_continuous_marked_state_h2b/run_v03_continuous_phenotype.py"),
             "--v0-2-root", str(v02), "--result-root", str(root),
+            "--allow-diagnostic-exploration",
         ]),
     ]
     for stage, command in commands:
