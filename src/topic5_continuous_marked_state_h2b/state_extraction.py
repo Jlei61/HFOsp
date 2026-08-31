@@ -520,16 +520,30 @@ def build_inference_anchor_inputs(
         upper_time_by_segment=upper_time_by_segment,
         )
     )
-    observations = [reader.read(float(value)) for value in anchor]
-    if any(value is None for value in observations):
-        bad = [float(anchor[index]) for index, value in enumerate(observations) if value is None]
+    # The frozen H2b observer is explicit-only.  Retaining every RawObservation
+    # here also retained every 30 s waveform, even though the waveform was
+    # never consumed downstream.  On long subjects that inflated one CPU
+    # worker to tens of GiB.  Stream the reader and keep only the two arrays the
+    # frozen observer actually uses.
+    explicit_rows: list[np.ndarray] = []
+    contact_mask_rows: list[np.ndarray] = []
+    unreadable: list[float] = []
+    for value in anchor:
+        observation = reader.read(float(value))
+        if observation is None:
+            unreadable.append(float(value))
+            continue
+        explicit_rows.append(np.asarray(observation.explicit, dtype=np.float32))
+        contact_mask_rows.append(np.asarray(observation.contact_mask, dtype=bool))
+    if unreadable:
         raise RuntimeError(
-            f"{reader.subject}: inference-eligible raw anchors became unreadable {bad[:5]}"
+            f"{reader.subject}: inference-eligible raw anchors became unreadable "
+            f"{unreadable[:5]}"
         )
-    if not observations:
+    if not explicit_rows:
         raise ValueError(f"{reader.subject}: no inference observations in requested coverage")
-    explicit = np.stack([value.explicit for value in observations]).astype(np.float32)
-    contact_mask = np.stack([value.contact_mask for value in observations]).astype(bool)
+    explicit = np.stack(explicit_rows).astype(np.float32, copy=False)
+    contact_mask = np.stack(contact_mask_rows).astype(bool, copy=False)
     explicit = ((explicit - explicit_mean) / explicit_scale).astype(np.float32)
     input_hash = _sha256_arrays(
         anchor.astype(np.float64), segment.astype(np.int64),

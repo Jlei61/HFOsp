@@ -163,6 +163,57 @@ def test_real_e384_inference_inventory_bypasses_only_training_guard(
     assert int((~guard).sum()) == 560
 
 
+def test_inference_input_builder_does_not_retain_unused_raw_waveforms():
+    class CountingObservation:
+        alive = 0
+        peak = 0
+
+        def __init__(self, index):
+            type(self).alive += 1
+            type(self).peak = max(type(self).peak, type(self).alive)
+            self.waveform = np.zeros((2, 7680), dtype=np.float32)
+            self.explicit = np.full((2, 13), float(index), dtype=np.float32)
+            self.contact_mask = np.ones(2, dtype=bool)
+
+        def __del__(self):
+            type(self).alive -= 1
+
+    class StreamingReader:
+        subject = "synthetic_stream"
+        coordinates = np.zeros((2, 3), dtype=np.float32)
+        coordinate_valid = np.ones(2, dtype=bool)
+        shaft_index = np.asarray([0, 1], dtype=np.int64)
+        inference_min_valid_contact_fraction = 0.5
+        training_min_valid_contact_fraction = 0.5
+        source_hashes = {"synthetic": "0" * 64}
+
+        def inference_anchor_inventory(self, coverage, **kwargs):
+            del coverage, kwargs
+            n = 12
+            return (
+                np.arange(n, dtype=np.float64) + 30.0,
+                np.zeros(n, dtype=np.int64),
+                np.zeros(n, dtype=np.int64),
+                np.arange(n, dtype=np.int64),
+                np.ones(n, dtype=bool),
+            )
+
+        def read(self, anchor_time):
+            return CountingObservation(int(anchor_time))
+
+    coverage = object()
+    inputs = build_inference_anchor_inputs(
+        StreamingReader(), coverage,
+        explicit_mean=np.zeros(13, dtype=np.float32),
+        explicit_scale=np.ones(13, dtype=np.float32),
+    )
+    assert inputs.explicit.shape == (12, 2, 13)
+    assert inputs.contact_mask.shape == (12, 2)
+    # At most the previous and current loop item coexist.  The old list-based
+    # implementation retained all 12 full 30-second waveforms.
+    assert CountingObservation.peak <= 2
+
+
 def test_real_e384_same_session_coverage_rows_reset_independently(
         real_e384_inference_support):
     _, coverage, reader = real_e384_inference_support
