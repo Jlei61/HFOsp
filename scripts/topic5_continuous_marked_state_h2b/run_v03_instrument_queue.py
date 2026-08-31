@@ -49,6 +49,7 @@ def _complete(root: Path, subject: str, seed: int, checkpoint_sha256: str) -> bo
         trace = Path(payload["trace_path"])
         return bool(
             payload.get("status") == "COMPLETE"
+            and payload.get("revision") == "h2b_v0_3_interictal_instrument_cell_v2"
             and payload.get("subject") == subject
             and int(payload.get("seed", -1)) == seed
             and payload.get("source", {}).get("checkpoint", {}).get("checkpoint_sha256")
@@ -135,7 +136,7 @@ def main() -> None:
     ))
     status_path = result / "instrument/QUEUE_STATUS.json"
     status = {
-        "status": "RUNNING", "revision": "h2b_v0_3_instrument_queue_v1",
+        "status": "RUNNING", "revision": "h2b_v0_3_instrument_queue_v2",
         "created_utc": utc_now(), "pid": os.getpid(), "pgid": os.getpgid(0),
         "requested_tasks": len(tasks), "already_complete": len(tasks) - len(pending),
         "pending_tasks": len(pending), "cpu_workers": workers,

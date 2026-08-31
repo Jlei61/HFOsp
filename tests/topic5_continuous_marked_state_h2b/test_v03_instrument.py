@@ -6,6 +6,8 @@ from src.topic5_continuous_marked_state_h2b.v03_instrument import (
     effective_rank,
     lagged_decoder_autocorrelation,
     standardise_decoder,
+    reset_phase_explained_variance,
+    shuffled_temporal_structure_null,
 )
 
 
@@ -41,3 +43,36 @@ def test_decoder_autocorrelation_estimates_finite_tau_for_decaying_signal() -> N
     )
     assert observed["empirical_tau_minutes"] is not None
     assert 1.0 < observed["empirical_tau_minutes"] < 10.0
+
+
+def test_decoder_autocorrelation_does_not_treat_static_offset_as_memory() -> None:
+    observed = lagged_decoder_autocorrelation(
+        np.arange(100, dtype=float) * 30.0,
+        np.zeros(100, dtype=np.int64),
+        np.full((100, 1), 50.0),
+        lag_minutes=(0.5, 1.0, 2.0),
+    )
+    assert all(row["correlation"] is None for row in observed["lags"])
+
+
+def test_temporal_shuffle_detects_smooth_decoder_trace() -> None:
+    time = np.arange(300, dtype=float) * 30.0
+    value = np.column_stack([
+        np.sin(np.arange(300) / 25.0), np.cos(np.arange(300) / 31.0),
+    ])
+    result = shuffled_temporal_structure_null(
+        time, np.zeros(300, dtype=np.int64), value,
+        n_permutations=40, rng=np.random.default_rng(4),
+    )
+    assert result["temporally_smoother_than_shuffled"] is True
+    assert result["lower_tail_monte_carlo_p"] <= 0.05
+
+
+def test_reset_phase_r2_flags_reset_dominated_signal() -> None:
+    time = np.arange(200, dtype=float) * 30.0
+    elapsed = time / 60.0
+    value = np.log1p(elapsed)[:, None]
+    r2 = reset_phase_explained_variance(
+        time, np.zeros(200, dtype=np.int64), value,
+    )
+    assert r2 is not None and r2 > 0.99

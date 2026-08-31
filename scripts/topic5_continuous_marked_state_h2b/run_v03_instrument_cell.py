@@ -59,7 +59,8 @@ def _atomic_npz(path: Path, **arrays: np.ndarray) -> None:
             os.unlink(temporary)
 
 
-def run(subject: str, seed: int, *, v02_root: Path, result_root: Path) -> dict:
+def run(subject: str, seed: int, *, v02_root: Path, result_root: Path,
+        n_null_permutations: int = 100) -> dict:
     contract_path = result_root / "analysis_contract.json"
     assert_frozen_contract_matches(_json(contract_path))
     inventory_path = v02_root / "manifests/r1_7_checkpoint_inventory.json"
@@ -105,10 +106,14 @@ def run(subject: str, seed: int, *, v02_root: Path, result_root: Path) -> dict:
     trace = scan_interictal_state(model, design, embedding, device="cpu")
     summary = summarise_instrument_trace(
         model,
+        design,
         trace,
         state_start=float(state_support["state_start"]),
         state_stop=float(state_support["state_stop"]),
         interictal_persistent_minus_memoryless_joint=float(joint),
+        embedding=embedding,
+        rng_seed=int(seed) + int.from_bytes(subject.encode("utf-8"), "little") % 1_000_003,
+        n_null_permutations=int(n_null_permutations),
     )
     output = result_root / "instrument/by_cell" / subject / f"seed_{seed}"
     trace_path = output / "interictal_d_state_trace.npz"
@@ -122,7 +127,8 @@ def run(subject: str, seed: int, *, v02_root: Path, result_root: Path) -> dict:
     )
     payload = {
         "status": "COMPLETE",
-        "revision": "h2b_v0_3_interictal_instrument_cell_v1",
+        "revision": "h2b_v0_3_interictal_instrument_cell_v2",
+        "supersedes_revision": "h2b_v0_3_interictal_instrument_cell_v1",
         "h2b_revision": H2B_V0_3_REVISION,
         "created_utc": utc_now(),
         "subject": subject,
@@ -160,10 +166,12 @@ def main() -> None:
     parser.add_argument("--seed", required=True, type=int)
     parser.add_argument("--v0-2-root", type=Path, default=CANONICAL_V0_2_RESULT_ROOT)
     parser.add_argument("--result-root", type=Path, default=CANONICAL_V0_3_RESULT_ROOT)
+    parser.add_argument("--n-null-permutations", type=int, default=100)
     args = parser.parse_args()
     result = run(
         args.subject, args.seed,
         v02_root=args.v0_2_root.resolve(), result_root=args.result_root.resolve(),
+        n_null_permutations=int(args.n_null_permutations),
     )
     print(result["status"], result["subject"], result["seed"],
           result["diagnostics"]["status"])
