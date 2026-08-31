@@ -203,11 +203,11 @@ def main() -> None:
         tasks.append((subject, seed, command, query, output))
     pending = [task for task in tasks if not _complete(task[4], task[3])]
     available = _available_memory()
-    # Resource smoke on epilepsiae_442/seed_0 (361 grid rows) peaked at
-    # 9.27 GiB RSS.  Use a deliberately higher scheduling budget so larger
-    # contact sets and transient loader copies cannot turn parallelism into an
-    # avoidable host OOM.
-    measured_budget = int(12.0 * 1024 ** 3)
+    # A single epilepsiae_442/seed_0 smoke peaked at 9.27 GiB RSS, while the
+    # first mixed-patient 8-worker batch showed a 22.5 GiB live high-water
+    # process.  Schedule at 28 GiB/cell so the resumable follow-up batch keeps
+    # headroom for larger contact sets and loader transients.
+    measured_budget = int(28.0 * 1024 ** 3)
     workers = max(1, min(
         int(args.cpu_workers), len(pending) or 1,
         max(1, int(0.70 * available // measured_budget)),
@@ -216,7 +216,7 @@ def main() -> None:
     status_path = root / "full_grid/STATE_QUEUE_STATUS.json"
     status = {
         "status": "RUNNING", "created_utc": utc_now(),
-        "revision": "h2b_v0_3_full_grid_state_queue_v2",
+        "revision": "h2b_v0_3_full_grid_state_queue_v3",
         "requested_tasks": len(tasks), "pending_tasks": len(pending),
         "already_complete": len(tasks) - len(pending), "cpu_workers": workers,
         "configured_cpu_workers": int(args.cpu_workers),
@@ -224,6 +224,7 @@ def main() -> None:
         "per_worker_memory_budget_bytes": measured_budget,
         "resource_smoke_peak_rss_bytes": 9_274_196 * 1024,
         "resource_smoke_subject_seed": "epilepsiae_442/seed_0",
+        "mixed_batch_observed_live_high_water_rss_bytes": int(22.5 * 1024 ** 3),
         "thread_limits": 1, "formal_test_partition_opened": False,
         "sealed_opened": False, "h3_or_t2_run": False,
     }
