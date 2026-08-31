@@ -371,6 +371,10 @@
 - **2026-08-31 H2b Cross-task Transfer v0.3 冻结重设计**：
   - Scientific Spec：`continuous_marked_state_h2b_cross_task_v0_3_spec_2026-08-31.md`；执行计划：`continuous_marked_state_h2b_cross_task_v0_3_plan_2026-08-31.md`。
   - 冻结合同：`continuous_marked_state_h2b_cross_task_v0_3_contract_2026-08-31.md`；机器合同：`config/topic5_continuous_marked_state_h2b_v0_3.json`。
-  - 少 gate、多探索执行附录：`continuous_marked_state_h2b_cross_task_v0_3_exploration_addendum_2026-08-31.md`；A1/A2/T/M/D 改为 claim-specific evidence tiers，阴性不再全局阻断其他 development 探索。
+  - 历史“少 gate、多探索”执行附录：`continuous_marked_state_h2b_cross_task_v0_3_exploration_addendum_2026-08-31.md`，已由本次指定验收意见标记为 `SUPERSEDED`；当前恢复严格 gate：A1 无足够 `state_qualified` 即停止 downstream，A2 power 不足不解释真实阴性。
   - 顺序固定为 state instrument qualification → 半合成 assay/power → nested prequential hazard → `tau_z` lag-response → decoder-metric OOS 流形—流场；不以 UMAP 或更多 checkpoint 替代前置 gate。
   - v0.3 明确是看过 v0.2 development 结果后的重设计，不是独立 confirmation；formal/sealed/H3/T2 继续关闭。
+  - 白话验收：`continuous_marked_state_h2b_cross_task_v0_3_plain_2026-08-31.md`；技术验收：`continuous_marked_state_h2b_cross_task_v0_3_technical_2026-08-31.md`。
+  - A1 在完整 75 readable checkpoint cells / 16 patients 分母上完成 Q1–Q6，`state_qualified=0/16`：常见失败为 decoder state 近一维、generator retention 不足或 Q6 nuisance-adjusted IED increment 不成立。单一 slow axis 与稳定 raw latent 不升级为 persistent state。
+  - 修正版 decoder-metric A2 diagnostic smoke（7 worlds ×100）把 T、outer-train residualized M 与 lag 分开；独立 null false-positive 回到约 4–6%，三类 geometry recovery 为 99–100%，但 persistent world 的 joint T+M+lag K-selection power 为 0/100，故 `ASSAY_NOT_SENSITIVE`，未运行 1000-replicate final acceptance。
+  - 严格 A3–A8 route 返回 `NOT_RELEASED_A1_OR_A2, tasks_started=0`。两批提前生成的 v0.2 support-conditioned hazard 结果已移入 `quarantine/`，不进入科学结论。最终 machine audit 为 `PASS_GATED_NEGATIVE_CLOSEOUT_H2B_NOT_ESTABLISHED`；下一步回到纯间期 R1.8 slow/fast instrument redesign，而不是增加 seizure heads。
