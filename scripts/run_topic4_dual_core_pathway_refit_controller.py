@@ -17,9 +17,8 @@ import time
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG = ROOT / "config/topic4_dual_core_pathway_refit.json"
-COMPLETE = "DUAL_CORE_PATHWAY_REFIT_SCREEN_COMPLETE"
-RUNNING = "DUAL_CORE_PATHWAY_REFIT_SCREEN_RUNNING"
-FAILED = "DUAL_CORE_PATHWAY_REFIT_SCREEN_FAILED"
+def _status(phase: str, state: str) -> str:
+    return f"DUAL_CORE_PATHWAY_REFIT_{phase.upper()}_{state}"
 
 
 def _sha256(path: Path) -> str:
@@ -45,8 +44,8 @@ def _available_memory_gib() -> float:
     raise RuntimeError("MemAvailable is missing")
 
 
-def _unit(candidate_id: str, seed: int, commit: str) -> str:
-    return f"codex-t4-prefit-{candidate_id}-s{seed}-{commit[:8]}"
+def _unit(phase: str, candidate_id: str, seed: int, commit: str) -> str:
+    return f"codex-t4-prefit-{phase}-{candidate_id}-s{seed}-{commit[:8]}"
 
 
 def _active(unit: str) -> bool:
@@ -103,7 +102,7 @@ def _launch(job: dict, config_path: Path, manifest: Path, commit: str) -> None:
     subprocess.run(command, cwd=ROOT, check=True)
 
 
-def run(config_path: Path, commit: str) -> dict:
+def run(config_path: Path, commit: str, phase: str = "screen") -> dict:
     config_path = config_path.resolve()
     config = json.loads(config_path.read_text())
     for record in config["inputs"].values():
@@ -111,6 +110,10 @@ def run(config_path: Path, commit: str) -> dict:
         if _sha256(path) != record["sha256"]:
             raise RuntimeError(f"frozen input changed: {path}")
     output_root = ROOT / config["output_root"]
+    if phase == "selection":
+        output_root = output_root / "selection"
+    elif phase != "screen":
+        raise ValueError(f"unsupported pathway refit phase: {phase}")
     manifest_path = output_root / "candidate_manifest.json"
     manifest = json.loads(manifest_path.read_text())
     if manifest.get("config", {}).get("sha256") != _sha256(config_path):
@@ -125,10 +128,13 @@ def run(config_path: Path, commit: str) -> dict:
                 "npz": stem.with_suffix(".npz"),
                 "status": output_root / "run_logs" / f"{stem.name}.status",
                 "log": output_root / "run_logs" / f"{stem.name}.log",
-                "unit": _unit(candidate["candidate_id"], int(seed), commit),
+                "unit": _unit(phase, candidate["candidate_id"], int(seed), commit),
             })
     execution = config["execution"]
     status_path = output_root / "controller_status.json"
+    complete_status = _status(phase, "COMPLETE")
+    running_status = _status(phase, "RUNNING")
+    failed_status = _status(phase, "FAILED")
     while True:
         states = [_state(job) for job in jobs]
         failed = [
@@ -138,7 +144,7 @@ def run(config_path: Path, commit: str) -> dict:
         available = _available_memory_gib()
         free_disk = shutil.disk_usage(ROOT).free / 1024.0 ** 3
         payload = {
-            "status": FAILED if failed else RUNNING,
+            "status": failed_status if failed else running_status,
             "expected_commit": commit,
             "n_jobs": len(jobs), "n_complete": states.count("complete"),
             "n_running": states.count("running"),
@@ -157,9 +163,9 @@ def run(config_path: Path, commit: str) -> dict:
             subprocess.run([
                 sys.executable,
                 str(ROOT / "scripts/aggregate_topic4_dual_core_pathway_refit.py"),
-                "--config", str(config_path),
+                "--config", str(config_path), "--phase", phase,
             ], cwd=ROOT, check=True)
-            payload["status"] = COMPLETE
+            payload["status"] = complete_status
             _atomic_json(status_path, payload)
             subprocess.run(
                 ["notify-send", "Topic 4 pathway refit", "screen complete"],
@@ -199,13 +205,14 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
     parser.add_argument("--expected-commit", required=True)
+    parser.add_argument("--phase", choices=["screen", "selection"], default="screen")
     args = parser.parse_args()
     commit = subprocess.check_output(
         ["git", "rev-parse", args.expected_commit], cwd=ROOT, text=True,
     ).strip()
-    payload = run(args.config, commit)
+    payload = run(args.config, commit, args.phase)
     print(json.dumps(payload, indent=2))
-    if payload["status"] == FAILED:
+    if payload["status"].endswith("_FAILED"):
         raise SystemExit(2)
 
 

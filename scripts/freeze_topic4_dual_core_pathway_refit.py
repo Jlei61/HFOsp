@@ -33,7 +33,7 @@ def _candidate_id(g_ee: float, g_etoi: float) -> str:
     return f"gee{int(round(100 * g_ee)):03d}_getoi{int(round(100 * g_etoi)):03d}"
 
 
-def freeze(config_path: Path) -> dict:
+def freeze(config_path: Path, phase: str = "screen") -> dict:
     config_path = config_path.resolve()
     config = json.loads(config_path.read_text())
     for record in config["inputs"].values():
@@ -71,9 +71,7 @@ def freeze(config_path: Path) -> dict:
     if not (np.all(ee_source[1] == 0.0) and np.all(etoi_source[0] == 0.0)):
         raise RuntimeError("source pathway manifests are not row-isolated")
 
-    seeds = list(map(int, config["search"]["fit_network_seeds"]))
-    duration_ms = float(config["search"]["duration_ms"]["fit"])
-    candidates = []
+    all_candidates = []
     for g_ee in map(float, refit["g_EE"]):
         for g_etoi in map(float, refit["g_EtoI"]):
             coefficients = np.vstack([
@@ -96,23 +94,51 @@ def freeze(config_path: Path) -> dict:
                     "source_EE_candidate_id": refit["source_EE_candidate_id"],
                     "source_EtoI_candidate_id": refit["source_EtoI_candidate_id"],
                 },
-                "allowed_network_seeds": seeds,
-                "simulation_duration_ms": duration_ms,
                 "save_activity_grid": False,
             })
-            candidates.append(candidate)
+            all_candidates.append(candidate)
 
     expected_count = len(refit["g_EE"]) * len(refit["g_EtoI"])
-    if len(candidates) != expected_count or len({
-        row["candidate_id"] for row in candidates
+    if len(all_candidates) != expected_count or len({
+        row["candidate_id"] for row in all_candidates
     }) != expected_count:
         raise RuntimeError("pathway surface candidate count is not exact")
+    if phase == "screen":
+        seeds = list(map(int, config["search"]["fit_network_seeds"]))
+        duration_ms = float(config["search"]["duration_ms"]["fit"])
+        candidates = all_candidates
+        selection_ids = []
+        output_root = ROOT / config["output_root"]
+    elif phase == "selection":
+        screen_path = ROOT / config["output_root"] / "aggregate.json"
+        screen = json.loads(screen_path.read_text())
+        selection_ids = list(screen["selection_shortlist"])
+        if len(selection_ids) != 4:
+            raise RuntimeError("screen did not freeze exactly four candidates")
+        include = ["gee000_getoi000", *selection_ids]
+        lookup = {row["candidate_id"]: row for row in all_candidates}
+        if any(candidate_id not in lookup for candidate_id in include):
+            raise RuntimeError("selection candidate is outside the frozen screen")
+        candidates = [copy.deepcopy(lookup[candidate_id]) for candidate_id in include]
+        seeds = list(map(int, config["search"]["selection_network_seeds"]))
+        duration_ms = float(config["search"]["duration_ms"]["selection"])
+        output_root = ROOT / config["output_root"] / "selection"
+    else:
+        raise ValueError(f"unsupported pathway refit phase: {phase}")
+    for candidate in candidates:
+        candidate["allowed_network_seeds"] = seeds
+        candidate["simulation_duration_ms"] = duration_ms
+        candidate["selection_role"] = (
+            "paired_node_reference"
+            if phase == "selection" and candidate["candidate_id"] == "gee000_getoi000"
+            else "selectable_candidate"
+        )
     commit = subprocess.check_output(
         ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True,
     ).strip()
     manifest = {
         "status": "REV16_DUAL_CORE_OOD_PHASE_FROZEN",
-        "phase": "pathway_refit_screen",
+        "phase": f"pathway_refit_{phase}",
         "scientific_role": config["scientific_role"],
         "config": {
             "path": str(config_path.relative_to(ROOT)),
@@ -136,6 +162,7 @@ def freeze(config_path: Path) -> dict:
             "Node": "dualcore_s39 frozen",
             "spatial_OU": "frozen from dualcore_s39",
             "Z_M": "off",
+            "selection_candidate_ids": selection_ids,
         },
         "parent_inputs": config["inputs"],
         "provenance": {
@@ -145,7 +172,7 @@ def freeze(config_path: Path) -> dict:
             ).strip()),
         },
     }
-    output = ROOT / config["output_root"] / "candidate_manifest.json"
+    output = output_root / "candidate_manifest.json"
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(manifest, indent=2) + "\n")
     return manifest
@@ -154,8 +181,9 @@ def freeze(config_path: Path) -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
+    parser.add_argument("--phase", choices=["screen", "selection"], default="screen")
     args = parser.parse_args()
-    manifest = freeze(args.config)
+    manifest = freeze(args.config, args.phase)
     print(json.dumps({
         "status": manifest["status"],
         "n_candidates": manifest["candidate_set"]["n_candidates"],

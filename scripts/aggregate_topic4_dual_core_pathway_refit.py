@@ -151,7 +151,7 @@ def _heatmap(ax, matrix, xlabels, ylabels, title, *, fmt=".2f", cmap="viridis"):
     return image
 
 
-def aggregate(config_path: Path) -> dict:
+def aggregate(config_path: Path, phase: str = "screen") -> dict:
     config_path = config_path.resolve()
     config = json.loads(config_path.read_text())
     for record in config["inputs"].values():
@@ -159,6 +159,10 @@ def aggregate(config_path: Path) -> dict:
         if _sha256(path) != record["sha256"]:
             raise RuntimeError(f"frozen input changed: {path}")
     output_root = ROOT / config["output_root"]
+    if phase == "selection":
+        output_root = output_root / "selection"
+    elif phase != "screen":
+        raise ValueError(f"unsupported pathway refit phase: {phase}")
     manifest_path = output_root / "candidate_manifest.json"
     manifest = json.loads(manifest_path.read_text())
     if (
@@ -279,9 +283,22 @@ def aggregate(config_path: Path) -> dict:
     for row, is_pareto in zip(summaries, pareto):
         row["pareto_nondominated"] = bool(is_pareto)
     ranking = sorted(summaries, key=lambda row: (row["J_interictal"], row["candidate_id"]))
-    shortlist = [row["candidate_id"] for row in ranking[:4]]
+    registered_selection = list(
+        manifest["fixed_contract"].get("selection_candidate_ids", [])
+    )
+    if phase == "selection":
+        selectable = [
+            row for row in ranking if row["candidate_id"] in registered_selection
+        ]
+        if len(selectable) != 4:
+            raise RuntimeError("selection manifest candidates are incomplete")
+        shortlist = [row["candidate_id"] for row in selectable]
+        frozen_work_point = shortlist[0]
+    else:
+        shortlist = [row["candidate_id"] for row in ranking[:4]]
+        frozen_work_point = None
     output = {
-        "status": "DUAL_CORE_PATHWAY_REFIT_SCREEN_AGGREGATED",
+        "status": f"DUAL_CORE_PATHWAY_REFIT_{phase.upper()}_AGGREGATED",
         "scientific_role": config["scientific_role"],
         "patient_reference": {
             "mode_2_fraction": target_mode_2,
@@ -292,6 +309,7 @@ def aggregate(config_path: Path) -> dict:
         "summaries": summaries,
         "ranking": [row["candidate_id"] for row in ranking],
         "selection_shortlist": shortlist,
+        "frozen_work_point": frozen_work_point,
         "claim_boundary": config["claim_boundary"],
         "config": {"path": str(config_path.relative_to(ROOT)), "sha256": _sha256(config_path)},
         "manifest": {"path": str(manifest_path.relative_to(ROOT)), "sha256": _sha256(manifest_path)},
@@ -325,13 +343,14 @@ def aggregate(config_path: Path) -> dict:
                 fontsize=10.5, weight="bold", va="top")
     figure_root = output_root / "figures"
     figure_root.mkdir(parents=True, exist_ok=True)
-    fig.savefig(figure_root / "dual_core_pathway_refit_surface.png", dpi=300,
+    figure_stem = f"dual_core_pathway_refit_{phase}"
+    fig.savefig(figure_root / f"{figure_stem}.png", dpi=300,
                 bbox_inches="tight")
-    fig.savefig(figure_root / "dual_core_pathway_refit_surface.pdf",
+    fig.savefig(figure_root / f"{figure_stem}.pdf",
                 bbox_inches="tight")
     plt.close(fig)
     (figure_root / "README.md").write_text(
-        "### dual_core_pathway_refit_surface.png\n\n"
+        f"### {figure_stem}.png\n\n"
         "冻结双 core Node 后，分别缩放既有 EE 与 E→I coefficient row。A--E 展示患者支持、"
         "模式占用、自然双簇、事件产率和绝对招募时间；F 是预注册连续开发分数。\n\n"
         "**关注点**：低 OOD 不能靠压低事件产率或破坏自然 KMeans 获得；本图不评价原生高频载波。\n"
@@ -342,8 +361,9 @@ def aggregate(config_path: Path) -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
+    parser.add_argument("--phase", choices=["screen", "selection"], default="screen")
     args = parser.parse_args()
-    output = aggregate(args.config)
+    output = aggregate(args.config, args.phase)
     print(json.dumps({
         "status": output["status"],
         "shortlist": output["selection_shortlist"],
