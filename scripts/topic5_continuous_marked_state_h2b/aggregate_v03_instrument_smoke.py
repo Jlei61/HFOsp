@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Aggregate cross-seed A1 diagnostics without issuing qualification yet."""
+"""Aggregate A1 diagnostics and release qualification only on the full denominator."""
 from __future__ import annotations
 
 import argparse
@@ -12,6 +12,7 @@ if str(REPO) not in sys.path:
     sys.path.insert(0, str(REPO))
 
 from src.topic5_continuous_marked_state_h2b.contract import (  # noqa: E402
+    CANONICAL_V0_2_RESULT_ROOT,
     CANONICAL_V0_3_RESULT_ROOT,
     atomic_csv,
     atomic_json,
@@ -37,11 +38,26 @@ SEED_STABILITY_MODULE = (
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--result-root", type=Path, default=CANONICAL_V0_3_RESULT_ROOT)
+    parser.add_argument("--v0-2-root", type=Path, default=CANONICAL_V0_2_RESULT_ROOT)
     parser.add_argument("--subjects", nargs="+", required=True)
     parser.add_argument("--max-anchors", type=int, default=256)
     parser.add_argument("--n-permutations", type=int, default=100)
     args = parser.parse_args()
     root = args.result_root.resolve()
+    v02_root = args.v0_2_root.resolve()
+    inventory_path = v02_root / "manifests/r1_7_checkpoint_inventory.json"
+    inventory = json.loads(inventory_path.read_text(encoding="utf-8"))
+    expected_by_subject: dict[str, int] = {}
+    for entry in inventory["entries"]:
+        if bool(entry.get("checkpoint_available")):
+            subject = str(entry["subject"])
+            expected_by_subject[subject] = expected_by_subject.get(subject, 0) + 1
+    requested_subjects = list(map(str, args.subjects))
+    if len(requested_subjects) != len(set(requested_subjects)):
+        raise ValueError("duplicate aggregation subject")
+    unknown = sorted(set(requested_subjects) - set(expected_by_subject))
+    if unknown:
+        raise ValueError(f"subjects have no readable checkpoint: {unknown}")
     policy_path = root / "exploration_policy.json"
     policy = json.loads(policy_path.read_text(encoding="utf-8"))
     assert_frozen_exploration_policy_matches(policy)
@@ -55,6 +71,11 @@ def main() -> None:
         ))
         if len(manifests) < 1:
             raise FileNotFoundError(f"no instrument cells for {subject}")
+        if len(manifests) != expected_by_subject[subject]:
+            raise ValueError(
+                f"{subject}: expected {expected_by_subject[subject]} readable cells, "
+                f"found {len(manifests)}"
+            )
         cells = [load_cell_manifest(path) for path in manifests]
         for path, cell in zip(manifests, cells):
             if cell.get("status") != "COMPLETE" or cell.get("seizure_risk_outcome_read") is not False:
@@ -111,9 +132,12 @@ def main() -> None:
                     ]
                 ),
                 "Q6_status": diagnostics["Q6_not_only_clock"]["status"],
-                "Q6_median_relative_improvement": diagnostics[
+                "Q6_timing_median_relative_improvement": diagnostics[
                     "Q6_not_only_clock"
-                ].get("median_relative_improvement"),
+                ].get("timing", {}).get("median_relative_improvement"),
+                "Q6_mark_median_relative_improvement": diagnostics[
+                    "Q6_not_only_clock"
+                ].get("mark", {}).get("median_relative_improvement"),
                 "Q6_pass": diagnostics["Q6_not_only_clock"].get("pass", False),
                 "scalar_axis_noncollapse": bool(
                     int(diagnostics.get("active_decoder_dimensions", 0)) >= 1
@@ -202,21 +226,30 @@ def main() -> None:
             ),
             "exploration_stratum": stratum,
         })
+    full_readable_denominator = bool(
+        set(requested_subjects) == set(expected_by_subject)
+        and len(cell_rows) == sum(expected_by_subject.values())
+    )
     payload = {
         "status": "COMPLETE_GRADED_DIAGNOSTIC",
         "revision": "h2b_v0_3_interictal_instrument_aggregate_v3",
         "supersedes_revision": "h2b_v0_3_interictal_instrument_smoke_aggregate_v2",
         "created_utc": utc_now(),
-        "subjects": list(map(str, args.subjects)),
+        "subjects": requested_subjects,
         "n_cells": len(cell_rows),
         "n_patients": len(patient_rows),
         "patient_rows": patient_rows,
         "source_manifest_sha256": source_hashes,
+        "readable_checkpoint_inventory": str(inventory_path),
+        "readable_checkpoint_inventory_sha256": sha256_file(inventory_path),
+        "n_expected_readable_cells": int(sum(expected_by_subject.values())),
+        "n_expected_readable_patients": int(len(expected_by_subject)),
+        "full_readable_denominator": full_readable_denominator,
         "producer_script_sha256": sha256_file(PRODUCER_SCRIPT),
         "seed_stability_module_sha256": sha256_file(SEED_STABILITY_MODULE),
         "exploration_policy_receipt_sha256": sha256_file(policy_path),
         "seizure_risk_outcome_read": False,
-        "state_qualified_population_released": True,
+        "state_qualified_population_released": full_readable_denominator,
         "remaining_evidence": None,
         "grading_rule": (
             "at least three seeds jointly pass Q1,Q2,Q3,Q4,Q6 and patient Q5; "
@@ -234,22 +267,59 @@ def main() -> None:
         "population": "all_frozen", "n_patients": len(patient_rows),
         "n_cells": len(cell_rows), "patients": patient_rows,
         "source_summary_revision": payload["revision"],
+        "full_readable_denominator": full_readable_denominator,
         "seizure_risk_outcome_read": False,
     })
     qualified_subjects = [row["subject"] for row in patient_rows
                           if row["state_qualified"]]
     atomic_json(output / "state_qualified_manifest.json", {
-        "status": "COMPLETE", "created_utc": payload["created_utc"],
+        "status": "COMPLETE" if full_readable_denominator else "PARTIAL_NOT_RELEASED",
+        "created_utc": payload["created_utc"],
         "population": "state_qualified", "n_patients": len(qualified_subjects),
         "subjects": qualified_subjects,
         "patients": [row for row in patient_rows if row["state_qualified"]],
         "source_summary_revision": payload["revision"],
         "qualification_is_claim_specific_not_global_gate": True,
+        "full_readable_denominator": full_readable_denominator,
         "seizure_risk_outcome_read": False,
     })
     atomic_csv(output / "instrument_smoke_per_cell.csv", cell_rows)
     atomic_csv(output / "instrument_smoke_per_patient.csv", patient_rows)
     atomic_csv(output / "instrument_smoke_seed_pairs.csv", pair_rows)
+    if full_readable_denominator:
+        atomic_csv(output / "per_checkpoint_metrics.csv", cell_rows)
+        atomic_csv(output / "per_patient_seed_summary.csv", patient_rows)
+        atomic_csv(output / "tau_z_by_patient_seed.csv", [
+            {
+                "subject": row["subject"], "seed": row["seed"],
+                "analytic_tau_minutes": row["analytic_tau_minutes"],
+                "empirical_tau_minutes": row["empirical_tau_minutes"],
+                "empirical_tau_right_censored": row[
+                    "empirical_tau_right_censored"
+                ],
+            }
+            for row in cell_rows
+        ])
+        atomic_json(root / "reports/scientific_route_audit_A1.json", {
+            "status": "COMPLETE",
+            "created_utc": payload["created_utc"],
+            "revision": "h2b_v0_3_scientific_route_audit_A1_v1",
+            "n_readable_checkpoint_cells": len(cell_rows),
+            "n_all_frozen_patients": len(patient_rows),
+            "n_state_qualified_patients": len(qualified_subjects),
+            "state_qualified_subjects": qualified_subjects,
+            "full_readable_denominator": True,
+            "future_seizure_risk_outcome_read": False,
+            "past_seizure_times_used_only_as_causal_nuisance": True,
+            "validated_sleep_wake_available": False,
+            "validated_medication_or_stimulation_available": False,
+            "formal_test_partition_opened": False,
+            "sealed_opened": False,
+            "h3_or_t2_run": False,
+            "source_summary_sha256": sha256_file(
+                output / "instrument_smoke_summary.json"
+            ),
+        })
     print(f"COMPLETE patients={len(patient_rows)} cells={len(cell_rows)}")
 
 

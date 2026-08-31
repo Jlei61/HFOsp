@@ -255,7 +255,10 @@ def run(subject: str, seed: int, *, v02_root: Path, result_root: Path,
                 sha256_file(seizure_crosswalk) if seizure_crosswalk.is_file() else None
             ),
         },
-        "data_scope": "interictal TRAIN and D_state only",
+        "data_scope": (
+            "state and prediction targets use interictal TRAIN/D_state only; "
+            "verified past seizure onsets enter Q6 only as a causal nuisance"
+        ),
         "past_seizure_nuisance_read": bool(len(past_onsets)),
         "seizure_risk_outcome_read": False,
         "formal_test_partition_opened": False,

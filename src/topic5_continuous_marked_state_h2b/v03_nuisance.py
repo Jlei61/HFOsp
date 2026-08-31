@@ -410,7 +410,7 @@ def interictal_q6_diagnostic(
         "n_windows_with_event": int(np.sum(has_event)),
         "window_minutes": 5.0,
         "timezone": str(timezone_name),
-        "n_available_prior_seizures": int(len(past_seizure_onsets)),
+        "n_crosswalk_seizure_onsets_available": int(len(past_seizure_onsets)),
         "past_seizure_nuisance_read": bool(len(past_seizure_onsets)),
         "future_seizure_risk_outcome_read": False,
         "validated_sleep_wake_available": False,
