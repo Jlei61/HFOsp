@@ -48,6 +48,7 @@ def _complete(root: Path, subject: str, seed: int, cache_path: Path) -> bool:
     try:
         payload = _json(path)
         source = payload["source"]
+        assay_path = root / "assay/type1_power_summary_smoke.json"
         return bool(
             payload.get("status") == "COMPLETE_EXPLORATORY"
             and payload.get("revision") == "h2b_v0_3_hazard_cell_v1"
@@ -55,6 +56,8 @@ def _complete(root: Path, subject: str, seed: int, cache_path: Path) -> bool:
             and source.get("state_cache_sha256") == sha256_file(cache_path)
             and source.get("producer_sha256") == sha256_file(CELL_SCRIPT)
             and source.get("hazard_module_sha256") == sha256_file(HAZARD_MODULE)
+            and assay_path.is_file()
+            and source.get("assay_summary_sha256") == sha256_file(assay_path)
         )
     except Exception:
         return False

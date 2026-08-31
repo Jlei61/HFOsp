@@ -26,6 +26,7 @@ class AssayTemplate:
     segment: np.ndarray
     base: np.ndarray
     observation_axis: np.ndarray
+    clock_axis: np.ndarray
     persistent_decoder: np.ndarray
     memoryless_decoder: np.ndarray
     lagged_persistent_decoder: np.ndarray
@@ -42,7 +43,7 @@ class AssayTemplate:
     def validate(self) -> None:
         n = len(self.time_epoch)
         arrays = (
-            self.segment, self.base, self.observation_axis,
+            self.segment, self.base, self.observation_axis, self.clock_axis,
             self.persistent_decoder, self.memoryless_decoder,
             self.lagged_persistent_decoder, self.lag_available,
             self.persistent_axis, self.basin_score, self.approach_score,
@@ -174,6 +175,10 @@ def build_template(
     persistent, memoryless = persistent[selected], memoryless[selected]
 
     observation_code = _pca_scores(observation, maximum_components=8)
+    if history.shape[1] >= 10:
+        clock_axis = _pc1(history[:, 8:10])
+    else:
+        clock_axis = np.zeros(len(history), dtype=np.float64)
     base = _z(_drop_constant(np.column_stack([
         history[:, :min(11, history.shape[1])], observation_code,
     ])))
@@ -208,6 +213,7 @@ def build_template(
     value = AssayTemplate(
         time_epoch=time, segment=group, base=base,
         observation_axis=_pc1(observation_code),
+        clock_axis=clock_axis,
         persistent_decoder=persistent, memoryless_decoder=memoryless,
         lagged_persistent_decoder=persistent[lag_index],
         lag_available=lag_available, persistent_axis=_z(residual_axis),
@@ -304,8 +310,7 @@ def simulate_world(
     elif world == "persistent_state":
         score += effect_scale * template.persistent_axis
     elif world == "clock_confounded":
-        clock = template.base[:, 8] if template.base.shape[1] > 8 else template.base[:, 0]
-        score += effect_scale * clock
+        score += effect_scale * template.clock_axis
     elif world == "basin_gating":
         score += effect_scale * template.basin_score
     elif world == "directed_approach":
