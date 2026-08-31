@@ -82,11 +82,14 @@ def _split(n: int, index: int) -> tuple[str, str]:
 
 
 def _nearest_lead_row(
-    time: np.ndarray, segment: np.ndarray, *, onset: float, label: int,
+    time: np.ndarray, segment: np.ndarray, *, onset: float, label: int | None,
     lead_minutes: float,
 ) -> int | None:
     target = float(onset) - float(lead_minutes) * 60.0
-    rows = np.flatnonzero(segment == int(label))
+    rows = (
+        np.arange(len(time), dtype=np.int64)
+        if label is None else np.flatnonzero(segment == int(label))
+    )
     if not len(rows):
         return None
     local = int(rows[np.argmin(np.abs(time[rows] - target))])
@@ -127,11 +130,11 @@ def _mapped_targets(
             try:
                 label = int(seizure["segment_id"])
             except (TypeError, ValueError):
-                attrition.append({
-                    "subject": subject, "seizure_idx": index,
-                    "reason": "development_seizure_has_no_coverage_segment",
-                })
-                continue
+                # The v0.2 segment field encoded whether its support-conditioned
+                # query existed, not whether the regular full grid contains the
+                # 30-min lead.  Leave the label open and let the outcome-
+                # independent grid decide availability by absolute time.
+                label = None
             selected.append({
                 "subject": subject, "seizure_idx": index,
                 "seizure_id": str(seizure["seizure_id"]),
@@ -145,9 +148,22 @@ def _mapped_targets(
 
 
 def run(*, v02: Path, root: Path, target_source: Path,
-        lead_minutes: float = 30.0) -> dict:
+        lead_minutes: float = 30.0,
+        allow_diagnostic_exploration: bool = False) -> dict:
     if not target_source.is_file():
         raise FileNotFoundError(target_source)
+    qualification = _json(root / "qualification/state_qualified_manifest.json")
+    qualified = set(map(str, qualification.get("subjects", [])))
+    final_assay_path = root / "assay/type1_power_summary.json"
+    final_assay_pass = False
+    if final_assay_path.is_file():
+        final_assay = _json(final_assay_path)
+        final_assay_pass = bool(
+            final_assay.get("status") == "PASS_FINAL_ASSAY_ACCEPTANCE"
+            and final_assay.get("claim_bearing_route_released") is True
+        )
+    if (not qualified or not final_assay_pass) and not allow_diagnostic_exploration:
+        raise ValueError("A8 not released because A1/A2 qualification failed")
     caches = sorted((root / "full_grid/state_cache").glob(
         "*/seed_*/states.manifest.json"
     ))
@@ -262,7 +278,12 @@ def run(*, v02: Path, root: Path, target_source: Path,
         "cell_availability": cell_rows,
         "patient_is_inference_unit": True, "seed_is_not_patient_replicate": True,
         "negative_result_biological_interpretation_allowed": False,
-        "claim_status": "EXPLORATORY_A1_EMPTY_ASSAY_NOT_SENSITIVE",
+        "claim_status": (
+            "CLAIM_ROUTE_RELEASED_DEVELOPMENT_ONLY"
+            if qualified and final_assay_pass else
+            "EXPLORATORY_A1_EMPTY_ASSAY_NOT_SENSITIVE"
+        ),
+        "diagnostic_override_used": bool(allow_diagnostic_exploration),
         "formal_test_partition_opened": False, "sealed_opened": False,
         "h3_or_t2_run": False,
         "producer_sha256": sha256_file(Path(__file__).resolve()),
@@ -277,10 +298,12 @@ def main() -> None:
     parser.add_argument("--result-root", type=Path, default=CANONICAL_V0_3_RESULT_ROOT)
     parser.add_argument("--target-source", type=Path, default=TARGET_SOURCE)
     parser.add_argument("--lead-minutes", type=float, default=30.0)
+    parser.add_argument("--allow-diagnostic-exploration", action="store_true")
     args = parser.parse_args()
     payload = run(
         v02=args.v0_2_root.resolve(), root=args.result_root.resolve(),
         target_source=args.target_source.resolve(), lead_minutes=args.lead_minutes,
+        allow_diagnostic_exploration=bool(args.allow_diagnostic_exploration),
     )
     print(payload["status"], payload["n_full_grid_cells"], payload["n_probe_rows"])
 
