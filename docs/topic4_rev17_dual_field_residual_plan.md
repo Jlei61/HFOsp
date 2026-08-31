@@ -35,15 +35,44 @@ Select only by complete training-target score, weakest mode, mode-B protection
 and per-network support. Do not open natural KMeans, held-out patient blocks or
 figures during selection.
 
-## Phase 4: Node confirmation and causal validation
+## Phase 4: unseen-network confirmation
 
 1. Freeze one Node candidate before confirmation.
-2. Run unseen-network natural KMeans, frozen classifier, complete held-out
-   distribution and mode-specific source topology.
-3. From the same checkpoints, perform crossed hotspot suppression/relocation
-   controls and test mode-selective changes in onset density and event rate.
-4. Render the two Fig.4 acceptance views only from the frozen confirmation and
-   intervention artifacts.
+2. Run the candidate and paired exact dual anchor on unseen networks 2381--2383.
+3. Re-establish the complete training target, weak-mode improvement, mode-B
+   protection, support and safety independently in every network. Do not rerank
+   on failure and do not yet open held-out patient blocks.
+
+## Phase 5: frozen-candidate read-only acceptance
+
+1. On the exact confirmation workers, require both modes in every network and
+   run natural masked-rank KMeans without patient labels in the fit.
+2. Require at least three events per supervised mode and natural cluster,
+   per-network AMI at least 0.8, and a pooled positive-diagonal/negative-crossed
+   model--patient matrix.
+3. Only after KMeans acceptance, open patient held-out once. Relative to the
+   paired exact anchor require improvement in eventwise prototype `R2`, both
+   mode and weakest-mode losses, and both mode-specific and weakest event-cloud
+   losses.
+4. Require candidate source-topology separation above the occupancy-preserving
+   within-network label-permutation q95 and better than the exact dual anchor.
+   These checks may reject but never rerank the frozen candidate.
+
+## Phase 6: same-checkpoint causal validation and freeze
+
+1. In each confirmation network select one native event per mode by the frozen
+   joint source-topology/contact-rank medoid rule.
+2. Construct mode-contrast hotspots leave-one-network-out from the other two
+   networks and a separated off-template control matched over the actual pulse
+   footprint for Node field, `Delta Vtheta`, E count and baseline E rate.
+3. Branch sham, MTA hotspot/control and MTB hotspot/control from the identical
+   checkpoint and random stream. Apply the frozen +20 mV, 70 ms threshold pulse.
+4. Test event survival before onset delay and require at least one mode's
+   predicted hotspot to exceed both its opposite-mode effect and matched control
+   in at least two of three networks.
+5. Set `REV17_NODE_FIELD_FROZEN` only if this intervention is selective. Render
+   the two Fig.4 acceptance views and causal-validation panels only from these
+   frozen confirmation/intervention artifacts.
 
 ## Stop boundaries
 
@@ -52,5 +81,7 @@ figures during selection.
   coordinate, do not reinterpret it as mode failure.
 - No transferable dual-channel response: close this local static Node family
   before considering connectivity or Z/M.
+- Any confirmation, KMeans, held-out/topology or intervention failure rejects
+  the one frozen candidate without returning to the atlas ranking.
 - Node not frozen: EE, E-to-I, Z/M, ictal targets and hotspot claims remain
   closed.

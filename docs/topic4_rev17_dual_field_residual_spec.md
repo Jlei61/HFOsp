@@ -80,29 +80,90 @@ average score by collapsing one mode is not a useful direction.
 Natural KMeans, patient held-out blocks and figures remain closed during atlas
 construction and response-direction fitting.
 
-## 5. Advancement
+## 5. Advancement and final Node freeze
 
 The atlas advances if it is complete and yields at least one bounded joint
 direction whose predicted response improves weak mode A and `J14` without
 worsening mode B beyond 10% or pushing either mode below effective support six.
 This is an exploratory nomination rule, not Node acceptance.
 
-Nominated joint residuals are then run on fresh selection networks. Node can be
-frozen only after all of the following are established on unseen networks:
+Nominated joint residuals are first run on fresh selection networks 2371--2373.
+Each network must individually improve `J14` and weak mode A relative to the
+paired exact dual anchor, retain mode B within 10% and retain effective support
+six for both modes. Pooled compensation is not allowed. This stage freezes one
+candidate for confirmation; it does not freeze Node and does not open natural
+KMeans, patient held-out blocks or figures.
+
+The selected candidate and exact dual anchor are then run once on unseen
+confirmation networks 2381--2383. The training-target, safety and support rules
+are re-established without reranking. Only after this confirmation passes may
+the already frozen candidate undergo the following read-only acceptance layers:
 
 - both modes occur in the same network;
-- natural KMeans aligns with both patient modes;
-- complete patient-training distribution and weakest mode improve;
+- natural masked-rank KMeans has at least three events in each cluster and
+  aligns with the frozen patient-mode classifier at AMI at least 0.8 in all
+  three networks;
+- the pooled model--patient matrix has positive diagonal and negative crossed
+  cells;
+- complete patient-training distribution and weakest mode remain improved;
 - mode B is preserved;
 - each mode has adequate support and distinct source topology.
 
-Only after that freeze may patient held-out evaluation and same-checkpoint
-hotspot intervention run. EE, E-to-I and Z/M remain closed until Node is frozen.
+Natural KMeans may accept or reject the frozen candidate but may not rerank the
+field. If it passes, the same confirmation worker arrays are opened once for
+patient held-out and source-topology evaluation. Relative to the paired exact
+dual anchor, the candidate must improve positive held-out eventwise prototype
+`R2`, both mode losses and their weakest-mode aggregate, and both mode-specific
+event-cloud losses and their weakest-mode aggregate. Its mode-specific source
+topology must exceed a within-network occupancy-preserving label-permutation
+q95 and must improve over the exact dual anchor. Failure rejects the candidate;
+there is no return to atlas ranking.
 
-## 6. Claim boundary
+Passing this read-only audit permits, but is not itself, final Node freeze. The
+last requirement is a same-checkpoint crossed intervention on confirmation
+networks 2381--2383:
+
+- choose one source-evaluable native event per mode and network by the
+  within-network joint source-topology/contact-rank medoid rule;
+- define each mode hotspot leave-one-network-out from the other two networks'
+  earliest 10% onset support;
+- compare sham, the predicted hotspot and a spatially separated off-template
+  control matched over the actual pulse footprint for mean Node field,
+  `Delta Vtheta`, E-neuron count and baseline E rate;
+- raise local threshold by 20 mV for 70 ms from the identical checkpoint and
+  random stream, then compare event survival first and nonnegative onset delay
+  second;
+- require the predicted-mode effect to exceed both the opposite-mode effect
+  and its matched control in at least two of three networks for at least one
+  mode.
+
+Only that final intervention result can set `REV17_NODE_FIELD_FROZEN`. EE,
+E-to-I and Z/M remain closed throughout the complete chain and may be opened
+only after this status is established.
+
+## 6. Figure acceptance
+
+Formal figures cannot select or rerank the field. They are rendered only after
+`REV17_NODE_FIELD_FROZEN` and must consume the exact confirmation/intervention
+artifacts used by the audits.
+
+1. The direct-readout view shows the continuous dual Node substrate, the two
+   mode-specific onset-density fields and two temporally non-overlapping native
+   events from one confirmation network.
+2. The companion KMeans view reuses the accepted Figure 1E masked-rank painter
+   and reports per-network support/AMI together with pooled model--patient
+   profiles.
+3. Source-topology and crossed hotspot effects are shown as causal-validation
+   panels or a supplement from the same frozen artifacts; they cannot replace
+   either of the two Fig.4 acceptance views.
+
+## 7. Claim boundary
 
 Rev17 is development-only. The atlas uses the frozen patient-training target
 to estimate Node response and therefore is not patient-blind. A successful
-atlas establishes a viable continuous Node parameterization and a candidate
-dual-mode substrate; it does not identify a biological core, a causal patient
-mechanism or an interictal-to-ictal bridge.
+atlas establishes only a locally useful response direction. Full success
+requires fresh-network selection, unseen-network confirmation, natural KMeans,
+held-out distribution improvement, distinct source topology and selective
+same-checkpoint intervention. Even then the result is a viable continuous Node
+substrate with model-internal regional necessity; it does not identify a
+biological core, a causal patient mechanism or an interictal-to-ictal bridge.
