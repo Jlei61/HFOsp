@@ -97,6 +97,30 @@ Current accepted visual contract:
 - `TA/TB` are within-subject template aliases; do not report them as cross-subject global labels
 - top subtitle carries n/tau/MI/KMeans/within-tau/inter-corr details so it can be cropped away
 
+## Canonical Figure 2/3 data registry
+
+Figure 2B/E/F and Figure 3C/D/E/F must resolve their default data from
+`config/paper_figure_source_registry.json`. The active contract is
+`all_event_timing_plus_space_no_hard_qc_v1`: all interictal events remain in template discovery,
+direction-unavailable events carry a masked spatial view, and legacy hard-QC or timing-only roots are
+not valid defaults.
+
+Validate the registered files and hashes before plotting:
+
+```bash
+python scripts/paper_figures/paper_figure_source_registry.py --figure all
+```
+
+Canonical builders:
+
+```bash
+python scripts/paper_figures/build_main_figures_1_2.py --figure 2
+python scripts/paper_figures/build_main_figure_3_timing_plus_space.py
+```
+
+A missing registered source is a blocking error. Do not substitute an older `spatial_information_gain`,
+`template_gradient_fields`, or archived Figure 3 source directory.
+
 ## Fig2-C Interictal Event Envelope Field Candidate
 
 Canonical Figure 2 entry point:

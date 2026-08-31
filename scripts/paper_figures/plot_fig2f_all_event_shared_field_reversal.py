@@ -33,18 +33,13 @@ from scripts.paper_figures.plot_fig2_shared_field_reversal_row import (  # noqa:
 from scripts.paper_figures.plot_fig3f_ab_dominance_cohort import (  # noqa: E402
     _pretty as _manuscript_id,
 )
+from scripts.paper_figures.paper_figure_source_registry import (  # noqa: E402
+    registered_path,
+)
 
 
-DEFAULT_INPUT = (
-    ROOT
-    / "results/interictal_propagation_masked/"
-    "template_gradient_fields_all_events_timing_plus_space"
-)
-DEFAULT_OUTPUT = (
-    ROOT
-    / "results/paper-ready-figure/"
-    "fig2_all_events_timing_plus_space"
-)
+DEFAULT_INPUT = registered_path("fig2", "f", "analysis_root")
+DEFAULT_OUTPUT = registered_path("fig2", "f", "staging_root")
 
 
 def _load_rows(path: Path) -> list[dict]:

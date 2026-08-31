@@ -15,10 +15,19 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from scripts.paper_figures.paper_figure_source_registry import (  # noqa: E402
+    REGISTRY_PATH,
+    active_contract,
+    registered_path,
+    resolve_repo_path,
+    validate_active_sources,
+)
+
 PAPER_ROOT = ROOT / "results/paper-ready-figure"
 FIG1_ROOT = PAPER_ROOT / "fig1"
 FIG2_ROOT = PAPER_ROOT / "fig2"
 FIG2C_ACCEPTED_SCHEMA = "fig2c_interictal_event_envelope_field_candidate_v10"
+ACTIVE_CONTRACT_ID, ACTIVE_CONTRACT = active_contract()
 
 
 def _move(src: Path, dst: Path) -> Path:
@@ -166,9 +175,9 @@ E1146 的冻结间期模板轴从三维触点空间投影到 shared patient plan
 
 ### fig2-panelb.png / .pdf
 
-左侧以 E1146/E548 的同一组 fold-0 留出事件方向对比仅时序模板轴（同色虚线）和时序--空间模板轴（同色实线），右侧显示 25 名可评估患者的绝对留出方向得分、患者内配对变化和记录块内方向置换零模型。底部同一行叠加蓝色 Timing、橙色 +Space 的患者 bootstrap cohort-median 分布及灰色方向置换 cohort-median Null；底部分布区的长横括号表示 +Space 相对零模型的检验，短横括号表示 +Space 相对 Timing 的患者内配对检验。配对小提琴分布进入 Supplementary Fig. 4B。
+左侧固定复用 E1146 与 E548，每位患者只画一张 fold-0 held-out 全事件 rose；同色虚线为 Timing 训练模板轴，同色实线为 Timing+Space 训练模板轴，两种方法共享完全相同的事件集合和二维显示基底。右侧显示 26 名可评估患者的绝对留出方向得分与患者内配对变化；底部同一行叠加 Timing、+Space 的患者 bootstrap cohort-median 分布和冻结模型后的记录块内方向置换 null。
 
-**关注点**：该 panel 支持真实三维电极信息提高患者内跨记录块的方向一致性；不是未见患者预测，也不证明连续组织轨迹、传播速度或机制因果。
+**关注点**：该 panel 支持在保留全部间期事件时，真实三维电极信息提高患者内跨记录块的方向一致性；不是未见患者预测，也不证明连续组织轨迹、传播速度或机制因果。
 
 ### fig2-panelc.png / .pdf
 
@@ -184,15 +193,15 @@ E1146 的冻结 TA/TB shared-plane rank fields，作为静态模板对照。两�
 
 ### fig2-panele.png / .pdf
 
-四个锁定案例的 TA/TB shared-axis rank-field 配对展示；案例只用于说明可读的反向场形态，队列推断不由这四例承担。
+四名匿名患者的 TA/TB 均来自 all-event Timing+Space 聚类后冻结的 shared plane；上下图使用同一患者、同一坐标和同一 50×60 mm 显示窗。示例按 metadata 中预先写明的负相关强度与可读性规则选择，统计结论使用完整 18 人分母。
 
-**关注点**：患者选择和完整 12 人 denominator 写在 `fig2_panel_ef_metadata.json`，不能把 4 个显示例当独立抽样验证。
+**关注点**：逐列比较同一患者 TA 与 TB 的早晚传播场是否翻转，不能把 4 个显示例当作独立统计分母。
 
 ### fig2-panelf.png / .pdf
 
-完整 shared-axis、二维几何可评估队列的逐患者 signed field correlation，以及 full-contact shuffle 的 cohort-median-shift null。
+完整 18 人 all-event Timing+Space shared-plane 队列的逐患者 signed field correlation，以及 full-contact spatial shuffle 的 cohort-median-shift null。15/18 的 TA–TB 场相关为负，队列中位数为 −0.718。
 
-**关注点**：安全口径是 cohort median 比全触点随机化更负；不能升级成所有患者或所有 null 均显著。
+**关注点**：同时看患者级方向、绝对效应大小和相对空间零模型的偏移；不能升级成每名患者均显著。
 
 ### fig2-complete-layout.png / .pdf
 
@@ -277,6 +286,7 @@ def _reuse_accepted_fig2c(figures: Path, *, include_gif: bool = False) -> list[s
 
 
 def build_figure2(*, make_gif: bool = False, recompute_fig2c: bool = False) -> dict:
+    validate_active_sources(figures=("fig2",))
     figures = FIG2_ROOT / "figures"
     figures.mkdir(parents=True, exist_ok=True)
     outputs: dict[str, list[str]] = {}
@@ -296,13 +306,15 @@ def build_figure2(*, make_gif: bool = False, recompute_fig2c: bool = False) -> d
     outputs["a"].append(str(a_svg.relative_to(ROOT)))
     gc.collect()
 
-    spatial_gain_root = PAPER_ROOT / "fig2b_spatial_information_gain"
+    spatial_gain_root = registered_path("fig2", "b", "staging_root")
     subprocess.run(
         [
             sys.executable,
             str(ROOT / "scripts/paper_figures/plot_interictal_spatial_information_gain.py"),
             "--paper-root",
             str(spatial_gain_root),
+            "--analysis-root",
+            str(registered_path("fig2", "b", "analysis_root")),
         ],
         check=True,
     )
@@ -360,14 +372,55 @@ def build_figure2(*, make_gif: bool = False, recompute_fig2c: bool = False) -> d
     outputs["d"] = [str(d_png.relative_to(ROOT)), str(d_pdf.relative_to(ROOT))]
     gc.collect()
 
+    shared_stage = registered_path("fig2", "e", "staging_root")
+    shared_input = registered_path("fig2", "e", "analysis_root")
     subprocess.run(
-        [sys.executable, str(ROOT / "scripts/paper_figures/plot_fig2_shared_field_reversal_row.py"),
-         "--output-dir", str(FIG2_ROOT)],
+        [
+            sys.executable,
+            str(ROOT / "scripts/paper_figures/plot_fig2e_all_event_shared_fields.py"),
+            "--input-root", str(shared_input),
+            "--output-root", str(shared_stage),
+        ],
         check=True,
     )
-    ef_meta = json.loads((FIG2_ROOT / "fig2_panel_ef_metadata.json").read_text())
-    outputs["e"] = [ef_meta["outputs"]["panel_e_png"], ef_meta["outputs"]["panel_e_pdf"]]
-    outputs["f"] = [ef_meta["outputs"]["panel_f_png"], ef_meta["outputs"]["panel_f_pdf"]]
+    subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "scripts/paper_figures/plot_fig2f_all_event_shared_field_reversal.py"),
+            "--input-root", str(registered_path("fig2", "f", "analysis_root")),
+            "--output-root", str(registered_path("fig2", "f", "staging_root")),
+        ],
+        check=True,
+    )
+    for panel_id in ("e", "f"):
+        source_figures = registered_path("fig2", panel_id, "staging_root") / "figures"
+        source_stem = f"fig2-panel{panel_id}"
+        canonical_png = figures / f"{source_stem}.png"
+        canonical_pdf = figures / f"{source_stem}.pdf"
+        shutil.copy2(source_figures / f"{source_stem}.png", canonical_png)
+        shutil.copy2(source_figures / f"{source_stem}.pdf", canonical_pdf)
+        shutil.copy2(
+            source_figures / f"{source_stem}-metadata.json",
+            FIG2_ROOT / f"fig2_panel{panel_id}_metadata.json",
+        )
+        outputs[panel_id] = [
+            str(canonical_png.relative_to(ROOT)), str(canonical_pdf.relative_to(ROOT)),
+        ]
+    fig2_contract = ACTIVE_CONTRACT["fig2"]
+    direction_null = resolve_repo_path(
+        fig2_contract["b"]["required_inputs"]["direction_null"]["path"]
+    )
+    spatial_null = resolve_repo_path(
+        fig2_contract["f"]["required_inputs"]["spatial_null"]["path"]
+    )
+    shutil.copy2(direction_null, FIG2_ROOT / "cohort_direction_shuffle_null.npz")
+    shutil.copy2(spatial_null, FIG2_ROOT / "shared_field_similarity_null_draws.npz")
+    for stale in (
+        FIG2_ROOT / "cohort_rank_shuffle_null.npz",
+        FIG2_ROOT / "fig2_shared_field_reversal_cohort_null.npz",
+        FIG2_ROOT / "fig2_panel_ef_metadata.json",
+    ):
+        stale.unlink(missing_ok=True)
 
     _write_fig2_readme(figures)
     complete = _compose_complete_layout(
@@ -375,22 +428,26 @@ def build_figure2(*, make_gif: bool = False, recompute_fig2c: bool = False) -> d
         stem="fig2-complete-layout",
         canvas_size=(7000, 6000),
         placements={
-            "a": (figures / "fig2-panela.png", (160, 180, 3420, 1800)),
-            "b": (figures / "fig2-panelb.png", (3600, 180, 6840, 1800)),
+            "a": (figures / "fig2-panela.png", (160, 180, 2700, 1980)),
+            "b": (figures / "fig2-panelb.png", (2840, 180, 6840, 1980)),
             "c": (figures / "fig2-panelc.png", (160, 2080, 4920, 3830)),
             "d": (figures / "fig2-paneld.png", (5100, 2080, 6840, 3830)),
             "e": (figures / "fig2-panele.png", (160, 4100, 4920, 5850)),
             "f": (figures / "fig2-panelf.png", (5100, 4100, 6840, 5850)),
         },
         labels={
-            "A": (45, 35), "B": (3485, 35),
+            "A": (45, 35), "B": (2705, 35),
             "C": (45, 1930), "D": (4965, 1930),
             "E": (45, 3950), "F": (4965, 3950),
         },
         anchors={"c": "top", "d": "top", "e": "top", "f": "top"},
     )
     registry = {
-        "schema_version": "paper_figure2_panels_and_complete_layout_v2",
+        "schema_version": "paper_figure2_panels_and_complete_layout_v3",
+        "source_registry": str(REGISTRY_PATH.relative_to(ROOT)),
+        "source_contract_id": ACTIVE_CONTRACT_ID,
+        "updated_panels": ["b", "e", "f"],
+        "preserved_panels": ["a", "c", "d"],
         "composite_emitted": True,
         "png_dpi": 600,
         "panels": outputs,

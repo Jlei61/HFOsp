@@ -15,6 +15,23 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from scripts.paper_figures.paper_figure_source_registry import (  # noqa: E402
+    REGISTRY_PATH,
+    active_contract,
+    registered_path,
+    resolve_repo_path,
+    validate_active_sources,
+)
+
+
+ACTIVE_CONTRACT_ID, ACTIVE_CONTRACT = active_contract()
+DEFAULT_OUT_DIR = resolve_repo_path(ACTIVE_CONTRACT["fig3"]["canonical_root"])
+DEFAULT_REFERENCE_DIR = DEFAULT_OUT_DIR / "figures"
+DEFAULT_PANEL_SOURCES = {
+    panel_id: registered_path("fig3", panel_id, "source_pdf")
+    for panel_id in "cdef"
+}
+
 
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -35,7 +52,8 @@ def _copy_and_rasterize(
     if not source_pdf.exists():
         raise FileNotFoundError(source_pdf)
     pdf = figures_dir / f"fig3-panel{panel_id}.pdf"
-    shutil.copy2(source_pdf, pdf)
+    if source_pdf.resolve() != pdf.resolve():
+        shutil.copy2(source_pdf, pdf)
     subprocess.run(
         [
             "pdftoppm",
@@ -76,6 +94,7 @@ def _compose(figures_dir: Path) -> list[str]:
 
 
 def build(args: argparse.Namespace) -> dict:
+    validate_active_sources(figures=("fig3",))
     figures_dir = args.out_dir / "figures"
     figures_dir.mkdir(parents=True, exist_ok=True)
     sources = {
@@ -139,8 +158,10 @@ E1146 在 Timing+Space 共享场上的 amplitude-aware TA/TB 表达轨迹。
 """
     (figures_dir / "README.md").write_text(readme, encoding="utf-8")
     registry = {
-        "schema_version": "paper_figure3_timing_plus_space_refresh_v1",
+        "schema_version": "paper_figure3_all_event_timing_plus_space_refresh_v1",
         "producer": "scripts/paper_figures/build_main_figure_3_timing_plus_space.py",
+        "source_registry": _display_path(REGISTRY_PATH),
+        "source_contract_id": ACTIVE_CONTRACT_ID,
         "layout_reference": "locked Figure 3 7200x6000 complete layout",
         "panel_letters_in_individual_files": False,
         "panel_letters_in_complete_layout": True,
@@ -165,10 +186,16 @@ E1146 在 Timing+Space 共享场上的 amplitude-aware TA/TB 表达轨迹。
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--reference-figure-dir", type=Path, required=True)
+    parser.add_argument(
+        "--reference-figure-dir", type=Path, default=DEFAULT_REFERENCE_DIR,
+        help="Directory containing the preserved canonical Figure 3A/B PDFs",
+    )
     for panel_id in "cdef":
-        parser.add_argument(f"--panel-{panel_id}", type=Path, required=True)
-    parser.add_argument("--out-dir", type=Path, required=True)
+        parser.add_argument(
+            f"--panel-{panel_id}", type=Path,
+            default=DEFAULT_PANEL_SOURCES[panel_id],
+        )
+    parser.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
     args = parser.parse_args()
     args.reference_figure_dir = args.reference_figure_dir.resolve()
     for panel_id in "cdef":

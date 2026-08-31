@@ -1,6 +1,6 @@
 # Paper-ready figure 唯一登记表
 
-> 状态：v3，2026-08-13。本文是 `results/paper-ready-figure/` 的唯一指代入口。
+> 状态：v4，2026-08-31。本文是 `results/paper-ready-figure/` 的唯一指代入口。
 > 论文 panel 编号、资产语义、物理路径和科学状态必须分开记录；不能再仅凭目录名里的
 > `fig2` / `fig3b` / `fig6` 判断它现在属于哪张论文图。
 
@@ -29,8 +29,8 @@
 | asset_id | paper_slot | status | canonical_path | producer / 说明 |
 |---|---|---|---|---|
 | `interictal_hfo_temporal_scaffold` | Fig1-B–F | `LOCKED` | `results/paper-ready-figure/fig1/figures/` | 无角标的 B1/B2、C、D、E、F 独立输出 + 带 B–F 角标的 `fig1-complete-layout`；Fig1-A 为作者手绘 |
-| `interictal_spatial_scaffold` | Fig2-A–F | `CANDIDATE` | `results/paper-ready-figure/fig2/figures/` | 无角标的 A–F 独立输出 + 带 A–F 角标的 `fig2-complete-layout`；A 为局部电极几何→平面投影→TA/TB 场 |
-| `ictal_field_scaffold` | Fig3-A–F | `LOCKED` | `results/paper-ready-figure/fig3/figures/` | 无角标 A–F 独立 PNG/PDF + 带 A–F 角标的 `fig3-complete-layout`；A raw/TFR，B 四频带，C TA field↔early-ictal broadband，D onset-gradient cohort n=17/16/11，E 单病例时程，F 17-subject A/B heatmap |
+| `interictal_spatial_scaffold` | Fig2-A–F | `CANDIDATE` | `results/paper-ready-figure/fig2/figures/` | B/E/F 默认读取 `all_event_timing_plus_space_no_hard_qc_v1`：B 为 26 人 held-out 方向比较，E 为 4 例显示，F 为完整 18 人 shared-plane 队列；A/C/D 保持原 canonical 版本 |
+| `ictal_field_scaffold` | Fig3-A–F | `LOCKED` | `results/paper-ready-figure/fig3/figures/` | A/B 保持原 raw/TFR 与四频带 signal context；C–F 默认读取 `all_event_timing_plus_space_no_hard_qc_v1` 重算源，D 为 n=17/16/11，F 为 17-subject A/B heatmap |
 | `working_subject_snn_fig4` | Fig4-A–G | `CANDIDATE` | `results/paper-ready-figure/fig4/figures/` | 当前工作版：A/B 为 E1146 setup，C 已替换为 12 张新网络上的 Node / +EE / +E-to-I / +EE+EI 冻结终点确认，D/E 为双向读出，F/G 为 validation；整图仍是跨阶段组合，当前不是最终锁图 |
 | `data_driven_snn_nlc_pathway_confirmation` | Fig4-C source | `SOURCE` | `results/topic4_sef_hfo/data_driven_local_connectivity_rev11_nlc/pathway_mechanism_confirmation/figures/` | 1581--1592 共 12 张全新配对网络，20 s/arm；显示无病理命名的 Mode 1/2 事件占比、自然 KMeans 两簇与冻结 Mode 1/2 标签的匹配率及 OOD，逐网络配对值和 90% network-bootstrap 区间。属于 patient-development static-pathway mechanism confirmation，不支持 patient-blind、临床波形、解剖 core 或发作生命周期结论 |
 | `data_driven_snn_dual_mode_validation` | Fig4-C historical candidate | `DIAGNOSTIC_ONLY` | `results/topic4_sef_hfo/data_driven_core_field_rev10_d/spatial_ou_accessibility_d5_2_confirmation/figures/` | 连续场 + MTA/MTB same-network readout 和 KMeans 核验图；natural KMeans 未复现患者 TA/TB（direction purity `0.674` < patient-matched q05 `0.884`，pooled MTB↔TB `−0.60`），已被独立冻结终点的 NLC pathway panel 替代，不得再作为当前 Fig.4C source |
@@ -117,3 +117,13 @@ canonical 输出。
 Figure 3/4 builder 已同步读取归档 source，因此归档不影响当前主图重建。后续 producer 若再次向顶层生成
 `fig3_*`、`fig4_*`、`fig6_*` 或 `supp_fig*`，应视为输出路径回归；正式锁定新主图时统一建立
 `fig5/` 或 `fig6/`，而不是恢复旧候选目录。
+
+## 8. Figure 2/3 当前数据注册
+
+`config/paper_figure_source_registry.json` 是 Fig2-B/E/F 与 Fig3-C/D/E/F 的唯一 tracked 数据入口。当前 active contract 为 `all_event_timing_plus_space_no_hard_qc_v1`；旧 hard-QC 与 timing-only 路径均登记为 historical，禁止默认 fallback。任何对话或脚本在重画前应先运行：
+
+```bash
+python scripts/paper_figures/paper_figure_source_registry.py --figure all
+```
+
+若 active artifact 缺失或 SHA-256 不匹配，命令直接失败，不会静默使用旧结果。

@@ -51,14 +51,13 @@ from src.topic5_interictal_direction_rose import (  # noqa: E402
 from src.topic5_tspectral_field_concordance import (  # noqa: E402
     bootstrap_median_ci,
 )
+from scripts.paper_figures.paper_figure_source_registry import (  # noqa: E402
+    registered_path,
+)
 
 
-DEFAULT_ANALYSIS_ROOT = (
-    ROOT / "results/interictal_propagation_masked/spatial_information_gain"
-)
-DEFAULT_PAPER_ROOT = (
-    ROOT / "results/paper-ready-figure/fig2b_spatial_information_gain"
-)
+DEFAULT_ANALYSIS_ROOT = registered_path("fig2", "b", "analysis_root")
+DEFAULT_PAPER_ROOT = registered_path("fig2", "b", "staging_root")
 FIGURE_STEM = "interictal_spatial_information_gain"
 PAPER_STEM = "fig2b-spatial-information-gain"
 VIOLIN_FIGURE_STEM = "interictal_spatial_information_gain_paired_violin"

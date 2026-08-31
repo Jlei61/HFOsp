@@ -13,6 +13,11 @@ Before tracing any result, read these in order:
 5. `docs/yuquan_24h_dataset_structure.md`
 6. `config/default.yaml`
 
+Before rebuilding canonical Figure 2 or Figure 3, also read
+`config/paper_figure_source_registry.json`. It is the tracked source of truth for
+the active panel data contract. If a registered artifact is missing or its hash
+does not match, stop with an error; do not fall back to an older result directory.
+
 ## Canonical Topic Docs
 
 For any scientific-status question, go to the topic doc; do not rely on summaries in this file.

@@ -27,6 +27,9 @@ from scripts.paper_figures.plot_fig2_shared_field_reversal_row import (  # noqa:
 from scripts.paper_figures.plot_fig3f_ab_dominance_cohort import (  # noqa: E402
     _pretty as manuscript_id,
 )
+from scripts.paper_figures.paper_figure_source_registry import (  # noqa: E402
+    registered_path,
+)
 from scripts.plot_topic5_interictal_template_ab_fields import (  # noqa: E402
     DEFAULT_DISPLAY_SIGMA_MM,
     TA_COLOR,
@@ -36,11 +39,8 @@ from scripts.plot_topic5_interictal_template_ab_fields import (  # noqa: E402
 )
 
 
-DEFAULT_INPUT = (
-    ROOT / "results/interictal_propagation_masked/"
-    "template_gradient_fields_all_events_timing_plus_space"
-)
-DEFAULT_OUTPUT = ROOT / "results/paper-ready-figure/fig2_all_events_timing_plus_space"
+DEFAULT_INPUT = registered_path("fig2", "e", "analysis_root")
+DEFAULT_OUTPUT = registered_path("fig2", "e", "staging_root")
 N_EXAMPLES = 4
 MIN_CONTACTS = 7
 
