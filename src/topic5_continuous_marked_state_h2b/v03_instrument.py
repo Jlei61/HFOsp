@@ -218,10 +218,13 @@ def lagged_decoder_autocorrelation(
     matrix = np.asarray(values, dtype=np.float64)
     if len(time) != len(group) or len(time) != len(matrix):
         raise ValueError("autocorrelation arrays disagree")
-    # A held-out interval can sit at a different absolute decoder offset than
-    # TRAIN.  Autocorrelation concerns fluctuations around the interval mean;
-    # retaining that offset would make an almost constant trace look slow.
-    matrix = matrix - np.mean(matrix, axis=0, keepdims=True)
+    # Autocorrelation concerns within-segment fluctuations.  A global centre
+    # leaves between-segment offsets in every within-segment pair and can make
+    # a piecewise-constant trace look arbitrarily slow.
+    matrix = np.array(matrix, copy=True)
+    for label in np.unique(group):
+        rows = np.flatnonzero(group == label)
+        matrix[rows] -= np.mean(matrix[rows], axis=0, keepdims=True)
     result = []
     for lag in lag_minutes:
         left_values = []
@@ -360,25 +363,32 @@ def reset_phase_explained_variance(
     time = np.asarray(time_epoch, dtype=np.float64)
     group = np.asarray(session, dtype=np.int64)
     matrix = np.asarray(values, dtype=np.float64)
-    if len(matrix) < 5 or matrix.shape[1] == 0:
+    labels = np.unique(group)
+    # With one segment, chronological drift and time-since-reset are the same
+    # regressor.  Calling either one a reset artefact would be unidentifiable.
+    if len(matrix) < 5 or matrix.shape[1] == 0 or len(labels) < 2:
         return None
     elapsed = np.zeros(len(time), dtype=np.float64)
     for label in np.unique(group):
         rows = np.flatnonzero(group == label)
         elapsed[rows] = np.maximum(time[rows] - np.min(time[rows]), 0.0) / 60.0
-    design = np.column_stack([
-        np.ones(len(time)),
+    segment_design = np.column_stack([(group == label).astype(np.float64)
+                                      for label in labels])
+    phase_design = np.column_stack([
         np.log1p(elapsed),
         (elapsed <= 1.0).astype(np.float64),
         (elapsed <= 5.0).astype(np.float64),
     ])
-    fitted = design @ np.linalg.lstsq(design, matrix, rcond=None)[0]
-    centred = matrix - np.mean(matrix, axis=0, keepdims=True)
-    denominator = float(np.sum(centred ** 2))
-    if denominator <= 1e-20:
+    base_fitted = segment_design @ np.linalg.lstsq(
+        segment_design, matrix, rcond=None,
+    )[0]
+    full_design = np.column_stack([segment_design, phase_design])
+    full_fitted = full_design @ np.linalg.lstsq(full_design, matrix, rcond=None)[0]
+    base_sse = float(np.sum((matrix - base_fitted) ** 2))
+    if base_sse <= 1e-20:
         return None
-    residual = matrix - fitted
-    return float(np.clip(1.0 - np.sum(residual ** 2) / denominator, 0.0, 1.0))
+    full_sse = float(np.sum((matrix - full_fitted) ** 2))
+    return float(np.clip((base_sse - full_sse) / base_sse, 0.0, 1.0))
 
 
 def open_loop_and_reset_diagnostics(
@@ -743,6 +753,12 @@ def open_loop_interictal_prediction(
             break
     return {
         "status": "COMPLETE" if cuts else "NOT_ESTIMABLE_NO_COMPLETE_WINDOWS",
+        "observer_mode": "closed_after_each_cut",
+        "event_history_mode": "teacher_forced_recorded_history",
+        "interpretation": (
+            "state-generator retention conditional on recorded future event history; "
+            "not a fully autonomous event rollout"
+        ),
         "horizons": rows_by_horizon,
         "predictive_horizon_minutes": predictive_horizon,
         "preliminary_predictive_pass": bool(
@@ -818,10 +834,11 @@ def summarise_instrument_trace(
         and float(rank["top_pc_share"]) <= 0.95
         and float(np.median(persistence_distance)) > 1e-6
     )
+    reset_not_dominant = bool(reset_r2 is None or reset_r2 < 0.50)
     q1_pass = bool(
         q1_absolute_pass
         and temporal_null["temporally_smoother_than_shuffled"]
-        and reset_r2 is not None and reset_r2 < 0.50
+        and reset_not_dominant
     )
     generator_decoder = trace.generator_decoder_step_norm[validation]
     correction_decoder = trace.correction_decoder_step_norm[validation]
@@ -866,6 +883,8 @@ def summarise_instrument_trace(
             "collapsed_null_effective_rank": 0.0,
             "temporal_shuffled_null": temporal_null,
             "reset_phase_explained_variance": reset_r2,
+            "reset_phase_estimable": reset_r2 is not None,
+            "reset_not_dominant_or_not_estimable": reset_not_dominant,
             "null_calibrated_pass": q1_pass,
         },
         "Q2_cross_window_information": {

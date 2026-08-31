@@ -371,5 +371,6 @@
 - **2026-08-31 H2b Cross-task Transfer v0.3 冻结重设计**：
   - Scientific Spec：`continuous_marked_state_h2b_cross_task_v0_3_spec_2026-08-31.md`；执行计划：`continuous_marked_state_h2b_cross_task_v0_3_plan_2026-08-31.md`。
   - 冻结合同：`continuous_marked_state_h2b_cross_task_v0_3_contract_2026-08-31.md`；机器合同：`config/topic5_continuous_marked_state_h2b_v0_3.json`。
+  - 少 gate、多探索执行附录：`continuous_marked_state_h2b_cross_task_v0_3_exploration_addendum_2026-08-31.md`；A1/A2/T/M/D 改为 claim-specific evidence tiers，阴性不再全局阻断其他 development 探索。
   - 顺序固定为 state instrument qualification → 半合成 assay/power → nested prequential hazard → `tau_z` lag-response → decoder-metric OOS 流形—流场；不以 UMAP 或更多 checkpoint 替代前置 gate。
   - v0.3 明确是看过 v0.2 development 结果后的重设计，不是独立 confirmation；formal/sealed/H3/T2 继续关闭。

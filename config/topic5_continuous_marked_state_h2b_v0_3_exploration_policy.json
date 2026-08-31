@@ -1,0 +1,43 @@
+{
+  "schema_revision": "h2b_v0_3_exploration_policy_v1",
+  "status": "FROZEN_DEVELOPMENT_ADDENDUM",
+  "frozen_date": "2026-08-31",
+  "reason": "user-directed execution policy: fewer global gates and more parallel exploratory experiments",
+  "analysis_contract_revision": "h2b_v0_3_analysis_contract_v1",
+  "changes_estimands_or_data_boundaries": false,
+  "hard_gates": {
+    "source_purity": "state is learned without seizure supervision and frozen before seizure analysis",
+    "estimand_integrity": "state contrasts are nested on identical anchors outcomes and past-only folds",
+    "temporal_integrity": "no future input no gap crossing and no formal or sealed access",
+    "artifact_integrity": "hash-bound inputs atomic ownership resumable outputs and explicit failure states",
+    "resource_safety": "measured memory bounded workers thread limits and OOM resume without subject or seed deletion"
+  },
+  "claim_specific_not_global_gates": {
+    "A1_state_qualification": "stratifies all_frozen versus state_qualified and controls persistent-state wording; it does not block all_frozen hazard lag or geometry exploration",
+    "A2_assay_power": "controls biological-negative wording; an underpowered assay remains exploratory and does not block descriptive real-data runs",
+    "T_increment": "controls transferable-representation wording; T-negative does not block diagnostic M D source-ablation or phenotype exploration",
+    "M_memory": "controls persistent-memory wording only",
+    "D_specificity": "controls seizure-entry-state wording only",
+    "IED_source_ablation": "controls IED-specific wording only and may run as a predeclared development exploration when resources permit",
+    "phenotype_bridge": "controls organisational-continuity wording only and may run even when T M or D are weak"
+  },
+  "parallel_exploration_tracks": [
+    "all_frozen_nested_hazard",
+    "state_qualified_nested_hazard",
+    "persistent_memory_residual",
+    "tau_scaled_lag_response",
+    "oos_basin_approach_abrupt_geometry",
+    "ied_source_ablation",
+    "continuous_ictal_organisation_bridge"
+  ],
+  "reporting": {
+    "negative_result_never_global_blocker": true,
+    "engineering_pass_is_not_scientific_support": true,
+    "all_tracks_report_patient_and_oof_seizure_denominators": true,
+    "assay_not_sensitive_label_required_when_power_fails": true,
+    "state_claim_requires_state_qualified_stratum": true,
+    "formal_test_partition_opened": false,
+    "sealed_opened": false,
+    "h3_or_t2_run": false
+  }
+}

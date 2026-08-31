@@ -1,5 +1,7 @@
 # H2b Cross-task Transfer v0.3 冻结合同
 
+> 执行优先级更新：科学估计量和边界仍由本合同冻结；2026-08-31 用户要求“少 gate、多探索”后的 gate 语义，以 `continuous_marked_state_h2b_cross_task_v0_3_exploration_addendum_2026-08-31.md` 为准。A1/A2/T/M/D 只控制相应 claim，不再全局阻断其他预注册 development 探索。
+
 ## 1. 定位
 
 名称：**Frozen Interictal State, Incremental Hazard, and Seizure-entry Geometry**。

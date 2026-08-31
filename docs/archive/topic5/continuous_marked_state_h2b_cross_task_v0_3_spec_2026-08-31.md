@@ -1,5 +1,7 @@
 # H2b Cross-task Transfer v0.3 Scientific Spec
 
+> 2026-08-31 执行附录：保持本 spec 的假设、估计量与 claim ladder，但将 A1/A2/T/M/D 改为 claim-specific evidence tiers，不再作为整个 v0.3 的串行总 gate。详见 `continuous_marked_state_h2b_cross_task_v0_3_exploration_addendum_2026-08-31.md`。
+
 ## 0. 版本定位
 
 版本名：**Frozen Interictal State, Incremental Hazard, and Seizure-entry Geometry**。

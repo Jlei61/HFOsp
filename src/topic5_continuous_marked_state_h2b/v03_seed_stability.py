@@ -34,8 +34,8 @@ def _condensed_distance(values: np.ndarray) -> np.ndarray:
 
 
 def _correlation(left: np.ndarray, right: np.ndarray) -> float | None:
-    x = np.asarray(left, dtype=np.float64)
-    y = np.asarray(right, dtype=np.float64)
+    x = np.array(left, dtype=np.float64, copy=True)
+    y = np.array(right, dtype=np.float64, copy=True)
     if x.shape != y.shape or x.size < 2:
         return None
     x = x - np.mean(x)
@@ -45,8 +45,8 @@ def _correlation(left: np.ndarray, right: np.ndarray) -> float | None:
 
 
 def linear_cka(left: np.ndarray, right: np.ndarray) -> float | None:
-    x = np.asarray(left, dtype=np.float64)
-    y = np.asarray(right, dtype=np.float64)
+    x = np.array(left, dtype=np.float64, copy=True)
+    y = np.array(right, dtype=np.float64, copy=True)
     if x.ndim != 2 or y.ndim != 2 or len(x) != len(y):
         return None
     x -= np.mean(x, axis=0, keepdims=True)

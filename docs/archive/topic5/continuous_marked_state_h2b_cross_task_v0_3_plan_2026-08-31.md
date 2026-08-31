@@ -1,5 +1,7 @@
 # H2b Cross-task Transfer v0.3 执行计划
 
+> 2026-08-31 执行更新：A1/A2/T/M/D 的失败改变允许结论，不再自动停止其他预注册 development 探索。只有 source purity、嵌套 estimand、因果时间/分区、产物完整性和资源安全仍是硬门。详见同日 exploration addendum。
+
 ## 0. 交付目标
 
 本计划只做一件事：判断冻结的间期状态能否跨任务连接到发作风险与发作入口组织。执行顺序固定为：

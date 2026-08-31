@@ -69,10 +69,30 @@ def test_temporal_shuffle_detects_smooth_decoder_trace() -> None:
 
 
 def test_reset_phase_r2_flags_reset_dominated_signal() -> None:
-    time = np.arange(200, dtype=float) * 30.0
-    elapsed = time / 60.0
+    local_time = np.arange(100, dtype=float) * 30.0
+    time = np.concatenate([local_time, local_time + 100_000.0])
+    elapsed = np.tile(local_time / 60.0, 2)
     value = np.log1p(elapsed)[:, None]
     r2 = reset_phase_explained_variance(
-        time, np.zeros(200, dtype=np.int64), value,
+        time, np.repeat([0, 1], 100).astype(np.int64), value,
     )
     assert r2 is not None and r2 > 0.99
+
+
+def test_reset_phase_is_not_identifiable_from_one_segment() -> None:
+    time = np.arange(200, dtype=float) * 30.0
+    value = np.log1p(time / 60.0)[:, None]
+    assert reset_phase_explained_variance(
+        time, np.zeros(200, dtype=np.int64), value,
+    ) is None
+
+
+def test_decoder_autocorrelation_removes_between_segment_offsets() -> None:
+    local = np.tile(np.asarray([0.0, 1.0, 0.0, -1.0]), 20)
+    time = np.tile(np.arange(len(local), dtype=float) * 30.0, 2)
+    session = np.repeat([0, 1], len(local)).astype(np.int64)
+    values = np.concatenate([local, local + 10_000.0])[:, None]
+    observed = lagged_decoder_autocorrelation(
+        time, session, values, lag_minutes=(0.5,),
+    )
+    assert observed["lags"][0]["correlation"] < 0.1
