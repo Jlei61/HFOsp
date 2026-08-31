@@ -123,6 +123,19 @@ def freeze(config_path: Path, phase: str = "screen") -> dict:
         seeds = list(map(int, config["search"]["selection_network_seeds"]))
         duration_ms = float(config["search"]["duration_ms"]["selection"])
         output_root = ROOT / config["output_root"] / "selection"
+    elif phase == "confirmation":
+        selection_path = ROOT / config["output_root"] / "selection" / "aggregate.json"
+        selection = json.loads(selection_path.read_text())
+        work_point = selection.get("frozen_work_point")
+        if not work_point:
+            raise RuntimeError("selection did not freeze one work point")
+        selection_ids = [work_point]
+        include = ["gee000_getoi000", work_point]
+        lookup = {row["candidate_id"]: row for row in all_candidates}
+        candidates = [copy.deepcopy(lookup[candidate_id]) for candidate_id in include]
+        seeds = list(map(int, config["search"]["confirmation_network_seeds"]))
+        duration_ms = float(config["search"]["duration_ms"]["confirmation"])
+        output_root = ROOT / config["output_root"] / "confirmation"
     else:
         raise ValueError(f"unsupported pathway refit phase: {phase}")
     for candidate in candidates:
@@ -130,8 +143,13 @@ def freeze(config_path: Path, phase: str = "screen") -> dict:
         candidate["simulation_duration_ms"] = duration_ms
         candidate["selection_role"] = (
             "paired_node_reference"
-            if phase == "selection" and candidate["candidate_id"] == "gee000_getoi000"
+            if phase in {"selection", "confirmation"}
+            and candidate["candidate_id"] == "gee000_getoi000"
             else "selectable_candidate"
+        )
+        candidate["save_activity_grid"] = bool(
+            phase == "confirmation"
+            and candidate["candidate_id"] != "gee000_getoi000"
         )
     commit = subprocess.check_output(
         ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True,
@@ -181,7 +199,10 @@ def freeze(config_path: Path, phase: str = "screen") -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
-    parser.add_argument("--phase", choices=["screen", "selection"], default="screen")
+    parser.add_argument(
+        "--phase", choices=["screen", "selection", "confirmation"],
+        default="screen",
+    )
     args = parser.parse_args()
     manifest = freeze(args.config, args.phase)
     print(json.dumps({

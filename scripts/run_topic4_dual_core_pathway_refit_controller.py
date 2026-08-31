@@ -81,7 +81,9 @@ def _state(job: dict) -> str:
     return "pending"
 
 
-def _launch(job: dict, config_path: Path, manifest: Path, commit: str) -> None:
+def _launch(
+    job: dict, config_path: Path, manifest: Path, commit: str, phase: str,
+) -> None:
     job["status"].parent.mkdir(parents=True, exist_ok=True)
     command = [
         "systemd-run", "--user", "--collect", "--unit", job["unit"],
@@ -99,6 +101,8 @@ def _launch(job: dict, config_path: Path, manifest: Path, commit: str) -> None:
         "--expected-commit", commit, "--out-json", str(job["json"]),
         "--out-npz", str(job["npz"]),
     ]
+    if phase == "confirmation":
+        command.append("--carrier-readout")
     subprocess.run(command, cwd=ROOT, check=True)
 
 
@@ -110,8 +114,8 @@ def run(config_path: Path, commit: str, phase: str = "screen") -> dict:
         if _sha256(path) != record["sha256"]:
             raise RuntimeError(f"frozen input changed: {path}")
     output_root = ROOT / config["output_root"]
-    if phase == "selection":
-        output_root = output_root / "selection"
+    if phase in {"selection", "confirmation"}:
+        output_root = output_root / phase
     elif phase != "screen":
         raise ValueError(f"unsupported pathway refit phase: {phase}")
     manifest_path = output_root / "candidate_manifest.json"
@@ -194,7 +198,7 @@ def run(config_path: Path, commit: str, phase: str = "screen") -> dict:
                 continue
             if job["seed"] not in warmed_seeds and job["seed"] in active_seeds:
                 continue
-            _launch(job, config_path, manifest_path, commit)
+            _launch(job, config_path, manifest_path, commit, phase)
             active_seeds.add(job["seed"])
             slots -= 1
         _atomic_json(status_path, payload)
@@ -205,7 +209,10 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
     parser.add_argument("--expected-commit", required=True)
-    parser.add_argument("--phase", choices=["screen", "selection"], default="screen")
+    parser.add_argument(
+        "--phase", choices=["screen", "selection", "confirmation"],
+        default="screen",
+    )
     args = parser.parse_args()
     commit = subprocess.check_output(
         ["git", "rev-parse", args.expected_commit], cwd=ROOT, text=True,

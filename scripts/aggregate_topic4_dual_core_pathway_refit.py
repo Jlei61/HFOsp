@@ -17,6 +17,9 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from scripts.aggregate_topic4_dual_core_ood_phase import _score_worker  # noqa: E402
+from scripts.aggregate_topic4_dual_core_carrier_kinetics import (  # noqa: E402
+    _carrier_metrics,
+)
 from src.topic4_d6_natural_kmeans import natural_kmeans  # noqa: E402
 from src.topic4_dual_core_ood import load_embedding  # noqa: E402
 from src.topic4_shaft_aware import contract_groups  # noqa: E402
@@ -118,6 +121,13 @@ def _network_row(
         if np.any(np.isfinite(spans[support & (labels == mode)])) else None
         for mode in (0, 1)
     ]
+    carrier = None
+    with np.load(npz_path, allow_pickle=False) as loaded:
+        if "carrier_time_ms" in loaded.files:
+            carrier = _carrier_metrics(npz_path, events)
+            carrier.pop("selected", None)
+            carrier.pop("labels", None)
+            carrier.pop("ranks", None)
     return {
         **score,
         "mode_counts_in_support": counts,
@@ -127,6 +137,7 @@ def _network_row(
             if key not in {"valid_event_mask", "cluster_labels"}
         },
         "median_recruitment_span_ms_by_mode": timing,
+        "carrier": carrier,
     }
 
 
@@ -159,8 +170,8 @@ def aggregate(config_path: Path, phase: str = "screen") -> dict:
         if _sha256(path) != record["sha256"]:
             raise RuntimeError(f"frozen input changed: {path}")
     output_root = ROOT / config["output_root"]
-    if phase == "selection":
-        output_root = output_root / "selection"
+    if phase in {"selection", "confirmation"}:
+        output_root = output_root / phase
     elif phase != "screen":
         raise ValueError(f"unsupported pathway refit phase: {phase}")
     manifest_path = output_root / "candidate_manifest.json"
@@ -274,6 +285,16 @@ def aggregate(config_path: Path, phase: str = "screen") -> dict:
             "J_interictal": pathway_objective(
                 components, refit["objective_weights"],
             ),
+            "n_networks_carrier_evaluable": int(sum(
+                row["carrier"] is not None
+                and row["carrier"]["native_three_cycle_event_fraction"] is not None
+                for row in rows
+            )),
+            "native_three_cycle_event_fraction": _finite_mean([
+                None if row["carrier"] is None else
+                row["carrier"]["native_three_cycle_event_fraction"]
+                for row in rows
+            ]),
             "per_network": rows,
         })
     component_matrix = np.asarray([
@@ -286,7 +307,7 @@ def aggregate(config_path: Path, phase: str = "screen") -> dict:
     registered_selection = list(
         manifest["fixed_contract"].get("selection_candidate_ids", [])
     )
-    if phase == "selection":
+    if phase in {"selection", "confirmation"}:
         selectable = [
             row for row in ranking if row["candidate_id"] in registered_selection
         ]
@@ -361,7 +382,10 @@ def aggregate(config_path: Path, phase: str = "screen") -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
-    parser.add_argument("--phase", choices=["screen", "selection"], default="screen")
+    parser.add_argument(
+        "--phase", choices=["screen", "selection", "confirmation"],
+        default="screen",
+    )
     args = parser.parse_args()
     output = aggregate(args.config, args.phase)
     print(json.dumps({
