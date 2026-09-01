@@ -27,9 +27,15 @@ STATE_DIRS=()
 for p in P_local P_slow; do for s in $SEEDS; do
   [ -d "$S/${p}_seed${s}" ] && STATE_DIRS+=("$S/${p}_seed${s}")
 done; done
+# Secondary arms are limited on purpose: the load-bearing increment B vs B+S runs
+# for every (producer, seed); the state-only arm and the second shift offset are
+# diagnostics and running them for all six would nearly double the wall clock.
 $PY scripts/topic5_group_event_state/v02_run_future_block.py \
     --cohort all --workers "$WORKERS" --tag with_state \
     --shift-extra-steps 1 4 \
+    --state-only-for P_slow_seed1 P_local_seed1 \
+    --shift-for P_slow_seed1 P_slow_seed2 P_slow_seed3 P_local_seed1 \
+    --extra-shift-for P_slow_seed1 \
     --state-dir "${STATE_DIRS[@]}" 2>&1 | tee "$LOGS/future_block_with_state.log"
 
 echo "== 3. H2a same-prefix continuation =="
@@ -61,7 +67,7 @@ for v in fast_only slow_only matched_donor; do
 done
 $PY scripts/topic5_group_event_state/v02_run_future_block.py \
     --cohort all --workers "$WORKERS" --tag diagnostics --no-mlp \
-    --shift-extra-steps 1 \
+    --shift-extra-steps 1 --state-only-for --shift-for \
     --state-dir "${DIAG_DIRS[@]}" 2>&1 | tee "$LOGS/future_block_diagnostics.log"
 
 echo "== 7. cohort tables + the load-bearing figure =="
