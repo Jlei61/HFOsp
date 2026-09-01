@@ -1,139 +1,133 @@
 # Agent B (H2b seizure transfer) — CURRENT_HANDOFF
 
-状态：**B0 进行中**（crosswalk + risk set + lead coverage 已完成；early ictal field 未开始）
+状态：**B0 完成；B1/B2 仪器完成并已接上真 producer；科学结论一条都还不能下**
 最后更新：2026-09-01
 
 ---
 
 ## 1. 一句话现状
 
-我们还没有任何"状态能不能预测发作"的结果——**Agent A 的 producer 一个都还没产出**。
-这一轮做完的是**能不能做**这件事本身：把每一次发作对回它自己那段录音、逐次核对发作起点确实
-落在那段录音里、然后数清楚"在发作前 5 分钟 / 30 分钟 / 2 小时 / 6 小时那一刻，我们手上到底有没有
-一个能读状态的时刻"。答案是**有**：99 个可留出的发作事件里，75–98 个（随提前量不同）在那一刻有数据。
+支持度、目标、打分器、两条主任务的估计量都做完并跑通了，**而且已经接上 Agent A 的真 producer**。
+但目前 `P_local` / `P_slow` 只覆盖 **27 人里的 2 人**，所以**任何方向的结论都不能下**——
+现在能说的只有"这套东西能跑、分母有多大、什么样的阴性才算数"。
 
 ---
 
-## 2. 运行环境与边界（开始时实测，不是转述）
+## 2. 环境与边界（实测，非转述）
 
 | 项目 | 值 |
 |---|---|
 | worktree | `/tmp/hfosp_group_event_state_v02_b` |
-| branch | `codex/topic5-group-event-state-v02-b` |
-| base commit | `f0c9e0750cb59ee9691634d1c57a36487fdc421c`（`codex/topic5-group-event-state-v0-2`） |
-| 主仓 dirty | 是（`codex/topic5-state-r1-5-h3-long`，与本线无关，未触碰） |
-| Python | `/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python` |
-| 线程 | `OMP/MKL/OPENBLAS/NUMEXPR_NUM_THREADS=1` |
+| branch | `codex/topic5-group-event-state-v02-b`（base `f0c9e075`） |
+| Python | `/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python`；线程全设 1 |
+| 测试 | **98 passed**；改动**纯增量**（只有新增文件，0 个既有文件被改） |
 
-**开始时实测的活动队列（2026-09-01 22:04）**：
+**GPU：本线全程未申请。** 开工时 v0.1 队列占满两卡（99–100%），按工程附录不叠加；
+该队列已于 22:33:44 自然跑完（`ALL QUEUES DONE`, 162/162），**不是被我停的**。
+之后 Agent C 的 H3 队列接管 GPU。本线所有计算都是 CPU（8 worker，峰值 ~4.8 GB/worker）。
 
-- v0.1 队列 **仍在跑**：`queue_runner.py` PID **863139**，27 subject × {b4_memoryless, b1_no_real_dt} × 3 seeds，
-  GPU 0/1，8 jobs/GPU。GPU0 23.7/24 GiB、GPU1 14.9/24 GiB，两卡 util 99–100%。
-  → 按工程附录 §5「GPU 已被其他队列持续高利用时不得继续堆作业」，**本线本轮不申请 GPU**。
-- Topic 4 rev18 worker 亦在跑（`.worktrees/topic4-node-dualmode-rev17-continuation`）。
-- 我**没有**停止、修改或复用任何上述队列的输出目录或 tag。
+**Agent A registry**：`results/epi_prssm/group_event_state/v0_2/shared/checkpoint_registry.json`
 
-**Agent A registry：`not_available`**（`results/epi_prssm/group_event_state/v0_2/` 在主仓尚不存在）。
-registry 搜索顺序（两处都查，先到先用，并记录命中位置）：
+| producer | status | B 侧可用性 |
+|---|---|---|
+| `B_multiscale` | complete (27 人) | ❌ `not_available`——只存结果，不存逐时刻的 111 维特征（已提 additive 请求） |
+| `P_local` | partial (**2 人**) | ✅ 可读（916 三种子 / 253 一种子） |
+| `P_slow` | partial (**2 人**) | ✅ 可读（916 三种子 / 253 两种子） |
 
-1. `/home/honglab/leijiaxin/HFOsp/results/epi_prssm/group_event_state/v0_2/shared/checkpoint_registry.json`
-   （主仓 = v0.1 `MAIN_TREE` 约定，三个 agent 各自 worktree 都能看见）
-2. `/tmp/hfosp_group_event_state_v02/results/.../shared/checkpoint_registry.json`（A 的 worktree，兜底）
+---
 
-## 3. 目录约定
+## 3. 目录
 
 | 用途 | 路径 |
 |---|---|
-| 共享（registry / lease，跨 agent 可见） | 主仓 `results/epi_prssm/group_event_state/v0_2/shared/` |
-| 本线交付物（索引、小统计、报告、图） | 本 worktree `results/epi_prssm/group_event_state/v0_2/h2b/` |
-| 大产物（risk sets、field、预测） | `/data/hfosp_group_event_state_v0_2/agent_b/` |
-
-lease 已原子写入 `shared/resource_leases/agent_b.json`。**未** `pkill -f`，**未**抢占 A/C 租约。
+| 共享（registry / lease / issues） | 主仓 `.../v0_2/shared/` |
+| 本线交付物 | 本 worktree `.../v0_2/h2b/`（`support/`、`figures/`、`machine/`） |
+| 大产物 | `/data/hfosp_group_event_state_v0_2/agent_b/`（22 MB） |
 
 ---
 
-## 4. 已完成
+## 4. B0 结论（已完成）
 
-### B0.1 crosswalk（`support/seizure_crosswalk.{csv,json}`）
+- **crosswalk**：按录音编号连接、逐 onset 核对。274 次发作匹配，**零** onset 落在自己录音之外、
+  零歧义、零重复。5 位 Yuquan 病人 0 条记录 = **未检出**，不是无发作。
+- **成簇归并**：一位病人 8 次"发作"实为同一次（3.6 min 内、时长全 0）。
+  274 次发作 → **209 个独立事件** → 留出 **99 个**。
+- **各提前量可用锚点**：5min 98 / 30min 89 / 2h 79 / 6h 75（18–19 位病人）。
+- **不应期敏感性**：30/60/120 min → 留出 106/99/80，**60 min 主口径不在悬崖上**（2h 档最敏感）。
+- **锚点新鲜度**：上一次间期事件中位只早 5–14 s，几乎无超 1 h → 新鲜度不是瓶颈。
+- **发作能量场**：264 ok / 10 dropped（10 条全部是窗口越出块边界）。按**脑电起点**锚定。
+- **对拍**（168 次发作 / 11 人）：通道顺序处处一致；同锚点中位 **ρ=+0.9977**，
+  原样发布口径 +0.8655。脑电起点在 **145/168** 次里早于临床起点（中位 5.0 s，最大 86.2 s）。
+  ⚠️ **未解决**：8 次（全在 922）同锚点对拍 < 0.8，已排除信号强弱/电极数/基线长度/时间平移四种解释。
+- **`block_id` 修复**：2 条记录指向比自己发作早 14 h 结束的块，已修并各救回 1 次发作。
+- **坐标**：Epilepsiae 215 次全有标准空间坐标；**3 位 Yuquan 病人无坐标**（13 次发作）→ 算不了偏侧性。
 
-按 **recording code** 连接，不用 subject 字符串 inner join。逐 onset 核对其是否落在该录音自己的
-block 时间跨度内。
+### 承重的预注册数字（在读任何模型之前定死）
 
-- Epilepsiae 542 行 → matched **230**、recording_absent 26、incomplete_interval 5、
-  subject_not_in_dataset 281（14 个不在本 27 人队列里的病人）。
-- Yuquan 54 行 → matched **44**、subject_not_in_dataset 10（huanghanwen 2 + litengsheng 8，两人不在队列）。
-- **零 `onset_outside_recording`、零歧义、零重复 id** —— 即"逐发作零误差审计"通过。
-- 5 位 Yuquan 病人 0 条发作记录（chengshuai / hanyuxuan / huangwanling / zhangjiaqi / zhourongxuan）。
-  按 v0.1 数据合同 §11，这只能读作**未检出**，不可读作**无发作**。
-
-### B0.2 risk set + 发作边界（`/data/.../risk_sets/<subject>.csv`）
-
-每 5 分钟一个固定时刻锚点，落在**状态覆盖**内；发作区间与其后 60 分钟不出锚点（30/120 分钟为敏感性）。
-**两种覆盖分开**：锚点用「状态覆盖」（真正进了数据集的 block），结局是否可信用「监测覆盖」
-（Epilepsiae 用 SQL block 表、Yuquan 用 EDF block）。监测断掉 → 该行 **right-censored**，
-不会被当成"六小时内没发作"。
-
-- 27,982 行；7,511 行在 6h 内确有发作；7,640 行删失；12,831 行确认超出 6h。
-
-### B0.2b 发作成簇（重要，改变分母）
-
-`yuquan_zhangjinhan` 的 **8 次"发作"全部落在同一个 block 内 3.6 分钟之内、时长全为 0.0 s** ——
-这是检测器把**一次发作切成了 8 条**，不是 8 次独立发作。`sunyuanxin` 等也有成簇。
-因此按「后一次发作若落在前一次的 60 分钟不应期内，则同属一个 episode」归并：
-
-- 274 次发作 → **209 个 episode** → 留出 **99 个 episode**（滚动起点：每人前 ⌈n/2⌉ 个 episode 进 TRAIN）。
-- 只有 episode 的**首发**才可能被预测（后续那几次的前置锚点必然落在自己 episode 的不应期里）。
-- **15 条发作时长恰为 0.0 s**（Yuquan 13 条 + 部分），inventory 却标 `has_complete_eeg_interval=True` →
-  已打标，offset 不可信，需在 B3 做时长敏感性。
-
-### B0.2c 各提前量的可用锚点（决定 assay 能不能做）
-
-| 提前量 | 有锚点的留出 episode | 病人数 |
-|---|---:|---:|
-| 5 min | 98 / 99 | 19 |
-| 30 min | 89 / 99 | 19 |
-| 2 h | 79 / 99 | 18 |
-| 6 h | 75 / 99 | 19 |
-
-→ **B1 与 B2 在工程上都可估计**，6h 档也不必靠补零。
+**静态"病人平均场"基线**（不含任何状态）预测留出发作头 5 s：**中位 ρ=+0.41，最高 +0.93**。
+这是状态必须越过的线。单次发作自身的可复现度中位 +0.30（6/12 人低于 +0.30）——
+**它不是上限**：平均能消掉单次噪声，静态基线在 9/12 人身上反而超过它。
 
 ---
 
-## 5. 代码与测试
+## 5. B1 / B2 现状（仪器完成，结论未到）
 
-- `src/topic5_h2b_transfer/crosswalk.py` + `tests/test_topic5_h2b_crosswalk.py`（13 项）
-- `src/topic5_h2b_transfer/risk_grid.py` + `tests/test_topic5_h2b_risk_grid.py`（21 项）
-- `scripts/topic5_h2b_transfer/{build_seizure_crosswalk,build_risk_sets}.py`
-- 全部 **34 passed**。每项测试对应合同里的一条 clause（见模块 docstring 的 C1–C8 / D1–D9）。
+### B1 生存
+接上真 producer 后第一批数是每行 1–2 nat 的增益——**那是拟合外推，不是发现**。
+三处 TRAIN-only 修正：特征标准化、岭系数按 TRAIN 内时序 CV 选、状态维度同法选。
+并**实装**工程不变量「远坏于截距基线的拟合记为不可估计」——它确实触发：
+修之前状态臂在 **9 格里有 6 格输给纯截距**。修之后 916 六格中五格可用，
+增益 **−0.034 ~ +0.043 跨零**；253（46 个事件）仍全部不可估计。
 
-**刻意没有复用** `src/topic5_group_event_state/source_audit.py::seizure_index`：它按
-`(dataset, subject)` 字符串建索引，回答的是"这个事件是不是发作期"（间期剔除），
-与"这次发作属于哪一段有覆盖的录音"不是同一个问题（CLAUDE.md §6.1）。
+### B2 早期空间场
+估计量：用这位病人**自己**过去几次发作的场做加权平均，权重来自状态相似度；
+两臂**同一批场**，只差权重是否由状态给（均匀权重 = 病人平均场基线，是状态臂温度→∞ 的严格特例）。
+softmax 温度按 **TRAIN 内留一**选定后冻结。
+- 916（20 个留出事件，基线 ρ≈0.92）：增益 −0.027 ~ +0.008，贴零；**基线本身没余量**。
+- 253（**3 个**留出事件）：增益 −0.24 ~ +0.13，随种子乱跳 = 噪声。
+
+**两位病人都不能用来说状态有用或没用。**
 
 ---
 
-## 6. 下一步（按顺序）
+## 6. 已修的、会伪造结论的错（记下来防复发）
 
-1. **B0.3 early ictal field**：发作后前 5 s（10 s 敏感性）逐触点归一化能量/募集场。
-   决定：**不直接复用** `results/topic5_ictal_recruitment/ictal_field_long_cache` ——
-   它只覆盖 27 人里的 13 人（Yuquan 只有 2 人），且 Epilepsiae 侧锚在**临床起始**而非 EEG 起始
-   （topic5 caveat 9 要求按 EEG 起始锚定）。改为用已验证的原语重建，并把该 cache 当**对拍参照**。
-2. B0.4 冻结 TRAIN-only route / field normalization。
-3. B1 `plumbing_only`：用 v0.1 trajectory 打通 survival/field/censoring/schema（**绝不**写成 v0.2 人体结果）。
-4. B2 读取 registry 全部 producer（缺失记 `not_available`，不 fallback）。
+1. `np.savez` 会给文件名补 `.npz`，把「写临时文件再改名」的原子写打断 → 已封装 `save_npz_atomic` + 回归测试。
+2. 打分器原本要求「发作那一档必须被完整观测」→ 会**丢掉真实发作**（2.5 h 的发作 + 3 h 覆盖）。已放宽到正确判据。
+3. registry 读取器在「要 3 号种子、只有 1 号」时**悄悄给 1 号** → 伪造三次重复。已改为拒绝并列出可用种子。
+4. 重跑子集会把全队列 status 表**截断**（271 行 → 60 行）→ 已改为从盘上全部 JSON 重建。
+5. 我把「两次留出发作的相似度」写成"任何预测器的上限"——**同一张表当场证伪**，已在交付物里改正。
 
-## 7. 复现命令
+---
+
+## 7. 下一步
+
+1. 等 A 把 `P_local` / `P_slow` 铺到更多病人——**特别是静态基线低、有余量的那几位**
+   （1073 基线 0.08 / 1096 −0.04 / 1125 0.11 / 548 0.30）。916 基线 0.93 没余量，
+   在它身上得不到有信息的答案。
+2. `B_multiscale` 的逐时刻特征到位后，把它接成正式对照臂（issue 已提）。
+3. 922 那 8 次对拍偏低的原因仍未查明。
+4. 收口：承重两图（生存增量 vs 提前量、空间场增量 vs 提前量，每点标留出发作数）+ 双报告。
+
+## 8. 复现
 
 ```bash
 cd /tmp/hfosp_group_event_state_v02_b
 export OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1
 P=/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python
-$P -m pytest tests/test_topic5_h2b_crosswalk.py tests/test_topic5_h2b_risk_grid.py -q
+$P -m pytest tests/test_topic5_h2b_*.py -q                       # 98 passed
 $P scripts/topic5_h2b_transfer/build_seizure_crosswalk.py
 $P scripts/topic5_h2b_transfer/build_risk_sets.py
+$P scripts/topic5_h2b_transfer/build_early_ictal_field.py --workers 8 --skip-existing
+$P scripts/topic5_h2b_transfer/check_early_field_parity.py
+$P scripts/topic5_h2b_transfer/summarize_field_targets.py
+$P scripts/topic5_h2b_transfer/postictal_sensitivity.py
+$P scripts/topic5_h2b_transfer/plot_early_field_qa.py
+$P scripts/topic5_h2b_transfer/run_b1_plumbing.py     --subject epilepsiae_916 --producer P_slow --seed 1
+$P scripts/topic5_h2b_transfer/run_b2_field_transfer.py --subject epilepsiae_916 --producer P_slow --seed 1
 ```
 
-## 8. 未触碰范围
+## 9. 未触碰
 
-formal/sealed 分区、paper-ready Fig1–Fig4、Agent A 的 producer 代码与 registry 条目、
-`/tmp/hfosp_group_event_state_v01` 队列及其输出。
+formal/sealed 分区、paper-ready Fig1–Fig4、Agent A 的 producer 代码与 registry producer 条目、
+Agent C 的 H3 队列、v0.1 的输出目录与 tag。
