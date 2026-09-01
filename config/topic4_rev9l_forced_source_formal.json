@@ -1,0 +1,102 @@
+{
+  "schema_version": "topic4_rev9l_forced_source_formal_v1",
+  "scientific_role": "forced_initiation_propagation_capacity_development_audit",
+  "output_root": "results/topic4_sef_hfo/data_driven_core_field_rev9_learnability/forced_source_capacity",
+  "inputs": {
+    "rev9_base_config": {
+      "path": "config/topic4_rev9_exploratory.json",
+      "sha256": "92b18838edf06a8445955c6623f4025010b76e4f50b39e320f1160ea27473ab9"
+    },
+    "rev9l_l0_config": {
+      "path": "config/topic4_rev9l_mode_learnability.json",
+      "sha256": "de375ef4773a2be07482d9a11f6e9430ba53f7182e548155a8e7f15195963356"
+    },
+    "stage_config": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field/config/stage_config.json",
+      "sha256": "470de45715194f357396084a9cdad2f2e6a3bae044206be394d05207f2dd9fae"
+    },
+    "selection": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_stage3/joint_confirmation_rev8_1/selection.json",
+      "sha256": "cd5795064684f6a4a8e8cb7fb9be8765afd281857656d45cc1fff9dda76b5ae8"
+    },
+    "frozen_readouts_json": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev9/frozen_readouts.json",
+      "sha256": "c5e7ea403e8986157b1c6204d334e70d841423579c76f3adedad43dda1ab1c55"
+    },
+    "frozen_readouts_npz": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev9/frozen_readouts.npz",
+      "sha256": "94e5c7acba590691a52a5987c5264908c9654134ab4f5714024b0c9a6dfde28c"
+    },
+    "profile_reference": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_stage3/joint_observable/rank_curve_reference.npz",
+      "sha256": "987e6b4bdfdc9b3d31485852e2eb71cd8df3ee7d92ff6eb0456c8fa04925adc1"
+    },
+    "patient_training_target": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_stage3/joint_kmeans_training_target_rev8/patient_train_kmeans_target_rev8.npz",
+      "sha256": "a8ceaad48e0c61e36cb622f58df1d7b6bfde49b757a7086feab9d8e7183fe5ea"
+    },
+    "packet_canary_summary": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev9_learnability/forced_source_capacity/canary/packet_canary_summary.json",
+      "sha256": "c1368e073154b2c1cf20e31ab44fa05916361533ad8762d0137c1fc4fd2eaf50"
+    }
+  },
+  "simulation": {
+    "duration_ms": 400.0,
+    "forced_spike_ms": 100.0,
+    "trigger_max_latency_ms": 40.0,
+    "paired_response_end_ms": 250.0,
+    "early_stop_runaway": true,
+    "kick_boost_1_per_ms": 0.0
+  },
+  "packet": {
+    "frozen_fraction_of_E": 0.005,
+    "selection_source": "Node canary; smallest tested fraction readable for component_1 and component_2 in 3/3 networks",
+    "component_selection": "top_raw_gaussian_contribution",
+    "control_selection": "nearest_E_cells_to_frozen_control_center",
+    "formal_sources": [
+      "component_1", "component_2", "component_3",
+      "control_1", "control_2", "control_3"
+    ],
+    "sources": [
+      {"id": "component_1", "kind": "component", "component_1based": 1, "xy_mm": [3.6202140551125526, 7.054341437477716]},
+      {"id": "component_2", "kind": "component", "component_1based": 2, "xy_mm": [11.847833907651358, 3.577066400859459]},
+      {"id": "component_3", "kind": "component", "component_1based": 3, "xy_mm": [12.287567587097564, 17.19786634663256]},
+      {"id": "control_1", "kind": "matched_off_field", "xy_mm": [7.054341437477716, 16.37978594488745]},
+      {"id": "control_2", "kind": "matched_off_field", "xy_mm": [16.42293359914054, 11.847833907651358]},
+      {"id": "control_3", "kind": "matched_off_field", "xy_mm": [17.19786634663256, 7.712432412902436]}
+    ]
+  },
+  "primary_mapping": {
+    "mode_A_source": "component_2",
+    "mode_B_source": "component_1",
+    "mode_B_secondary_source": "component_2"
+  },
+  "arms": ["Null", "Node", "Edge", "Node+Edge"],
+  "alpha_star": 0.75,
+  "network_seeds": {
+    "fit": [1004, 1005, 1006, 1007, 1008, 1009],
+    "selection": [1011, 1012, 1013],
+    "confirmation": [1021, 1022, 1023]
+  },
+  "readout": {
+    "primary_window_ms": [100.0, 250.0],
+    "exclude_injected_frame_from_primary": true,
+    "rank_curve": "read_event_on_clip(forced_contact_envelope_after_replacing_injected_source_frame_with_sham_minus_sham_contact_envelope,0,infinity)",
+    "inclusive_packet_frame_sensitivity": "same readout without replacing the injected source frame",
+    "secondary_triggered_event": "returned event overlapping trigger and starting no later than trigger_plus_40ms",
+    "paired_excess": "clip(forced_minus_sham_spike_count,0,infinity) from trigger to 250ms",
+    "source_identity_defines_target": true,
+    "de_novo_kmeans": false
+  },
+  "interpretation": {
+    "role": "exploratory forced-capacity decomposition; descriptors remain separate",
+    "primary_directional_summary": "intended-minus-cross patient prototype Spearman for component_2_to_A and component_1_to_B",
+    "no_formal_acceptance_gate": true
+  },
+  "execution": {
+    "max_workers": 18,
+    "wait_seconds": 120,
+    "launcher": "systemd-run --user -> /usr/bin/nohup",
+    "notify_on_completion": true
+  }
+}

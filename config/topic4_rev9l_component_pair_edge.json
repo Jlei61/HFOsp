@@ -1,0 +1,163 @@
+{
+  "schema_version": "topic4_rev9l_component_pair_edge_v2",
+  "scientific_role": "component_pair_edge_forced_oracle_development",
+  "output_root": "results/topic4_sef_hfo/data_driven_core_field_rev9_learnability/relaxed_edge_oracle",
+  "inputs": {
+    "rev9_base_config": {
+      "path": "config/topic4_rev9_exploratory.json",
+      "sha256": "92b18838edf06a8445955c6623f4025010b76e4f50b39e320f1160ea27473ab9"
+    },
+    "rev9l_l0_config": {
+      "path": "config/topic4_rev9l_mode_learnability.json",
+      "sha256": "de375ef4773a2be07482d9a11f6e9430ba53f7182e548155a8e7f15195963356"
+    },
+    "stage_config": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field/config/stage_config.json",
+      "sha256": "470de45715194f357396084a9cdad2f2e6a3bae044206be394d05207f2dd9fae"
+    },
+    "selection": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_stage3/joint_confirmation_rev8_1/selection.json",
+      "sha256": "cd5795064684f6a4a8e8cb7fb9be8765afd281857656d45cc1fff9dda76b5ae8"
+    },
+    "frozen_readouts_json": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev9/frozen_readouts.json",
+      "sha256": "c5e7ea403e8986157b1c6204d334e70d841423579c76f3adedad43dda1ab1c55"
+    },
+    "frozen_readouts_npz": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev9/frozen_readouts.npz",
+      "sha256": "94e5c7acba590691a52a5987c5264908c9654134ab4f5714024b0c9a6dfde28c"
+    },
+    "profile_reference": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_stage3/joint_observable/rank_curve_reference.npz",
+      "sha256": "987e6b4bdfdc9b3d31485852e2eb71cd8df3ee7d92ff6eb0456c8fa04925adc1"
+    },
+    "patient_training_target": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_stage3/joint_kmeans_training_target_rev8/patient_train_kmeans_target_rev8.npz",
+      "sha256": "a8ceaad48e0c61e36cb622f58df1d7b6bfde49b757a7086feab9d8e7183fe5ea"
+    },
+    "l1_formal_config": {
+      "path": "config/topic4_rev9l_forced_source_formal.json",
+      "sha256": "18df3ea6f18593a315f310cfd847bb3927f52ffc987423d4d87ff066f264b239"
+    },
+    "l1_formal_summary": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev9_learnability/forced_source_capacity/formal_fit/forced_source_capacity_summary.json",
+      "sha256": "1dd7d5e349bc8a2c8700e22458ec0477e78d8852de54256f4bbb7dcbb36545f0"
+    },
+    "l1_scientific_review": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev9_learnability/forced_source_capacity/formal_fit/l1_scientific_review.json",
+      "sha256": "131c316de765de6aee19fd2efeda1483d56b363be4bad6f7e8d3e49f61863811"
+    }
+  },
+  "simulation": {
+    "duration_ms": 400.0,
+    "forced_spike_ms": 100.0,
+    "trigger_max_latency_ms": 40.0,
+    "paired_response_end_ms": 250.0,
+    "early_stop_runaway": true,
+    "kick_boost_1_per_ms": 0.0
+  },
+  "packet": {
+    "frozen_fraction_of_E": 0.005,
+    "component_selection": "top_raw_gaussian_contribution",
+    "formal_sources": ["component_1", "component_2"],
+    "sources": [
+      {"id": "component_1", "kind": "component", "component_1based": 1, "xy_mm": [3.6202140551125526, 7.054341437477716]},
+      {"id": "component_2", "kind": "component", "component_1based": 2, "xy_mm": [11.847833907651358, 3.577066400859459]}
+    ]
+  },
+  "primary_mapping": {
+    "mode_A_source": "component_2",
+    "mode_B_source": "component_1"
+  },
+  "arms": ["Edge"],
+  "alpha_star": 0.75,
+  "network_seeds": {
+    "fit": [1004, 1005, 1006, 1007, 1008, 1009],
+    "selection": [1011, 1012, 1013]
+  },
+  "readout": {
+    "primary_window_ms": [100.0, 250.0],
+    "exclude_injected_frame_from_primary": true,
+    "rank_curve": "read_event_on_packet_frame_excluded_paired_excess_envelope",
+    "inclusive_packet_frame_sensitivity": "retained",
+    "source_identity_defines_target": true,
+    "de_novo_kmeans": false
+  },
+  "component_pair_family": {
+    "gamma_order": [
+      "gamma_c1_from_c1",
+      "gamma_c1_from_c2",
+      "gamma_c2_from_c1",
+      "gamma_c2_from_c2",
+      "gamma_bg_from_c1",
+      "gamma_bg_from_c2"
+    ],
+    "gamma_matrix": "rows target C1/C2/background, columns source C1/C2",
+    "scalar_alpha_baseline": 0.75,
+    "zero_gamma_contract": "exactly reproduces the frozen scalar alpha edge",
+    "component_3_parameterized": false,
+    "background_source_is_zero_residual_reference": true,
+    "per_target_incoming_E_normalization": true,
+    "gamma_bounds": [-1.3862943611198906, 1.3862943611198906],
+    "epsilon": 0.75,
+    "phase1_candidates": [
+      {"candidate_id": "gamma0", "gamma": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]},
+      {"candidate_id": "g_c1_c1_p", "gamma": [0.75, 0.0, 0.0, 0.0, 0.0, 0.0]},
+      {"candidate_id": "g_c1_c1_m", "gamma": [-0.75, 0.0, 0.0, 0.0, 0.0, 0.0]},
+      {"candidate_id": "g_c1_c2_p", "gamma": [0.0, 0.75, 0.0, 0.0, 0.0, 0.0]},
+      {"candidate_id": "g_c1_c2_m", "gamma": [0.0, -0.75, 0.0, 0.0, 0.0, 0.0]},
+      {"candidate_id": "g_c2_c1_p", "gamma": [0.0, 0.0, 0.75, 0.0, 0.0, 0.0]},
+      {"candidate_id": "g_c2_c1_m", "gamma": [0.0, 0.0, -0.75, 0.0, 0.0, 0.0]},
+      {"candidate_id": "g_c2_c2_p", "gamma": [0.0, 0.0, 0.0, 0.75, 0.0, 0.0]},
+      {"candidate_id": "g_c2_c2_m", "gamma": [0.0, 0.0, 0.0, -0.75, 0.0, 0.0]},
+      {"candidate_id": "g_bg_c1_p", "gamma": [0.0, 0.0, 0.0, 0.0, 0.75, 0.0]},
+      {"candidate_id": "g_bg_c1_m", "gamma": [0.0, 0.0, 0.0, 0.0, -0.75, 0.0]},
+      {"candidate_id": "g_bg_c2_p", "gamma": [0.0, 0.0, 0.0, 0.0, 0.0, 0.75]},
+      {"candidate_id": "g_bg_c2_m", "gamma": [0.0, 0.0, 0.0, 0.0, 0.0, -0.75]}
+    ]
+  },
+  "objective": {
+    "patient_training_only": true,
+    "patient_heldout_permitted": false,
+    "sampling_unit": "six distinct recording blocks per mode, one event per block",
+    "n_model_events_per_mode": 6,
+    "bootstrap_repeats": 512,
+    "bootstrap_seed": 940217,
+    "descriptors": [
+      "recruitment_mean_absolute_error",
+      "precedence_mean_absolute_error",
+      "mean_rank_profile_absolute_error",
+      "event_distribution_sliced_wasserstein"
+    ],
+    "floor_center": "median",
+    "floor_scale": "interquartile_range",
+    "floor_scale_minimum": 1e-6,
+    "descriptor_penalty": "softplus((distance-floor_median)/floor_IQR)",
+    "readable_fraction_penalty_weight": 2.0,
+    "weakest_mode_lse_tau": 0.25,
+    "ood_weight": 0.1,
+    "floor_output": "results/topic4_sef_hfo/data_driven_core_field_rev9_learnability/relaxed_edge_oracle/objective_floor/patient_training_descriptor_floor.json"
+  },
+  "sobol_search": {
+    "n_candidates": 64,
+    "dimension": 6,
+    "scramble": true,
+    "seed": 940218,
+    "candidate_zero_reserved_for_gamma0": true,
+    "top_k_for_selection_seeds": 8,
+    "selection_rule": "lowest training weakest-mode objective among structurally admissible candidates"
+  },
+  "interpretation": {
+    "phase1_role": "six-axis finite-difference response audit before Sobol search",
+    "descriptors_remain_separate": true,
+    "no_formal_acceptance_gate": true,
+    "patient_heldout_scores_computed": false,
+    "beta_opened": false
+  },
+  "execution": {
+    "max_workers": 18,
+    "wait_seconds": 120,
+    "launcher": "systemd-run --user -> /usr/bin/nohup",
+    "notify_on_completion": true
+  }
+}

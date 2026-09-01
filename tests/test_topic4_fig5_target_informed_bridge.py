@@ -1,0 +1,176 @@
+import numpy as np
+
+from src.topic4_fig5_target_informed_bridge import (
+    bootstrap_patient_summary,
+    exact_contact_reorder,
+    lse,
+    nonoverlap_log_power_windows,
+    qualify_model_ictal_for_bridge,
+    rank_selection_candidates,
+    robust_z_against_reference,
+    select_state_defined_readout,
+    shaft_balanced_scaled_l1,
+    smooth_rate,
+    score_energy_burden,
+)
+
+
+def _oscillation(freq, seconds, *, fs=1000.0, contacts=2, amplitude=1.0):
+    t = np.arange(int(seconds * fs)) / fs
+    return np.stack([
+        amplitude * np.sin(2 * np.pi * freq * t + phase)
+        for phase in np.linspace(0.0, 0.4, contacts)
+    ], axis=1)
+
+
+def test_exact_contact_reorder_is_name_based_and_fail_closed():
+    values = np.array([[1.0, 2.0, 3.0]])
+    got = exact_contact_reorder(values, ["b", "c", "a"], ["a", "b", "c"])
+    np.testing.assert_array_equal(got, [[3.0, 1.0, 2.0]])
+    try:
+        exact_contact_reorder(values, ["b", "c", "x"], ["a", "b", "c"])
+    except ValueError as error:
+        assert "exact contact mismatch" in str(error)
+    else:
+        raise AssertionError("contact mismatch did not fail")
+
+
+def test_reference_robust_z_does_not_use_candidate_values():
+    reference = np.array([[0.0, 10.0], [1.0, 11.0], [2.0, 12.0], [3.0, 13.0]])
+    candidate = np.array([100.0, 100.0])
+    z1, audit1 = robust_z_against_reference(reference, candidate)
+    z2, audit2 = robust_z_against_reference(reference, candidate * 100.0)
+    np.testing.assert_allclose(audit1["median"], audit2["median"])
+    np.testing.assert_allclose(audit1["mad"], audit2["mad"])
+    assert np.all(z2 > z1)
+
+
+def test_nonoverlap_power_keeps_independent_windows():
+    trace = _oscillation(40.0, 2.0)
+    powers = nonoverlap_log_power_windows(trace, 1.0, window_ms=500.0)
+    assert powers.shape == (4, 2)
+    np.testing.assert_allclose(powers, np.tile(powers[0], (4, 1)), atol=1e-8)
+
+
+def test_readout_is_earliest_state_window_not_later_better_target_frame():
+    baseline = _oscillation(12.0, 1.0)
+    trace = np.concatenate([
+        _oscillation(12.0, 1.0),
+        _oscillation(40.0, 0.5, amplitude=1.0),
+        _oscillation(80.0, 0.5, amplitude=20.0),
+    ])
+    field_t = np.arange(20.0, 2000.1, 20.0)
+    active = np.where(field_t >= 1000.0, 0.9, 0.1)
+    spatial = active.copy()
+    selected = select_state_defined_readout(
+        trace=trace,
+        dt_ms=1.0,
+        full_field_time_ms=field_t,
+        active_fraction=active,
+        spatial_fraction=spatial,
+        t_ictal_ms=1000.0,
+        baseline_trace=baseline,
+    )
+    assert selected is not None
+    assert selected.start_ms == 1000.0
+
+
+def test_shaft_balance_prevents_long_shaft_from_hiding_short_shaft_failure():
+    model = np.array([0.0] * 11 + [10.0] * 4)
+    target = np.zeros(15)
+    scale = np.ones(15)
+    shafts = np.array(["ICL"] * 11 + ["SCL"] * 4)
+    score, by_shaft = shaft_balanced_scaled_l1(model, target, scale, shafts)
+    assert by_shaft == {"ICL": 0.0, "SCL": 10.0}
+    assert score > 9.0
+    assert score > np.mean(np.abs(model - target))
+
+
+def test_patient_bootstrap_excludes_display_seizure_upstream_and_is_deterministic():
+    pre = np.arange(60.0).reshape(4, 15)
+    early = pre + np.arange(15.0)
+    first = bootstrap_patient_summary(pre, early, draws=128, seed=7)
+    second = bootstrap_patient_summary(pre, early, draws=128, seed=7)
+    np.testing.assert_array_equal(first["early"]["q025"], second["early"]["q025"])
+    assert len(first["global_early_per_seizure"]) == 4
+
+
+def test_lse_is_equal_to_common_value_for_equal_inputs():
+    assert lse([3.0, 3.0, 3.0]) == 3.0
+
+
+def test_smoothed_rate_makes_sparse_reference_median_resolvable():
+    rate = np.zeros(1000)
+    rate[::50] = 1000.0
+    assert np.median(rate) == 0.0
+    assert np.median(smooth_rate(rate, 0.1, 20.0)) > 0.0
+
+
+def test_selection_ranking_requires_two_eligible_seeds_before_loss():
+    rows = [
+        {"candidate_id": "a", "status": "BRIDGE_EVALUABLE",
+         "J_early_bridge": 1.0, "parameters": {}},
+        {"candidate_id": "a", "status": "FAIL", "parameters": {}},
+        {"candidate_id": "a", "status": "FAIL", "parameters": {}},
+        {"candidate_id": "b", "status": "BRIDGE_EVALUABLE",
+         "J_early_bridge": 5.0, "parameters": {}},
+        {"candidate_id": "b", "status": "BRIDGE_EVALUABLE",
+         "J_early_bridge": 6.0, "parameters": {}},
+        {"candidate_id": "b", "status": "FAIL", "parameters": {}},
+    ]
+    ranked = rank_selection_candidates(rows, minimum_eligible=2)
+    assert ranked[0]["candidate_id"] == "b"
+    assert ranked[0]["selection_eligible"] is True
+
+
+def test_all_positive_patient_fraction_uses_one_contact_resolution_floor():
+    target = {
+        "global_early_per_seizure": [2.0, 2.0, 2.0],
+        "positive_fraction_per_seizure": [1.0, 1.0, 1.0],
+        "contact_iqr_per_seizure": [1.0, 1.0, 1.0],
+    }
+    result = score_energy_burden(np.r_[np.ones(14), -1.0], target)
+    assert result["patient_iqr_unfloored"][1] == 0.0
+    assert result["patient_iqr"][1] == 1.0 / 15.0
+    assert np.isfinite(result["D_energy"])
+    assert np.isclose(result["scaled_components"][1], 1.0)
+
+
+def test_bridge_qualification_requires_full_one_second_not_one_good_readout():
+    dt = 1.0
+    trace = np.concatenate([
+        _oscillation(12.0, 1.0),
+        _oscillation(40.0, 0.5),
+        _oscillation(12.0, 1.0),
+    ])
+    time_ms = np.arange(20.0, 2500.1, 20.0)
+    active = np.where((time_ms >= 1000.0) & (time_ms < 1500.0), 0.9, 0.1)
+    config = {
+        "t_ictal_offset_from_operational_onset_ms": -100.0,
+        "early_window_ms_relative_to_t_ictal": [100.0, 1100.0],
+        "frequency_window_ms_relative_to_t_ictal": [100.0, 600.0],
+        "recruitment_window_ms": 20.0,
+        "activity_threshold": 0.5,
+        "joint_duty_threshold": 0.8,
+        "rate_smoothing_ms": 20.0,
+        "population_rate_ratio": 2.0,
+        "contact_centroid_band_hz": [10.0, 150.0],
+        "contact_frequency_shift_hz": 5.0,
+        "contact_frequency_ratio": 1.25,
+    }
+    verdict = qualify_model_ictal_for_bridge(
+        operational_onset_ms=1100.0,
+        full_field_time_ms=time_ms,
+        active_fraction=active,
+        spatial_fraction=active,
+        rate_hz=np.where(np.arange(2500) >= 1000, 100.0, 10.0),
+        rate_dt_ms=dt,
+        contact_trace=trace,
+        contact_dt_ms=dt,
+        paired_baseline_rate_hz=np.full(500, 10.0),
+        paired_baseline_trace=_oscillation(12.0, 0.5),
+        config=config,
+    )
+    assert verdict["eligible"] is False
+    assert verdict["joint_duty"] < 0.8
+    assert "joint_broad_recruitment_duty" in verdict["reason"]

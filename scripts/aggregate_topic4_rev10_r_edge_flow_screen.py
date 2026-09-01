@@ -1,0 +1,677 @@
+"""Aggregate rev10-R with network seeds, not pooled events, as units."""
+from __future__ import annotations
+
+import argparse
+import csv
+import json
+import os
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+import numpy as np
+
+sys.path.insert(0, os.getcwd())
+from scripts.rescore_topic4_rev10_sa_historical_artifacts import (  # noqa: E402
+    load_scoring_contract,
+    score_mode_conditioned_events,
+)
+from scripts.run_topic4_rev9l_forced_source_worker import (  # noqa: E402
+    _load_json_input,
+    _runtime_provenance,
+    _sha256,
+)
+from scripts.run_topic4_rev10_r_edge_flow_worker import active_network_seeds  # noqa: E402
+from src.topic4_shaft_aware import (  # noqa: E402
+    centered_smooth_max,
+    contract_groups,
+    contract_pairs,
+)
+from src.topic4_shaft_aware_direction import (  # noqa: E402
+    all_event_shaft_participation,
+    assign_direction_modes,
+    mode_conditioned_joint_support,
+)
+
+
+ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_CONFIG = ROOT / "config/topic4_rev10_r_graph_edge_flow.json"
+
+
+def _jsonable(value):
+    if isinstance(value, dict):
+        return {str(key): _jsonable(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_jsonable(item) for item in value]
+    if isinstance(value, np.ndarray):
+        return value.tolist()
+    if isinstance(value, np.generic):
+        return value.item()
+    return value
+
+
+def _atomic_json(path, payload):
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temporary = tempfile.mkstemp(dir=path.parent, suffix=".json.tmp")
+    os.close(fd)
+    try:
+        Path(temporary).write_text(json.dumps(
+            _jsonable(payload), indent=2, sort_keys=True,
+        ))
+        os.replace(temporary, path)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
+
+
+def _atomic_csv(path, rows):
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    keys = sorted({key for row in rows for key in row})
+    fd, temporary = tempfile.mkstemp(dir=path.parent, suffix=".csv.tmp")
+    os.close(fd)
+    try:
+        with open(temporary, "w", newline="") as stream:
+            writer = csv.DictWriter(stream, fieldnames=keys, lineterminator="\n")
+            writer.writeheader()
+            writer.writerows(rows)
+        os.replace(temporary, path)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
+
+
+def _classifier_from_manifest(manifest):
+    classifier = dict(manifest["direction_classifier"])
+    for key in (
+        "coef", "class_centers", "class_precisions", "ood_distance_thresholds",
+    ):
+        classifier[key] = np.asarray(classifier[key], float)
+    return classifier
+
+
+def _worker_complete(payload, npz_path, config_sha, manifest_sha, commit):
+    provenance = payload.get("provenance", {})
+    return bool(
+        payload.get("status") == "REV10R_EDGE_FLOW_WORKER_COMPLETE"
+        and payload.get("config", {}).get("sha256") == config_sha
+        and payload.get("manifest", {}).get("sha256") == manifest_sha
+        and provenance.get("expected_git_commit") == commit
+        and provenance.get("runtime_modules_match_expected_commit") is True
+        and not provenance.get("runtime_modules_dirty")
+        and payload.get("arrays", {}).get("sha256") == _sha256(npz_path)
+    )
+
+
+def _mode_shape_scores(score6, score3):
+    output, source = {}, {}
+    for mode, name in ((0, "A"), (1, "B")):
+        row6 = score6["modes"].get(str(mode), {})
+        row3 = score3["modes"].get(str(mode), {})
+        if row6.get("status") == "OK":
+            output[name] = float(row6["objective"]["mode_score"])
+            source[name] = "n6"
+        elif row3.get("status") == "OK":
+            output[name] = float(row3["objective"]["mode_score"])
+            source[name] = "n3_fallback"
+        else:
+            output[name] = 8.0
+            source[name] = "unsupported_penalty"
+    return output, source
+
+
+def returned_only_onsets(onsets, event_returned):
+    onsets = np.asarray(onsets, float)
+    event_returned = np.asarray(event_returned, bool)
+    if onsets.ndim != 2 or event_returned.shape != (len(onsets),):
+        raise ValueError("onsets and event_returned must align by event")
+    return onsets[event_returned]
+
+
+def _incoming_e_error_by_pathway(edge_audit):
+    """Normalize legacy E->E and rev11 pathway-specific conservation audits."""
+    pathway_audit = edge_audit.get("pathway_audit", {})
+    if pathway_audit:
+        return {
+            str(pathway): float(values["max_abs_incoming_error"])
+            for pathway, values in pathway_audit.items()
+        }
+    return {
+        "E_to_E": float(edge_audit["max_abs_incoming_E_error"]),
+    }
+
+
+def _score_seed(onsets, *, classifier, groups, pairs, embedding, targets,
+                floors6, floors3, scoring_config, objective):
+    onsets = np.asarray(onsets, float)
+    if len(onsets):
+        assigned = assign_direction_modes(
+            onsets, groups=groups, embedding=embedding, classifier=classifier,
+        )
+        labels = np.asarray(assigned["labels"], int)
+        ood = np.asarray(assigned["ood"], bool)
+    else:
+        labels, ood = np.empty(0, int), np.empty(0, bool)
+    support = mode_conditioned_joint_support(onsets, labels, ood, groups)
+    icl = np.isfinite(onsets[:, groups["ICL"]]).any(axis=1)
+    scl = np.isfinite(onsets[:, groups["SCL"]]).any(axis=1)
+    clean = icl & scl & ~ood
+    clean_onsets, clean_labels = onsets[clean], labels[clean]
+    score6 = score_mode_conditioned_events(
+        clean_onsets, clean_labels, groups=groups, pairs=pairs,
+        embedding=embedding, targets=targets, floors=floors6,
+        config=scoring_config, fixed_events_per_mode=6,
+    )
+    score3 = score_mode_conditioned_events(
+        clean_onsets, clean_labels, groups=groups, pairs=pairs,
+        embedding=embedding, targets=targets, floors=floors3,
+        config=scoring_config, fixed_events_per_mode=3,
+    )
+    shape_by_mode, source = _mode_shape_scores(score6, score3)
+    required = int(objective[
+        "minimum_joint_in_distribution_events_per_mode_per_network"
+    ])
+    support_deficit = {
+        name: max(0.0, required - support[name]["n_joint_in_distribution"])
+        / max(1, required)
+        for name in ("A", "B")
+    }
+    tau = float(objective["lse_temperature"])
+    shape_lse = centered_smooth_max(list(shape_by_mode.values()), tau)
+    support_lse = centered_smooth_max(list(support_deficit.values()), tau)
+    ood_fraction = float(np.mean(ood)) if len(ood) else 1.0
+    selection_score = (
+        shape_lse + float(objective["support_weight"]) * support_lse
+        + float(objective["ood_weight"]) * ood_fraction
+    )
+    return {
+        "n_events": int(len(onsets)),
+        "n_clean_joint_in_distribution": int(np.sum(clean)),
+        "mode_conditioned_joint_support": support,
+        "all_event_shaft_participation": all_event_shaft_participation(
+            onsets, groups,
+        ),
+        "ood_fraction": ood_fraction,
+        "shape_score_source": source,
+        "shape_by_mode": shape_by_mode,
+        "shape_lse": float(shape_lse),
+        "support_deficit_by_mode": support_deficit,
+        "support_lse": float(support_lse),
+        "selection_score": float(selection_score),
+        "score_n6": score6,
+        "score_n3": score3,
+    }
+
+
+def _pareto(rows):
+    values = np.asarray([
+        [row["mean_network_shape_A"], row["mean_network_shape_B"],
+         row["mean_network_support_A"], row["mean_network_support_B"],
+         row["mean_network_ood_fraction"]]
+        for row in rows
+    ])
+    output = []
+    for index, value in enumerate(values):
+        output.append(not any(
+            np.all(other <= value) and np.any(other < value)
+            for other_index, other in enumerate(values) if other_index != index
+        ))
+    return output
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--config", default=str(DEFAULT_CONFIG))
+    parser.add_argument("--expected-commit", required=True)
+    parser.add_argument("--worker-commit")
+    args = parser.parse_args()
+    config_path = Path(args.config).resolve()
+    config = json.loads(config_path.read_text())
+    config_sha = _sha256(config_path)
+    commit = subprocess.check_output(
+        ["git", "rev-parse", args.expected_commit], cwd=ROOT, text=True,
+    ).strip()
+    worker_commit = subprocess.check_output(
+        ["git", "rev-parse", args.worker_commit or args.expected_commit],
+        cwd=ROOT, text=True,
+    ).strip()
+    output_root = ROOT / config["output_root"]
+    manifest_path = output_root / "candidate_manifest.json"
+    manifest = json.loads(manifest_path.read_text())
+    manifest_sha = _sha256(manifest_path)
+    if manifest["config"]["sha256"] != config_sha:
+        raise RuntimeError("rev10-R manifest uses another config")
+
+    contract = _load_json_input(config["inputs"]["contact_contract"])
+    groups, pairs = contract_groups(contract), contract_pairs(contract)
+    scoring_config = _load_json_input(config["inputs"]["shaft_aware_scoring_config"])
+    target_path = config["inputs"]["shaft_aware_target_npz"]["path"]
+    floor_path = config["inputs"]["shaft_aware_floors"]["path"]
+    names, embedding, targets, floors6 = load_scoring_contract(
+        target_path, floor_path, "FULL_TIMING", fixed_events_per_mode=6,
+    )
+    _, _, _, floors3 = load_scoring_contract(
+        target_path, floor_path, "FULL_TIMING", fixed_events_per_mode=3,
+    )
+    expected_names = np.asarray([
+        row["contact_name"] for row in contract["contacts"]
+    ]).astype(str)
+    if not np.array_equal(names.astype(str), expected_names):
+        raise RuntimeError("scoring and contact contracts differ")
+    classifier = _classifier_from_manifest(manifest)
+    objective = config["search"]["objective"]
+    phase = config.get("search", {}).get("phase", "fit")
+    seeds = active_network_seeds(config)
+    rows, details, worker_inputs = [], {}, []
+    for candidate in manifest["candidate_set"]["candidates"]:
+        by_seed, metadata = {}, []
+        for seed in seeds:
+            stem = output_root / "workers" / f"{candidate['candidate_id']}_seed_{seed}"
+            json_path, npz_path = stem.with_suffix(".json"), stem.with_suffix(".npz")
+            payload = json.loads(json_path.read_text())
+            if not _worker_complete(
+                    payload, npz_path, config_sha, manifest_sha, worker_commit):
+                raise RuntimeError(f"stale rev10-R worker: {stem}")
+            with np.load(npz_path, allow_pickle=False) as loaded:
+                worker_names = np.asarray(loaded["contact_names"]).astype(str)
+                onsets = np.asarray(loaded["onsets"], float)
+                event_returned = np.asarray(loaded["event_returned"], bool)
+            if not np.array_equal(worker_names, names.astype(str)):
+                raise RuntimeError(f"contact order changed: {stem}")
+            scored_onsets = returned_only_onsets(onsets, event_returned)
+            by_seed[str(seed)] = _score_seed(
+                scored_onsets, classifier=classifier, groups=groups, pairs=pairs,
+                embedding=embedding, targets=targets, floors6=floors6,
+                floors3=floors3, scoring_config=scoring_config,
+                objective=objective,
+            )
+            by_seed[str(seed)]["n_detected_events"] = int(len(onsets))
+            by_seed[str(seed)]["n_returned_events_scored"] = int(
+                len(scored_onsets)
+            )
+            by_seed[str(seed)]["n_nonreturned_events_excluded"] = int(
+                len(onsets) - len(scored_onsets)
+            )
+            by_seed[str(seed)]["fraction_time_above_common_detector"] = float(
+                payload["run"]["fraction_time_above_common_detector"]
+            )
+            metadata.append(payload)
+            worker_inputs.append({
+                "candidate_id": candidate["candidate_id"], "seed": seed,
+                "json_sha256": _sha256(json_path), "npz_sha256": _sha256(npz_path),
+            })
+        values = list(by_seed.values())
+        runaway = int(sum(
+            payload["run"]["runaway_early_stop_ms"] is not None
+            for payload in metadata
+        ))
+        mean_score = float(np.mean([value["selection_score"] for value in values]))
+        if runaway:
+            mean_score = 1000.0 + runaway
+        incoming_e_errors = [
+            _incoming_e_error_by_pathway(payload["edge_audit"])
+            for payload in metadata
+        ]
+        row = {
+            "candidate_id": candidate["candidate_id"],
+            "arm": candidate.get("arm"),
+            "node_field_sha256": candidate.get("node_field", {}).get(
+                "field_sha256"
+            ),
+            "search_coordinates": candidate.get("search_coordinates"),
+            "adaptation_mode": candidate.get("adaptation", {}).get("mode", "off"),
+            "adaptation_tau_ms": candidate.get("adaptation", {}).get("tau_ms", 0.0),
+            "adaptation_increment_mV": candidate.get("adaptation", {}).get(
+                "increment_mV", 0.0,
+            ),
+            "resource_mode": candidate.get("inhibitory_resource", {}).get(
+                "mode", "off",
+            ),
+            "resource_k_q_per_ms": candidate.get(
+                "inhibitory_resource", {},
+            ).get("k_q_per_ms", 0.0),
+            "ee_std_mode": candidate.get("ee_std", {}).get("mode", "off"),
+            "ee_std_u": candidate.get("ee_std", {}).get("u", 0.0),
+            "ee_std_tau_ms": candidate.get("ee_std", {}).get("tau_ms", 0.0),
+            "spatial_ou_mode": candidate.get("spatial_ou", {}).get("mode", "off"),
+            "spatial_ou_sigma_rate_per_ms": candidate.get(
+                "spatial_ou", {},
+            ).get("sigma_rate_per_ms", 0.0),
+            "spatial_ou_tau_ms": candidate.get("spatial_ou", {}).get("tau_ms", 0.0),
+            "spatial_ou_ell_mm": candidate.get("spatial_ou", {}).get("ell_mm", 0.0),
+            "mz_mode": candidate.get("mz", {}).get("mode", "off"),
+            "mz_use_z": candidate.get("mz", {}).get("use_z", False),
+            "mz_use_m": candidate.get("mz", {}).get("use_m", False),
+            "selection_score_equal_network": mean_score,
+            "n_runaway_networks": runaway,
+            "total_events_descriptive": int(sum(
+                value["n_detected_events"] for value in values
+            )),
+            "mean_network_events": float(np.mean([
+                value["n_detected_events"] for value in values
+            ])),
+            "total_detected_events_descriptive": int(sum(
+                value["n_detected_events"] for value in values
+            )),
+            "total_returned_events_scored": int(sum(
+                value["n_returned_events_scored"] for value in values
+            )),
+            "total_nonreturned_events_excluded": int(sum(
+                value["n_nonreturned_events_excluded"] for value in values
+            )),
+            "mean_network_detected_events_descriptive": float(np.mean([
+                value["n_detected_events"] for value in values
+            ])),
+            "mean_network_returned_events_scored": float(np.mean([
+                value["n_returned_events_scored"] for value in values
+            ])),
+            "mean_network_returned_fraction": float(np.mean([
+                payload["run"]["n_returned_events"]
+                / max(payload["run"]["n_common_detector_events"], 1)
+                for payload in metadata
+            ])),
+            "mean_network_fraction_time_above_detector": float(np.mean([
+                payload["run"]["fraction_time_above_common_detector"]
+                for payload in metadata
+            ])),
+            "max_network_fraction_time_above_detector": float(max(
+                payload["run"]["fraction_time_above_common_detector"]
+                for payload in metadata
+            )),
+            "mean_network_peak_active_fraction": float(np.mean([
+                payload["run"]["peak_active_fraction"] for payload in metadata
+            ])),
+            "mean_network_shape_A": float(np.mean([
+                value["shape_by_mode"]["A"] for value in values
+            ])),
+            "mean_network_shape_B": float(np.mean([
+                value["shape_by_mode"]["B"] for value in values
+            ])),
+            "mean_network_support_A": float(np.mean([
+                value["support_deficit_by_mode"]["A"] for value in values
+            ])),
+            "mean_network_support_B": float(np.mean([
+                value["support_deficit_by_mode"]["B"] for value in values
+            ])),
+            "mean_network_ood_fraction": float(np.mean([
+                value["ood_fraction"] for value in values
+            ])),
+            "networks_with_clean_A": int(sum(
+                value["mode_conditioned_joint_support"]["A"][
+                    "n_joint_in_distribution"
+                ] > 0 for value in values
+            )),
+            "networks_with_clean_B": int(sum(
+                value["mode_conditioned_joint_support"]["B"][
+                    "n_joint_in_distribution"
+                ] > 0 for value in values
+            )),
+            "networks_with_both_clean_modes": int(sum(
+                all(value["mode_conditioned_joint_support"][name][
+                    "n_joint_in_distribution"
+                ] > 0 for name in ("A", "B"))
+                for value in values
+            )),
+            "edge_ratio_min": float(min(
+                value["edge_audit"]["edge_ratio"]["min"]
+                for value in metadata
+            )),
+            "edge_ratio_max": float(max(
+                value["edge_audit"]["edge_ratio"]["max"]
+                for value in metadata
+            )),
+            "max_incoming_E_error": float(max(
+                error
+                for by_pathway in incoming_e_errors
+                for error in by_pathway.values()
+            )),
+            "max_incoming_E_to_E_error": float(max(
+                by_pathway["E_to_E"] for by_pathway in incoming_e_errors
+                if "E_to_E" in by_pathway
+            )),
+            "max_incoming_E_to_I_error": (
+                float(max(
+                    by_pathway["E_to_I"] for by_pathway in incoming_e_errors
+                    if "E_to_I" in by_pathway
+                ))
+                if any("E_to_I" in values for values in incoming_e_errors)
+                else None
+            ),
+            "mean_network_peak_adaptation_mean_mV": float(np.mean([
+                payload.get("dynamic_accessibility", {}).get("peak_mean_mV", 0.0)
+                for payload in metadata
+            ])),
+            "mean_network_peak_adaptation_spatial_sd_mV": float(np.mean([
+                payload.get("dynamic_accessibility", {}).get(
+                    "peak_spatial_sd_mV", 0.0,
+                ) for payload in metadata
+            ])),
+            "mean_network_minimum_resource_q": float(np.mean([
+                payload.get("dynamic_inhibitory_resource", {}).get(
+                    "minimum_local_q", 1.0,
+                ) for payload in metadata
+            ])),
+            "mean_network_peak_resource_spatial_sd": float(np.mean([
+                payload.get("dynamic_inhibitory_resource", {}).get(
+                    "peak_spatial_q_sd", 0.0,
+                ) for payload in metadata
+            ])),
+            "mean_network_minimum_std_availability": float(np.mean([
+                payload.get("dynamic_ee_std", {}).get(
+                    "minimum_mean_availability", 1.0,
+                ) for payload in metadata
+            ])),
+            "mean_network_spatial_ou_sd_rate_per_ms": float(np.mean([
+                payload.get("spatial_ou_accessibility", {}).get(
+                    "mean_spatial_sd_rate_per_ms", 0.0,
+                ) for payload in metadata
+            ])),
+            "max_network_spatial_ou_clip_fraction": float(max([
+                payload.get("spatial_ou_accessibility", {}).get(
+                    "negative_rate_clip_fraction", 0.0,
+                ) for payload in metadata
+            ], default=0.0)),
+            "mean_network_final_z": float(np.mean([
+                payload.get("mz_slow_state", {}).get("final_z_mean")
+                for payload in metadata
+                if payload.get("mz_slow_state", {}).get("final_z_mean") is not None
+            ])) if any(
+                payload.get("mz_slow_state", {}).get("final_z_mean") is not None
+                for payload in metadata
+            ) else None,
+            "mean_network_peak_m": float(np.mean([
+                payload.get("mz_slow_state", {}).get("maximum_m")
+                for payload in metadata
+                if payload.get("mz_slow_state", {}).get("maximum_m") is not None
+            ])) if any(
+                payload.get("mz_slow_state", {}).get("maximum_m") is not None
+                for payload in metadata
+            ) else None,
+            "mean_network_peak_mean_adaptation_current": float(np.mean([
+                payload.get("mz_slow_state", {}).get(
+                    "peak_mean_adaptation_current"
+                ) for payload in metadata
+                if payload.get("mz_slow_state", {}).get(
+                    "peak_mean_adaptation_current"
+                ) is not None
+            ])) if any(
+                payload.get("mz_slow_state", {}).get(
+                    "peak_mean_adaptation_current"
+                ) is not None for payload in metadata
+            ) else None,
+        }
+        rows.append(row)
+        details[candidate["candidate_id"]] = {
+            "by_seed": by_seed,
+            "edge_audit_by_seed": {
+                str(payload["seed"]): payload["edge_audit"]
+                for payload in metadata
+            },
+            "dynamic_accessibility_by_seed": {
+                str(payload["seed"]): payload.get("dynamic_accessibility", {})
+                for payload in metadata
+            },
+            "dynamic_inhibitory_resource_by_seed": {
+                str(payload["seed"]): payload.get(
+                    "dynamic_inhibitory_resource", {},
+                ) for payload in metadata
+            },
+            "dynamic_ee_std_by_seed": {
+                str(payload["seed"]): payload.get("dynamic_ee_std", {})
+                for payload in metadata
+            },
+            "spatial_ou_by_seed": {
+                str(payload["seed"]): payload.get(
+                    "spatial_ou_accessibility", {},
+                ) for payload in metadata
+            },
+            "mz_slow_state_by_seed": {
+                str(payload["seed"]): payload.get("mz_slow_state", {})
+                for payload in metadata
+            },
+        }
+    for row, flag in zip(rows, _pareto(rows)):
+        row["pareto_nondominated"] = bool(flag)
+    rows.sort(key=lambda row: (
+        row["n_runaway_networks"] > 0,
+        row["selection_score_equal_network"], row["candidate_id"],
+    ))
+    baseline_id = manifest.get("selection_freeze", {}).get(
+        "paired_control_candidate_id", "edge_noop",
+    )
+    baseline = next(row for row in rows if row["candidate_id"] == baseline_id)
+    status_by_phase = {
+        "fit": "REV10R_RETURNED_ONLY_FIT_SCREEN_COMPLETE",
+        "selection": "REV10R_RETURNED_ONLY_SELECTION_COMPLETE",
+        "confirmation": "REV10R_RETURNED_ONLY_CONFIRMATION_COMPLETE",
+    }
+    basename_by_phase = {
+        "fit": "fit_screen",
+        "selection": "selection",
+        "confirmation": "confirmation",
+    }
+    is_dynamic_canary = (
+        config["scientific_role"] == "development_only_dynamic_accessibility_canary"
+    )
+    is_resource_canary = config["scientific_role"] == (
+        "development_only_inhibitory_resource_accessibility_canary"
+    )
+    is_dynamic_edge_canary = config["scientific_role"] == (
+        "development_only_dynamic_ee_std_accessibility_canary"
+    )
+    is_spatial_ou_canary = config["scientific_role"] == (
+        "development_only_translation_invariant_spatial_ou_accessibility_canary"
+    )
+    is_spatial_ou_bracket = config["scientific_role"] == (
+        "development_only_translation_invariant_spatial_ou_low_amplitude_bracket"
+    )
+    is_spatial_ou_kmeans_grid = config["scientific_role"] == (
+        "development_only_translation_invariant_spatial_ou_kmeans_grid"
+    )
+    is_continuous_field_kmeans_screen = config["scientific_role"] == (
+        "development_only_observation_invariant_continuous_field_kmeans_screen"
+    )
+    is_natural_kmeans_closeout = config["scientific_role"] == (
+        "development_only_continuous_field_natural_kmeans_fresh_closeout"
+    )
+    is_joint_continuous_surface = config["scientific_role"] == (
+        "development_only_continuous_field_joint_direction_surface"
+    )
+    is_joint_field_replication = config["scientific_role"] == (
+        "development_only_continuous_field_joint_direction_replication"
+    )
+    is_local_connectivity_canary = config["scientific_role"] == (
+        "development_only_data_driven_node_local_connectivity_canary"
+    )
+    is_local_connectivity_joint_fit = config["scientific_role"] == (
+        "development_only_data_driven_node_local_connectivity_joint_fit"
+    )
+    is_local_connectivity_joint_selection = config["scientific_role"] == (
+        "development_only_data_driven_node_local_connectivity_joint_selection"
+    )
+    is_local_connectivity_frozen_confirmation = config["scientific_role"] == (
+        "development_only_data_driven_node_local_connectivity_frozen_confirmation"
+    )
+    summary = {
+        "status": (
+            "REV10D_RETURNED_ONLY_CANARY_COMPLETE"
+            if is_dynamic_canary else status_by_phase[phase]
+        ),
+        "phase": phase,
+        "scientific_role": config["scientific_role"],
+        "safe_claim": (
+            "all candidate scores use equal network weights; event-pooled counts "
+            "are descriptive only; non-returned detector events are excluded; "
+            "mode shape is scored only on returned, joint, patient-supported "
+            "events, while absent support remains a penalty"
+        ),
+        "baseline_candidate_id": baseline_id,
+        "baseline": baseline,
+        "diagnostic_best_candidate_id": rows[0]["candidate_id"],
+        "candidate_rows": rows,
+        "candidate_details": details,
+        "network_seeds": seeds,
+        "worker_inputs": worker_inputs,
+        "manifest": {"path": str(manifest_path), "sha256": manifest_sha},
+        "config": {"path": str(config_path.relative_to(ROOT)), "sha256": config_sha},
+        "source_worker_commit": worker_commit,
+        "provenance": _runtime_provenance(args.expected_commit),
+    }
+    if is_resource_canary:
+        summary["status"] = "REV10D2_RETURNED_ONLY_CANARY_COMPLETE"
+    if is_dynamic_edge_canary:
+        summary["status"] = "REV10D3_RETURNED_ONLY_CANARY_COMPLETE"
+    if is_spatial_ou_canary:
+        summary["status"] = "REV10D5_RETURNED_ONLY_CANARY_COMPLETE"
+    if is_spatial_ou_bracket:
+        summary["status"] = "REV10D5_1_RETURNED_ONLY_BRACKET_COMPLETE"
+    if is_spatial_ou_kmeans_grid:
+        summary["status"] = "REV10D5_3_RETURNED_ONLY_KMEANS_GRID_COMPLETE"
+    if is_continuous_field_kmeans_screen:
+        summary["status"] = (
+            "REV10D6_RETURNED_ONLY_CONTINUOUS_FIELD_SCREEN_COMPLETE"
+        )
+    if is_natural_kmeans_closeout:
+        summary["status"] = (
+            "REV10D6_1_RETURNED_ONLY_FRESH_CLOSEOUT_COMPLETE"
+        )
+    if is_joint_continuous_surface:
+        summary["status"] = (
+            "REV10D6_2_RETURNED_ONLY_JOINT_SURFACE_COMPLETE"
+        )
+    if is_joint_field_replication:
+        summary["status"] = (
+            "REV10D6_3_RETURNED_ONLY_REPLICATION_COMPLETE"
+        )
+    if is_local_connectivity_canary:
+        summary["status"] = "REV11NLC_RETURNED_ONLY_CANARY_COMPLETE"
+    if is_local_connectivity_joint_fit:
+        summary["status"] = "REV11NLC_JOINT_FIT_RETURNED_ONLY_COMPLETE"
+    if is_local_connectivity_joint_selection:
+        summary["status"] = "REV11NLC_JOINT_SELECTION_RETURNED_ONLY_COMPLETE"
+    if is_local_connectivity_frozen_confirmation:
+        summary["status"] = (
+            "REV11NLC_FROZEN_CONFIRMATION_RETURNED_ONLY_COMPLETE"
+        )
+    basename = (
+        "canary" if is_dynamic_canary or is_resource_canary
+        or is_dynamic_edge_canary or is_spatial_ou_canary
+        or is_spatial_ou_bracket or is_spatial_ou_kmeans_grid
+        or is_continuous_field_kmeans_screen
+        or is_local_connectivity_canary or is_local_connectivity_joint_fit
+        else basename_by_phase[phase]
+    )
+    _atomic_csv(output_root / f"{basename}_candidate_summary_returned_only.csv", rows)
+    _atomic_json(output_root / f"{basename}_summary_returned_only.json", summary)
+    print(json.dumps({
+        "status": summary["status"],
+        "diagnostic_best_candidate_id": summary["diagnostic_best_candidate_id"],
+        "baseline_score": baseline["selection_score_equal_network"],
+        "best_score": rows[0]["selection_score_equal_network"],
+    }, indent=2))
+
+
+if __name__ == "__main__":
+    main()

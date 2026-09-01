@@ -1,0 +1,133 @@
+{
+  "schema_version": "topic4_data_driven_snn_cohort_formal_v1",
+  "scientific_role": "formal_34_subject_canonical_layout_cohort_with_28_subject_real_geometry_sensitivity",
+  "output_root": "results/topic4_sef_hfo/data_driven_snn_cohort_v1/formal",
+  "inputs": {
+    "cohort_config": {"path": "config/topic4_data_driven_snn_cohort_v1.json", "sha256": "1dda710517a65002d21618f26569df91077ba6d02953fbfcee9b2f98b0ac4249"},
+    "cohort_target_audit": {"path": "results/topic4_sef_hfo/data_driven_snn_cohort_v1/target_audit/cohort_target_audit.json", "sha256": "7542c20c8c48902396ca6f4f2802adeb50565d8123a8b0a5687de6da704c00d4"},
+    "source_target_root": {"path": "results/topic4_sef_hfo/data_driven_snn_cohort_v1/target_audit/per_subject"},
+    "rev9_base_config": {"path": "config/topic4_rev9_exploratory.json", "sha256": "92b18838edf06a8445955c6623f4025010b76e4f50b39e320f1160ea27473ab9"},
+    "stage_config": {"path": "results/topic4_sef_hfo/data_driven_core_field/config/stage_config.json", "sha256": "470de45715194f357396084a9cdad2f2e6a3bae044206be394d05207f2dd9fae"},
+    "common_detector_audit": {"path": "results/topic4_sef_hfo/data_driven_core_field_rev9/review_audit_20260810/rev9_review_audit.json", "sha256": "6ca18234bc1ee9c06a9a4f8f6007b2d2709b138ccffef1bbc0f3dfd84c066471"},
+    "node_anchor_config": {"path": "config/topic4_rev10_sa_observation_invariant_field_v6_2.json", "sha256": "1277dbc5620fe6b1cc06d85592c46a16e22d7b7b4a4de0ca3a9e0a1f714a0719"},
+    "nlc_selection_manifest": {"path": "results/topic4_sef_hfo/data_driven_local_connectivity_rev11_nlc/joint_node_connectivity_selection/candidate_manifest.json", "sha256": "501dcc6a25c6903811449fd4069f96a7c455177eda17a9a820965d11517bd955"}
+  },
+  "patient_target_reuse": {
+    "rule": "the frozen target_audit NPZ/JSON are reused byte for byte",
+    "rebuild_forbidden": true,
+    "reason": "the patient targets must be identical to the ones the canary consumed; a rebuild would silently move the KMeans fit, the block split and the held-out margins"
+  },
+  "observation": {
+    "primary_layout": "canonical_parallel_shaft_rows_v2_span_filling",
+    "primary_denominator": 34,
+    "sensitivity_layout": "geometry_only_pca_3d_to_2d",
+    "sensitivity_denominator": 28,
+    "sheet_size_mm": 20.0,
+    "sheet_margin_mm": 2.0,
+    "forbidden_layout_inputs": [
+      "patient rank values",
+      "patient event or mode labels",
+      "template direction",
+      "event counts or recruitment frequency",
+      "field peaks or core count"
+    ],
+    "anatomical_interpretation": false,
+    "boundary": "The canonical layout is a target-blind contact-order readout, not patient anatomy. The six subjects without usable 3-D coordinates stay in the primary denominator."
+  },
+  "null": {
+    "kind": "within_shaft_contact_identity_permutation",
+    "n_permutations": 64,
+    "base_seed": 20260820,
+    "exhaustive_when_group_not_larger_than_request": true,
+    "padding_with_replacement": "forbidden",
+    "applies_to": "model readout contacts, so shaft membership survives and within-shaft contact identity is destroyed"
+  },
+  "candidate_library": {
+    "source": "rev11 NLC joint selection winner, used as shared pretrained morphology",
+    "field_transforms": {"rotations_deg": [0, 90, 180, 270], "reflections": [false, true]},
+    "arms": ["Node", "Node+EE", "Node+EE+EtoI"],
+    "n_candidates": 24,
+    "generated_before_any_patient_score": true,
+    "frozen_independently_of_canary_alignment": "the canary shares five subjects with the formal cohort, so its patient-alignment scores may not prune this library; the canary only clears capacity, detector behaviour and memory"
+  },
+  "selection_protocol": {
+    "stage_a": {"seeds": [1661, 1662], "candidates": "all 24", "target": "patient train split"},
+    "stage_b": {"seeds": [1671, 1672], "candidates": "union of each subject's best two candidates from stage A", "target": "patient train split"},
+    "stage_c": {"seeds": [1681, 1682, 1683, 1684], "candidates": "union of each subject's single selected candidate", "target": "patient held-out split"},
+    "why_staged": "a flat 24-candidate by 4-seed sweep costs about three extra hours of wall clock at the five-worker cap for no extra selection information; the stages are frozen here before any formal score exists",
+    "held_out_blocks_never_enter_stage_a_or_stage_b": true
+  },
+  "search": {
+    "phase": "formal",
+    "fit_network_seeds": [1661, 1662],
+    "selection_network_seeds": [1671, 1672],
+    "confirmation_network_seeds": [1681, 1682, 1683, 1684],
+    "simulation": {"duration_ms": 20000.0, "early_stop_runaway": true},
+    "detector": {"population_active_fraction_threshold": 0.0195703125, "role": "frozen common absolute detector"},
+    "contact_readout": {"participation_margin_fraction": 0.1, "timing_fraction": 0.5},
+    "minimum_contacts_per_event": 3,
+    "minimum_events_per_mode": 3,
+    "kmeans_seed": 20260815,
+    "kmeans_n_init": 20,
+    "readout_contact_chunk": 128,
+    "readout_note": "the batched contact readout blocks BLAS by chunk, which moves the envelope at float64 round-off, so the chunk size is frozen here and recorded in worker provenance",
+    "beta": "closed",
+    "Z_M": "off"
+  },
+  "endpoint": {
+    "frozen_before_any_formal_patient_score": true,
+    "subject_primary": {
+      "split": "patient held-out recording blocks",
+      "network_seeds": "confirmation only",
+      "requires_status": "EVALUABLE",
+      "statistic": "weakest_mode_loss",
+      "comparator": "within_shaft_permutation_null_median",
+      "rule": "observed strictly below the matched null median",
+      "why_not_a_per_subject_p_value": "three subjects have too few distinct within-shaft permutations to ever reach p<=0.05, so a per-subject p gate would fail them for montage reasons rather than model reasons"
+    },
+    "cohort_primary": {
+      "unit": "subject",
+      "denominator": 34,
+      "pass_fraction_min": 0.6,
+      "test": "two_sided_wilcoxon_signed_rank_on_null_median_minus_observed",
+      "alpha": 0.05
+    },
+    "same_network_k2": {
+      "reported_separately_from_supervised_assignment": true,
+      "requires": {
+        "two_natural_clusters_with_minimum_events": true,
+        "both_aligned_clusters_have_positive_patient_template_margin": true,
+        "natural_seed_ami_median_min": 0.5
+      },
+      "cohort_fraction_min": 0.5,
+      "note": "the natural clustering is unsupervised and is not compared against the permutation null; running the clustering inside every null draw would cost more than the simulation it scores, and the spec's requirement is a positive patient-template margin for both aligned clusters"
+    },
+    "sensitivity": {
+      "layout": "real_geometry",
+      "denominator": 28,
+      "rule": "the paired canonical and real-geometry cohort effects must agree in direction",
+      "on_disagreement": "OBSERVATION_LAYOUT_DEPENDENCE_UNRESOLVED"
+    },
+    "robustness": {
+      "event_count_confound": "report Spearman(subject null-relative delta, in-distribution event count) and re-run the cohort test after dropping the top event-count quartile",
+      "single_network_confound": "report the pass fraction per confirmation seed; no single seed may supply more than half of the passing subjects"
+    },
+    "failure_statuses": [
+      "COHORT_MODEL_SUPPORT_INSUFFICIENT",
+      "SAME_NETWORK_K2_INSUFFICIENT",
+      "OBSERVATION_LAYOUT_DEPENDENCE_UNRESOLVED",
+      "TARGET_BLIND_FIELD_LIBRARY_CAPACITY_FAIL"
+    ]
+  },
+  "execution": {
+    "launcher": "systemd-run --user -> /usr/bin/nohup -> managed command",
+    "max_workers": 5,
+    "wait_seconds": 300,
+    "numeric_threads_per_worker": 1,
+    "minimum_available_memory_gib_per_worker": 8.0,
+    "notify_on_completion": true,
+    "one_simulation_serves_every_montage": true,
+    "upstream_wait_status": "results/topic4_sef_hfo/data_driven_snn_cohort_v1/multisubject_canary/controller.status"
+  },
+  "claim_boundary": "A positive result may state that patient-conditioned data-driven SNNs recovered cohort-level held-out contact-order stereotypy against matched within-shaft nulls. It may not be shortened to reproducing 34 patients, and it does not establish anatomical cores, clinical waveform identity, patient-blind generalization or seizure mechanism."
+}

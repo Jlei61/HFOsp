@@ -70,6 +70,23 @@ def ee_std_apply(a_w, a_dst, x_per_edge, NE):
     return a_w * np.where(a_dst < NE, x_per_edge, 1.0)
 
 
+def ee_std_source_availability(x_dep, spiking_sources, mode):
+    """Availability applied to firing E sources for local or mean-matched STD.
+
+    The global control retains the same latent per-source resource dynamics as
+    the local arm, but applies their instantaneous mean to every outgoing E->E
+    source.  Thus an identical spike history has an identical mean resource
+    dose while only the local arm retains source identity in edge application.
+    """
+    x_dep = np.asarray(x_dep, dtype=float)
+    spiking_sources = np.asarray(spiking_sources, dtype=np.int64)
+    if mode == "local":
+        return x_dep[spiking_sources]
+    if mode == "global":
+        return np.full(spiking_sources.shape, x_dep.mean(), dtype=float)
+    raise ValueError("ee_std_mode must be local or global")
+
+
 def membrane_step(V, I_E, I_I, decay_V, *, shunt_gaba=False, e_gaba=11.0, g_gaba_scale=0.0):
     """One LIF membrane update. Default (shunt_gaba=False) = current-based LIF, BIT-IDENTICAL
     to the pre-2026-06-19 engine: V_inf = I_E - I_I; V -> V_inf + (V - V_inf)*decay_V.
@@ -91,16 +108,28 @@ def membrane_step(V, I_E, I_I, decay_V, *, shunt_gaba=False, e_gaba=11.0, g_gaba
 def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                   verbose=False, kick_center=None, lfp_recorder=None, r_kick=None, t_kick=None,
                   V_th_per_neuron=None, perturb=None,
+                  forced_spike_mask=None, forced_spike_ms=None,
                   early_stop_runaway=False, es_thresh_hz=120.0, es_dur_ms=100.0,
+                  post_runaway_record_ms=0.0,
+                  checkpoint_steps=None, checkpoint_sink=None,
+                  resume_state=None, time_offset_ms=0.0,
                   ee_std_u=0.0, ee_std_tau_ms=0.0,
                   dump_ee_std_trace=False, ee_std_trace_maskE=None, t_kick2=None, KICK_BOOST2=0.0,
                   shunt_gaba=False, e_gaba=None, g_gaba_scale=0.0,
                   dump_i_spikes=False, dump_drive=False,
-                  feedback_gain=0.0, feedback_tau_ms=0.0, dump_fb=False, fb_override_trace=None):
+                  dump_pathway_trace=False, pathway_trace_dt_ms=1.0,
+                  feedback_gain=0.0, feedback_tau_ms=0.0, dump_fb=False,
+                  fb_override_trace=None, ee_std_mode="local",
+                  external_e_rate_drive=None):
     """Verbatim copy of model.simulate's integration loop, with ONE addition:
     a localized transient kick on the external Poisson rate. The kick adds
     `KICK_BOOST` (extra external rate, 1/ms) to the E neurons in a disk of
     radius R_KICK about the sheet center, during [T_KICK, T_KICK+DUR_KICK).
+
+    `forced_spike_mask` and `forced_spike_ms` are an off-by-default causal
+    assay hook. Together they inject one exact E-neuron presynaptic spike packet
+    on the simulation time grid; the packet then follows the ordinary reset,
+    refractory, delay-ring and synaptic-weight path.
 
     Returns the standard recorders plus per-step inside/outside-disk E-spike
     counts. Use slow=None (epilepsy layer off). KICK_BOOST=0 -> pure control
@@ -120,6 +149,32 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
 
     dt = p.dt
     nsteps = int(round(p.T / dt))
+    forced_on = forced_spike_mask is not None or forced_spike_ms is not None
+    if forced_on:
+        if forced_spike_mask is None or forced_spike_ms is None:
+            raise ValueError("forced spike mask and time must be provided together")
+        forced_spike_mask = np.asarray(forced_spike_mask, bool)
+        if forced_spike_mask.shape != (N,):
+            raise ValueError("forced spike mask must align to all neurons")
+        if np.any(forced_spike_mask[NE:]):
+            raise ValueError("forced spike packet must contain excitatory neurons only")
+        if not np.any(forced_spike_mask[:NE]):
+            raise ValueError("forced spike packet must contain at least one E neuron")
+        # ZM-ITX: resolve against the segment's clock origin. With
+        # time_offset_ms == 0 both lines are literally the pre-existing ones, so
+        # the default path is unchanged; without this a probe resumed at 2000 ms
+        # and injected at 2000 ms would compute step 20000 and fail the < nsteps
+        # bound of its 200 ms continuation.
+        forced_spike_step = int(round((float(forced_spike_ms) - time_offset_ms) / dt))
+        if abs(time_offset_ms + forced_spike_step * dt - float(forced_spike_ms)) > 1e-9:
+            raise ValueError("forced spike time must lie on the simulation time grid")
+        if forced_spike_step < 0 or forced_spike_step >= nsteps:
+            raise ValueError("forced spike time lies outside the simulation")
+    else:
+        forced_spike_step = None
+    forced_spike_collision_count = 0
+    external_rate_clip_count = 0
+    external_rate_sample_count = 0
 
     # ---- precomputed decays ---- (identical to model.simulate)
     decay_sE = np.exp(-dt / p.tau_r_AMPA)
@@ -171,30 +226,28 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
     ref = np.zeros(N, dtype=np.int32)
     s_E = np.zeros(N); I_E = np.zeros(N)
     s_I = np.zeros(N); I_I = np.zeros(N)
-    # ---- M4/FCXR: recurrent-only AMPA accumulator (OFF by default -> no alloc/float touch on the default
-    # path). Tracks the recurrent (delay-ring) component of I_E separately: M4's shared pool DIVIDES only
-    # recurrent E input; FCXR full-conductance SPLITS excitation into feedforward vs recurrent AMPA. The
-    # combined I_E accumulation below is untouched (byte-parity when neither is requested). ----
-    # Generic off-by-default conductance slow protocol.  Current slow implementations do not expose
-    # uses_conductance_membrane(), so they stay on the literal historical branch below.  MZ uses this
-    # hook to provide leak-relative GABA/sAHP terms without pretending its mV current proxies are nS.
-    conductance_slow = bool(
-        slow is not None
-        and hasattr(slow, "uses_conductance_membrane")
-        and slow.uses_conductance_membrane()
+    # ---- M4: recurrent-only AMPA accumulator (OFF by default -> no alloc/float touch on the default
+    # path). Tracks the recurrent (delay-ring) component of I_E separately so the shared pool can DIVIDE
+    # only recurrent E input; the combined I_E accumulation below is untouched (byte-parity). ----
+    pathway_trace_on = bool(dump_pathway_trace)
+    track_rec = bool(
+        getattr(getattr(slow, "cfg", None), "use_SG", False)
+        or pathway_trace_on
     )
-    split_exc = bool(
-        slow is not None
-        and hasattr(slow, "uses_split_excitation")
-        and slow.uses_split_excitation()
-    )
-    track_rec = bool(getattr(getattr(slow, "cfg", None), "use_SG", False)) or split_exc
-    if conductance_slow:
-        assert not shunt_gaba, "conductance slow membrane cannot combine with the separate shunt_gaba path"
-    if split_exc:
-        assert conductance_slow, "uses_split_excitation requires a conductance membrane"
     if track_rec:
         s_E_rec = np.zeros(N); I_E_rec = np.zeros(N)
+    if pathway_trace_on:
+        pathway_trace_stride = int(round(float(pathway_trace_dt_ms) / dt))
+        if pathway_trace_stride < 1 or not np.isclose(
+                pathway_trace_stride * dt, float(pathway_trace_dt_ms),
+                atol=1e-12, rtol=0.0):
+            raise ValueError("pathway_trace_dt_ms must lie on the simulation grid")
+        pathway_trace_size = (nsteps + pathway_trace_stride - 1) // pathway_trace_stride
+        pathway_time_ms = np.empty(pathway_trace_size, dtype=np.float32)
+        pathway_recurrent_E_to_E_mean = np.empty(pathway_trace_size, dtype=np.float32)
+        pathway_recurrent_E_to_I_mean = np.empty(pathway_trace_size, dtype=np.float32)
+        pathway_GABA_to_E_mean = np.empty(pathway_trace_size, dtype=np.float32)
+        pathway_trace_count = 0
     ring_sE = np.zeros((M, N))
     ring_sI = np.zeros((M, N))
 
@@ -203,18 +256,10 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
     ee_std_on = ee_std_u > 0.0
     if ee_std_on:
         assert ee_std_tau_ms > 0.0, "ee_std_u>0 requires ee_std_tau_ms>0"
+        if ee_std_mode not in {"local", "global"}:
+            raise ValueError("ee_std_mode must be local or global")
         x_dep = np.ones(NE)                                  # availability per E neuron, recovers to 1
         x_rec_f = ee_std_recover_factor(dt, ee_std_tau_ms)
-
-    # ---- FCXR: persistence-gated presynaptic E->E relay availability x_j (default OFF; gated on the slow
-    # protocol's uses_ee_relay()). The slow object drives y_j/x_j in slow.step() and exposes ee_relay_send
-    # == x_j(t-); this loop scales E->E edges by that pre-update value at the scatter. Mutually exclusive
-    # with M1 per-spike STD (double-scaling the same edges); requires the full_conductance split membrane. ----
-    relay_on = bool(slow is not None and hasattr(slow, "uses_ee_relay") and slow.uses_ee_relay())
-    if relay_on and ee_std_on:
-        raise ValueError("FCXR relay (slow.uses_ee_relay) and ee_std_u>0 are mutually exclusive")
-    if relay_on:
-        assert conductance_slow and split_exc, "FCXR relay requires a full_conductance split-excitation membrane"
 
     # ---- A1c: DYNAMIC GLOBAL FEEDBACK RESTRAINT (default OFF; gated on feedback_gain>0 -> bit-parity;
     # no alloc / no RNG / no float touch on the gain=0 path). I_global = feedback_gain * EMA_Hz(global E
@@ -249,11 +294,51 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
     # OFF (early_stop_runaway=False) -> the block below never runs -> no behaviour change.
     _es_alpha = 1.0 - np.exp(-dt / 20.0)                 # 20ms EMA (matches runner _smooth win_ms=20)
     _es_ema = 0.0; _es_dur = int(round(es_dur_ms / dt)); _es_run = 0; _stop_t = nsteps
+    # ZM-ITX: keep recording a bounded tail AFTER detection so the state that was
+    # entered can be characterised. _post_steps=0 -> the break fires on the same step
+    # as before -> byte parity.
+    _post_steps = int(round(float(post_runaway_record_ms) / dt))
+    if _post_steps < 0:
+        raise ValueError('post_runaway_record_ms must be non-negative')
+    _detect_t = None
     spk_t = []; spk_i = []
     ras_keepE = rng.choice(NE, size=min(80, NE), replace=False)
     ras_keepI = NE + rng.choice(NI, size=min(20, NI), replace=False)
     ras_keep = np.concatenate([ras_keepE, ras_keepI])
     ras_mask = np.zeros(N, dtype=bool); ras_mask[ras_keep] = True
+    # ---- ZM-ITX resume. Placed AFTER the recorder RNG draws above so the
+    # restored bit-generator state overwrites whatever the setup consumed; that
+    # is what makes the continuation exact rather than merely similar. ----
+    _resume_step = 0
+    if resume_state is not None:
+        from checkpoint import restore_external_drive, restore_slow
+        if not np.isclose(float(resume_state["absolute_time_ms"]),
+                          float(time_offset_ms), atol=1e-9):
+            raise ValueError(
+                "time_offset_ms does not continue the checkpoint clock")
+        if resume_state["ring_sE"].shape != ring_sE.shape:
+            raise ValueError("checkpoint delay-ring shape differs from this network")
+        if bool(resume_state["track_rec"]) != bool(track_rec):
+            raise ValueError("checkpoint track_rec differs from this run")
+        V[:] = resume_state["V"]; ref[:] = resume_state["ref"]
+        s_E[:] = resume_state["s_E"]; I_E = np.array(resume_state["I_E"], copy=True)
+        s_I[:] = resume_state["s_I"]; I_I = np.array(resume_state["I_I"], copy=True)
+        ring_sE[:] = resume_state["ring_sE"]; ring_sI[:] = resume_state["ring_sI"]
+        xi = float(resume_state["xi"])
+        rng.bit_generator.state = resume_state["rng_state"]
+        ras_keep = np.array(resume_state["ras_keep"], copy=True)
+        ras_mask = np.zeros(N, dtype=bool); ras_mask[ras_keep] = True
+        _es_ema = float(resume_state["es_ema"]); _es_run = int(resume_state["es_run"])
+        if track_rec:
+            s_E_rec[:] = resume_state["s_E_rec"]
+            I_E_rec = np.array(resume_state["I_E_rec"], copy=True)
+        restore_slow(resume_state, slow)
+        restore_external_drive(resume_state, external_e_rate_drive)
+        _resume_step = int(resume_state["step"])
+    _ckpt_steps = set() if checkpoint_steps is None else {int(v) for v in checkpoint_steps}
+    if _ckpt_steps and checkpoint_sink is None:
+        raise ValueError("checkpoint_steps requires a checkpoint_sink")
+
     # ---- NEW recorders: spread readout + distinct-neuron active fraction ----
     spk_inside = np.zeros(nsteps)
     spk_outside = np.zeros(nsteps)
@@ -281,7 +366,19 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
 
     t0 = time.time()
     for t in range(nsteps):
-        tm = t * dt
+        _abs_step = _resume_step + t
+        if _abs_step in _ckpt_steps:                 # top of step, before any RNG draw
+            from checkpoint import capture
+            checkpoint_sink(_abs_step, capture(
+                step=_abs_step, absolute_time_ms=time_offset_ms + t * dt,
+                V=V, ref=ref, s_E=s_E, I_E=I_E, s_I=s_I, I_I=I_I,
+                ring_sE=ring_sE, ring_sI=ring_sI, xi=xi, rng=rng,
+                ras_keep=ras_keep, es_ema=_es_ema, es_run=_es_run,
+                track_rec=track_rec,
+                s_E_rec=(s_E_rec if track_rec else None),
+                I_E_rec=(I_E_rec if track_rec else None),
+                slow=slow, external_drive=external_e_rate_drive))
+        tm = time_offset_ms + t * dt
         # ----- external homogeneous Poisson rate (Eq 6) -----
         xi = ou_a * xi + ou_b * rng.standard_normal()
         nu_now = nu_signal_fn(tm) + xi
@@ -291,7 +388,7 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         # ----- synaptic gating s: decay, recurrent arrivals, external -----
         s_E *= decay_sE
         s_I *= decay_sI
-        slot = t % M
+        slot = _abs_step % M
         if track_rec:
             # HARD CONSTRAINT: read ring_sE[slot] HERE, BEFORE the next line clears it (ring_sE[slot]=0.0).
             # Moving this read after the clear makes I_E_rec read 0 -> divisive term silently no-ops.
@@ -303,6 +400,14 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
             x_dep += (1.0 - x_dep) * x_rec_f                 # M1: recover availability toward 1 each step
         # ===================== KICK: the only change vs model.simulate =====================
         nu_vec = np.full(N, max(nu_now, 0.0))
+        if external_e_rate_drive is not None:
+            delta_rate = np.asarray(external_e_rate_drive.step(tm), float)
+            if delta_rate.shape != (NE,) or not np.isfinite(delta_rate).all():
+                raise ValueError("external E rate drive must return finite shape (NE,)")
+            raw_e_rate = nu_vec[:NE] + delta_rate
+            external_rate_clip_count += int(np.count_nonzero(raw_e_rate < 0.0))
+            external_rate_sample_count += int(NE)
+            nu_vec[:NE] = np.maximum(raw_e_rate, 0.0)
         if tk <= tm < tk + DUR_KICK:
             nu_vec[kick_mask] += KICK_BOOST          # extra external rate, units 1/ms
         if t_kick2 is not None and t_kick2 <= tm < t_kick2 + DUR_KICK:
@@ -316,17 +421,19 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         I_I = s_I + (I_I - s_I) * decay_II
         if track_rec:
             I_E_rec = s_E_rec + (I_E_rec - s_E_rec) * decay_IE
+        if pathway_trace_on and t % pathway_trace_stride == 0:
+            index = pathway_trace_count
+            pathway_time_ms[index] = tm
+            pathway_recurrent_E_to_E_mean[index] = np.mean(I_E_rec[:NE])
+            pathway_recurrent_E_to_I_mean[index] = np.mean(I_E_rec[NE:])
+            pathway_GABA_to_E_mean[index] = np.mean(I_I[:NE])
+            pathway_trace_count += 1
         if lfp_trace is not None:                       # current-based LFP at custom sites
             lfp_trace[t] = lfp_recorder.sample(I_E, I_I)
 
         # slow layer off (slow=None)
         if slow is not None:
-            if conductance_slow:
-                if split_exc:   # FCXR full conductance: pass the recurrent AMPA component for the ff/rec split
-                    cond_drive, cond_g_rel, cond_g_rev = slow.membrane_terms(I_E, I_I, labels, I_E_rec=I_E_rec)
-                else:
-                    cond_drive, cond_g_rel, cond_g_rev = slow.membrane_terms(I_E, I_I, labels)
-            elif track_rec:
+            if track_rec:
                 I_net = slow.apply_currents(I_E, I_I, labels, I_E_rec)
             else:
                 I_net = slow.apply_currents(I_E, I_I, labels)
@@ -347,17 +454,7 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         ref -= 1
         np.maximum(ref, 0, out=ref)
         free = ref == 0
-        if conductance_slow:
-            # Exact exponential update for
-            #   tau_m dV/dt = -V + drive + sum_k g_k(E_k - V).
-            # cond_g_rel is sum(g_k/g_leak); cond_g_rev is sum(g_k/g_leak*E_k).
-            # I cells receive g=0 and cond_drive=I_E-I_I, hence remain on the literal current formula.
-            denom = 1.0 + cond_g_rel
-            V_inf = (cond_drive + cond_g_rev) / denom
-            Vtmp = V_inf + (V - V_inf) * decay_V ** denom
-            # Preserve the literal current arithmetic for I cells (the conductance protocol is E-only).
-            Vtmp[~is_E] = cond_drive[~is_E] + (V[~is_E] - cond_drive[~is_E]) * decay_V[~is_E]
-        elif slow is not None:
+        if slow is not None:
             # M4-3A conductance a-shunt (form A). uses_shunt() is SpatialSlowField-only (Task 4); the
             # OTHER "slow" implementers (FrozenSlowVars/SlowVars, RegionalResource) have no a-shunt
             # concept, so hasattr guards them onto the literal parity path below (plan-correction for
@@ -380,6 +477,10 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                                  shunt_gaba=shunt_gaba, e_gaba=e_gaba, g_gaba_scale=g_gaba_scale)
         V = np.where(free, Vtmp, p.V_reset)
         spk = free & (V >= (V_th_eff if np.isscalar(V_th_eff) else V_th_eff))
+        if forced_spike_step is not None and t == forced_spike_step:
+            forced_spike_collision_count = int(np.count_nonzero(
+                spk & forced_spike_mask))
+            spk[forced_spike_mask] = True
         V[spk] = p.V_reset
         ref[spk] = ref_steps[spk]
 
@@ -403,7 +504,9 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         if early_stop_runaway:                                       # runaway detected -> break before the O(N) scatter
             _es_ema += _es_alpha * (rate_E[t] / NE / dt * 1e3 - _es_ema)   # 20ms-EMA per-neuron rate (Hz)
             _es_run = _es_run + 1 if _es_ema >= es_thresh_hz else 0
-            if _es_run >= _es_dur:
+            if _detect_t is None and _es_run >= _es_dur:
+                _detect_t = t + 1
+            if _detect_t is not None and t + 1 >= _detect_t + _post_steps:
                 _stop_t = t + 1
                 if dump_ee_std_trace:            # break frame is KEPT (_stop_t=t+1) -> write its trace, else phantom 0
                     _rec_xdep(t)                 # (pre-depletion: this frame's O(N) scatter is skipped by design)
@@ -438,25 +541,21 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                     if ee_std_on:
                         # M1: E->E edges scaled by the presynaptic availability at spike time (x_j(t-));
                         # E->I edges untouched. Then deplete the firers (vesicle use): x_j(t+)=x_j*(1-U).
-                        x_per_edge = np.repeat(x_dep[spE], cnt)
+                        x_source = ee_std_source_availability(
+                            x_dep, spE, ee_std_mode,
+                        )
+                        x_per_edge = np.repeat(x_source, cnt)
                         w_eff = ee_std_apply(a_w[idx], a_dst[idx], x_per_edge, NE)
-                        np.add.at(ring_sE, ((t + a_dly[idx]) % M, a_dst[idx]), w_eff)
+                        np.add.at(ring_sE, ((_abs_step + a_dly[idx]) % M, a_dst[idx]), w_eff)
                         x_dep[spE] *= (1.0 - ee_std_u)
-                    elif relay_on:
-                        # FCXR: scale E->E edges by the persistence-gated relay availability x_j(t-) that
-                        # slow.step() snapshotted BEFORE updating y/x this frame; E->I edges untouched. No
-                        # per-spike depletion here -- x dynamics live entirely in the slow protocol.
-                        x_per_edge = np.repeat(slow.ee_relay_send[spE], cnt)
-                        w_eff = ee_std_apply(a_w[idx], a_dst[idx], x_per_edge, NE)
-                        np.add.at(ring_sE, ((t + a_dly[idx]) % M, a_dst[idx]), w_eff)
                     else:
-                        np.add.at(ring_sE, ((t + a_dly[idx]) % M, a_dst[idx]), a_w[idx])
+                        np.add.at(ring_sE, ((_abs_step + a_dly[idx]) % M, a_dst[idx]), a_w[idx])
             if spI.size:
                 st = g_indptr[spI]; cnt = g_indptr[spI + 1] - st; tot = int(cnt.sum())
                 if tot:
                     idx = (np.arange(tot) - np.repeat(np.cumsum(cnt) - cnt, cnt)
                            + np.repeat(st, cnt))
-                    np.add.at(ring_sI, ((t + g_dly[idx]) % M, g_dst[idx]), g_w[idx])
+                    np.add.at(ring_sI, ((_abs_step + g_dly[idx]) % M, g_dst[idx]), g_w[idx])
 
         if verbose and (t % max(1, nsteps // 5) == 0):
             print(f"  sim {t}/{nsteps}  ({tm:.0f} ms)  "
@@ -482,21 +581,48 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
     rate_E_hz = rate_E / NE / dt * 1e3
     rate_I_hz = rate_I / NI / dt * 1e3
     res = dict(
-        times=np.arange(nsteps) * dt,
-        runaway_early_stop_ms=(None if _stop_t >= (int(round(p.T / dt))) else round(_stop_t * dt, 1)),
+        times=time_offset_ms + np.arange(nsteps) * dt,
+        runaway_early_stop_ms=(
+            None if _detect_t is None else round(time_offset_ms + _detect_t * dt, 1)),
         rate_E=rate_E_hz, rate_I=rate_I_hz,
         spk_inside=spk_inside, spk_outside=spk_outside,
         E_spk_bool=E_spk_bool,
         n_inside=int(kick_mask.sum()), n_outside=int(outside_mask.sum()),
         NE=NE, nu_theta=nu_theta, wall_s=time.time() - t0,
+        forced_spike_step=forced_spike_step,
+        forced_spike_requested_count=(
+            0 if forced_spike_step is None else int(forced_spike_mask.sum())),
+        forced_spike_collision_count=int(forced_spike_collision_count),
         lfp_trace=lfp_trace,                                    # (nsteps, n_sites) or None
         lfp_sites=(None if lfp_recorder is None else lfp_recorder.sites),
+        external_e_rate_drive=(
+            None if external_e_rate_drive is None else {
+                "negative_rate_clip_count": int(external_rate_clip_count),
+                "rate_sample_count": int(external_rate_sample_count),
+                "negative_rate_clip_fraction": float(
+                    external_rate_clip_count / max(external_rate_sample_count, 1)
+                ),
+            }
+        ),
     )
+    res["post_runaway_recorded_ms"] = (
+        0.0 if _detect_t is None else round((nsteps - _detect_t) * dt, 1))
     if dump_i_spikes:
         res["I_spk_bool"] = I_spk_bool
     if dump_drive:
         res["I_E_peak"] = I_E_peak
         res["I_I_peak"] = I_I_peak
+    if pathway_trace_on:
+        res["pathway_trace"] = {
+            "time_ms": pathway_time_ms[:pathway_trace_count],
+            "recurrent_E_to_E_mean": pathway_recurrent_E_to_E_mean[
+                :pathway_trace_count
+            ],
+            "recurrent_E_to_I_mean": pathway_recurrent_E_to_I_mean[
+                :pathway_trace_count
+            ],
+            "GABA_to_E_mean": pathway_GABA_to_E_mean[:pathway_trace_count],
+        }
     if fb_dyn and dump_fb:
         res["I_global_trace"] = I_global_trace                  # (nsteps,) the per-step scalar I_global
     elif fb_static and dump_fb:

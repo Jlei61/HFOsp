@@ -31,6 +31,10 @@ MONTAGE_TREES = {
         geo="results/spatial_modulation/propagation_geometry_broad/observation_readout/real_subjects"),
 }
 
+GRADIENT_FIELD_ROOT = (
+    "results/interictal_propagation_masked/template_gradient_fields/per_subject"
+)
+
 
 def load_swap_endpoints(subject, montage, root="."):
     """Source/sink swap-k nodes from the montage-assigned masked rank_displacement.
@@ -82,6 +86,61 @@ def template_source_foci(subject, montage, k_early=3, root="."):
     if missing:
         raise ValueError(f"template_source_foci: {missing} not in t_a geometry")
     return m, core_a, core_b
+
+
+def gradient_shared_template_foci(subject, k_early=3, root="."):
+    """Frozen shared gradient-plane montage and TA/TB early-contact cores.
+
+    This is the coordinate contract used by the paper-ready gradient-axis
+    figure.  It consumes the frozen field-model points directly, including the
+    stored physical-mm scale and the deterministic transverse display sign;
+    no axis or contact order is refitted here.
+    """
+    path = os.path.join(root, GRADIENT_FIELD_ROOT, f"{subject}.json")
+    record = json.load(open(path))
+    if record.get("status") != "ok":
+        raise ValueError(f"gradient field unavailable for {subject}: {record.get('status')}")
+    field = record.get("interictal_field") or {}
+    planes = field.get("planes") or {}
+    models = field.get("field_models") or {}
+    if "shared" not in planes or not all(k in models for k in ("shared_a", "shared_b")):
+        raise ValueError(f"{subject} has no frozen shared TA/TB gradient plane")
+
+    names = [str(x) for x in field["contact_order"]]
+    model_a = models["shared_a"]
+    plane = planes["shared"]
+    points = np.asarray(model_a["points"], float)
+    if points.shape != (len(names), 2):
+        raise ValueError("shared gradient-plane point/contact shape mismatch")
+    scale_mm = float(plane["scale_mm"])
+    coords = points * scale_mm
+
+    # Match the frozen paper producer's geometry-only transverse sign rule.
+    w = np.asarray(plane["w"], float)
+    dominant = int(np.argmax(np.abs(w)))
+    transverse_sign = 1 if w[dominant] >= 0 else -1
+    coords[:, 1] *= transverse_sign
+    montage = VirtualMontage(
+        coords,
+        names,
+        provenance="frozen_template_gradient_shared_plane",
+    )
+    if not montage.spans_2d():
+        raise ValueError("shared gradient montage collapses to <2D")
+
+    def earliest(rank_key):
+        ranks = np.asarray(field[rank_key], float)
+        valid = np.where(np.isfinite(ranks))[0]
+        order = valid[np.argsort(ranks[valid], kind="stable")]
+        return [names[i] for i in order[: int(k_early)]]
+
+    return montage, earliest("rank_a"), earliest("rank_b"), {
+        "artifact": path,
+        "fingerprint_sha256": field.get("fingerprint_sha256"),
+        "axis_definition": "template_propagation_axis_v2 shared plane",
+        "transverse_sign": int(transverse_sign),
+        "contact_order": names,
+    }
 
 
 def load_subject_montage(subject, montage, template="t_a", root="."):

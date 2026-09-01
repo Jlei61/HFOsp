@@ -1,0 +1,89 @@
+{
+  "schema_version": "topic4_rev11_nlc_frozen_substrate_confirmation_v1",
+  "scientific_role": "development_only_data_driven_node_local_connectivity_frozen_confirmation",
+  "output_root": "results/topic4_sef_hfo/data_driven_local_connectivity_rev11_nlc/frozen_substrate_confirmation",
+  "inputs": {
+    "rev9_base_config": {"path": "config/topic4_rev9_exploratory.json", "sha256": "92b18838edf06a8445955c6623f4025010b76e4f50b39e320f1160ea27473ab9"},
+    "stage_config": {"path": "results/topic4_sef_hfo/data_driven_core_field/config/stage_config.json", "sha256": "470de45715194f357396084a9cdad2f2e6a3bae044206be394d05207f2dd9fae"},
+    "contact_contract": {"path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/contact_shaft_contract.json", "sha256": "548643b6e89b61408b8bdf4cbc1566133937204dc36e8d512049cb25762fde91"},
+    "shaft_aware_target_npz": {"path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/shaft_aware_patient_training_target.npz", "sha256": "7d11100c0f431479f8decb17b6de97575a91dcb889887ce9e2cedbbdcd54140b"},
+    "shaft_aware_floors": {"path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/shaft_aware_patient_floors.json", "sha256": "2f28c5ecd991d0a1b051337370fa7b975ecc2ce95b2f00f26a3ea88469299b94"},
+    "shaft_aware_scoring_config": {"path": "config/topic4_rev10_sa_shaft_aware.json", "sha256": "88ea711352088e32dd1d4f361dced9e8d1bd4153fc08df584c4ef02ca6a0fb57"},
+    "common_detector_audit": {"path": "results/topic4_sef_hfo/data_driven_core_field_rev9/review_audit_20260810/rev9_review_audit.json", "sha256": "6ca18234bc1ee9c06a9a4f8f6007b2d2709b138ccffef1bbc0f3dfd84c066471"},
+    "node_anchor_config": {"path": "config/topic4_rev10_sa_observation_invariant_field_v6_2.json", "sha256": "1277dbc5620fe6b1cc06d85592c46a16e22d7b7b4a4de0ca3a9e0a1f714a0719"},
+    "node_anchor_manifest": {"path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/observation_invariant_field_v6_2_final/candidate_manifest.json", "sha256": "1c30be6f2121ed54f1c42ab312a8fae334902bd0a4246fcb5bcf4e42bbbb7298"},
+    "direction_classifier_manifest": {"path": "results/topic4_sef_hfo/data_driven_core_field_rev10_d/continuous_field_kmeans_d6_3_fresh_replication/candidate_manifest.json", "sha256": "7c8a059a47abcad2544be04789d3b5a3888c6641f30e54fd10b65adf952cd5e7"},
+    "current_connectivity_audit": {"path": "results/topic4_sef_hfo/data_driven_local_connectivity_rev11_nlc/current_connectivity_audit.json", "sha256": "4abfbaba860a9a13756fb39e6b1ecdf7247991df169e0ded4316a67cedcfcf8f"},
+    "nlc3_selection_manifest": {"path": "results/topic4_sef_hfo/data_driven_local_connectivity_rev11_nlc/joint_node_connectivity_selection/candidate_manifest.json", "sha256": "501dcc6a25c6903811449fd4069f96a7c455177eda17a9a820965d11517bd955"},
+    "nlc3_selection_verdict": {"path": "results/topic4_sef_hfo/data_driven_local_connectivity_rev11_nlc/joint_node_connectivity_selection/selection_verdict.json", "sha256": "698664616382e095472276f704fe717632dc1f695e6dbd56de97343964024c4d"},
+    "spec": {"path": "docs/superpowers/specs/2026-08-14-topic4-data-driven-node-local-connectivity-frozen-confirmation-design.md", "sha256": "a6c3e9adde178290d683463c61be43f4966f942ea8e0a1c027a6033b8bcff7d5"}
+  },
+  "node_anchor": {
+    "candidate_id": "v62_density_t050",
+    "field_sha256": "5fc404a876713430b8d258a63e94e58fd9bd6e7a60234f7f34598dd49b97e060",
+    "role": "continuous full-sheet warm field; no component or contact support"
+  },
+  "field_search": {
+    "representation": "frozen_continuous_tensor_bspline",
+    "residual_log_rms_amplitude_range": [0.15, 0.8],
+    "component_count": null,
+    "peak_count_constraint": null,
+    "forbidden_builder_inputs": ["contact coordinates", "shaft identity", "patient events or labels", "Gaussian components, peaks, or core count"]
+  },
+  "local_connectivity_basis": {
+    "representation": "continuous_field_coupled_local_E_source_flow_v1",
+    "pathways": ["E_to_E", "E_to_I"],
+    "feature_names": ["source_field_contrast", "source_target_field_interaction", "source_field_locality", "source_target_field_locality", "source_target_flow_x", "source_target_flow_y"],
+    "E_to_E_length_scale_mm": 0.38,
+    "E_to_I_length_scale_mm": 0.25,
+    "coefficient_abs_bounds": [0.5, 0.5, 0.15, 0.15, 0.15, 0.15],
+    "local_delta_half_width": [0.15, 0.15, 0.06, 0.06, 0.06, 0.06],
+    "raw_logit_clip_abs": 0.75,
+    "topology": "frozen",
+    "delays": "frozen",
+    "incoming_weight_budget": "conserved separately for every E and I target"
+  },
+  "candidate_library": {
+    "selected_candidate_id": "joint_04_control",
+    "arms": ["node_baseline", "joint_04_ee_only", "joint_04_etoi_only", "joint_04_control"],
+    "candidate_count": 4,
+    "single_pathway_arms_are_postselection_mechanism_ablations": true
+  },
+  "fixed_spatial_ou": {
+    "mode": "local",
+    "sigma_rate_per_ms": 0.1,
+    "tau_ms": 20.0,
+    "ell_mm": 0.38,
+    "update_interval_ms": 1.0,
+    "grid_spacing_mm": 0.4,
+    "seed_offset": 500000,
+    "role": "frozen accessibility process; not optimized"
+  },
+  "search": {
+    "phase": "confirmation",
+    "arm": "frozen_node_local_connectivity_pathway_factorial_confirmation",
+    "beta": "closed",
+    "network_topology": "frozen",
+    "fit_network_seeds": [],
+    "selection_network_seeds": [],
+    "confirmation_network_seeds": [1561, 1562, 1563, 1564, 1565, 1566, 1567, 1568, 1569, 1570, 1571, 1572],
+    "simulation": {"duration_ms": 20000.0, "early_stop_runaway": true},
+    "detector": {"population_active_fraction_threshold": 0.0195703125, "role": "frozen common absolute detector"},
+    "contact_readout": {"participation_margin_fraction": 0.1, "timing_fraction": 0.5},
+    "objective": {"semantics": "FINAL_EQUAL_NETWORK_RETURNED_ONLY", "fixed_events_per_mode": 6, "fallback_events_per_mode": 3, "lse_temperature": 0.25, "minimum_joint_in_distribution_events_per_mode_per_network": 1, "support_weight": 4.0, "ood_weight": 0.5},
+    "kmeans_selection": {"minimum_networks_with_three_clean_events_per_mode": 10, "balanced_events_per_mode_per_network": 6, "bootstrap_draws": 256, "bootstrap_seed": 20260819},
+    "joint_objective": {"weakest_component_temperature": 0.15, "recruitment_weight": 0.2, "ood_weight": 0.1, "detector_occupancy_weight": 0.05, "perturbation_energy_weight": 0.02},
+    "paired_network_bootstrap": {"draws": 4096, "seed": 20260819},
+    "acceptance": {"minimum_evaluable_joint_networks": 10, "natural_alignment_q05_min": 0.5, "patient_margin_q05_min": 0.0, "edge_increment_probability_min": 0.9},
+    "hard_invalid_only": ["nonfinite", "late_runaway", "structural_contract_violation", "statistic_not_evaluable"]
+  },
+  "execution": {
+    "launcher": "systemd-run --user -> /usr/bin/nohup -> managed command",
+    "screen_max_workers": 9,
+    "wait_seconds": 300,
+    "numeric_threads_per_worker": 1,
+    "notify_on_completion": true,
+    "minimum_available_memory_gib_per_screen_worker": 8.0
+  },
+  "claim_boundary": "final patient-development static-substrate confirmation; Z/M, beta and topology are frozen, and no patient-blind, complete-clinical-waveform or ictal claim is allowed"
+}

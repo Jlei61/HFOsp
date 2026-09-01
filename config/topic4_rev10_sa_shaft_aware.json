@@ -1,0 +1,58 @@
+{
+  "schema": "topic4_rev10_sa_shaft_aware_config_v1",
+  "subject": "epilepsiae_1146",
+  "inputs": {
+    "patient_root": "/mnt/epilepsia_data/interilca_inter_results/all_data_lns/1146/all_recs",
+    "stage_config": "results/topic4_sef_hfo/data_driven_core_field/config/stage_config.json",
+    "old_rank_curve_reference": "results/topic4_sef_hfo/data_driven_core_field_stage3/joint_observable/rank_curve_reference.npz",
+    "old_training_target": "results/topic4_sef_hfo/data_driven_core_field_stage3/joint_kmeans_training_target_rev8/patient_train_kmeans_target_rev8.npz"
+  },
+  "output_root": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target",
+  "patient_split": {
+    "unit": "recording_block",
+    "heldout_fraction": 0.3,
+    "seed": 20260808
+  },
+  "embedding": {
+    "variance_fraction": 0.95,
+    "max_components": 24,
+    "reference_n_per_mode": 4096,
+    "n_directions": 64,
+    "seed": 20260811
+  },
+  "consensus": {
+    "n_init_per_seed": 20,
+    "seeds": [20260811, 20260812, 20260813, 20260814, 20260815, 20260816, 20260817, 20260818, 20260819, 20260820, 20260821, 20260822],
+    "ami_gate": 0.8
+  },
+  "floors": {
+    "event_counts_per_mode": [3, 6, 10, 20],
+    "repeats": 256,
+    "seed": 20260823,
+    "shaft_tau": 0.25,
+    "pair_tau": 0.25,
+    "profile_tau": 0.25
+  },
+  "positive_controls": {
+    "matched_event_count_per_mode": 20,
+    "repeats": 128,
+    "seed": 20260824
+  },
+  "mode_factorization_audit": {
+    "repeats": 128,
+    "max_events_per_label_per_stratum": 40,
+    "seed": 20260826
+  },
+  "readout_contract": {
+    "lfp_rx_mm": 0.13,
+    "lfp_Rr_mm": 0.278,
+    "contact_onset_margin_fraction": 0.1,
+    "contact_onset_timing_fraction": 0.5,
+    "population_detector_calibration_fraction": 0.5,
+    "population_bin_ms": 1.0,
+    "k_dir": 2,
+    "readability_part_min": 5,
+    "readable_semantics": "event-level onset extraction only",
+    "multishaft_coverage_semantics": "separate per-event recruitment endpoint"
+  }
+}

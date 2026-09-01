@@ -1,0 +1,136 @@
+{
+  "schema_version": "topic4_rev10_sa_continuous_field_canary_v1",
+  "scientific_role": "development_only_noncomponent_continuous_field_capacity",
+  "output_root": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/dual_shaft_canary",
+  "inputs": {
+    "rev9_base_config": {
+      "path": "config/topic4_rev9_exploratory.json",
+      "sha256": "92b18838edf06a8445955c6623f4025010b76e4f50b39e320f1160ea27473ab9"
+    },
+    "stage_config": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field/config/stage_config.json",
+      "sha256": "470de45715194f357396084a9cdad2f2e6a3bae044206be394d05207f2dd9fae"
+    },
+    "frozen_confirmation": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_stage3/joint_confirmation_rev8_1/final_confirmation.json",
+      "sha256": "313061cd5d3cfb6cb77342e122ebff347e4a55b38b0559775bd2c9cd42b57705"
+    },
+    "contact_contract": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/contact_shaft_contract.json",
+      "sha256": "548643b6e89b61408b8bdf4cbc1566133937204dc36e8d512049cb25762fde91"
+    },
+    "shaft_aware_target_npz": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/shaft_aware_patient_training_target.npz",
+      "sha256": "7d11100c0f431479f8decb17b6de97575a91dcb889887ce9e2cedbbdcd54140b"
+    },
+    "shaft_aware_floors": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/shaft_aware_patient_floors.json",
+      "sha256": "2f28c5ecd991d0a1b051337370fa7b975ecc2ce95b2f00f26a3ea88469299b94"
+    },
+    "sa5_summary": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/dual_shaft_canary/contact_detectability/contact_detectability_summary.json",
+      "sha256": "2d6544c513c8dc61f8eaea8bc8530a46b642899871493e4c619317e4abd2a669"
+    },
+    "rev9_common_detector_audit": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev9/review_audit_20260810/rev9_review_audit.json",
+      "sha256": "6ca18234bc1ee9c06a9a4f8f6007b2d2709b138ccffef1bbc0f3dfd84c066471"
+    }
+  },
+  "sa6f_continuous_field": {
+    "status": "DESIGN_FROZEN_AFTER_K3_REPRESENTATION_AUDIT",
+    "arm": "Node_only",
+    "field_representation": "continuous_tensor_product_cubic_bspline",
+    "component_count": null,
+    "peak_count_constraint": null,
+    "total_field_mass": "same N_core_manual level-set projection as rev8.1",
+    "edge": "off",
+    "beta": "closed",
+    "network_topology": "frozen",
+    "d_i": "same quantile_seed realization",
+    "network_seeds": [1031, 1032, 1033],
+    "simulation": {
+      "duration_ms": 400.0,
+      "forced_spike_ms": 100.0,
+      "response_window_ms": [100.0, 250.0],
+      "early_stop_runaway": true
+    },
+    "detector": {
+      "population_active_fraction_threshold": 0.0195703125,
+      "origin": "posthoc median of 12 rev9 Node thresholds; reused unchanged",
+      "role": "common exploratory canary detector"
+    },
+    "contact_readout": {
+      "participation_margin_fraction": 0.1,
+      "timing_fraction": 0.5,
+      "tie_tolerance_ms": "one envelope frame",
+      "forced_primary": "clip(packet-frame-excluded forced envelope minus paired sham envelope, 0, infinity)"
+    },
+    "forced_packet": {
+      "radius_mm": 1.0,
+      "fraction_of_E": 0.005,
+      "minimum_common_count": 20,
+      "sources": [
+        "patient_mode_A_earliest_ICL_centroid",
+        "patient_mode_B_earliest_ICL_centroid",
+        "equal_mode_earliest_SCL_centroid"
+      ]
+    },
+    "candidate_design": {
+      "degree": 3,
+      "shaft_balanced_contact_fit": true,
+      "background_anchor_contract": {
+        "spacing_mm": 2.5,
+        "minimum_distance_from_any_contact_mm": 2.0,
+        "total_fit_weight": 0.25,
+        "baseline_probability": 0.05,
+        "uses_shaft_labels": false
+      },
+      "target_ids": [
+        "uniform_contact_support",
+        "mode_A_recruitment",
+        "mode_B_recruitment",
+        "weakest_mode_recruitment",
+        "either_mode_early_support"
+      ],
+      "designs": [
+        {
+          "n_basis": 4,
+          "effective_dof_after_mass_projection": 15,
+          "role": "matched_dof_primary_vs_K3_17_parameters",
+          "roughness": [0.1, 1.0],
+          "contrast": [1.0, 2.0, 4.0]
+        },
+        {
+          "n_basis": 6,
+          "effective_dof_after_mass_projection": 35,
+          "role": "resolution_sensitivity_not_more_cores",
+          "roughness": [0.3],
+          "contrast": [2.0]
+        }
+      ],
+      "include_frozen_K3_benchmark": true,
+      "maximum_candidate_count": 37,
+      "minimum_unique_candidate_count": 10
+    },
+    "exploratory_readout": {
+      "event_count_per_patient_mode": 3,
+      "report_floor_excess_reference": 1.0,
+      "report_majority_networks": 2,
+      "hard_safety": "no runaway early stop",
+      "role": "descriptive capacity comparison without a preregistered pass gate"
+    }
+  },
+  "execution": {
+    "launcher": "systemd-run --user -> /usr/bin/nohup -> managed command",
+    "max_workers": 12,
+    "wait_seconds": 120,
+    "notify_on_completion": true
+  },
+  "forbidden": [
+    "interpret_spline_coefficients_as_cores",
+    "patient_heldout_score",
+    "beta",
+    "edge_recalibration",
+    "topology_expansion"
+  ]
+}

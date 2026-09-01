@@ -1,0 +1,611 @@
+"""Re-evaluate preselected rev6 field candidates on unseen network seeds.
+
+Confirmation measures transfer; it does not choose a winner. The training
+global best, final-generation best, and final CMA mean are frozen before any
+confirmation simulation. Every distance uses exactly 20 model events.
+"""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+import sys
+import tempfile
+from itertools import combinations
+from multiprocessing import Pool
+
+import numpy as np
+from sklearn.metrics import adjusted_mutual_info_score
+
+sys.path.insert(0, os.getcwd())
+sys.path.insert(0, os.path.join("src", "snn_engine"))
+from scripts.calibrate_topic4_core_field_stage3_joint_observable import (  # noqa: E402
+    DISTANCE_BOOTSTRAP_SEED,
+    HELD_OUT_FRAC,
+    N_DISTANCE_BOOTSTRAP,
+    OPPOSITION_MIN_CLUSTER_EVENTS,
+    SPLIT_SEED,
+    _matched_distance,
+    _model_curves,
+    _patient_curves,
+    _prototype_diagnostic,
+)
+from scripts.run_topic4_core_field_stage3_fit import STAGE2, _evaluate  # noqa: E402
+from scripts.run_topic4_core_field_stage3_joint_fit import (  # noqa: E402
+    MIN_PROFILE_EVENTS,
+    REFERENCE_PATH,
+    _precache_network,
+    _unique_seed_cache_jobs,
+    load_reference,
+    score_candidate,
+)
+from scripts.run_topic4_core_field_stage3_profile_round1 import axial_map  # noqa: E402
+from src.topic4_core_field_profile import (  # noqa: E402
+    PROFILE_REFERENCE_N,
+    fit_profile_modes,
+    fixed_count_indices,
+    kmeans_data_consistency,
+    rank_curve_table,
+    sliced_embedding_distance,
+    split_by_block,
+    transform_rank_curves,
+)
+from src.topic4_core_field_runner import atomic_write_json, provenance  # noqa: E402
+from src.topic4_core_field_stage3 import latent_to_theta  # noqa: E402
+
+
+ROOT = "results/topic4_sef_hfo/data_driven_core_field_stage3"
+CHECKPOINT = f"{ROOT}/joint_fit_clean_pilot_rev6/checkpoint_K3_r0.json"
+CALIBRATION = f"{ROOT}/joint_observable/calibration_summary.json"
+OUT = f"{ROOT}/joint_confirmation_pilot_rev6.json"
+CURVES_OUT = f"{ROOT}/joint_confirmation/joint_confirmation_event_profiles_rev6.npz"
+CONFIRM_SEED_POOL = tuple(range(501, 560))
+HELDOUT_REFERENCE_SEED = 20260815
+
+
+def _sha256(path):
+    with open(path, "rb") as fh:
+        return hashlib.sha256(fh.read()).hexdigest()
+
+
+def _atomic_npz(path, **arrays):
+    directory = os.path.dirname(path) or "."
+    os.makedirs(directory, exist_ok=True)
+    fd, temporary = tempfile.mkstemp(prefix=".tmp_", suffix=".npz", dir=directory)
+    os.close(fd)
+    try:
+        np.savez_compressed(temporary, **arrays)
+        os.replace(temporary, path)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
+
+
+def _kmeans_summary(row):
+    """Remove event-sized arrays while retaining every acceptance quantity."""
+    out = {}
+    for key, value in row.items():
+        if key in {"labels", "prototypes"}:
+            continue
+        if isinstance(value, np.ndarray):
+            out[key] = value.tolist()
+        elif isinstance(value, np.generic):
+            out[key] = value.item()
+        else:
+            out[key] = value
+    return out
+
+
+def _kmeans_robustness(curves, network_ids, all_network_ids,
+                       patient_prototypes, reference):
+    """Initialization and leave-one-network-out diagnostics for pooled KMeans."""
+    curves = np.asarray(curves, float)
+    network_ids = np.asarray(network_ids, int)
+    labels = [
+        fit_profile_modes(curves, reference, seed=seed)["labels"]
+        for seed in range(5)
+    ]
+    ami = [
+        float(adjusted_mutual_info_score(labels[left], labels[right]))
+        for left, right in combinations(range(len(labels)), 2)
+    ]
+    leave_one_out = []
+    for held_seed in all_network_ids:
+        selected = network_ids != int(held_seed)
+        row = kmeans_data_consistency(
+            curves[selected], patient_prototypes, reference,
+            min_cluster_events=OPPOSITION_MIN_CLUSTER_EVENTS,
+        )
+        leave_one_out.append(dict(
+            held_seed=int(held_seed),
+            n_events=int(selected.sum()),
+            cluster_counts=([] if row.get("status") != "ok" else
+                            np.asarray(row["cluster_counts"], int).tolist()),
+            support_eligible=bool(row.get("support_eligible", False)),
+            matrix_sign_consistent=bool(
+                row.get("matrix_sign_consistent", False)),
+            matched_mean=(None if row.get("matched_mean") is None else
+                          float(row["matched_mean"])),
+        ))
+    joint = [
+        row["support_eligible"] and row["matrix_sign_consistent"]
+        for row in leave_one_out
+    ]
+    return dict(
+        kmeans_initialization_seeds=list(range(5)),
+        pairwise_ami_median=float(np.median(ami)),
+        pairwise_ami_min=float(np.min(ami)),
+        pairwise_ami_max=float(np.max(ami)),
+        leave_one_network_out=leave_one_out,
+        loo_supported_data_pattern_count=int(sum(joint)),
+        loo_total=int(len(leave_one_out)),
+        scientific_role="stability diagnostic; not an additional post-hoc acceptance threshold",
+    )
+
+
+def augment_kmeans_robustness(payload, profiles_path, reference):
+    """Add zero-simulation robustness diagnostics from the hashed curve artifact."""
+    arrays = np.load(profiles_path)
+    patient_prototypes = np.asarray(arrays["patient_train_prototypes"], float)
+    seeds = [int(seed) for seed in payload["confirm_network_seeds"]]
+    for index, candidate in enumerate(payload["candidates"]):
+        curves = np.asarray(arrays[f"candidate_{index}_curves"], float)
+        network_ids = np.asarray(arrays[f"candidate_{index}_seed_ids"], int)
+        candidate["confirm"]["kmeans_data_consistency"]["robustness"] = (
+            _kmeans_robustness(
+                curves, network_ids, seeds, patient_prototypes, reference))
+    return payload
+
+
+def select_candidates(checkpoint, sheet_length):
+    """Freeze candidate roles before confirmation and merge exact duplicates."""
+    feasible = [row for row in checkpoint["history"]
+                if row.get("distance") is not None]
+    if not feasible:
+        raise ValueError("checkpoint contains no feasible candidate")
+    global_best = min(feasible, key=lambda row: row["distance"])
+    final_generation = max(int(row["generation"]) for row in checkpoint["history"])
+    final_feasible = [row for row in feasible
+                      if int(row["generation"]) == final_generation]
+    if not final_feasible:
+        raise ValueError("final generation contains no feasible candidate")
+    final_best = min(final_feasible, key=lambda row: row["distance"])
+    mean_theta = latent_to_theta(
+        checkpoint["optimizer"]["mean"], int(checkpoint["K"]), sheet_length)
+
+    raw = [
+        ("training_global_best", np.asarray(global_best["theta"], float), global_best),
+        ("final_generation_best", np.asarray(final_best["theta"], float), final_best),
+        ("final_optimizer_mean", np.asarray(mean_theta, float), None),
+    ]
+    selected = []
+    for role, theta, source in raw:
+        duplicate = next((row for row in selected
+                          if np.array_equal(theta, np.asarray(row["theta"]))), None)
+        if duplicate is not None:
+            duplicate["roles"].append(role)
+            continue
+        selected.append(dict(
+            candidate_id=f"candidate_{len(selected)}",
+            roles=[role],
+            theta=theta.tolist(),
+            theta_sha256=hashlib.sha256(theta.astype("<f8").tobytes()).hexdigest(),
+            training=(None if source is None else dict(
+                generation=int(source["generation"]),
+                distance=float(source["distance"]),
+                n_usable=int(source["n_usable"]),
+                seeds=[int(seed) for seed in source["seeds"]],
+            )),
+        ))
+    return selected
+
+
+def confirmation_seeds(checkpoint, n_confirm):
+    fit_seeds = {int(seed) for row in checkpoint["history"] for seed in row["seeds"]}
+    selected = [seed for seed in CONFIRM_SEED_POOL if seed not in fit_seeds][
+        :int(n_confirm)]
+    if len(selected) != int(n_confirm) or set(selected) & fit_seeds:
+        raise ValueError("could not construct an independent confirmation seed pool")
+    return selected, sorted(fit_seeds)
+
+
+def evaluation_errors(raw, candidates, seeds):
+    """Attach candidate and network identity to every caught worker error."""
+    rows = []
+    for index, row in enumerate(raw):
+        if "error" not in row:
+            continue
+        candidate_index, seed_index = divmod(index, len(seeds))
+        rows.append(dict(
+            candidate_id=candidates[candidate_index]["candidate_id"],
+            roles=candidates[candidate_index]["roles"],
+            seed=int(seeds[seed_index]),
+            error=str(row["error"]),
+        ))
+    return rows
+
+
+def _distance_to_target(curves, reference, target_z, n_events=MIN_PROFILE_EVENTS):
+    index = fixed_count_indices(len(curves), n_events)
+    if index is None:
+        return None
+    z = transform_rank_curves(np.asarray(curves)[index], reference)
+    value = sliced_embedding_distance(z, target_z, reference["directions"])
+    return None if not np.isfinite(value) else float(value)
+
+
+def _bootstrap_to_target(curves, reference, target_z, seed,
+                         n_events=MIN_PROFILE_EVENTS,
+                         n_bootstrap=N_DISTANCE_BOOTSTRAP):
+    curves = np.asarray(curves, float)
+    if len(curves) < int(n_events):
+        return None
+    rng = np.random.default_rng(int(seed))
+    values = np.asarray([
+        sliced_embedding_distance(
+            transform_rank_curves(
+                curves[rng.choice(len(curves), size=int(n_events), replace=False)],
+                reference),
+            target_z,
+            reference["directions"],
+        )
+        for _ in range(int(n_bootstrap))
+    ])
+    return dict(n_events=int(n_events), n_bootstrap=int(n_bootstrap), seed=int(seed),
+                median=float(np.median(values)),
+                p05=float(np.quantile(values, 0.05)),
+                p95=float(np.quantile(values, 0.95)))
+
+
+def _posthoc_diagnostic(curves, reference):
+    row = _prototype_diagnostic(curves, reference)
+    row.pop("prototypes", None)
+    return row
+
+
+def _control_curve_sets(calibration, patient_heldout, axial, grid):
+    curves = dict(patient_heldout=patient_heldout)
+    for key in ("hand_placed_two_cores", "stage2_filament"):
+        curves[key] = _model_curves(
+            calibration["inputs"]["model_paths"][key], axial, grid)
+    return curves
+
+
+def _control_distributions(curves, reference):
+    out = {}
+    for index, (key, values) in enumerate(curves.items()):
+        row = _matched_distance(
+            values, reference, MIN_PROFILE_EVENTS,
+            DISTANCE_BOOTSTRAP_SEED + 20 + index)
+        row.pop("values")
+        out[key] = row
+    return out
+
+
+def reconcile_confirmation(payload):
+    """Apply held-out gates to an already completed measurement payload."""
+    controls = payload["optimization_controls_n20"]
+    rigid_best = min(
+        controls["hand_placed_two_cores"]["median"],
+        controls["stage2_filament"]["median"],
+    )
+    patient_floor_p95 = float(payload["patient_floor_train"]["p95"])
+    if "kmeans_controls" not in payload:
+        raise ValueError(
+            "confirmation payload predates the KMeans-to-data contract; rerun measurement")
+    rigid_template_match = max(
+        float(payload["kmeans_controls"][key]["matched_mean"])
+        for key in ("hand_placed_two_cores", "stage2_filament")
+    )
+    verdicts = []
+    for row in payload["candidates"]:
+        confirm = row["confirm"]
+        diagnostic = confirm["posthoc_prototypes"]
+        counts = [int(value) for value in diagnostic.get("cluster_counts", [])]
+        if len(counts) == 2 and sum(counts) > 0:
+            diagnostic["min_cluster_count"] = int(min(counts))
+            diagnostic["minority_fraction"] = float(min(counts) / sum(counts))
+            diagnostic["opposition_support_eligible"] = bool(
+                min(counts) >= OPPOSITION_MIN_CLUSTER_EVENTS)
+        else:
+            diagnostic["min_cluster_count"] = 0
+            diagnostic["minority_fraction"] = 0.0
+            diagnostic["opposition_support_eligible"] = False
+
+        train_bootstrap = confirm.get("bootstrap_distance_patient_train")
+        heldout_bootstrap = confirm.get("bootstrap_distance_patient_heldout")
+        train_median = (None if train_bootstrap is None else
+                        float(train_bootstrap["median"]))
+        heldout_median = (None if heldout_bootstrap is None else
+                          float(heldout_bootstrap["median"]))
+        corr = diagnostic.get("prototype_correlation")
+        consistency = confirm.get("kmeans_data_consistency")
+        if consistency is None:
+            raise ValueError(
+                "candidate predates the KMeans-to-data contract; rerun measurement")
+        matched_mean = consistency.get("matched_mean")
+        gates = dict(
+            no_simulation_errors=bool(confirm.get("n_failed_networks", 0) == 0),
+            enough_usable_events=bool(confirm.get("n_usable", 0)
+                                      >= payload["objective_event_count"]),
+            two_cluster_support=bool(
+                consistency.get("support_eligible", False)),
+            kmeans_matrix_sign_consistent=bool(
+                consistency.get("support_eligible", False)
+                and consistency.get("matrix_sign_consistent", False)),
+            kmeans_matches_patient_modes=bool(
+                consistency.get("support_eligible", False)
+                and consistency.get("matrix_sign_consistent", False)),
+            beats_rigid_template_match=bool(
+                consistency.get("support_eligible", False)
+                and matched_mean is not None
+                and float(matched_mean) >= rigid_template_match),
+            opposing_prototypes=bool(
+                diagnostic["opposition_support_eligible"]
+                and corr is not None and float(corr) <= -0.2),
+            better_than_rigid_control_median=bool(
+                train_median is not None and train_median < rigid_best),
+            within_patient_floor_p95=bool(
+                train_median is not None and train_median <= patient_floor_p95),
+        )
+        if not gates["no_simulation_errors"]:
+            verdict = "FAIL_CLOSED_SIMULATION_ERRORS"
+        elif not gates["enough_usable_events"]:
+            verdict = "TRANSFER_FEASIBILITY_FAIL"
+        elif not gates["two_cluster_support"]:
+            verdict = "TWO_CLUSTER_SUPPORT_FAIL"
+        elif not gates["kmeans_matches_patient_modes"]:
+            verdict = "KMEANS_DATA_PATTERN_FAIL"
+        elif not gates["beats_rigid_template_match"]:
+            verdict = "RIGID_TEMPLATE_MATCH_NOT_BEATEN"
+        elif not gates["better_than_rigid_control_median"]:
+            verdict = "RIGID_CONTROL_NOT_BEATEN"
+        elif not gates["within_patient_floor_p95"]:
+            verdict = "PATIENT_DISTRIBUTION_MISMATCH"
+        else:
+            verdict = "CONFIRMATION_SCREEN_PASS"
+        confirm["gates"] = gates
+        confirm["heldout_minus_train_bootstrap_median"] = (
+            None if train_median is None or heldout_median is None else
+            float(heldout_median - train_median))
+        confirm["verdict"] = verdict
+        verdicts.append(verdict)
+
+    payload["status"] = (
+        "UNSEEN_NETWORK_CONFIRMATION_SCREEN_PASS"
+        if any(value == "CONFIRMATION_SCREEN_PASS" for value in verdicts)
+        else "UNSEEN_NETWORK_CONFIRMATION_NO_CANDIDATE_PASSES")
+    payload["scientific_verdict"] = (
+        "No preselected candidate jointly achieves two supported KMeans modes, "
+        "the patient mode-similarity pattern, improvement over rigid controls, "
+        "and the patient floor."
+        if payload["status"].endswith("NO_CANDIDATE_PASSES") else
+        "At least one preselected candidate passes this bounded confirmation screen; "
+        "K/restart identifiability and final sufficiency gates remain pending.")
+    payload["opposition_min_cluster_events"] = OPPOSITION_MIN_CLUSTER_EVENTS
+    payload["kmeans_rigid_benchmark_matched_mean"] = rigid_template_match
+    return payload
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--checkpoint", default=CHECKPOINT)
+    parser.add_argument("--reference", default=REFERENCE_PATH)
+    parser.add_argument("--calibration", default=CALIBRATION)
+    parser.add_argument("--n-confirm", type=int, default=6)
+    parser.add_argument("--workers", type=int, default=6)
+    parser.add_argument("--out", default=OUT)
+    parser.add_argument("--curves-out", default=CURVES_OUT)
+    parser.add_argument("--reconcile-existing", action="store_true")
+    args = parser.parse_args()
+
+    if args.reconcile_existing:
+        payload = json.load(open(args.out))
+        profiles_path = payload.get("event_profiles", {}).get("path", args.curves_out)
+        if _sha256(profiles_path) != payload.get("event_profiles", {}).get("sha256"):
+            raise RuntimeError("confirmation JSON and event-profile NPZ hashes differ")
+        payload = augment_kmeans_robustness(
+            payload, profiles_path, load_reference(args.reference))
+        payload = reconcile_confirmation(payload)
+        payload["reconciliation_provenance"] = provenance()
+        atomic_write_json(payload, args.out)
+        print(f"reconciled {args.out}: {payload['status']}")
+        return
+
+    checkpoint = json.load(open(args.checkpoint))
+    cfg = json.load(open(f"{STAGE2}/config/stage_config.json"))
+    reference = load_reference(args.reference)
+    reference_file = np.load(args.reference)
+    grid = np.asarray(reference_file["grid"], float)
+    axial = axial_map()
+    calibration = json.load(open(args.calibration))
+    if _sha256(args.reference) != checkpoint["run_contract"]["reference_sha256"]:
+        raise SystemExit("checkpoint and confirmation reference hashes differ")
+    if cfg["checksum"] != checkpoint["run_contract"]["config_checksum"]:
+        raise SystemExit("checkpoint and confirmation config checksums differ")
+
+    candidates = select_candidates(checkpoint, float(cfg["engine"]["L"]))
+    seeds, fit_seeds = confirmation_seeds(checkpoint, args.n_confirm)
+    patient, blocks = _patient_curves(axial, grid)
+    train_index, heldout_index = split_by_block(blocks, HELD_OUT_FRAC, SPLIT_SEED)
+    patient_train = patient[train_index]
+    patient_heldout = patient[heldout_index]
+    patient_modes = fit_profile_modes(patient_train, reference)
+    if patient_modes["status"] != "ok":
+        raise RuntimeError("patient training data did not define two KMeans modes")
+    patient_prototypes = patient_modes["prototypes"]
+    heldout_z_all = transform_rank_curves(patient_heldout, reference)
+    rng = np.random.default_rng(HELDOUT_REFERENCE_SEED)
+    heldout_take = min(PROFILE_REFERENCE_N, len(heldout_z_all))
+    heldout_z = heldout_z_all[
+        rng.choice(len(heldout_z_all), size=heldout_take, replace=False)]
+    control_curves = _control_curve_sets(
+        calibration, patient_heldout, axial, grid)
+    controls = _control_distributions(control_curves, reference)
+    kmeans_controls_full = {
+        key: kmeans_data_consistency(
+            values, patient_prototypes, reference,
+            min_cluster_events=OPPOSITION_MIN_CLUSTER_EVENTS,
+        )
+        for key, values in control_curves.items()
+    }
+    if any(row.get("status") != "ok" for row in kmeans_controls_full.values()):
+        raise RuntimeError("a frozen KMeans control did not define two modes")
+    kmeans_controls = {
+        key: _kmeans_summary(value)
+        for key, value in kmeans_controls_full.items()
+    }
+
+    cache = os.path.join(STAGE2, "network_cache")
+    cache_jobs = _unique_seed_cache_jobs(seeds, cfg, cache)
+    with Pool(min(args.workers, len(cache_jobs)), maxtasksperchild=1) as pool:
+        cache_rows = pool.map(_precache_network, cache_jobs)
+    errors = [row for row in cache_rows if "error" in row]
+    if errors:
+        raise RuntimeError(f"confirmation network cache prewarm failed: {errors}")
+
+    jobs = [(candidate["theta"], seed, cfg, cache, int(checkpoint["K"]), 6)
+            for candidate in candidates for seed in seeds]
+    with Pool(args.workers, maxtasksperchild=1) as pool:
+        raw = pool.map(_evaluate, jobs)
+    simulation_errors = evaluation_errors(raw, candidates, seeds)
+    if simulation_errors:
+        atomic_write_json(dict(
+            status="FAIL_CLOSED_SIMULATION_ERRORS",
+            checkpoint=dict(path=args.checkpoint, sha256=_sha256(args.checkpoint)),
+            confirm_network_seeds=seeds,
+            errors=simulation_errors,
+            provenance=provenance(),
+        ), args.out)
+        raise RuntimeError(
+            f"confirmation failed closed with {len(simulation_errors)} simulation errors; "
+            f"see {args.out}")
+
+    result_rows = []
+    profile_arrays = dict(
+        grid=np.asarray(grid, np.float32),
+        patient_train_prototypes=np.asarray(patient_prototypes, np.float32),
+        patient_train_cluster_counts=np.asarray(
+            patient_modes["cluster_counts"], np.int64),
+        patient_heldout_curves=np.asarray(patient_heldout, np.float32),
+        patient_heldout_labels=np.asarray(
+            kmeans_controls_full["patient_heldout"]["labels"], np.int8),
+    )
+    for candidate_index, candidate in enumerate(candidates):
+        chunk = raw[candidate_index * len(seeds):(candidate_index + 1) * len(seeds)]
+        curve_chunks = [
+            rank_curve_table(row.get("events", []), axial, grid=grid)
+            for row in chunk
+        ]
+        curves = np.vstack(curve_chunks)
+        curve_seed_ids = np.concatenate([
+            np.full(len(values), int(seed), dtype=np.int64)
+            for seed, values in zip(seeds, curve_chunks)
+        ])
+        _, score = score_candidate(chunk, axial, reference, MIN_PROFILE_EVENTS)
+        consistency_full = kmeans_data_consistency(
+            curves, patient_prototypes, reference,
+            min_cluster_events=OPPOSITION_MIN_CLUSTER_EVENTS,
+        )
+        consistency_full["robustness"] = _kmeans_robustness(
+            curves, curve_seed_ids, seeds, patient_prototypes, reference)
+        consistency = _kmeans_summary(consistency_full)
+        profile_arrays[f"candidate_{candidate_index}_curves"] = np.asarray(
+            curves, np.float32)
+        profile_arrays[f"candidate_{candidate_index}_labels"] = np.asarray(
+            consistency_full.get("labels", []), np.int8)
+        profile_arrays[f"candidate_{candidate_index}_seed_ids"] = curve_seed_ids
+        train_bootstrap = (None if len(curves) < MIN_PROFILE_EVENTS else
+                           _matched_distance(
+                               curves, reference, MIN_PROFILE_EVENTS,
+                               DISTANCE_BOOTSTRAP_SEED + 100 + candidate_index))
+        if train_bootstrap is not None:
+            train_bootstrap.pop("values")
+        loo = []
+        for held_seed, held_row in zip(seeds, chunk):
+            keep_events = [event for seed, row in zip(seeds, chunk)
+                           if seed != held_seed and "error" not in row
+                           for event in row.get("events", [])]
+            keep_curves = rank_curve_table(keep_events, axial, grid=grid)
+            loo.append(dict(
+                held_seed=int(held_seed),
+                n_events=int(len(keep_curves)),
+                distance_patient_train=_distance_to_target(
+                    keep_curves, reference, reference["reference_z"]),
+            ))
+        result_rows.append(dict(
+            **candidate,
+            confirm=dict(
+                deterministic_distance_patient_train=score["distance"],
+                bootstrap_distance_patient_train=train_bootstrap,
+                deterministic_distance_patient_heldout=_distance_to_target(
+                    curves, reference, heldout_z),
+                bootstrap_distance_patient_heldout=_bootstrap_to_target(
+                    curves, reference, heldout_z,
+                    DISTANCE_BOOTSTRAP_SEED + 200 + candidate_index),
+                n_usable=int(len(curves)),
+                n_detected=int(score["n_detected"]),
+                n_failed_networks=int(score["n_failed"]),
+                event_count_by_seed={str(seed): int(len(row.get("events", [])))
+                                     for seed, row in zip(seeds, chunk)},
+                leave_one_network_out=loo,
+                posthoc_prototypes=_posthoc_diagnostic(curves, reference),
+                kmeans_data_consistency=consistency,
+            ),
+        ))
+
+    _atomic_npz(args.curves_out, **profile_arrays)
+    output = reconcile_confirmation(dict(
+        status="UNSEEN_NETWORK_CONFIRMATION_MEASUREMENT_COMPLETE",
+        scientific_role=("candidate transfer screen; candidates were frozen before confirmation, "
+                         "but this is not K/restart identifiability or lifecycle acceptance"),
+        checkpoint=dict(path=args.checkpoint, sha256=_sha256(args.checkpoint),
+                        run_contract=checkpoint["run_contract"]),
+        reference=dict(path=args.reference, sha256=_sha256(args.reference)),
+        event_profiles=dict(path=args.curves_out, sha256=_sha256(args.curves_out),
+                            dtype="float32 curves; int8 aligned KMeans labels"),
+        patient_split=dict(unit="recording block", frac=HELD_OUT_FRAC,
+                           seed=SPLIT_SEED, n_train=int(len(train_index)),
+                           n_heldout=int(len(heldout_index)),
+                           heldout_reference_n=int(heldout_take),
+                           heldout_reference_seed=HELDOUT_REFERENCE_SEED),
+        fit_network_seeds=fit_seeds,
+        confirm_network_seeds=seeds,
+        network_cache=dict(hits=int(sum(row.get("cache_hit", False)
+                                        for row in cache_rows)),
+                           builds=int(sum(not row.get("cache_hit", False)
+                                          for row in cache_rows))),
+        objective_event_count=MIN_PROFILE_EVENTS,
+        patient_floor_train=calibration["optimization_patient_floor"],
+        optimization_controls_n20=controls,
+        kmeans_patient_train=dict(
+            n_events=int(patient_modes["n_events"]),
+            cluster_counts=np.asarray(
+                patient_modes["cluster_counts"], int).tolist(),
+            prototype_correlation=float(
+                patient_modes["prototype_correlation"]),
+        ),
+        kmeans_controls=kmeans_controls,
+        candidates=result_rows,
+        limitations=[
+            "single K=3 restart and three optimization generations",
+            "six confirmation networks do not establish K or field identifiability",
+            "event bootstrap does not model network-seed clustering; leave-one-network-out is reported separately",
+            "post-hoc prototype opposition is a falsification diagnostic and was not optimized",
+            "KMeans-to-data consistency is confirmation-only and was not optimized",
+        ],
+        provenance=provenance(),
+    ))
+    atomic_write_json(output, args.out)
+    print(f"wrote {args.out}")
+    for row in result_rows:
+        confirm = row["confirm"]
+        print(f"{row['candidate_id']} {','.join(row['roles'])}: "
+              f"n={confirm['n_usable']} train={confirm['deterministic_distance_patient_train']} "
+              f"heldout={confirm['deterministic_distance_patient_heldout']} "
+              f"prototype_r={confirm['posthoc_prototypes'].get('prototype_correlation')}")
+
+
+if __name__ == "__main__":
+    main()

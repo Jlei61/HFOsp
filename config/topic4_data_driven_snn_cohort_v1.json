@@ -1,0 +1,104 @@
+{
+  "schema_version": "topic4_data_driven_snn_cohort_v1",
+  "scientific_role": "development_cohort_patient_conditioned_continuous_node_local_connectivity",
+  "output_root": "results/topic4_sef_hfo/data_driven_snn_cohort_v1",
+  "inputs": {
+    "stable_k2_cohort_csv": "results/topic4_attractor_masked/step1_cohort_summary.csv",
+    "masked_propagation_root": "results/interictal_propagation_masked/per_subject",
+    "rank_displacement_root": "results/interictal_propagation_masked/rank_displacement/per_subject",
+    "gradient_geometry_root": "results/interictal_propagation_masked/template_gradient_fields/per_subject",
+    "epilepsiae_raw_root": "/mnt/epilepsia_data/interilca_inter_results/all_data_lns",
+    "yuquan_raw_root": "/mnt/yuquan_data/yuquan_24h_edf"
+  },
+  "patient_target": {
+    "minimum_participating_contacts": 3,
+    "minimum_contacts": 6,
+    "heldout_block_fraction": 0.3,
+    "split_seed": 20260815,
+    "kmeans_fit_max_events": 10000,
+    "kmeans_n_init": 20,
+    "kmeans_seed": 20260815,
+    "stability_seeds": [20260815, 20260816, 20260817, 20260818, 20260819],
+    "minimum_train_blocks": 3,
+    "minimum_heldout_blocks": 2,
+    "minimum_events_per_mode_per_split": 20,
+    "stored_events_per_mode_per_split": 4096,
+    "heldout_patient_margin_min": 0.0
+  },
+  "geometry": {
+    "projection": "geometry_only_pca_3d_to_2d",
+    "sheet_size_mm": 20.0,
+    "sheet_margin_mm": 2.0,
+    "minimum_matrix_rank": 2,
+    "forbidden_projection_inputs": [
+      "patient rank values",
+      "patient event labels",
+      "template direction",
+      "field peaks or core count"
+    ]
+  },
+  "shared_candidate_library": {
+    "field_representation": "continuous_full_sheet_tensor_bspline_plus_low_frequency_spectral_residual",
+    "component_count": null,
+    "peak_count_constraint": null,
+    "field_candidates": 16,
+    "field_rotations_deg": [0, 90, 180, 270],
+    "field_reflections": [false, true],
+    "local_connectivity_representation": "continuous_field_coupled_local_E_source_flow_v1",
+    "pathways": ["E_to_E", "E_to_I"],
+    "topology": "frozen",
+    "delays": "frozen",
+    "incoming_weight_budget": "conserved_per_target_and_pathway",
+    "candidate_generation_must_precede_patient_scoring": true
+  },
+  "selection": {
+    "unit": "subject",
+    "fit_network_seeds": [1661, 1662],
+    "selection_network_seeds": [1671, 1672],
+    "confirmation_network_seeds": [1681, 1682, 1683, 1684],
+    "primary_loss": "heldout_safe_train_target_weakest_mode_contact_rank_recruitment_precedence",
+    "natural_kmeans": "mandatory_secondary_endpoint",
+    "contact_permutation_nulls": 64,
+    "null_seed": 20260820
+  },
+  "canary": {
+    "subjects": [
+      "epilepsiae_1077",
+      "epilepsiae_1146",
+      "epilepsiae_590",
+      "yuquan_huanghanwen",
+      "yuquan_songzishuo",
+      "yuquan_zhangbichen"
+    ],
+    "candidate_subset": 4,
+    "duration_ms": 12000.0,
+    "minimum_subjects_with_evaluable_same_network_k2": 4
+  },
+  "formal_run": {
+    "duration_ms": 20000.0,
+    "minimum_snn_eligible_subjects": 24,
+    "minimum_subject_pass_fraction": 0.6,
+    "subject_is_independent_unit": true,
+    "patient_heldout_blocks_are_never_used_for_selection": true
+  },
+  "execution": {
+    "launcher": "systemd-run --user -> /usr/bin/nohup -> managed command",
+    "max_workers": 5,
+    "wait_seconds": 300,
+    "numeric_threads_per_worker": 1,
+    "minimum_available_memory_gib_per_worker": 8.0,
+    "notify_on_completion": true
+  },
+  "figure_contract": {
+    "subject_example": "field + MTA/MTB + same-network readout + natural KMeans",
+    "cohort_panels": [
+      "eligibility funnel",
+      "subject-level heldout patient alignment",
+      "subject-level KMeans support",
+      "matched contact-permutation null",
+      "representative Fig4-style direct readout and KMeans"
+    ],
+    "required_formats": ["png", "pdf", "json"]
+  },
+  "claim_boundary": "A positive result supports cohort-level development capacity of a shared data-driven continuous Node plus local-connectivity family. It does not establish patient-blind generalization, clinical waveform equivalence, a unique anatomical core, or seizure dynamics."
+}

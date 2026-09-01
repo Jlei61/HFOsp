@@ -1,0 +1,49 @@
+{
+  "schema_version": "topic4_rev9l_v1",
+  "scientific_role": "development_oracle_audit_no_patient_blind_claim",
+  "result_root": "results/topic4_sef_hfo/data_driven_core_field_rev9_learnability",
+  "inputs": {
+    "fit_checkpoint": "results/topic4_sef_hfo/data_driven_core_field_stage3/joint_fit_kmeans_rev8_1/checkpoint_K3_r0.json",
+    "selection": "results/topic4_sef_hfo/data_driven_core_field_stage3/joint_confirmation_rev8_1/selection.json",
+    "final_confirmation": "results/topic4_sef_hfo/data_driven_core_field_stage3/joint_confirmation_rev8_1/final_confirmation.json",
+    "final_event_profiles": "results/topic4_sef_hfo/data_driven_core_field_stage3/joint_confirmation_rev8_1/final_event_profiles.npz",
+    "profile_reference": "results/topic4_sef_hfo/data_driven_core_field_stage3/joint_observable/rank_curve_reference.npz",
+    "patient_training_target": "results/topic4_sef_hfo/data_driven_core_field_stage3/joint_kmeans_training_target_rev8/patient_train_kmeans_target_rev8.npz",
+    "patient_training_summary": "results/topic4_sef_hfo/data_driven_core_field_stage3/joint_kmeans_training_target_rev8/training_target_summary.json",
+    "rev9_factorial_summary": "results/topic4_sef_hfo/data_driven_core_field_rev9/node_edge_factorial/factorial_summary.json",
+    "rev9_factorial_arrays": "results/topic4_sef_hfo/data_driven_core_field_rev9/node_edge_factorial/factorial_summary.npz",
+    "rev9_frozen_readouts": "results/topic4_sef_hfo/data_driven_core_field_rev9/frozen_readouts.npz"
+  },
+  "l0": {
+    "weak_mode_temperature": 0.25,
+    "patient_min_events_per_block_mode": 5,
+    "bootstrap_repeats": 2000,
+    "bootstrap_seed": 20260810,
+    "heldout_scores_permitted": false
+  },
+  "l1": {
+    "simulation_ms": 400.0,
+    "forced_spike_ms": 100.0,
+    "packet_fraction_canary": [0.005, 0.01, 0.02],
+    "primary_mode_to_component_1based": {"A": 2, "B": 1},
+    "source_scan_component_1based": [1, 2, 3],
+    "n_off_field_controls": 3,
+    "arms": ["Null", "Node", "Edge", "Node+Edge"],
+    "alpha_star": 0.75
+  },
+  "network_seeds": {
+    "fit": [1001, 1002, 1003, 1004, 1005, 1006],
+    "selection": [1011, 1012, 1013],
+    "confirmation": [1021, 1022, 1023]
+  },
+  "l2": {
+    "max_full_snn_candidates": 16,
+    "component_3_is_negative_control": true,
+    "radial_beta_enabled": false
+  },
+  "execution": {
+    "max_workers": 18,
+    "launcher": "systemd-run --user -> /usr/bin/nohup",
+    "notify_on_completion": true
+  }
+}

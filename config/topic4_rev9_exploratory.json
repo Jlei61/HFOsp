@@ -1,0 +1,110 @@
+{
+  "revision": "topic4_rev9_exploratory_v1",
+  "scientific_role": "node-edge substrate exploration; not patient blind validation",
+  "inputs": {
+    "stage_config": "results/topic4_sef_hfo/data_driven_core_field/config/stage_config.json",
+    "selection": "results/topic4_sef_hfo/data_driven_core_field_stage3/joint_confirmation_rev8_1/selection.json",
+    "confirmation": "results/topic4_sef_hfo/data_driven_core_field_stage3/joint_confirmation_rev8_1/final_confirmation.json",
+    "profiles": "results/topic4_sef_hfo/data_driven_core_field_stage3/joint_confirmation_rev8_1/final_event_profiles.npz",
+    "onsets": "results/topic4_sef_hfo/data_driven_core_field_stage3/joint_confirmation_rev8_1/all_event_onset_diagnostics.npz",
+    "representative_figdata": "results/topic4_sef_hfo/data_driven_core_field_stage3/joint_confirmation_rev8_1/representative_figdata.npz",
+    "upstream_network_cache": "results/topic4_sef_hfo/data_driven_core_field/network_cache",
+    "candidate_id": "rev8_candidate_1",
+    "K": 3,
+    "theta_sha256": "35acdbb96a8cc34baba70e7aded0ca0e7bb8b8a3d594a12975a04279f5df6b21"
+  },
+  "output_root": "results/topic4_sef_hfo/data_driven_core_field_rev9",
+  "hard_stops": [
+    "node_reconstruction_mismatch",
+    "edge_structure_or_incoming_weight_violation",
+    "simulation_error_nonfinite_or_runaway_early_stop"
+  ],
+  "execution": {
+    "launcher": "systemd-run --user -> /usr/bin/nohup -> managed command",
+    "max_concurrent_response_workers": 18,
+    "worker_partition": "one arm-alpha-seed per process",
+    "memory_basis": "246 GiB available on 2026-08-10; one cached network file is about 0.53 GB"
+  },
+  "edge": {
+    "mechanism": "field_normalized_EE_pair_exp_v2",
+    "alpha_grid": [0.0, 0.25, 0.5, 1.0, 2.0, 4.0],
+    "alpha_midpoint_grid": [0.75, 1.5],
+    "beta_default": 0.0,
+    "structure_audit_seeds": [901],
+    "calibration_seeds": [901, 902, 903, 904, 905, 906],
+    "out_of_selection_and_factorial_seeds": [911, 912, 913, 914, 915, 916, 917, 918, 919, 920, 921, 922],
+    "out_of_selection_bootstrap_seed": 20260810,
+    "out_of_selection_bootstrap_repeats": 2000,
+    "incoming_E_absolute_tolerance": 1e-9,
+    "diagnostic_reference_bands": {
+      "edge_ratio": [0.25, 4.0],
+      "target_KL_median_nats": 0.05,
+      "target_KL_p99_nats": 0.2
+    }
+  },
+  "small_kick_instrument": {
+    "engine_function": "src/snn_engine/kick_probe.py::simulate_kick",
+    "kick_variable": "extra_external_Poisson_rate",
+    "kick_population": "E",
+    "spatial_kernel": "top_hat_disk",
+    "radius_mm": 1.0,
+    "kick_onset_ms": 220.0,
+    "initial_kick_onset_ms": 100.0,
+    "timing_selection_artifact": "results/topic4_sef_hfo/data_driven_core_field_rev9/node_edge_calibration/sham_onset_scan.json",
+    "network_cache_source_artifact": "results/topic4_sef_hfo/data_driven_core_field_rev9/node_edge_calibration/node_kick_canary.json",
+    "kick_duration_ms": 18.0,
+    "simulation_duration_ms": 400.0,
+    "amplitude_source": "src/snn_engine/params.py::compute_nu_theta(params)[0]",
+    "amplitude_unit": "1_per_ms",
+    "initial_amplitude_multipliers": [0.25, 0.5, 1.0],
+    "threshold_mapping_amplitude_multipliers": [0.05, 0.1, 0.2],
+    "amplitude_multipliers": [0.0125, 0.025, 0.05],
+    "response_bin_ms": 5.0,
+    "spatial_bins_per_axis": 20,
+    "candidate_windows_after_pulse_end_ms": [[0.0, 10.0], [10.0, 20.0], [20.0, 40.0]],
+    "primary_window_after_pulse_end_ms": [0.0, 10.0],
+    "signed_response": "(kick_spike_mass - sham_spike_mass) / number_of_E_cells_in_region",
+    "positive_response": "clip(signed_response, 0, infinity)",
+    "source_region": "E_cells_inside_kick_disk",
+    "downstream_region": "E_cells_outside_kick_disk",
+    "slope": "OLS_with_intercept_over_three_amplitudes",
+    "window_selection": "predefined_first_generation_window; later_windows_are_diagnostic",
+    "window_selection_amplitude_multiplier": 0.025,
+    "window_tie_break": "earliest",
+    "event_exclusion": "for_each_window_if_any_arm_event_overlaps_exclude_site_seed_from_that_window_only_and_report_imbalance",
+    "runaway_handling": "terminate_run_record_nonlinear_outcome",
+    "canary_seeds": [901, 902, 903],
+    "onset_scan_candidates_ms": [100.0, 160.0, 220.0, 280.0, 340.0],
+    "onset_selection_result": {
+      "event_free_seed_counts": [0, 1, 3, 2, 2],
+      "selected_onset_ms": 220.0,
+      "rule": "require all three Node sham seeds event-free, then lowest median interval peak and earliest tie break"
+    },
+    "origins": [
+      {"id": "component_1", "role": "field_component", "xy_mm": [3.6202140551125526, 7.054341437477716]},
+      {"id": "component_2", "role": "field_component", "xy_mm": [11.847833907651358, 3.577066400859459]},
+      {"id": "component_3", "role": "field_component", "xy_mm": [12.287567587097564, 17.19786634663256]},
+      {"id": "control_1", "role": "matched_off_field", "xy_mm": [7.054341437477716, 16.37978594488745]},
+      {"id": "control_2", "role": "matched_off_field", "xy_mm": [16.42293359914054, 11.847833907651358]},
+      {"id": "control_3", "role": "matched_off_field", "xy_mm": [17.19786634663256, 7.712432412902436]}
+    ],
+    "control_construction": "choose the lower-h of +/-90 degree rotations of each component center around sheet center on seed 901; component 3 uses the lower-mass branch"
+  },
+  "mode_readout": {
+    "primary": "frozen_rev8_nearest_centroid_in_patient_training_PCA_space",
+    "ood_quantile": 0.99,
+    "secondary": {
+      "algorithm": "KMeans",
+      "K": 2,
+      "n_init": 100,
+      "primary_random_state": 0,
+      "consensus_random_states": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    }
+  },
+  "patient_objective_development": {
+    "assignment_pool_n": 50,
+    "mode_shape_events_per_mode": 10,
+    "balanced_subset_repeats": 10,
+    "formal_status_without_new_blind_unit": "DEVELOPMENT_ONLY_NO_BLIND_UNIT"
+  }
+}

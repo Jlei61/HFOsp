@@ -1,0 +1,47 @@
+{
+  "schema_version": "topic4_rev9l_l3a_selection_sanity_v1",
+  "scientific_role": "single_event_route_surrogate_out_of_fit_sanity",
+  "inputs": {
+    "component_pair_config": {
+      "path": "config/topic4_rev9l_component_pair_edge.json",
+      "sha256": "553e787c465c1e7cea348c4fe95f3b2b116f0126a78e2ab0a7a0824fdd40c92a"
+    },
+    "l3a_fit_surrogate": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev9_learnability/relaxed_edge_oracle/network_oracle_surrogate/l3a_network_surrogate.json",
+      "sha256": "051f5ae9760cf27781f8d5cd965c9f67899251387c65fa0ef0a002c3e36a9740"
+    },
+    "selection_floor_n3": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev9_learnability/relaxed_edge_oracle/objective_floor/patient_training_descriptor_floor_n3.json",
+      "sha256": "c02cc5b147b66bae5a925e4edbdfe6df4c35cb8349ad082e7df558d8dde9e29a"
+    },
+    "selection_summary": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev9_learnability/relaxed_edge_oracle/selection_confirmation/selection_confirmation_summary.json",
+      "sha256": "3e4c8f8df18a4787b038410e444c365bda3af1b4eed4df54041e671528617ca7"
+    },
+    "l2_scientific_review": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev9_learnability/relaxed_edge_oracle/scientific_review/l2_scientific_review.json",
+      "sha256": "2b36d0cc43fa2070485d5a427b46450fd93d8652bd877e0d6a771488a661a4e3"
+    }
+  },
+  "candidate": {
+    "candidate_id": "sobol_058",
+    "selection_rule": "shared L3a minimum; tie broken by frozen L2 full fit objective then candidate id",
+    "gamma": [
+      -1.0155350531782228,
+      -0.3318278970687727,
+      1.240705541858765,
+      -0.727587996371388,
+      -0.7170692530441959,
+      1.0582844568895424
+    ]
+  },
+  "network_seeds": [1011, 1012, 1013],
+  "output_stage": "network_oracle_surrogate/selection_sanity",
+  "patient_heldout_permitted": false,
+  "execution": {
+    "max_workers": 3,
+    "wait_seconds": 120,
+    "launcher": "systemd-run --user -> /usr/bin/nohup",
+    "notify_on_completion": true
+  }
+}

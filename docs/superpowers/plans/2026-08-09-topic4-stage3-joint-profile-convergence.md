@@ -1,0 +1,159 @@
+# Topic 4 Stage 3 联合剖面与收敛计划（rev3，2026-08-09）
+
+**Spec：** `docs/superpowers/specs/2026-08-06-topic4-axis-constrained-data-driven-core-field-design.md` rev8 §9.3e。
+
+**核心问题：** 在不把双向验收门写入目标的前提下，完整逐事件剖面的联合分布能否从患者数据约束出一个
+跨网络稳定的病理场；随后同一空间场能否由局部连接性调制替代外加阈值场，并接入既有相图与有限发作生命周期合同。
+
+## 冻结边界
+
+- rev8 训练目标只用 patient-training recording blocks：`J_rev8 = D_curve + 0.5*D_mode`；
+  `D_mode` 是无监督模型 KMeans 模式矩阵到 patient-train 模式矩阵的误差。`k_dir`、人工 TA/TB 标签、
+  patient-heldout 与 §10.3 门不进入优化。
+- 每个候选的主目标固定使用 20 条 usable events；患者同构地板为 `0.287 [0.236, 0.358]`。
+  少于 20 条只走 feasibility key，超过 20 条不得凭更多事件降低经验 Wasserstein 偏差。
+- 患者侧按 recording block 留出；模型侧确认 seed 不得进入拟合。
+- 模型网络三池锁定：优化 `701--760`、选择 `761--766`、最终确认 `801--806`；候选选择完成前不得读取
+  patient held-out。
+- 第一轮旧的一维 TV 结果只作历史对照，不作 warm start 的科学证据。
+- 当前 core 是 `V_th_per_neuron` 的静态**带符号阈值调制场**：冻结异质性中约 69.5% E 细胞的
+  depth 降低阈值、30.5% 提高阈值。连接性等效版本是独立机制层，只有阈值场先稳定后才能启动。
+- 固定耦合下已有 readable 与 self-limited tradeoff；局部连接增强不得以“更多事件”为成功，必须同时检查
+  size、duration、空间自限、退出和恢复。
+
+## Task 1：联合观测量冻结（零仿真）
+
+- [x] 同码构造 31 点 normalized rank curve。
+- [x] 患者训练段拟合 8 维固定 embedding；64 投影 sliced Wasserstein。
+- [x] 已有患者/手放双核/Stage 2/Stage 3 标定。
+- [x] 四臂共同配平到 n=18；优化合同固定 n=20，并生成同构患者地板。
+- [x] Leg A 留一网络位置敏感性。
+- [x] 将 reference NPZ、summary、图和 README 纳入可复现产物检查；reference SHA256
+  `987e6b4bdfdc9b3d31485852e2eb71cd8df3ee7d92ff6eb0456c8fa04925adc1`，producer 在
+  `18c64806` 上 `tracked_modules_dirty: false` 且逐值复现。
+
+**进入 Task 2 的门：** 四项 calibration gate 全过；患者留出必须最接近；Stage 3 正相关失败必须被距离自然惩罚。
+
+## Task 2：3D landscape
+
+- [x] 左侧 7×7 网格改为真实 `x-y-score` 3D bars；缺事件格保持灰色底面，不插成虚假高地。
+- [x] 在底面保留真实电极位置，并投影学得场的 90% 质量等值线。
+- [x] 视角固定并保留原有二维 diagnostic 版本，避免透视遮掉局部最优区。
+- [x] PNG/PDF 像素、标签、遮挡和 metadata 输入合同检查。
+
+## Task 3：优化器收敛修复
+
+- [x] 先审计参数尺度：中心 mm、log-sigma、角度、weight logits 不能共用未预条件化的单位协方差。
+- [x] 新一轮使用标准化 latent decoder；禁止继续使用 clip 造成的大块平坦区。
+- [x] 对 `<20` usable events 的候选使用可审计 feasibility key（usable count、near-readable participant credit），
+  不把所有 0-event 候选压成同一个分数。
+- [ ] `K=1/2/3` 各自优化，至少 3 次独立重启；不得靠 K=3 权重饱和冒充正规嵌套比较。
+- [ ] cheap pilot 先证明 sigma 不持续发散、每代死区比例下降、best/median 有稳定改进，再开长跑。
+- [x] 把训练 global best、最后一代 best 与 CMA mean 在预先冻结的 6 张未见网络上并列重评；确认池不再选参数。
+
+**Pilot-1（工程结果，不进入科学证据）**：K=3、1 代、16 候选、2 网络。空间覆盖初始化把
+zero-usable fraction 从旧 pilot 的 62.5% 降到 12.5%，median usable events 从 0 提到 11，feasible
+fraction 从 12.5% 提到 25%，sigma `0.650→0.627`；但 best 固定-n 距离为 0.820，尚差于已有 Stage 3
+校准值 0.740。裁定为**解除死区阻断，但未证明目标收敛**；下一步只能做小规模多代/多 restart，不得直接称恢复场。
+
+**Pilot-1--3（clean convergence pilot，仍不进入科学接受）**：commit `63eeab79`，K=3 restart 0，
+每代 16 候选、2 张同代共享网络。三代 `sigma=0.627/0.607/0.584`，feasible fraction
+`25%/25%/38%`，zero-usable `12%/31%/19%`，median usable `11/9/16`，best `D_curve`
+`0.820/0.634/0.702`。第一代与 dirty engineering pilot 逐值一致，证明重建可复现；尺度和死区工程问题
+明显改善，但目标随网络池波动，尚不满足稳定收敛门。全局训练 best 的有效结构是一主一次两个紧凑团块，
+第三分量权重很小且都偏在板的一侧，**不是两端 core 恢复证据**。下一步先做固定未见网络重评，不继续堆代数。
+
+**未见网络确认（6 网络，commit `6bd7bbc8`，不再选参数）**：三候选均无执行错误且 usable events
+分别为 59/35/67。训练 global best 的患者训练/held-out 距离为 0.673/0.702，两簇 23/36 但相关
+`+0.951`；最后一代 best 为 0.640/0.663，两簇 2/33；CMA mean 为 0.776/0.795，两簇 1/66，
+其 `r=-0.464` 由单事件小簇造成，不能读成双簇恢复。按每簇至少 10 个事件的原充分性门，三者分别为
+`OPPOSITION_FAIL / TWO_CLUSTER_SUPPORT_FAIL / TWO_CLUSTER_SUPPORT_FAIL`。事件 bootstrap 的训练距离中位数
+为 0.675/0.706/0.789，均未优于 Stage 2 控制 0.627，也远高于患者地板 0.284。裁定：**死区修复有效，
+但当前三代优化没有恢复“接近患者且两个簇相反”的联合结构；不得进入连接性功能等效或 lifecycle 动态验证。**
+确认图见 `results/topic4_sef_hfo/data_driven_core_field_stage3/joint_confirmation/figures/`
+`stage3_joint_confirmation_screen.png`；左图是距离，右图是双簇支持与相反性联合门。
+
+**rev7 KMeans-data consistency 补充（用户指定 Fig. 4C 判据）**：旧确认只做了模型内部 KMeans 两原型
+相关，没有画、也没有 gate 模型 KMeans 簇与病人 KMeans 簇的一致性。现按 spec §9.3d 增加真正的
+无监督比较：patient-train、patient-heldout、每个模型候选和两个 rigid controls 分别独立拟合 K=2，
+再做 Hungarian permutation match 的 `2×2` Spearman matrix。接受必须同时满足每簇 `>=10`、matched
+cells 全正、crossed cells 全负，以及 matched mean 不弱于最佳 rigid control；旧 `r<=-0.2` 只保留为
+辅助诊断。该 gate 不进入 rev6 optimizer，避免把确认池回灌训练。
+
+**rev7 实测（同一 501--506 未见网络池，commit `a02fee81`，dirty false）**：患者 held-out 对
+patient-train 的 KMeans 匹配为 `matched mean=0.994`、`contrast=1.771`，两簇 `5652/10981`；rigid
+controls 为手放双核 `0.871`、Stage 2 filament `0.807`。training global best 虽有 `23/36` 的簇支持，
+但匹配矩阵为 `[[-0.981,+0.775],[-0.907,+0.918]]`，两个模型簇都指向 data B，`matched mean=-0.032`，
+裁定 `KMEANS_DATA_PATTERN_FAIL`。final-generation best 为 `2/33`、matched mean `0.100`；CMA mean
+为 `1/66`、matched mean `0.397`，后两者均为 `TWO_CLUSTER_SUPPORT_FAIL`。因此 Fig. 4C 判据没有挽救
+当前候选，反而把失败定位为**模式塌缩到同一个病人方向**，不是单纯距离偏高。
+五个 KMeans 初始化的 pairwise AMI 对三个候选均为 `1.000`，说明该负结果不是初始化噪声；逐一移除
+501--506 网络后，三个候选满足“簇支持 + 病人矩阵结构”的次数均为 `0/6`。LOO 在本 revision 只作
+稳定性诊断，不在看到结果后新增阈值，但它确认 training global best 的同向塌缩跨网络保留。
+
+正式核验图：`results/topic4_sef_hfo/data_driven_core_field_stage3/joint_kmeans_consistency/figures/`
+`stage3_joint_kmeans_data_consistency.png`。曲线 artifact：`joint_confirmation/`
+`joint_confirmation_event_profiles_rev6.npz`；JSON 存其 SHA256，绘图入口先验 hash 不一致即停止。
+
+**收敛门：** 至少两次重启的 held-out `D_curve` 落入彼此 bootstrap 区间；场的主要质量分量跨重启可匹配；
+独立网络确认不回退到 rigid-family best。
+
+### Task 3b：rev8 KMeans 辅助目标与 Fig. 4 双图交付
+
+- [x] 冻结 patient-train KMeans target 合同；target 不含 held-out 分数或 prototype。
+- [x] 冻结 `32` 条模式事件、每簇至少 `8` 条和 `J_rev8 = D_curve + 0.5*D_mode`。
+- [x] 实现优化/选择/最终确认三套 disjoint network seed 合同和 resume hash。
+- [x] 生成并校验 patient-train target artifact。
+- [x] 运行 K=2/3 cheap pilot；K=3 六代 23/48 双簇支持但 0/48 矩阵符号一致，确认死区已解决、目标尺度仍错配。
+- [x] 冻结 rev8.1：`J=D_curve+2*D_mode`、符号一致高层级、训练 elite warm-start；held-out 仍封存。
+- [x] 以独立目录运行 K=3 rev8.1；48 个训练候选中 6 个满足符号+训练支持，3 个还满足最终簇大小。
+- [x] 在 `761--766` 上选择并冻结唯一候选；selection JSON 记录 `patient_heldout_read=false`。
+- [x] 在 patient held-out + `801--806` 上确认：双模式与 LOO `6/6` 稳定，但未胜 rigid match、未到 patient floor。
+- [x] 用同一最终事件池生成两张正式图：Fig4A 直接 virtual-SEEG 波形；Fig4B KMeans 四块一致性核验。
+- [x] PNG/PDF、metadata、中文 README、输入 hash 与视觉 QA 全部通过；失败 verdict 已原样标记。
+
+## Task 4：阈值 core 到连接性等效 core（由 rev9 接管）
+
+**活动合同已迁移到：**
+`docs/superpowers/specs/2026-08-10-topic4-rev9-node-edge-substrate-factorization-design.md` 与
+`docs/superpowers/plans/2026-08-10-topic4-rev9-node-edge-substrate-factorization.md`。下列已完成项只保留为 rev8.1
+工程审计记录；不得直接从旧 additive prototype 开长跑。node/edge 不再称“同预算”，正式比较使用
+matched-local-response，patient optimization 还受新 blind unit 硬门约束。
+
+- [x] 记录阈值场自由参数与派生量：中心、长短轴、角度、质量、`h_i`、`V_th` 深度分布；core radius 不是单独自由参数，
+  而是混合分量 sigma 与预算投影后的派生尺度。
+- [x] 首个等效版本只调制已有 E→E recurrent gain：同一 `h_i` 调制局部 E→E，保持 postsynaptic incoming-E 总量归一，
+  避免把全局增益变化误写成局部 core。
+- [x] 对 rev8.1 冻结候选重做参数审计：两个主分量权重 `0.443/0.401`，第三分量 `0.156`；FWHM 分别
+  `3.29×2.99`、`2.55×4.36`、`1.60×1.55 mm`，面积等效半径 `2.71 mm`，不是单一自由半径。
+- [x] 明确阈值符号：按 `h` 质量 `69.1%` 降低 `V_th`、`30.9%` 升高 `V_th`；只有 `5.6%` E 细胞
+  `|ΔV_th|≥0.1 mV`，因此不得把当前场简写成全局或全-core 降阈。
+- [x] E→E 等效映射守恒预检：`alpha=0.5–10` 的逐 target incoming-E 最大误差约 `1.1e-11`；这只证明
+  工程守恒，不是动力学等效。
+- [ ] 按 rev9 plan 完成 matched-local-response calibration、四臂分解和因果 controls。
+- [ ] 通过 rev9 handoff gate 后只生成 hash-locked `h_i + alpha_EE` 交接产物，不在本分支直接改正在并行执行的
+  FCXR-LC3/LC4。历史 E→E STD 单独终止器已经是 3-seed clean no-go，只能作受限负对照，不能再作为默认恢复解。
+
+## Task 5：相图与有限生命周期接口
+
+- [x] 映射到现有合同但不混变量：静态 `h_i/alpha_EE` 是 substrate/core-support coordinate；动态
+  `D_i=1-Z_i` 是 FCXR-LC3 entry field，presynaptic `a_X` 是 relay/offset coordinate，逐细胞 adaptation 是
+  当前 LC3/LC4 termination 候选。旧 `q_core/q_global` 只保留为历史 M3/M4 坐标，不与新静态 core 等同。
+- [ ] 相图候选点必须再过 finite-pulse 生命周期：entry、bounded carrier、exit、postictal protection、return/recovery。
+- [ ] runaway、tonic plateau、只短暂下降分别保留独立状态，不合并成“发作样”。
+- [ ] synthetic readout 继续走真实事件/电极 pipeline；只作为 mechanism screen，不作患者机制证明。
+
+## 跨工作树边界
+
+- 当前分支只拥有 data-driven field、联合目标和 field→connectivity 适配器。
+- `main` 已锁定完整 lifecycle 尚未 PASS；`codex/topic4-fcxr-lc3` 工作树仍有未提交 LC3/LC4 执行改动，禁止在本线
+  修改、合并或重写。
+- 后续交接的最小合同是：field/reference/config checksum、网络位置顺序、连续 `h_i`、`alpha_EE`、逐 target
+  incoming-E 守恒审计和 paired local-response 标定。由 lifecycle 线显式消费后，才允许讨论进入、退出和恢复。
+
+## 停止规则
+
+- 新联合观测量若不能稳定区分单中段生成器，停止优化并回到观测量设计。
+- cheap pilot 若仍有 >50% 候选完全无 usable event 且连续三代不降，停止长跑。
+- 连接性版本若只提高 rate、不改善 size/duration/self-limitation/return，按历史负对照关闭，不继续扫静态增益。
+- 生命周期任一退出或恢复门失败，不进入发作机制表述。

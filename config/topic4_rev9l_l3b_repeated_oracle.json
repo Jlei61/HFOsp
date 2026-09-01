@@ -1,0 +1,57 @@
+{
+  "schema_version": "topic4_rev9l_l3b_repeated_oracle_v1",
+  "scientific_role": "repeated_event_per_network_and_shared_capacity_audit",
+  "inputs": {
+    "component_pair_config": {
+      "path": "config/topic4_rev9l_component_pair_edge.json",
+      "sha256": "553e787c465c1e7cea348c4fe95f3b2b116f0126a78e2ab0a7a0824fdd40c92a"
+    },
+    "l2_fit_summary": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev9_learnability/relaxed_edge_oracle/sobol_fit/sobol_fit_summary.json",
+      "sha256": "8a3c1c0e0be6ef02a4d319f6a6c6670f98c0eccd527fd17ed1b90a5009beaf30"
+    },
+    "patient_floor_n2": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev9_learnability/relaxed_edge_oracle/objective_floor/patient_training_descriptor_floor_n2.json",
+      "sha256": "30ffc751886721d3119d6142403dbc5946b9c69128d9a7ae2a65e0de5131b1ef"
+    },
+    "patient_floor_n3": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev9_learnability/relaxed_edge_oracle/objective_floor/patient_training_descriptor_floor_n3.json",
+      "sha256": "c02cc5b147b66bae5a925e4edbdfe6df4c35cb8349ad082e7df558d8dde9e29a"
+    },
+    "l3a_selection_sanity": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev9_learnability/relaxed_edge_oracle/network_oracle_surrogate/selection_sanity/l3a_selection_sanity.json",
+      "sha256": "34dd3267d83e9bed3900c1ff5c2d5187010cc16c333394bcd765fc5b6cc1c719"
+    },
+    "parity_canary_json": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev9_learnability/relaxed_edge_oracle/network_oracle_repeated/canary/workers/default_seed1004.json",
+      "sha256": "d2276a74e5166ae128a9389865caf41e9eac35dc4e3148b94df490b5460e7737"
+    },
+    "parity_canary_npz": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev9_learnability/relaxed_edge_oracle/network_oracle_repeated/canary/workers/default_seed1004.npz",
+      "sha256": "76dbd65036f10ffe9585a45c771af2c90de71b3e65427bfe4ecb8f86a01aeff7"
+    },
+    "parity_reference_npz": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev9_learnability/relaxed_edge_oracle/sobol_fit/workers/sobol_000_seed1004.npz",
+      "sha256": "76dbd65036f10ffe9585a45c771af2c90de71b3e65427bfe4ecb8f86a01aeff7"
+    }
+  },
+  "candidate_set": "all structurally admissible candidates in frozen L2 fit summary",
+  "network_seeds": [1004, 1005, 1006, 1007, 1008, 1009],
+  "dynamics_seeds": [31001, 31002, 31003],
+  "common_random_numbers": true,
+  "events_per_mode_per_network": 3,
+  "patient_floor_event_counts": [2, 3],
+  "minimum_usable_events_per_mode": 2,
+  "floor_policy": "match each mode to its actual readable event count and retain the readable-fraction penalty",
+  "readout_failure_objective": 100.0,
+  "output_stage": "network_oracle_repeated/fit",
+  "shared_tie_break_rule": "lowest median network objective, then lowest mean, then candidate id",
+  "patient_heldout_permitted": false,
+  "worker_expected_commit": "217f9982c07b780f870d11f32e1e39ffbdb9d29e",
+  "execution": {
+    "max_workers": 18,
+    "wait_seconds": 120,
+    "launcher": "systemd-run --user -> /usr/bin/nohup",
+    "notify_on_completion": true
+  }
+}

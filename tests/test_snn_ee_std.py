@@ -16,7 +16,12 @@ from params import Params
 from connectivity import place_neurons
 from connectivity_rot import build_connectivity_rot
 import kick_probe
-from kick_probe import simulate_kick, ee_std_recover_factor, ee_std_apply
+from kick_probe import (
+    ee_std_apply,
+    ee_std_recover_factor,
+    ee_std_source_availability,
+    simulate_kick,
+)
 
 # captured from the pre-M1-edit engine (a51e0875c3ec) on the L=6/d100/T300/seed1 fixture
 M0_BASELINE_SHA = "da5fc18c27d5340a"
@@ -41,6 +46,26 @@ def test_apply_depresses_only_EE():
     x = np.full(4, 0.25)                       # presynaptic availability per edge
     w = ee_std_apply(a_w, a_dst, x, NE)
     assert np.allclose(w, [0.25, 1.0, 0.25, 1.0])   # E targets scaled, I targets untouched
+
+
+def test_global_std_applies_exact_latent_mean_without_source_identity():
+    state = np.asarray([0.2, 0.6, 1.0, 0.8])
+    sources = np.asarray([0, 2])
+    local = ee_std_source_availability(state, sources, "local")
+    global_ = ee_std_source_availability(state, sources, "global")
+    np.testing.assert_allclose(local, [0.2, 1.0])
+    np.testing.assert_allclose(global_, [state.mean(), state.mean()])
+
+
+def test_std_mode_is_validated_only_when_std_is_active():
+    p, net, NE, NI = _net()
+    net["rng"] = np.random.default_rng(1)
+    with pytest.raises(ValueError, match="ee_std_mode"):
+        simulate_kick(
+            p, net, KICK_BOOST=0.0, t_kick=1e9,
+            V_th_per_neuron=np.full(NE + NI, 18.0),
+            ee_std_u=0.2, ee_std_tau_ms=200.0, ee_std_mode="bad",
+        )
 
 
 def test_u0_is_bit_identical_to_M0():

@@ -31,7 +31,8 @@ from src.sef_hfo_snn_adapter import snn_event_envelope       # noqa: E402
 from src.sef_hfo_events import detect_events                 # noqa: E402
 from src.sef_hfo_heterogeneity import sample_core_field      # noqa: E402
 from src.sef_hfo_subject_placement import (                  # noqa: E402
-    load_swap_endpoints, load_subject_montage, register_to_sheet, template_source_foci)
+    gradient_shared_template_foci, load_swap_endpoints, load_subject_montage,
+    register_to_sheet, template_source_foci)
 
 _spec = importlib.util.spec_from_file_location(
     "cmrun", os.path.join("scripts", "run_sef_hfo_snn_cm_spontaneous_readout.py"))
@@ -40,23 +41,111 @@ _spec.loader.exec_module(cmrun)
 read_event, valid_mask, active_fraction = cmrun.read_event, cmrun.valid_mask, cmrun.active_fraction
 per_neuron_onset = cmrun.per_neuron_onset
 DT, BIN_MS, BASELINE_MS, CAL_FRAC = cmrun.DT, cmrun.BIN_MS, cmrun.BASELINE_MS, cmrun.CAL_FRAC
-# PART_MIN/KDIR live as module globals in cmrun and are read inside read_event; we override
-# them for sparse patient electrodes (see --k-dir). Strict clean gate uses 2*k_dir.
+# PART_MIN/KDIR live as module globals in cmrun.  read_event's Python defaults
+# were bound when cmrun was imported, so subject_run also passes both values
+# explicitly below.  The readable participant floor is 2*k_dir+1.
 
 OUT = "results/topic4_sef_hfo/field_swap_subject_snn"
 
 
+def _participant_floor(k_dir):
+    k_dir = int(k_dir)
+    if k_dir < 1:
+        raise ValueError("k_dir must be positive")
+    return 2 * k_dir + 1
+
+
+def _learned_vth(core_field_dir, posE, NE, NI, reg):
+    """Per-neuron thresholds from the Stage 2 learned pathology field.
+
+    ``core_field_dir`` is a data_driven_core_field output root; the best
+    candidate of its CMA-ES checkpoint is the field that gets rendered.
+    """
+    from src.topic4_core_field import (axis_coords, build_vth, core_thresholds,
+                                       sample_core_quantiles, signed_depth)
+    from src.topic4_core_field_scoring import candidate_key
+    from src.topic4_core_field_stage2 import params_to_h
+
+    cfg = json.load(open(os.path.join(core_field_dir, "config", "stage_config.json")))
+    hist = json.load(open(os.path.join(core_field_dir, "stage2_optimization",
+                                       "checkpoint.json")))["history"]
+    best = max(hist, key=lambda x: candidate_key(x["n_dir"], x["S_rank"]))
+    e = cfg["engine"]
+    s, r = axis_coords(posE, reg["center"],
+                       (reg["sink_centroid"] - reg["source_centroid"])
+                       / np.linalg.norm(reg["sink_centroid"] - reg["source_centroid"]))
+    geom = dict(sep=float(np.linalg.norm(reg["sink_centroid"] - reg["source_centroid"])),
+                s_support=(float(s.min()) + cfg["field"]["AXIAL_MARGIN"],
+                           float(s.max()) - cfg["field"]["AXIAL_MARGIN"]),
+                M=cfg["field"]["M"], sigma_perp=e["core_r"],
+                shift_mm=cfg["field"]["SHIFT_MM"])
+    h = params_to_h(np.asarray(best["theta"], float), s, r, geom,
+                    float(cfg["N_core_manual"]))
+    d = signed_depth(core_thresholds(
+        sample_core_quantiles(NE, cfg["quantile_seed"]), e["core_mean"], e["core_std"]),
+        e["v_base"])
+    vth = build_vth(h, d, n_total=NE + NI, n_E=NE, v_base=e["v_base"])
+    return vth, dict(source=core_field_dir, config_checksum=cfg["checksum"],
+                     theta=best["theta"], train_S_rank=best["S_rank"],
+                     train_n_dir=best["n_dir"], budget_cells=float(cfg["N_core_manual"]))
+
+
+def _stage3_vth(path, posE, NE, NI, reg, L):
+    """Per-neuron thresholds from a Stage 3 free-centre mixture field.
+
+    ``path`` is a Stage 3 fit checkpoint or confirmation file; whichever it is,
+    the theta it carries is the one that was scored, so the field rendered here
+    is the field that was measured.
+    """
+    from src.topic4_core_field import (build_vth, core_thresholds,
+                                       sample_core_quantiles, signed_depth)
+    from src.topic4_core_field_stage3 import K_COMPONENTS, params_to_h
+
+    rec = json.load(open(path))
+    if "best_theta" in rec:
+        theta, fit = rec["best_theta"], rec.get("fit_value")
+    else:
+        best = min(rec["history"], key=lambda r: r["distance"])
+        theta, fit = best["theta"], best["distance"]
+    cfg = json.load(open(os.path.join(
+        "results/topic4_sef_hfo/data_driven_core_field", "config", "stage_config.json")))
+    e = cfg["engine"]
+    h = params_to_h(np.asarray(theta, float), posE, K_COMPONENTS, float(L),
+                    float(cfg["N_core_manual"]))
+    d = signed_depth(core_thresholds(
+        sample_core_quantiles(NE, cfg["quantile_seed"]), e["core_mean"],
+        e["core_std"]), e["v_base"])
+    vth = build_vth(h, d, n_total=NE + NI, n_E=NE, v_base=e["v_base"])
+    return vth, dict(source=path, theta=theta, fit_distance=fit,
+                     K=K_COMPONENTS, budget_cells=float(cfg["N_core_manual"]))
+
+
 def subject_run(subject, montage_name, lesion, L, density, drive, T,
                 core_mean, core_std, core_r, seed, target_inter_core, k_dir=2,
-                placement="template_source", k_early=3, manual_source=None, manual_sink=None):
-    # adapt the read-out estimator to sparse patient electrodes: k_dir=2 lets a 4-5 contact
-    # event get a direction sign (k_dir=3 needs >=6 participating). Strict clean gate = 2*k_dir.
+                placement="template_source", k_early=3, manual_source=None,
+                manual_sink=None, core_field=None, rep_pad_ms=None,
+                stage3_field=None):
+    # Adapt the read-out estimator to sparse patient electrodes. The endpoint
+    # estimator itself requires 2*k_dir+1 participants (5 for k_dir=2).
     cmrun.KDIR = int(k_dir)
-    cmrun.PART_MIN = 2 * int(k_dir)
-    PART_MIN = 2 * int(k_dir)
+    cmrun.PART_MIN = _participant_floor(k_dir)
+    PART_MIN = _participant_floor(k_dir)
     # core placement: 'template_source' = earliest-k of each template = the two template SOURCES at
     # the two true ends (user-corrected 2026-06-26); 'swap' = rank-displacement source/sink centroids.
-    if placement == "template_source":
+    gradient_contract = None
+    if placement == "gradient_shared":
+        m_real, _, _, gradient_contract = gradient_shared_template_foci(
+            subject, k_early,
+        )
+        # Change only the coordinate frame.  Keep the accepted model's two
+        # template-source core memberships frozen so a layout correction does
+        # not silently redefine the working point.
+        _, src_names, snk_names = template_source_foci(subject, montage_name, k_early)
+        gradient_contract["core_membership_contract"] = (
+            "accepted template_source_foci; coordinates only from gradient shared plane"
+        )
+        swap_class, decision_k = "gradient_shared_template_source", k_early
+    elif placement == "template_source":
         m_real, src_names, snk_names = template_source_foci(subject, montage_name, k_early)
         swap_class, decision_k = "template_source", k_early
     elif placement == "manual":
@@ -84,13 +173,24 @@ def subject_run(subject, montage_name, lesion, L, density, drive, T,
     def core(xy, s):
         return sample_core_field(net["pos"], is_E, xy, core_r, np.random.default_rng(s),
                                  core_mean=core_mean, core_std=core_std, base_mean=18.0)
-    if lesion == "twoend_equal":
+    if stage3_field is not None:
+        vth, learned_meta = _stage3_vth(stage3_field, net["pos"][:NE], NE, NI, reg, L)
+    elif core_field is not None:
+        # Same two-core budget and the same threshold draws, but the spatial
+        # membership comes from the learned field instead of two hand-placed
+        # disks. Reuses the Stage 2 constructors so the field rendered here is
+        # bit-for-bit the one that was scored.
+        vth, learned_meta = _learned_vth(core_field, net["pos"][:NE], NE, NI, reg)
+    elif lesion == "twoend_equal":
         cf1, cf2 = core(src_xy, seed + 7), core(snk_xy, seed + 8)
         vth = np.minimum(cf1["vth"], cf2["vth"])
+        learned_meta = None
     elif lesion == "source":
         vth = core(src_xy, seed + 7)["vth"]
+        learned_meta = None
     elif lesion == "sink":
         vth = core(snk_xy, seed + 8)["vth"]
+        learned_meta = None
     else:
         raise ValueError(lesion)
 
@@ -111,7 +211,18 @@ def subject_run(subject, montage_name, lesion, L, density, drive, T,
 
     recs = []
     for ev in events:
-        rd = read_event(env_f, fdt, msheet, valid, (ev["t_on"], ev["t_off"]), axis_unit)
+        # Pass these explicitly. Mutating cmrun.KDIR/PART_MIN does not change
+        # Python defaults already bound when read_event was defined.
+        rd = read_event(
+            env_f,
+            fdt,
+            msheet,
+            valid,
+            (ev["t_on"], ev["t_off"]),
+            axis_unit,
+            k_dir=int(k_dir),
+            part_min=PART_MIN,
+        )
         s, e = int(ev["t_on"] / bin_w), int(ev["t_off"] / bin_w)
         ep = (s + int(np.argmax(af[s:e]))) * bin_w if e > s else ev["t_on"]
         recs.append(dict(t_on=round(ev["t_on"], 1), t_off=round(ev["t_off"], 1),
@@ -120,13 +231,15 @@ def subject_run(subject, montage_name, lesion, L, density, drive, T,
                          readability=rd["readability"], ranks=rd["ranks"]))
     clean = [r for r in recs if r["n_part"] >= PART_MIN and r["sign"] is not None and r["readability"] is not None]
     fwd = [r for r in clean if r["sign"] > 0]; rev = [r for r in clean if r["sign"] < 0]
-    # softer "directional" screen: any event with a computable axis sign (needs n_part >= 2*k_dir = 6),
+    # Softer directional screen: any event with a computable axis sign
+    # (endpoint estimator needs n_part >= 2*k_dir+1).
     # below the strict clean gate -- captures whether forward/reverse exists even when events are sparse.
     directional = [r for r in recs if r["sign"] is not None]
     dir_fwd = [r for r in directional if r["sign"] > 0]; dir_rev = [r for r in directional if r["sign"] < 0]
     max_n_part = max((r["n_part"] for r in recs), default=0)
 
     out = dict(subject=subject, montage=montage_name, lesion=lesion, seed=seed,
+               learned_core_field=learned_meta,
                swap_class=swap_class, decision_k=decision_k, placement=placement,
                anchor=reg["anchor"], target_inter_core=target_inter_core, k_dir=int(k_dir),
                inter_core_sheet=round(reg["inter_core_mm_sheet"], 2), theta_deg=round(reg["theta_deg"], 1),
@@ -141,19 +254,29 @@ def subject_run(subject, montage_name, lesion, L, density, drive, T,
     # representative forward + reverse events (for the core_model_s3-style A/B panels):
     # pick the directional event with the most participating contacts (ties -> readability),
     # save its per-neuron onset field (spatial propagation gradient) + window.
-    def pick(evs):
+    def pick(evs, pad_ms=0.0):
         if not evs:
             return None
         best = max(evs, key=lambda r: (r["n_part"], r["readability"] or 0))
-        on = per_neuron_onset(spk, best["t_on"], best["t_off"], DT)
-        return dict(meta=best, onset=on.astype(np.float32))
+        # The detector's t_off is where the POPULATION rate falls back through
+        # the bar; individual cells keep being recruited past it. Padding the
+        # onset window only -- event detection, readout and scoring all still
+        # use the unpadded event -- shows how far the front actually got.
+        on = per_neuron_onset(spk, best["t_on"],
+                              min(float(T), best["t_off"] + float(pad_ms)), DT)
+        return dict(meta=best, onset=on.astype(np.float32), pad_ms=float(pad_ms))
     rep_fwd, rep_rev = pick(dir_fwd), pick(dir_rev)
+    pads = [float(x) for x in (rep_pad_ms or []) if float(x) > 0]
+    rep_fwd_pads = [pick(dir_fwd, p) for p in pads]
+    rep_rev_pads = [pick(dir_rev, p) for p in pads]
 
     # figure/cluster sidecar: rep forward + reverse events + LFP + onset fields
     fig = dict(reg=dict(source_centroid=src_xy.tolist(), sink_centroid=snk_xy.tolist(),
                         center=reg["center"].tolist(), theta_deg=reg["theta_deg"], L=L,
                         axis_unit=axis_unit.tolist(),
-                        source_names=src_names, sink_names=snk_names),
+                        source_names=src_names, sink_names=snk_names,
+                        coordinate_frame=("gradient_shared" if gradient_contract else "template_source"),
+                        gradient_contract=gradient_contract),
                contacts=np.asarray(msheet.contacts), names=np.array(msheet.names, dtype=object),
                valid=valid, lfp_trace=lfp_trace, times=times, bin_w=bin_w,
                posE=posE.astype(np.float32),
@@ -161,6 +284,11 @@ def subject_run(subject, montage_name, lesion, L, density, drive, T,
                foci=np.array([src_xy, snk_xy], float),   # two core centroids (sheet coords)
                core_r=float(core_r), core_mean=float(core_mean), theta_deg=float(reg["theta_deg"]), L=float(L),
                rep_fwd=np.array(rep_fwd, dtype=object), rep_rev=np.array(rep_rev, dtype=object))
+    if pads:
+        # extra onset windows for the event maps only; nothing else consumes them
+        fig["rep_fwd_pads"] = np.array(rep_fwd_pads, dtype=object)
+        fig["rep_rev_pads"] = np.array(rep_rev_pads, dtype=object)
+        fig["active_fraction"] = af.astype(np.float32)
     return out, fig, spk
 
 
@@ -181,11 +309,20 @@ def main():
                          "(blessed separation = sep_frac*L = 14; keeps dynamics, drops far contacts)")
     ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--k-dir", type=int, default=2, help="endpoint-centroid k_dir (2 for sparse patient electrodes)")
-    ap.add_argument("--placement", default="template_source", choices=["template_source", "swap", "manual"],
-                    help="template_source = earliest-k of each template; swap = rank-displacement source/sink; manual = user --source-core/--sink-core")
+    ap.add_argument("--placement", default="template_source", choices=["gradient_shared", "template_source", "swap", "manual"],
+                    help="gradient_shared = frozen paper gradient-plane contacts + earliest-k TA/TB cores; template_source = legacy per-template plane; swap = rank-displacement source/sink; manual = user --source-core/--sink-core")
     ap.add_argument("--k-early", type=int, default=3, help="template_source: # earliest electrodes per template core")
     ap.add_argument("--source-core", default=None, help="manual: comma-separated left-core channels, e.g. C6,C7")
     ap.add_argument("--sink-core", default=None, help="manual: comma-separated right-core channels, e.g. F5,F6")
+    ap.add_argument("--core-field", default=None,
+                    help="data_driven_core_field output root; replaces the two hand-placed "
+                         "cores with the best learned field from its Stage 2 checkpoint")
+    ap.add_argument("--stage3-field", default=None,
+                    help="Stage 3 fit checkpoint or confirmation json; renders the "
+                         "free-centre mixture field it carries")
+    ap.add_argument("--rep-pad-ms", default=None,
+                    help="comma-separated extra ms appended to the representative "
+                         "events' onset window, e.g. 60,150,300; maps only")
     ap.add_argument("--tag", default=None)
     ap.add_argument("--out", default=OUT)
     a = ap.parse_args()
@@ -197,7 +334,9 @@ def main():
     msnk = a.sink_core.split(",") if a.sink_core else None
     out, fig, _ = subject_run(a.subject, a.montage, a.lesion, a.L, a.density, a.drive, a.T,
                               a.core_mean, a.core_std, a.core_r, a.seed, a.target_inter_core, a.k_dir,
-                              a.placement, a.k_early, msrc, msnk)
+                              a.placement, a.k_early, msrc, msnk, a.core_field,
+                              [float(x) for x in a.rep_pad_ms.split(",")] if a.rep_pad_ms else None,
+                              a.stage3_field)
     json.dump(out, open(os.path.join(a.out, f"readout_{tag}.json"), "w"), indent=2)
     np.savez_compressed(os.path.join(a.out, f"figdata_{tag}.npz"), **fig)
     print(f"[{tag}] events={out['n_events']} clean(n>=7)={out['n_clean']} fwd/rev={out['clean_forward']}/{out['clean_reverse']} "

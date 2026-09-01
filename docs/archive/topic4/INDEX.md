@@ -11,6 +11,12 @@
 **SEF-HFO**（Spatial Excitability Field model for interictal HFO propagation）：
 
 - 主文档：`docs/topic4_sef_hfo.md`
+- 2026-08-31 双 core Node OOD 拟合与 EE/E->I 四臂分解：
+  `docs/archive/topic4/sef_hfo/dual_core_ood_node_pathway_factorization_2026-08-31.md`
+  （12/12 独立网络有双模式，但 OOD 0.462，完整患者事件分布未恢复；EE 为带事件产率代价的 OOD 过滤候选，E->I 为模式占用调节候选，联合效应非加性）
+- 2026-09-01 Fig4/5 统一代码合同：
+  `docs/archive/topic4/sef_hfo/topic4_data_driven_zm_fig45_integration_2026-09-01.md`
+  （Fig4 = data-driven Node + local connectivity；Fig5 = 同一冻结底物只增加 Z/M；artifact 外置且尚未锁定）
 - 2026-07-21 MZ actual-entry lifecycle R4：`docs/archive/topic4/sef_hfo/mz_actual_entry_lifecycle_closure_2026-07-21.md`。同一 regional center state 已闭合 event-5 entry、4 次 paired bursts、finite exit、真实 latch reset、M 自然释放、同一 LLL basin 与 early/late 同挑战分离；共同 20-s checkpoint 后的 recovery 与 recovered challenge 在 base/half-dt 一致，原 Segment A 为 `.125 ms` source。它是 fixed-bath three-patch hybrid existence proof，不是 smooth bifurcation、连续空间、零输入自发 onset 或 full SNN。下一门仅为 coupled local robustness + causal ablation。
 - 2026-07-21 MZ M-gated reserve coupled R3：`docs/archive/topic4/sef_hfo/mz_m_gated_reserve_coupled_canary_2026-07-21.md`。formal event-6-first gate 因真实闭环在 event 5 提前 crossing 而 clean no-go；actual-entry-aligned 诊断发现 4 次 autonomous paired returns 与 finite low-rate exit，因而解锁不重标 q 的 R4 center closure，而不是 R3 grid。
 - 2026-07-20 MZ M-gated reserve scalar/path R3：`docs/archive/topic4/sef_hfo/mz_m_gated_reserve_recovery_2026-07-20.md`。fixed-sensor/path 层形成 `80/90/100 s` 三节点 corridor，且 `tau_fast=15/20/25 s` 一致；nullcline 与 causal controls 只支持 additive M 管 exit、state-dependent q recovery 管 reset，不支持 Hopf 或 coupled lifecycle claim。

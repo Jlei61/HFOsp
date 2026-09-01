@@ -1,0 +1,28 @@
+{
+  "schema_version": "topic4_rev9l_l3b_scientific_review_v1",
+  "scientific_role": "training-only review of repeated-event finite-library capacity",
+  "inputs": {
+    "l3b_result": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev9_learnability/relaxed_edge_oracle/network_oracle_repeated/fit/l3b_repeated_fit_oracle.json",
+      "sha256": "8358589f634fdaf6ce0456821090e69750b973ebb7cd225b79ba445956204b65"
+    },
+    "patient_floor_n2": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev9_learnability/relaxed_edge_oracle/objective_floor/patient_training_descriptor_floor_n2.json",
+      "sha256": "30ffc751886721d3119d6142403dbc5946b9c69128d9a7ae2a65e0de5131b1ef"
+    },
+    "patient_floor_n3": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev9_learnability/relaxed_edge_oracle/objective_floor/patient_training_descriptor_floor_n3.json",
+      "sha256": "c02cc5b147b66bae5a925e4edbdfe6df4c35cb8349ad082e7df558d8dde9e29a"
+    },
+    "component_pair_config": {
+      "path": "config/topic4_rev9l_component_pair_edge.json",
+      "sha256": "553e787c465c1e7cea348c4fe95f3b2b116f0126a78e2ab0a7a0824fdd40c92a"
+    }
+  },
+  "baseline_candidate_id": "sobol_000",
+  "patient_heldout_permitted": false,
+  "selection_sanity_policy": "run only when shared forced capacity is supported",
+  "optimizer_policy": "run only after a known-good full shared solution exists",
+  "spontaneous_policy": "run only after forced shared capacity is supported",
+  "output": "results/topic4_sef_hfo/data_driven_core_field_rev9_learnability/relaxed_edge_oracle/network_oracle_repeated/scientific_review/l3b_scientific_review.json"
+}

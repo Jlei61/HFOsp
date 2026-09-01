@@ -1,0 +1,486 @@
+{
+  "schema_version": "topic4_data_driven_zm_ictal_transition_v1",
+  "scientific_role": "development_only_data_driven_zm_interictal_to_ictal_transition",
+  "output_root": "results/topic4_sef_hfo/data_driven_zm_ictal_transition",
+  "inputs": {
+    "frozen_substrate_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_local_connectivity_rev11_nlc/frozen_substrate_confirmation/candidate_manifest.json",
+      "sha256": "545b029d2d7947de5a27979e7166f6bc55ea2b01c64a67a9b736977ec960fcbb"
+    },
+    "zm_baseline": {
+      "path": "config/topic4_data_driven_snn_baseline_zm_v1.json",
+      "sha256": "2b9586d274b85d9e3663557b5f4dfab7ac64292817667020503d144579ff8a91"
+    },
+    "rev11_config": {
+      "path": "config/topic4_rev11_nlc_frozen_substrate_confirmation.json",
+      "sha256": "7e3ff4786a96ed5fc5b27f7b6b292eb5d7cd51fedb847f669c0e648165835df7"
+    },
+    "spec": {
+      "path": "docs/superpowers/specs/2026-08-17-topic4-data-driven-zm-ictal-transition-design.md",
+      "sha256": "11e8474fe103ff47a569cd70fd60efc2b7bc85c615c007f0858b7b214ce9cc1e"
+    },
+    "rev9_base_config": {
+      "path": "config/topic4_rev9_exploratory.json",
+      "sha256": "92b18838edf06a8445955c6623f4025010b76e4f50b39e320f1160ea27473ab9"
+    },
+    "stage_config": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field/config/stage_config.json",
+      "sha256": "470de45715194f357396084a9cdad2f2e6a3bae044206be394d05207f2dd9fae"
+    },
+    "contact_contract": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/contact_shaft_contract.json",
+      "sha256": "548643b6e89b61408b8bdf4cbc1566133937204dc36e8d512049cb25762fde91"
+    },
+    "shaft_aware_target_npz": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/shaft_aware_patient_training_target.npz",
+      "sha256": "7d11100c0f431479f8decb17b6de97575a91dcb889887ce9e2cedbbdcd54140b"
+    },
+    "shaft_aware_floors": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/shaft_aware_patient_floors.json",
+      "sha256": "2f28c5ecd991d0a1b051337370fa7b975ecc2ce95b2f00f26a3ea88469299b94"
+    },
+    "shaft_aware_scoring_config": {
+      "path": "config/topic4_rev10_sa_shaft_aware.json",
+      "sha256": "88ea711352088e32dd1d4f361dced9e8d1bd4153fc08df584c4ef02ca6a0fb57"
+    },
+    "common_detector_audit": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev9/review_audit_20260810/rev9_review_audit.json",
+      "sha256": "6ca18234bc1ee9c06a9a4f8f6007b2d2709b138ccffef1bbc0f3dfd84c066471"
+    },
+    "node_anchor_config": {
+      "path": "config/topic4_rev10_sa_observation_invariant_field_v6_2.json",
+      "sha256": "1277dbc5620fe6b1cc06d85592c46a16e22d7b7b4a4de0ca3a9e0a1f714a0719"
+    },
+    "node_anchor_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/observation_invariant_field_v6_2_final/candidate_manifest.json",
+      "sha256": "1c30be6f2121ed54f1c42ab312a8fae334902bd0a4246fcb5bcf4e42bbbb7298"
+    },
+    "direction_classifier_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_d/continuous_field_kmeans_d6_3_fresh_replication/candidate_manifest.json",
+      "sha256": "7c8a059a47abcad2544be04789d3b5a3888c6641f30e54fd10b65adf952cd5e7"
+    },
+    "current_connectivity_audit": {
+      "path": "results/topic4_sef_hfo/data_driven_local_connectivity_rev11_nlc/current_connectivity_audit.json",
+      "sha256": "4abfbaba860a9a13756fb39e6b1ecdf7247991df169e0ded4316a67cedcfcf8f"
+    },
+    "nlc3_selection_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_local_connectivity_rev11_nlc/joint_node_connectivity_selection/candidate_manifest.json",
+      "sha256": "501dcc6a25c6903811449fd4069f96a7c455177eda17a9a820965d11517bd955"
+    },
+    "nlc3_selection_verdict": {
+      "path": "results/topic4_sef_hfo/data_driven_local_connectivity_rev11_nlc/joint_node_connectivity_selection/selection_verdict.json",
+      "sha256": "698664616382e095472276f704fe717632dc1f695e6dbd56de97343964024c4d"
+    },
+    "rev11_spec": {
+      "path": "docs/superpowers/specs/2026-08-14-topic4-data-driven-node-local-connectivity-frozen-confirmation-design.md",
+      "sha256": "a6c3e9adde178290d683463c61be43f4966f942ea8e0a1c027a6033b8bcff7d5"
+    },
+    "placement_gradient_field": {
+      "path": "results/interictal_propagation_masked/template_gradient_fields/per_subject/epilepsiae_1146.json",
+      "sha256": "e46c883f4c3b7f9f31c3355ba9e289dcd65a7c9f89d1a6f989ca1796a75efa70",
+      "note": "read by src/sef_hfo_subject_placement.py to derive theta_EE and the patient axis; undeclared by the rev11-NLC frozen contract, hashed here"
+    },
+    "placement_rank_displacement": {
+      "path": "results/interictal_propagation_masked/rank_displacement/per_subject/epilepsiae_1146.json",
+      "sha256": "5134537ca908b2f151b1ff7ac6af7fe4eb8d06907b3953a97d7d8de1dace7f8e",
+      "note": "read by src/sef_hfo_subject_placement.py to derive theta_EE and the patient axis; undeclared by the rev11-NLC frozen contract, hashed here"
+    },
+    "placement_geometry_t_a": {
+      "path": "results/spatial_modulation/propagation_geometry/observation_readout/real_subjects/epilepsiae_1146_t_a.json",
+      "sha256": "61bcd9dfc8b9426643a05883a741af8b1224f618cf346297096a269f96ebb96c",
+      "note": "read by src/sef_hfo_subject_placement.py to derive theta_EE and the patient axis; undeclared by the rev11-NLC frozen contract, hashed here"
+    },
+    "placement_geometry_t_b": {
+      "path": "results/spatial_modulation/propagation_geometry/observation_readout/real_subjects/epilepsiae_1146_t_b.json",
+      "sha256": "8a286d2c3cd62e3fc6e52df47ee0fd3c349d8f8a914ec8b72e32ba0f0af88470",
+      "note": "read by src/sef_hfo_subject_placement.py to derive theta_EE and the patient axis; undeclared by the rev11-NLC frozen contract, hashed here"
+    }
+  },
+  "node_anchor": {
+    "candidate_id": "v62_density_t050",
+    "field_sha256": "5fc404a876713430b8d258a63e94e58fd9bd6e7a60234f7f34598dd49b97e060",
+    "role": "continuous full-sheet warm field; no component or contact support"
+  },
+  "local_connectivity_basis": {
+    "representation": "continuous_field_coupled_local_E_source_flow_v1",
+    "pathways": [
+      "E_to_E",
+      "E_to_I"
+    ],
+    "feature_names": [
+      "source_field_contrast",
+      "source_target_field_interaction",
+      "source_field_locality",
+      "source_target_field_locality",
+      "source_target_flow_x",
+      "source_target_flow_y"
+    ],
+    "E_to_E_length_scale_mm": 0.38,
+    "E_to_I_length_scale_mm": 0.25,
+    "coefficient_abs_bounds": [
+      0.5,
+      0.5,
+      0.15,
+      0.15,
+      0.15,
+      0.15
+    ],
+    "local_delta_half_width": [
+      0.15,
+      0.15,
+      0.06,
+      0.06,
+      0.06,
+      0.06
+    ],
+    "raw_logit_clip_abs": 0.75,
+    "topology": "frozen",
+    "delays": "frozen",
+    "incoming_weight_budget": "conserved separately for every E and I target"
+  },
+  "engine_detector": {
+    "population_active_fraction_threshold": 0.0195703125
+  },
+  "arms": {
+    "Node": "node_baseline",
+    "Node+EE": "joint_04_ee_only",
+    "Node+EtoI": "joint_04_etoi_only",
+    "Joint": "joint_04_control"
+  },
+  "zm": {
+    "mode": "z_plus_m",
+    "use_z": true,
+    "use_m": true,
+    "I_th_EI": 95.19851312666987,
+    "tau_z": 5000.0,
+    "tau_adp": 500.0,
+    "eta_m": 0.007451594355587098,
+    "trace_stride_steps": 10
+  },
+  "spatial_ou": {
+    "mode": "local",
+    "sigma_rate_per_ms": 0.1,
+    "tau_ms": 20.0,
+    "ell_mm": 0.38,
+    "update_interval_ms": 1.0,
+    "grid_spacing_mm": 0.4,
+    "seed_offset": 500000,
+    "role": "frozen accessibility process; not optimized"
+  },
+  "simulation": {
+    "duration_ms": 20000.0,
+    "early_stop_runaway": true,
+    "es_thresh_hz": 120.0,
+    "es_dur_ms": 100.0,
+    "post_runaway_record_ms": 500.0
+  },
+  "seeds": {
+    "canary": [
+      1801,
+      1802,
+      1803
+    ],
+    "formal": [
+      1811,
+      1812,
+      1813,
+      1814,
+      1815,
+      1816,
+      1817,
+      1818,
+      1819,
+      1820,
+      1821,
+      1822
+    ],
+    "parity": 1561
+  },
+  "phases": {
+    "canary_arms": [
+      "Joint",
+      "Node",
+      "Node+EE",
+      "Node+EtoI"
+    ],
+    "canary_zm_off_paired": true,
+    "phase2_arms": [
+      "Joint",
+      "Node"
+    ],
+    "phase3_latency_arms": [
+      "Node+EE",
+      "Node+EtoI"
+    ],
+    "onset_relative_checkpoints_for_arms": [
+      "Joint",
+      "Node"
+    ],
+    "phase2_continue_rule": "classify the endpoint; continue unless NO_DETECTABLE_STATE_CHANGE. The direction of the E1 change governs WORDING, not whether the pathway decomposition runs.",
+    "canary_gate_minimum_passing_networks": 2
+  },
+  "phase2_stop_rule": {
+    "role": "WORDING ONLY -- this no longer gates whether Phase 3 runs",
+    "q05_gt_0": "pre-ictal susceptibility is higher",
+    "q95_lt_0": "pre-ictal susceptibility is lower",
+    "straddles_zero": "unresolved at this n; a statement about resolution, not absence",
+    "mixed_regime_override": "whenever ANY site was excluded for igniting, a negative interval may only be reported as MIXED_REGIME -- the excluded sites are the largest responses, so the complete-case mean is biased toward zero and a negative reading is not safe"
+  },
+  "checkpoints": {
+    "baseline_ms": 2000.0,
+    "pre_ictal_offset_ms": 500.0,
+    "sensitivity_offset_ms": 1000.0,
+    "minimum_onset_for_perturbation_ms": 2500.0,
+    "minimum_onset_for_sensitivity_ms": 3500.0,
+    "baseline_discovery": {
+      "method": "src.topic4_zm_baseline_discovery.find_baseline_window",
+      "definition": "first post-burn-in 500 ms window whose population rate, h-weighted DISINHIBITION (1-z) and h-weighted adaptation m all sit inside the Z/M-off support. The two slow clauses bound the quantity that GROWS toward the transition; stating the first on z itself inverts it",
+      "burn_in_ms": 500.0,
+      "window_ms": 500.0,
+      "measured_population_rate_q95_hz": 30.6,
+      "measured_location_ms": [
+        500.0,
+        1000.0
+      ],
+      "if_not_found": "label the two states 'early transition vs pre-ictal'; the word baseline is not used",
+      "reference_construction": "shadow runs (--zm-mode shadow): z and m integrate and are recorded but never reach the membrane, so the trajectory is bit-identical to Z/M-off while the slow variables are observable. Without this the two slow clauses are untestable, because with Z/M off there is no z or m at all",
+      "measured_pooled_support": {
+        "rate_q95_hz": 30.6466,
+        "disinhibition_q95": 0.2445,
+        "m_q95": 11.7569,
+        "n_windows": 120
+      },
+      "measured_time_matched": {
+        "window_ms": [
+          500.0,
+          1000.0
+        ],
+        "rate_hz_on_vs_shadow": [
+          [
+            1.91,
+            5.21
+          ],
+          [
+            8.78,
+            8.99
+          ],
+          [
+            16.65,
+            9.57
+          ]
+        ],
+        "disinhibition_on_vs_shadow": [
+          [
+            0.0272,
+            0.03
+          ],
+          [
+            0.0315,
+            0.0307
+          ],
+          [
+            0.0299,
+            0.0277
+          ]
+        ],
+        "m_on_vs_shadow": [
+          [
+            6.56,
+            6.38
+          ],
+          [
+            7.22,
+            7.49
+          ],
+          [
+            5.71,
+            5.22
+          ]
+        ],
+        "note": "quote THESE, not the pooled q95: the pooled bound spans 20 s of z drift at tau_z = 5 s and every early window clears it easily"
+      },
+      "verdict": "all three canary seeds qualify at [500, 1000] ms; the label baseline is earned"
+    },
+    "two_second_checkpoint_is": "early_transition, NOT baseline",
+    "early_transition_evidence": {
+      "joint_median_ema_rate_1500_2000ms_hz": [
+        37.3,
+        63.6,
+        49.7
+      ],
+      "same_seed_zm_off_q95_hz": [
+        29.9,
+        30.1,
+        30.6
+      ],
+      "n_reference_windows_per_run": 40,
+      "verdict": "elevated on all three seeds"
+    }
+  },
+  "interictal_baseline_gate": {
+    "minimum_onset_ms": 2500.0,
+    "minimum_returned_events_before_onset": 3,
+    "baseline_window_ms": [
+      1500.0,
+      2000.0
+    ],
+    "reference": "same-seed Z/M-off canary runs at seeds 1801-1803",
+    "baseline_rate_percentile": 95.0,
+    "minimum_passing_canary_networks": 2
+  },
+  "repertoire_claim_gate": {
+    "name": "INTERICTAL_REPERTOIRE_RETAINED",
+    "is_run_blocker": false,
+    "rule": "conjunctive: all four clauses must hold",
+    "scope": "all returned events before onset",
+    "reference_workers": "results/topic4_sef_hfo/data_driven_local_connectivity_rev11_nlc/frozen_substrate_confirmation/workers",
+    "minimum_returned_events_before_onset": 20,
+    "maximum_ood_fraction": "q95 across the 48 reference runs",
+    "minimum_events_per_mode": 3,
+    "minimum_kmeans_balanced_alignment": "q05 across the 48 reference runs",
+    "kmeans_metric": "src.topic4_d6_natural_kmeans.best_binary_alignment -> balanced_alignment"
+  },
+  "recruitment": {
+    "bin_mm": 1.0,
+    "rate_kernel_ms": 5.0,
+    "bin_baseline_quantile": 0.99,
+    "minimum_persistence_ms": 15.0,
+    "reference_window_ms": [
+      1000.0,
+      2000.0
+    ],
+    "reference_window_rationale": "early interictal, NOT pre-onset: tau_z=5000 ms means a window 1 s before onset is already inside the buildup",
+    "search_window_relative_to_onset_ms": [
+      -300.0,
+      200.0
+    ],
+    "offaxial_uses_absolute_perpendicular_distance": true
+  },
+  "perturbation": {
+    "dose_ladder_cells": [
+      16,
+      32,
+      64,
+      128,
+      256
+    ],
+    "dose_selection": "smallest rung satisfying all four clauses",
+    "dose_minimum_median_descendant_excess_spikes": 50.0,
+    "dose_maximum_probe_attributable_event_units": 0,
+    "dose_maximum_model_ictal_units": 0,
+    "dose_linearity_ratio_range": [
+      1.2,
+      3.0
+    ],
+    "dose_calibration_units": "3 canary seeds x 6 representative sites = 18",
+    "exclude_injected_frame_from_response": true,
+    "packet_radius_mm": 1.2,
+    "response_window_ms": 200.0,
+    "response_split_ms": 50.0,
+    "grid_seeds": "all formal seeds",
+    "grid_extent_mm": [
+      3.0,
+      17.0
+    ],
+    "grid_n": 7,
+    "grid_measures": [
+      "E1",
+      "in_window_ignition_flags"
+    ],
+    "onset_advance_sites": "representative",
+    "regime_limited_ignition_fraction": 0.25,
+    "baseline_onset_search_cap_ms": 20000.0,
+    "packet_radius_rationale": "32000 E over 400 mm^2 = 80/mm^2, so a 1.0 mm disk holds only ~251 cells and the 256-cell ladder rung would be unrealizable at most sites. 1.2 mm gives ~362. Smaller rungs are unaffected: select_packet takes the NEAREST n within the radius.",
+    "grid_arms": [
+      "Joint",
+      "Node"
+    ]
+  },
+  "counterfactual_splices": [
+    "native_baseline",
+    "native_pre_ictal",
+    "reset_z",
+    "reset_m",
+    "reset_zm",
+    "slow_only"
+  ],
+  "spatial_reregistration_control": {
+    "formal_element": "r180",
+    "formal_seeds": "all formal seeds",
+    "descriptive_elements": [
+      "r90",
+      "mx"
+    ],
+    "descriptive_seeds": [
+      1801,
+      1802,
+      1803
+    ],
+    "arm": "Joint",
+    "minimum_transitioned_control_networks": 6,
+    "name": "matched spatial re-registration control"
+  },
+  "observation_control": {
+    "montage_transforms": [
+      "identity",
+      "r90",
+      "r180",
+      "r270",
+      "mx",
+      "my",
+      "md1",
+      "md2"
+    ],
+    "record_in_primary_run": true
+  },
+  "statistics": {
+    "bootstrap_draws": 4096,
+    "bootstrap_seed": 20260817,
+    "spatial_null": "exact toroidal shifts, grid_n**2 = 49"
+  },
+  "execution": {
+    "worker_sizing": "measured per job class before every launch round, never a fixed number",
+    "max_workers_full_run": 16,
+    "max_workers_probe": 24,
+    "minimum_available_memory_gib": 40.0,
+    "minimum_free_cores": 2,
+    "measured_full_run_peak_rss_gib": 8.0,
+    "measured_probe_peak_rss_gib": 3.0,
+    "co_tenant_note": "this machine is shared: a Topic 5 Epi-PRSSM ladder was using ~36 cores and ~32 GiB when this round was sized. Reserve raised 32 -> 40 GiB and the launcher re-reads MemAvailable and the free-core count before each round, so a co-tenant starting mid-round shrinks OUR pool, not theirs. Processes outside this round's unit prefix are never signalled.",
+    "numeric_threads_per_worker": 1,
+    "monitor_interval_seconds": 600,
+    "core_rule_note": "our own running units are added back before subtracting the margin, otherwise each launch shrinks the next pool and the round self-throttles to 2 workers. The co-tenant's load still shrinks our pool, which is the intended direction. Margin lowered 6 -> 2 so memory is the binding constraint, per the instruction to use more workers whenever memory allows."
+  },
+  "claim_boundary": "Development-only. runaway_sustained is an OPERATIONAL label for the model ictal state. Never write: clinical seizure reproduced; patient seizure onset predicted; complete seizure lifecycle recovered; Z/M identified as the patient biological mechanism.",
+  "phase2_endpoint_classification": {
+    "FINITE_RESPONSE": "E1 evaluable at most sites and probe-attributable ignition rare",
+    "MIXED_RESPONSE_IGNITION": "both a measurable finite response and ignition at some sites",
+    "IGNITION_DOMINATED": "pre-ictal ignition fraction > 0.25; ignition probability becomes the endpoint, not the complete-case E1 mean",
+    "NO_DETECTABLE_STATE_CHANGE": "neither E1 nor ignition differs from baseline anywhere; the only stopping branch",
+    "rationale": "state-dependent susceptibility can rise OR fall, and the human critical-slowing literature is split (Maturana 2020 positive; Milanowski & Suffczynski 2016 and Wilkat 2019 negative). Requiring E1 to rise before testing whether the substrate organises space conflates two questions and would discard the spatial result whenever the mean went the other way."
+  },
+  "primary_spatial_endpoint": {
+    "per_arm": "delta_S_arm(x) = S_pre_ictal(x) - S_baseline(x) on the frozen 7x7 grid",
+    "edge_contribution": "delta_S_Joint(x) - delta_S_Node(x), paired within network seed",
+    "rationale": "h IS the node field. 'Joint susceptibility correlates with h' cannot separate the node field from the local connectivity; only the same-network Joint-minus-Node difference can.",
+    "factorial_interaction": "I = Joint - (Node+EE) - (Node+EtoI) + Node, representative sites",
+    "primary_covariates": [
+      "h",
+      "local_recruitment_time"
+    ],
+    "descriptive_covariates": [
+      "ee_out_gain",
+      "etoi_out_gain"
+    ]
+  },
+  "stage2_joint_perturbation": {
+    "scope": "Joint arm only, 3 canary networks, 6 representative sites",
+    "pairs": [
+      "baseline/sham",
+      "preictal/sham"
+    ],
+    "dose_determined_by": "baseline only",
+    "escalate_to_grid_only_if": "a state difference is first established at the 6 sites",
+    "rationale": "the 7x7 grid costs ~9 h at current machine load and answers a spatial question that only matters once a state difference exists"
+  }
+}

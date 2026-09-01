@@ -1,0 +1,47 @@
+{
+  "revision": "topic4_rev9_factorial_v1",
+  "scientific_role": "exploratory Null/Node/Edge/Node+Edge spontaneous factorization; no patient blind validation",
+  "base_config": {
+    "path": "config/topic4_rev9_exploratory.json",
+    "sha256": "92b18838edf06a8445955c6623f4025010b76e4f50b39e320f1160ea27473ab9"
+  },
+  "frozen_readouts": {
+    "json": "results/topic4_sef_hfo/data_driven_core_field_rev9/frozen_readouts.json",
+    "json_sha256": "c5e7ea403e8986157b1c6204d334e70d841423579c76f3adedad43dda1ab1c55",
+    "npz": "results/topic4_sef_hfo/data_driven_core_field_rev9/frozen_readouts.npz"
+  },
+  "alpha_reference": {
+    "value": 0.75,
+    "selection_summary": "results/topic4_sef_hfo/data_driven_core_field_rev9/node_edge_calibration/edge_alpha_selection_summary.json",
+    "selection_summary_sha256": "2cb6d2324ad30ad202f6454da2194374fe7f65b354bf7aa65de4c42a8a8cbf81",
+    "role": "response-matched reference only; not Node-Edge equivalence"
+  },
+  "arms": ["Null", "Node", "Edge", "Node+Edge"],
+  "seeds": [911, 912, 913, 914, 915, 916, 917, 918, 919, 920, 921, 922],
+  "simulation_duration_ms": 8000.0,
+  "early_onset_quantile": 0.01,
+  "onset_density_bins_per_axis": 40,
+  "bootstrap_seed": 20260811,
+  "bootstrap_repeats": 2000,
+  "max_concurrent_workers": 12,
+  "worker_partition": "one arm-seed per process",
+  "output_root": "results/topic4_sef_hfo/data_driven_core_field_rev9/node_edge_factorial",
+  "mode_readout": {
+    "frozen": "rev9 frozen nearest-centroid classifier; no refit",
+    "de_novo_kmeans": {
+      "K": 2,
+      "n_init": 100,
+      "primary_random_state": 0,
+      "consensus_random_states": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    }
+  },
+  "figure_inputs": {
+    "patient_block_diagnostics": "results/topic4_sef_hfo/data_driven_core_field_stage3/joint_confirmation_rev8_1/figure_diagnostics.npz"
+  },
+  "hard_stops": [
+    "input_hash_or_arm_contract_mismatch",
+    "edge_structure_or_incoming_weight_violation",
+    "nonfinite_simulation_output"
+  ],
+  "runaway_handling": "stop the affected simulation early, retain it as an explicit nonlinear outcome, and exclude only unavailable event-level endpoints"
+}

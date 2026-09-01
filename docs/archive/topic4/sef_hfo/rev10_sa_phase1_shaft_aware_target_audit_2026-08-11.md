@@ -1,0 +1,393 @@
+# Topic 4 rev10-SA 第一阶段审计：shaft-aware target 与历史重评分
+
+日期：2026-08-11
+
+# 审阅结论
+
+## 1. 一句话判断
+
+rev10-SA 已回答三个不同问题。第一，旧目标确实看不见 SCL；新的目标能稳定识别 SCL 删除、跨杆 timing 改变和 0/4 到 4/4 的连续恢复。第二，SCL 虚拟触点本身可读，旧 fixed-K3 relocation 阴性不能外推成自由场失败。第三，回到 Stage 3 学习场并改用均匀二维连续基底后，mode B 跨新网络稳定，mode A 仍未形成同一网络内的共享 repertoire。
+
+因此当前不再增加 K/core，也不继续做 Node 场系数细化。下一步是单独的 contact-density-invariant edge-flow 探索；Edge、`beta` 和 topology 在 rev10-SA 内保持关闭。rev10-R 首轮跨网络共享参数使用 singular value 上的四系数 Chebyshev 响应 `f_c(sigma)`，不直接共享 full `Gamma`：后者在不同网络的近退化 SVD 子空间旋转下没有固定数值含义，而谱函数在退化块内给出相同响应。
+
+## 2. 完成程度
+
+> **rev10-SA 工程执行完成度：100/100；患者双模式科学恢复完成度：约 60/100**
+
+已完成：
+
+- SA0 的 15-contact/shaft 合同、55/6/44 无序 pair 类和哈希；
+- patient-training-only 的 fixed-contact timing 与 ordinal-compatible 双目标；
+- 分杆 recruitment、四状态 precedence、分杆 profile 和 event cloud；
+- 四个零仿真正控；
+- patient direction 与 event extent 的 factorization 审计；
+- rev8.1 final、rev9 factorial、hand dual-core、filament、L2/L3 retained artifact 的统一重评分。
+- Stage 3 warm start 到均匀 `18 x 18` continuous spline 的表示桥接；
+- V4-V6.2 的 fit、selection 和 fresh-network confirmation；
+- 最终 `9/9` V6.2 workers 与 Fig.4-style 波形/KMeans、网络级 A/B support 图。
+
+未完成的科学闭环：
+
+- mode A 的跨网络共享传播容量；
+- 冻结新场后的 edge-flow/factorial 机制分解；
+- 新 patient blind unit，以及患者波形、频谱、持续时间、幅度和事件率层面的完整比较。
+
+## 3. P0 / P1 关键问题
+
+### P0：低 AMI 不能被写成新 target “通过”
+
+新的 shaft-aware consensus KMeans 很稳定，但与旧 A/B 的 AMI 只有 `0.0112`。预设 stop 确实触发。后续附加审计显示，它主要按事件招募范围分组，而不是重现传播方向。
+
+处理：旧 A/B 继续作为方向模式；shaft recruitment extent 和 event cloud 作为每个方向模式内部的连续因子。这个修改属于 patient-training-only 的探索性 amendment，不是盲验证。
+
+### P1：旧 field-selection miss 无法回顾性证明
+
+48 个 rev8.1 field-fit history 候选只保留了聚合分数，没有逐事件 contact identity。不能从 mean curve 反推 SCL recruitment 或 cross-shaft precedence。
+
+处理：状态固定为 `OLD_OBJECTIVE_FIELD_SELECTION_MISS_NOT_TESTABLE`。下一步用 matched relocation 直接测试容量，不再从缺失 artifact 推断。
+
+### P1：Null/Edge 的高 SCL 招募不是患者模式支持
+
+Null 与 Edge 的 SCL recruited-contact fraction 为 `0.577/0.542`，但 OOD 为 `92.3%/83.3%`。它们只能说明均匀网络偶尔会出现 SCL 活动，不能说明恢复患者 A/B。
+
+处理：图中用斜线灰柱标记 `NOT_EVALUABLE`，不参与患者模式排名。
+
+## 4. 科学性结果
+
+### 4.1 新目标是否真的看到两杆
+
+四个正控全部按预期响应：
+
+- 删除全部 SCL 显著恶化 SCL recruitment、SCL-SCL/ICL-SCL precedence 和 event cloud；
+- 只平移跨杆 timing 时，杆内 precedence 基本不变，跨杆项显著改变；
+- 0/4、1/4、2/4、3/4、4/4 恢复 SCL 时，recruitment、cross precedence 和总分连续改善；
+- shared-axis 坐标塌缩不改变 fixed-contact/shaft feature。
+
+因此此前担心的“单杆 contact 数量更多，优化器靠 ICL 内 rank 得到好分”已经被目标层修复。它过去确实可能发生；新目标不会再让缺失 SCL 以 NaN 方式消失。
+
+### 4.2 患者模式应如何定义
+
+shaft-aware K=2 对 event extent 的预测 AUC 为 `0.9519`，对旧 A/B 只有 `0.6181`。旧方向 × 新 extent 的四格均有大量事件：
+
+```text
+5082 / 4193
+8668 / 12106
+```
+
+在 `recording block × ICL count × SCL count` 内严格配平后，每次每模式 `7590` 个事件，旧 A/B 的三类 precedence 都高于置换 null。方向和范围是两个因子，不应强迫一个平面 KMeans 同时表达。
+
+### 4.3 历史模型重新评分
+
+| 历史 family | multishaft fraction | SCL recruited-contact fraction | patient mode status |
+|---|---:|---:|---|
+| rev8.1 final | 0.000 | 0.000 | development-only |
+| rev9 Node | 0.000 | 0.000 | development-only |
+| rev9 Node+Edge | 0.000 | 0.000 | development-only |
+| hand dual-core | 0.077 | 0.019 | development-only |
+| Stage 2 filament | 0.022 | 0.011 | development-only |
+| rev9 Edge | 0.889 | 0.542 | not evaluable, OOD 0.833 |
+| rev9 Null | 0.923 | 0.577 | not evaluable, OOD 0.923 |
+
+L2 的 64 个候选和 L3 的 57 个候选全部为零 SCL recruitment。旧目标与新 weakest-mode score 的 Spearman 相关为：
+
+```text
+L2: rho=0.364, n=62, p=0.0037
+L3: rho=0.129, n=57, p=0.338
+```
+
+说明旧目标与新问题不等价；但由于 fit-history 缺事件级数据，不能声称已经找到“被旧目标错过的现成 field”。
+
+## 5. 工程性结果
+
+- FULL_TIMING 和 ORDINAL_COMPATIBLE 使用不同 patient embedding/floors，禁止比较绝对分数；
+- L2 `768` 行、L3 `2052` 行 retained envelope 的重新提取 rank 与保存 rank 完全一致；
+- missing SCL 保留为四状态 precedence 的“未共同招募”，不删除 pair；
+- 当前 SA0-SA6 定向单元测试 `19/19` 通过；
+- SA4 使用 `systemd-run --user -> nohup`，独立日志、退出码、完成标记和桌面通知，修正版退出码为 0。
+
+最终 clean freeze 由 commit `c6bde4b4` 重建。target、direction/extent 和 SA4 三份 sidecar 均记录该 commit 且 `runtime_dirty=false`；数值与提交前审计一致。
+
+## 6. 图
+
+### Shaft-aware 正控
+
+![rev10-SA shaft-aware positive controls](/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/figures/rev10_sa_shaft_aware_positive_controls.png)
+
+### Direction 与 event extent 分解
+
+![rev10-SA direction extent factorization](/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/figures/rev10_sa_direction_extent_factorization.png)
+
+### 历史 artifact 重评分
+
+![rev10-SA historical artifact rescore](/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/figures/rev10_sa_historical_artifact_rescore.png)
+
+### SA5 contact detectability
+
+![rev10-SA contact detectability](/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_core_field_rev10_sa/dual_shaft_canary/contact_detectability/figures/rev10_sa_contact_detectability.png)
+
+六张网络均使用每 contact `160` 个、半径 `1 mm` 的等量 E-cell packet。SCL/ICL current gain 为 `0.961 [0.934, 0.986]`，local neural response 为 `0.953 [0.942, 0.985]`，两杆 detector margin 均为 100% 正值。结论是 `SCL_READOUT_NOT_PRIMARY_LIMIT`：SCL 在同等局部活动下可被当前 virtual-contact readout 正常读出。
+
+### SA6 fixed-K3 component-3 relocation canary
+
+![rev10-SA dual-shaft capacity](/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_core_field_rev10_sa/dual_shaft_canary/dual_shaft_capacity/figures/rev10_sa_dual_shaft_capacity.png)
+
+`21` 个固定 K=3 fields 在 `3` 张新网络上全部完成，共 `63/63` workers 成功、零 runaway。没有任何候选让 ICL mode-A 或 mode-B source 招募 SCL；因此 mode A/B 的 SCL recruitment floor excess 分别固定在 `2.81/3.88`，全部高于 1。
+
+这不是因为 SCL field 没有真正加上去。最强候选 `grid_mid_w35_s4p5` 在 SCL contact 1 mm 邻域达到：
+
+```text
+mean h                         0.424
+median h                       0.447
+h >= 0.5                      42.2%
+mean delta Vtheta             -0.216 mV
+threshold-lowered neurons      69.7%
+```
+
+但该候选的 ICL-A -> SCL 和 ICL-B -> SCL 招募仍均为 `0`。反向的 SCL packet 在 `2/3` 网络能触及至少一个 ICL contact，不过平均只招募 `0.061` 的 ICL contacts。短 spontaneous 总共检测到 `14` 个事件，全部返回、`0` 个 multishaft event。
+
+因此最窄的结论是：**固定两个 ICL Gaussian、只移动并调节第三个 component 的 2+1 分配没有产生 ICL→SCL 传播。** 它既不能外推成所有 K=3 fields 失败，也不能裁定连续自由场容量。
+
+## 7. 最小修改路线
+
+1. 先运行无 K、无 component/峰数约束的 continuous B-spline field canary。
+2. 以 4×4 控制面作为 matched-DoF primary，6×6 只作分辨率敏感性；控制系数不是 core。
+3. 只有 continuous field 仍不能产生 ICL→SCL 时，才运行 packet-amplitude 与总 field-budget curve。
+4. 若上述实验仍显示方向性不可达，再设计 directional route-support；`beta` 继续关闭。
+
+## 8. 当前状态
+
+```text
+OBJECTIVE_SHAFT_BLINDNESS_CONFIRMED
+/
+DIRECTION_AND_EXTENT_FACTORS_BOTH_SUPPORTED_EXPLORATORY
+/
+FROZEN_LEARNED_NODE_FIELDS_HAVE_ZERO_SCL_SUPPORT
+/
+OLD_OBJECTIVE_FIELD_SELECTION_MISS_NOT_TESTABLE
+/
+SCL_READOUT_NOT_PRIMARY_LIMIT
+/
+FIXED_K3_COMPONENT3_RELOCATION_CANARY_NEGATIVE
+/
+LOW_RESOLUTION_CONTINUOUS_INITIALIZATION_NO_CROSS_SHAFT_SUPPORT
+/
+NO_K_CONTINUOUS_CONNECTED_FIELD_FAILS_CROSS_SHAFT_AT_FIXED_PACKET_AND_BUDGET
+```
+
+SA6F 已完成 `37 x 3 = 111` 个无 K B-spline workers，零 runaway，但没有
+ICL-to-SCL recruitment。该结果仍不能裁定连续场或 connectivity：最强 SCL 邻域
+平均 `h` 只有 `0.128`，明显低于 constrained K3 canary 的 `0.424`。一个 4x4
+候选把 mode-A ICL precedence excess 从约 `2.99` 降到 `0.393`，说明连续场能
+改变杆内限制项，但没有解决 SCL。
+
+SA6G 已完成 `8 x 3 = 24` 个 workers，全部 clean、零 runaway。四个已连接场的
+真实 bridge mean `h=0.528-0.907`，bridge-near `h>=0.5` 比例为
+`74.4-98.0%`；但两个 ICL source 在所有场和所有网络中均为 0 个 SCL contacts。
+SCL 反向只平均触及约 1/11 个 ICL contacts。5 个短 spontaneous events 全部来自
+disconnected narrow controls，全部返回、无 multishaft event。
+
+因此已排除“固定 K/core 数”和“桥上场太弱”作为当前阴性的主要解释，但还不能直接写
+connectivity family fail：packet amplitude 与总 field budget 尚未扫。下一步先做小型
+packet-amplitude curve，再视结果做 budget curve；只有持续 ICL→SCL=0 才开放
+directional route-support，`beta` 继续关闭。
+
+## 9. Observation-boundary correction: SA6H
+
+后续审计撤回了 SA6F/SA6G 的“自由场”称谓。SA6F 的 B-spline 系数由患者接触点上的
+recruitment target 拟合，SA6G 的支撑直接来自观测到的两条杆路径；二者都会让信息量随
+电极覆盖变化，只能保留为 observation-conditioned capacity diagnostics，不能说明患者数据
+从无偏二维场中恢复出 substrate。
+
+SA6H 回到 Stage 3 已学出的明确场，但只把它作为全 sheet warm start。新的 latent field
+使用整张 `20 x 20 mm` sheet 上的 real Fourier `cos/sin` 基底和 stationary isotropic
+residual；field builder 不接收 contact、shaft、patient onset、mode label 或 forced source。
+患者信息只在 8-s spontaneous SNN 仿真完成后，经虚拟电极 readout、冻结 mode classifier
+和 shaft-aware training objective 进入评分。
+
+初始开发库为 `V0/V1/V2` 共 21 个候选，在配对网络 `1031-1033` 上运行；结果用于构造
+小型 `V3` refinement，再以新网络确认。由于患者 held-out 已经使用，整个 SA6H 仍只能写
+development-only recovery，不能写 patient blind generalization。Edge、`beta` 和 topology
+在 observation-invariant Node field 冻结前继续关闭。
+
+### SA6H initial result
+
+初轮 `21 x 3 = 63` 个 8-s spontaneous workers 全部从 clean commit `dd9ae9ac`
+完成，无 worker failure、无 runaway。旧 K3 与它的均匀 Fourier 投影分别产生 `34/33`
+个事件；投影 `h` RMSE 为 `0.0103`，top-5% support Jaccard 为 `0.952`，说明表示替换
+没有破坏旧场。uniform field 为 0 事件，是有效负对照。
+
+但初轮没有恢复 shaft-aware patient repertoire。谱 warm start 的 weak-mode score 为
+`5.397`；表面 winner `v1_pair01_plus` 为 `5.407`，只因 OOD 从 `0.037` 降到 0 才在总分
+上领先 `0.009`，不能视为场改善。9 个 support-eligible candidates 的 SCL recruitment
+均为 0，mode A/B SCL recruitment excess 固定为 `5.413/4.105`。KMeans 与 frozen labels
+的 AMI 为 1，但 model-A prototype 与 patient A 明显不符，证明双簇稳定不等于患者模式复现。
+
+本轮主要限制是搜索半径：旧 warm field 在场外比峰值低约 `6-7` 个 log units，V1/V2
+扰动至多约 1 RMS，足以改变 A/B occupancy，甚至造成单模式 collapse，却不足以让候选在
+SCL recruitment 上产生变化。V3 改为 4x4 全 sheet 等距 allocation scan；16 个位置在不读取
+contact/shaft 的情况下冻结，同一平滑方向投影回 Fourier 场，由仿真后的 patient objective
+选择。这些是 optimizer probes，不是新增 core 或 K。
+
+### SA6H V3 correction and V4 handoff
+
+V3 `63/63` workers 在 `c933986b` 完成，零失败、零 runaway。原聚合仍选择旧场，但原因
+不是所有新场都没有 SCL：位置 07/10 分别产生 `39/21` 个 SCL-only 事件，位置 12 产生
+`13/43` 个双杆事件，位置 09 产生 `4/12` 个双杆事件。原 aggregator 在 shaft-aware loss
+之前调用旧 shared-axis rank curve；SCL-rich events 被变成不可用或 OOD，因此目标入口仍然
+shaft-blind。这个结果只能解释为 continuous Node field 具有 SCL activation capacity，不能
+解释为患者双杆 repertoire 已恢复。
+
+patient full shaft-aware KMeans 与旧 A/B 的 AMI 只有 `0.011`，因为前者主要区分招募范围，
+后者是传播方向。使用 patient train、按 recording block 隔离的监督式 A/B 分类器，6 折
+balanced accuracy 为 `0.939-0.957`，pooled `0.945`，AUC `0.990`。因此 V4 把方向身份和
+双杆参与因子化：每个事件都分配 A/B，同时 OOD 只作惩罚不作删除；所有事件另算 ICL-only、
+joint、SCL-only。
+
+V3 Fourier 坐标的条件数约 `1e8`，不适合继续优化。V4 改为不读取观测的 `14 x 14` uniform
+cubic B-spline continuous field，条件数 `27.6`；Stage 3 warm 的 `h` RMSE `0.0098`，top-5%
+Jaccard `0.966`。V4 冻结 50 个候选：warm、uniform negative、16 个全 sheet 位置各两个温和
+幅度，以及 8 对 observation-free 平滑随机场。Edge、`beta`、topology 继续关闭。
+
+### SA6H V4 result and V4.1 bridge
+
+V4 从 clean commit `48d49318` 完成 `50/50` workers，零失败、零 runaway。
+数值线程已限制为每 worker 1 个，16 并发时内存余量超过 170 GiB。50 个候选均没有
+joint ICL+SCL event；只有 6 个候选出现少量 SCL-only activity。因此原自动输出的
+`v4_alloc_02_a1p0` 只是 joint penalty 全部相同时的 route scalar minimum，不是科学
+winner。修正状态为：
+
+```text
+REV10SA_V4_NO_JOINT_SHAFT_CANDIDATE
+```
+
+这一阴性不能归因于 spline family 或 optimizer。V4 实际测试的是 `1.0 x Stage3 warm`
+加幅度 1/2、宽 3 mm 的温和扰动，没有覆盖 V3 已知产生 SCL/joint events 的
+`0.5 x warm + amplitude 4, width 2.5 mm` 区域。下一步 V4.1 不根据结果挑位置，而把 V3
+全部 21 个场逐一投影到稳定 `18 x 18` uniform B-spline 坐标。全库预检最大 `h` RMSE
+`0.00316`、最小相关 `0.99975`、最小 top-5% Jaccard `0.971`、条件数 `27.53`；field
+builder 仍不读取 contact、shaft、patient event 或 V3 score。V4.1 先验证表示桥接，再开放
+V5 连续系数优化；不增加 K/core，Edge 与 `beta` 继续关闭。
+
+V4.1 随后完成 `21/21` workers，零失败、零 runaway。uniform 09 在同 seed 上从 V3 的
+`3 joint + 3 ICL-only` 变为 spline 的 `2 joint + 4 ICL-only`；uniform 12 从
+`2 joint + 9 SCL-only` 变为 `4 joint + 9 SCL-only`。因此稳定 spline 保留了旧场的
+shaft capacity，但最佳 joint fraction 仍只有 `0.333`，远低于患者约 `0.95`，且事件云
+高 OOD。这是表示桥接通过，不是患者模式恢复。
+
+V5 使用冻结规则从训练 seed 选四个锚点：Stage 3 参考、两个最高 joint 场 uniform 09/12、
+一个额外最低 route 场 uniform 06。患者训练目标只作为 optimizer feedback；18×18 均匀
+basis、每处空间分辨率和正则化不变。对 6 对锚点分别构建 latent-linear 与 density-mixture
+两条连续路径，每条取 `t=0.25/0.5/0.75`，加四个锚点共 40 个场。未观测区域仍是平滑先验
+延拓，不能声称由患者数据识别。V5 先在 1031 拟合，再把多样 Pareto subset 带到
+1032/1033；不增加 K/core，Edge、`beta` 和 topology 继续关闭。
+
+### SA6I V5 fit result and V5.1 selection contract
+
+V5 在 fit seed 1031 完成 `40/40` workers，零失败、零 runaway。18 个 latent-linear
+内插场全部为 `0 joint`；density-mixture 路径产生了新的 joint support。fit minimum
+`v5_density_p03_t025` 共 6 个事件，其中 3 个 joint、2 个 ICL-only、1 个 SCL-only，
+A/B 为 `3/3`，OOD fraction 为 `0.50`。相比 uniform 09 的 `2/6 joint` 和 uniform 12
+的 `4/13 joint`，joint fraction 提高到 `0.50`，但分母只有 6，不能称为患者恢复。
+
+这个结果支持的只是一个优化方向：在同一个 observation-invariant `18 x 18` spline
+basis 中，正密度混合保留两个场的 support union，优于对 log field 做直线平移。它不支持
+把 spline 极值解释成多个 core，也没有识别未放置电极的二维区域。
+
+V5.1 在读取 1032/1033 前冻结 8 个多样场：fit winner、joint-positive anchors、全部
+Pareto candidates，以及 winner anchor pair 上全部 density points。每个场在两个新网络上
+各跑一次。唯一新增的跨网络资格条件是：pooled 至少 2 个 joint events，且两个网络各至少
+1 个 joint event。若没有候选通过，裁定为训练网络信号不能跨网络实现；不得归因于优化器，
+也不得据此开放 Edge、`beta` 或 observation-conditioned basis。
+
+V5.1 完成 `16/16` workers，零失败、零 runaway。训练 winner `t=0.25` 没有跨网络
+复现：1032 为 `0/2 joint`，1033 为 `2/3 joint`。同一 uniform09/uniform12 density
+path 的 `t=0.75` 在两个网络均有 joint event：1032 为 `4/6`，1033 为 `2/8`；合计
+`6/14`、OOD `0.571`。uniform12 anchor 的事件支持更大，为 `15/34 joint`，也覆盖
+两个网络，但 route score 更差。两者的 joint fraction 均约 `0.43-0.44`，仍远低于患者
+约 `0.95`，A/B occupancy 也随网络明显变化。
+
+因此 V5.1 的安全结论是 `CROSS_NETWORK_JOINT_SHAFT_CAPACITY_FOUND`，不是患者模式恢复。
+V5.2 在读取 1041-1043 前冻结三场：`t=0.75` score winner、uniform12 joint-support
+anchor、Stage 3 reference。每场跑三个全新 development networks；正式报告以逐网络结果
+为主，不再让一个混合 scalar 掩盖 event yield、joint support 和方向误差之间的权衡。
+
+V5.2 完成 `9/9` workers，零失败、零 runaway。pooled readout 表面改善：score winner
+在三个新网络均有 joint events，合计 `18/26=0.692`，A/B 数量 `8/18`，总体 OOD
+`0.308`。但 eventwise 交叉审计推翻了自动 PASS：A 为 `0/8 joint` 且 `8/8 OOD`，B 为
+`18/18 joint` 且 `0/18 OOD`。uniform12 anchor 也是 A `0/27 joint, 27/27 OOD`，B
+`31/31 joint, 0/31 OOD`。KMeans 与监督方向 AMI=1 是因为两者都在分“joint B”与
+“SCL-only pseudo-A”，不是患者的两个 joint-shaft 方向。
+
+因此正式状态降级为：
+
+```text
+CONTINUOUS_FIELD_CROSS_NETWORK_MODE_B_CAPACITY_CONFIRMED
+/
+MODE_A_JOINT_PATIENT_SUPPORT_NOT_OBSERVED
+/
+POOLED_JOINT_OBJECTIVE_SHAFT_PARTITION_BLINDNESS_CONFIRMED
+```
+
+这首先是目标函数问题，不是 optimizer non-convergence。下一步把资格单位改为每个模式各自
+`joint-shaft AND in-distribution`，先零仿真重扫已有场，再只细化 uniform12 到 uniform06
+之间已观察到 A/B support 交界的连续 density path；仍不增加 K/core，不开放 Edge 或 `beta`。
+
+正式审计脚本随后对 V4.1、V5、V5.1、V5.2 全部重算，四轮均为
+`MODE_CONDITIONED_JOINT_SUPPORT_NOT_FOUND`。V6 不增加场自由度，只在 uniform12 到
+uniform06 的正密度混合路径上把 `t=0-0.25` 细分为 11 个点。左端提供 joint+ID B，旧
+`t=0.25` 提供 1 个 joint+ID A 但没有 B；目标是检查中间是否存在两者共存窗口。候选资格
+直接要求 A、B 各至少 1 个 joint+ID event，pooled joint 和 KMeans AMI 不再能代偿缺失模式。
+
+V6 完成 `11/11` workers，零失败、零 runaway，但没有候选通过。`t=0-0.15` 只有
+joint+ID B；`t=0.175-0.20` 两者都没有；`t=0.225-0.25` 首次出现 1 个 joint+ID A，
+但 B 已为零。由于 fit seed 事件数较少，V6.1 不按 score 筛点，而把 11 点完整路径原样带到
+1032/1033。资格进一步要求至少一张同一网络同时产生 joint+ID A 与 B；不同网络分别承担
+两种模式不算同一 substrate 的 repertoire。
+
+V6.1 完成 `22/22` workers，零失败、零 runaway。`t=0.025/0.05/0.075` 在 seed 1033
+都出现 exactly 1 个 joint+ID A，同时分别保留 `9/4/6` 个 joint+ID B；seed 1032 的
+joint+ID A 全为 0。因此这是一个相邻但单事件、单网络的 coexistence signal，不是稳定恢复。
+V6.2 将三点全部冻结到 1041-1043，要求 A/B 各至少 2 个 joint+ID events，并且至少两张
+同一网络分别同时表达 A/B；这将作为 Node-only continuous-field 路线的最终容量裁定。
+
+### SA6J V6.2 新网络最终裁定
+
+V6.2 完成 `9/9` workers，零失败、零 runaway。三个场在 1041-1043 上的结果为：
+
+| field | 总事件 | A joint+ID | B joint+ID | 同时有 A/B 的网络数 |
+|---|---:|---:|---:|---:|
+| `t=0.025` | 44 | 0 | 26 | 0 |
+| `t=0.050` | 52 | 1 | 26 | 1 |
+| `t=0.075` | 39 | 0 | 26 | 0 |
+
+`t=0.050` 的唯一有效 A 事件只出现在 seed 1041；1042/1043 均为 0。三场的 B 则都在三张
+新网络中稳定出现。因此正式状态是：
+
+```text
+REV10SA_V62_FRESH_NETWORK_MODE_COEXISTENCE_NOT_CONFIRMED
+/
+MODE_B_SHARED_NODE_CAPACITY_OBSERVED
+/
+MODE_A_SHARED_NODE_CAPACITY_NOT_OBSERVED_IN_TESTED_CONTINUOUS_PATH
+```
+
+当前 data-driven Node 场不能说复现了患者完整间期活动，也不能说恢复了患者两种传播模式。能说的是：
+**从 Stage 3 学习场出发、在不读取 contact/shaft 位置的均匀二维连续基底上，模型跨新网络稳定产生患者
+支持域内的双杆 mode B；mode A 只出现过单事件、单网络信号，没有形成共享 repertoire。**
+
+这不是“K 不够大”。本轮正式场为 `18 x 18` tensor-product spline 表示的一张连续曲面，系数是数值基底，
+不是 324 个 core；继续增加 Gaussian 数或峰数会重新引入 core 分解偏见，并不能针对目前的 mode-A route
+残差。也不能把失败归因于 CMA-ES：修正 objective 后已经完成细路径、selection networks 和 fresh networks，
+但没有已知 good shared solution，因此不存在可解释的 optimizer regret benchmark。
+
+下一步不再修 field allocation，而冻结连续 `h(x,y)`，单独测试 contact-density-invariant directional
+edge-flow。这里的“contact-density-invariant”只表示不会在电极密集处放更多连接参数；冻结 connectivity
+本身仍继承患者 rank-derived axis，患者训练目标也会选择 edge 参数，不能称为 observation-free。
+`beta` 继续关闭，因为它主要改变径向集中或有效 delay scale，当前缺口是 mode A 的传播路线。
+旧 rev9L Gaussian component-pair residual 已经只在 `1/3` selection networks 改变 mode A，并在 6 张网络
+的 shared 候选中只改善 `2/6`；新实验不得复用 component responsibility 作为连接坐标。
+
+最终图：
+
+- `results/topic4_sef_hfo/data_driven_core_field_rev10_sa/observation_invariant_field_v6_2_final/figures/rev10_sa_v62_mode_boundary_final_search.png`
+- `results/topic4_sef_hfo/data_driven_core_field_rev10_sa/observation_invariant_field_v6_2_final/figures/rev10_sa_v62_mode_boundary_final_fig4_modes.png`
