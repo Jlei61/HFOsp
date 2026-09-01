@@ -50,6 +50,22 @@ DATASET_ROOT = Path("/data/hfosp_group_event_state_v0_1/dataset")
 
 MAX_OOM_RETRIES = 3
 
+# Memory pressure does not always arrive as ``OutOfMemoryError``.  When a card is
+# nearly full, cuBLASLt fails to allocate its workspace and surfaces as a plain
+# RuntimeError with this text, which slipped past the ladder once
+# (yuquan_hanyuxuan / P_slow / seed 3) and was booked as an ordinary crash even
+# though seeds 1 and 2 of the same cell had just succeeded.
+MEMORY_PRESSURE_MARKERS = (
+    "CUBLAS_STATUS_NOT_SUPPORTED",
+    "CUBLAS_STATUS_ALLOC_FAILED",
+    "CUDA error: out of memory",
+    "CUDNN_STATUS_ALLOC_FAILED",
+)
+
+
+def _is_memory_pressure(exc: BaseException) -> bool:
+    return any(marker in str(exc) for marker in MEMORY_PRESSURE_MARKERS)
+
 
 def _cohort(name: str | None, subjects: list[str] | None) -> list[str]:
     if subjects:
@@ -116,13 +132,16 @@ def _run_job(args: argparse.Namespace) -> int:
             started = time.time()
             result = train_producer(tl, seq, cfg, args.seed, device, out_dir)
             break
-        except torch.cuda.OutOfMemoryError as exc:  # noqa: PERF203
+        except RuntimeError as exc:  # noqa: PERF203
+            if not (isinstance(exc, torch.cuda.OutOfMemoryError)
+                    or _is_memory_pressure(exc)):
+                raise
             attempt += 1
             torch.cuda.empty_cache()
             if attempt > MAX_OOM_RETRIES:
                 atomic_write_json(out_dir / "resource_failed.json", {
                     "subject": args.subject, "producer": args.producer,
-                    "seed": args.seed, "reason": "cuda_out_of_memory",
+                    "seed": args.seed, "reason": "cuda_memory_pressure",
                     "attempts": attempt, "final_chunk_events": cfg.chunk_events,
                     "final_batch_segments": cfg.batch_segments,
                     "note": "this is a resource failure, NOT a scientific negative",

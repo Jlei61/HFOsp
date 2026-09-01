@@ -190,8 +190,20 @@ count 增益 > 0.5 nats/window、participation > 0.02、continuous > 0.05；
 | `torch.cuda.reset_peak_memory_stats(device)` 在 CUDA 未初始化时 | `RuntimeError: Invalid device argument`，两个 job 直接失败 | 在 import torch **之前**用 `CUDA_VISIBLE_DEVICES` 钉卡 |
 | 验证 pass 重放全部 segment | 每个 epoch 多跑一遍整条记录 | 只重放**含验证事件**的 segment（段仍从自身起点热身，warm-up 不变） |
 | `estimate_stats` 只接受连续区间 | v0.2 的 TRAIN 不是连续区间 | 加可选 `positions=`，默认行为不变 |
+| 显存压力伪装成 `CUBLAS_STATUS_NOT_SUPPORTED` | 它是 `RuntimeError` 不是 `OutOfMemoryError`，**绕过了降级阶梯**，被记成普通崩溃（`yuquan_hanyuxuan`/`P_slow`/seed 3，而同一格的 seed 1、2 刚刚成功） | 阶梯改为按错误文本识别显存压力（cuBLASLt / cuDNN 分配失败、`CUDA error: out of memory`），非显存的 `RuntimeError` 仍原样抛出 |
+| `config_hash` 含 git commit，而运行期间提交过代码 | 直接重跑同一条命令会**整批重跑** 161 个已完成的 job | 增加 `v02_retry_missing.py`，只补跑没有 `result.json` 的单元；断点续跑一律走它 |
 | 容量敏感性臂写成 `tanh(zH)@W`（无跳连） | 它是线性模型的限制而非扩展，整条塌回截距，对照失去意义 | 加跳连 `z@W_lin + tanh(zH)@W`，严格包含线性模型 |
 | 用 `str.replace` 打 CLI 补丁时锚点写错默认值 | 三个新参数**静默**没加上，作业启动后才在 usage 报错里发现 | 所有文本补丁改为 `assert old in s` 后再替换，并回读校验 |
+
+## 10.2 训练期间的代码改动是否影响可比性
+
+162 个 checkpoint 不是在同一个 commit 下产出的（运行期间提交过多次）。逐条核对，
+训练数值路径**没有**变化：新增的 `reset_every_events` / `reset_every_seconds` 默认为
+0 且整段逻辑在 `if` 之后；`P_memoryless` 只是往配置字典里加了一项；
+`load_producer` / `replay_with_reset` 是新函数；`marks.py` 只在原有
+`nanmax` / `nan_to_num` 周围加了一个计数器，返回的数值逐位不变。
+改动集中在评估、诊断与报告侧。因此这 162 次拟合可比；但 `config_hash` 里含 commit
+这一点必须知道，否则断点续跑会整批重来（见上表最后一行）。
 
 ## 10.1 资源实测与并发选择
 
