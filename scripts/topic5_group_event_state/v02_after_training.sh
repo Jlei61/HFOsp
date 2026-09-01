@@ -68,6 +68,7 @@ echo "== 7. cohort tables + the load-bearing figure =="
 $PY scripts/topic5_group_event_state/v02_summarize.py \
     --future-root "$ROOT/future_block/with_state" \
     --prefix-root "$ROOT/prefix/main" \
+    --diagnostics-root "$ROOT/future_block/diagnostics" \
     --tag main 2>&1 | tee "$LOGS/summarize.log"
 
 echo "== 8. registry refresh (now complete) =="

@@ -29,6 +29,8 @@ from src.topic5_group_event_state.v02.aggregate import (  # noqa: E402
 )
 from src.topic5_group_event_state.v02.figures import (  # noqa: E402
     plot_future_block_figure,
+    plot_mark_block_figure,
+    plot_memory_truncation_figure,
 )
 from src.topic5_group_event_state.v02.registry import atomic_write_json  # noqa: E402
 
@@ -70,6 +72,7 @@ def main() -> None:
     parser.add_argument("--prefix-root", type=Path, default=None)
     parser.add_argument("--out-root", type=Path, default=REPO_OUT)
     parser.add_argument("--tag", default="main")
+    parser.add_argument("--diagnostics-root", type=Path, default=None)
     parser.add_argument("--arms", nargs="*", default=None,
                         help="curve=pattern pairs, e.g. P_slow=B+S(P_slow_seed")
     args = parser.parse_args()
@@ -115,6 +118,27 @@ def main() -> None:
         "subjects": sorted(r["subject"] for r in results),
         "panels": payload["panels"],
     })
+    block_payload = plot_mark_block_figure(
+        results,
+        out / "figures" / "which_part_of_the_block.png",
+        out / "figures" / "which_part_of_the_block.pdf",
+        arms={k: v for k, v in arms.items() if k != "shift"},
+    )
+    atomic_write_json(out / "figures" / "which_part_of_the_block_metadata.json",
+                      {"arms": arms, "blocks": block_payload})
+
+    if args.diagnostics_root and (Path(args.diagnostics_root) / "per_subject").exists():
+        diag = load_results(args.diagnostics_root)
+        trunc = plot_memory_truncation_figure(
+            diag, results,
+            out / "figures" / "memory_truncation_diagnostic.png",
+            out / "figures" / "memory_truncation_diagnostic.pdf",
+        )
+        atomic_write_json(
+            out / "figures" / "memory_truncation_diagnostic_metadata.json",
+            {"diagnostics_root": str(args.diagnostics_root), "ladder": trunc},
+        )
+
     print(json.dumps({
         "n_subjects": len(results),
         "n_cells": len(cells),

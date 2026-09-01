@@ -307,3 +307,169 @@ def _plot_prefix_panel(ax, prefix_results, arms, rng) -> dict[str, Any]:
     ax.set_ylabel("gain over the start-only model\n(nats per unit)")
     ax.set_xlabel("what happened next")
     return out
+
+
+# Only the conditional-mark blocks: every one of these is a per-observation
+# log-loss, so they share a y axis.  The event count is nats *per window* and
+# belongs on its own panel of the load-bearing figure -- putting it here would
+# plot two different units against one scale.
+BLOCK_LABELS = {
+    "participation": "which contacts",
+    "continuous:size": "how many contacts",
+    "continuous:span": "recruitment duration",
+    "continuous:band_energy": "band energy",
+    "continuous:band_peak": "band timing",
+    "continuous:embedding": "overall event shape",
+}
+BLOCK_ORDER = (
+    "participation", "continuous:size", "continuous:span",
+    "continuous:band_energy", "continuous:band_peak", "continuous:embedding",
+)
+
+
+def plot_mark_block_figure(
+    results: Sequence[Mapping[str, Any]],
+    out_png: Path,
+    out_pdf: Path,
+    *,
+    arms: Mapping[str, str],
+    horizons: Sequence[float] = (300.0, 1800.0, 7200.0),
+) -> dict[str, Any]:
+    """Auxiliary: *which kind* of state, if any (SP 8's rate / extent / repertoire).
+
+    The load-bearing figure pools the continuous mark into one number.  The
+    allowed conclusions distinguish a rate state from an extent state from a
+    repertoire state, and that distinction lives exactly in these blocks, so it
+    gets its own figure rather than a sentence asserting it.
+    """
+
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    _style()
+    fig, axes = plt.subplots(1, len(horizons), figsize=(3.5 * len(horizons), 3.4),
+                             sharey=False)
+    axes = np.atleast_1d(axes)
+    payload: dict[str, Any] = {}
+    xs = np.arange(len(BLOCK_ORDER), dtype=float)
+    for ax, horizon in zip(axes, horizons):
+        ax.axhline(0.0, color="#333333", lw=0.9, zorder=1)
+        for offset, (key, pattern) in enumerate(arms.items()):
+            colour = ARM_COLORS.get(key, "#444444")
+            med, lo, hi = [], [], []
+            for block in BLOCK_ORDER:
+                points = [p for p in collect_curve(results, pattern, block)
+                          if p.horizon == horizon]
+                v = points[0].values if points else np.zeros(0)
+                med.append(float(np.median(v)) if v.size else np.nan)
+                l, h = _bootstrap_ci(v)
+                lo.append(l)
+                hi.append(h)
+                payload.setdefault(f"{int(horizon)}s", {}).setdefault(key, {})[block] = {
+                    "median_gain": med[-1], "ci95": [l, h],
+                    "n_subjects": int(v.size),
+                    "n_positive": int((v > 0).sum()) if v.size else 0,
+                    "p_sign": points[0].p_sign if points else float("nan"),
+                }
+            dx = (offset - (len(arms) - 1) / 2) * 0.16
+            ax.errorbar(xs + dx, med, yerr=[np.array(med) - np.array(lo),
+                                            np.array(hi) - np.array(med)],
+                        color=colour, marker="o", ms=4, capsize=2, lw=0, elinewidth=1.4,
+                        label=ARM_LABELS.get(key, key))
+        ax.set_xticks(xs)
+        ax.set_xticklabels([BLOCK_LABELS[b] for b in BLOCK_ORDER], fontsize=7,
+                           rotation=30, ha="right")
+        ax.set_xlim(xs[0] - 0.5, xs[-1] + 0.5)
+        ax.set_title(f"{HORIZON_LABELS.get(horizon, f'{horizon / 60:.0f} min')} ahead")
+        if ax is axes[0]:
+            ax.set_ylabel("gain over baseline\n(nats per scored observation)")
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(handles, labels, loc="lower center", ncol=len(labels), frameon=False,
+               bbox_to_anchor=(0.5, -0.10))
+    fig.suptitle(
+        "Given that events arrive, which part of what they look like does the "
+        "state help with?", y=1.02, fontsize=10,
+    )
+    fig.tight_layout()
+    out_png.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out_png)
+    fig.savefig(out_pdf)
+    plt.close(fig)
+    return payload
+
+
+RESET_ORDER = (
+    ("reset_e1", "1 event"),
+    ("reset_e100", "100 events"),
+    ("reset_e1000", "1000 events"),
+    ("reset_t300", "5 min"),
+    ("reset_t1800", "30 min"),
+    ("reset_t7200", "2 h"),
+    ("", "whole segment"),
+)
+
+
+def plot_memory_truncation_figure(
+    diagnostic_results: Sequence[Mapping[str, Any]],
+    full_results: Sequence[Mapping[str, Any]],
+    out_png: Path,
+    out_pdf: Path,
+    *,
+    producer: str = "P_slow_seed1",
+    endpoints: Sequence[str] = ("count", "participation", "continuous"),
+) -> dict[str, Any]:
+    """Auxiliary diagnostic: how much of the past the frozen state actually uses.
+
+    CC 6 is explicit that the useful history scale is read off the future-block
+    curve against real horizons, **not** from "which reset first stops being
+    significant".  This figure is therefore labelled as a diagnostic and carries
+    no verdict of its own.
+    """
+
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    _style()
+    fig, axes = plt.subplots(1, len(endpoints), figsize=(3.5 * len(endpoints), 3.3))
+    axes = np.atleast_1d(axes)
+    payload: dict[str, Any] = {}
+    xs = np.arange(len(RESET_ORDER), dtype=float)
+    horizons = (300.0, 1800.0, 7200.0)
+    shades = {300.0: "#c1571c", 1800.0: "#8a5a2b", 7200.0: "#4a4a4a"}
+    for ax, endpoint in zip(axes, endpoints):
+        ax.axhline(0.0, color="#333333", lw=0.9, zorder=1)
+        for horizon in horizons:
+            med = []
+            for label, _pretty in RESET_ORDER:
+                source = full_results if label == "" else diagnostic_results
+                pattern = (f"B+S({producer})" if label == ""
+                           else f"B+S({producer}_{label})")
+                points = [p for p in collect_curve(source, pattern, endpoint)
+                          if p.horizon == horizon]
+                v = points[0].values if points else np.zeros(0)
+                med.append(float(np.median(v)) if v.size else np.nan)
+                payload.setdefault(endpoint, {}).setdefault(f"{int(horizon)}s", {})[
+                    label or "full"
+                ] = {"median_gain": med[-1], "n_subjects": int(v.size)}
+            ax.plot(xs, med, marker="o", ms=4, color=shades[horizon],
+                    label=HORIZON_LABELS.get(horizon, f"{horizon / 60:.0f} min"))
+        ax.set_xticks(xs)
+        ax.set_xticklabels([p for _l, p in RESET_ORDER], fontsize=6.5, rotation=35,
+                           ha="right")
+        ax.set_xlim(xs[0] - 0.4, xs[-1] + 0.4)
+        ax.set_title(PANEL_TITLES.get(endpoint, endpoint))
+        ax.set_ylabel("gain over baseline (nats per unit)")
+        ax.set_xlabel("how much past the state is allowed to keep")
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(handles, labels, loc="lower center", ncol=len(labels), frameon=False,
+               bbox_to_anchor=(0.5, -0.10), title="block starts")
+    fig.suptitle("Diagnostic: how much of the past the state actually uses", y=1.02,
+                 fontsize=10)
+    fig.tight_layout()
+    out_png.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out_png)
+    fig.savefig(out_pdf)
+    plt.close(fig)
+    return payload
