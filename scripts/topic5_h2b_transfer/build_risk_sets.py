@@ -142,6 +142,7 @@ def main() -> None:
     (args.data_root / "risk_sets").mkdir(parents=True, exist_ok=True)
 
     lead_rows, support_rows = [], []
+    event_times: dict[str, "np.ndarray"] = {}
     for subject in sorted(state_spans):
         spans = state_spans[subject]
         mon = monitoring.get(subject, spans)
@@ -183,6 +184,24 @@ def main() -> None:
         # D9: a cluster is one predictable episode. Rolling origin is applied to
         # EPISODES, and only the lead seizure of an episode can be a target --
         # every follower sits inside its own episode's postictal exclusion.
+        # Interictal event times: how fresh is the state a lead anchor can carry?
+        if subject not in event_times:
+            import numpy as _np
+            zp = args.dataset_root / subject / "scalars.npz"
+            if zp.exists():
+                _z = _np.load(zp)
+                event_times[subject] = _np.sort(_z["t_abs"][~_z["is_ictal"]])
+            else:
+                event_times[subject] = _np.empty(0)
+
+        def _age(t):
+            import numpy as _np
+            arr = event_times[subject]
+            if arr.size == 0:
+                return None
+            i = int(_np.searchsorted(arr, t, side="left")) - 1
+            return float(t - arr[i]) if i >= 0 else None
+
         episodes = group_seizure_episodes(sz, gap_seconds=args.postictal_exclusion_seconds)
         n, n_ep = len(sz), len(episodes)
         n_train_ep = max(1, math.ceil(n_ep / 2)) if n_ep else 0
@@ -204,6 +223,7 @@ def main() -> None:
                     "onset_epoch": lead_sz["onset_epoch"],
                     "state_period": period_of(lead_sz["onset_epoch"], bounds),
                     "zero_duration_lead": int(lead_sz["offset_epoch"] <= lead_sz["onset_epoch"]),
+                    "seconds_since_last_event": _age(lead_sz["onset_epoch"] - lead),
                 })
 
         n_ho_ep = n_ep - n_train_ep
