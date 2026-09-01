@@ -64,13 +64,15 @@ def _artifact_complete(job: dict) -> bool:
         return False
 
 
-def _state(job: dict) -> str:
+def _state(job: dict, commit: str) -> str:
     if _artifact_complete(job):
         return "complete"
     if _active(job["unit"]):
         return "running"
     if job["status"].is_file():
         status = job["status"].read_text().strip()
+        if f"commit={commit}" not in status:
+            return "pending"
         if status.startswith("FAILED"):
             return "failed"
         if status.startswith("SUCCESS"):
@@ -131,6 +133,7 @@ def _launch(job: dict, *, phase: str, config_path: Path, artifact_root: Path,
     job["status"].parent.mkdir(parents=True, exist_ok=True)
     command = [
         "systemd-run", "--user", f"--unit={job['unit']}", "--collect",
+        f"--working-directory={ROOT}",
         "--property=OOMPolicy=stop",
         "--setenv=OMP_NUM_THREADS=1", "--setenv=OPENBLAS_NUM_THREADS=1",
         "--setenv=MKL_NUM_THREADS=1", "--setenv=NUMEXPR_NUM_THREADS=1",
@@ -184,7 +187,7 @@ def main() -> None:
     status_path = output_root / args.phase / "status" / "controller.json"
 
     while True:
-        states = [_state(job) for job in jobs]
+        states = [_state(job, commit) for job in jobs]
         failed = [
             (job, state) for job, state in zip(jobs, states)
             if state in {"failed", "invalid_artifact", "orphaned"}
