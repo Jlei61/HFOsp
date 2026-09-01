@@ -69,4 +69,3 @@ E1146 在 target 解封前固定，只作辅助空间示例，不进入主 P 值
 - 视觉验收：`VISUAL_QA.json`
 - 跨状态统计：`early_ictal_model_contrasts.json`
 - 理论统计：`EFFECTIVE_MOTIF_SUMMARY.json`、`MATCHED_LESION_SUMMARY.json`
-

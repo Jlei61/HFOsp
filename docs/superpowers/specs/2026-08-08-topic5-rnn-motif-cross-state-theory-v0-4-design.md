@@ -1,8 +1,8 @@
 # Topic 5 — RNN motif benchmark、跨状态场复用与计算机制 v0.4
 
-状态：**LOCKED FOR EXECUTION 2026-08-09**  
-日期：2026-08-09  
-承接：`2026-08-08-topic5-wiring-economy-spatial-latent-rnn-v0-3-design.md`  
+状态：**LOCKED FOR EXECUTION 2026-08-09**
+日期：2026-08-09
+承接：`2026-08-08-topic5-wiring-economy-spatial-latent-rnn-v0-3-design.md`
 建议结果根目录：`results/topic5_rnn_motif_cross_state_benchmark_v0_4/`
 
 ---

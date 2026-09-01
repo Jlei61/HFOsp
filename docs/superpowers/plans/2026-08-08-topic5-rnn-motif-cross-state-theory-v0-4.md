@@ -1,6 +1,6 @@
 # Topic 5 RNN motif / cross-state / theory v0.4 — Execution Plan
 
-状态：**EXECUTING AGAINST LOCKED SPEC 2026-08-09**  
+状态：**EXECUTING AGAINST LOCKED SPEC 2026-08-09**
 对应 spec：`docs/superpowers/specs/2026-08-08-topic5-rnn-motif-cross-state-theory-v0-4-design.md`
 
 ---
