@@ -13,6 +13,7 @@ import argparse
 import csv
 import hashlib
 import json
+import os
 import shutil
 import sys
 import time
@@ -66,10 +67,14 @@ from src.topic5_tspectral_field_concordance import (  # noqa: E402
 )
 
 
-EPI_CACHE = ROOT / "results/topic5_ictal_recruitment/v2_band_scan/cache_tspectral_v1p2_common_1_80hz"
-YUQ_CACHE = ROOT / "results/topic5_ictal_recruitment/v2_band_scan/cache_tspectral_v1p2_yuquan_common_1_80hz"
-FIELD_ROOT = ROOT / "results/interictal_propagation_masked/template_gradient_fields/per_subject"
-PHENOTYPE_TABLE = (ROOT / "results/topic5_ictal_recruitment/peri_onset_energy_timing/"
+ARTIFACT_ROOT = Path(os.environ.get("HFOSP_ARTIFACT_ROOT", ROOT)).resolve()
+EPI_CACHE = ARTIFACT_ROOT / "results/topic5_ictal_recruitment/v2_band_scan/cache_tspectral_v1p2_common_1_80hz"
+YUQ_CACHE = ARTIFACT_ROOT / "results/topic5_ictal_recruitment/v2_band_scan/cache_tspectral_v1p2_yuquan_common_1_80hz"
+FIELD_ROOT = Path(os.environ.get(
+    "HFOSP_INTERICTAL_FIELD_DIR",
+    ARTIFACT_ROOT / "results/interictal_propagation_masked/template_gradient_fields/per_subject",
+)).resolve()
+PHENOTYPE_TABLE = (ARTIFACT_ROOT / "results/topic5_ictal_recruitment/peri_onset_energy_timing/"
                    "early_spectral_phenotype/per_seizure_spectral_overlap_state.csv")
 DEFAULT_OUT = ROOT / "results/topic5_ictal_recruitment/tspectral_field_concordance"
 PAPER_FIGURES = ROOT / "results/paper-ready-figure/fig3-sup-tspectral-field-concordance/figures"

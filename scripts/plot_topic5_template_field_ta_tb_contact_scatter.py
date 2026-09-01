@@ -19,7 +19,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-from plot_topic5_interictal_template_ab_fields import (
+from scripts.plot_topic5_interictal_template_ab_fields import (
     DEFAULT_YUQUAN_CROSSWALK,
     _display_name,
     _load_yuquan_crosswalk,

@@ -27,6 +27,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import os
 import sys
 import warnings
 from collections import Counter
@@ -43,8 +44,9 @@ warnings.filterwarnings("ignore", message="All-NaN slice encountered")
 from src.ictal_onset_extraction import extract_seizure_window, resolve_baseline_window
 from src.topic5_ictal_recruitment import band_power_trace, bipolar_alias_label
 
-GEOM_ROOT = Path("results/spatial_modulation/propagation_geometry/observation_readout/real_subjects")
-OUT_ROOT = Path("results/topic5_ictal_recruitment")
+ARTIFACT_ROOT = Path(os.environ.get("HFOSP_ARTIFACT_ROOT", _ROOT)).resolve()
+GEOM_ROOT = ARTIFACT_ROOT / "results/spatial_modulation/propagation_geometry/observation_readout/real_subjects"
+OUT_ROOT = ARTIFACT_ROOT / "results/topic5_ictal_recruitment"
 ICTAL_REFERENCE = {"yuquan": "bipolar", "epilepsiae": "car"}
 
 HOP = 0.1
@@ -105,8 +107,8 @@ def _cohort(only=None):
 def _inventory_rows(dataset: str, sid: str):
     """Ordered inventory rows for the subject (same filter/order as the extractor's index)."""
     onset_field = "clin_onset_epoch" if dataset == "epilepsiae" else "eeg_onset_epoch"
-    for cand in (Path("results/dataset_inventory") / f"{dataset}_seizure_inventory.csv",
-                 Path("results") / f"{dataset}_seizure_inventory.csv"):
+    for cand in (ARTIFACT_ROOT / "results/dataset_inventory" / f"{dataset}_seizure_inventory.csv",
+                 ARTIFACT_ROOT / "results" / f"{dataset}_seizure_inventory.csv"):
         if cand.exists():
             with open(cand) as fh:
                 rows = [r for r in csv.DictReader(fh)
@@ -122,8 +124,8 @@ def _full_inventory_n():
     out = {}
     for ds in ("epilepsiae", "yuquan"):
         of = "clin_onset_epoch" if ds == "epilepsiae" else "eeg_onset_epoch"
-        for cand in (Path("results/dataset_inventory") / f"{ds}_seizure_inventory.csv",
-                     Path("results") / f"{ds}_seizure_inventory.csv"):
+        for cand in (ARTIFACT_ROOT / "results/dataset_inventory" / f"{ds}_seizure_inventory.csv",
+                     ARTIFACT_ROOT / "results" / f"{ds}_seizure_inventory.csv"):
             if cand.exists():
                 with open(cand) as fh:
                     out[ds] = sum(1 for r in csv.DictReader(fh) if r.get(of))

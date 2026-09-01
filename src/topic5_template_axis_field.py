@@ -681,8 +681,27 @@ def _pearson(a: np.ndarray, b: np.ndarray) -> float:
     return float(np.corrcoef(a[ok], b[ok])[0, 1])
 
 
+def _template_projection_z(template: np.ndarray, activation: np.ndarray) -> float:
+    """Project activation onto a standardized frozen template.
+
+    The result has the same units as ``activation``. Unlike Pearson
+    correlation, it retains spatial-contrast amplitude while remaining
+    insensitive to a spatially uniform offset.
+    """
+    t = np.asarray(template, float)
+    a = np.asarray(activation, float)
+    ok = np.isfinite(t) & np.isfinite(a)
+    if int(ok.sum()) < 3:
+        return np.nan
+    tc = t[ok] - float(np.mean(t[ok]))
+    tsd = float(np.std(tc))
+    if not np.isfinite(tsd) or tsd < 1e-12:
+        return np.nan
+    return float(np.mean((tc / tsd) * a[ok]))
+
+
 def score_field(scorer: Mapping[str, object], activation: Sequence[float]) -> Dict[str, object]:
-    """Correct abs-max identity/mirror contact-field correlation for one template."""
+    """Score morphology and amplitude-aware expression of one frozen field."""
     value = np.asarray(activation, float)
     if "weight_id" in scorer:
         act_id = _smooth_from_weights(value, np.asarray(scorer["weight_id"], float))
@@ -697,14 +716,43 @@ def score_field(scorer: Mapping[str, object], activation: Sequence[float]) -> Di
         act_mirror = kernel_smooth_at_contacts(value, pts, mirrored_eval, sup, sigma)
     tpl = np.asarray(scorer["template_field"], float)
     c_id, c_mirror = _pearson(tpl, act_id), _pearson(tpl, act_mirror)
+    q_id = _template_projection_z(tpl, act_id)
+    q_mirror = _template_projection_z(tpl, act_mirror)
     candidates = [("identity", c_id), ("mirror", c_mirror)]
     candidates = [(k, c) for k, c in candidates if np.isfinite(c)]
     if not candidates:
-        return {"signed_r": np.nan, "abs_r": np.nan, "mirror_choice": None,
-                "r_identity": c_id, "r_mirror": c_mirror}
+        q_candidates = [("identity", q_id), ("mirror", q_mirror)]
+        q_candidates = [(k, q) for k, q in q_candidates if np.isfinite(q)]
+        q_choice, projection = (
+            max(q_candidates, key=lambda z: abs(z[1]))
+            if q_candidates else (None, np.nan)
+        )
+        return {
+            "signed_r": np.nan,
+            "abs_r": np.nan,
+            "mirror_choice": None,
+            "r_identity": c_id,
+            "r_mirror": c_mirror,
+            "signed_projection_z": float(projection),
+            "abs_projection_z": abs(float(projection)),
+            "projection_mirror_choice": q_choice,
+            "projection_identity_z": q_id,
+            "projection_mirror_z": q_mirror,
+        }
     choice, signed = max(candidates, key=lambda z: abs(z[1]))
-    return {"signed_r": float(signed), "abs_r": abs(float(signed)),
-            "mirror_choice": choice, "r_identity": c_id, "r_mirror": c_mirror}
+    projection = q_id if choice == "identity" else q_mirror
+    return {
+        "signed_r": float(signed),
+        "abs_r": abs(float(signed)),
+        "mirror_choice": choice,
+        "r_identity": c_id,
+        "r_mirror": c_mirror,
+        "signed_projection_z": float(projection),
+        "abs_projection_z": abs(float(projection)),
+        "projection_mirror_choice": choice,
+        "projection_identity_z": q_id,
+        "projection_mirror_z": q_mirror,
+    }
 
 
 def _row_pearson(template: np.ndarray, values: np.ndarray) -> np.ndarray:
@@ -728,21 +776,61 @@ def _row_pearson(template: np.ndarray, values: np.ndarray) -> np.ndarray:
     return out
 
 
+def _row_template_projection_z(template: np.ndarray, values: np.ndarray) -> np.ndarray:
+    """Batch counterpart of :func:`_template_projection_z`."""
+    t = np.asarray(template, float)
+    y = np.asarray(values, float)
+    if y.ndim != 2:
+        raise ValueError("values must have shape (n_draw, n_field_point)")
+    mask = np.isfinite(y) & np.isfinite(t)[None, :]
+    n = mask.sum(axis=1).astype(float)
+    tx = np.where(mask, t[None, :], 0.0)
+    yy = np.where(mask, y, 0.0)
+    t_mean = tx.sum(axis=1) / np.maximum(n, 1.0)
+    tc = np.where(mask, t[None, :] - t_mean[:, None], 0.0)
+    t_sd = np.sqrt((tc * tc).sum(axis=1) / np.maximum(n, 1.0))
+    out = np.full(len(y), np.nan)
+    ok = (n >= 3) & np.isfinite(t_sd) & (t_sd > 1e-12)
+    if np.any(ok):
+        out[ok] = (((tc[ok] / t_sd[ok, None]) * yy[ok]).sum(axis=1) / n[ok])
+    return out
+
+
 def score_field_batch(scorer: Mapping[str, object], activations: np.ndarray) -> Dict[str, np.ndarray]:
-    """Vectorized, numerically equivalent identity/mirror abs-max field score."""
+    """Vectorized, numerically equivalent morphology and projection score."""
     v = np.asarray(activations, float)
     if "weight_id" not in scorer:
         rows = [score_field(scorer, row) for row in v]
         return {"signed_r": np.asarray([r["signed_r"] for r in rows]),
-                "abs_r": np.asarray([r["abs_r"] for r in rows])}
+                "abs_r": np.asarray([r["abs_r"] for r in rows]),
+                "signed_projection_z": np.asarray(
+                    [r["signed_projection_z"] for r in rows]
+                ),
+                "abs_projection_z": np.asarray(
+                    [r["abs_projection_z"] for r in rows]
+                )}
     act_id = _smooth_matrix_from_weights(v, np.asarray(scorer["weight_id"], float))
     act_mirror = _smooth_matrix_from_weights(v, np.asarray(scorer["weight_mirror"], float))
     tpl = np.asarray(scorer["template_field"], float)
     c_id, c_mirror = _row_pearson(tpl, act_id), _row_pearson(tpl, act_mirror)
+    q_id = _row_template_projection_z(tpl, act_id)
+    q_mirror = _row_template_projection_z(tpl, act_mirror)
     choose_mirror = np.abs(c_mirror) > np.abs(c_id)
+    only_mirror_corr = ~np.isfinite(c_id) & np.isfinite(c_mirror)
+    no_corr = ~np.isfinite(c_id) & ~np.isfinite(c_mirror)
+    choose_mirror[only_mirror_corr] = True
+    only_mirror_q = no_corr & ~np.isfinite(q_id) & np.isfinite(q_mirror)
+    both_q = no_corr & np.isfinite(q_id) & np.isfinite(q_mirror)
+    choose_mirror[only_mirror_q] = True
+    choose_mirror[both_q] = np.abs(q_mirror[both_q]) > np.abs(q_id[both_q])
     signed = np.where(choose_mirror, c_mirror, c_id)
-    signed[~np.isfinite(c_id) & np.isfinite(c_mirror)] = c_mirror[~np.isfinite(c_id) & np.isfinite(c_mirror)]
-    return {"signed_r": signed, "abs_r": np.abs(signed)}
+    projection = np.where(choose_mirror, q_mirror, q_id)
+    return {
+        "signed_r": signed,
+        "abs_r": np.abs(signed),
+        "signed_projection_z": projection,
+        "abs_projection_z": np.abs(projection),
+    }
 
 
 def score_scorer_bundle(scorers: Mapping[str, Mapping[str, object]],
@@ -753,11 +841,20 @@ def score_scorer_bundle(scorers: Mapping[str, Mapping[str, object]],
         s = score_field(scorer, activation)
         result[f"{name}_signed"] = float(s["signed_r"])
         result[f"{name}_abs"] = float(s["abs_r"])
+        result[f"{name}_signed_projection_z"] = float(s["signed_projection_z"])
+        result[f"{name}_abs_projection_z"] = float(s["abs_projection_z"])
     for prefix in ("own", "shared"):
         vals = [result.get(f"{prefix}_{t}_abs", np.nan) for t in ("a", "b")]
         finite = [v for v in vals if np.isfinite(v)]
         if finite:
             result[f"{prefix}_maxab"] = float(max(finite))
+        q_vals = [
+            result.get(f"{prefix}_{t}_abs_projection_z", np.nan)
+            for t in ("a", "b")
+        ]
+        q_finite = [v for v in q_vals if np.isfinite(v)]
+        if q_finite:
+            result[f"{prefix}_maxab_projection_z"] = float(max(q_finite))
     return result
 
 
@@ -769,8 +866,19 @@ def score_scorer_bundle_batch(scorers: Mapping[str, Mapping[str, object]],
         s = score_field_batch(scorer, activations)
         result[f"{name}_signed"] = s["signed_r"]
         result[f"{name}_abs"] = s["abs_r"]
+        result[f"{name}_signed_projection_z"] = s["signed_projection_z"]
+        result[f"{name}_abs_projection_z"] = s["abs_projection_z"]
     for prefix in ("own", "shared"):
         keys = [f"{prefix}_{t}_abs" for t in ("a", "b") if f"{prefix}_{t}_abs" in result]
         if keys:
             result[f"{prefix}_maxab"] = np.nanmax(np.vstack([result[k] for k in keys]), axis=0)
+        q_keys = [
+            f"{prefix}_{t}_abs_projection_z"
+            for t in ("a", "b")
+            if f"{prefix}_{t}_abs_projection_z" in result
+        ]
+        if q_keys:
+            result[f"{prefix}_maxab_projection_z"] = np.nanmax(
+                np.vstack([result[k] for k in q_keys]), axis=0
+            )
     return result

@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import ast
 import json
+import os
 import re
 import sys
 from functools import lru_cache
@@ -24,6 +25,11 @@ if str(ROOT) not in sys.path:
 from src.plot_style import savefig_pub, style_panel  # noqa: E402
 
 
+ARTIFACT_ROOT = Path(os.environ.get("HFOSP_ARTIFACT_ROOT", ROOT)).resolve()
+if not (ARTIFACT_ROOT / "ReplayIED").exists():
+    canonical_checkout = Path("/home/honglab/leijiaxin/HFOsp")
+    if (canonical_checkout / "ReplayIED").exists():
+        ARTIFACT_ROOT = canonical_checkout
 DATA_DIR = ROOT / "results/paper-ready-figure/fig3f_ab_dominance_cohort"
 COHORT_JSON = DATA_DIR / "fig3f_ab_dominance_cohort.json"
 FIG_DIR = DATA_DIR / "figures"
@@ -31,11 +37,11 @@ PAIRED_STEM = "fig3f_ab_dominance_paired"
 HEATMAP_STEM = "fig3f_ab_dominance_heatmap"
 SUPPLEMENTARY_TABLE = ROOT / "docs/paper-draft/cohort_contract_and_supplementary_tables.md"
 EPILEPSIAE_ORDER_SOURCE = (
-    ROOT / "ReplayIED/inter_events/epilepsiae_interictal/"
+    ARTIFACT_ROOT / "ReplayIED/inter_events/epilepsiae_interictal/"
     "plotting_figAdd_personalKuramoto_withDelay.py"
 )
 YUQUAN_ORDER_SOURCE = (
-    ROOT / "ReplayIED/inter_events/yuquan_24h_perPatientAnalysis_dropRef/"
+    ARTIFACT_ROOT / "ReplayIED/inter_events/yuquan_24h_perPatientAnalysis_dropRef/"
     "plotting_fig1_hfoHist.py"
 )
 
@@ -44,6 +50,13 @@ COL_NONSIG = "#A9A9A9"
 COL_MEDIAN = "#202020"
 START_SEC, STOP_SEC, STEP_SEC = -120.0, 20.0, 2.0
 HEATMAP_SORT_WINDOW = (-30.0, 20.0)
+
+
+def _display_path(path: Path) -> str:
+    try:
+        return str(path.relative_to(ROOT))
+    except ValueError:
+        return str(path)
 
 
 def _literal_list_assignment(path: Path, variable: str) -> list[str]:
@@ -366,7 +379,7 @@ def _write_sidecars(payload: dict, paths: dict[str, Path]) -> None:
     cohort = payload["primary_cohort_hierarchical_time_null"]
     summary = {
         "panel": "Figure 3F",
-        "source": str(COHORT_JSON.relative_to(ROOT)),
+        "source": _display_path(COHORT_JSON),
         "canonical_n": payload["n_canonical_subjects"],
         "primary_n": cohort["n"],
         "primary_statistic": payload["primary_statistic"],
@@ -379,7 +392,7 @@ def _write_sidecars(payload: dict, paths: dict[str, Path]) -> None:
         "within_shaft_sensitivity_cohort_hierarchical_time_null": payload[
             "within_shaft_sensitivity_cohort_hierarchical_time_null"
         ],
-        "files": {key: str(path.relative_to(ROOT)) for key, path in paths.items()},
+        "files": {key: _display_path(path) for key, path in paths.items()},
         "heatmap_sort": {
             "window_sec": list(HEATMAP_SORT_WINDOW),
             "coherence_definition": "abs(mean C_AB) / mean(abs(C_AB))",
@@ -394,9 +407,9 @@ def _write_sidecars(payload: dict, paths: dict[str, Path]) -> None:
             ],
         },
         "manuscript_y_labels": {
-            "supplementary_table": str(SUPPLEMENTARY_TABLE.relative_to(ROOT)),
-            "epilepsiae_order_source": str(EPILEPSIAE_ORDER_SOURCE.relative_to(ROOT)),
-            "yuquan_order_source": str(YUQUAN_ORDER_SOURCE.relative_to(ROOT)),
+            "supplementary_table": _display_path(SUPPLEMENTARY_TABLE),
+            "epilepsiae_order_source": _display_path(EPILEPSIAE_ORDER_SOURCE),
+            "yuquan_order_source": _display_path(YUQUAN_ORDER_SOURCE),
             "labels": [
                 {
                     "subject": item["record"]["subject"],
@@ -430,9 +443,18 @@ def _write_sidecars(payload: dict, paths: dict[str, Path]) -> None:
 
 
 def main() -> None:
+    global DATA_DIR, COHORT_JSON, FIG_DIR
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", type=Path, default=COHORT_JSON)
+    parser.add_argument("--output-dir", type=Path, default=None)
     args = parser.parse_args()
+    args.input = args.input.resolve()
+    DATA_DIR = args.input.parent
+    COHORT_JSON = args.input
+    FIG_DIR = (
+        args.output_dir.resolve()
+        if args.output_dir is not None else DATA_DIR / "figures"
+    )
     payload = json.loads(args.input.read_text())
     plt.rcParams.update({
         "font.family": "DejaVu Sans",

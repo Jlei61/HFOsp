@@ -10,6 +10,7 @@ Default target: E1146, 10 s windows from -120 s to seizure offset.
 from __future__ import annotations
 
 import argparse
+import concurrent.futures
 import json
 import os
 import sys
@@ -37,10 +38,21 @@ from scripts.compute_topic5_signed_broadband_similarity import (  # noqa: E402
 from scripts.run_topic5_t0_eligibility import _inventory_rows  # noqa: E402
 
 
-T0_CACHE = _ROOT / "results/topic5_ictal_recruitment/t0_feature_cache"
-LONG_CACHE = _ROOT / "results/topic5_ictal_recruitment/ictal_field_long_cache"
-OUT = _ROOT / "results/topic5_ictal_recruitment/field_dynamics_signed"
+ARTIFACT_ROOT = Path(os.environ.get("HFOSP_ARTIFACT_ROOT", _ROOT)).resolve()
+T0_CACHE = ARTIFACT_ROOT / "results/topic5_ictal_recruitment/t0_feature_cache"
+LONG_CACHE = ARTIFACT_ROOT / "results/topic5_ictal_recruitment/ictal_field_long_cache"
+OUT = Path(os.environ.get(
+    "HFOSP_FIELD_DYNAMICS_DIR",
+    _ROOT / "results/topic5_ictal_recruitment/field_dynamics_signed",
+)).resolve()
 FIG = OUT / "figures"
+
+
+def _display_path(path: Path) -> str:
+    try:
+        return str(path.relative_to(_ROOT))
+    except ValueError:
+        return str(path)
 
 
 def _eligibility_status(ds_sid: str) -> dict:
@@ -57,7 +69,7 @@ def _eligibility_status(ds_sid: str) -> dict:
                 return {
                     "status": "eligible_cache_ready",
                     "inventory_n": len(inv_rows),
-                    "cache_path": str(fp.relative_to(_ROOT)),
+                    "cache_path": _display_path(fp),
                     "eligible_idxs": idxs,
                     "reason_code": None,
                 }
@@ -141,9 +153,15 @@ def _score_row(ds_sid: str, seizure_idx: int, lo: float, hi: float, offset: floa
         r = per_template.get(key, {})
         row[f"{key}_signed_corr"] = _nan(r.get("signed_corr"))
         row[f"{key}_abs_corr"] = _nan(r.get("abs_corr"))
+        row[f"{key}_signed_projection_z"] = _nan(r.get("signed_projection_z"))
+        row[f"{key}_abs_projection_z"] = _nan(r.get("abs_projection_z"))
         row[f"{key}_mirror_choice"] = r.get("mirror_choice")
     row["maxAB_abs_corr"] = max(row["A_abs_corr"], row["B_abs_corr"])
     row["maxAB_signed_corr"] = row[f"{best}_signed_corr"] if best in ("A", "B") else float("nan")
+    projection_best = max(("A", "B"), key=lambda key: row[f"{key}_abs_projection_z"])
+    row["best_projection_template"] = projection_best
+    row["maxAB_abs_projection_z"] = row[f"{projection_best}_abs_projection_z"]
+    row["maxAB_signed_projection_z"] = row[f"{projection_best}_signed_projection_z"]
     return row
 
 
@@ -162,7 +180,7 @@ def _aggregate(df: pd.DataFrame) -> pd.DataFrame:
     for (lo, hi, cen), g in df.groupby(["window_start_sec", "window_end_sec", "window_center_sec"], sort=True):
         v = pd.to_numeric(g["maxAB_abs_corr"], errors="coerce").dropna().to_numpy(float)
         signed = pd.to_numeric(g["maxAB_signed_corr"], errors="coerce").dropna().to_numpy(float)
-        rows.append({
+        row = {
             "window_start_sec": float(lo),
             "window_end_sec": float(hi),
             "window_center_sec": float(cen),
@@ -177,7 +195,20 @@ def _aggregate(df: pd.DataFrame) -> pd.DataFrame:
             "median_maxAB_signed_corr": float(np.median(signed)) if signed.size else np.nan,
             "sd_maxAB_signed_corr": float(np.std(signed, ddof=1)) if signed.size >= 2 else np.nan,
             "var_maxAB_signed_corr": float(np.var(signed, ddof=1)) if signed.size >= 2 else np.nan,
-        })
+        }
+        for prefix, column in {
+            "maxAB_abs_projection_z": "maxAB_abs_projection_z",
+            "A_signed_projection_z": "A_signed_projection_z",
+            "B_signed_projection_z": "B_signed_projection_z",
+        }.items():
+            values = pd.to_numeric(g[column], errors="coerce").dropna().to_numpy(float)
+            row[f"mean_{prefix}"] = float(np.mean(values)) if values.size else np.nan
+            row[f"median_{prefix}"] = float(np.median(values)) if values.size else np.nan
+            row[f"sd_{prefix}"] = float(np.std(values, ddof=1)) if values.size >= 2 else np.nan
+            row[f"var_{prefix}"] = float(np.var(values, ddof=1)) if values.size >= 2 else np.nan
+            row[f"q25_{prefix}"] = float(np.percentile(values, 25)) if values.size else np.nan
+            row[f"q75_{prefix}"] = float(np.percentile(values, 75)) if values.size else np.nan
+        rows.append(row)
     return pd.DataFrame(rows)
 
 
@@ -231,6 +262,55 @@ def _plot(ds_sid: str, per: pd.DataFrame, agg: pd.DataFrame, out_png: Path, *, b
     plt.close(fig)
 
 
+def _process_seizure_timecourse(
+    args_dict: dict,
+    seizure_idx: int,
+) -> list[dict]:
+    args = SimpleNamespace(**args_dict)
+    ds_sid = args.subject
+    args.seizure_idx = int(seizure_idx)
+    args.smooth_sec = float(args.window_sec)
+    args.frame_step_sec = float(args.step_sec)
+    (
+        _ds_sid,
+        _idx,
+        _sw,
+        offset,
+        _bl,
+        field_record,
+        names,
+        starts,
+        window_vals,
+        _onset_vals,
+    ) = _compute_shared_values(args)
+    score = _shared_scorer(ds_sid, names)
+    rows = []
+    for lo, vals in zip(starts, window_vals):
+        if not _on_common_grid(lo, start_sec=args.start_sec, step_sec=args.step_sec):
+            continue
+        row = _score_row(
+            ds_sid,
+            seizure_idx,
+            float(lo),
+            float(lo + args.window_sec),
+            float(offset),
+            vals,
+            score,
+        )
+        row.update({
+            "field_plane": "shared",
+            "field_scorers": "shared_a,shared_b",
+            "field_contract": field_record["contract"],
+            "field_fingerprint_sha256": field_record["interictal_field"]["fingerprint_sha256"],
+            "axis_definition": field_record["axis_definition"],
+            "axis_direction_convention": field_record["axis_direction_convention"],
+            "own_field_fallback": False,
+            **_shared_geometry_metadata(field_record),
+        })
+        rows.append(row)
+    return rows
+
+
 def run(args: argparse.Namespace) -> tuple[Path, Path, Path]:
     ds_sid = args.subject
     out_dir_value = getattr(args, "out_dir", None)
@@ -245,44 +325,36 @@ def run(args: argparse.Namespace) -> tuple[Path, Path, Path]:
         )
     rows = []
     drops = []
-    for k, seizure_idx in enumerate(idxs, start=1):
-        print(f"[{ds_sid}] seizure {seizure_idx} ({k}/{len(idxs)})", flush=True)
-        per_args = SimpleNamespace(**vars(args))
-        per_args.seizure_idx = int(seizure_idx)
-        per_args.smooth_sec = float(args.window_sec)
-        per_args.frame_step_sec = float(args.step_sec)
-        try:
-            _ds_sid, _idx, sw, offset, bl, field_record, names, starts, window_vals, _onset_vals = _compute_shared_values(per_args)
-            score = _shared_scorer(ds_sid, names)
-            for lo, vals in zip(starts, window_vals):
-                if not _on_common_grid(lo, start_sec=args.start_sec, step_sec=args.step_sec):
-                    # `_compute_values` appends an offset-aligned final window per seizure.
-                    # That is useful for single-seizure movies, but cross-seizure variance
-                    # requires common time bins; otherwise each seizure contributes a private
-                    # n=1 endpoint.
-                    continue
-                row = _score_row(
-                    ds_sid, seizure_idx, float(lo), float(lo + args.window_sec),
-                    float(offset), vals, score,
-                )
-                row.update({
-                    "field_plane": "shared",
-                    "field_scorers": "shared_a,shared_b",
-                    "field_contract": field_record["contract"],
-                    "field_fingerprint_sha256": field_record["interictal_field"]["fingerprint_sha256"],
-                    "axis_definition": field_record["axis_definition"],
-                    "axis_direction_convention": field_record["axis_direction_convention"],
-                    "own_field_fallback": False,
-                    **_shared_geometry_metadata(field_record),
-                })
-                rows.append(row)
-        except Exception as exc:
-            drops.append({"seizure_idx": int(seizure_idx), "reason": f"{type(exc).__name__}: {exc}"})
-            print(f"  drop: {drops[-1]['reason']}", flush=True)
+    workers = max(1, min(int(getattr(args, "workers", 1)), 2, len(idxs)))
+    args_dict = vars(args).copy()
+    if workers == 1:
+        for k, seizure_idx in enumerate(idxs, start=1):
+            print(f"[{ds_sid}] seizure {seizure_idx} ({k}/{len(idxs)})", flush=True)
+            try:
+                rows.extend(_process_seizure_timecourse(args_dict, seizure_idx))
+            except Exception as exc:
+                drops.append({"seizure_idx": int(seizure_idx), "reason": f"{type(exc).__name__}: {exc}"})
+                print(f"  drop: {drops[-1]['reason']}", flush=True)
+    else:
+        with concurrent.futures.ProcessPoolExecutor(max_workers=workers) as pool:
+            futures = {
+                pool.submit(_process_seizure_timecourse, args_dict, seizure_idx): seizure_idx
+                for seizure_idx in idxs
+            }
+            for k, future in enumerate(concurrent.futures.as_completed(futures), start=1):
+                seizure_idx = futures[future]
+                print(f"[{ds_sid}] seizure {seizure_idx} ({k}/{len(idxs)})", flush=True)
+                try:
+                    rows.extend(future.result())
+                except Exception as exc:
+                    drops.append({"seizure_idx": int(seizure_idx), "reason": f"{type(exc).__name__}: {exc}"})
+                    print(f"  drop: {drops[-1]['reason']}", flush=True)
     if not rows:
         raise RuntimeError(f"{ds_sid}: no seizure produced timecourse rows")
 
-    per = pd.DataFrame(rows)
+    per = pd.DataFrame(rows).sort_values(
+        ["seizure_idx", "window_start_sec"]
+    ).reset_index(drop=True)
     agg = _aggregate(per)
     out_dir.mkdir(parents=True, exist_ok=True)
     fig_dir.mkdir(parents=True, exist_ok=True)
@@ -320,7 +392,10 @@ def run(args: argparse.Namespace) -> tuple[Path, Path, Path]:
         "band_hz": [float(args.band_lo), float(args.band_hi)],
         "window_sec": float(args.window_sec),
         "step_sec": float(args.step_sec),
-        "feature": "1-150 Hz log power, per-channel baseline robust-z; signed values, shared-gradient maxAB |r| similarity",
+        "feature": (
+            "1-150 Hz log power, per-channel baseline robust-z; shared-gradient "
+            "morphology r plus amplitude-aware projection in robust-z units"
+        ),
         "field_contract": str(per["field_contract"].iloc[0]),
         "field_plane": "shared",
         "field_scorers": ["shared_a", "shared_b"],
@@ -356,6 +431,18 @@ def run(args: argparse.Namespace) -> tuple[Path, Path, Path]:
             "median_of_aggregate_median": float(np.nanmedian(early["median_maxAB_abs_corr"])) if len(early) else None,
             "median_of_aggregate_variance": float(np.nanmedian(early["var_maxAB_abs_corr"])) if len(early) else None,
         },
+        "template_projection_z": {
+            "definition": (
+                "mean(zscore(frozen template field) * smoothed ictal activation); "
+                "identity/mirror orientation selected by abs correlation"
+            ),
+            "pre_m120_0_median": (
+                float(np.nanmedian(pre["median_maxAB_abs_projection_z"])) if len(pre) else None
+            ),
+            "early_0_30_median": (
+                float(np.nanmedian(early["median_maxAB_abs_projection_z"])) if len(early) else None
+            ),
+        },
     }
     _atomic_json(summary, summary_json)
     print(png)
@@ -378,6 +465,7 @@ def main() -> None:
     ap.add_argument("--step-sec", type=float, default=10.0)
     ap.add_argument("--onset-win-sec", type=float, default=10.0)
     ap.add_argument("--chunk-ch", type=int, default=16)
+    ap.add_argument("--workers", type=int, default=1)
     ap.add_argument(
         "--out-dir",
         default=None,

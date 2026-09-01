@@ -196,6 +196,15 @@ def main() -> None:
     parser.add_argument("--n-perm", type=int, default=10_000)
     parser.add_argument("--n-cohort-perm", type=int, default=100_000)
     parser.add_argument("--seed", type=int, default=20260721)
+    parser.add_argument(
+        "--expected-subjects",
+        type=int,
+        default=12,
+        help=(
+            "Expected eligible shared-plane cohort size. Use 0 to accept the "
+            "data-derived denominator while still requiring at least two subjects."
+        ),
+    )
     args = parser.parse_args()
 
     yuquan_labels = _load_yuquan_crosswalk(args.yuquan_crosswalk)
@@ -213,8 +222,16 @@ def main() -> None:
         row, subject_nulls = result
         rows.append(row)
         null_arrays[row["subject_id"]] = subject_nulls
-    if len(rows) != 12:
-        raise ValueError(f"expected 12 shared-axis subjects with supported 2D geometry, found {len(rows)}")
+    if args.expected_subjects > 0 and len(rows) != args.expected_subjects:
+        raise ValueError(
+            "expected "
+            f"{args.expected_subjects} shared-axis subjects with supported 2D geometry, "
+            f"found {len(rows)}"
+        )
+    if len(rows) < 2:
+        raise ValueError(
+            "shared-axis cohort inference requires at least two eligible subjects"
+        )
 
     _add_fdr(rows, observed_key=OBSERVED_KEY)
     summaries = {
@@ -266,6 +283,9 @@ def main() -> None:
                 "contract": "topic5_interictal_template_fields_v1",
                 "cohort": "shared_field_available_and_geometry_2d_supported",
                 "n_subjects": len(rows),
+                "expected_subjects": (
+                    int(args.expected_subjects) if args.expected_subjects > 0 else None
+                ),
                 "inclusion": (
                     "saved shared_a/shared_b fields and supported 2D geometry; no strict-stability "
                     "gate and no grouping by signed axis cosine"

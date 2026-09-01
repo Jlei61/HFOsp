@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import sys
 import zlib
 from pathlib import Path
@@ -67,6 +68,7 @@ from src.topic5_tspectral_field_concordance import (  # noqa: E402
 )
 
 
+ARTIFACT_ROOT = Path(os.environ.get("HFOSP_ARTIFACT_ROOT", ROOT)).resolve()
 OUT = ROOT / "results/topic5_ictal_recruitment/tspectral_field_concordance"
 PAPER = ROOT / "results/paper-ready-figure/fig3-sup-tspectral-field-concordance"
 PAPER_FIGURES = PAPER / "figures"
@@ -91,6 +93,13 @@ STRATA = {
         "label": "Non-strict reversed",
     },
 }
+
+
+def _display_path(path: Path) -> str:
+    try:
+        return str(path.relative_to(ROOT))
+    except ValueError:
+        return str(path)
 
 
 def clinical_relative_times(times_from_crop: Sequence[float], pre_sec: float) -> np.ndarray:
@@ -162,6 +171,7 @@ def _process_event(subject: str, dataset: str, seizure_idx: int,
     sw = extract_seizure_window(
         f"{dataset}/{sid}", seizure_idx, pre_sec=pre_sec, post_sec=post_sec,
         reference=ICTAL_REFERENCE[dataset],
+        results_root=ARTIFACT_ROOT / "results",
     )
     if dataset == "epilepsiae":
         if sw.eeg_onset_epoch is None:
@@ -377,11 +387,13 @@ def run(args: argparse.Namespace) -> dict:
     OUT.mkdir(parents=True, exist_ok=True)
     CHECKPOINT_DIR.mkdir(parents=True, exist_ok=True)
     source_paths = sorted(OLD_CACHE.glob("*.npz"))
-    hashes_before = {str(p.relative_to(ROOT)): _sha256(p) for p in source_paths}
+    hashes_before = {_display_path(p): _sha256(p) for p in source_paths}
 
     event_rows, subject_rows, audit = [], [], []
     candidates = []
     for field_path in sorted(FIELD_ROOT.glob("*.json")):
+        if args.subjects and field_path.stem not in set(args.subjects):
+            continue
         record = json.loads(field_path.read_text())
         stratum = clinical_stratum(record)
         if stratum:
@@ -433,7 +445,11 @@ def run(args: argparse.Namespace) -> dict:
                     print(f"    DROP {event['drop_reason']}", flush=True)
                 checkpoint.write_text(json.dumps(jsonable({
                     "contract": CONTRACT, "eeg_counterpart_contract": EEG_CONTRACT,
-                    "field_sha256": field_hash, "source_cache_sha256": source_hash,
+                    "field_sha256": field_hash,
+                    "field_fingerprint_sha256": (
+                        record.get("interictal_field") or {}
+                    ).get("fingerprint_sha256"),
+                    "source_cache_sha256": source_hash,
                     "n_perm": args.n_perm, "seed": args.seed, "event": event,
                 }), ensure_ascii=False) + "\n")
             if event.get("status") == "included": events.append(event)
@@ -473,7 +489,7 @@ def run(args: argparse.Namespace) -> dict:
     subject_frame.to_csv(paths["subject"], index=False)
     cohort.to_csv(paths["cohort"], index=False)
     audit_frame.to_csv(paths["audit"], index=False)
-    hashes_after = {str(p.relative_to(ROOT)): _sha256(p) for p in source_paths}
+    hashes_after = {_display_path(p): _sha256(p) for p in source_paths}
     if hashes_before != hashes_after:
         raise RuntimeError("historical source cache NPZ changed during analysis")
 
@@ -495,9 +511,9 @@ def run(args: argparse.Namespace) -> dict:
                  "folding": "seizure median within subject for every draw"},
         "cohort_statistics": cohort.to_dict(orient="records"),
         "source_cache_npz_unchanged": True,
-        "outputs": {key: str(path.relative_to(ROOT)) for key, path in paths.items()}
-                   | {"figure_png": str(png.relative_to(ROOT)),
-                      "figure_pdf": str(pdf.relative_to(ROOT))},
+        "outputs": {key: _display_path(path) for key, path in paths.items()}
+                   | {"figure_png": _display_path(png),
+                      "figure_pdf": _display_path(pdf)},
     }
     summary_path = OUT / "clinical_onset_shared_field_summary.json"
     summary_path.write_text(json.dumps(jsonable(summary), ensure_ascii=False, indent=2) + "\n")
@@ -510,11 +526,26 @@ def run(args: argparse.Namespace) -> dict:
 
 
 def main() -> None:
+    global ARTIFACT_ROOT, FIELD_ROOT, OLD_CACHE, OUT, PAPER, PAPER_FIGURES, CHECKPOINT_DIR
     parser = argparse.ArgumentParser()
+    parser.add_argument("--subjects", nargs="*", default=None)
+    parser.add_argument("--field-root", type=Path, default=FIELD_ROOT)
+    parser.add_argument("--artifact-root", type=Path, default=ARTIFACT_ROOT)
+    parser.add_argument("--old-cache-dir", type=Path, default=OLD_CACHE)
+    parser.add_argument("--out-dir", type=Path, default=OUT)
+    parser.add_argument("--paper-dir", type=Path, default=PAPER)
     parser.add_argument("--n-perm", type=int, default=1000)
     parser.add_argument("--seed", type=int, default=BASE_SEED)
     parser.add_argument("--resume", action="store_true")
-    run(parser.parse_args())
+    args = parser.parse_args()
+    ARTIFACT_ROOT = args.artifact_root.resolve()
+    FIELD_ROOT = args.field_root.resolve()
+    OLD_CACHE = args.old_cache_dir.resolve()
+    OUT = args.out_dir.resolve()
+    PAPER = args.paper_dir.resolve()
+    PAPER_FIGURES = PAPER / "figures"
+    CHECKPOINT_DIR = OUT / "per_subject/clinical_onset_shared_field"
+    run(args)
 
 
 if __name__ == "__main__":
