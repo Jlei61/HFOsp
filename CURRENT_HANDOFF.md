@@ -82,6 +82,9 @@ $PY scripts/topic5_group_event_state/v02_train_producers.py \
 4. 承重图 + 两张辅助图 + `figures/README.md` + 目视验收
    （1–4 已由 `v02_after_training.sh` 串好，并已挂在训练完成后自动触发，PID 953195）。
 5. 写 registry producer 条目；补完 plain / technical 报告的结果段。
+   ⚠️ `.gitignore` 里有 `results/*`，但本仓库既有 1409 个 `results/` 文件是被跟踪的
+   （前几条线用 `git add -f` 入库）。所以 `results/epi_prssm/group_event_state/v0_2/h1_h2a/`
+   下的小 JSON/CSV、图和 `figures/README.md` 必须用 **`git add -f`** 才会进版本库。
 6. 可选：`P_memoryless` seed 1（SP §4.2 敏感性臂，27 个 job）与
    `P_slow` seed 4/5（承重配置补到 5 seeds，54 个 job）。前者优先，后者按 GPU 时间决定。
 
