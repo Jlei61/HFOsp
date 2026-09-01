@@ -52,6 +52,14 @@ class EvaluationConfig:
     mlp_hidden: int = 32
     run_mlp_baseline: bool = True
     shift_extra_steps: tuple[int, ...] = SHIFT_EXTRA_STEPS
+    # Secondary arms are run for a named subset of producers.  The load-bearing
+    # increment ``B`` vs ``B+S`` is always run for every producer; the state-only
+    # arm and the extra shift offsets are diagnostics, and running them for every
+    # (producer, seed) triples the cost of the whole evaluation for no additional
+    # load-bearing content.
+    state_only_for: tuple[str, ...] | None = None
+    shift_for: tuple[str, ...] | None = None
+    extra_shift_for: tuple[str, ...] | None = None
 
 
 def _stack(*blocks: np.ndarray) -> np.ndarray:
@@ -206,11 +214,12 @@ def evaluate_subject(
             s = _run(f"B+S({producer})", _stack(x_base, values),
                      "baseline_plus_state", config.readout, subset)
             entry["arms"][f"B+S({producer})"]["gain_vs_baseline"] = gain_table(s, local_base)
-            s_alone = _run(f"S({producer})", _stack(ones, values),
-                           "state_only", config.readout, subset)
-            entry["arms"][f"S({producer})"]["gain_vs_baseline"] = gain_table(
-                s_alone, local_base
-            )
+            if config.state_only_for is None or producer in config.state_only_for:
+                s_alone = _run(f"S({producer})", _stack(ones, values),
+                               "state_only", config.readout, subset)
+                entry["arms"][f"S({producer})"]["gain_vs_baseline"] = gain_table(
+                    s_alone, local_base
+                )
 
             shift_gains: list[dict[str, float]] = []
             min_steps = int(math.ceil(horizon / tl.config.grid_seconds))
@@ -218,6 +227,11 @@ def evaluate_subject(
             # writes NaN where no donor existed) is not shifted again: rolling it
             # would mix donor rows with the zeros that stand in for missing ones.
             shift_steps_list = () if subset is not None else config.shift_extra_steps
+            if config.shift_for is not None and producer not in config.shift_for:
+                shift_steps_list = ()
+            elif (config.extra_shift_for is not None
+                  and producer not in config.extra_shift_for):
+                shift_steps_list = shift_steps_list[:1]
             for extra in shift_steps_list:
                 steps = min_steps + int(extra)
                 validate_shift_exceeds_horizon(steps, tl.config.grid_seconds, horizon)

@@ -88,6 +88,10 @@ def _load_states(state_dirs: list[Path], subject: str, n_anchors: int) -> dict[s
     return out
 
 
+def _tuple_or_none(values):
+    return None if values is None else tuple(values)
+
+
 def _run_one(args: tuple) -> dict:
     subject, out_root, state_dirs, cfg_hash, eval_kwargs = args
     started = time.time()
@@ -105,6 +109,9 @@ def _run_one(args: tuple) -> dict:
                 run_mlp_baseline=eval_kwargs["run_mlp"],
                 mlp_hidden=eval_kwargs["mlp_hidden"],
                 shift_extra_steps=tuple(eval_kwargs["shift_extra_steps"]),
+                state_only_for=_tuple_or_none(eval_kwargs["state_only_for"]),
+                shift_for=_tuple_or_none(eval_kwargs["shift_for"]),
+                extra_shift_for=_tuple_or_none(eval_kwargs["extra_shift_for"]),
             ),
         )
         result["timeline"] = timeline_summary(tl)
@@ -140,6 +147,12 @@ def main() -> None:
     parser.add_argument("--mlp-hidden", type=int, default=32)
     parser.add_argument("--no-mlp", action="store_true")
     parser.add_argument("--shift-extra-steps", type=int, nargs="+", default=[1, 4, 12])
+    parser.add_argument("--state-only-for", nargs="*", default=None,
+                        help="producers that also get the state-only arm (default: all)")
+    parser.add_argument("--shift-for", nargs="*", default=None,
+                        help="producers that get the block-shift null (default: all)")
+    parser.add_argument("--extra-shift-for", nargs="*", default=None,
+                        help="producers that get every shift offset; the rest get one")
     parser.add_argument("--tag", default="main")
     args = parser.parse_args()
 
@@ -164,6 +177,9 @@ def main() -> None:
         "run_mlp": not args.no_mlp,
         "mlp_hidden": args.mlp_hidden,
         "shift_extra_steps": list(args.shift_extra_steps),
+        "state_only_for": args.state_only_for,
+        "shift_for": args.shift_for,
+        "extra_shift_for": args.extra_shift_for,
     }
     commit = source_commit(ROOT)
     cfg_hash = config_fingerprint(

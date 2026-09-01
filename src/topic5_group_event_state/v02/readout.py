@@ -149,6 +149,13 @@ def _family_params(
         "W": torch.zeros((n_in, out_dim), dtype=torch.float64, requires_grad=True),
     }
     if hidden > 0:
+        # The capacity check needs a *skip connection*.  Without it the arm is
+        # ``tanh(zH + b) @ W``, which is a restriction of the linear model rather
+        # than an extension of it -- and the first real run showed exactly that:
+        # the MLP arm collapsed onto the intercept while the linear GLM was far
+        # better, so "extra capacity does not help" would have been meaningless.
+        params["W_lin"] = torch.zeros((n_features, out_dim), dtype=torch.float64,
+                                      requires_grad=True)
         params["H"] = (torch.randn((n_features, hidden), generator=g, dtype=torch.float64)
                        * 0.1).requires_grad_(True)
         params["hb"] = torch.zeros(hidden, dtype=torch.float64, requires_grad=True)
@@ -166,8 +173,10 @@ def _family_params(
 
 
 def _family_linear(params: Mapping[str, Tensor], z: Tensor, hidden: int) -> Tensor:
-    h = torch.tanh(z @ params["H"] + params["hb"]) if hidden > 0 else z
-    return h @ params["W"] + params["b"]
+    if hidden <= 0:
+        return z @ params["W"] + params["b"]
+    h = torch.tanh(z @ params["H"] + params["hb"])
+    return z @ params["W_lin"] + h @ params["W"] + params["b"]
 
 
 def _family_nll(
@@ -193,12 +202,27 @@ def _family_nll(
 
 def _fit_family_one_lambda(
     family: str, z_train: Tensor, stats_train, *, lam: float, n_contacts: int,
-    n_dims: int, config: ReadoutConfig,
+    n_dims: int, config: ReadoutConfig, init: Mapping[str, Tensor] | None = None,
 ) -> dict[str, Tensor]:
+    """Fit one family at one ridge value, optionally warm-started.
+
+    ``init`` is used only to walk the lambda path from strong to weak
+    regularisation within a single arm: at the top of the grid the solution is
+    the intercept model, and each step down moves a little.  It is applied
+    identically to every arm and every fold, so it cannot favour one arm -- the
+    asymmetry this repository was burned by came from inheriting an already
+    converged read-out *between* arms, which is not what happens here.
+    """
+
     params = _family_params(
         family, stats_train, n_contacts, n_dims, z_train.shape[1], config.hidden,
         config.seed,
     )
+    if init is not None:
+        with torch.no_grad():
+            for key, value in init.items():
+                if key in params and params[key].shape == value.shape:
+                    params[key].copy_(value)
     opt = torch.optim.LBFGS(
         list(params.values()), max_iter=config.max_iter, history_size=20,
         line_search_fn="strong_wolfe", tolerance_grad=1e-9, tolerance_change=1e-12,
@@ -211,8 +235,9 @@ def _fit_family_one_lambda(
             n_dims=n_dims, hidden=config.hidden,
         )
         loss = total / units + float(lam) * (params["W"] ** 2).sum()
-        if "H" in params:
-            loss = loss + float(lam) * (params["H"] ** 2).sum()
+        for extra in ("H", "W_lin"):
+            if extra in params:
+                loss = loss + float(lam) * (params[extra] ** 2).sum()
         if torch.isfinite(loss):
             loss.backward()
         return loss
@@ -275,7 +300,10 @@ def fit_readout(
         path: list[dict[str, float]] = []
         best_lam: float | None = None
         best_cv = math.inf
-        for lam in grid:
+        # Walk from the strongest shrinkage downwards so each fit starts from the
+        # previous, slightly-more-regularised solution.
+        warm: dict[int, dict[str, Tensor]] = {}
+        for lam in sorted(grid, reverse=True):
             if len(grid) == 1:
                 path.append({"lambda": float(lam), "cv_nll_per_unit": float("nan")})
                 best_lam, best_cv = float(lam), 0.0
@@ -290,7 +318,9 @@ def fit_readout(
                 fitted = _fit_family_one_lambda(
                     family, z_train[keep], _subset_stats(stats_train, keep), lam=lam,
                     n_contacts=n_contacts, n_dims=n_dims, config=config,
+                    init=warm.get(f_i),
                 )
+                warm[f_i] = fitted
                 with torch.no_grad():
                     nll, units = _family_nll(
                         family, fitted, z_train[held], _subset_stats(stats_train, held),

@@ -165,7 +165,12 @@ anchor 每 5 min 一个，所以 2 小时档相邻窗口共享 96% 的内容；
    并从队列聚合中剔除且计数（`epilepsiae_1096` 5 min count、`yuquan_pengzihang` 5 min count、
    `epilepsiae_583` 三个 horizon 的 band energy、`yuquan_gaolan` 30 min band energy）。
 
-小容量 MLP 与线性 GLM 在同一批 anchor 上互有胜负，所以线性 GLM 作主、MLP 作容量敏感性是公平的。
+**关于容量敏感性臂的一处更正**：第一版把它写成 `tanh(zH + b) @ W`，这**不是**线性模型的扩展
+而是它的限制——第一次真实运行里它整条塌回截距（`epilepsiae_916` 5 min：
+count 4.196 / participation 0.53642 / continuous 1.5053，与截距逐位相同），
+而线性 GLM 是 3.604 / 0.49120 / 1.4070。此时"多给容量没有帮助"这句话是没有意义的。
+已加跳连改成 `z @ W_lin + tanh(zH + b) @ W + b`，使它严格包含线性模型
+（合成线性真值上两者数值一致，见验证），容量敏感性的最终数字以修复后的运行为准。
 
 ## 9. 仪器灵敏度（不是工程测试，是"这套装置能不能看见"）
 
@@ -185,6 +190,8 @@ count 增益 > 0.5 nats/window、participation > 0.02、continuous > 0.05；
 | `torch.cuda.reset_peak_memory_stats(device)` 在 CUDA 未初始化时 | `RuntimeError: Invalid device argument`，两个 job 直接失败 | 在 import torch **之前**用 `CUDA_VISIBLE_DEVICES` 钉卡 |
 | 验证 pass 重放全部 segment | 每个 epoch 多跑一遍整条记录 | 只重放**含验证事件**的 segment（段仍从自身起点热身，warm-up 不变） |
 | `estimate_stats` 只接受连续区间 | v0.2 的 TRAIN 不是连续区间 | 加可选 `positions=`，默认行为不变 |
+| 容量敏感性臂写成 `tanh(zH)@W`（无跳连） | 它是线性模型的限制而非扩展，整条塌回截距，对照失去意义 | 加跳连 `z@W_lin + tanh(zH)@W`，严格包含线性模型 |
+| 用 `str.replace` 打 CLI 补丁时锚点写错默认值 | 三个新参数**静默**没加上，作业启动后才在 usage 报错里发现 | 所有文本补丁改为 `assert old in s` 后再替换，并回读校验 |
 
 ## 10.1 资源实测与并发选择
 
