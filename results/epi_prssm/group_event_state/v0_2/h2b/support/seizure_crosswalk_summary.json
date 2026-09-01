@@ -1,0 +1,494 @@
+{
+  "generated_utc": "2026-09-01T14:09:32.941151Z",
+  "inputs": {
+    "dataset_root": "/data/hfosp_group_event_state_v0_1/dataset",
+    "block_inventory": "/home/honglab/leijiaxin/HFOsp/results/epi_prssm/group_event_state/v0_1/block_inventory.csv",
+    "epilepsiae_seizures": "/home/honglab/leijiaxin/HFOsp/results/epilepsiae_seizure_inventory.csv",
+    "yuquan_seizures": "/tmp/hfosp_group_event_state_v02_b/results/dataset_inventory/yuquan_seizure_inventory.csv"
+  },
+  "coverage": {
+    "n_dataset_subjects": 27,
+    "n_blocks_in_inventory": 3896,
+    "n_blocks_kept_as_coverage": 2526,
+    "n_blocks_not_in_dataset": 1370,
+    "n_recordings_indexed": 208
+  },
+  "per_dataset": {
+    "epilepsiae": {
+      "n_input_rows": 542,
+      "disposition_counts": {
+        "incomplete_interval": 5,
+        "matched": 230,
+        "recording_absent": 26,
+        "subject_not_in_dataset": 281
+      },
+      "dataset_subjects_without_seizure_rows": [],
+      "inventory_subjects_not_in_dataset": [
+        "epilepsiae_1084",
+        "epilepsiae_115",
+        "epilepsiae_1150",
+        "epilepsiae_139",
+        "epilepsiae_264",
+        "epilepsiae_273",
+        "epilepsiae_375",
+        "epilepsiae_442",
+        "epilepsiae_565",
+        "epilepsiae_590",
+        "epilepsiae_620",
+        "epilepsiae_635",
+        "epilepsiae_862",
+        "epilepsiae_970"
+      ]
+    },
+    "yuquan": {
+      "n_input_rows": 54,
+      "disposition_counts": {
+        "matched": 44,
+        "subject_not_in_dataset": 10
+      },
+      "dataset_subjects_without_seizure_rows": [
+        "yuquan_chengshuai",
+        "yuquan_hanyuxuan",
+        "yuquan_huangwanling",
+        "yuquan_zhangjiaqi",
+        "yuquan_zhourongxuan"
+      ],
+      "inventory_subjects_not_in_dataset": [
+        "yuquan_huanghanwen",
+        "yuquan_litengsheng"
+      ]
+    }
+  },
+  "per_subject": {
+    "epilepsiae_1073": {
+      "dataset": "epilepsiae",
+      "n_records": 231,
+      "n_events": 194521,
+      "n_events_interictal": 194207,
+      "n_sessions": 18,
+      "n_contacts": 6,
+      "native_rate_hz": 1024.0,
+      "geometry_status": "partial",
+      "coord_space": "mni152_1mm",
+      "n_seizures_v0_1_index": 17,
+      "dispositions": {
+        "incomplete_interval": 3,
+        "matched": 17
+      },
+      "n_matched": 17
+    },
+    "epilepsiae_1077": {
+      "dataset": "epilepsiae",
+      "n_records": 189,
+      "n_events": 56527,
+      "n_events_interictal": 56155,
+      "n_sessions": 15,
+      "n_contacts": 6,
+      "native_rate_hz": 1024.0,
+      "geometry_status": "ok",
+      "coord_space": "mni152_1mm",
+      "n_seizures_v0_1_index": 9,
+      "dispositions": {
+        "matched": 9
+      },
+      "n_matched": 9
+    },
+    "epilepsiae_1096": {
+      "dataset": "epilepsiae",
+      "n_records": 159,
+      "n_events": 223347,
+      "n_events_interictal": 222254,
+      "n_sessions": 15,
+      "n_contacts": 7,
+      "native_rate_hz": 1024.0,
+      "geometry_status": "ok",
+      "coord_space": "mni152_1mm",
+      "n_seizures_v0_1_index": 9,
+      "dispositions": {
+        "matched": 9
+      },
+      "n_matched": 9
+    },
+    "epilepsiae_1125": {
+      "dataset": "epilepsiae",
+      "n_records": 160,
+      "n_events": 70707,
+      "n_events_interictal": 69904,
+      "n_sessions": 10,
+      "n_contacts": 8,
+      "native_rate_hz": 1024.0,
+      "geometry_status": "partial",
+      "coord_space": "mni152_1mm",
+      "n_seizures_v0_1_index": 14,
+      "dispositions": {
+        "matched": 14
+      },
+      "n_matched": 14
+    },
+    "epilepsiae_1146": {
+      "dataset": "epilepsiae",
+      "n_records": 80,
+      "n_events": 46683,
+      "n_events_interictal": 44283,
+      "n_sessions": 15,
+      "n_contacts": 15,
+      "native_rate_hz": 1024.0,
+      "geometry_status": "ok",
+      "coord_space": "mni152_1mm",
+      "n_seizures_v0_1_index": 26,
+      "dispositions": {
+        "matched": 26
+      },
+      "n_matched": 26
+    },
+    "epilepsiae_253": {
+      "dataset": "epilepsiae",
+      "n_records": 268,
+      "n_events": 75062,
+      "n_events_interictal": 74956,
+      "n_sessions": 15,
+      "n_contacts": 8,
+      "native_rate_hz": 512.0,
+      "geometry_status": "ok",
+      "coord_space": "mni152_1mm",
+      "n_seizures_v0_1_index": 7,
+      "dispositions": {
+        "matched": 7
+      },
+      "n_matched": 7
+    },
+    "epilepsiae_384": {
+      "dataset": "epilepsiae",
+      "n_records": 64,
+      "n_events": 42533,
+      "n_events_interictal": 42482,
+      "n_sessions": 11,
+      "n_contacts": 9,
+      "native_rate_hz": 1024.0,
+      "geometry_status": "ok",
+      "coord_space": "mni152_1mm",
+      "n_seizures_v0_1_index": 15,
+      "dispositions": {
+        "matched": 8,
+        "recording_absent": 7
+      },
+      "n_matched": 8
+    },
+    "epilepsiae_548": {
+      "dataset": "epilepsiae",
+      "n_records": 144,
+      "n_events": 25282,
+      "n_events_interictal": 24254,
+      "n_sessions": 15,
+      "n_contacts": 12,
+      "native_rate_hz": 1024.0,
+      "geometry_status": "partial",
+      "coord_space": "mni152_1mm",
+      "n_seizures_v0_1_index": 31,
+      "dispositions": {
+        "matched": 31
+      },
+      "n_matched": 31
+    },
+    "epilepsiae_583": {
+      "dataset": "epilepsiae",
+      "n_records": 63,
+      "n_events": 10967,
+      "n_events_interictal": 10930,
+      "n_sessions": 6,
+      "n_contacts": 7,
+      "native_rate_hz": 1024.0,
+      "geometry_status": "ok",
+      "coord_space": "mni152_1mm",
+      "n_seizures_v0_1_index": 22,
+      "dispositions": {
+        "incomplete_interval": 1,
+        "matched": 3,
+        "recording_absent": 19
+      },
+      "n_matched": 3
+    },
+    "epilepsiae_818": {
+      "dataset": "epilepsiae",
+      "n_records": 222,
+      "n_events": 11398,
+      "n_events_interictal": 8989,
+      "n_sessions": 21,
+      "n_contacts": 5,
+      "native_rate_hz": 1024.0,
+      "geometry_status": "ok",
+      "coord_space": "mni152_1mm",
+      "n_seizures_v0_1_index": 9,
+      "dispositions": {
+        "matched": 9
+      },
+      "n_matched": 9
+    },
+    "epilepsiae_916": {
+      "dataset": "epilepsiae",
+      "n_records": 435,
+      "n_events": 93257,
+      "n_events_interictal": 86732,
+      "n_sessions": 24,
+      "n_contacts": 6,
+      "native_rate_hz": 1024.0,
+      "geometry_status": "ok",
+      "coord_space": "mni152_1mm",
+      "n_seizures_v0_1_index": 52,
+      "dispositions": {
+        "matched": 52
+      },
+      "n_matched": 52
+    },
+    "epilepsiae_922": {
+      "dataset": "epilepsiae",
+      "n_records": 114,
+      "n_events": 243991,
+      "n_events_interictal": 234976,
+      "n_sessions": 8,
+      "n_contacts": 8,
+      "native_rate_hz": 1024.0,
+      "geometry_status": "ok",
+      "coord_space": "mni152_1mm",
+      "n_seizures_v0_1_index": 29,
+      "dispositions": {
+        "incomplete_interval": 1,
+        "matched": 29
+      },
+      "n_matched": 29
+    },
+    "epilepsiae_958": {
+      "dataset": "epilepsiae",
+      "n_records": 225,
+      "n_events": 165577,
+      "n_events_interictal": 165252,
+      "n_sessions": 18,
+      "n_contacts": 16,
+      "native_rate_hz": 1024.0,
+      "geometry_status": "ok",
+      "coord_space": "mni152_1mm",
+      "n_seizures_v0_1_index": 16,
+      "dispositions": {
+        "matched": 16
+      },
+      "n_matched": 16
+    },
+    "yuquan_chengshuai": {
+      "dataset": "yuquan",
+      "n_records": 12,
+      "n_events": 27632,
+      "n_events_interictal": 27632,
+      "n_sessions": 1,
+      "n_contacts": 8,
+      "native_rate_hz": 2000.0,
+      "geometry_status": "ok",
+      "coord_space": "fs_native_ras_mm",
+      "n_seizures_v0_1_index": 0,
+      "dispositions": {},
+      "n_matched": 0
+    },
+    "yuquan_chenziyang": {
+      "dataset": "yuquan",
+      "n_records": 12,
+      "n_events": 9609,
+      "n_events_interictal": 9609,
+      "n_sessions": 1,
+      "n_contacts": 10,
+      "native_rate_hz": 2000.0,
+      "geometry_status": "unavailable:FileNotFoundError",
+      "coord_space": null,
+      "n_seizures_v0_1_index": 1,
+      "dispositions": {
+        "matched": 1
+      },
+      "n_matched": 1
+    },
+    "yuquan_gaolan": {
+      "dataset": "yuquan",
+      "n_records": 12,
+      "n_events": 7451,
+      "n_events_interictal": 7417,
+      "n_sessions": 1,
+      "n_contacts": 12,
+      "native_rate_hz": 2000.0,
+      "geometry_status": "unavailable:FileNotFoundError",
+      "coord_space": null,
+      "n_seizures_v0_1_index": 4,
+      "dispositions": {
+        "matched": 4
+      },
+      "n_matched": 4
+    },
+    "yuquan_hanyuxuan": {
+      "dataset": "yuquan",
+      "n_records": 13,
+      "n_events": 5468,
+      "n_events_interictal": 5468,
+      "n_sessions": 1,
+      "n_contacts": 22,
+      "native_rate_hz": 2000.0,
+      "geometry_status": "unavailable:FileNotFoundError",
+      "coord_space": null,
+      "n_seizures_v0_1_index": 0,
+      "dispositions": {},
+      "n_matched": 0
+    },
+    "yuquan_huangwanling": {
+      "dataset": "yuquan",
+      "n_records": 12,
+      "n_events": 107062,
+      "n_events_interictal": 107062,
+      "n_sessions": 1,
+      "n_contacts": 4,
+      "native_rate_hz": 2000.0,
+      "geometry_status": "ok",
+      "coord_space": "fs_native_ras_mm",
+      "n_seizures_v0_1_index": 0,
+      "dispositions": {},
+      "n_matched": 0
+    },
+    "yuquan_pengzihang": {
+      "dataset": "yuquan",
+      "n_records": 12,
+      "n_events": 46055,
+      "n_events_interictal": 45048,
+      "n_sessions": 1,
+      "n_contacts": 12,
+      "native_rate_hz": 2000.0,
+      "geometry_status": "ok",
+      "coord_space": "fs_native_ras_mm",
+      "n_seizures_v0_1_index": 8,
+      "dispositions": {
+        "matched": 8
+      },
+      "n_matched": 8
+    },
+    "yuquan_sunyuanxin": {
+      "dataset": "yuquan",
+      "n_records": 12,
+      "n_events": 5085,
+      "n_events_interictal": 5055,
+      "n_sessions": 1,
+      "n_contacts": 12,
+      "native_rate_hz": 2000.0,
+      "geometry_status": "unavailable:FileNotFoundError",
+      "coord_space": null,
+      "n_seizures_v0_1_index": 8,
+      "dispositions": {
+        "matched": 8
+      },
+      "n_matched": 8
+    },
+    "yuquan_xuxinyi": {
+      "dataset": "yuquan",
+      "n_records": 13,
+      "n_events": 9646,
+      "n_events_interictal": 9645,
+      "n_sessions": 1,
+      "n_contacts": 15,
+      "native_rate_hz": 2000.0,
+      "geometry_status": "ok",
+      "coord_space": "fs_native_ras_mm",
+      "n_seizures_v0_1_index": 3,
+      "dispositions": {
+        "matched": 3
+      },
+      "n_matched": 3
+    },
+    "yuquan_zhangbichen": {
+      "dataset": "yuquan",
+      "n_records": 11,
+      "n_events": 8371,
+      "n_events_interictal": 8371,
+      "n_sessions": 1,
+      "n_contacts": 52,
+      "native_rate_hz": 2000.0000000000002,
+      "geometry_status": "ok",
+      "coord_space": "fs_native_ras_mm",
+      "n_seizures_v0_1_index": 1,
+      "dispositions": {
+        "matched": 1
+      },
+      "n_matched": 1
+    },
+    "yuquan_zhangjiaqi": {
+      "dataset": "yuquan",
+      "n_records": 13,
+      "n_events": 48494,
+      "n_events_interictal": 48494,
+      "n_sessions": 2,
+      "n_contacts": 7,
+      "native_rate_hz": 2000.0,
+      "geometry_status": "ok",
+      "coord_space": "fs_native_ras_mm",
+      "n_seizures_v0_1_index": 0,
+      "dispositions": {},
+      "n_matched": 0
+    },
+    "yuquan_zhangjinhan": {
+      "dataset": "yuquan",
+      "n_records": 13,
+      "n_events": 6196,
+      "n_events_interictal": 6196,
+      "n_sessions": 1,
+      "n_contacts": 5,
+      "native_rate_hz": 1999.9999999999998,
+      "geometry_status": "ok",
+      "coord_space": "fs_native_ras_mm",
+      "n_seizures_v0_1_index": 8,
+      "dispositions": {
+        "matched": 8
+      },
+      "n_matched": 8
+    },
+    "yuquan_zhangkexuan": {
+      "dataset": "yuquan",
+      "n_records": 12,
+      "n_events": 18190,
+      "n_events_interictal": 18157,
+      "n_sessions": 1,
+      "n_contacts": 26,
+      "native_rate_hz": 2000.0000000000002,
+      "geometry_status": "ok",
+      "coord_space": "fs_native_ras_mm",
+      "n_seizures_v0_1_index": 6,
+      "dispositions": {
+        "matched": 6
+      },
+      "n_matched": 6
+    },
+    "yuquan_zhaojinrui": {
+      "dataset": "yuquan",
+      "n_records": 13,
+      "n_events": 81141,
+      "n_events_interictal": 81102,
+      "n_sessions": 1,
+      "n_contacts": 4,
+      "native_rate_hz": 2000.0000000000002,
+      "geometry_status": "ok",
+      "coord_space": "fs_native_ras_mm",
+      "n_seizures_v0_1_index": 5,
+      "dispositions": {
+        "matched": 5
+      },
+      "n_matched": 5
+    },
+    "yuquan_zhourongxuan": {
+      "dataset": "yuquan",
+      "n_records": 12,
+      "n_events": 23142,
+      "n_events_interictal": 23142,
+      "n_sessions": 1,
+      "n_contacts": 4,
+      "native_rate_hz": 2000.0,
+      "geometry_status": "ok",
+      "coord_space": "fs_native_ras_mm",
+      "n_seizures_v0_1_index": 0,
+      "dispositions": {},
+      "n_matched": 0
+    }
+  },
+  "provenance_caveats": [
+    "Yuquan seizures are pr1 spatial-extent DETECTIONS, not clinical annotations (v0.1 data contract \u00a711); a subject with zero rows reads as 'not detected', never as 'no seizures'."
+  ]
+}
