@@ -1,0 +1,6586 @@
+{
+  "schema_id": "topic4_rev17_dual_field_selection_v1",
+  "scientific_role": "development_only_dual_continuous_node_residual_selection",
+  "output_root": "results/topic4_sef_hfo/data_driven_node_dualmode_rev17/dual_field_selection",
+  "candidate_manifest": "results/topic4_sef_hfo/data_driven_node_dualmode_rev17/dual_field_selection/candidate_manifest.json",
+  "network_cache": "results/topic4_sef_hfo/data_driven_core_field_rev9/network_cache",
+  "inputs": {
+    "transition_config": {
+      "path": "config/topic4_data_driven_zm_ictal_transition_v1.json",
+      "sha256": "2ce70caf70ca1225ba9a95721692cf7fc9ce0f8fa9b977c85d0370c78941b20f"
+    },
+    "source_atlas_config": {
+      "path": "config/topic4_rev17_dual_field_residual_atlas.json",
+      "sha256": "8425d2ed03b66683b9bd74f2bb29d380f28aad8b4904e63581ce541a7a9db3ab"
+    },
+    "source_atlas_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev17/dual_field_residual_atlas/candidate_manifest.json",
+      "sha256": "3274f67aa5f6f3f1d7557376c238d7ec0ae36fdfb02e4a8a154df0fa685f9776"
+    },
+    "response_analysis_config": {
+      "path": "config/topic4_rev17_dual_field_response_analysis.json",
+      "sha256": "6159e6b73a15ff4b7ffbffffc7ec3b50ecd818cc10a502bbabf7e0748e058829"
+    },
+    "response_aggregate": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev17/dual_field_residual_atlas/analysis/dual_field_response_aggregate.json",
+      "sha256": "f27a140d310f0e187fdaaccb89a6aeb08f419b26b4bd86fe28ce414f71657a54"
+    },
+    "j14_config": {
+      "path": "config/topic4_rev14_static_node_historical_rescore.json",
+      "sha256": "af3116d4a56feb077d17893196eee1f2ebcc42fd77688d56e15f2a5b89631ed2"
+    },
+    "patient_support_config": {
+      "path": "config/topic4_rev14_patient_support_acceptance.json",
+      "sha256": "5dec1ff3277294697515d701e82246c242fb627348751571a5a6fe86e008940e"
+    }
+  },
+  "dual_field_selection": {
+    "source_formula": "delta_vtheta_i=-h_mean_i*mu_mean-h_dispersion_i*(d_i-mu_dispersion)",
+    "maximum_frequency": 3,
+    "target_n_basis": 18,
+    "degree": 3,
+    "sheet_mm": 20.0,
+    "projection_grid_per_axis": 61,
+    "candidate_blueprint": [
+      {
+        "candidate_id": "direct_mean_f09_p_a15",
+        "source_candidate_id": "mean_f09_p_a15",
+        "family": "discrete_single_coordinate",
+        "nomination_strategy": "measured_antithetic_endpoint",
+        "radius": 0.15,
+        "direction": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "fit_observed_changes": {
+          "J14": [
+            -0.3457901163721586,
+            -0.3613555861040445,
+            -0.42164137151422687
+          ],
+          "A": [
+            -0.5106862100576716,
+            -0.116542291918311,
+            -0.20633552152726864
+          ],
+          "B": [
+            -0.04428875588792125,
+            -0.17345880098496402,
+            -0.16009008285859694
+          ]
+        },
+        "fit_observed_support": {
+          "A": [
+            9.991680640652826,
+            3.8241198931907032,
+            5.5725542476307774
+          ],
+          "B": [
+            10.98657254863428,
+            9.945556955560846,
+            9.334347264175165
+          ]
+        },
+        "fit_observed_gates": {
+          "valid_all_networks": true,
+          "J14_improves_all_networks": true,
+          "A_improves_all_networks": true,
+          "B_within_ratio_all_networks": true,
+          "A_support_at_least_minimum_all_networks": true,
+          "B_support_at_least_minimum_all_networks": true
+        },
+        "predicted_advancement_eligible": true,
+        "worst_delta_J14": -0.3457901163721586,
+        "worst_delta_A": -0.116542291918311,
+        "mean_delta_J14": -0.37626235799681,
+        "mean_delta_A": -0.27785467450108375,
+        "minimum_support": 3.8241198931907032
+      },
+      {
+        "candidate_id": "direct_dispersion_f04_m_a15",
+        "source_candidate_id": "dispersion_f04_m_a15",
+        "family": "discrete_single_coordinate",
+        "nomination_strategy": "measured_antithetic_endpoint",
+        "radius": 0.15,
+        "direction": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "fit_observed_changes": {
+          "J14": [
+            -0.29231434898224595,
+            -0.3237951472574001,
+            -0.4352831545896787
+          ],
+          "A": [
+            -0.2665467975189997,
+            -0.20553107596447973,
+            -0.11048878682289787
+          ],
+          "B": [
+            -0.07826543493082139,
+            -0.22201095666841786,
+            -0.16144675838531386
+          ]
+        },
+        "fit_observed_support": {
+          "A": [
+            4.724313299006858,
+            4.294977194165392,
+            4.39643227328219
+          ],
+          "B": [
+            10.134752781825465,
+            6.377730927813908,
+            12.404151702120894
+          ]
+        },
+        "fit_observed_gates": {
+          "valid_all_networks": true,
+          "J14_improves_all_networks": true,
+          "A_improves_all_networks": true,
+          "B_within_ratio_all_networks": true,
+          "A_support_at_least_minimum_all_networks": true,
+          "B_support_at_least_minimum_all_networks": true
+        },
+        "predicted_advancement_eligible": true,
+        "worst_delta_J14": -0.29231434898224595,
+        "worst_delta_A": -0.11048878682289787,
+        "mean_delta_J14": -0.35046421694310825,
+        "mean_delta_A": -0.19418888676879242,
+        "minimum_support": 4.294977194165392
+      },
+      {
+        "candidate_id": "direct_dispersion_f11_p_a15",
+        "source_candidate_id": "dispersion_f11_p_a15",
+        "family": "discrete_single_coordinate",
+        "nomination_strategy": "measured_antithetic_endpoint",
+        "radius": 0.15,
+        "direction": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "fit_observed_changes": {
+          "J14": [
+            -0.2869022554868257,
+            -0.30136074908550237,
+            -0.4810174354356742
+          ],
+          "A": [
+            -0.428207881625144,
+            -0.015526131870521986,
+            -0.41797377849638395
+          ],
+          "B": [
+            -0.010444226282597002,
+            -0.29272861702153197,
+            -0.08947145272485346
+          ]
+        },
+        "fit_observed_support": {
+          "A": [
+            6.5908285246158655,
+            3.1680017353625542,
+            7.23351227144169
+          ],
+          "B": [
+            7.161578921588167,
+            8.830612262678777,
+            10.719109667000403
+          ]
+        },
+        "fit_observed_gates": {
+          "valid_all_networks": true,
+          "J14_improves_all_networks": true,
+          "A_improves_all_networks": true,
+          "B_within_ratio_all_networks": true,
+          "A_support_at_least_minimum_all_networks": true,
+          "B_support_at_least_minimum_all_networks": true
+        },
+        "predicted_advancement_eligible": true,
+        "worst_delta_J14": -0.2869022554868257,
+        "worst_delta_A": -0.015526131870521986,
+        "mean_delta_J14": -0.35642681333600074,
+        "mean_delta_A": -0.28723593066401665,
+        "minimum_support": 3.1680017353625542
+      },
+      {
+        "candidate_id": "direct_dispersion_f14_p_a15",
+        "source_candidate_id": "dispersion_f14_p_a15",
+        "family": "discrete_single_coordinate",
+        "nomination_strategy": "measured_antithetic_endpoint",
+        "radius": 0.15,
+        "direction": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "fit_observed_changes": {
+          "J14": [
+            -0.3985011704767314,
+            -0.32158486641376927,
+            -0.2561568642398315
+          ],
+          "A": [
+            -0.350505817085196,
+            -0.11632445963927918,
+            -0.33472351926112665
+          ],
+          "B": [
+            -0.17468822008414908,
+            -0.19008665179851936,
+            0.012802168999366925
+          ]
+        },
+        "fit_observed_support": {
+          "A": [
+            5.05156832360481,
+            3.5494489266843434,
+            5.979250340953658
+          ],
+          "B": [
+            5.945113298735922,
+            6.145245276206862,
+            7.992309870220203
+          ]
+        },
+        "fit_observed_gates": {
+          "valid_all_networks": true,
+          "J14_improves_all_networks": true,
+          "A_improves_all_networks": true,
+          "B_within_ratio_all_networks": true,
+          "A_support_at_least_minimum_all_networks": true,
+          "B_support_at_least_minimum_all_networks": true
+        },
+        "predicted_advancement_eligible": true,
+        "worst_delta_J14": -0.2561568642398315,
+        "worst_delta_A": -0.11632445963927918,
+        "mean_delta_J14": -0.3254143003767774,
+        "mean_delta_A": -0.2671845986618673,
+        "minimum_support": 3.5494489266843434
+      },
+      {
+        "candidate_id": "direct_mean_f02_p_a15",
+        "source_candidate_id": "mean_f02_p_a15",
+        "family": "discrete_single_coordinate",
+        "nomination_strategy": "measured_antithetic_endpoint",
+        "radius": 0.15,
+        "direction": [
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "fit_observed_changes": {
+          "J14": [
+            -0.21700396602586736,
+            -0.48784531307577983,
+            -0.48891652749775805
+          ],
+          "A": [
+            -0.34838705420269367,
+            -0.18013643938905854,
+            -0.3125345957006955
+          ],
+          "B": [
+            -0.10624945801298868,
+            -0.2727007672747481,
+            -0.04109448785028835
+          ]
+        },
+        "fit_observed_support": {
+          "A": [
+            5.529948617315961,
+            3.9577000577244816,
+            6.847487445901468
+          ],
+          "B": [
+            6.273758330913783,
+            16.05068290792263,
+            13.923724811532683
+          ]
+        },
+        "fit_observed_gates": {
+          "valid_all_networks": true,
+          "J14_improves_all_networks": true,
+          "A_improves_all_networks": true,
+          "B_within_ratio_all_networks": true,
+          "A_support_at_least_minimum_all_networks": true,
+          "B_support_at_least_minimum_all_networks": true
+        },
+        "predicted_advancement_eligible": true,
+        "worst_delta_J14": -0.21700396602586736,
+        "worst_delta_A": -0.18013643938905854,
+        "mean_delta_J14": -0.3979219355331351,
+        "mean_delta_A": -0.2803526964308159,
+        "minimum_support": 3.9577000577244816
+      },
+      {
+        "candidate_id": "direct_dispersion_f12_m_a15",
+        "source_candidate_id": "dispersion_f12_m_a15",
+        "family": "discrete_single_coordinate",
+        "nomination_strategy": "measured_antithetic_endpoint",
+        "radius": 0.15,
+        "direction": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "fit_observed_changes": {
+          "J14": [
+            -0.2739106843917041,
+            -0.2068093487032927,
+            -0.5524559113399383
+          ],
+          "A": [
+            -0.438889250582845,
+            -0.040651676688861826,
+            -0.46332297673867684
+          ],
+          "B": [
+            -0.015251402061308372,
+            -0.20643116470845935,
+            -0.24272083089904206
+          ]
+        },
+        "fit_observed_support": {
+          "A": [
+            9.867975649143952,
+            3.0238595070182854,
+            7.505908979290977
+          ],
+          "B": [
+            7.048694845772309,
+            5.973798301550957,
+            7.36816114748197
+          ]
+        },
+        "fit_observed_gates": {
+          "valid_all_networks": true,
+          "J14_improves_all_networks": true,
+          "A_improves_all_networks": true,
+          "B_within_ratio_all_networks": true,
+          "A_support_at_least_minimum_all_networks": true,
+          "B_support_at_least_minimum_all_networks": true
+        },
+        "predicted_advancement_eligible": true,
+        "worst_delta_J14": -0.2068093487032927,
+        "worst_delta_A": -0.040651676688861826,
+        "mean_delta_J14": -0.3443919814783117,
+        "mean_delta_A": -0.3142879680034612,
+        "minimum_support": 3.0238595070182854
+      },
+      {
+        "candidate_id": "direct_dispersion_f06_p_a15",
+        "source_candidate_id": "dispersion_f06_p_a15",
+        "family": "discrete_single_coordinate",
+        "nomination_strategy": "measured_antithetic_endpoint",
+        "radius": 0.15,
+        "direction": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "fit_observed_changes": {
+          "J14": [
+            -0.1907574498153055,
+            -0.6838881272088304,
+            -0.22462092985404536
+          ],
+          "A": [
+            -0.3776784574491656,
+            -0.49947534625791956,
+            -0.10216953300729581
+          ],
+          "B": [
+            0.06822602348467743,
+            -0.2933763355762995,
+            -0.1661992664556684
+          ]
+        },
+        "fit_observed_support": {
+          "A": [
+            5.493243243124479,
+            5.922671605817855,
+            4.254881175629465
+          ],
+          "B": [
+            7.2901267014814835,
+            6.068195207399581,
+            6.577772544197274
+          ]
+        },
+        "fit_observed_gates": {
+          "valid_all_networks": true,
+          "J14_improves_all_networks": true,
+          "A_improves_all_networks": true,
+          "B_within_ratio_all_networks": true,
+          "A_support_at_least_minimum_all_networks": true,
+          "B_support_at_least_minimum_all_networks": true
+        },
+        "predicted_advancement_eligible": true,
+        "worst_delta_J14": -0.1907574498153055,
+        "worst_delta_A": -0.10216953300729581,
+        "mean_delta_J14": -0.3664221689593938,
+        "mean_delta_A": -0.326441112238127,
+        "minimum_support": 4.254881175629465
+      },
+      {
+        "candidate_id": "direct_mean_f01_m_a15",
+        "source_candidate_id": "mean_f01_m_a15",
+        "family": "discrete_single_coordinate",
+        "nomination_strategy": "measured_antithetic_endpoint",
+        "radius": 0.15,
+        "direction": [
+          0.0,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "fit_observed_changes": {
+          "J14": [
+            -0.1881177614917624,
+            -0.2937857742554404,
+            -0.23323267296129457
+          ],
+          "A": [
+            -0.3715419445800925,
+            -0.1147353011617227,
+            -0.2940367465810034
+          ],
+          "B": [
+            -0.021810673869256947,
+            -0.24629269592035374,
+            0.12275589365873518
+          ]
+        },
+        "fit_observed_support": {
+          "A": [
+            5.0798908335633435,
+            3.528417179650589,
+            7.805489974422555
+          ],
+          "B": [
+            6.619625232039089,
+            6.302380879635531,
+            5.089690127329389
+          ]
+        },
+        "fit_observed_gates": {
+          "valid_all_networks": true,
+          "J14_improves_all_networks": true,
+          "A_improves_all_networks": true,
+          "B_within_ratio_all_networks": true,
+          "A_support_at_least_minimum_all_networks": true,
+          "B_support_at_least_minimum_all_networks": true
+        },
+        "predicted_advancement_eligible": true,
+        "worst_delta_J14": -0.1881177614917624,
+        "worst_delta_A": -0.1147353011617227,
+        "mean_delta_J14": -0.2383787362361658,
+        "mean_delta_A": -0.2601046641076062,
+        "minimum_support": 3.528417179650589
+      },
+      {
+        "candidate_id": "direct_dispersion_f01_p_a15",
+        "source_candidate_id": "dispersion_f01_p_a15",
+        "family": "discrete_single_coordinate",
+        "nomination_strategy": "measured_antithetic_endpoint",
+        "radius": 0.15,
+        "direction": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "fit_observed_changes": {
+          "J14": [
+            -0.18449377281708723,
+            -0.3891697091861246,
+            -0.5497148927726718
+          ],
+          "A": [
+            -0.4292431336133957,
+            -0.5430649319793055,
+            -0.4116532077677961
+          ],
+          "B": [
+            0.03636104101814719,
+            -0.045688343681148824,
+            -0.13133518138069622
+          ]
+        },
+        "fit_observed_support": {
+          "A": [
+            6.407217377458106,
+            6.669557928413928,
+            5.700429332964479
+          ],
+          "B": [
+            6.364087803858657,
+            5.275088483280996,
+            8.160139334807475
+          ]
+        },
+        "fit_observed_gates": {
+          "valid_all_networks": true,
+          "J14_improves_all_networks": true,
+          "A_improves_all_networks": true,
+          "B_within_ratio_all_networks": true,
+          "A_support_at_least_minimum_all_networks": true,
+          "B_support_at_least_minimum_all_networks": true
+        },
+        "predicted_advancement_eligible": true,
+        "worst_delta_J14": -0.18449377281708723,
+        "worst_delta_A": -0.4116532077677961,
+        "mean_delta_J14": -0.37445945825862786,
+        "mean_delta_A": -0.46132042445349913,
+        "minimum_support": 5.275088483280996
+      },
+      {
+        "candidate_id": "direct_mean_f06_p_a15",
+        "source_candidate_id": "mean_f06_p_a15",
+        "family": "discrete_single_coordinate",
+        "nomination_strategy": "measured_antithetic_endpoint",
+        "radius": 0.15,
+        "direction": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "fit_observed_changes": {
+          "J14": [
+            -0.3197918273379585,
+            -0.15758706756192398,
+            -0.2596104517284854
+          ],
+          "A": [
+            -0.45144776496937067,
+            -0.21613939935764304,
+            -0.3091503415087473
+          ],
+          "B": [
+            -0.06754438460769552,
+            0.050669088533829676,
+            0.011475624320378852
+          ]
+        },
+        "fit_observed_support": {
+          "A": [
+            7.302524887922053,
+            4.1654340413819355,
+            7.953977523488867
+          ],
+          "B": [
+            9.68271212284544,
+            3.5722341478424946,
+            5.035738042774103
+          ]
+        },
+        "fit_observed_gates": {
+          "valid_all_networks": true,
+          "J14_improves_all_networks": true,
+          "A_improves_all_networks": true,
+          "B_within_ratio_all_networks": true,
+          "A_support_at_least_minimum_all_networks": true,
+          "B_support_at_least_minimum_all_networks": true
+        },
+        "predicted_advancement_eligible": true,
+        "worst_delta_J14": -0.15758706756192398,
+        "worst_delta_A": -0.21613939935764304,
+        "mean_delta_J14": -0.2456631155427893,
+        "mean_delta_A": -0.3255791686119203,
+        "minimum_support": 3.5722341478424946
+      },
+      {
+        "candidate_id": "direct_mean_f01_p_a15",
+        "source_candidate_id": "mean_f01_p_a15",
+        "family": "discrete_single_coordinate",
+        "nomination_strategy": "measured_antithetic_endpoint",
+        "radius": 0.15,
+        "direction": [
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "fit_observed_changes": {
+          "J14": [
+            -0.14284557367402684,
+            -0.26112687543496627,
+            -0.3279651736522222
+          ],
+          "A": [
+            -0.43727333221816367,
+            -0.0656820556247153,
+            -0.10032974914028481
+          ],
+          "B": [
+            0.06134051879303115,
+            -0.1739878919979514,
+            -0.1954920348704916
+          ]
+        },
+        "fit_observed_support": {
+          "A": [
+            6.526911560286093,
+            3.2192582726166257,
+            4.593496806496073
+          ],
+          "B": [
+            8.060227445217826,
+            8.76189100811608,
+            9.31503353172147
+          ]
+        },
+        "fit_observed_gates": {
+          "valid_all_networks": true,
+          "J14_improves_all_networks": true,
+          "A_improves_all_networks": true,
+          "B_within_ratio_all_networks": true,
+          "A_support_at_least_minimum_all_networks": true,
+          "B_support_at_least_minimum_all_networks": true
+        },
+        "predicted_advancement_eligible": true,
+        "worst_delta_J14": -0.14284557367402684,
+        "worst_delta_A": -0.0656820556247153,
+        "mean_delta_J14": -0.24397920758707178,
+        "mean_delta_A": -0.2010950456610546,
+        "minimum_support": 3.2192582726166257
+      },
+      {
+        "candidate_id": "direct_dispersion_f05_m_a15",
+        "source_candidate_id": "dispersion_f05_m_a15",
+        "family": "discrete_single_coordinate",
+        "nomination_strategy": "measured_antithetic_endpoint",
+        "radius": 0.15,
+        "direction": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "fit_observed_changes": {
+          "J14": [
+            -0.23820267828745512,
+            -0.22619121338226167,
+            -0.14230420891575646
+          ],
+          "A": [
+            -0.43747066758000397,
+            -0.26593846739736726,
+            -0.045594695678010666
+          ],
+          "B": [
+            0.03157523388032968,
+            -0.027333658633065472,
+            -0.11727312535499501
+          ]
+        },
+        "fit_observed_support": {
+          "A": [
+            5.988087115832249,
+            4.338058399938279,
+            4.277693885346858
+          ],
+          "B": [
+            5.659785535538356,
+            4.303599616256374,
+            5.505157094721934
+          ]
+        },
+        "fit_observed_gates": {
+          "valid_all_networks": true,
+          "J14_improves_all_networks": true,
+          "A_improves_all_networks": true,
+          "B_within_ratio_all_networks": true,
+          "A_support_at_least_minimum_all_networks": true,
+          "B_support_at_least_minimum_all_networks": true
+        },
+        "predicted_advancement_eligible": true,
+        "worst_delta_J14": -0.14230420891575646,
+        "worst_delta_A": -0.045594695678010666,
+        "mean_delta_J14": -0.20223270019515774,
+        "mean_delta_A": -0.24966794355179397,
+        "minimum_support": 4.277693885346858
+      },
+      {
+        "candidate_id": "direct_mean_f08_m_a15",
+        "source_candidate_id": "mean_f08_m_a15",
+        "family": "discrete_single_coordinate",
+        "nomination_strategy": "measured_antithetic_endpoint",
+        "radius": 0.15,
+        "direction": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "fit_observed_changes": {
+          "J14": [
+            -0.13511325518117334,
+            -0.4158371286679834,
+            -0.2888108421945659
+          ],
+          "A": [
+            -0.4597334421139949,
+            -0.6125577405920775,
+            -0.18395041318711391
+          ],
+          "B": [
+            0.0660537996140278,
+            -0.11797954359184382,
+            -0.1792260213400918
+          ]
+        },
+        "fit_observed_support": {
+          "A": [
+            6.285633298156994,
+            6.036958685613297,
+            5.0122359170526
+          ],
+          "B": [
+            6.699517271184852,
+            4.960315182118585,
+            6.960813057338577
+          ]
+        },
+        "fit_observed_gates": {
+          "valid_all_networks": true,
+          "J14_improves_all_networks": true,
+          "A_improves_all_networks": true,
+          "B_within_ratio_all_networks": true,
+          "A_support_at_least_minimum_all_networks": true,
+          "B_support_at_least_minimum_all_networks": true
+        },
+        "predicted_advancement_eligible": true,
+        "worst_delta_J14": -0.13511325518117334,
+        "worst_delta_A": -0.18395041318711391,
+        "mean_delta_J14": -0.27992040868124085,
+        "mean_delta_A": -0.4187471986310621,
+        "minimum_support": 4.960315182118585
+      },
+      {
+        "candidate_id": "direct_dispersion_f09_m_a15",
+        "source_candidate_id": "dispersion_f09_m_a15",
+        "family": "discrete_single_coordinate",
+        "nomination_strategy": "measured_antithetic_endpoint",
+        "radius": 0.15,
+        "direction": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "fit_observed_changes": {
+          "J14": [
+            -0.16097659769284078,
+            -0.1304200574238248,
+            -0.2836821221941648
+          ],
+          "A": [
+            -0.11573799659522432,
+            -0.04815139776662258,
+            -0.3229574709891183
+          ],
+          "B": [
+            -0.13364275735569842,
+            -0.12812779649486217,
+            0.03573601269617033
+          ]
+        },
+        "fit_observed_support": {
+          "A": [
+            4.0728788111817416,
+            3.364265927895572,
+            7.639094871697101
+          ],
+          "B": [
+            7.918047003072327,
+            5.174056804372125,
+            5.31045266003524
+          ]
+        },
+        "fit_observed_gates": {
+          "valid_all_networks": true,
+          "J14_improves_all_networks": true,
+          "A_improves_all_networks": true,
+          "B_within_ratio_all_networks": true,
+          "A_support_at_least_minimum_all_networks": true,
+          "B_support_at_least_minimum_all_networks": true
+        },
+        "predicted_advancement_eligible": true,
+        "worst_delta_J14": -0.1304200574238248,
+        "worst_delta_A": -0.04815139776662258,
+        "mean_delta_J14": -0.19169292577027677,
+        "mean_delta_A": -0.16228228845032175,
+        "minimum_support": 3.364265927895572
+      },
+      {
+        "candidate_id": "direct_dispersion_f00_p_a15",
+        "source_candidate_id": "dispersion_f00_p_a15",
+        "family": "discrete_single_coordinate",
+        "nomination_strategy": "measured_antithetic_endpoint",
+        "radius": 0.15,
+        "direction": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "fit_observed_changes": {
+          "J14": [
+            -0.10987688163295717,
+            -0.40160648456556647,
+            -0.2015866451345456
+          ],
+          "A": [
+            -0.11760734486003876,
+            -0.13733269852806962,
+            -0.278715981881519
+          ],
+          "B": [
+            -0.0523247510126823,
+            -0.2772329161986049,
+            0.09123988383586323
+          ]
+        },
+        "fit_observed_support": {
+          "A": [
+            3.9825341453263197,
+            3.6950779038729467,
+            7.501755418942981
+          ],
+          "B": [
+            10.850918528949148,
+            7.2414779307951225,
+            4.448232097411277
+          ]
+        },
+        "fit_observed_gates": {
+          "valid_all_networks": true,
+          "J14_improves_all_networks": true,
+          "A_improves_all_networks": true,
+          "B_within_ratio_all_networks": true,
+          "A_support_at_least_minimum_all_networks": true,
+          "B_support_at_least_minimum_all_networks": true
+        },
+        "predicted_advancement_eligible": true,
+        "worst_delta_J14": -0.10987688163295717,
+        "worst_delta_A": -0.11760734486003876,
+        "mean_delta_J14": -0.23769000377768976,
+        "mean_delta_A": -0.17788534175654247,
+        "minimum_support": 3.6950779038729467
+      },
+      {
+        "candidate_id": "direct_mean_f12_m_a15",
+        "source_candidate_id": "mean_f12_m_a15",
+        "family": "discrete_single_coordinate",
+        "nomination_strategy": "measured_antithetic_endpoint",
+        "radius": 0.15,
+        "direction": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "fit_observed_changes": {
+          "J14": [
+            -0.25333556073525654,
+            -0.1380736314691542,
+            -0.059637665733259126
+          ],
+          "A": [
+            -0.5041295415895193,
+            -0.3144779222298735,
+            -0.4211502159939472
+          ],
+          "B": [
+            0.09683767067384097,
+            0.12744168465785877,
+            0.07646014397460466
+          ]
+        },
+        "fit_observed_support": {
+          "A": [
+            8.05351378573321,
+            4.444596992593914,
+            6.43263353081812
+          ],
+          "B": [
+            8.926777400457306,
+            4.076842529084754,
+            4.445556548111554
+          ]
+        },
+        "fit_observed_gates": {
+          "valid_all_networks": true,
+          "J14_improves_all_networks": true,
+          "A_improves_all_networks": true,
+          "B_within_ratio_all_networks": true,
+          "A_support_at_least_minimum_all_networks": true,
+          "B_support_at_least_minimum_all_networks": true
+        },
+        "predicted_advancement_eligible": true,
+        "worst_delta_J14": -0.059637665733259126,
+        "worst_delta_A": -0.3144779222298735,
+        "mean_delta_J14": -0.15034895264588996,
+        "mean_delta_A": -0.41325255993777993,
+        "minimum_support": 4.076842529084754
+      },
+      {
+        "candidate_id": "direct_dispersion_f13_p_a15",
+        "source_candidate_id": "dispersion_f13_p_a15",
+        "family": "discrete_single_coordinate",
+        "nomination_strategy": "measured_antithetic_endpoint",
+        "radius": 0.15,
+        "direction": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        "fit_observed_changes": {
+          "J14": [
+            -0.054778322891722464,
+            -0.4609301870117397,
+            -0.28387857809342854
+          ],
+          "A": [
+            -0.13621133305254984,
+            -0.2552630843554322,
+            -0.15514429741535984
+          ],
+          "B": [
+            0.04152073087856256,
+            -0.26571383542888083,
+            -0.12614746149990963
+          ]
+        },
+        "fit_observed_support": {
+          "A": [
+            4.203652034248053,
+            4.009301062196849,
+            5.198468504668966
+          ],
+          "B": [
+            5.500687763018985,
+            5.974697610505077,
+            8.768187576803236
+          ]
+        },
+        "fit_observed_gates": {
+          "valid_all_networks": true,
+          "J14_improves_all_networks": true,
+          "A_improves_all_networks": true,
+          "B_within_ratio_all_networks": true,
+          "A_support_at_least_minimum_all_networks": true,
+          "B_support_at_least_minimum_all_networks": true
+        },
+        "predicted_advancement_eligible": true,
+        "worst_delta_J14": -0.054778322891722464,
+        "worst_delta_A": -0.13621133305254984,
+        "mean_delta_J14": -0.2665290293322969,
+        "mean_delta_A": -0.1822062382744473,
+        "minimum_support": 4.009301062196849
+      },
+      {
+        "candidate_id": "direct_mean_f05_m_a15",
+        "source_candidate_id": "mean_f05_m_a15",
+        "family": "discrete_single_coordinate",
+        "nomination_strategy": "measured_antithetic_endpoint",
+        "radius": 0.15,
+        "direction": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "fit_observed_changes": {
+          "J14": [
+            -0.02784323427546287,
+            -0.5990755383940802,
+            -0.4379984744293992
+          ],
+          "A": [
+            -0.005592282269681892,
+            -0.6061705392212827,
+            -0.24487765149063123
+          ],
+          "B": [
+            -0.06228891649758217,
+            -0.20073788113400393,
+            -0.15803338212011764
+          ]
+        },
+        "fit_observed_support": {
+          "A": [
+            3.598531338807623,
+            6.191048206311246,
+            5.621229069067958
+          ],
+          "B": [
+            7.1831730312427915,
+            6.792904623702603,
+            11.145334077046549
+          ]
+        },
+        "fit_observed_gates": {
+          "valid_all_networks": true,
+          "J14_improves_all_networks": true,
+          "A_improves_all_networks": true,
+          "B_within_ratio_all_networks": true,
+          "A_support_at_least_minimum_all_networks": true,
+          "B_support_at_least_minimum_all_networks": true
+        },
+        "predicted_advancement_eligible": true,
+        "worst_delta_J14": -0.02784323427546287,
+        "worst_delta_A": -0.005592282269681892,
+        "mean_delta_J14": -0.35497241569964744,
+        "mean_delta_A": -0.28554682432719863,
+        "minimum_support": 3.598531338807623
+      }
+    ],
+    "nomination_audit": {
+      "nomination_strategy": "measured_antithetic_endpoint",
+      "fit_network_seeds": [
+        2361,
+        2362,
+        2363
+      ],
+      "source_amplitude": 0.15,
+      "minimum_effective_support_per_mode": 3.0,
+      "B_protection_ratio": 1.1,
+      "maximum_candidates": 24,
+      "eligible_before_cap": 18,
+      "nominated_candidate_ids": [
+        "direct_mean_f09_p_a15",
+        "direct_dispersion_f04_m_a15",
+        "direct_dispersion_f11_p_a15",
+        "direct_dispersion_f14_p_a15",
+        "direct_mean_f02_p_a15",
+        "direct_dispersion_f12_m_a15",
+        "direct_dispersion_f06_p_a15",
+        "direct_mean_f01_m_a15",
+        "direct_dispersion_f01_p_a15",
+        "direct_mean_f06_p_a15",
+        "direct_mean_f01_p_a15",
+        "direct_dispersion_f05_m_a15",
+        "direct_mean_f08_m_a15",
+        "direct_dispersion_f09_m_a15",
+        "direct_dispersion_f00_p_a15",
+        "direct_mean_f12_m_a15",
+        "direct_dispersion_f13_p_a15",
+        "direct_mean_f05_m_a15"
+      ],
+      "nominated_candidate_count": 18,
+      "all_proposals": [
+        {
+          "candidate_id": "direct_dispersion_f00_m_a15",
+          "source_candidate_id": "dispersion_f00_m_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.20245612643670974,
+              -0.38532859757319615,
+              0.05209409879123239
+            ],
+            "A": [
+              -0.23094982408214992,
+              -0.1899412390688564,
+              0.06902472272747961
+            ],
+            "B": [
+              -0.007056960785405186,
+              -0.25426533916174243,
+              0.1044068369556288
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              4.575579887416016,
+              3.967808420694225,
+              3.6468854791136094
+            ],
+            "B": [
+              12.200489188972478,
+              6.024380020571515,
+              4.285601475503605
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": false,
+            "A_improves_all_networks": false,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": true,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": false,
+          "worst_delta_J14": 0.05209409879123239,
+          "worst_delta_A": 0.06902472272747961,
+          "mean_delta_J14": -0.17856354173955782,
+          "mean_delta_A": -0.11728878014117557,
+          "minimum_support": 3.6468854791136094
+        },
+        {
+          "candidate_id": "direct_dispersion_f00_p_a15",
+          "source_candidate_id": "dispersion_f00_p_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.10987688163295717,
+              -0.40160648456556647,
+              -0.2015866451345456
+            ],
+            "A": [
+              -0.11760734486003876,
+              -0.13733269852806962,
+              -0.278715981881519
+            ],
+            "B": [
+              -0.0523247510126823,
+              -0.2772329161986049,
+              0.09123988383586323
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              3.9825341453263197,
+              3.6950779038729467,
+              7.501755418942981
+            ],
+            "B": [
+              10.850918528949148,
+              7.2414779307951225,
+              4.448232097411277
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": true,
+            "A_improves_all_networks": true,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": true,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": true,
+          "worst_delta_J14": -0.10987688163295717,
+          "worst_delta_A": -0.11760734486003876,
+          "mean_delta_J14": -0.23769000377768976,
+          "mean_delta_A": -0.17788534175654247,
+          "minimum_support": 3.6950779038729467
+        },
+        {
+          "candidate_id": "direct_dispersion_f01_m_a15",
+          "source_candidate_id": "dispersion_f01_m_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.02600407237519642,
+              -0.024492666910448158,
+              -0.21234564895062835
+            ],
+            "A": [
+              -0.41757359650021386,
+              0.14633082253254504,
+              -0.5105359212730387
+            ],
+            "B": [
+              0.20642309058204433,
+              0.08709836687191785,
+              0.04760320405904306
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              7.169127499375503,
+              2.0013402901614743,
+              6.740584185701471
+            ],
+            "B": [
+              4.6624595808127625,
+              3.9986427902163255,
+              5.741387942697287
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": true,
+            "A_improves_all_networks": false,
+            "B_within_ratio_all_networks": false,
+            "A_support_at_least_minimum_all_networks": false,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": false,
+          "worst_delta_J14": -0.024492666910448158,
+          "worst_delta_A": 0.14633082253254504,
+          "mean_delta_J14": -0.08761412941209097,
+          "mean_delta_A": -0.2605928984135692,
+          "minimum_support": 2.0013402901614743
+        },
+        {
+          "candidate_id": "direct_dispersion_f01_p_a15",
+          "source_candidate_id": "dispersion_f01_p_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.18449377281708723,
+              -0.3891697091861246,
+              -0.5497148927726718
+            ],
+            "A": [
+              -0.4292431336133957,
+              -0.5430649319793055,
+              -0.4116532077677961
+            ],
+            "B": [
+              0.03636104101814719,
+              -0.045688343681148824,
+              -0.13133518138069622
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              6.407217377458106,
+              6.669557928413928,
+              5.700429332964479
+            ],
+            "B": [
+              6.364087803858657,
+              5.275088483280996,
+              8.160139334807475
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": true,
+            "A_improves_all_networks": true,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": true,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": true,
+          "worst_delta_J14": -0.18449377281708723,
+          "worst_delta_A": -0.4116532077677961,
+          "mean_delta_J14": -0.37445945825862786,
+          "mean_delta_A": -0.46132042445349913,
+          "minimum_support": 5.275088483280996
+        },
+        {
+          "candidate_id": "direct_dispersion_f02_m_a15",
+          "source_candidate_id": "dispersion_f02_m_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.43179952307023606,
+              0.17224035960266004,
+              -0.2586128415151656
+            ],
+            "A": [
+              -0.4612890890857302,
+              0.30659919065231556,
+              -0.10540476980650948
+            ],
+            "B": [
+              -0.07983976821171601,
+              -0.28861147974992685,
+              -0.08527191618240337
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              6.618300879256098,
+              1.0295846563469402,
+              5.085191645169417
+            ],
+            "B": [
+              10.158398527206549,
+              6.96345736636908,
+              6.909751650002763
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": false,
+            "A_improves_all_networks": false,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": false,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": false,
+          "worst_delta_J14": 0.17224035960266004,
+          "worst_delta_A": 0.30659919065231556,
+          "mean_delta_J14": -0.17272400166091387,
+          "mean_delta_A": -0.08669822274664137,
+          "minimum_support": 1.0295846563469402
+        },
+        {
+          "candidate_id": "direct_dispersion_f02_p_a15",
+          "source_candidate_id": "dispersion_f02_p_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.2744296739924412,
+              -0.4800898711494357,
+              -0.05985600591998841
+            ],
+            "A": [
+              -0.3830532453691968,
+              -0.5795588032391519,
+              0.05033923972177323
+            ],
+            "B": [
+              -0.0077277656418195395,
+              -0.1218205568150661,
+              0.08292598163172582
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              5.916383501310385,
+              7.996577944153304,
+              3.3210257171670605
+            ],
+            "B": [
+              7.023028550350883,
+              6.999079629895594,
+              4.657442613003902
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": true,
+            "A_improves_all_networks": false,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": true,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": false,
+          "worst_delta_J14": -0.05985600591998841,
+          "worst_delta_A": 0.05033923972177323,
+          "mean_delta_J14": -0.2714585170206218,
+          "mean_delta_A": -0.30409093629552514,
+          "minimum_support": 3.3210257171670605
+        },
+        {
+          "candidate_id": "direct_dispersion_f03_m_a15",
+          "source_candidate_id": "dispersion_f03_m_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.3161354993323635,
+              -0.19791661580036868,
+              0.10347212136394823
+            ],
+            "A": [
+              -0.4415576448830427,
+              0.13048873648657255,
+              0.14151871841959496
+            ],
+            "B": [
+              -0.03470260640912359,
+              -0.20759643852812548,
+              0.1756498104795845
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              6.752502350941957,
+              2.2314696751010143,
+              2.924998684171934
+            ],
+            "B": [
+              8.147281433280819,
+              9.768194640780871,
+              4.964598366752847
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": false,
+            "A_improves_all_networks": false,
+            "B_within_ratio_all_networks": false,
+            "A_support_at_least_minimum_all_networks": false,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": false,
+          "worst_delta_J14": 0.10347212136394823,
+          "worst_delta_A": 0.14151871841959496,
+          "mean_delta_J14": -0.136859997922928,
+          "mean_delta_A": -0.05651672999229174,
+          "minimum_support": 2.2314696751010143
+        },
+        {
+          "candidate_id": "direct_dispersion_f03_p_a15",
+          "source_candidate_id": "dispersion_f03_p_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              0.11163458681170901,
+              -0.00031231139928111773,
+              0.03262757224307311
+            ],
+            "A": [
+              -0.212902525544151,
+              -0.20448123518864447,
+              0.28694986848244985
+            ],
+            "B": [
+              0.3288543117575675,
+              0.17055655244052348,
+              -0.052080252373713165
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              4.5118706101019335,
+              3.9404676204947835,
+              2.2588150393108344
+            ],
+            "B": [
+              3.3219075107352296,
+              3.052021823376669,
+              7.689236211203466
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": false,
+            "A_improves_all_networks": false,
+            "B_within_ratio_all_networks": false,
+            "A_support_at_least_minimum_all_networks": false,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": false,
+          "worst_delta_J14": 0.11163458681170901,
+          "worst_delta_A": 0.28694986848244985,
+          "mean_delta_J14": 0.04798328255183367,
+          "mean_delta_A": -0.04347796408344854,
+          "minimum_support": 2.2588150393108344
+        },
+        {
+          "candidate_id": "direct_dispersion_f04_m_a15",
+          "source_candidate_id": "dispersion_f04_m_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.29231434898224595,
+              -0.3237951472574001,
+              -0.4352831545896787
+            ],
+            "A": [
+              -0.2665467975189997,
+              -0.20553107596447973,
+              -0.11048878682289787
+            ],
+            "B": [
+              -0.07826543493082139,
+              -0.22201095666841786,
+              -0.16144675838531386
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              4.724313299006858,
+              4.294977194165392,
+              4.39643227328219
+            ],
+            "B": [
+              10.134752781825465,
+              6.377730927813908,
+              12.404151702120894
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": true,
+            "A_improves_all_networks": true,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": true,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": true,
+          "worst_delta_J14": -0.29231434898224595,
+          "worst_delta_A": -0.11048878682289787,
+          "mean_delta_J14": -0.35046421694310825,
+          "mean_delta_A": -0.19418888676879242,
+          "minimum_support": 4.294977194165392
+        },
+        {
+          "candidate_id": "direct_dispersion_f04_p_a15",
+          "source_candidate_id": "dispersion_f04_p_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.2707300715124463,
+              0.041989830664751704,
+              -0.11478755733147494
+            ],
+            "A": [
+              -0.3272322468662705,
+              0.28518577412424717,
+              0.03880145467880047
+            ],
+            "B": [
+              -0.051067544845584845,
+              -0.2922183293784997,
+              -0.22416922935794847
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              5.234802703547226,
+              1.1067883639816323,
+              3.765315729594831
+            ],
+            "B": [
+              6.520252036700401,
+              6.893972308366369,
+              6.188748980561382
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": false,
+            "A_improves_all_networks": false,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": false,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": false,
+          "worst_delta_J14": 0.041989830664751704,
+          "worst_delta_A": 0.28518577412424717,
+          "mean_delta_J14": -0.11450926605972318,
+          "mean_delta_A": -0.0010816726877409533,
+          "minimum_support": 1.1067883639816323
+        },
+        {
+          "candidate_id": "direct_dispersion_f05_m_a15",
+          "source_candidate_id": "dispersion_f05_m_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.23820267828745512,
+              -0.22619121338226167,
+              -0.14230420891575646
+            ],
+            "A": [
+              -0.43747066758000397,
+              -0.26593846739736726,
+              -0.045594695678010666
+            ],
+            "B": [
+              0.03157523388032968,
+              -0.027333658633065472,
+              -0.11727312535499501
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              5.988087115832249,
+              4.338058399938279,
+              4.277693885346858
+            ],
+            "B": [
+              5.659785535538356,
+              4.303599616256374,
+              5.505157094721934
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": true,
+            "A_improves_all_networks": true,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": true,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": true,
+          "worst_delta_J14": -0.14230420891575646,
+          "worst_delta_A": -0.045594695678010666,
+          "mean_delta_J14": -0.20223270019515774,
+          "mean_delta_A": -0.24966794355179397,
+          "minimum_support": 4.277693885346858
+        },
+        {
+          "candidate_id": "direct_dispersion_f05_p_a15",
+          "source_candidate_id": "dispersion_f05_p_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.1378412139772096,
+              -0.15438230461315428,
+              0.13108945945807315
+            ],
+            "A": [
+              -0.2878203973181106,
+              -0.01381291376328897,
+              0.3357914204821919
+            ],
+            "B": [
+              0.059675066429671686,
+              -0.15566725228292344,
+              -0.06339136850081006
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              4.959085657365296,
+              3.7929043938748785,
+              2.048820786734543
+            ],
+            "B": [
+              9.423561152762481,
+              7.8284414956578265,
+              7.910163483944016
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": false,
+            "A_improves_all_networks": false,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": false,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": false,
+          "worst_delta_J14": 0.13108945945807315,
+          "worst_delta_A": 0.3357914204821919,
+          "mean_delta_J14": -0.05371135304409691,
+          "mean_delta_A": 0.01138603646693078,
+          "minimum_support": 2.048820786734543
+        },
+        {
+          "candidate_id": "direct_dispersion_f06_m_a15",
+          "source_candidate_id": "dispersion_f06_m_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.35704853992826213,
+              -0.08954488299661634,
+              -0.3529161063317736
+            ],
+            "A": [
+              -0.34968498400441006,
+              -0.4006052439240917,
+              -0.13741114701053392
+            ],
+            "B": [
+              -0.18611930251965658,
+              0.15147968764380693,
+              -0.13044595033402806
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              5.374222856604146,
+              5.426086343485888,
+              5.167558161436926
+            ],
+            "B": [
+              9.107922257259114,
+              4.356076212396002,
+              6.815890809922919
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": true,
+            "A_improves_all_networks": true,
+            "B_within_ratio_all_networks": false,
+            "A_support_at_least_minimum_all_networks": true,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": false,
+          "worst_delta_J14": -0.08954488299661634,
+          "worst_delta_A": -0.13741114701053392,
+          "mean_delta_J14": -0.26650317641888405,
+          "mean_delta_A": -0.29590045831301187,
+          "minimum_support": 4.356076212396002
+        },
+        {
+          "candidate_id": "direct_dispersion_f06_p_a15",
+          "source_candidate_id": "dispersion_f06_p_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.1907574498153055,
+              -0.6838881272088304,
+              -0.22462092985404536
+            ],
+            "A": [
+              -0.3776784574491656,
+              -0.49947534625791956,
+              -0.10216953300729581
+            ],
+            "B": [
+              0.06822602348467743,
+              -0.2933763355762995,
+              -0.1661992664556684
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              5.493243243124479,
+              5.922671605817855,
+              4.254881175629465
+            ],
+            "B": [
+              7.2901267014814835,
+              6.068195207399581,
+              6.577772544197274
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": true,
+            "A_improves_all_networks": true,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": true,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": true,
+          "worst_delta_J14": -0.1907574498153055,
+          "worst_delta_A": -0.10216953300729581,
+          "mean_delta_J14": -0.3664221689593938,
+          "mean_delta_A": -0.326441112238127,
+          "minimum_support": 4.254881175629465
+        },
+        {
+          "candidate_id": "direct_dispersion_f07_m_a15",
+          "source_candidate_id": "dispersion_f07_m_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              0.10353107477303425,
+              -0.36154200270035686,
+              -0.39321219179713873
+            ],
+            "A": [
+              0.09445235855592005,
+              -0.33797395279387077,
+              -0.32377362952661715
+            ],
+            "B": [
+              0.05490991776395937,
+              -0.22891488425016382,
+              -0.10074475773546676
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              2.737746043249093,
+              5.009789906596786,
+              8.555044409746483
+            ],
+            "B": [
+              9.03090647540693,
+              7.9731468858288315,
+              9.305258925107244
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": false,
+            "A_improves_all_networks": false,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": false,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": false,
+          "worst_delta_J14": 0.10353107477303425,
+          "worst_delta_A": 0.09445235855592005,
+          "mean_delta_J14": -0.21707437324148712,
+          "mean_delta_A": -0.18909840792152263,
+          "minimum_support": 2.737746043249093
+        },
+        {
+          "candidate_id": "direct_dispersion_f07_p_a15",
+          "source_candidate_id": "dispersion_f07_p_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              0.2824900967076549,
+              -0.049270860504518676,
+              -0.258730455831627
+            ],
+            "A": [
+              0.2649509716857499,
+              0.14253381788583108,
+              -0.3283523040592584
+            ],
+            "B": [
+              -0.09687358599535667,
+              -0.37482830819205293,
+              -0.1204734802890528
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              1.6133520279350422,
+              2.0762435787740543,
+              8.178718427517284
+            ],
+            "B": [
+              9.198290112499343,
+              8.923169504670843,
+              6.661445078270433
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": false,
+            "A_improves_all_networks": false,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": false,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": false,
+          "worst_delta_J14": 0.2824900967076549,
+          "worst_delta_A": 0.2649509716857499,
+          "mean_delta_J14": -0.008503739876163596,
+          "mean_delta_A": 0.026377495170774184,
+          "minimum_support": 1.6133520279350422
+        },
+        {
+          "candidate_id": "direct_dispersion_f08_m_a15",
+          "source_candidate_id": "dispersion_f08_m_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              0.12319154778221986,
+              -0.6713884296534074,
+              0.04641434457853233
+            ],
+            "A": [
+              -0.43660690860208007,
+              -0.559096576172393,
+              -0.36218560753226936
+            ],
+            "B": [
+              0.3756292371575294,
+              -0.2778159246162897,
+              0.26342829550571056
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              5.55180034082822,
+              7.08827649271103,
+              9.978291436710952
+            ],
+            "B": [
+              4.231454550929233,
+              6.909137551881663,
+              3.540675734240923
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": false,
+            "A_improves_all_networks": true,
+            "B_within_ratio_all_networks": false,
+            "A_support_at_least_minimum_all_networks": true,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": false,
+          "worst_delta_J14": 0.12319154778221986,
+          "worst_delta_A": -0.36218560753226936,
+          "mean_delta_J14": -0.1672608457642184,
+          "mean_delta_A": -0.4526296974355808,
+          "minimum_support": 3.540675734240923
+        },
+        {
+          "candidate_id": "direct_dispersion_f08_p_a15",
+          "source_candidate_id": "dispersion_f08_p_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              0.25230472164279494,
+              -0.5090373857498447,
+              -0.4913396657223892
+            ],
+            "A": [
+              0.21967662646524433,
+              -0.2587170576092386,
+              -0.329258928824131
+            ],
+            "B": [
+              0.041023685919909125,
+              -0.3245127361554765,
+              -0.20757908372556333
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              1.8219844061497923,
+              4.1399157076931745,
+              6.515758016706926
+            ],
+            "B": [
+              8.939379260646723,
+              10.854110623380354,
+              7.413018395617887
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": false,
+            "A_improves_all_networks": false,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": false,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": false,
+          "worst_delta_J14": 0.25230472164279494,
+          "worst_delta_A": 0.21967662646524433,
+          "mean_delta_J14": -0.24935744327647966,
+          "mean_delta_A": -0.12276645332270841,
+          "minimum_support": 1.8219844061497923
+        },
+        {
+          "candidate_id": "direct_dispersion_f09_m_a15",
+          "source_candidate_id": "dispersion_f09_m_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.16097659769284078,
+              -0.1304200574238248,
+              -0.2836821221941648
+            ],
+            "A": [
+              -0.11573799659522432,
+              -0.04815139776662258,
+              -0.3229574709891183
+            ],
+            "B": [
+              -0.13364275735569842,
+              -0.12812779649486217,
+              0.03573601269617033
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              4.0728788111817416,
+              3.364265927895572,
+              7.639094871697101
+            ],
+            "B": [
+              7.918047003072327,
+              5.174056804372125,
+              5.31045266003524
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": true,
+            "A_improves_all_networks": true,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": true,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": true,
+          "worst_delta_J14": -0.1304200574238248,
+          "worst_delta_A": -0.04815139776662258,
+          "mean_delta_J14": -0.19169292577027677,
+          "mean_delta_A": -0.16228228845032175,
+          "minimum_support": 3.364265927895572
+        },
+        {
+          "candidate_id": "direct_dispersion_f09_p_a15",
+          "source_candidate_id": "dispersion_f09_p_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              0.2135077017459932,
+              -0.24867942306823299,
+              -0.36692451118802794
+            ],
+            "A": [
+              0.25412045429401564,
+              -0.18919612812832098,
+              -0.220431625118658
+            ],
+            "B": [
+              -0.040290760377446944,
+              -0.19095629320062635,
+              -0.14898715765504944
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              1.6943601274300477,
+              4.075025075772181,
+              5.135152404128089
+            ],
+            "B": [
+              6.153982345968161,
+              5.910233159116237,
+              8.829080092347604
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": false,
+            "A_improves_all_networks": false,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": false,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": false,
+          "worst_delta_J14": 0.2135077017459932,
+          "worst_delta_A": 0.25412045429401564,
+          "mean_delta_J14": -0.13403207750342258,
+          "mean_delta_A": -0.05183576631765444,
+          "minimum_support": 1.6943601274300477
+        },
+        {
+          "candidate_id": "direct_dispersion_f10_m_a15",
+          "source_candidate_id": "dispersion_f10_m_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.1885664003130323,
+              0.026034192303212134,
+              -0.35995886084065165
+            ],
+            "A": [
+              -0.3147279250933197,
+              -0.3446043111095203,
+              -0.2147133802187311
+            ],
+            "B": [
+              -0.023423599578406007,
+              0.20508954892356313,
+              -0.13458379858342684
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              4.628836352625653,
+              4.969068990697572,
+              5.449943995160969
+            ],
+            "B": [
+              7.155952562292817,
+              3.025503073280719,
+              12.145932393776606
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": false,
+            "A_improves_all_networks": true,
+            "B_within_ratio_all_networks": false,
+            "A_support_at_least_minimum_all_networks": true,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": false,
+          "worst_delta_J14": 0.026034192303212134,
+          "worst_delta_A": -0.2147133802187311,
+          "mean_delta_J14": -0.17416368961682394,
+          "mean_delta_A": -0.29134853880719036,
+          "minimum_support": 3.025503073280719
+        },
+        {
+          "candidate_id": "direct_dispersion_f10_p_a15",
+          "source_candidate_id": "dispersion_f10_p_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.08295433806483166,
+              0.11339635649470114,
+              0.06718294600373342
+            ],
+            "A": [
+              -0.12112177285821746,
+              0.21875387807384739,
+              -0.28668225576656114
+            ],
+            "B": [
+              -0.08672428194665138,
+              0.029589372294407834,
+              0.19103558450562197
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              3.7940634934903743,
+              1.4825943291479662,
+              5.798176913339146
+            ],
+            "B": [
+              8.058300363277858,
+              4.285503073939872,
+              5.097187962947097
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": false,
+            "A_improves_all_networks": false,
+            "B_within_ratio_all_networks": false,
+            "A_support_at_least_minimum_all_networks": false,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": false,
+          "worst_delta_J14": 0.11339635649470114,
+          "worst_delta_A": 0.21875387807384739,
+          "mean_delta_J14": 0.03254165481120097,
+          "mean_delta_A": -0.0630167168503104,
+          "minimum_support": 1.4825943291479662
+        },
+        {
+          "candidate_id": "direct_dispersion_f11_m_a15",
+          "source_candidate_id": "dispersion_f11_m_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.2369177248900074,
+              0.10452456280586198,
+              -0.5070730320233032
+            ],
+            "A": [
+              -0.30764810418132726,
+              0.2566180164506999,
+              -0.35954899799014384
+            ],
+            "B": [
+              -0.04359166083816679,
+              -0.17513600768826887,
+              -0.12794014724423874
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              5.058406284115007,
+              1.2542109952574856,
+              5.863493678068059
+            ],
+            "B": [
+              6.538293067575355,
+              7.750643009847269,
+              13.085019433282039
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": false,
+            "A_improves_all_networks": false,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": false,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": false,
+          "worst_delta_J14": 0.10452456280586198,
+          "worst_delta_A": 0.2566180164506999,
+          "mean_delta_J14": -0.2131553980358162,
+          "mean_delta_A": -0.13685969524025707,
+          "minimum_support": 1.2542109952574856
+        },
+        {
+          "candidate_id": "direct_dispersion_f11_p_a15",
+          "source_candidate_id": "dispersion_f11_p_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.2869022554868257,
+              -0.30136074908550237,
+              -0.4810174354356742
+            ],
+            "A": [
+              -0.428207881625144,
+              -0.015526131870521986,
+              -0.41797377849638395
+            ],
+            "B": [
+              -0.010444226282597002,
+              -0.29272861702153197,
+              -0.08947145272485346
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              6.5908285246158655,
+              3.1680017353625542,
+              7.23351227144169
+            ],
+            "B": [
+              7.161578921588167,
+              8.830612262678777,
+              10.719109667000403
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": true,
+            "A_improves_all_networks": true,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": true,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": true,
+          "worst_delta_J14": -0.2869022554868257,
+          "worst_delta_A": -0.015526131870521986,
+          "mean_delta_J14": -0.35642681333600074,
+          "mean_delta_A": -0.28723593066401665,
+          "minimum_support": 3.1680017353625542
+        },
+        {
+          "candidate_id": "direct_dispersion_f12_m_a15",
+          "source_candidate_id": "dispersion_f12_m_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.2739106843917041,
+              -0.2068093487032927,
+              -0.5524559113399383
+            ],
+            "A": [
+              -0.438889250582845,
+              -0.040651676688861826,
+              -0.46332297673867684
+            ],
+            "B": [
+              -0.015251402061308372,
+              -0.20643116470845935,
+              -0.24272083089904206
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              9.867975649143952,
+              3.0238595070182854,
+              7.505908979290977
+            ],
+            "B": [
+              7.048694845772309,
+              5.973798301550957,
+              7.36816114748197
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": true,
+            "A_improves_all_networks": true,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": true,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": true,
+          "worst_delta_J14": -0.2068093487032927,
+          "worst_delta_A": -0.040651676688861826,
+          "mean_delta_J14": -0.3443919814783117,
+          "mean_delta_A": -0.3142879680034612,
+          "minimum_support": 3.0238595070182854
+        },
+        {
+          "candidate_id": "direct_dispersion_f12_p_a15",
+          "source_candidate_id": "dispersion_f12_p_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              0.07153437348460212,
+              -0.06494871413174286,
+              -0.09259535272593933
+            ],
+            "A": [
+              -0.47159063367882337,
+              -0.024872963406381787,
+              0.007592437953306996
+            ],
+            "B": [
+              0.18844831558061026,
+              -0.02811210105043016,
+              0.028213719520143066
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              6.20918705513236,
+              3.0888547464902407,
+              4.033818435638752
+            ],
+            "B": [
+              4.523863077717951,
+              4.909963758171066,
+              7.844917632640669
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": false,
+            "A_improves_all_networks": false,
+            "B_within_ratio_all_networks": false,
+            "A_support_at_least_minimum_all_networks": true,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": false,
+          "worst_delta_J14": 0.07153437348460212,
+          "worst_delta_A": 0.007592437953306996,
+          "mean_delta_J14": -0.02866989779102669,
+          "mean_delta_A": -0.16295705304396604,
+          "minimum_support": 3.0888547464902407
+        },
+        {
+          "candidate_id": "direct_dispersion_f13_m_a15",
+          "source_candidate_id": "dispersion_f13_m_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.23325775917539548,
+              -0.1374165636969833,
+              -0.2569018754648922
+            ],
+            "A": [
+              -0.2618803082963299,
+              0.10114904869287233,
+              -0.3068075232938594
+            ],
+            "B": [
+              -0.06183378088836533,
+              -0.23589411856527098,
+              0.017852733321508163
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              4.618451041090297,
+              2.203538969450616,
+              6.5667858818144875
+            ],
+            "B": [
+              8.163186518034953,
+              7.795373056270464,
+              7.2720432208344175
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": true,
+            "A_improves_all_networks": false,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": false,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": false,
+          "worst_delta_J14": -0.1374165636969833,
+          "worst_delta_A": 0.10114904869287233,
+          "mean_delta_J14": -0.20919206611242366,
+          "mean_delta_A": -0.15584626096577234,
+          "minimum_support": 2.203538969450616
+        },
+        {
+          "candidate_id": "direct_dispersion_f13_p_a15",
+          "source_candidate_id": "dispersion_f13_p_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.054778322891722464,
+              -0.4609301870117397,
+              -0.28387857809342854
+            ],
+            "A": [
+              -0.13621133305254984,
+              -0.2552630843554322,
+              -0.15514429741535984
+            ],
+            "B": [
+              0.04152073087856256,
+              -0.26571383542888083,
+              -0.12614746149990963
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              4.203652034248053,
+              4.009301062196849,
+              5.198468504668966
+            ],
+            "B": [
+              5.500687763018985,
+              5.974697610505077,
+              8.768187576803236
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": true,
+            "A_improves_all_networks": true,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": true,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": true,
+          "worst_delta_J14": -0.054778322891722464,
+          "worst_delta_A": -0.13621133305254984,
+          "mean_delta_J14": -0.2665290293322969,
+          "mean_delta_A": -0.1822062382744473,
+          "minimum_support": 4.009301062196849
+        },
+        {
+          "candidate_id": "direct_dispersion_f14_m_a15",
+          "source_candidate_id": "dispersion_f14_m_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.15199566525068398,
+              0.020845149995585288,
+              0.4250554923659955
+            ],
+            "A": [
+              -0.1365348208721513,
+              0.16883392815499798,
+              0.5101067921360358
+            ],
+            "B": [
+              -0.09239021857374063,
+              -0.0019821632331311623,
+              -0.1034347739842183
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              4.101336886808669,
+              1.8703926708254979,
+              0.8084099197664133
+            ],
+            "B": [
+              9.397180995810766,
+              4.112760048908942,
+              6.126220134993644
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": false,
+            "A_improves_all_networks": false,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": false,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": false,
+          "worst_delta_J14": 0.4250554923659955,
+          "worst_delta_A": 0.5101067921360358,
+          "mean_delta_J14": 0.09796832570363227,
+          "mean_delta_A": 0.18080196647296085,
+          "minimum_support": 0.8084099197664133
+        },
+        {
+          "candidate_id": "direct_dispersion_f14_p_a15",
+          "source_candidate_id": "dispersion_f14_p_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.3985011704767314,
+              -0.32158486641376927,
+              -0.2561568642398315
+            ],
+            "A": [
+              -0.350505817085196,
+              -0.11632445963927918,
+              -0.33472351926112665
+            ],
+            "B": [
+              -0.17468822008414908,
+              -0.19008665179851936,
+              0.012802168999366925
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              5.05156832360481,
+              3.5494489266843434,
+              5.979250340953658
+            ],
+            "B": [
+              5.945113298735922,
+              6.145245276206862,
+              7.992309870220203
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": true,
+            "A_improves_all_networks": true,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": true,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": true,
+          "worst_delta_J14": -0.2561568642398315,
+          "worst_delta_A": -0.11632445963927918,
+          "mean_delta_J14": -0.3254143003767774,
+          "mean_delta_A": -0.2671845986618673,
+          "minimum_support": 3.5494489266843434
+        },
+        {
+          "candidate_id": "direct_mean_f00_m_a15",
+          "source_candidate_id": "mean_f00_m_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            -1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              0.1862090254036599,
+              -0.30010612247843493,
+              -0.3772127056465182
+            ],
+            "A": [
+              0.15901081354140834,
+              -0.461565783932379,
+              -0.24587558466733284
+            ],
+            "B": [
+              -0.08496928690595529,
+              -0.01962536099394674,
+              -0.13334241700177074
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              2.160141043487067,
+              6.261740667366987,
+              7.770386323500258
+            ],
+            "B": [
+              10.837601027638975,
+              4.8092180666040605,
+              9.818205899950849
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": false,
+            "A_improves_all_networks": false,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": false,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": false,
+          "worst_delta_J14": 0.1862090254036599,
+          "worst_delta_A": 0.15901081354140834,
+          "mean_delta_J14": -0.1637032675737644,
+          "mean_delta_A": -0.1828101850194345,
+          "minimum_support": 2.160141043487067
+        },
+        {
+          "candidate_id": "direct_mean_f00_p_a15",
+          "source_candidate_id": "mean_f00_p_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.21085526423919942,
+              0.06134771854511811,
+              0.13854969611179557
+            ],
+            "A": [
+              -0.2362607316321481,
+              -0.018013720887799067,
+              -0.16179137411774192
+            ],
+            "B": [
+              -0.1816422469570338,
+              0.17955530170166,
+              0.3249169401400407
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              4.658543200332995,
+              2.9742149833586553,
+              5.01292527320366
+            ],
+            "B": [
+              9.108640155593022,
+              3.0253582704083146,
+              3.9695772385705066
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": false,
+            "A_improves_all_networks": true,
+            "B_within_ratio_all_networks": false,
+            "A_support_at_least_minimum_all_networks": false,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": false,
+          "worst_delta_J14": 0.13854969611179557,
+          "worst_delta_A": -0.018013720887799067,
+          "mean_delta_J14": -0.0036526165274285796,
+          "mean_delta_A": -0.1386886088792297,
+          "minimum_support": 2.9742149833586553
+        },
+        {
+          "candidate_id": "direct_mean_f01_m_a15",
+          "source_candidate_id": "mean_f01_m_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            -1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.1881177614917624,
+              -0.2937857742554404,
+              -0.23323267296129457
+            ],
+            "A": [
+              -0.3715419445800925,
+              -0.1147353011617227,
+              -0.2940367465810034
+            ],
+            "B": [
+              -0.021810673869256947,
+              -0.24629269592035374,
+              0.12275589365873518
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              5.0798908335633435,
+              3.528417179650589,
+              7.805489974422555
+            ],
+            "B": [
+              6.619625232039089,
+              6.302380879635531,
+              5.089690127329389
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": true,
+            "A_improves_all_networks": true,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": true,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": true,
+          "worst_delta_J14": -0.1881177614917624,
+          "worst_delta_A": -0.1147353011617227,
+          "mean_delta_J14": -0.2383787362361658,
+          "mean_delta_A": -0.2601046641076062,
+          "minimum_support": 3.528417179650589
+        },
+        {
+          "candidate_id": "direct_mean_f01_p_a15",
+          "source_candidate_id": "mean_f01_p_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.14284557367402684,
+              -0.26112687543496627,
+              -0.3279651736522222
+            ],
+            "A": [
+              -0.43727333221816367,
+              -0.0656820556247153,
+              -0.10032974914028481
+            ],
+            "B": [
+              0.06134051879303115,
+              -0.1739878919979514,
+              -0.1954920348704916
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              6.526911560286093,
+              3.2192582726166257,
+              4.593496806496073
+            ],
+            "B": [
+              8.060227445217826,
+              8.76189100811608,
+              9.31503353172147
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": true,
+            "A_improves_all_networks": true,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": true,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": true,
+          "worst_delta_J14": -0.14284557367402684,
+          "worst_delta_A": -0.0656820556247153,
+          "mean_delta_J14": -0.24397920758707178,
+          "mean_delta_A": -0.2010950456610546,
+          "minimum_support": 3.2192582726166257
+        },
+        {
+          "candidate_id": "direct_mean_f02_m_a15",
+          "source_candidate_id": "mean_f02_m_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            -1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.22168409068359085,
+              -0.13914463142042077,
+              0.11488955413969171
+            ],
+            "A": [
+              -0.10609323501663814,
+              0.1451295855441086,
+              -0.13289643520511962
+            ],
+            "B": [
+              -0.06771571498603257,
+              -0.2745773641883611,
+              0.25149919006020416
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              3.5638796198581577,
+              2.11147152588731,
+              4.525800172858498
+            ],
+            "B": [
+              6.217569787168562,
+              7.887952191895028,
+              4.187214139505079
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": false,
+            "A_improves_all_networks": false,
+            "B_within_ratio_all_networks": false,
+            "A_support_at_least_minimum_all_networks": false,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": false,
+          "worst_delta_J14": 0.11488955413969171,
+          "worst_delta_A": 0.1451295855441086,
+          "mean_delta_J14": -0.08197972265477331,
+          "mean_delta_A": -0.031286694892549725,
+          "minimum_support": 2.11147152588731
+        },
+        {
+          "candidate_id": "direct_mean_f02_p_a15",
+          "source_candidate_id": "mean_f02_p_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.21700396602586736,
+              -0.48784531307577983,
+              -0.48891652749775805
+            ],
+            "A": [
+              -0.34838705420269367,
+              -0.18013643938905854,
+              -0.3125345957006955
+            ],
+            "B": [
+              -0.10624945801298868,
+              -0.2727007672747481,
+              -0.04109448785028835
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              5.529948617315961,
+              3.9577000577244816,
+              6.847487445901468
+            ],
+            "B": [
+              6.273758330913783,
+              16.05068290792263,
+              13.923724811532683
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": true,
+            "A_improves_all_networks": true,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": true,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": true,
+          "worst_delta_J14": -0.21700396602586736,
+          "worst_delta_A": -0.18013643938905854,
+          "mean_delta_J14": -0.3979219355331351,
+          "mean_delta_A": -0.2803526964308159,
+          "minimum_support": 3.9577000577244816
+        },
+        {
+          "candidate_id": "direct_mean_f03_m_a15",
+          "source_candidate_id": "mean_f03_m_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            -1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              0.15127131382555303,
+              -0.2010802733434316,
+              -0.2452361648370256
+            ],
+            "A": [
+              0.09255148342576991,
+              -0.04200987180294602,
+              0.03947340949596345
+            ],
+            "B": [
+              0.041394182567815685,
+              -0.14935206988943261,
+              -0.17388782594150287
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              2.68210575496286,
+              3.1255520856367935,
+              3.8711238095137728
+            ],
+            "B": [
+              7.082621131895938,
+              5.873042029319645,
+              8.091095136001135
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": false,
+            "A_improves_all_networks": false,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": false,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": false,
+          "worst_delta_J14": 0.15127131382555303,
+          "worst_delta_A": 0.09255148342576991,
+          "mean_delta_J14": -0.09834837478496805,
+          "mean_delta_A": 0.03000500703959578,
+          "minimum_support": 2.68210575496286
+        },
+        {
+          "candidate_id": "direct_mean_f03_p_a15",
+          "source_candidate_id": "mean_f03_p_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.3969941373355377,
+              -0.16877640598876464,
+              -0.23532985538369178
+            ],
+            "A": [
+              -0.49825691221233614,
+              0.06356033687902696,
+              -0.28742272826827797
+            ],
+            "B": [
+              -0.05361165940867596,
+              -0.1909116810997682,
+              0.06325907880029114
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              6.742611878371838,
+              2.4157430002973883,
+              5.562922155280869
+            ],
+            "B": [
+              14.145877626944625,
+              5.2683723694445295,
+              4.341035674763571
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": true,
+            "A_improves_all_networks": false,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": false,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": false,
+          "worst_delta_J14": -0.16877640598876464,
+          "worst_delta_A": 0.06356033687902696,
+          "mean_delta_J14": -0.26703346623599805,
+          "mean_delta_A": -0.2407064345338624,
+          "minimum_support": 2.4157430002973883
+        },
+        {
+          "candidate_id": "direct_mean_f04_m_a15",
+          "source_candidate_id": "mean_f04_m_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.14156010135500718,
+              -0.28264003496071277,
+              -0.17983512248454625
+            ],
+            "A": [
+              -0.09220834128608546,
+              -0.14736796041591482,
+              0.07921508029172752
+            ],
+            "B": [
+              -0.16184912266721185,
+              -0.18018093379820055,
+              -0.15118999257460808
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              3.66575366023847,
+              3.8724744186357336,
+              3.646007820398727
+            ],
+            "B": [
+              10.167130162041792,
+              6.109192925313262,
+              9.266985276012653
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": true,
+            "A_improves_all_networks": false,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": true,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": false,
+          "worst_delta_J14": -0.14156010135500718,
+          "worst_delta_A": 0.07921508029172752,
+          "mean_delta_J14": -0.2013450862667554,
+          "mean_delta_A": -0.05345374047009092,
+          "minimum_support": 3.646007820398727
+        },
+        {
+          "candidate_id": "direct_mean_f04_p_a15",
+          "source_candidate_id": "mean_f04_p_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.35060968819393423,
+              0.2615175242686587,
+              -0.2462769813799368
+            ],
+            "A": [
+              -0.5062874200243244,
+              0.37688195001791125,
+              0.0043642853853227415
+            ],
+            "B": [
+              -0.03998159174768645,
+              -0.2595229721175263,
+              -0.16325544482594267
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              6.757359472051454,
+              0.4749391298025441,
+              3.660052203620804
+            ],
+            "B": [
+              8.062885172327565,
+              10.125967260446874,
+              9.093230427908534
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": false,
+            "A_improves_all_networks": false,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": false,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": false,
+          "worst_delta_J14": 0.2615175242686587,
+          "worst_delta_A": 0.37688195001791125,
+          "mean_delta_J14": -0.11178971510173745,
+          "mean_delta_A": -0.04168039487369679,
+          "minimum_support": 0.4749391298025441
+        },
+        {
+          "candidate_id": "direct_mean_f05_m_a15",
+          "source_candidate_id": "mean_f05_m_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.02784323427546287,
+              -0.5990755383940802,
+              -0.4379984744293992
+            ],
+            "A": [
+              -0.005592282269681892,
+              -0.6061705392212827,
+              -0.24487765149063123
+            ],
+            "B": [
+              -0.06228891649758217,
+              -0.20073788113400393,
+              -0.15803338212011764
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              3.598531338807623,
+              6.191048206311246,
+              5.621229069067958
+            ],
+            "B": [
+              7.1831730312427915,
+              6.792904623702603,
+              11.145334077046549
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": true,
+            "A_improves_all_networks": true,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": true,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": true,
+          "worst_delta_J14": -0.02784323427546287,
+          "worst_delta_A": -0.005592282269681892,
+          "mean_delta_J14": -0.35497241569964744,
+          "mean_delta_A": -0.28554682432719863,
+          "minimum_support": 3.598531338807623
+        },
+        {
+          "candidate_id": "direct_mean_f05_p_a15",
+          "source_candidate_id": "mean_f05_p_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.03766458054023136,
+              -0.09415680680421579,
+              -0.2034755193514859
+            ],
+            "A": [
+              -0.21825553745430604,
+              0.0008641660034425236,
+              -0.2683847324609081
+            ],
+            "B": [
+              0.12390655906825221,
+              -0.17171006069382866,
+              0.08104691306511347
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              4.9724736552705275,
+              2.902090050798927,
+              9.691159601769309
+            ],
+            "B": [
+              5.020307830223718,
+              6.084468680248313,
+              5.0223528721866755
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": true,
+            "A_improves_all_networks": false,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": false,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": false,
+          "worst_delta_J14": -0.03766458054023136,
+          "worst_delta_A": 0.0008641660034425236,
+          "mean_delta_J14": -0.11176563556531101,
+          "mean_delta_A": -0.16192536797059054,
+          "minimum_support": 2.902090050798927
+        },
+        {
+          "candidate_id": "direct_mean_f06_m_a15",
+          "source_candidate_id": "mean_f06_m_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.28571059465822324,
+              0.12511874370464948,
+              -0.36248826673456813
+            ],
+            "A": [
+              -0.41068647045091256,
+              0.2870196120139361,
+              -0.02226253349639573
+            ],
+            "B": [
+              -0.06997819423100671,
+              -0.14466414802138217,
+              -0.18391010996602541
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              5.740482687997262,
+              1.062580424575713,
+              4.122862574696198
+            ],
+            "B": [
+              9.06748539768239,
+              4.936478127707957,
+              11.868107243838955
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": false,
+            "A_improves_all_networks": false,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": false,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": false,
+          "worst_delta_J14": 0.12511874370464948,
+          "worst_delta_A": 0.2870196120139361,
+          "mean_delta_J14": -0.17436003922938062,
+          "mean_delta_A": -0.04864313064445739,
+          "minimum_support": 1.062580424575713
+        },
+        {
+          "candidate_id": "direct_mean_f06_p_a15",
+          "source_candidate_id": "mean_f06_p_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.3197918273379585,
+              -0.15758706756192398,
+              -0.2596104517284854
+            ],
+            "A": [
+              -0.45144776496937067,
+              -0.21613939935764304,
+              -0.3091503415087473
+            ],
+            "B": [
+              -0.06754438460769552,
+              0.050669088533829676,
+              0.011475624320378852
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              7.302524887922053,
+              4.1654340413819355,
+              7.953977523488867
+            ],
+            "B": [
+              9.68271212284544,
+              3.5722341478424946,
+              5.035738042774103
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": true,
+            "A_improves_all_networks": true,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": true,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": true,
+          "worst_delta_J14": -0.15758706756192398,
+          "worst_delta_A": -0.21613939935764304,
+          "mean_delta_J14": -0.2456631155427893,
+          "mean_delta_A": -0.3255791686119203,
+          "minimum_support": 3.5722341478424946
+        },
+        {
+          "candidate_id": "direct_mean_f07_m_a15",
+          "source_candidate_id": "mean_f07_m_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              0.020896769166872886,
+              0.0984068283227546,
+              -0.37996244806670854
+            ],
+            "A": [
+              -0.10128370724025193,
+              0.27032308792027493,
+              -0.38042021953418104
+            ],
+            "B": [
+              0.016486746659274187,
+              -0.2608491830475357,
+              -0.1556902566530629
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              4.190889437065182,
+              1.198060762300067,
+              7.004062275671719
+            ],
+            "B": [
+              5.79845866125465,
+              6.803706999568304,
+              5.772234261038711
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": false,
+            "A_improves_all_networks": false,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": false,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": false,
+          "worst_delta_J14": 0.0984068283227546,
+          "worst_delta_A": 0.27032308792027493,
+          "mean_delta_J14": -0.08688628352569368,
+          "mean_delta_A": -0.07046027961805268,
+          "minimum_support": 1.198060762300067
+        },
+        {
+          "candidate_id": "direct_mean_f07_p_a15",
+          "source_candidate_id": "mean_f07_p_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.17672337856670395,
+              0.07279743458924282,
+              -0.034972536105426055
+            ],
+            "A": [
+              -0.37171539379308083,
+              0.11305553047769612,
+              -0.1604672751722236
+            ],
+            "B": [
+              0.004876083049696556,
+              0.002794013151030672,
+              -0.03006202860173368
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              5.640393482524068,
+              2.603055933807252,
+              5.01459801351859
+            ],
+            "B": [
+              5.265119712434416,
+              4.339409477580881,
+              5.9648788948874705
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": false,
+            "A_improves_all_networks": false,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": false,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": false,
+          "worst_delta_J14": 0.07279743458924282,
+          "worst_delta_A": 0.11305553047769612,
+          "mean_delta_J14": -0.046299493360962396,
+          "mean_delta_A": -0.1397090461625361,
+          "minimum_support": 2.603055933807252
+        },
+        {
+          "candidate_id": "direct_mean_f08_m_a15",
+          "source_candidate_id": "mean_f08_m_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.13511325518117334,
+              -0.4158371286679834,
+              -0.2888108421945659
+            ],
+            "A": [
+              -0.4597334421139949,
+              -0.6125577405920775,
+              -0.18395041318711391
+            ],
+            "B": [
+              0.0660537996140278,
+              -0.11797954359184382,
+              -0.1792260213400918
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              6.285633298156994,
+              6.036958685613297,
+              5.0122359170526
+            ],
+            "B": [
+              6.699517271184852,
+              4.960315182118585,
+              6.960813057338577
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": true,
+            "A_improves_all_networks": true,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": true,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": true,
+          "worst_delta_J14": -0.13511325518117334,
+          "worst_delta_A": -0.18395041318711391,
+          "mean_delta_J14": -0.27992040868124085,
+          "mean_delta_A": -0.4187471986310621,
+          "minimum_support": 4.960315182118585
+        },
+        {
+          "candidate_id": "direct_mean_f08_p_a15",
+          "source_candidate_id": "mean_f08_p_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.03996497142360811,
+              0.11019895367361254,
+              -0.05683091702231957
+            ],
+            "A": [
+              0.05797927017209781,
+              0.2634167626375423,
+              0.20888791159334708
+            ],
+            "B": [
+              -0.10082498707691046,
+              -0.23333278017039527,
+              -0.1857513603097387
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              2.7174643506831564,
+              1.1552313770792,
+              2.8107127499190634
+            ],
+            "B": [
+              6.228095322395287,
+              5.846350693393909,
+              8.058117423483745
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": false,
+            "A_improves_all_networks": false,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": false,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": false,
+          "worst_delta_J14": 0.11019895367361254,
+          "worst_delta_A": 0.2634167626375423,
+          "mean_delta_J14": 0.004467688409228288,
+          "mean_delta_A": 0.17676131480099574,
+          "minimum_support": 1.1552313770792
+        },
+        {
+          "candidate_id": "direct_mean_f09_m_a15",
+          "source_candidate_id": "mean_f09_m_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.2772922477387123,
+              -0.3206892070771379,
+              0.08884586624710566
+            ],
+            "A": [
+              -0.5155521162240231,
+              -0.09795344269595985,
+              0.14400719549293317
+            ],
+            "B": [
+              0.06248920492389143,
+              -0.21557784745612518,
+              0.08241955861386852
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              9.911813322216418,
+              3.645116379878276,
+              3.2728486144577045
+            ],
+            "B": [
+              5.0759373339819565,
+              8.172072818590937,
+              6.6917508550931535
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": false,
+            "A_improves_all_networks": false,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": true,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": false,
+          "worst_delta_J14": 0.08884586624710566,
+          "worst_delta_A": 0.14400719549293317,
+          "mean_delta_J14": -0.16971186285624817,
+          "mean_delta_A": -0.15649945447568325,
+          "minimum_support": 3.2728486144577045
+        },
+        {
+          "candidate_id": "direct_mean_f09_p_a15",
+          "source_candidate_id": "mean_f09_p_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.3457901163721586,
+              -0.3613555861040445,
+              -0.42164137151422687
+            ],
+            "A": [
+              -0.5106862100576716,
+              -0.116542291918311,
+              -0.20633552152726864
+            ],
+            "B": [
+              -0.04428875588792125,
+              -0.17345880098496402,
+              -0.16009008285859694
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              9.991680640652826,
+              3.8241198931907032,
+              5.5725542476307774
+            ],
+            "B": [
+              10.98657254863428,
+              9.945556955560846,
+              9.334347264175165
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": true,
+            "A_improves_all_networks": true,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": true,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": true,
+          "worst_delta_J14": -0.3457901163721586,
+          "worst_delta_A": -0.116542291918311,
+          "mean_delta_J14": -0.37626235799681,
+          "mean_delta_A": -0.27785467450108375,
+          "minimum_support": 3.8241198931907032
+        },
+        {
+          "candidate_id": "direct_mean_f10_m_a15",
+          "source_candidate_id": "mean_f10_m_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.30115267926910794,
+              0.17272648727846018,
+              -0.06482223304071599
+            ],
+            "A": [
+              -0.4759818784467629,
+              0.15181303306748295,
+              0.28018113846699055
+            ],
+            "B": [
+              -0.10477492382868592,
+              -0.005057185392048469,
+              -0.09994227313162152
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              6.138665347381546,
+              2.032474295517883,
+              2.428714881614537
+            ],
+            "B": [
+              6.853617728616566,
+              4.967031535865823,
+              13.444086458676004
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": false,
+            "A_improves_all_networks": false,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": false,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": false,
+          "worst_delta_J14": 0.17272648727846018,
+          "worst_delta_A": 0.28018113846699055,
+          "mean_delta_J14": -0.06441614167712124,
+          "mean_delta_A": -0.014662568970763123,
+          "minimum_support": 2.032474295517883
+        },
+        {
+          "candidate_id": "direct_mean_f10_p_a15",
+          "source_candidate_id": "mean_f10_p_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              0.05893415383238665,
+              0.05580720475780465,
+              -0.3648437851178927
+            ],
+            "A": [
+              -0.07526035164930489,
+              0.14939419101402018,
+              -0.3296853037351719
+            ],
+            "B": [
+              0.1243960573103402,
+              -0.138870764499347,
+              -0.1394752642224204
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              3.487715602143803,
+              2.0681512958391877,
+              5.6583788266108375
+            ],
+            "B": [
+              5.290567692996485,
+              6.931020328231817,
+              7.306084549621703
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": false,
+            "A_improves_all_networks": false,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": false,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": false,
+          "worst_delta_J14": 0.05893415383238665,
+          "worst_delta_A": 0.14939419101402018,
+          "mean_delta_J14": -0.0833674755092338,
+          "mean_delta_A": -0.08518382145681887,
+          "minimum_support": 2.0681512958391877
+        },
+        {
+          "candidate_id": "direct_mean_f11_m_a15",
+          "source_candidate_id": "mean_f11_m_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.24243748778959673,
+              0.04244021676517651,
+              0.034624571929890546
+            ],
+            "A": [
+              -0.43974991921481643,
+              0.18852957388168523,
+              0.22788140020648684
+            ],
+            "B": [
+              -0.029698525260704267,
+              -0.2961053952950785,
+              0.05021464424504085
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              6.56788528958112,
+              1.6887623835731267,
+              3.0096398619840112
+            ],
+            "B": [
+              5.8346497508518524,
+              7.195170674566782,
+              7.913313439422624
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": false,
+            "A_improves_all_networks": false,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": false,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": false,
+          "worst_delta_J14": 0.04244021676517651,
+          "worst_delta_A": 0.22788140020648684,
+          "mean_delta_J14": -0.055124233031509894,
+          "mean_delta_A": -0.0077796483755481205,
+          "minimum_support": 1.6887623835731267
+        },
+        {
+          "candidate_id": "direct_mean_f11_p_a15",
+          "source_candidate_id": "mean_f11_p_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.24033002806295256,
+              -0.13168851341350507,
+              -0.321541606642783
+            ],
+            "A": [
+              -0.43392679935589173,
+              0.11470667471571394,
+              -0.24714898923034245
+            ],
+            "B": [
+              -0.01698930864304571,
+              -0.3126086346430561,
+              -0.17161728232496132
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              6.297906892670753,
+              2.1843693072758397,
+              5.502364491221598
+            ],
+            "B": [
+              11.510235637209464,
+              6.810716984723702,
+              5.449807897268954
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": true,
+            "A_improves_all_networks": false,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": false,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": false,
+          "worst_delta_J14": -0.13168851341350507,
+          "worst_delta_A": 0.11470667471571394,
+          "mean_delta_J14": -0.23118671603974686,
+          "mean_delta_A": -0.18878970462350675,
+          "minimum_support": 2.1843693072758397
+        },
+        {
+          "candidate_id": "direct_mean_f12_m_a15",
+          "source_candidate_id": "mean_f12_m_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.25333556073525654,
+              -0.1380736314691542,
+              -0.059637665733259126
+            ],
+            "A": [
+              -0.5041295415895193,
+              -0.3144779222298735,
+              -0.4211502159939472
+            ],
+            "B": [
+              0.09683767067384097,
+              0.12744168465785877,
+              0.07646014397460466
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              8.05351378573321,
+              4.444596992593914,
+              6.43263353081812
+            ],
+            "B": [
+              8.926777400457306,
+              4.076842529084754,
+              4.445556548111554
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": true,
+            "A_improves_all_networks": true,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": true,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": true,
+          "worst_delta_J14": -0.059637665733259126,
+          "worst_delta_A": -0.3144779222298735,
+          "mean_delta_J14": -0.15034895264588996,
+          "mean_delta_A": -0.41325255993777993,
+          "minimum_support": 4.076842529084754
+        },
+        {
+          "candidate_id": "direct_mean_f12_p_a15",
+          "source_candidate_id": "mean_f12_p_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.20584094126185581,
+              0.034214139059247195,
+              -0.2878654558148672
+            ],
+            "A": [
+              -0.2699105672494333,
+              0.2769191130546431,
+              -0.21438854582920408
+            ],
+            "B": [
+              -0.0359466653584104,
+              -0.25329712593380593,
+              0.0011908231625303856
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              4.667457403961889,
+              1.0903401261668637,
+              5.414527934956028
+            ],
+            "B": [
+              8.108128348823069,
+              8.91014672597358,
+              4.49361425082202
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": false,
+            "A_improves_all_networks": false,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": false,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": false,
+          "worst_delta_J14": 0.034214139059247195,
+          "worst_delta_A": 0.2769191130546431,
+          "mean_delta_J14": -0.1531640860058253,
+          "mean_delta_A": -0.06912666667466476,
+          "minimum_support": 1.0903401261668637
+        },
+        {
+          "candidate_id": "direct_mean_f13_m_a15",
+          "source_candidate_id": "mean_f13_m_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.3652943111987519,
+              -0.4662184289850204,
+              -0.12985745801518345
+            ],
+            "A": [
+              -0.47007095861645376,
+              -0.29790218300952964,
+              -0.2907351135066576
+            ],
+            "B": [
+              -0.08932940334392647,
+              -0.21228586331886157,
+              0.1395585735278715
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              6.411668830985521,
+              4.8053441784663855,
+              6.617612058136418
+            ],
+            "B": [
+              10.344477020127396,
+              6.120367313799013,
+              5.087700223356316
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": true,
+            "A_improves_all_networks": true,
+            "B_within_ratio_all_networks": false,
+            "A_support_at_least_minimum_all_networks": true,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": false,
+          "worst_delta_J14": -0.12985745801518345,
+          "worst_delta_A": -0.2907351135066576,
+          "mean_delta_J14": -0.32045673273298525,
+          "mean_delta_A": -0.3529027517108803,
+          "minimum_support": 4.8053441784663855
+        },
+        {
+          "candidate_id": "direct_mean_f13_p_a15",
+          "source_candidate_id": "mean_f13_p_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              0.045229068789927496,
+              0.14296433225685323,
+              -0.26050574894964873
+            ],
+            "A": [
+              0.03924878417037325,
+              0.28506114385407244,
+              0.04493726178381885
+            ],
+            "B": [
+              -0.02215418600850616,
+              -0.2014958063647707,
+              -0.17209921281243368
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              2.934837540647203,
+              1.1108205166880978,
+              3.6115175453700763
+            ],
+            "B": [
+              6.059486982745137,
+              5.890188452929299,
+              9.335167478829725
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": false,
+            "A_improves_all_networks": false,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": false,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": false,
+          "worst_delta_J14": 0.14296433225685323,
+          "worst_delta_A": 0.28506114385407244,
+          "mean_delta_J14": -0.02410411596762267,
+          "mean_delta_A": 0.12308239660275484,
+          "minimum_support": 1.1108205166880978
+        },
+        {
+          "candidate_id": "direct_mean_f14_m_a15",
+          "source_candidate_id": "mean_f14_m_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              -0.20589456339413892,
+              -0.3307114711010133,
+              -0.35221315176407475
+            ],
+            "A": [
+              -0.5145779097535035,
+              -0.36346921521179754,
+              0.004986971077444169
+            ],
+            "B": [
+              0.031571180781804875,
+              0.008998929442717962,
+              -0.20384018978357465
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              6.548312059178381,
+              4.88465396705516,
+              4.070425892940527
+            ],
+            "B": [
+              10.93500905166579,
+              4.541868526175205,
+              9.927135107224851
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": true,
+            "A_improves_all_networks": false,
+            "B_within_ratio_all_networks": true,
+            "A_support_at_least_minimum_all_networks": true,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": false,
+          "worst_delta_J14": -0.20589456339413892,
+          "worst_delta_A": 0.004986971077444169,
+          "mean_delta_J14": -0.29627306208640897,
+          "mean_delta_A": -0.29102005129595226,
+          "minimum_support": 4.070425892940527
+        },
+        {
+          "candidate_id": "direct_mean_f14_p_a15",
+          "source_candidate_id": "mean_f14_p_a15",
+          "family": "discrete_single_coordinate",
+          "nomination_strategy": "measured_antithetic_endpoint",
+          "radius": 0.15,
+          "direction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fit_observed_changes": {
+            "J14": [
+              0.04385446030181406,
+              -0.17455455499615624,
+              -0.3139027284200635
+            ],
+            "A": [
+              -0.49103379885268117,
+              -0.021179899030456584,
+              -0.21534455129645713
+            ],
+            "B": [
+              0.24681227820844542,
+              -0.2457108235757799,
+              -0.08951675412097204
+            ]
+          },
+          "fit_observed_support": {
+            "A": [
+              6.375365026269582,
+              3.09161252272787,
+              5.1664483011049285
+            ],
+            "B": [
+              5.592885264118588,
+              8.907387637850418,
+              7.81058493300432
+            ]
+          },
+          "fit_observed_gates": {
+            "valid_all_networks": true,
+            "J14_improves_all_networks": false,
+            "A_improves_all_networks": true,
+            "B_within_ratio_all_networks": false,
+            "A_support_at_least_minimum_all_networks": true,
+            "B_support_at_least_minimum_all_networks": true
+          },
+          "predicted_advancement_eligible": false,
+          "worst_delta_J14": 0.04385446030181406,
+          "worst_delta_A": -0.021179899030456584,
+          "mean_delta_J14": -0.14820094103813522,
+          "mean_delta_A": -0.2425194163931983,
+          "minimum_support": 3.09161252272787
+        }
+      ],
+      "natural_kmeans_used": false,
+      "patient_heldout_used": false,
+      "EE_EtoI_ZM": "off"
+    },
+    "selection_candidate_count": 18,
+    "candidate_count_including_anchor": 19
+  },
+  "search": {
+    "canary_network_seeds": [],
+    "fit_network_seeds": [],
+    "selection_network_seeds": [
+      2371,
+      2372,
+      2373
+    ],
+    "confirmation_network_seeds": [],
+    "common_random_numbers_across_candidates": true,
+    "edge": "off",
+    "beta": "closed",
+    "simulation": {
+      "duration_ms": 20000.0,
+      "early_stop_runaway": true,
+      "late_runaway_is_invalid": true
+    },
+    "contact_readout": {
+      "source": "lineage_restricted_neuron_activity",
+      "kernel_width_mm": 0.25,
+      "smooth_ms": 5.0,
+      "participation_margin_fraction": 0.1,
+      "timing_fraction": 0.5
+    }
+  },
+  "selection": {
+    "J14_improvement_required_networks": 3,
+    "A_improvement_required_networks": 3,
+    "B_protection_required_networks": 3,
+    "B_protection_ratio": 1.1,
+    "minimum_effective_support_per_mode_per_network": 6.0,
+    "natural_kmeans_used": false,
+    "patient_heldout_used": false,
+    "ictal_data_used": false,
+    "figure_used": false
+  },
+  "event_unit": {
+    "name": "edge_supported_causal_family_observation",
+    "minimum_active_neurons": 2,
+    "minimum_dominance": 0.7,
+    "sensitivity_minimum_dominances": [
+      0.6,
+      0.7,
+      0.8
+    ],
+    "movie_frame_ms": 2.0,
+    "movie_bin_mm": 1.0,
+    "causal_memory_method": "local_ee_psp_tail",
+    "psp_tail_fraction": 0.5,
+    "sensitivity_psp_tail_fractions": [
+      0.8,
+      0.5,
+      0.2
+    ],
+    "local_ee_delay_quantile": 1.0,
+    "forward_parent_neighborhood_bins": 1,
+    "minimum_parent_support": 0.001,
+    "sensitivity_minimum_parent_supports": [
+      0.0003,
+      0.001,
+      0.003
+    ],
+    "minimum_parent_dominance": 0.7,
+    "edge_delay_rounding": "nearest",
+    "sensitivity_edge_delay_roundings": [
+      "floor",
+      "nearest",
+      "ceil"
+    ],
+    "contact_geometry_used_for_boundary": false
+  },
+  "source_topology": {
+    "bin_mm": 1.0,
+    "event_window_ms": [
+      -20.0,
+      180.0
+    ],
+    "baseline_window_ms": [
+      -120.0,
+      -20.0
+    ],
+    "frame_step_ms": 2.0,
+    "frame_width_ms": 3.0,
+    "minimum_active_neurons": 2,
+    "persistence_frames": 2,
+    "full_sheet_movie": {
+      "enabled": true,
+      "frame_ms": 2.0
+    }
+  },
+  "resources": {
+    "maximum_workers": 8,
+    "estimated_worker_gib": 14.0,
+    "reserved_available_memory_gib": 48.0,
+    "monitor_interval_seconds": 600
+  },
+  "pathways": {
+    "learned_E_to_E_redistribution": "off",
+    "learned_E_to_I_redistribution": "off",
+    "Z_M": "off"
+  },
+  "claim_boundary": "Response-nominated dual continuous Node fields on three disjoint development networks. Only complete training-target J14, weak-mode loss, strong-mode protection and per-network support may select a candidate. Natural KMeans, held-out, figures, EE, E-to-I and Z/M remain closed."
+}
