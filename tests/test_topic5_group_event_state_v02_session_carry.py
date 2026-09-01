@@ -284,3 +284,67 @@ def test_padded_slots_contribute_no_loss() -> None:
         )
     for key in tight:
         assert tight[key] == pytest.approx(padded[key], rel=1e-5, abs=1e-6)
+
+
+# --------------------------------------------------------------------- A4 probes
+
+
+def test_resetting_every_event_leaves_exactly_one_event_of_memory() -> None:
+    """A4: K=1 means one-event memory, not zero.
+
+    The reset happens before the step, so the state an anchor reads still holds
+    the single event that immediately preceded it -- and nothing earlier.  The
+    test perturbs every event *except* those immediate predecessors and requires
+    the anchor states not to move; then perturbs a predecessor and requires that
+    they do.
+    """
+
+    tl, seq = _timeline()
+    model, cfg = _model(tl, use_future=False)
+    targets = P.build_anchor_targets(tl, None)
+
+    def _states() -> np.ndarray:
+        with torch.no_grad():
+            _m, extra = P.run_session_pass(
+                model, tl, seq, P.full_segment_ranges(tl), targets,
+                torch.device("cpu"), cfg, train=False, collect_states=True,
+                rng=np.random.default_rng(0), reset_every_events=1,
+            )
+        return extra["anchor_state"]
+
+    seen = targets.last_event_pos >= 0
+    assert seen.sum() > 20
+    predecessors = np.unique(targets.last_event_pos[seen])
+    others = np.setdiff1d(np.arange(tl.event_times.size), predecessors)
+
+    before = _states()
+    for key in ("waveform", "band_features"):
+        seq.arrays[key][others] *= 11.0
+    assert np.allclose(before[seen], _states()[seen], atol=1e-5)
+
+    for key in ("waveform", "band_features"):
+        seq.arrays[key][predecessors] *= 11.0
+    assert not np.allclose(before[seen], _states()[seen], atol=1e-3)
+
+
+def test_a_physical_time_reset_shortens_memory_without_touching_the_clock() -> None:
+    """A4: a 5 min reset must differ from full history but keep the anchor grid."""
+
+    tl, seq = _timeline()
+    model, cfg = _model(tl, use_future=False)
+    targets = P.build_anchor_targets(tl, None)
+
+    def _states(seconds: float) -> np.ndarray:
+        with torch.no_grad():
+            _m, extra = P.run_session_pass(
+                model, tl, seq, P.full_segment_ranges(tl), targets,
+                torch.device("cpu"), cfg, train=False, collect_states=True,
+                rng=np.random.default_rng(0), reset_every_seconds=seconds,
+            )
+        return extra["anchor_state"]
+
+    full = _states(0.0)
+    short = _states(300.0)
+    seen = targets.last_event_pos >= 0
+    assert not np.allclose(full[seen], short[seen], atol=1e-4)
+    assert np.isfinite(short[seen]).all()

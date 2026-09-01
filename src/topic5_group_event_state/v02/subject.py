@@ -102,11 +102,19 @@ class SubjectTimeline:
     def anchor_mask(self, split_name: str, horizon_index: int) -> np.ndarray:
         return self.grid.split_mask(split_name) & self.grid.eligible[:, horizon_index]
 
-    def window_stats(self, split_name: str, horizon_index: int):
+    def window_stats(self, split_name: str, horizon_index: int, extra_mask=None):
         m = self.anchor_mask(split_name, horizon_index)
+        if extra_mask is not None:
+            m = m & np.asarray(extra_mask, dtype=bool)
         return self.builder.window_stats(
             self.grid.window_lo[m, horizon_index], self.grid.window_hi[m, horizon_index]
         )
+
+    def anchor_rows(self, split_name: str, horizon_index: int, extra_mask=None):
+        m = self.anchor_mask(split_name, horizon_index)
+        if extra_mask is not None:
+            m = m & np.asarray(extra_mask, dtype=bool)
+        return m
 
     def coverage_report(self) -> dict[str, Any]:
         out: dict[str, Any] = {

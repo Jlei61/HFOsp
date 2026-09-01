@@ -96,7 +96,13 @@ def build_producer_configs() -> dict[str, ProducerConfig]:
     local = ProducerConfig(name="P_local", use_future_heads=False)
     slow = ProducerConfig(name="P_slow", use_future_heads=True,
                           encoder=local.encoder, state=local.state)
-    return {"P_local": local, "P_slow": slow}
+    # SP 4.2 sensitivity: the same encoder and the same multi-horizon objective,
+    # but the state is re-initialised at every event, so nothing is carried.
+    memoryless = ProducerConfig(
+        name="P_memoryless", use_future_heads=True, encoder=local.encoder,
+        state=replace(local.state, persistent=False),
+    )
+    return {"P_local": local, "P_slow": slow, "P_memoryless": memoryless}
 
 
 # --------------------------------------------------------------------- heads
@@ -443,6 +449,8 @@ def run_session_pass(
     collect_event_states: bool = False,
     grad_norms: list[float] | None = None,
     score_mask: np.ndarray | None = None,
+    reset_every_events: int = 0,
+    reset_every_seconds: float = 0.0,
 ) -> tuple[dict[str, float], dict[str, Any]]:
     """One session-preserving pass over a split.
 
@@ -479,6 +487,12 @@ def run_session_pass(
     b_slots = streamer.batch
     fast, slow = model.state.initial(b_slots, device)
     init_f, init_s = model.state.initial(b_slots, device)
+    # A4 truncation probes: turn the same trained model into a K-event or
+    # T-second memory model at evaluation time.  Diagnostics only -- CC 6 says
+    # the history scale is decided by the future-block curve, not by "which reset
+    # first stops being significant".
+    since_events = np.zeros(b_slots, dtype=np.int64)
+    since_seconds = np.zeros(b_slots, dtype=np.float64)
 
     for pos, valid, reset in streamer.epoch():
         n_step = pos.shape[1]
@@ -501,10 +515,26 @@ def run_session_pass(
         reset_t = torch.from_numpy(reset).to(device).unsqueeze(-1)
         fast = torch.where(reset_t, init_f, fast)
         slow = torch.where(reset_t, init_s, slow)
+        since_events[reset] = 0
+        since_seconds[reset] = 0.0
 
         taus = model.state.taus()
         timing_list, content_list, post_fast, post_slow = [], [], [], []
         for step in range(n_step):
+            if reset_every_events or reset_every_seconds:
+                due = np.zeros(b_slots, dtype=bool)
+                if reset_every_events:
+                    due |= since_events >= int(reset_every_events)
+                if reset_every_seconds:
+                    due |= since_seconds >= float(reset_every_seconds)
+                if due.any():
+                    d = torch.from_numpy(due).to(device).unsqueeze(-1)
+                    fast = torch.where(d, init_f, fast)
+                    slow = torch.where(d, init_s, slow)
+                    since_events[due] = 0
+                    since_seconds[due] = 0.0
+                since_events += valid[:, step].astype(np.int64)
+                since_seconds += np.where(valid[:, step], np.nan_to_num(dt_np[:, step]), 0.0)
             timing_list.append(torch.cat([fast, slow], dim=-1))
             fast_e, slow_e = model.state.evolve(fast, slow, dt_step[:, step], taus)
             content_list.append(torch.cat([fast_e, slow_e], dim=-1))
@@ -982,3 +1012,64 @@ def train_producer(
             [model.state.taus()[1].min(), model.state.taus()[1].median(),
              model.state.taus()[1].max()]).tolist()],
     }
+
+
+def load_producer(
+    checkpoint_path: Path,
+    tl: SubjectTimeline,
+    seq: SubjectSequence,
+    device: torch.device,
+) -> tuple[GroupEventStateProducer, ProducerConfig]:
+    """Rebuild a frozen producer from its checkpoint, for A4 replay probes."""
+
+    payload = torch.load(checkpoint_path, map_location="cpu", weights_only=False)
+    saved = payload["config"]
+    base = build_producer_configs()[payload["producer"]]
+    cfg = replace(
+        base,
+        encoder=EncoderConfig(**saved["encoder"]),
+        state=StateConfig(**{k: (tuple(v) if isinstance(v, list) else v)
+                             for k, v in saved["state"].items()}),
+        chunk_events=int(saved["chunk_events"]),
+        batch_segments=int(saved["batch_segments"]),
+    )
+    shape = _data_shape(seq)
+    geometry = _load_geometry(seq) if cfg.encoder.use_geometry else None
+    model = GroupEventStateProducer(
+        cfg, shape, geometry.to(device) if geometry is not None else None,
+        tl.n_dims, tl.grid.horizons_seconds,
+    ).to(device)
+    model.load_state_dict(payload["state_dict"], strict=True)
+    model.eval()
+    return model, cfg
+
+
+def replay_with_reset(
+    model: GroupEventStateProducer,
+    tl: SubjectTimeline,
+    seq: SubjectSequence,
+    device: torch.device,
+    cfg: ProducerConfig,
+    *,
+    reset_every_events: int = 0,
+    reset_every_seconds: float = 0.0,
+) -> np.ndarray:
+    """Anchor states from the same trained model under a truncated memory."""
+
+    targets = build_anchor_targets(tl, None)
+    with torch.no_grad():
+        _means, extra = run_session_pass(
+            model, tl, seq, full_segment_ranges(tl), targets, device, cfg,
+            train=False, collect_states=True, rng=np.random.default_rng(0),
+            reset_every_events=reset_every_events,
+            reset_every_seconds=reset_every_seconds,
+        )
+    states = extra["anchor_state"]
+    orphan = np.flatnonzero(targets.last_event_pos < 0)
+    if orphan.size:
+        with torch.no_grad():
+            f0, s0 = model.state.initial(orphan.size, device)
+            dt = torch.from_numpy(targets.dt[orphan].astype(np.float32)).to(device)
+            fe, se = model.state.evolve(f0, s0, dt, model.state.taus())
+            states[orphan] = torch.cat([fe, se], -1).float().cpu().numpy()
+    return states

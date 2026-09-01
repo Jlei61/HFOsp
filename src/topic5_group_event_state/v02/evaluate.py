@@ -65,13 +65,14 @@ def _fit_and_score(
     *,
     config: ReadoutConfig,
     forced_lambdas: Mapping[str, float] | None = None,
+    extra_mask: np.ndarray | None = None,
 ) -> tuple[dict[str, Any], dict[str, float], dict[str, Any]]:
-    tr = tl.anchor_mask("train", h_i)
-    va = tl.anchor_mask("val", h_i)
-    te = tl.anchor_mask("test", h_i)
-    stats_tr = tl.window_stats("train", h_i)
-    stats_va = tl.window_stats("val", h_i)
-    stats_te = tl.window_stats("test", h_i)
+    tr = tl.anchor_rows("train", h_i, extra_mask)
+    va = tl.anchor_rows("val", h_i, extra_mask)
+    te = tl.anchor_rows("test", h_i, extra_mask)
+    stats_tr = tl.window_stats("train", h_i, extra_mask)
+    stats_va = tl.window_stats("val", h_i, extra_mask)
+    stats_te = tl.window_stats("test", h_i, extra_mask)
     pinned = (
         None if not forced_lambdas
         else {k: (float(v),) for k, v in forced_lambdas.items()}
@@ -160,10 +161,21 @@ def evaluate_subject(
             "kind": "reference",
         }
 
-        def _run(name: str, x: np.ndarray, kind: str, readout: ReadoutConfig) -> Any:
-            payload, _lam, scores = _fit_and_score(tl, x, h_i, config=readout)
+        def _run(name: str, x: np.ndarray, kind: str, readout: ReadoutConfig,
+                 extra_mask: np.ndarray | None = None) -> Any:
+            payload, _lam, scores = _fit_and_score(
+                tl, x, h_i, config=readout, extra_mask=extra_mask
+            )
             payload["kind"] = kind
             payload["estimability"] = estimability(scores, ref)
+            if extra_mask is not None:
+                payload["anchor_subset"] = {
+                    "n_test_anchors": int(tl.anchor_rows("test", h_i, extra_mask).sum()),
+                    "fraction_of_full": float(
+                        tl.anchor_rows("test", h_i, extra_mask).sum()
+                        / max(int(tl.anchor_mask("test", h_i).sum()), 1)
+                    ),
+                }
             entry["arms"][name] = payload
             return scores
 
@@ -180,13 +192,22 @@ def evaluate_subject(
             )
 
         for producer, values in sorted(states.items()):
+            finite = np.isfinite(values).all(axis=1)
+            subset = None if bool(finite.all()) else finite
+            local_base = base_scores
+            if subset is not None:
+                # A control that could not be built for every anchor is scored on
+                # its own subset, against a baseline re-fitted on that same
+                # subset -- never against the full-anchor baseline.
+                local_base = _run(f"B_multiscale|subset({producer})", x_base,
+                                  "baseline_on_subset", config.readout, subset)
             s = _run(f"B+S({producer})", _stack(x_base, values),
-                     "baseline_plus_state", config.readout)
-            entry["arms"][f"B+S({producer})"]["gain_vs_baseline"] = gain_table(s, base_scores)
+                     "baseline_plus_state", config.readout, subset)
+            entry["arms"][f"B+S({producer})"]["gain_vs_baseline"] = gain_table(s, local_base)
             s_alone = _run(f"S({producer})", _stack(ones, values),
-                           "state_only", config.readout)
+                           "state_only", config.readout, subset)
             entry["arms"][f"S({producer})"]["gain_vs_baseline"] = gain_table(
-                s_alone, base_scores
+                s_alone, local_base
             )
 
             shift_gains: list[dict[str, float]] = []
@@ -198,12 +219,12 @@ def evaluate_subject(
                 if usable == 0:
                     continue
                 shifted = block_circular_shift(
-                    values, tl.grid.session_id, tl.grid.t_anchor, steps
+                    np.nan_to_num(values), tl.grid.session_id, tl.grid.t_anchor, steps
                 )
                 name = f"B+shift{steps}(S({producer}))"
                 s_shift = _run(name, _stack(x_base, shifted), "block_shift_null",
-                               config.readout)
-                g = gain_table(s_shift, base_scores)
+                               config.readout, subset)
+                g = gain_table(s_shift, local_base)
                 entry["arms"][name]["gain_vs_baseline"] = g
                 entry["arms"][name]["shift_steps"] = steps
                 entry["arms"][name]["shift_seconds"] = steps * tl.config.grid_seconds
