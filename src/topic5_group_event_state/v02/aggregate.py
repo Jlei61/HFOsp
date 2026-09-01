@@ -183,3 +183,84 @@ def denominator_table(results: Sequence[Mapping[str, Any]]) -> list[dict[str, An
 
 def summarise(cells: Iterable[CohortCell]) -> dict[str, Any]:
     return {"cells": [c.as_dict() for c in cells]}
+
+
+def seed_spread_table(
+    results: Sequence[Mapping[str, Any]],
+    *,
+    producers: Sequence[str],
+    endpoints: Sequence[str] = PRIMARY_ENDPOINTS,
+    reference_arm: str = "B_multiscale",
+) -> list[dict[str, Any]]:
+    """Effect size next to the across-seed drift of the very same quantity.
+
+    A per-patient gain smaller than that patient's own seed-to-seed spread is not
+    a per-patient finding: re-fitting the same model with a different
+    initialisation moves the number further than the effect does.  This table is
+    what makes that comparison unavoidable rather than optional.
+    """
+
+    rows: list[dict[str, Any]] = []
+    for producer in producers:
+        for r in results:
+            for hk, entry in r["horizons"].items():
+                if entry.get("status") != "ok":
+                    continue
+                ref = entry["arms"].get(reference_arm)
+                if ref is None:
+                    continue
+                for endpoint in endpoints:
+                    if ref.get("estimability", {}).get(endpoint, "ok") != "ok":
+                        continue
+                    base = ref["scores"].get(endpoint)
+                    if base is None:
+                        continue
+                    gains: dict[str, float] = {}
+                    for name, payload in entry["arms"].items():
+                        if not name.startswith(f"B+S({producer}_seed"):
+                            continue
+                        if payload.get("estimability", {}).get(endpoint, "ok") != "ok":
+                            continue
+                        score = payload["scores"].get(endpoint)
+                        if score is None:
+                            continue
+                        seed = name.rsplit("seed", 1)[-1].rstrip(")")
+                        gains[seed] = base["nll_per_unit"] - score["nll_per_unit"]
+                    if len(gains) < 2:
+                        continue
+                    values = np.array(list(gains.values()), dtype=float)
+                    effect = float(np.median(values))
+                    spread = float(values.max() - values.min())
+                    rows.append({
+                        "subject": r["subject"],
+                        "producer": producer,
+                        "horizon_seconds": float(hk[:-1]),
+                        "endpoint": endpoint,
+                        "n_seeds": int(values.size),
+                        "median_gain": effect,
+                        "seed_spread_range": spread,
+                        "seed_spread_std": float(values.std(ddof=1)),
+                        "effect_exceeds_seed_spread": bool(abs(effect) > spread),
+                        **{f"gain_seed{k}": float(v) for k, v in sorted(gains.items())},
+                    })
+    return rows
+
+
+def seed_noise_floor(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
+    """Cohort-level: how the typical effect compares with the typical seed drift."""
+
+    out: dict[str, Any] = {}
+    keys = {(r["producer"], r["horizon_seconds"], r["endpoint"]) for r in rows}
+    for producer, horizon, endpoint in sorted(keys):
+        sel = [r for r in rows if (r["producer"], r["horizon_seconds"], r["endpoint"])
+               == (producer, horizon, endpoint)]
+        eff = np.array([r["median_gain"] for r in sel], dtype=float)
+        spread = np.array([r["seed_spread_range"] for r in sel], dtype=float)
+        out[f"{producer}|{int(horizon)}s|{endpoint}"] = {
+            "n_subjects": len(sel),
+            "median_effect": float(np.median(eff)),
+            "median_seed_spread": float(np.median(spread)),
+            "n_subjects_effect_exceeds_own_seed_spread":
+                int(sum(r["effect_exceeds_seed_spread"] for r in sel)),
+        }
+    return out

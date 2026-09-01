@@ -24,6 +24,8 @@ from src.topic5_group_event_state.v02.aggregate import (  # noqa: E402
     denominator_table,
     gain_cells,
     load_results,
+    seed_noise_floor,
+    seed_spread_table,
 )
 from src.topic5_group_event_state.v02.figures import (  # noqa: E402
     plot_future_block_figure,
@@ -92,6 +94,10 @@ def main() -> None:
         {k: v for k, v in c.as_dict().items() if k != "per_subject"} for c in cells
     ])
     _write_csv(out / "denominators.csv", denominator_table(results))
+
+    spread = seed_spread_table(results, producers=["P_local", "P_slow"])
+    _write_csv(out / "seed_spread.csv", spread)
+    atomic_write_json(out / "seed_noise_floor.json", seed_noise_floor(spread))
 
     payload = plot_future_block_figure(
         results, prefix,

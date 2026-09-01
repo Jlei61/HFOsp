@@ -50,3 +50,19 @@
   可训练判据（先于结果）：TRAIN/VAL/TEST 三段在 Δ=5 min 上各至少 1 个合格 anchor。
   覆盖短的患者只在长 horizon 上缺 anchor，记 `insufficient_coverage`，**不记阴性**。
 - **A4**：承重配置 = `P_slow` 主配置，预先指定，补到 5 seeds；不看结果再选。
+
+## 预注册补充（2026-09-01，写于任何 producer 结果产出之前）
+
+1. **5-seed 承重配置**：`P_slow`（多 horizon producer）是本线的承重配置，补 seed 4、5
+   到 5 seeds。`P_local` 与 `P_memoryless` 保持 3 seeds / 1 seed。
+   本条在第一个 `P_slow` 评估数字出现之前写入，**不得**在看到结果后改选。
+2. **`P_memoryless` 敏感性臂**：同 encoder、同 multi-horizon 目标，但状态在每个事件
+   重新初始化（`persistent=False`）。只跑 seed 1、全 27 位患者——它是 SP §4.2 的敏感性臂，
+   不承担队列主张，因此不配 3 seeds。这一取舍在此明写。
+3. **A4 缩减 reset 阶梯**：事件数 1/100/1000/full 与物理时间 5/30/120 min/full，
+   在 `P_slow` seed 1 上全 27 位患者跑；`fast-only` / `slow-only` 与
+   粗匹配错时 donor 同样只在 `P_slow` seed 1 上跑（CC §6 "fast-only/slow-only reset
+   只在少数固定患者做机制诊断"）。
+4. **clock/event 基线**：SP §A1 比较表的第 1 项是"当前时钟 / 事件基线"。
+   实现为 `B_clock_only`：截距 + 距上次事件时间 + 本段已发生事件数 + 日/半日正余弦
+   + 段内位置/剩余覆盖。**不含**发作记账（那属于 nuisance 模型，不属于"时钟"）。

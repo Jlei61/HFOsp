@@ -115,6 +115,7 @@ def evaluate_subject(
 
     ones = np.ones((tl.grid.n_anchors, 1), dtype=np.float64)
     x_base = _stack(ones, tl.baseline.x)
+    x_clock = _stack(ones, tl.baseline.x[:, tl.baseline.clock_only_columns()])
 
     out: dict[str, Any] = {
         "subject": tl.subject,
@@ -179,6 +180,7 @@ def evaluate_subject(
             entry["arms"][name] = payload
             return scores
 
+        _run("B_clock_only", x_clock, "clock_and_current_event_baseline", config.readout)
         base_scores = _run("B_multiscale", x_base, "baseline", config.readout)
         if config.run_mlp_baseline:
             _run(

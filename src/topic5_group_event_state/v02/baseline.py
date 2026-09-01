@@ -45,6 +45,27 @@ SEIZURE_TIME_CAP_SECONDS = 7 * SECONDS_PER_DAY
 POSTICTAL_INDICATOR_SECONDS = 6 * 3600.0
 
 
+# SP A1 lists a "current clock / event baseline" *before* the multiscale one:
+# what can be said from the calendar and from the fact that an event just
+# happened, with no history summary of any kind.  Seizure bookkeeping is
+# deliberately excluded from it -- that belongs to the nuisance model, not to
+# "the clock".
+CLOCK_ONLY_FEATURES = (
+    "log_time_since_last_event",
+    "has_previous_event",
+    "log_events_so_far_in_segment",
+    "clock_sin_day",
+    "clock_cos_day",
+    "clock_sin_half_day",
+    "clock_cos_half_day",
+    "log_seconds_into_segment",
+    "log_seconds_left_in_segment",
+    "fraction_through_segment",
+    "log_segment_duration",
+    "days_since_recording_start",
+)
+
+
 @dataclass(frozen=True)
 class BaselineFeatures:
     x: np.ndarray                     # (A, F) float64
@@ -54,6 +75,13 @@ class BaselineFeatures:
     @property
     def n_features(self) -> int:
         return int(self.x.shape[1])
+
+    def clock_only_columns(self) -> np.ndarray:
+        lookup = {name: i for i, name in enumerate(self.names)}
+        missing = [n for n in CLOCK_ONLY_FEATURES if n not in lookup]
+        if missing:
+            raise KeyError(f"clock-only baseline is missing columns: {missing}")
+        return np.array([lookup[n] for n in CLOCK_ONLY_FEATURES], dtype=np.int64)
 
 
 def _ewma_after_each_event(
