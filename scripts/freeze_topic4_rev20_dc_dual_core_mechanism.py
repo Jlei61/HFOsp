@@ -7,10 +7,13 @@ import hashlib
 import json
 import os
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from src.topic4_rev20_dual_core_mechanism import (  # noqa: E402
     build_one_factor_candidates, dual_core_field_sha256,
