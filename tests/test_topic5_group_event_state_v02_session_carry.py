@@ -348,3 +348,50 @@ def test_a_physical_time_reset_shortens_memory_without_touching_the_clock() -> N
     seen = targets.last_event_pos >= 0
     assert not np.allclose(full[seen], short[seen], atol=1e-4)
     assert np.isfinite(short[seen]).all()
+
+
+# ------------------------------------------- what the memoryless control carries
+
+
+def test_the_memoryless_arm_carries_only_the_time_since_the_last_event() -> None:
+    """The whole H1 reading rests on this, so it is pinned rather than asserted.
+
+    With ``persistent=False`` the update returns the learned initial vector, so an
+    anchor's state is ``bias + (init - bias) * exp(-dt / tau)`` -- a 96-dimensional
+    exponential basis in the time since the last event and nothing else.  It is
+    therefore the control that separates "the model carries history" from "the
+    baseline's single log(1 + dt) column was too rigid", which the block-shift
+    null cannot do: shifting destroys the dt correspondence too.
+    """
+
+    tl, seq = _timeline()
+    model, cfg = _model(tl, use_future=True)
+    model.state.cfg = replace(model.state.cfg, persistent=False)
+    targets = P.build_anchor_targets(tl, None)
+
+    def _states() -> np.ndarray:
+        with torch.no_grad():
+            _m, extra = P.run_session_pass(
+                model, tl, seq, P.full_segment_ranges(tl), targets,
+                torch.device("cpu"), cfg, train=False, collect_states=True,
+                rng=np.random.default_rng(0),
+            )
+        return extra["anchor_state"]
+
+    before = _states()
+    for key in ("waveform", "band_features", "band_envelope"):
+        seq.arrays[key] *= 9.0
+    seen = targets.last_event_pos >= 0
+    assert seen.sum() > 20
+    assert np.allclose(before[seen], _states()[seen], atol=1e-6), (
+        "a memoryless state moved when only event content changed"
+    )
+
+    # Anchors that share a dt must share a state exactly.
+    dt = np.round(tl.grid.seconds_since_last_event[seen], 9)
+    states = before[seen]
+    order = np.argsort(dt, kind="stable")
+    dts, sts = dt[order], states[order]
+    tied = np.flatnonzero(np.diff(dts) == 0)
+    if tied.size:
+        assert np.abs(sts[tied] - sts[tied + 1]).max() < 1e-6

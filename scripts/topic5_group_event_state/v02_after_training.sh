@@ -80,6 +80,11 @@ echo "== 6b. training-health evidence table =="
 $PY scripts/topic5_group_event_state/v02_training_health.py \
     --producer-root "$PROD" --tag main 2>&1 | tee "$LOGS/training_health.log"
 
+echo "== 6c. carrying state vs the dt-only control =="
+$PY scripts/topic5_group_event_state/v02_carry_vs_dt_control.py \
+    --future-root "$ROOT/future_block/with_state" --tag main \
+    2>&1 | tee "$LOGS/carry_vs_dt.log"
+
 echo "== 7. cohort tables + the load-bearing figure =="
 $PY scripts/topic5_group_event_state/v02_summarize.py \
     --future-root "$ROOT/future_block/with_state" \
