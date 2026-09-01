@@ -70,6 +70,10 @@ $PY scripts/topic5_group_event_state/v02_run_future_block.py \
     --shift-extra-steps 1 --state-only-for --shift-for \
     --state-dir "${DIAG_DIRS[@]}" 2>&1 | tee "$LOGS/future_block_diagnostics.log"
 
+echo "== 6b. training-health evidence table =="
+$PY scripts/topic5_group_event_state/v02_training_health.py \
+    --producer-root "$PROD" --tag main 2>&1 | tee "$LOGS/training_health.log"
+
 echo "== 7. cohort tables + the load-bearing figure =="
 $PY scripts/topic5_group_event_state/v02_summarize.py \
     --future-root "$ROOT/future_block/with_state" \
