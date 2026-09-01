@@ -163,7 +163,8 @@ class TrainConfig:
 
 
 def estimate_stats(
-    seq: SubjectSequence, train_lo: int, train_hi: int, *, max_events: int = 2048, seed: int = 0
+    seq: SubjectSequence, train_lo: int, train_hi: int, *, max_events: int = 2048, seed: int = 0,
+    positions: np.ndarray | None = None,
 ) -> tuple[InputStats, TargetStats]:
     """Robust input scales and target locations from the TRAIN split only.
 
@@ -173,9 +174,14 @@ def estimate_stats(
     """
 
     rng = np.random.default_rng(seed)
-    n = train_hi - train_lo
-    take = min(max_events, n)
-    pos = np.sort(rng.choice(np.arange(train_lo, train_hi), size=take, replace=False))
+    # v0.2 splits by recorded physical time, so its TRAIN positions are not a
+    # contiguous [lo, hi) range; that caller passes them explicitly.
+    pool = (
+        np.arange(train_lo, train_hi) if positions is None
+        else np.asarray(positions, dtype=np.int64)
+    )
+    take = min(max_events, pool.size)
+    pos = np.sort(rng.choice(pool, size=take, replace=False))
     batch = seq.gather_positions(pos)
 
     wave = np.abs(np.nan_to_num(batch["waveform"].astype(np.float32)))
