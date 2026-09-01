@@ -33,6 +33,12 @@ from src.topic5_group_event_state.v02.registry import (  # noqa: E402
 from src.topic5_group_event_state.v02.subject import SubjectTimelineConfig  # noqa: E402
 
 DEFAULT_PRODUCER_ROOT = Path("/data/hfosp_group_event_state_v0_2/agent_a/producers/main")
+
+# P_memoryless is a seed-1 sensitivity arm by design (pre-registered before any
+# producer result).  Recording it against a 3-seed expectation would mark it
+# ``partial`` and make a downstream line report two seeds as ``not_available``
+# that were never meant to exist.
+SEEDS_BY_PRODUCER = {"P_memoryless": [1]}
 BASELINE_ROOT = Path(
     "/data/hfosp_group_event_state_v0_2/agent_a/future_block/baseline_only"
 )
@@ -117,6 +123,10 @@ def _recurrent_entry(producer: str, root: Path, seeds: list[int],
         notes={
             "n_subjects": len(per_subject),
             "seeds": seeds,
+            "seed_policy": (
+                "3 seeds for the core producers; P_memoryless is a pre-registered "
+                "seed-1 sensitivity arm and is complete at one seed"
+            ),
             "missing_cells": missing,
             "future_loss_weights_example": weights,
             "state_layout": "columns [z_fast | z_slow]; d_fast/d_slow in each result.json",
@@ -185,7 +195,8 @@ def main() -> None:
         registry.write(_baseline_entry(args.baseline_root, commit))
         written.append("B_multiscale")
     for producer in args.producers:
-        entry = _recurrent_entry(producer, args.producer_root, args.seeds, subjects, commit)
+        seeds = SEEDS_BY_PRODUCER.get(producer, args.seeds)
+        entry = _recurrent_entry(producer, args.producer_root, seeds, subjects, commit)
         registry.write(entry)
         written.append(f"{producer}({entry.status}, {len(entry.subjects)} subjects)")
     path = registry.refresh_combined_view()
