@@ -161,6 +161,7 @@ def main() -> None:
     parser.add_argument("--phase", choices=("canary", "screen", "confirmation"),
                         required=True)
     parser.add_argument("--expected-commit", required=True)
+    parser.add_argument("--maximum-workers-override", type=int)
     parser.add_argument(
         "--artifact-root", type=Path,
         default=Path("/home/honglab/leijiaxin/HFOsp"),
@@ -183,6 +184,13 @@ def main() -> None:
     output_root = artifact_root / config["output_root"]
     jobs = _jobs(args.phase, config, manifest, output_root, commit)
     resources = config["resources"]
+    maximum_workers = (
+        int(args.maximum_workers_override)
+        if args.maximum_workers_override is not None
+        else int(resources["maximum_workers"])
+    )
+    if maximum_workers < 1:
+        raise ValueError("maximum worker count must be positive")
     interval = int(resources["monitor_interval_seconds"])
     status_path = output_root / args.phase / "status" / "controller.json"
 
@@ -204,6 +212,7 @@ def main() -> None:
             "state_counts": counts,
             "available_memory_gib": available,
             "free_disk_gib": free_disk,
+            "maximum_workers": maximum_workers,
             "status": "RUNNING",
         }
         if failed:
@@ -237,7 +246,7 @@ def main() -> None:
             / float(resources["estimated_worker_gib"])
         ))
         slots = max(0, min(
-            int(resources["maximum_workers"]) - running, memory_slots,
+            maximum_workers - running, memory_slots,
         ))
         for job, state in zip(jobs, states):
             if slots <= 0:
