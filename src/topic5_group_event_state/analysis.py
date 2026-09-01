@@ -193,12 +193,25 @@ HIGHER_IS_BETTER = (
 )
 
 
+# These endpoints are per-event averages, so the mean over events is the
+# estimator.  Summarising them by their median is wrong and, for the binary
+# next-contact indicator, destroys the metric outright: the median of a 0/1
+# series is 0 or 1, which is exactly what it collapsed to before this fix.
+_SUMMARISE_BY_MEAN = frozenset({
+    "prefix_next_contact_hit",
+    "tied_group_agreement",
+    "recruitment_order_spearman",
+    "prefix_continuation_spearman",
+})
+
+
 def _extract_scalar(run: Mapping[str, Any], name: str) -> float:
     if name == "participation_auc":
         return float(run.get("participation_auc_sampled", float("nan")))
     entry = run.get(name)
     if isinstance(entry, Mapping):
-        return float(entry.get("median", float("nan")))
+        key = "mean" if name in _SUMMARISE_BY_MEAN else "median"
+        return float(entry.get(key, entry.get("median", float("nan"))))
     return float("nan")
 
 
