@@ -67,6 +67,7 @@ class EventMarks:
     embedding_spec: MarkEmbeddingSpec
     continuous_mean: np.ndarray     # (D,) TRAIN mean, before standardising
     continuous_scale: np.ndarray    # (D,) TRAIN scale, before standardising
+    n_span_imputed: int = 0         # events whose recruitment span had to be set to 0
 
     @property
     def n_events(self) -> int:
@@ -125,18 +126,25 @@ def _continuous_blocks(
     relative_delay: np.ndarray,
     band_features: np.ndarray,
     band_keep: np.ndarray,
-) -> tuple[np.ndarray, list[tuple[str, int]]]:
+) -> tuple[np.ndarray, list[tuple[str, int]], int]:
     part = np.asarray(participation, dtype=bool)
     size = part.sum(axis=1).astype(np.float64)[:, None]
     delay = np.asarray(relative_delay, dtype=np.float64)
-    span = np.nanmax(np.where(part, delay, np.nan), axis=1)[:, None]
+    # An event whose participants all carry a non-finite delay would get span 0
+    # here rather than being flagged out of the conditional-mark score, which is
+    # the one imputation left in this file.  Measured incidence in this cohort is
+    # 0.000% (participant delays are 100% finite, DC 3), and the count is carried
+    # in the summary so a future cohort cannot inherit the assumption silently.
+    with np.errstate(all="ignore"):
+        span = np.nanmax(np.where(part, delay, np.nan), axis=1)[:, None]
+    n_span_imputed = int((~np.isfinite(span)).sum())
     span = np.nan_to_num(span, nan=0.0)
     energy = _masked_band_mean(band_features, part, band_keep, BAND_FEATURE_ENERGY)
     peak = _masked_band_mean(band_features, part, band_keep, BAND_FEATURE_PEAK)
     blocks = np.concatenate([size, span, energy, peak], axis=1)
     layout = [("size", 1), ("span", 1), ("band_energy", energy.shape[1]),
               ("band_peak", peak.shape[1])]
-    return blocks, layout
+    return blocks, layout, n_span_imputed
 
 
 def fit_mark_embedding(
@@ -198,7 +206,7 @@ def build_event_marks(
         raise ValueError("no supported frequency band for this patient")
     kept_names = tuple(str(band_names[i]) for i in band_keep)
 
-    blocks, layout = _continuous_blocks(
+    blocks, layout, n_span_imputed = _continuous_blocks(
         participation, relative_delay, band_features, band_keep
     )
     features = _raw_features(participation, relative_delay, band_features, band_keep)
@@ -238,6 +246,7 @@ def build_event_marks(
         cursor += width
 
     return EventMarks(
+        n_span_imputed=n_span_imputed,
         participation=np.asarray(participation, dtype=bool),
         continuous=standardised,
         valid=valid,
@@ -265,7 +274,7 @@ def apply_event_marks(
             _band_keep_from_reference(reference, band_features.shape[2]),
         )
     )
-    blocks, _layout = _continuous_blocks(
+    blocks, _layout, _n_imputed = _continuous_blocks(
         participation, relative_delay, band_features, band_keep
     )
     features = _raw_features(participation, relative_delay, band_features, band_keep)
@@ -291,6 +300,7 @@ def summarise(marks: EventMarks) -> dict[str, Any]:
         "continuous_names": list(marks.continuous_names),
         "bands_available": list(marks.band_names_available),
         "fraction_valid_mark": float(marks.valid.mean()),
+        "n_events_with_span_imputed_to_zero": int(marks.n_span_imputed),
         "embedding_components": int(marks.embedding_spec.n_components),
         "embedding_explained_variance_ratio": [
             float(v) for v in marks.embedding_spec.explained_variance_ratio
