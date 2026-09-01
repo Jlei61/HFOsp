@@ -34,7 +34,7 @@
 | 任务 | queue owner PID | 输出 | 日志 |
 |---|---|---|---|
 | producer 训练（162 job = 27 患者 × 2 producer × 3 seed） | **919885** | `/data/hfosp_group_event_state_v0_2/agent_a/producers/main/` | `/data/hfosp_group_event_state_v0_2/agent_a/logs/train_main.log` |
-| 下游全链（等训练 manifest → 无记忆对照臂训练 → registry → 嵌套评估 → H2a → A4 → 图） | **955200** | 见各阶段 tag | `/data/hfosp_group_event_state_v0_2/agent_a/logs/chain_after_training.log` |
+| 下游全链（等训练 manifest → 无记忆对照臂训练 → registry → 嵌套评估 → H2a → A4 → 图） | **955207** | 见各阶段 tag | `/data/hfosp_group_event_state_v0_2/agent_a/logs/chain_after_training.log` |
 
 - GPU：0 和 1，各 3 slot；单 job 实测峰值显存 0.76–2.93 GB。
 - 租约：`results/epi_prssm/group_event_state/v0_2/shared/resource_leases/agent_a_train_main.json`
