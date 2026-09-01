@@ -1,0 +1,53 @@
+{
+  "schema_version": "topic4_dual_core_carrier_kinetics_v1",
+  "scientific_role": "development_only_fast_carrier_canary_on_frozen_dual_core_node",
+  "output_root": "results/topic4_sef_hfo/data_driven_dual_core_ood/carrier_kinetics",
+  "inputs": {
+    "worker_config": {
+      "path": "config/topic4_dual_core_ood_node_pathways.json",
+      "sha256": "3a2dcb4b9c63780cbe6bbffdd62ad2094da5c60b314023aaa7aca468b8a7bd25"
+    },
+    "confirmation_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_dual_core_ood/confirmation/candidate_manifest.json",
+      "sha256": "aedcb88baac4f995ac15e6eef5856511facf36fe91849d9f16acb8841b4883d2"
+    },
+    "contact_contract": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/contact_shaft_contract.json",
+      "sha256": "548643b6e89b61408b8bdf4cbc1566133937204dc36e8d512049cb25762fde91"
+    },
+    "patient_target": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/shaft_aware_patient_training_target.npz",
+      "sha256": "7d11100c0f431479f8decb17b6de97575a91dcb889887ce9e2cedbbdcd54140b"
+    }
+  },
+  "frozen_substrate": {
+    "candidate_id": "dualcore_s39",
+    "pathway_coefficients": "exact zero",
+    "spatial_ou": "unchanged",
+    "zm": "off",
+    "external_poisson_mean": "frozen to the baseline 3.5/18 ms work point"
+  },
+  "simulation": {
+    "duration_ms": 8000.0,
+    "network_seeds": [2430, 2431, 2432],
+    "carrier_bin_ms": 1.0,
+    "carrier_temporal_smoothing_ms": 0.0
+  },
+  "candidates": [
+    {"candidate_id": "ampa2p0_gaba8", "tau_d_AMPA_ms": 2.0, "tau_d_GABA_ms": 8.0},
+    {"candidate_id": "ampa2p0_gaba12", "tau_d_AMPA_ms": 2.0, "tau_d_GABA_ms": 12.0},
+    {"candidate_id": "ampa2p0_gaba18", "tau_d_AMPA_ms": 2.0, "tau_d_GABA_ms": 18.0},
+    {"candidate_id": "ampa3p5_gaba8", "tau_d_AMPA_ms": 3.5, "tau_d_GABA_ms": 8.0},
+    {"candidate_id": "ampa3p5_gaba12", "tau_d_AMPA_ms": 3.5, "tau_d_GABA_ms": 12.0},
+    {"candidate_id": "ampa3p5_gaba18", "tau_d_AMPA_ms": 3.5, "tau_d_GABA_ms": 18.0}
+  ],
+  "execution": {
+    "worker_cap": 8,
+    "safe_peak_rss_gib": 16.0,
+    "minimum_reserved_memory_gib": 32.0,
+    "minimum_free_disk_gib": 30.0,
+    "monitor_interval_seconds": 600,
+    "numeric_threads_per_worker": 1
+  },
+  "claim_boundary": "model-internal fast-carrier canary; carrier frequency cannot override OOD, natural K=2, event-yield or timing failures"
+}

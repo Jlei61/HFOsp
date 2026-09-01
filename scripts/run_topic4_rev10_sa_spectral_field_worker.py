@@ -31,6 +31,7 @@ from src.topic4_core_field_rev9 import (  # noqa: E402
 )
 from src.topic4_core_field_runner import _placement, atomic_write_json  # noqa: E402
 from src.topic4_continuous_field import continuous_field_h  # noqa: E402
+from src.topic4_manual_dual_core import budget_matched_dual_core_h  # noqa: E402
 from src.topic4_spectral_field import spectral_field_h  # noqa: E402
 
 
@@ -62,6 +63,18 @@ def _contact_onsets(envelope, envelope_dt, montage, valid, window,
 
 def _candidate_node(candidate, positions, *, n_total, stage, config):
     engine = stage["engine"]
+    if candidate["field_type"] == "manual_dual_core_budget_matched":
+        h, audit = budget_matched_dual_core_h(
+            positions, np.asarray(candidate["centers_mm"], float),
+            target_count=int(candidate["target_count"]),
+        )
+        node = reconstruct_node_from_h(
+            h, n_total=n_total, quantile_seed=stage["quantile_seed"],
+            core_mean=engine["core_mean"], core_std=engine["core_std"],
+            v_base=engine["v_base"],
+        )
+        node["field_audit"] = audit
+        return node
     if candidate["field_type"] == "gaussian_k3_benchmark":
         return reconstruct_frozen_node(
             candidate["theta"], positions, n_total=n_total,

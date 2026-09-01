@@ -1,5 +1,11 @@
 # Topic 4：SEF-HFO Framework —— 间期 HFO 传播的空间易激场 SNN 模型
 
+> **2026-09-01 Fig4/5 统一合同**：paper-facing 模型身份收敛为 Fig4 的 data-driven Node +
+> local-connectivity 间期底物，以及 Fig5 在**同一冻结底物**上只增加 Z/M。dual-core 仅作
+> development-level pathway/OOD 诊断；Fig5 因全局 carrier/recovery/三新 seed 门未过仍未锁图。
+> 统一合同与排除清单见
+> `docs/archive/topic4/sef_hfo/topic4_data_driven_zm_fig45_integration_2026-09-01.md`。
+
 > **2026-06-28 瘦身 + 重命名**：本文件由 `topic4_sef_itp_framework.md` 重命名为 `topic4_sef_hfo.md`，
 > Topic 4 收敛到 **SNN 模型主线**。以下过时计划与代码已**整条删除**（不再是 archive，避免误导）：
 > HR/FHN 抽象节点模型（`src/topic4_modeling/hr_*`、phase4_v1）、kuramoto/BHPN-toy（`pr_t4_1_bhpn_toy`、
@@ -899,6 +905,13 @@ scripts/run_sef_itp_phase1.py --dataset <epilepsiae|yuquan> --subject <sid> \
 
 ## 13. 历史文档索引
 
+- **严格双 core Node 的 OOD 拟合与通路分解（2026-08-31）**：
+  `docs/archive/topic4/sef_hfo/dual_core_ood_node_pathway_factorization_2026-08-31.md`
+  —— 两个固定预算 Node core 在 12/12 独立网络内都产生两种患者支持模式，
+  但全部 returned events 的 OOD 仍为 0.462（90% CI 0.426-0.500），模型模式占比
+  77/23 也未恢复患者的 31/69，故裁定为 **repertoire partial support**，不是完整分布恢复。
+  冻结 Node 的四臂结果显示 EE 以显著降低事件产率为代价降低 OOD，E->I 主要把占用推向
+  Mode 2，联合臂存在非加性交互；均为模型内部机制，不作患者因果解释。
 - **数据驱动静态底物线（rev10-D → rev11-NLC，当前状态见复审报告）**：
   `docs/archive/topic4/sef_hfo/rev11_nlc_frozen_substrate_review_2026-08-15.md`
   —— 患者数据约束出来的连续兴奋度地形 + 在同一地形上按数据重分配的局部兴奋连接，

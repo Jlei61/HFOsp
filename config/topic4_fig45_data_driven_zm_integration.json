@@ -1,0 +1,73 @@
+{
+  "schema_version": "topic4_fig45_data_driven_zm_integration_v1",
+  "scientific_role": "paper_ready_figure_4_5_source_contract",
+  "artifact_root": "/data/hfosp_topic4_fig45_artifacts",
+  "artifact_state": "NOT_LOCKED",
+  "source_commits": {
+    "data_driven_zm": "799f5ccc0312c1ba382de92f49b7f989829ab15d",
+    "dual_core_development": "26bc4338edaf0b158e4ad633f9fc58a9724994a1",
+    "main_at_integration_start": "46dbcbc230d3495dad40f44df73f9e515be51321"
+  },
+  "figures": {
+    "fig4": {
+      "model_id": "data_driven_node_local_connectivity",
+      "status": "CANDIDATE_PARTIAL_SUPPORT",
+      "scientific_role": "interictal_propagation_substrate",
+      "artifact_subdir": "fig4/data_driven_node_local_connectivity",
+      "producers": [
+        "scripts/paper_figures/plot_fig4_subject_snn_grouped.py",
+        "scripts/paper_figures/plot_fig4c_nlc_pathway_ablation.py"
+      ],
+      "required_gates": [
+        "same_network_mode_readout",
+        "held_out_or_fresh_network_confirmation",
+        "natural_kmeans_reported",
+        "event_yield_reported"
+      ],
+      "claim_boundary": "development-only data-driven substrate; no patient-blind, anatomical-core, native-HFO-carrier, or causal claim"
+    },
+    "fig5": {
+      "model_id": "data_driven_node_local_connectivity_plus_zm",
+      "inherits_frozen_substrate_from": "data_driven_node_local_connectivity",
+      "added_state_variables": ["Z", "M"],
+      "status": "BLOCKED_NO_ELIGIBLE_ARTIFACT",
+      "scientific_role": "within-model transition and recovery assay",
+      "artifact_subdir": "fig5/data_driven_node_local_connectivity_plus_zm",
+      "producers": [
+        "scripts/audit_topic4_zm_exact_fig4_carryover.py",
+        "scripts/paper_figures/plot_fig5_data_driven_zm_main.py"
+      ],
+      "required_gates": [
+        "exact_fig4_substrate_carryover",
+        "global_carrier",
+        "recovery",
+        "at_least_three_fresh_seeds",
+        "same_state_png_pdf_visual_qa"
+      ],
+      "claim_boundary": "model-internal transition candidate only; no clinical seizure reproduction or biological causality claim"
+    }
+  },
+  "development_evidence": {
+    "dual_core_ood_refit": {
+      "status": "DEVELOPMENT_ONLY_PARTIAL_SUPPORT",
+      "role": "pathway and OOD diagnostic, not the canonical Fig4 or Fig5 model",
+      "forbidden_upgrades": [
+        "natural_kmeans_recovery",
+        "full_patient_distribution_recovery",
+        "native_hfo_carrier_recovery"
+      ]
+    }
+  },
+  "deferred_lines": {
+    "node_rev18_rev19": "ACTIVE_RUN_DO_NOT_IMPORT_UNTIL_FINAL_ARTIFACT",
+    "spatial_zm_ou_followup": "DIRTY_DEVELOPMENT_WORKTREE_NOT_INCLUDED",
+    "m4_adaptation_episode": "ARCHIVED_CARRIER_RECOVERY_GATE_FAILED",
+    "patient_specific_cohort_v2": "ARCHIVED_INCOMPLETE_RUN",
+    "rnn": "SEPARATE_REPOSITORY"
+  },
+  "repository_policy": {
+    "runtime_products": "EXTERNAL_ONLY",
+    "forbidden_main_paths": ["results/", "cache/", "checkpoints/"],
+    "integration_commit_may_contain": ["src/", "scripts/", "config/", "tests/", "docs/"]
+  }
+}
