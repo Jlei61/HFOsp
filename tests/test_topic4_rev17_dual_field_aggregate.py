@@ -3,6 +3,7 @@ from __future__ import annotations
 import numpy as np
 
 from scripts.aggregate_topic4_rev17_dual_field_residual_atlas import (
+    _configured_network_seeds,
     finite_differences,
     summarize_differences,
 )
@@ -53,3 +54,16 @@ def test_response_summary_counts_network_signs_without_pooling_events():
     assert len(summary) == 1
     assert summary[0]["negative_networks_mode_0_mean_derivative"] == 2
     assert summary[0]["positive_networks_mode_0_mean_derivative"] == 1
+
+
+def test_reference_geometry_uses_the_active_stage_seed_pool():
+    assert _configured_network_seeds({"search": {
+        "fit_network_seeds": [],
+        "selection_network_seeds": [2373, 2371, 2372],
+        "confirmation_network_seeds": [],
+    }}) == [2371, 2372, 2373]
+    assert _configured_network_seeds({"search": {
+        "fit_network_seeds": [],
+        "selection_network_seeds": [],
+        "confirmation_network_seeds": [2381, 2382, 2383],
+    }}) == [2381, 2382, 2383]

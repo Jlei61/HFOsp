@@ -128,6 +128,21 @@ def _analysis_provenance(manifest: Mapping[str, Any]) -> dict[str, Any]:
     }
 
 
+def _configured_network_seeds(config: Mapping[str, Any]) -> list[int]:
+    search = config.get("search") or {}
+    seeds = sorted({
+        int(seed)
+        for key in (
+            "canary_network_seeds", "fit_network_seeds",
+            "selection_network_seeds", "confirmation_network_seeds",
+        )
+        for seed in search.get(key, [])
+    })
+    if not seeds:
+        raise RuntimeError("rev17 config has no active network seed pool")
+    return seeds
+
+
 def _reference_geometry(config: Mapping[str, Any], manifest: Mapping[str, Any],
                         root: Path) -> tuple[dict[int, np.ndarray], dict]:
     transition_path = _resolve(root, config["inputs"]["transition_config"]["path"])
@@ -137,7 +152,7 @@ def _reference_geometry(config: Mapping[str, Any], manifest: Mapping[str, Any],
         if row["candidate_id"] == "exact_dual_anchor"
     )
     positions = {}
-    for seed in config["search"]["fit_network_seeds"]:
+    for seed in _configured_network_seeds(config):
         substrate = build_substrate(
             transition, "node_baseline", int(seed),
             cache_dir=str(root / config["network_cache"]),

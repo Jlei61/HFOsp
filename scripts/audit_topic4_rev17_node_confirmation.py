@@ -87,7 +87,9 @@ def audit(config_path: Path = DEFAULT_CONFIG,
                         positions[seed], stage, root,
                     ))
                 except Exception as error:
-                    invalid.append(f"{candidate_id}:{seed}:{error}")
+                    invalid.append(
+                        f"{candidate_id}:{seed}:{type(error).__name__}:{error}"
+                    )
     status, error, scored, evaluations, eligible = "INCOMPLETE", None, [], [], []
     if not provenance["analysis_worktree_clean"]:
         status, error = "INVALID_PROVENANCE", "analysis worktree is dirty"

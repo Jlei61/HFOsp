@@ -193,7 +193,9 @@ def aggregate(
                         positions[seed], stage, root.resolve(),
                     ))
                 except Exception as error:
-                    invalid.append(f"{candidate_id}:{seed}:{error}")
+                    invalid.append(
+                        f"{candidate_id}:{seed}:{type(error).__name__}:{error}"
+                    )
     status, error = "INCOMPLETE", None
     evaluations, eligible = [], []
     if not provenance["analysis_worktree_clean"]:
