@@ -17,23 +17,27 @@ cd "$HERE"
 
 WORKERS=${WORKERS:-12}
 SEEDS=${SEEDS:-"1 2 3"}
+# P_memoryless is a seed-1 sensitivity arm; the loop below simply skips the
+# directories that do not exist, so listing it here is harmless if it was not run.
+PRODUCERS=${PRODUCERS:-"P_local P_slow P_memoryless"}
 
 echo "== 1. registry =="
 $PY scripts/topic5_group_event_state/v02_write_registry.py --seeds $SEEDS \
-    2>&1 | tee "$LOGS/registry.log"
+    --producers $PRODUCERS 2>&1 | tee "$LOGS/registry.log"
 
 echo "== 2. future-block evaluation with the frozen states =="
 STATE_DIRS=()
-for p in P_local P_slow; do for s in $SEEDS; do
+for p in $PRODUCERS; do for s in $SEEDS; do
   [ -d "$S/${p}_seed${s}" ] && STATE_DIRS+=("$S/${p}_seed${s}")
 done; done
+echo "state dirs: ${STATE_DIRS[*]}"
 # Secondary arms are limited on purpose: the load-bearing increment B vs B+S runs
 # for every (producer, seed); the state-only arm and the second shift offset are
 # diagnostics and running them for all six would nearly double the wall clock.
 $PY scripts/topic5_group_event_state/v02_run_future_block.py \
     --cohort all --workers "$WORKERS" --tag with_state \
     --shift-extra-steps 1 4 \
-    --state-only-for P_slow_seed1 P_local_seed1 \
+    --state-only-for P_slow_seed1 P_local_seed1 P_memoryless_seed1 \
     --shift-for P_slow_seed1 P_slow_seed2 P_slow_seed3 P_local_seed1 \
     --extra-shift-for P_slow_seed1 \
     --state-dir "${STATE_DIRS[@]}" 2>&1 | tee "$LOGS/future_block_with_state.log"
@@ -42,6 +46,8 @@ echo "== 3. H2a same-prefix continuation =="
 $PY scripts/topic5_group_event_state/v02_run_prefix.py \
     --workers "$WORKERS" --tag main --producer-root "$PROD" \
     --producers P_local P_slow --seeds $SEEDS 2>&1 | tee "$LOGS/prefix.log"
+# H2a uses the two carry-state producers only: a memoryless arm has, by
+# construction, no state to condition a continuation on.
 
 echo "== 4. A4 memory-truncation replays (P_slow seed 1) =="
 $PY scripts/topic5_group_event_state/v02_run_state_diagnostics.py \
@@ -83,6 +89,6 @@ $PY scripts/topic5_group_event_state/v02_summarize.py \
 
 echo "== 8. registry refresh (now complete) =="
 $PY scripts/topic5_group_event_state/v02_write_registry.py --seeds $SEEDS \
-    2>&1 | tee -a "$LOGS/registry.log"
+    --producers $PRODUCERS 2>&1 | tee -a "$LOGS/registry.log"
 
 echo "ALL STAGES DONE"
