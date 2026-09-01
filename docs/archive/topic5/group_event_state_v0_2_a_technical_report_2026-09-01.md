@@ -218,7 +218,7 @@ count 增益 > 0.5 nats/window、participation > 0.02、continuous > 0.05；
 
 | 项 | 证据 |
 |---|---|
-| target / anchor / registry / session carry 正确 | 73 项回归测试，含 EI §3 点名的三条最小检验 |
+| target / anchor / registry / session carry 正确 | **65** 项回归测试全绿（新增 40 + 既有 25），含 EI §3 点名的三条最小检验 |
 | 前缀和 target == dense 计算 | `test_window_statistics_match_brute_force` 逐窗口核对 |
 | 所有模块真的在更新 | 逐 run 的参数更新幅度（部分队列中位：encoder 0.013 / state 0.103 / heads 0.193 / future 0.465） |
 | 非有限训练步 | 0 |

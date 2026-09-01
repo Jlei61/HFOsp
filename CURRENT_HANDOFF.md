@@ -49,7 +49,7 @@ cd /home/honglab/leijiaxin/HFOsp/.worktrees/topic5-group-event-state-v02-a
 export OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1
 PY=/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python
 
-# 回归测试（63 项）
+# 回归测试（65 项：新增 40 + 既有 25）
 $PY -m pytest tests/test_topic5_group_event_state_v02_*.py \
               tests/test_topic5_group_event_state_{contract,no_leakage,source_audit,streams}.py -q
 
