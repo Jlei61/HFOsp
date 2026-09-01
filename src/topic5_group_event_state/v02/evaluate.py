@@ -214,7 +214,11 @@ def evaluate_subject(
 
             shift_gains: list[dict[str, float]] = []
             min_steps = int(math.ceil(horizon / tl.config.grid_seconds))
-            for extra in config.shift_extra_steps:
+            # A state that is already a wrong-time control (the matched donor
+            # writes NaN where no donor existed) is not shifted again: rolling it
+            # would mix donor rows with the zeros that stand in for missing ones.
+            shift_steps_list = () if subset is not None else config.shift_extra_steps
+            for extra in shift_steps_list:
                 steps = min_steps + int(extra)
                 validate_shift_exceeds_horizon(steps, tl.config.grid_seconds, horizon)
                 usable, total = shiftable_sessions(tl.grid.session_id, steps)

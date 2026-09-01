@@ -85,18 +85,34 @@ def early_waveform_summary(root: Path, raw_positions: np.ndarray, index: dict,
     return out
 
 
-def _states_for(state_dirs, subject: str, n_events: int) -> dict[str, np.ndarray]:
+def _states_for(state_specs, subject: str, n_events: int) -> dict[str, np.ndarray]:
+    """Per-event states, read straight from each training run directory.
+
+    Event states are ~70 MB per (patient, producer, seed); copying them into a
+    parallel directory tree would duplicate ~11 GB for no benefit, so the runner
+    reads ``runs/<subject>/<producer>/seed<k>/event_state.npz`` in place.
+    """
+
     out: dict[str, np.ndarray] = {}
-    for d in state_dirs:
-        path = Path(d) / f"{subject}.npz"
+    for name, path in state_specs:
+        path = Path(path)
         if not path.exists():
             continue
         with np.load(path) as z:
             values = np.asarray(z["state"], dtype=np.float64)
         if values.shape[0] != n_events:
             raise ValueError(f"{path}: {values.shape[0]} states for {n_events} events")
-        out[Path(d).name] = values
+        out[name] = values
     return out
+
+
+def _event_state_specs(producer_root: Path, subject: str, producers, seeds):
+    return [
+        (f"{producer}_seed{seed}",
+         Path(producer_root) / "runs" / subject / producer / f"seed{seed}"
+         / "event_state.npz")
+        for producer in producers for seed in seeds
+    ]
 
 
 def _fit_arm(x, data, tr, te, config) -> dict:
@@ -129,7 +145,7 @@ def _fit_arm(x, data, tr, te, config) -> dict:
 
 
 def _run_one(args: tuple) -> dict:
-    subject, out_root, state_dirs, cfg_hash, max_iter = args
+    subject, out_root, producer_root, producers, seeds, cfg_hash, max_iter = args
     started = time.time()
     result_path = Path(out_root) / "per_subject" / f"{subject}.json"
     if already_done(result_path, cfg_hash):
@@ -185,7 +201,10 @@ def _run_one(args: tuple) -> dict:
             "producers_present": [],
         }
 
-        states = _states_for([Path(d) for d in state_dirs], subject, data.n_events)
+        states = _states_for(
+            _event_state_specs(Path(producer_root), subject, producers, seeds),
+            subject, data.n_events,
+        )
         dt = np.median(np.diff(tl.event_times[tl.event_times < tl.event_times[-1]]))
         shift_events = max(int(round(SHIFT_SECONDS / max(dt, 1e-3))), 1)
         for name, values in sorted(states.items()):
@@ -218,7 +237,10 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--subjects", nargs="+", default=None)
     parser.add_argument("--out-root", type=Path, default=DEFAULT_OUT)
-    parser.add_argument("--state-dir", type=Path, nargs="*", default=[])
+    parser.add_argument("--producer-root", type=Path,
+                        default=Path("/data/hfosp_group_event_state_v0_2/agent_a/producers/main"))
+    parser.add_argument("--producers", nargs="+", default=["P_local", "P_slow"])
+    parser.add_argument("--seeds", nargs="+", type=int, default=[1, 2, 3])
     parser.add_argument("--workers", type=int, default=8)
     parser.add_argument("--max-iter", type=int, default=200)
     parser.add_argument("--tag", default="main")
@@ -232,10 +254,10 @@ def main() -> None:
     (out_root / "failures").mkdir(parents=True, exist_ok=True)
     cfg_hash = config_fingerprint(
         SubjectTimelineConfig().as_dict(), args.max_iter, SHIFT_SECONDS,
-        sorted(Path(d).name for d in args.state_dir),
+        sorted(args.producers), sorted(args.seeds),
     )
-    payload = [(s, str(out_root), [str(d) for d in args.state_dir], cfg_hash,
-                args.max_iter) for s in subjects]
+    payload = [(s, str(out_root), str(args.producer_root), list(args.producers),
+                list(args.seeds), cfg_hash, args.max_iter) for s in subjects]
     results = []
     started = time.time()
     with mp.get_context("spawn").Pool(processes=max(1, args.workers)) as pool:
@@ -245,7 +267,8 @@ def main() -> None:
                   f"{res.get('seconds', '')}", flush=True)
     atomic_write_json(out_root / "manifest.json", {
         "tag": args.tag, "subjects": sorted(subjects), "results": results,
-        "config_hash": cfg_hash, "state_dirs": [str(d) for d in args.state_dir],
+        "config_hash": cfg_hash, "producer_root": str(args.producer_root),
+        "producers": list(args.producers), "seeds": list(args.seeds),
         "n_ok": sum(1 for r in results if r["status"] in ("ok", "skipped_done")),
         "n_failed": sum(1 for r in results if r["status"] == "failed"),
         "elapsed_seconds": round(time.time() - started, 1),
