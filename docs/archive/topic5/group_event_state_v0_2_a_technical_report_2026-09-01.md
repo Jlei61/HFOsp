@@ -186,6 +186,23 @@ count 增益 > 0.5 nats/window、participation > 0.02、continuous > 0.05；
 | 验证 pass 重放全部 segment | 每个 epoch 多跑一遍整条记录 | 只重放**含验证事件**的 segment（段仍从自身起点热身，warm-up 不变） |
 | `estimate_stats` 只接受连续区间 | v0.2 的 TRAIN 不是连续区间 | 加可选 `positions=`，默认行为不变 |
 
+## 10.1 资源实测与并发选择
+
+| 量 | 实测 |
+|---|---|
+| 单 job 峰值显存（reserved） | `P_local` 0.76 GB / `P_slow` 2.0–2.9 GB |
+| 单 job 独占一张卡时的 epoch 时间（`epilepsiae_1073`，18.4 万事件） | ~60 s |
+| 6 个 job 并发（每卡 3 个）时的同一 epoch | ~100 s |
+| 由此得到的聚合吞吐 | 6 / 1.67 ≈ **3.6 倍**单 job 速率 |
+| CPU 侧：全 27 人 `B_multiscale` 评估（12 worker） | 314 s |
+| CPU 侧：单患者 27 臂 × 3 horizon 的完整嵌套评估（最大患者） | ~15 min |
+
+**为什么停在每卡 3 个**：显存预算允许每卡约 5 个（24 GB − 4 GB 安全余量，再取 80% 容量预算，
+除以 2.9 GB 峰值）。但按上表，6 路并发时每个 job 已经慢到 1.67 倍，说明瓶颈已经落在 GPU 本身
+而不是 CPU 侧空档；再加到 10 路，若每 job 慢到 2.5–3.3 倍，聚合吞吐只有 4.0–3.0 倍，
+**可能不升反降**。因此按实测停在 6 路，并把这条测量写下来而不是凭"还有显存"继续堆
+（EI §5 明确禁止后者）。
+
 ## 11. 结果
 
 （待 162 个训练 job 跑完后填入：嵌套增量、block-shift 零假设、same-prefix continuation、

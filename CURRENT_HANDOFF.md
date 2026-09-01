@@ -63,6 +63,13 @@ $PY scripts/topic5_group_event_state/v02_train_producers.py \
 
 产出：`/data/hfosp_group_event_state_v0_2/agent_a/future_block/baseline_only/`（27 个 per-subject JSON + manifest）。
 
+## 4.1 实测资源（决定并发的依据）
+
+- 单 job 峰值显存 0.76–2.93 GB；每卡 3 个 slot（共 6 路）。
+- 单 job 独占一卡时 `epilepsiae_1073` 每 epoch ~60 s；6 路并发时 ~100 s
+  → 聚合吞吐 ≈ 3.6 倍单 job。再往上堆很可能不升反降，因此**不**按"还有显存"继续加。
+- 大患者单 job 30–40 min，小患者 5–10 min；162 个 job 预计 **7–8 小时**。
+
 ## 5. 下一步（按顺序）
 
 1. 训练结束后，用 `--state-dir .../producers/main/states/{P_local,P_slow}_seed{1,2,3}`
@@ -70,8 +77,11 @@ $PY scripts/topic5_group_event_state/v02_train_producers.py \
 2. 跑 `v02_run_prefix.py`（H2a），输入同样的 6 个 state 目录。
 3. A4 缩减诊断：event reset 1/100/1000/full、physical reset 5/30/120 min/full、
    fast-only / slow-only、memoryless、粗匹配错时 donor。
-4. 承重图 + `figures/README.md` + 目视验收。
-5. 写 registry producer 条目；写 plain / technical 报告。
+4. 承重图 + 两张辅助图 + `figures/README.md` + 目视验收
+   （`scripts/topic5_group_event_state/v02_after_training.sh` 已把 1–4 串好，一条命令跑完）。
+5. 写 registry producer 条目；补完 plain / technical 报告的结果段。
+6. 可选：`P_memoryless` seed 1（SP §4.2 敏感性臂，27 个 job）与
+   `P_slow` seed 4/5（承重配置补到 5 seeds，54 个 job）。前者优先，后者按 GPU 时间决定。
 
 ## 6. 已知的、必须写进报告的限制
 
