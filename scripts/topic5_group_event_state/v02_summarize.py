@@ -40,7 +40,9 @@ REPO_OUT = Path(
 DEFAULT_ARMS = {
     "P_local": "B+S(P_local_seed",
     "P_slow": "B+S(P_slow_seed",
-    "shift": "B+shift",
+    # Only the load-bearing producer's shifted state; "B+shift" alone would
+    # silently pool the two producers' nulls into one grey curve.
+    "shift": "(S(P_slow_seed",
 }
 
 
