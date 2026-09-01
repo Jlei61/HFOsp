@@ -12,6 +12,7 @@ from src.topic4_d6_natural_kmeans import (
 )
 from src.topic4_shaft_aware import (
     build_event_features, contract_groups, sliced_event_cloud_distance,
+    transform_patient_embedding,
 )
 from src.topic4_shaft_aware_direction import assign_direction_modes
 
@@ -55,6 +56,16 @@ def matched_patient_floor(patient_onsets, sample_size: int, *, groups,
     }
 
 
+def reference_embedding(patient_onsets, *, groups, embedding) -> dict:
+    """Reuse the frozen training transform with a different event-cloud reference."""
+    features = build_event_features(np.asarray(patient_onsets, float), groups)[
+        "features"
+    ]
+    output = dict(embedding)
+    output["reference_z"] = transform_patient_embedding(features, embedding)
+    return output
+
+
 def _prototype_matrix(model_ranks, mapped_labels, patient_ranks,
                       patient_labels) -> np.ndarray:
     model = normalize_event_ranks(np.asarray(model_ranks, float))
@@ -82,10 +93,38 @@ def _prototype_matrix(model_ranks, mapped_labels, patient_ranks,
     return matrix
 
 
-def score_returned_families(onsets, ranks, returned, *, contract: Mapping,
-                            training_arrays: Mapping,
-                            classifier: Mapping, kmeans_seed: int) -> dict:
-    """Score one network without allowing validation metrics into selection."""
+def score_complete_distribution(onsets, returned, *, contract: Mapping,
+                                training_arrays: Mapping) -> dict:
+    """Selection-only score with no classifier, KMeans, OOD or held-out input."""
+    onsets = np.asarray(onsets, float)
+    returned = np.asarray(returned, bool)
+    if onsets.ndim != 2:
+        raise ValueError("onsets must be an event x contact table")
+    if returned.shape != (len(onsets),):
+        raise ValueError("returned mask must align with events")
+    values = onsets[returned]
+    groups = contract_groups(contract)
+    embedding = embedding_from_training_arrays(training_arrays)
+    distribution = complete_distribution_distance(
+        values, groups=groups, embedding=embedding,
+    ) if len(values) >= 2 else float("nan")
+    return {
+        "complete_distribution_distance_training": (
+            None if not np.isfinite(distribution) else float(distribution)
+        ),
+        "n_returned_families": int(len(values)),
+        "selection_used_labels": False,
+        "selection_used_ood": False,
+        "selection_used_heldout": False,
+    }
+
+
+def score_validation_endpoints(
+        onsets, ranks, returned, *, contract: Mapping,
+        training_arrays: Mapping, classifier: Mapping, kmeans_seed: int,
+        patient_reference_onsets=None, patient_reference_ranks=None,
+        patient_reference_labels=None) -> dict:
+    """Validation-only KMeans/OOD and optional frozen-reference readout."""
     onsets = np.asarray(onsets, float)
     ranks = np.asarray(ranks, float)
     returned = np.asarray(returned, bool)
@@ -97,9 +136,6 @@ def score_returned_families(onsets, ranks, returned, *, contract: Mapping,
     rank_values = ranks[returned]
     groups = contract_groups(contract)
     embedding = embedding_from_training_arrays(training_arrays)
-    distribution = complete_distribution_distance(
-        values, groups=groups, embedding=embedding,
-    ) if len(values) >= 2 else float("nan")
 
     assigned = assign_direction_modes(
         values, groups=groups, embedding=embedding, classifier=classifier,
@@ -128,10 +164,19 @@ def score_returned_families(onsets, ranks, returned, *, contract: Mapping,
             clusters, np.asarray(assigned["labels"], int)[valid],
         )
         mapped = np.asarray(alignment["mapped_labels"], int)
+        reference_ranks = (
+            np.asarray(training_arrays["patient_train_ranks"], float)
+            if patient_reference_ranks is None
+            else np.asarray(patient_reference_ranks, float)
+        )
+        reference_labels = (
+            np.asarray(training_arrays["patient_train_old_labels"], int)
+            if patient_reference_labels is None
+            else np.asarray(patient_reference_labels, int)
+        )
         matrix = _prototype_matrix(
             rank_values[valid], mapped,
-            np.asarray(training_arrays["patient_train_ranks"], float),
-            np.asarray(training_arrays["patient_train_old_labels"], int),
+            reference_ranks, reference_labels,
         )
         validation.update({
             "cluster_counts": np.bincount(mapped, minlength=2).tolist(),
@@ -146,14 +191,30 @@ def score_returned_families(onsets, ranks, returned, *, contract: Mapping,
             "silhouette": natural["silhouette"],
             "prototype_spearman_matrix": matrix.tolist(),
         })
+    if patient_reference_onsets is not None:
+        reference = reference_embedding(
+            patient_reference_onsets, groups=groups, embedding=embedding,
+        )
+        distance = complete_distribution_distance(
+            values, groups=groups, embedding=reference,
+        ) if len(values) >= 2 else float("nan")
+        validation["complete_distribution_distance_reference"] = (
+            None if not np.isfinite(distance) else float(distance)
+        )
+    return validation
+
+
+def score_returned_families(onsets, ranks, returned, *, contract: Mapping,
+                            training_arrays: Mapping,
+                            classifier: Mapping, kmeans_seed: int) -> dict:
+    """Backward-compatible combined canary diagnostic."""
     return {
-        "selection": {
-            "complete_distribution_distance_training": (
-                None if not np.isfinite(distribution) else float(distribution)
-            ),
-            "selection_used_labels": False,
-            "selection_used_ood": False,
-            "selection_used_heldout": False,
-        },
-        "validation_diagnostic": validation,
+        "selection": score_complete_distribution(
+            onsets, returned, contract=contract, training_arrays=training_arrays,
+        ),
+        "validation_diagnostic": score_validation_endpoints(
+            onsets, ranks, returned, contract=contract,
+            training_arrays=training_arrays, classifier=classifier,
+            kmeans_seed=kmeans_seed,
+        ),
     }

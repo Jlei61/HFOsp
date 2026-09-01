@@ -18,8 +18,8 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from src.topic4_rev20_dual_core_endpoint import (  # noqa: E402
-    embedding_from_training_arrays, matched_patient_floor,
-    score_returned_families,
+    embedding_from_training_arrays, matched_patient_floor, reference_embedding,
+    score_complete_distribution, score_validation_endpoints,
 )
 from src.topic4_shaft_aware import contract_groups  # noqa: E402
 
@@ -129,9 +129,23 @@ def main() -> None:
         default=Path("/home/honglab/leijiaxin/HFOsp"),
     )
     parser.add_argument("--open-heldout", action="store_true")
+    parser.add_argument("--open-validation", action="store_true")
     args = parser.parse_args()
-    if args.open_heldout and args.phase != "confirmation":
-        raise RuntimeError("held-out endpoint opens only in confirmation")
+    if args.open_heldout and not args.open_validation:
+        raise RuntimeError("held-out requires validation to be opened")
+    if args.open_validation and args.phase == "screen":
+        selection_path = (
+            args.artifact_root.resolve()
+            / json.loads(args.config.resolve().read_text())["output_root"]
+            / "selected_candidates.json"
+        )
+        if not selection_path.is_file():
+            raise RuntimeError("screen validation opens only after selection freeze")
+        frozen_selection = json.loads(selection_path.read_text())
+        sealed_aggregate = selection_path.parent / "screen" / "aggregate.json"
+        if frozen_selection.get("screen_aggregate_sha256") != _sha256(
+                sealed_aggregate):
+            raise RuntimeError("selection does not freeze the sealed screen aggregate")
     config_path = args.config.resolve()
     artifact_root = args.artifact_root.resolve()
     config = json.loads(config_path.read_text())
@@ -155,15 +169,6 @@ def main() -> None:
         artifact_root, config["inputs"]["patient_support_config"]["path"],
     )
     support_config = json.loads(support_config_path.read_text())
-    support_manifest_path = _resolve(
-        artifact_root,
-        support_config["inputs"]["old_ab_train_only_classifier"]["path"],
-    )
-    if _sha256(support_manifest_path) != support_config["inputs"][
-            "old_ab_train_only_classifier"]["sha256"]:
-        raise RuntimeError("direction classifier source changed")
-    support_manifest = json.loads(support_manifest_path.read_text())
-    classifier = support_manifest["direction_classifier"]
     contract_path = _resolve(
         artifact_root, support_config["inputs"]["contact_contract"]["path"],
     )
@@ -174,6 +179,32 @@ def main() -> None:
     if list(training["contact_names"]) != [
             row["contact_name"] for row in contract["contacts"]]:
         raise RuntimeError("patient target and contact contract orders differ")
+
+    classifier = heldout = heldout_embedding = None
+    if args.open_validation or args.phase == "canary":
+        support_manifest_path = _resolve(
+            artifact_root,
+            support_config["inputs"]["old_ab_train_only_classifier"]["path"],
+        )
+        if _sha256(support_manifest_path) != support_config["inputs"][
+                "old_ab_train_only_classifier"]["sha256"]:
+            raise RuntimeError("direction classifier source changed")
+        support_manifest = json.loads(support_manifest_path.read_text())
+        classifier = support_manifest["direction_classifier"]
+    if args.open_heldout:
+        heldout_path = _resolve(
+            artifact_root, config["inputs"]["patient_heldout_npz"]["path"],
+        )
+        if _sha256(heldout_path) != config["inputs"]["patient_heldout_npz"][
+                "sha256"]:
+            raise RuntimeError("held-out patient endpoint changed")
+        heldout = _load_npz(heldout_path)
+        if list(heldout["contact_names"]) != list(training["contact_names"]):
+            raise RuntimeError("held-out and training contact orders differ")
+        heldout_embedding = reference_embedding(
+            heldout["heldout_onsets"], groups=contract_groups(contract),
+            embedding=embedding_from_training_arrays(training),
+        )
 
     rows, floor_cache = [], {}
     worker_root = output_root / args.phase / "workers"
@@ -187,11 +218,18 @@ def main() -> None:
             if payload.get("arrays", {}).get("sha256") != _sha256(npz_path):
                 raise RuntimeError(f"worker array hash changed: {npz_path}")
             provenance = payload.get("provenance", {})
-            if (provenance.get("git_commit") != manifest["git_commit"]
-                    or provenance.get("expected_git_commit") != manifest["git_commit"]
+            expected_commit = provenance.get("expected_git_commit")
+            if (not expected_commit
                     or provenance.get("runtime_modules_dirty")
                     or not provenance.get("runtime_modules_match_expected_commit")):
                 raise RuntimeError(f"worker provenance is not frozen: {json_path}")
+            ancestry = subprocess.run(
+                ["git", "merge-base", "--is-ancestor",
+                 manifest["git_commit"], expected_commit],
+                cwd=ROOT, check=False,
+            )
+            if ancestry.returncode != 0:
+                raise RuntimeError("worker commit predates or diverges from manifest")
             if payload.get("event_unit", {}).get("name") != config["event_unit"]["name"]:
                 raise RuntimeError("formal event unit changed")
             if not payload.get("event_unit", {}).get("all_detector_fragments_represented"):
@@ -199,13 +237,11 @@ def main() -> None:
             if payload.get("mechanism_freeze", {}).get("Z_M") != "off":
                 raise RuntimeError("Z/M was active in an interictal mechanism run")
             arrays = _load_npz(npz_path)
-            scored = score_returned_families(
-                arrays["onsets"], arrays["ranks"], arrays["event_returned"],
+            selection = score_complete_distribution(
+                arrays["onsets"], arrays["event_returned"],
                 contract=contract, training_arrays=training,
-                classifier=classifier,
-                kmeans_seed=int(config["validation"]["natural_kmeans_seed"]),
             )
-            n_returned = scored["validation_diagnostic"]["n_returned_families"]
+            n_returned = selection["n_returned_families"]
             if n_returned not in floor_cache:
                 floor_cache[n_returned] = matched_patient_floor(
                     training["patient_train_onsets"], n_returned,
@@ -214,7 +250,7 @@ def main() -> None:
                     draws=int(config["complete_distribution"]["floor_draws"]),
                     seed=int(config["complete_distribution"]["floor_seed"]) + n_returned,
                 )
-            rows.append({
+            row = {
                 "candidate_id": candidate["candidate_id"],
                 "family": candidate["family"],
                 "level": candidate["level"],
@@ -230,8 +266,37 @@ def main() -> None:
                     "n_compound_detector_fragments", 0
                 ),
                 "training_patient_floor": floor_cache[n_returned],
-                **scored,
-            })
+                "selection": selection,
+            }
+            if args.open_validation or args.phase == "canary":
+                row["validation"] = score_validation_endpoints(
+                    arrays["onsets"], arrays["ranks"],
+                    arrays["event_returned"], contract=contract,
+                    training_arrays=training, classifier=classifier,
+                    kmeans_seed=int(config["validation"]["natural_kmeans_seed"]),
+                    patient_reference_onsets=(
+                        None if heldout is None else heldout["heldout_onsets"]
+                    ),
+                    patient_reference_ranks=(
+                        None if heldout is None else heldout["heldout_ranks"]
+                    ),
+                    patient_reference_labels=(
+                        None if heldout is None else heldout["heldout_old_labels"]
+                    ),
+                )
+                if heldout is not None:
+                    key = ("heldout", n_returned)
+                    if key not in floor_cache:
+                        floor_cache[key] = matched_patient_floor(
+                            heldout["heldout_onsets"], n_returned,
+                            groups=contract_groups(contract),
+                            embedding=heldout_embedding,
+                            draws=int(config["complete_distribution"]["floor_draws"]),
+                            seed=(int(config["complete_distribution"]["floor_seed"])
+                                  + 100000 + n_returned),
+                        )
+                    row["heldout_patient_floor"] = floor_cache[key]
+            rows.append(row)
 
     aggregate = {
         "schema_id": "topic4_rev20_dc_phase_aggregate_v1",
@@ -248,8 +313,9 @@ def main() -> None:
             "unconditional complete-event distribution on patient training only"
         ),
         "validation_endpoint_status": (
-            "TRAINING_ONLY_DIAGNOSTIC" if args.phase != "confirmation"
-            else "FROZEN_VALIDATION_OPENED"
+            "CANARY_BASELINE_DIAGNOSTIC" if args.phase == "canary"
+            else ("FROZEN_VALIDATION_OPENED" if args.open_validation
+                  else "SEALED_UNTIL_SELECTION_FREEZE")
         ),
         "heldout_opened": bool(args.open_heldout),
         "per_network": rows,

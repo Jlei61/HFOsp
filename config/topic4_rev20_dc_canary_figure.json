@@ -1,0 +1,16 @@
+{
+  "schema_id": "topic4_rev20_dc_canary_figure_v1",
+  "scientific_role": "training_only_corrected_causal_family_visual_audit",
+  "output_root": "results/topic4_sef_hfo/data_driven_dual_core_mechanism_atlas/canary",
+  "inputs": {
+    "cohort_config": {
+      "path": "config/topic4_data_driven_snn_cohort_v1.json",
+      "sha256": "1dda710517a65002d21618f26569df91077ba6d02953fbfcee9b2f98b0ac4249"
+    },
+    "classifier_config": {
+      "path": "config/topic4_rev11_nlc_frozen_substrate_confirmation.json",
+      "sha256": "7e3ff4786a96ed5fc5b27f7b6b292eb5d7cd51fedb847f669c0e648165835df7"
+    }
+  },
+  "claim_boundary": "Training-only visual audit of corrected model causal families; no patient held-out, ictal or causal claim"
+}

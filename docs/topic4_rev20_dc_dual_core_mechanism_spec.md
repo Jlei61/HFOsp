@@ -113,6 +113,12 @@ After a level is selected within each family using only the endpoint above:
    unreadable events count as OOD, with unreadable and readable-support OOD
    shown separately.
 
+The screen is aggregated twice from identical immutable worker artifacts. The
+first pass cannot load the classifier or held-out endpoint and freezes one
+level per family. Only after the selection JSON records the sealed aggregate
+hash may the second pass expose the all-level validation curves. No selected
+level can be changed after this opening.
+
 The old mode-conditioned J14 components remain diagnostic. They cannot replace
 the unconditional distribution endpoint or select a parameter.
 
@@ -157,4 +163,3 @@ one SNN family. It can identify which model coordinates control patient-like
 interictal distributions under the frozen dual-core hypothesis. It cannot prove
 anatomical cores, identify biological synaptic changes, establish patient
 generalization or make an ictal claim.
-

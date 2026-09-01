@@ -38,6 +38,8 @@
 ## Task 4: formal screen
 
 - Run all 31 candidates on seeds 2511-2514 for 20 s with common random numbers.
+- The first screen aggregation writes only the unconditional training
+  distribution endpoint. KMeans, OOD and held-out arrays are not loaded.
 - Use systemd-run plus nohup, one numerical thread per worker, measured RSS-based
   concurrency up to 12 workers while reserving at least 32 GiB RAM. The first
   real substrate rebuild reached 7.2 GiB before simulation; until the canary
@@ -50,6 +52,9 @@
 - Within each family select at most one non-reference level by training
   complete-distribution distance only.
 - Freeze selected IDs before reading validation metrics.
+- After that file is frozen, reopen the existing screen artifacts once for the
+  descriptive all-level KMeans/OOD/held-out response curves; these values cannot
+  alter the selected levels.
 - Run reference plus selected levels on seeds 2521-2532.
 - Open held-out distribution, KMeans/prototype and OOD endpoints once.
 
