@@ -1,0 +1,136 @@
+{
+  "schema_id": "topic4_rev20_dc_dual_core_mechanism_atlas_v1",
+  "scientific_role": "development_only_frozen_dual_core_interictal_mechanism_atlas",
+  "output_root": "results/topic4_sef_hfo/data_driven_dual_core_mechanism_atlas",
+  "candidate_manifest": "results/topic4_sef_hfo/data_driven_dual_core_mechanism_atlas/candidate_manifest.json",
+  "network_cache": "results/topic4_sef_hfo/data_driven_core_field_rev9/network_cache",
+  "inputs": {
+    "transition_config": {
+      "path": "config/topic4_data_driven_zm_ictal_transition_v1.json",
+      "sha256": "2ce70caf70ca1225ba9a95721692cf7fc9ce0f8fa9b977c85d0370c78941b20f"
+    },
+    "j14_config": {
+      "path": "config/topic4_rev14_static_node_historical_rescore.json",
+      "sha256": "af3116d4a56feb077d17893196eee1f2ebcc42fd77688d56e15f2a5b89631ed2"
+    },
+    "patient_support_config": {
+      "path": "config/topic4_rev14_patient_support_acceptance.json",
+      "sha256": "5dec1ff3277294697515d701e82246c242fb627348751571a5a6fe86e008940e"
+    },
+    "patient_training_target": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/shaft_aware_patient_training_target.npz",
+      "sha256": "7d11100c0f431479f8decb17b6de97575a91dcb889887ce9e2cedbbdcd54140b"
+    },
+    "patient_heldout_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev14/patient_heldout_endpoint/patient_heldout_endpoint_manifest_v1.json",
+      "sha256": "97938e0b6f93ef8a836605bf098f1dc85aecec70f71e696dcff9c16ef7ca0216"
+    },
+    "patient_heldout_npz": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev14/patient_heldout_endpoint/patient_heldout_endpoint_v1.npz",
+      "sha256": "b9169e7e94acbe0e3781f0a72e5c1c64a8a588e9697f2ef926dcc6f57ffa6c2c"
+    }
+  },
+  "dual_core_anchor": {
+    "candidate_id": "dualcore_s39",
+    "centers_mm": [[1.5377342579886317, 1.2264179880730808], [18.606612137053162, 2.417713414411992]],
+    "target_count": 1499,
+    "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+    "source_commit": "26bc4338",
+    "source_path": "results/topic4_sef_hfo/data_driven_dual_core_ood/final_analysis.json",
+    "source_blob_sha256": "9c50b67764aa705f2119f052df34476426017a7d4bc00eb7569a24927f59185b"
+  },
+  "reference": {
+    "base_substrate_candidate_id": "joint_04_control",
+    "node_gain": 1.0,
+    "signed_depth_shrinkage": 1.0,
+    "g_EE": 0.5,
+    "g_EtoI": 1.0,
+    "ellipse_angle_deg": 45.0,
+    "ellipse_aspect_ratio": 2.0,
+    "Z_M": "off"
+  },
+  "parameter_families": {
+    "node_gain": [0.75, 0.875, 1.0, 1.125, 1.25],
+    "core_budget_scale": [0.75, 0.875, 1.0, 1.125, 1.25],
+    "signed_depth_shrinkage": [0.0, 0.5, 1.0],
+    "g_EE": [0.0, 0.25, 0.5, 0.75, 1.0],
+    "g_EtoI": [0.0, 0.5, 1.0, 1.25, 1.5],
+    "both_scale": [0.0, 0.5, 0.75, 1.0, 1.25],
+    "ellipse_angle_deg": [0.0, 22.5, 45.0, 67.5, 90.0],
+    "ellipse_aspect_ratio": [1.0, 1.5, 2.0, 3.0, 4.0]
+  },
+  "search": {
+    "canary_network_seeds": [2501, 2502, 2503],
+    "fit_network_seeds": [2511, 2512, 2513, 2514],
+    "selection_network_seeds": [],
+    "confirmation_network_seeds": [2521, 2522, 2523, 2524, 2525, 2526, 2527, 2528, 2529, 2530, 2531, 2532],
+    "simulation": {
+      "duration_ms": 20000.0,
+      "early_stop_runaway": true,
+      "late_runaway_is_invalid": true
+    },
+    "contact_readout": {
+      "source": "lineage_restricted_neuron_activity",
+      "kernel_width_mm": 0.25,
+      "smooth_ms": 5.0,
+      "participation_margin_fraction": 0.1,
+      "timing_fraction": 0.5
+    }
+  },
+  "event_unit": {
+    "name": "edge_supported_causal_family_observation",
+    "minimum_active_neurons": 2,
+    "minimum_dominance": 0.7,
+    "sensitivity_minimum_dominances": [0.6, 0.7, 0.8],
+    "movie_frame_ms": 2.0,
+    "movie_bin_mm": 1.0,
+    "causal_memory_method": "local_ee_psp_tail",
+    "psp_tail_fraction": 0.5,
+    "sensitivity_psp_tail_fractions": [0.8, 0.5, 0.2],
+    "local_ee_delay_quantile": 1.0,
+    "forward_parent_neighborhood_bins": 1,
+    "minimum_parent_support": 0.001,
+    "sensitivity_minimum_parent_supports": [0.0003, 0.001, 0.003],
+    "minimum_parent_dominance": 0.7,
+    "edge_delay_rounding": "nearest",
+    "sensitivity_edge_delay_roundings": ["floor", "nearest", "ceil"],
+    "contact_geometry_used_for_boundary": false
+  },
+  "source_topology": {
+    "bin_mm": 1.0,
+    "event_window_ms": [-20.0, 180.0],
+    "baseline_window_ms": [-120.0, -20.0],
+    "frame_step_ms": 2.0,
+    "frame_width_ms": 3.0,
+    "minimum_active_neurons": 2,
+    "persistence_frames": 2,
+    "full_sheet_movie": {"enabled": true, "frame_ms": 2.0}
+  },
+  "complete_distribution": {
+    "primary": "unconditional_fixed_projection_sliced_wasserstein",
+    "minimum_estimable_events": 2,
+    "patient_reference_max_events": 4096,
+    "floor_draws": 256,
+    "floor_seed": 20260902,
+    "patient_training_only_for_selection": true,
+    "heldout_open_after_selection": true
+  },
+  "validation": {
+    "natural_kmeans_seed": 20260902,
+    "minimum_fig4_readable_contacts": 3,
+    "ood_denominator": "all returned isolated causal families",
+    "unreadable_counts_as_ood": true,
+    "paired_bootstrap_draws": 4096,
+    "paired_bootstrap_seed": 20260902
+  },
+  "resources": {
+    "numerical_threads_per_worker": 1,
+    "maximum_workers": 12,
+    "estimated_worker_gib": 18.0,
+    "reserved_available_memory_gib": 32,
+    "monitor_interval_seconds": 600,
+    "minimum_free_disk_gib": 30,
+    "long_run_launcher": "systemd-run --user plus nohup"
+  },
+  "claim_boundary": "Development-only one-patient frozen dual-core interictal mechanism atlas; no anatomical-core, biological-synapse, patient-generalization, ictal or patient-causal claim"
+}

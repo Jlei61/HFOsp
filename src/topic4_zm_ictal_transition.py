@@ -186,6 +186,8 @@ def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=No
                     ee_dose=1.0, etoi_dose=1.0,
                     node_candidate_override=None, node_depth_shrinkage=1.0,
                     node_gain=1.0, node_dispersion_candidate_override=None,
+                    ee_ellipse_angle_deg=45.0,
+                    ee_ellipse_aspect_ratio=2.0,
                     artifact_root=None):
     """Reconstruct one frozen arm on one network seed.
 
@@ -210,6 +212,12 @@ def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=No
     from src.topic4_core_field_runner import _placement
     from src.topic4_graph_edge_flow import array_sha256
     from src.topic4_local_connectivity import continuous_local_e_source_flow
+    from src.topic4_manual_dual_core import (
+        budget_matched_dual_core_h, dual_core_query_h,
+    )
+    from src.topic4_rev20_dual_core_mechanism import (
+        fixed_topology_ee_ellipse_redistribution,
+    )
 
     verify_frozen_inputs(config, artifact_root=artifact_root)
     inputs = config["inputs"]
@@ -263,10 +271,26 @@ def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=No
         frozen_node_candidate if node_candidate_override is None
         else dict(node_candidate_override)
     )
-    if node_candidate.get("field_type") != "spline_continuous":
-        raise RuntimeError("Node override must be a continuous spline field")
-    node = _candidate_node(node_candidate, positions, n_total=n_e + n_i,
-                           stage=stage, config=anchor_config)
+    field_type = node_candidate.get("field_type")
+    manual_field_audit = None
+    if field_type == "spline_continuous":
+        node = _candidate_node(node_candidate, positions, n_total=n_e + n_i,
+                               stage=stage, config=anchor_config)
+    elif field_type == "manual_dual_core_budget_matched":
+        if field_transform is not None:
+            raise RuntimeError("manual dual-core field does not support field transforms")
+        h_manual, manual_field_audit = budget_matched_dual_core_h(
+            positions, np.asarray(node_candidate["centers_mm"], float),
+            target_count=int(node_candidate["target_count"]),
+        )
+        node = reconstruct_node_from_h(
+            h_manual, n_total=n_e + n_i,
+            quantile_seed=stage["quantile_seed"],
+            core_mean=engine["core_mean"], core_std=engine["core_std"],
+            v_base=engine["v_base"],
+        )
+    else:
+        raise RuntimeError(f"unsupported Node field type: {field_type!r}")
     depth_shrinkage = float(node_depth_shrinkage)
     gain = float(node_gain)
     if depth_shrinkage != 1.0 or gain != 1.0:
@@ -293,7 +317,12 @@ def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=No
             core_mean=engine["core_mean"], core_std=engine["core_std"],
             v_base=engine["v_base"],
         )
-    if not np.isclose(node["h"].sum(), float(stage["N_core_manual"]), atol=1e-8):
+    expected_mass = (
+        float(node_candidate["target_count"])
+        if field_type == "manual_dual_core_budget_matched"
+        else float(stage["N_core_manual"])
+    )
+    if not np.isclose(node["h"].sum(), expected_mass, atol=1e-8):
         raise RuntimeError("Node anchor field budget changed")
     coefficients = np.asarray(candidate["coefficients"], float)
     if array_sha256(coefficients) != candidate["coefficients_sha256"]:
@@ -303,8 +332,6 @@ def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=No
     net["rng"] = np.random.default_rng(int(seed))
 
     # ---- 7: E/I field query, optionally through the spatial transform ----
-    if node_candidate["field_type"] != "spline_continuous":
-        raise RuntimeError("rev11-NLC requires the frozen continuous spline Node field")
     query_e, query_i = positions, positions_i
     coefficients_eff = coefficients
     if field_transform is not None:
@@ -315,10 +342,21 @@ def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=No
         coefficients_eff = transform_flow_coefficients(coefficients, field_transform)
     coefficients_eff = dose_local_connectivity_coefficients(
         coefficients_eff, ee_dose=ee_dose, etoi_dose=etoi_dose)
-    h_e, h_i, field_query_audit = continuous_field_h_with_queries(
-        node_candidate["coefficients"], query_e, query_i,
-        n_basis=node_candidate["n_basis"], degree=node_candidate["degree"],
-        target_count=stage["N_core_manual"], L=engine["L"])
+    if field_type == "spline_continuous":
+        h_e, h_i, field_query_audit = continuous_field_h_with_queries(
+            node_candidate["coefficients"], query_e, query_i,
+            n_basis=node_candidate["n_basis"], degree=node_candidate["degree"],
+            target_count=stage["N_core_manual"], L=engine["L"])
+    else:
+        h_e = np.asarray(node["h"], float)
+        h_i = dual_core_query_h(
+            query_i, np.asarray(node_candidate["centers_mm"], float),
+            distance_cutoff_mm=manual_field_audit["distance_cutoff_mm"],
+        )
+        field_query_audit = {
+            **manual_field_audit,
+            "query_I_selected_count": int(np.sum(h_i)),
+        }
     if field_transform is None:
         if not np.array_equal(h_e, node["h"]):
             raise RuntimeError("E/I field query changed the frozen E-node field")
@@ -331,11 +369,17 @@ def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=No
             node_gain=gain)
         vtheta, delta_vtheta = transformed["vtheta"], transformed["delta_vtheta"]
 
-    # ---- 8: local connectivity mapper (pre-mapping bins captured first) ----
+    # ---- 8: fixed-topology EE geometry, then learned local mapper ----
+    local = config["local_connectivity_basis"]
+    net, ellipse_audit = fixed_topology_ee_ellipse_redistribution(
+        net, np.asarray(net["pos"], float),
+        length_scale=float(local["E_to_E_length_scale_mm"]),
+        angle_deg=float(ee_ellipse_angle_deg),
+        aspect_ratio=float(ee_ellipse_aspect_ratio),
+    )
     pre_bins = list(net["ampa_by_delay"])
     pre_ee = _outgoing_by_pathway(pre_bins, n_e, "E_to_E")
     pre_etoi = _outgoing_by_pathway(pre_bins, n_e, "E_to_I")
-    local = config["local_connectivity_basis"]
     mapped_net, edge_audit = continuous_local_e_source_flow(
         net, np.asarray(net["pos"], float), np.concatenate([h_e, h_i]),
         coefficients_eff,
@@ -383,6 +427,8 @@ def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=No
                     node_dispersion_candidate_override is not None
                 ),
                 "node_mapping_audit": node["mapping_audit"],
+                "manual_field_audit": manual_field_audit,
+                "ellipse_audit": ellipse_audit,
                 "frozen_node_field_sha256": frozen_node_candidate["field_sha256"],
                 "pathway_dose": {"E_to_E": float(ee_dose),
                                    "E_to_I": float(etoi_dose)},

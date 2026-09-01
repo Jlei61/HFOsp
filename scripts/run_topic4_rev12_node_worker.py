@@ -52,6 +52,8 @@ from src.topic4_node_dualmode import (  # noqa: E402
 from src.topic4_zm_ictal_transition import (  # noqa: E402
     build_substrate, load_round_config, make_external_drive,
 )
+import src.topic4_manual_dual_core  # noqa: E402,F401
+import src.topic4_rev20_dual_core_mechanism  # noqa: E402,F401
 from kick_probe import simulate_kick  # noqa: E402
 from src.sef_hfo_events import RETURN_FRAC, detect_events  # noqa: E402
 from src.sef_hfo_snn_adapter import snn_event_envelope  # noqa: E402
@@ -74,6 +76,7 @@ ALLOWED_SCIENTIFIC_ROLES = {
     "development_only_dual_continuous_node_residual_selection",
     "development_only_dual_continuous_node_confirmation",
     "development_only_dual_continuous_node_global_screen",
+    "development_only_frozen_dual_core_interictal_mechanism_atlas",
 }
 
 
@@ -517,13 +520,23 @@ def main() -> None:
     depth_shrinkage = float(node_mapping.get("signed_depth_shrinkage", 1.0))
     node_gain = float(node_mapping.get("node_gain", 1.0))
     dispersion_field = candidate.get("node_dispersion_field")
+    mechanisms = candidate.get("mechanisms", {})
+    g_ee = float(mechanisms.get("g_EE", 0.0))
+    g_etoi = float(mechanisms.get("g_EtoI", 0.0))
+    ellipse_angle = float(mechanisms.get("ellipse_angle_deg", 45.0))
+    ellipse_aspect = float(mechanisms.get("ellipse_aspect_ratio", 2.0))
+    base_candidate_id = str(config.get("reference", {}).get(
+        "base_substrate_candidate_id", "node_baseline",
+    ))
     substrate = build_substrate(
-        transition, "node_baseline", args.seed, cache_dir=str(cache_dir),
-        ee_dose=0.0, etoi_dose=0.0,
+        transition, base_candidate_id, args.seed, cache_dir=str(cache_dir),
+        ee_dose=g_ee, etoi_dose=g_etoi,
         node_candidate_override=candidate["node_field"],
         node_depth_shrinkage=depth_shrinkage,
         node_gain=node_gain,
         node_dispersion_candidate_override=dispersion_field,
+        ee_ellipse_angle_deg=ellipse_angle,
+        ee_ellipse_aspect_ratio=ellipse_aspect,
         artifact_root=artifact_root,
     )
     simulation = config["search"]["simulation"]
@@ -1271,6 +1284,10 @@ def main() -> None:
         h=np.asarray(substrate.h_e, np.float32),
         delta_vtheta=np.asarray(substrate.delta_vtheta, np.float32),
         edge_coefficients=np.asarray(substrate.edge_coefficients, np.float64),
+        mechanism_parameters=np.asarray([
+            node_gain, depth_shrinkage, g_ee, g_etoi,
+            ellipse_angle, ellipse_aspect,
+        ], np.float64),
         **movie_arrays,
         **cascade_arrays,
     )
@@ -1315,8 +1332,16 @@ def main() -> None:
             },
         },
         "mechanism_freeze": {
-            "EE": "off", "E_to_I": "off", "Z_M": "off",
+            "EE": "off" if g_ee == 0.0 else "learned_coefficient_row",
+            "E_to_I": "off" if g_etoi == 0.0 else "learned_coefficient_row",
+            "Z_M": str(mechanisms.get("Z_M", "off")),
+            "g_EE": g_ee,
+            "g_EtoI": g_etoi,
+            "ellipse_angle_deg": ellipse_angle,
+            "ellipse_aspect_ratio": ellipse_aspect,
             "edge_coefficients_all_zero": bool(np.allclose(substrate.edge_coefficients, 0.0)),
+            "ellipse_audit": substrate.extras["ellipse_audit"],
+            "learned_edge_audit": substrate.edge_audit,
         },
         "node_mapping": {
             **substrate.extras["node_mapping_audit"],
