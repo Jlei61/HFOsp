@@ -73,6 +73,7 @@ ALLOWED_SCIENTIFIC_ROLES = {
     "development_only_dual_continuous_node_residual_atlas",
     "development_only_dual_continuous_node_residual_selection",
     "development_only_dual_continuous_node_confirmation",
+    "development_only_dual_continuous_node_global_screen",
 }
 
 
