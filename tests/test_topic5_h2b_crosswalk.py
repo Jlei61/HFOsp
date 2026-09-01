@@ -218,3 +218,40 @@ def test_recording_index_rejects_a_recording_shared_by_two_subjects():
     ]
     with pytest.raises(ValueError, match="shared by"):
         build_recording_index(blocks)
+
+
+# --- C9: the inventory's own block_id is checked, not trusted ----------------
+
+
+def _blk(bid, start, end):
+    return {"block_id": bid, "block_start_epoch": str(start), "block_end_epoch": str(end)}
+
+
+def test_block_id_that_contains_the_onset_is_kept_unchanged():
+    from src.topic5_h2b_transfer.crosswalk import resolve_block_for_onset
+
+    blocks = [_blk("b0", 0.0, 100.0), _blk("b1", 100.0, 200.0)]
+    bid, status = resolve_block_for_onset(150.0, blocks, claimed_block_id="b1")
+    assert (bid, status) == ("b1", "claim_ok")
+
+
+def test_a_stale_block_id_is_repaired_to_the_block_that_holds_the_onset():
+    """Two canonical Epilepsiae rows name a block ~14 h before their own onset.
+
+    The onset epoch is the trustworthy field, so the denormalised block_id is
+    repaired rather than the seizure being dropped -- but the repair is
+    reported, never silent.
+    """
+    from src.topic5_h2b_transfer.crosswalk import resolve_block_for_onset
+
+    blocks = [_blk("b0", 0.0, 100.0), _blk("b1", 100.0, 200.0)]
+    bid, status = resolve_block_for_onset(150.0, blocks, claimed_block_id="b0")
+    assert (bid, status) == ("b1", "claim_repaired")
+
+
+def test_an_onset_in_no_block_at_all_is_not_repaired():
+    from src.topic5_h2b_transfer.crosswalk import resolve_block_for_onset
+
+    blocks = [_blk("b0", 0.0, 100.0)]
+    bid, status = resolve_block_for_onset(999.0, blocks, claimed_block_id="b0")
+    assert bid is None and status == "no_block_contains_onset"

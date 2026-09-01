@@ -295,3 +295,34 @@ def crosswalk_seizures(
         n_input_rows=len(seizure_rows),
         per_subject=per_subject,
     )
+
+
+def resolve_block_for_onset(
+    onset_epoch: float,
+    blocks: Sequence[Mapping[str, Any]],
+    claimed_block_id: str,
+) -> tuple[str | None, str]:
+    """Check -- never trust -- a seizure row's own ``block_id`` (C9).
+
+    Two rows in the canonical Epilepsiae inventory name a block that ends ~14 h
+    before their own EEG onset. The onset epoch comes straight from the SQL
+    seizure table and lands cleanly inside a real block, so the denormalised
+    ``block_id`` is the wrong field, not the onset. Repair it and say so;
+    dropping the seizure would lose a usable target silently.
+
+    Returns ``(block_id, status)`` where status is one of
+    ``claim_ok`` / ``claim_repaired`` / ``no_block_contains_onset``.
+    """
+
+    t = float(onset_epoch)
+    claimed = next((b for b in blocks if str(b["block_id"]) == str(claimed_block_id)), None)
+    if claimed is not None and _f(claimed["block_start_epoch"]) <= t < _f(claimed["block_end_epoch"]):
+        return str(claimed_block_id), "claim_ok"
+    holder = next(
+        (b for b in blocks
+         if _f(b["block_start_epoch"]) <= t < _f(b["block_end_epoch"])),
+        None,
+    )
+    if holder is None:
+        return None, "no_block_contains_onset"
+    return str(holder["block_id"]), "claim_repaired"
