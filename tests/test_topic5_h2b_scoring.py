@@ -60,10 +60,22 @@ def test_hazards_are_clipped_so_a_confident_wrong_call_is_finite():
     assert np.isfinite(ll[0])
 
 
-def test_event_after_the_last_observed_bin_is_rejected_as_inconsistent():
+def test_event_far_beyond_the_last_observed_bin_is_rejected_as_inconsistent():
     h = np.array([[0.1, 0.2, 0.5]])
     with pytest.raises(ValueError, match="beyond"):
         discrete_time_log_score(h, outcome_bin=[2], last_observed_bin=[0], censored=[False])
+
+
+def test_an_event_in_the_first_partially_observed_bin_is_accepted():
+    """A seizure at 2.5 h with 3 h of coverage lands in the 2-6 h bin.
+
+    That bin is not *fully* observed, but every earlier bin was survived and the
+    event itself was seen, so the likelihood is well defined. Requiring the
+    event bin to be fully covered would throw away real events.
+    """
+    h = np.array([[0.1, 0.2, 0.5]])
+    ll = discrete_time_log_score(h, outcome_bin=[2], last_observed_bin=[1], censored=[False])
+    assert np.isclose(ll[0], np.log(0.9) + np.log(0.8) + np.log(0.5))
 
 
 # --- Brier ---------------------------------------------------------------------

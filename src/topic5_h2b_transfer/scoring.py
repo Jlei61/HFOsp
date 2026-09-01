@@ -25,7 +25,11 @@ def _prep(hazards, outcome_bin, last_observed_bin, censored):
     if not (h.shape[0] == len(ob) == lb.size == cs.size):
         raise ValueError("hazards, outcome_bin, last_observed_bin, censored must align")
     for i, b in enumerate(ob):
-        if b is not None and b > lb[i]:
+        # An event may legitimately fall in the first *partially* observed bin:
+        # every earlier bin was survived and the event itself was seen. Only an
+        # event separated from the observed span by a whole unobserved bin is
+        # inconsistent.
+        if b is not None and b > lb[i] + 1:
             raise ValueError(
                 f"row {i}: event in bin {b} lies beyond the last observed bin {lb[i]}"
             )
