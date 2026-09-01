@@ -1,98 +1,130 @@
-# Group-Event State v0.2-C：H3 Scientific Spec 与执行计划
+# Group-Event State v0.2-C：Event feedback（H3）
 
-本文件可独立交给 Agent C。开始前必须先读
-`group_event_state_v0_2_common_contract_2026-09-01.md`。H3 人体轨迹和反事实分析是主线；synthetic 只作代码校准。
+开始前完整阅读共同科学合同和工程附录。本线不再把普通 RNN“看到事件后更新 hidden state”当作 IED 塑形，因为那也可能只是 observer 更新了对共同慢状态的估计。
 
-## 1. 科学问题
+## 1. 唯一核心问题
 
-在已经观测到的患者状态轨迹上，群体 IED 的发生时刻和事件内容是否对之后的慢预测状态留下增量影响？影响是否只持续几十次事件，还是累积到数千/上万次事件与小时尺度？
+在控制 pre-event state、真实 `dt`、背景与近期统计后，未来间期事件块是否仍需要一条从 IED 数量或内容进入状态转移的显式反馈边？
 
-H3 不再以“rolling exposure 能否预测下一次 size”作为主问题，而是：
+最高允许结论为：**event-feedback-like predictive dependence**。人体观察数据不能仅凭模型比较写成 IED 因果改变脑网络。
 
-> 从同一个 pre-event state 出发，保留或扰动一段群体事件后，之后的 slow functional state 和未见未来事件分布是否系统改变？
+## 2. 第一层：functional innovation trajectory
 
-## 2. 承重状态对象
+对每个观察事件记录：
 
-原始 `z_slow` 坐标可旋转且每事件必然更新，只作诊断。承重轨迹至少包含：
+\[
+\Delta S^{func}_e=S^{func}(z_e^+)-S^{func}(\widetilde z_e^-),
+\]
 
-- slow state 读出的未来 repertoire cluster distribution；
-- future participation/extent/multiband field；
-- H2b 可用时的 frozen seizure-distance/risk readout；
-- fast 与 slow 的 pre/post-event update norm。
+其中 `z_e+` 是 observer 读取当前事件后的状态，`z_tilde_e-` 只做时间/背景传播、不读取当前事件。`S_func` 使用冻结 future-block readout，不使用 raw latent 欧氏距离。
 
-H3 只在功能读出上称“状态改变”；单维 latent 位移不能承担结论。
+先描述：
 
-## 3. 观察来源分解
+- 哪类事件产生正/负 innovation；
+- innovation 与未来 5/30/120 min 的实际 count、conditional mark、extent/multiband 变化是否相关；
+- 累积 innovation 是否超过 `B_multiscale` 中的 rate/count。
 
-同一患者、相同 decoder 语义下比较：
+这一步是轨迹测量和候选机制定位，不单独证明 feedback。
 
-1. event-only observer；
-2. background-only observer；
-3. event + background combined；
-4. combined 但关闭 event update；
-5. combined 但关闭 background correction。
+## 3. 三个必须显式比较的模型
 
-保存两条 update contribution。当前 a4 的状态完全由事件更新加时间衰减，不能把“只有 IED 才更新”当发现；必须由 matched 模型和未来预测判定哪一路含有增量。
+### `M0_no_feedback`：common-drive/readout-only
 
-## 4. 尺度
+\[
+S_{e+1}=G(S_e,\Delta t_e,B_e),\qquad X_e\sim p(X_e\mid S_e).
+\]
 
-事件数主网格：100/1,000/5,000/10,000；覆盖允许时增加更长。真实时间并行：5/30 min、2/6/12 h。每个患者报告实际时间分布、完整 recorded coverage 和非重叠独立窗数。
+IED 是状态的读数，不能进入未来状态转移。
 
-不为每位患者事后选择最好尺度；所有可支持尺度探索性并排报告。短尺度阴性不 gate 长尺度。
+### `M1_count_rate_feedback`
 
-## 5. 人体 perturbation
+\[
+S_{e+1}=G(\cdot)+A_{count/rate}(X_e).
+\]
 
-每个 anchor 固定同一 pre-event state，构造 in-support 干预：
+只允许 event occurrence/count/rate/burden 进入低容量 signed feedback。
 
-1. `real_sequence`：真实 event time + mark；
-2. `no_event_update`：保留 elapsed time/background，关闭 event update；
-3. `mark_shuffled`：保留 event times/count/rate，置换 state-matched event content；
-4. `time_shifted`：保留 marks，在同 coverage/circadian block 内平移时刻；
-5. `burst_removed`：删除预先定义高负荷 burst，同时用匹配 control window 校正缺少的 event count；
-6. `state_matched_replacement`：以相同 pre-state、size/rate 的 donor events 替换；
-7. `intercept/count_matched`：捕获固定 jump 饱和后变免费截距的旧失效。
+### `M2_mark_specific_feedback`
 
-扰动 exposure window 后，关闭真实未来 teacher forcing，从共同终态预测下一未来块。比较真实未见 future block 的分布损失，而不是只比较 latent 欧氏距离。
+\[
+S_{e+1}=G(\cdot)+A_{mark}(participation,extent,waveform,multiband).
+\]
 
-## 6. 自然实验与关联层
+在 event times/count 相同条件下，检验空间—频带内容是否提供额外反馈。
 
-counterfactual 模型仍不是随机刺激。并行做患者内自然实验：在 pre-state、time of day、rate、coverage 匹配后，比高/低 IED burst 后的 future functional state。报告 exposure→future state 的关联；只有模型反事实与自然实验方向一致时，才称“支持 event-driven shaping”，仍避免临床因果措辞。
+三者共享 observer、base dynamics、decoder 和训练预算；新增 adapter 做容量配平。checkpoint 只按间期 inner-validation future-block objective 选择。
 
-## 7. 执行计划
+## 4. 两个 estimand 不得混在一起
 
-### C0：轨迹与 schema
+### 4.1 Event burden effect
 
-先实现读取 shared state manifest，验证 pre/post fast/slow、session/gap、绝对时刻和功能读出对齐。可用 v0.1 做 plumbing，但不产生承重数字。
+问题：在相同 pre-state/background 下，更多事件是否改善对之后状态/未来块的预测？这里不能匹配或回归掉 exposure window 的 event count/rate。
 
-### C1：来源分解
+### 4.2 Event content effect
 
-实现 background-only 与 combined update attribution。先在3位长患者、3 seeds 检查训练和轨迹非退化；然后扩全部有支持患者，不以阳性 gate。
+问题：在事件数和时刻相同时，mark 内容是否改善未来预测？这里使用 count/time-preserving mark replacement 或 shuffle。
 
-### C2：长尺度 support inventory
+两者分别报告 signed effect；不预设 IED 一定促发作。不同 event type 可以产生相反 impulse response。
 
-按 recorded session/coverage segment 真建窗，报告每尺度 TRAIN/validation/test 的非重叠窗数。滑窗数绝不写成样本量；支持少则保留 case series。
+## 5. 主要端点与时间窗
 
-### C3：最小人体 perturbation
+承重端点是完全未见 future block 的 held-out log score，拆：
 
-先跑 `real/no_event/mark_shuffled/state_matched/intercept-count-matched` 五臂，尺度 100/1,000/5,000/10,000，3 seeds。所有臂从逐位相同的 pre-state 开始、使用相同 decoder 和 future rows。
+- event count/rate；
+- conditional mark/repertoire；
+- participation/extent；
+- multiband expression；
+- H2b frozen seizure-risk/field readout 仅作 secondary，缺失不阻断 H3。
 
-### C4：物理时间与 burst
+主 horizon 为 5/30/120 min fixed-time blocks；6 h 仅在连续 coverage 和有效不重叠窗足够时探索。event-count 100/1,000/10,000 只作映射/敏感性，不作为“长尺度”定义，也不做全笛卡尔网格。
 
-并行扩 30 min/2 h/6 h/12 h、time-shift 与 burst removal。不要因 C3 阴性停止；但分别标清 event-count 与 physical-time 结果。
+## 6. 最小 perturbation 集合
 
-### C5：与 H2b 连接
+首轮主比较只保留：
 
-若 H2b 有可用冻结 risk readout，将它作为一个 secondary functional trajectory；没有则不阻塞 H3 的 repertoire/field 结果。
+1. `real_sequence`；
+2. `no_event_feedback`；
+3. `state_matched_mark_replacement`（保留 event count/time）。
 
-### C6：报告
+secondary：rate-preserving mark shuffle、预先定义 burst thinning/removal。intercept/count-matched、constant/drift zero-truth 继续作为回归测试和少量 sensitivity，不占一条完整人体主 arm。
 
-白话版用整条患者轨迹说明“删掉/替换这段 IED 后，模型认为之后的一片事件会怎样”；技术版给出每个窗口、尺度、独立分母、状态匹配质量和所有对照。
+所有 perturbation 从同一 pre-state、同一 exposure window、同一未来 target 开始；扰动后关闭真实未来 teacher forcing。窗口不跨 gap、split、seizure，统计分母是不重叠 physical blocks。
 
-## 8. 允许结论
+## 7. Background/common drive
 
-- event perturbation 稳定改变未见 future-block 功能读出并优于全部匹配对照：development support for event-driven state shaping。
-- 只改变 raw latent：模型内部敏感性，不称状态塑形。
-- 只有 rolling exposure 预测下一事件：antecedent association，不称 generator edge。
-- event-only 与 combined 相同：背景未提供增量；不是背景生理无关。
-- 长尺度不可估计：该患者/设计不可测，不作 H3 阴性。
+`M0` 必须读取 manifest 中允许的 background/clock/multiscale covariates，避免把共同驱动误归为反馈。若 producer 不使用 background，明确 `uses_background=false`；不得把 a4/a5 名称当作语义。
 
+可比较 event-only、background-only、combined 作为 observer 信息来源诊断，但它们不替代 M0/M1/M2，也不扩成主 arm 网格。
+
+## 8. 执行计划
+
+### C0：support 和 schema
+
+1. 读取 checkpoint registry，验证 producer/trajectory/functional-readout hash 对齐。
+2. 按真实 coverage segment 构造不重叠 5/30/120 min exposure/target blocks。
+3. 报告每患者 TRAIN/inner-validation/development-test 的真实小时、block 数和有效独立分母。
+
+### C1：functional innovation
+
+先在固定 3 位长患者 × 3 seeds 画完整 trajectory，确认 pre/post、事件输入和 future outcomes 对齐；再扩所有有支持患者。只描述轨迹，不借此宣布 feedback。
+
+### C2：M0/M1/M2
+
+实现统一接口和低容量 signed adapters；用同一 optimizer/steps/early-stopping 规则训练。synthetic recovery 只校验三模型在已知零/非零边下可区分，不作为人体探索 gate。
+
+### C3：人体主分析
+
+运行 M0/M1/M2 的 5/30/120 min future-block score；burden 与 content estimand 分开。3 seeds 全跑；预先固定的主配置可增加 5 seeds，不按结果补 seed。
+
+### C4：最小 perturbation 和收口
+
+在固定 checkpoint 上做 real/no-feedback/state-matched replacement；再运行少量 secondary shuffle/burst。主图只呈 M0/M1/M2 gain 和 signed event-type impulse response。
+
+## 9. 验收和允许结论
+
+- M1 超过 M0：count/rate feedback-like predictive dependence。
+- M2 在相同 count/time 下超过 M1：mark-specific feedback-like predictive dependence。
+- 只有 observer innovation 或 hidden ablation 改变：event observation is informative，不称反馈。
+- 只有 rolling exposure 与未来相关：antecedent association/common drive 未排除。
+- 不重叠窗不足或模型未估计：instrument/data not estimable，不作 H3 阴性。
+- signed effect 患者/事件型异质：如实报告促发作样、抗发作样或双向，不强行合并成单调恶化。

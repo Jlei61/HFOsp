@@ -1,110 +1,239 @@
-# Group-Event State v0.2：三条假设共同科学合同
+# Group-Event State v0.2：共同科学合同（重大修订版）
 
-状态：**冻结设计输入，development-only**  
-代码基线：`7c847246`；v0.2 独立工作树 `/tmp/hfosp_group_event_state_v02`  
-数据继续只读使用 `/data/hfosp_group_event_state_v0_1/dataset`；新结果只写
-`results/epi_prssm/group_event_state/v0_2/`。
+状态：**development scientific contract；工程修复已通过，科学设计按本版执行，正式分区保持封存**
 
-## 0. 共同目标
+代码线：`codex/topic5-group-event-state-v0-2`
 
-我们不是要证明“RNN 能预测下一次事件”，而是要从患者按真实时间排列的完整间期群体事件中判断：
+数据：只读复用 `/data/hfosp_group_event_state_v0_1/dataset`
+新结果根：`results/epi_prssm/group_event_state/v0_2/`
 
-1. **H1/H2a**：是否存在跨很多事件、跨真实时间持续的预测状态；它是否改变一片未来群体事件的网络表达？
-2. **H2b**：这个完全从间期任务中学到并冻结的状态，能否跨任务预测距离下一次发作、发作风险和发作入口类型？
-3. **H3**：群体 IED 的出现和内容是否对之后的慢状态轨迹留下增量、长期影响？
+本文件只规定科学问题、共同数据边界、共享状态生产者和跨线接口。历史缺陷、资源、原子写入和回归测试移到
+`group_event_state_v0_2_engineering_invariants_2026-09-01.md`。
 
-三条线可并行探索，任何一条阴性都不 gate 另外两条；但 H2b/H3 使用哪个 checkpoint、哪条状态轨迹，必须写入不可变 manifest。
+## 1. 唯一科学主线
 
-## 1. 一个 timestep 是什么
+```text
+背景生理过程（睡眠/昼夜/药物/住院进程/记录条件）
+                         │
+                         ▼
+                 慢易感状态 S(t)
+                  ╱             ╲
+                 ▼               ▼
+       群体间期事件 X(t)      发作风险与早期路径 Y(t)
+                 │
+                 └──── ? ────► S(t+)
+                         H3 feedback
+```
 
-一个 timestep 是一次完整间期群体事件，不是单触点尖峰、rank step 或固定一分钟窗。
+三条线不是三个互不相干的 benchmark：
 
-每个事件输入包括全部患者触点上的：participation、基于 `lagPatRaw` 频谱质心的参与触点相对延迟、10 ms tied groups、原生事件窗 waveform 视图、多频带包络/峰时/能量/cross-band lag、静态几何与可用性 mask。连续背景 SEEG 只作辅助 observation。
+- **A：H1/H2a** 建立只依赖间期群体事件历史的 predictive state，并判断它预测 rate 还是 network repertoire。
+- **B：H2b** 判断该状态能否跨任务预测距发作的距离和发作早期空间场；这决定状态是否接近“癫痫易感状态”。
+- **C：H3** 比较 common-drive 与 explicit event-feedback，判断 IED 数量和内容是否对之后状态具有额外反馈式预测依赖。
 
-测试按事件顺序因果运行：先预测事件，再用真实观察到的事件更新状态。所有 teacher-forced 一步结果必须明确标作 filtering；从同一 anchor 不读取中间真实事件的多未来预测另行标作 forecasting。
+A 是地基，B 决定核心科学价值，C 是高风险机制扩展。三线可以并行探索；任何一线的阴性都不阻断另外两线，C 的首轮算力不得超过 B。
 
-## 2. fast 与 slow 当前到底有什么区别
+## 2. 一个时间步和完整事件输入
 
-| | `z_fast` | `z_slow` |
-|---|---|---|
-| 维度 | 64 | 32 |
-| 衰减范围 | 1 s–1 h | 1 min–48 h |
-| 初始化范围 | 10 s–10 min | 30 min–24 h |
-| 事件更新 | `GRUCell([event,z_slow],z_fast)`，每事件可大幅改写 | `z_slow + 0.05 × gate × delta`，每事件只作小残差更新 |
-| 共同点 | 都在真实 `dt` 间向学习到的 bias 指数衰减；都由每次事件驱动；都进入预测头 | 同左 |
+模型的一步对应一次完整间期群体事件，不是单触点尖峰、rank step 或固定一分钟窗。事件输入保留：
 
-这只是**架构先验**，不是已经识别出的生理时间尺度：
+- participation mask、size/STOP、10 ms tied groups；
+- participant-masked `lagPatRaw` 频谱质心相对延迟；
+- bipolar/CAR 后的原生事件窗 waveform；
+- 多频带能量、包络、峰时和 cross-band lag；
+- 触点几何、shaft、坏道、gap 和 coverage mask。
 
-- fast 与 slow 在 1 min–1 h 有重叠；fast 也可能携带慢信息，slow 也可能编码短程统计；
-- 当前 head 拼接两者，reset/wrong-time 同时扰动两者，旧结果不能归因于 slow；
-- `tau` 能达到小时只证明模型有表达能力，训练后的 `tau` 或坐标未必被数据识别；
-- 潜坐标可旋转，单维曲线不作承重结果。承重对象优先使用状态读出的未来 repertoire/participation/risk 等功能量。
+连续背景 SEEG 是辅助 observation；manifest 必须明确某个 producer 是否真的使用它。每次预测必须是 causal prefix：先预测，再读取当前真实事件更新 observer/state。一步 teacher-forced 结果称 **filtering**；从同一 anchor 不读取中间真实事件的预测才称 **forecasting**。
 
-因此 v0.2 必须分别报告 fast-only、slow-only、fast+slow 的冻结读出增量和多未来预测；“slow”一词在通过这些检验前只指代码模块名。
+## 3. 三种必须并列生产的候选状态
 
-## 3. v0.1 已发现的实现与解释问题
+共享目录不再只登记一个“最佳 checkpoint”，而是维护：
 
-1. **warm-up 终态被丢弃**：旧代码先 warm 再 test，但 `run_sequence` 每次重新初始化；`full_session` 实际只是 test 段内 carry。v0.2 已改成显式传入/返回 `(z_fast,z_slow,since_reset)`，并从当前 recorded session 起点因果 replay。
-2. **reset 不是生理状态证据**：post-hoc reset 只说明同一训练模型依赖递归轨迹，且带测试分布改变。必须补同 encoder、同输入、独立训练的 memoryless 模型。
-3. **K=100 不能叫饱和**：当前只有 `{1,20,100,full}`，且一步端点、8人低功效。事件数还混杂事件率。以后同时用事件数和真实时间。
-4. **wrong-time 不是 matched**：旧实现是 test 状态行的任意 permutation。v0.2 每个 anchor 使用同患者、同 session 的 5–10 个 donor，并匹配昼夜、近期 rate、距上次事件、近期 size/STOP、coverage 与 session position。
-5. **一步 teacher forcing 不是慢状态**：每次预测后都读取真实事件。慢状态必须从同一 anchor 预测多个未来事件/时间窗。
-6. **简单近期统计是科学候选**：若最近 1/5/20 事件的低维统计追平 RNN，应报告“简单统计可能足够”，而不是把它写成失败。
-7. **延迟语义已澄清**：a3 的连续延迟来自 participant-masked `lagPatRaw` 频谱质心，不是原始波形；设置本身保留。原生 waveform/multiband 只在 a4 进入。
-8. **H2b 当前新线尚未运行**：旧脚本只取发作前最后一次事件做 case/control AUC，不是逐事件 distance/hazard；必须重写主端点。
-9. **H3 不能读取架构定义当发现**：当前 slow 每次事件后必然更新。观察到 `z_slow` 改变是同义反复；必须比较能否解释未见未来，以及 event-preserving controls。
-10. **训练并行也可能截断长历史**：`n_streams=8` 把 TRAIN 人为切成八段并分别初始化。它是吞吐优化，但对数千事件记忆未必科学中性；H1 agent 必须做 `n_streams=1` 或 session-preserving sensitivity。
+`results/epi_prssm/group_event_state/v0_2/shared/checkpoint_registry.json`
 
-### 3.1 本项目此前已经踩过、三条线都必须知道的坑
+至少包含三种 producer；B/C 全部读取，不能由 A 的阳性/阴性筛选。
 
-- `softplus(log tau)` 曾把想要的 300 s 初始化变成约 5.7 s，并使模型在预算内无法表示小时状态；继续使用 `exp(clamp(log_tau))`，但“范围覆盖小时”不等于“数据识别了小时尺度”。
-- “无状态”臂曾让 STOP/participation head 偷看到 state；每个 no-state/memoryless 臂都要用输入扰动回归测试证明所有 head 真看不到 carry。
-- 图零假设曾跨五个代码包并静默平均重复 run；任何成对比较必须锁相同 source/checkpoint/config hash，重复 payload 报错而不是平均。
-- Yuquan seizure ID 与规范表字符串不通用；按 recording code 显式 crosswalk，逐发作核对 onset，禁止直接字符串 inner join 静默丢患者。
-- 长窗资格曾按粗 `event_session` 计数，而真正窗口按 recording coverage segment 建立；所有 H2b/H3 支持必须用与最终 estimator 完全相同的 coverage/gap 逻辑。
-- H3 固定 event jump 曾饱和成免费截距；real arm 必须有 fitted-intercept/count/rate matched control。delayed control 与真实 exposure 窗必须严格不重叠。
-- ridge 正则曾因未按 Gram/样本尺度归一而在时间外外推发散；线性 probe 必须标准化、报告相对条件数/目标位移，并把远坏于 intercept baseline 的拟合标为不可估计。
-- 三个 seed 曾生成 byte-identical payload；交付时检查初始化、训练顺序和输出 hash 真正不同。seed 是重复拟合，不是患者分母。
-- synthetic recovery、测试全绿和工程 `PASS_COMPLETE` 只证明仪器按合同运行，不证明人体 H1/H2/H3 成立。
+### 3.1 `B_multiscale`：可解释多尺度基线
 
-## 4. 共同数据与切分
+在固定物理时刻构造 1/5/30/120 min EWMA，至少覆盖：
 
-- ictal-overlap 事件排除；preictal 间期事件保留。
-- train/validation/test 仍按事件时序 70/10/20；同时报告各 split 的真实小时数、session 数、事件率和发作数。
-- 不跨未记录 gap 传播状态。split 若切在 session 中间，validation/test 必须从该 session 起点 replay 并传入终态。
-- 事件行可以进入似然，但患者和独立发作/不重叠未来窗才是统计分母。
-- formal/sealed 分区继续关闭；所有数字均为 development。
+- event rate、time since last event；
+- size/STOP、participation burden；
+- repertoire occupancy；
+- band-energy summary；
+- clock time、session position、coverage；
+- time since previous seizure、postictal/cluster indicator；
+- sleep/wake、ASM/临床干预只在数据确实存在且通过元数据合同后加入。
 
-## 5. 共同比较纪律
+使用线性 GLM 和一个低容量 MLP。若它追平 recurrent state，这本身是有价值的科学结果。
 
-- patient-first：先 seed 内/患者内，再跨患者；事件数不冒充患者数。
-- 一步 timing、mark、未来块、seizure 与 perturbation 分开报告，不合成一个总分。
-- 每个方向性数字同时给出患者数、seed spread、有效独立时间块/发作数。
-- 参数更新、selected epoch、梯度、非有限值、OOM 是训练资格信息，不是科学结论。
-- synthetic 只作实现和灵敏度校准，不作人体证据、不作继续探索的 gate。
+### 3.2 `P_local`：局部事件状态
 
-## 6. 三 agent 的写权限与交付接口
+当前 next-event recurrent model，优化：
 
-### Agent A：H1/H2a + 共同状态生产者
+\[
+\mathcal L_{local}=\mathcal L_{timing}+\mathcal L_{mark}.
+\]
 
-拥有 `src/topic5_group_event_state/` 的 core state/evaluation 修改权；写
-`results/.../v0_2/h1_h2a/` 与 `shared/checkpoint_manifest.json`、`shared/state_trajectory_manifest.json`。
+它回答近期事件历史是否影响下一事件，不承担小时级慢状态的阴性结论。
 
-### Agent B：H2b
+### 3.3 `P_slow`：真正的 multi-horizon predictive-state producer
 
-core 模型只读；新增代码放 `scripts/topic5_group_event_state/v02_h2b_*` 或独立 H2b 模块；写
-`results/.../v0_2/h2b/`。可以先用 v0.1 checkpoint 调通并明确标 `plumbing_only`，人体承重数字只认 shared manifest 中的 v0.2 checkpoint。
+保留 local loss，同时直接训练未来物理时间块：
 
-### Agent C：H3
+\[
+\mathcal L=\mathcal L_{local}+\lambda_5\mathcal L_{5m}
++\lambda_{30}\mathcal L_{30m}+\lambda_{120}\mathcal L_{120m}.
+\]
 
-core 模型只读；新增代码放 `scripts/topic5_group_event_state/v02_h3_*` 或独立 H3 模块；写
-`results/.../v0_2/h3/`。可并行实现轨迹分解和 perturbation，但承重人体结果绑定 shared manifest。
+future-block target 至少包含：event count、conditional mark/repertoire、participation field、extent/STOP、multiband expression。长 horizon 主要读取候选慢状态；第一版不加正交约束，不靠 latent 命名证明快慢分离。
 
-三个 agent 都不得覆盖别人的 manifest、报告或结果根。共同 schema 修改先写 additive 字段，禁止在下游运行中静默改旧字段语义。
+## 4. 什么才叫“慢预测状态”
 
-## 7. 运行与报告
+`z_fast` 和 `z_slow` 仍保留为架构模块和诊断量，但不是科学定义。它们都读取事件、时间常数重叠且潜空间可重参数化。
 
-- 长任务由单一 queue owner 通过 nohup/setsid 或 tmux 持久运行；原子输出、幂等跳过、可恢复。
-- 使用实测显存决定 GPU slot；OOM 只降低当前 job 并发/chunk，不改变科学数据，失败记 `resource_failed`。
-- CPU worker 固定 `OMP/MKL/OPENBLAS/NUMEXPR=1`；按物理盘限并发，避免寻道竞争。
-- 每条线最后各交付白话版和技术版；白话版不能省略 estimand、分母、teacher forcing/open-loop、fast/slow 与关联/因果边界。
+承重对象是冻结功能读出：
+
+\[
+S_{func}(t)=\big[p(N_{t:t+\Delta}),\ p(mark\mid N>0),\
+p(participation),\ p(extent/STOP),\ p(multiband)\big].
+\]
+
+一个状态只有在固定真实时间上持续预测未见 future block，并且相对 `B_multiscale` 有增量、正确时刻优于 block-shift 时，才称 time-specific predictive state。`fast-only`、`slow-only`、reset 和 raw latent trajectory 都是诊断，不是必要判据。
+
+## 5. 两类 anchor，不再用事件率给慢分析加权
+
+### 5.1 Event anchor
+
+只用于 H2a：下一事件、same-prefix continuation、event-to-event mark/propagation。
+
+### 5.2 Fixed physical-time anchor
+
+慢状态、future-block、H2b risk trajectory 的主分析使用每 5 min 一个 anchor；30/120 min target，覆盖足够再探索 6 h。在 grid 时刻，把最后事件后的状态按真实 `dt` 传播到 grid：
+
+\[
+S(t_{grid})=propagate\{S(t_{last\ event}),t_{grid}-t_{last\ event}\}.
+\]
+
+每段真实时间只按网格贡献，不因 IED 多而自动重复加权。
+
+## 6. 时间 null、历史尺度和主比较
+
+承重比较是同一批 anchors 上的嵌套增量：
+
+\[
+B_t\quad\text{vs}\quad B_t+S_t.
+\]
+
+主要 time-specific null 是同患者、同 recorded session 的 **block circular shift**：平移量严格大于 target horizon，保留状态自相关和 session/coarse-clock 结构，破坏与当前未来块的精确对应。
+
+matched wrong-time donor 降为敏感性，只粗匹配 session、time-of-day bin、coverage、recent-rate bin；每 anchor 5–10 个 donor，报告可匹配比例。不要匹配 size、participation 等可能本身构成慢状态的信号。
+
+reset 网格缩为：
+
+- event count：1、100、1,000、full；
+- physical time：5、30、120 min、full；
+- fast-only/slow-only reset 只在少数固定患者做机制诊断。
+
+历史尺度由 future-block score 随真实 horizon 的曲线决定，不用“哪个 reset 首次不显著”定义。
+
+## 7. 数据切分、session 和发作边界
+
+1. state model 按累计 **recorded physical time** chronological 切 TRAIN/inner-validation/development-test，不再按事件数切；所有 future target 不跨 split。
+2. batch 可以包含不同 recorded sessions；同一 session 内 chunk 严格按序、carry hidden state，边界只 `detach` 不 reset；只 shuffle sessions，不 shuffle session 内 chunks。
+3. 不跨未记录 gap、记录段或不允许的 coverage boundary 传播状态。
+4. H1/H3 exposure 和 target window 不跨 seizure onset。
+5. H2b 只读取 seizure 前 trajectory；seizure onset 立即终止该条 trajectory。发作后不静默桥接：从 seizure offset 后 60 min 起新 segment；60 min 为首轮 primary postictal exclusion，其他长度只作敏感性。
+6. ictal-overlap 事件排除；preictal 间期事件保留。以后若要学习 seizure 对状态的更新，另开显式 ictal-token 版本。
+7. formal/sealed 分区继续关闭，所有结果均为 development。
+
+## 8. Repertoire 和 target 语义
+
+future block 必须分开：
+
+- `count/rate`：未来有多少事件；
+- `conditional mark`：给定发生事件后，它们属于什么空间—频带表达。
+
+TRAIN-only patient-specific clusters 只作解释性输出；主稳健输出使用 continuous event embedding distribution（如均值/协方差、energy/probabilistic score）。这样结论不依赖 KMeans 的 K 和初始化。
+
+future targets 使用稀疏 anchor、cumulative sums、prefix counts 和 sparse participation arrays；只保存 anchor index、区间和必要统计，不完整复制“事件×horizon×触点”张量。
+
+## 9. H3 的两种解释必须在模型内分开
+
+普通 RNN 的 event update 首先是 observer 看见新观测后的 belief update，不能自动解释为生理反馈。H3 必须显式比较：
+
+\[
+M_0:\ S_{e+1}=G(S_e,\Delta t_e,B_e),\quad X_e\sim p(X_e\mid S_e)
+\]
+
+\[
+M_1:\ S_{e+1}=G(\cdot)+A_{count/rate}(X_e)
+\]
+
+\[
+M_2:\ S_{e+1}=G(\cdot)+A_{mark}(participation,extent,waveform,multiband).
+\]
+
+最高允许措辞是 **event-feedback-like predictive dependence**。人体观察数据不直接证明 IED 生理因果塑形。
+
+## 10. 共同评估和 checkpoint registry
+
+每个 registry 条目必须显式包含：
+
+```json
+{
+  "producer_id": "P_slow",
+  "model_family": "group_event_recurrent",
+  "uses_waveform": true,
+  "uses_multiband": true,
+  "uses_background": false,
+  "event_update": true,
+  "feedback_model": "observer_only",
+  "physical_dt": true,
+  "training_objective": ["next_event", "future_5m", "future_30m", "future_120m"],
+  "anchor_grid_minutes": 5,
+  "source_commit": "...",
+  "config_hash": "...",
+  "checkpoint_hash": "..."
+}
+```
+
+checkpoint 只能依据各自的间期 TRAIN/inner-validation objective 选择，不能看 seizure 或 H3 结果。B/C 读取 registry 的全部合格 producer；缺失 producer 报 `not_available`，不得静默 fallback。
+
+共同统计纪律：patient-first；H2b 以 held-out seizure 为基本分母；H3 以不重叠 physical block 为基本分母；seed 是重复拟合，不是样本量；工程 PASS、assay sensitivity 和生物学结论分开报告。
+
+## 11. 执行顺序和三张承重图
+
+### Phase 0：共同地基
+
+验收 warm-up/session carry，落实发作边界、fixed-time grid、physical-time split、checkpoint registry 和稀疏 future target。
+
+### Phase 1：三种 producer
+
+并列训练 `B_multiscale`、`P_local`、`P_slow`，不按结果筛 producer 或患者。
+
+### Phase 2：A 与 B 并行
+
+- A：future-block、count/conditional-mark 分解、same-prefix、block shift。
+- B：fixed-grid seizure survival 与 early ictal spatial field/path。
+
+### Phase 3：C
+
+先 functional innovation，再比较 `M0/M1/M2`，最后做最小 perturbation。无需等待 B 阳性，也不把 synthetic recovery 作为科学 gate。
+
+首轮主文只需要三张承重图：
+
+1. A：相对 `B_multiscale` 的 future-block gain 随 5/30/120 min horizon 变化，拆 count 与 conditional mark，并显示 local/slow/correct-time/block-shift。
+2. B：survival/Brier 和 early ictal spatial-field gain 随 lead time 变化，分母为 held-out seizures。
+3. C：M0/M1/M2 的未见 future-block score，加 event-type-specific signed impulse response。
+
+其余 latent、tau、reset、matched donor、cluster transition、update norm 和额外 perturbation 全部放辅助图或技术报告。
+
+## 12. 当前允许和禁止的结论
+
+- `P_local` 只在一步上赢：短程 predictive filtering。
+- `P_slow` 在 fixed-time future block 超过 baseline 且 correct-time 超过 shift：time-specific predictive state。
+- conditional mark、same-prefix 或 early ictal field 有增量：network-expression/susceptibility state。
+- M1/M2 在未见 future block 超过 M0：event-feedback-like predictive dependence。
+- 只有 latent update 或 post-hoc ablation：observer sensitivity，不称 IED 塑形。
+- 住院 SEEG 首轮主目标是几十分钟至数小时；6 h 可探索，跨天不作必要 gate。

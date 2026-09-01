@@ -389,10 +389,13 @@
   - 顺序固定为 state instrument qualification → 半合成 assay/power → nested prequential hazard → `tau_z` lag-response → decoder-metric OOS 流形—流场；不以 UMAP 或更多 checkpoint 替代前置 gate。
   - v0.3 明确是看过 v0.2 development 结果后的重设计，不是独立 confirmation；formal/sealed/H3/T2 继续关闭。
 
-- **2026-09-01 Group-Event State v0.2 三线纠偏与交接**：
-  - 共同合同：`group_event_state_v0_2_common_contract_2026-09-01.md`
+- **2026-09-01 Group-Event State v0.2 三线纠偏与交接（重大修订）**：
+  - 共同科学合同：`group_event_state_v0_2_common_contract_2026-09-01.md`
+  - 工程不变量：`group_event_state_v0_2_engineering_invariants_2026-09-01.md`
   - H1/H2a：`group_event_state_v0_2_h1_h2a_spec_plan_2026-09-01.md`
   - H2b：`group_event_state_v0_2_h2b_spec_plan_2026-09-01.md`
   - H3：`group_event_state_v0_2_h3_spec_plan_2026-09-01.md`
-  - 三 Agent 交接：`group_event_state_v0_2_three_agent_handoff_2026-09-01.md`
-  - 明确 fast/slow 只是架构先验；修复 v0.1 warm pass 丢弃终态的问题；H1 改用 matched wrong-time 与多未来块，H2b 改为逐事件 distance/hazard，H3 改为完整慢轨迹上的来源分解与人体 event perturbation。三条线并行探索，互不作结果 gate。
+  - 三 Agent 索引：`group_event_state_v0_2_three_agent_handoff_2026-09-01.md`
+  - 可直接执行的 A/B/C handoff：`group_event_state_v0_2_agent_{a,b,c}_handoff_2026-09-01.md`
+  - 三种 producer 并列进入 registry：`B_multiscale`、一步 `P_local`、直接优化 5/30/120 min future block 的 `P_slow`。慢状态以固定物理时间上的功能预测定义，不以 `z_slow` 名称或 reset 定义。
+  - A 建立 predictive state；B 以 fixed-grid survival 和 early ictal field/path 判断是否为癫痫易感状态；C 显式比较 common-drive、count/rate feedback、mark-specific feedback。三线互不作结果 gate，H3 首轮不扩大为大网格。

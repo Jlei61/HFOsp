@@ -1,119 +1,138 @@
-# Group-Event State v0.2-A：H1/H2a Scientific Spec 与执行计划
+# Group-Event State v0.2-A：Predictive-state identification（H1/H2a）
 
-本文件可独立交给 Agent A。开始前必须先读同目录
-`group_event_state_v0_2_common_contract_2026-09-01.md`；冲突时以共同合同为准。
+开始前完整阅读共同科学合同和工程附录。本线的任务不是证明“RNN 记住了历史”，而是直接训练并检验：仅由间期群体事件历史形成的状态，能否在真实时间上预测未来一片事件的 rate 和 network expression。
 
-## 1. 科学问题
+## 1. 三个核心问题
 
-### H1-short：跨事件预测记忆
+### A1：历史是否形成 future-block predictive state
 
-过去的完整群体事件是否在模型中留下超过当前事件/近期手工统计的预测信息？
+同一固定时间网格比较：
 
-### H1-slow：真实时间慢状态
+1. current clock/event baseline；
+2. `B_multiscale`；
+3. `P_local`；
+4. `P_slow`；
+5. `P_slow` 的 within-session block-shift state。
 
-是否存在一个在几十分钟至数小时内持续、与真实时刻对应、能从同一 anchor 预测一片未来事件分布的状态？
+主结果是相对 `B_multiscale` 的 future-block score 改善随 5/30/120 min horizon 的曲线。6 h 只在真实连续 coverage 足够时探索。
 
-### H2a：状态改变群体事件表达
+### A2：状态预测的是 rate，还是 repertoire
 
-在控制患者固定习惯、近期事件统计和当前时间后，状态是否改变未来事件的 participation、size/STOP、recruitment delay/order、same-prefix continuation 和 multiband field？
+future block 的联合目标必须拆成：
 
-## 2. 状态与输出
+\[
+p(N_{t:t+\Delta}\mid S_t)
+\]
 
-保留当前 64-d fast + 32-d slow 架构，第一轮不扩维。每次完整群体事件为一步。保存每个 recorded session 的：
+和
 
-- `z_fast_pre/post`、`z_slow_pre/post`；
-- event embedding 与所有一歩预测；
-- fitted tau、event update norm、background correction norm；
-- session/gap/split/absolute time/event index。
+\[
+p(mark\mid N>0,S_t).
+\]
 
-所有轨迹必须从 session 真起点因果 replay。保存原始 latent 供诊断，但承重状态使用冻结读出后的功能量。
+conditional mark 至少包含 participation field、size/STOP、continuous event-embedding distribution、multiband field。TRAIN-only clusters 只作为可解释的 secondary endpoint。
 
-## 3. 必做比较
+### A3：same-prefix continuation
 
-1. `persistent_full`：a4 全输入、fast+slow carry。
-2. `trained_memoryless_full`：同 encoder/输入/参数预算，从训练开始每事件 reset。
-3. `recent_summary`：最近 1/5/20 事件统计；扩展线性与小 MLP 两个简单版本。
-4. `fast_readout`、`slow_readout`、`fast+slow_readout`：同一冻结 checkpoint 上训练低容量 future-block decoder，防止把 head 容量误作状态。
-5. `no_real_dt`：只用于区分事件计数与真实时间，不把阴性解释成无状态。
-6. `n_streams=1` 对 `n_streams=8`：至少 3 位长患者、3 seeds，量化训练并行切段是否损失长状态。
+对早期前缀相似的事件，比较：
 
-## 4. H1 测量
+\[
+p(later\ recruitment\mid prefix)
+\quad\text{vs}\quad
+p(later\ recruitment\mid prefix,S_t).
+\]
 
-### 4.1 reset 诊断
+前缀匹配至少考虑首发触点、前两个 tied groups、前 50–100 ms waveform 和早期能量范围；结局拆为是否继续传播、后续触点、STOP/extent 和后续 multiband expression。这是 H2a 最接近“状态改变病理网络走法”的主端点。
 
-同一 checkpoint 做两套轴：
+## 2. `P_slow` 训练规格
 
-- 事件数：1/20/100/500/1,000/5,000/10,000；
-- 真实时间：1/5/30/120/360/720 min。
+每个事件仍是一步，保留完整 waveform/multiband/participation/delay 输入。`P_slow` 与 `P_local` 使用相同 encoder 和基本容量，差别是加入 fixed-time future-block heads：
 
-reset 必须从 session 起点对齐，报告每个 K 在各患者对应的真实时间分布。它是模型诊断，不单独承担 slow-state 结论。
+\[
+\mathcal L_{slow}=\mathcal L_{local}
++\lambda_5\mathcal L_{5m}
++\lambda_{30}\mathcal L_{30m}
++\lambda_{120}\mathcal L_{120m}.
+\]
 
-### 4.2 matched wrong-time
+首轮权重按 TRAIN 中各 loss 的初始梯度/尺度配平后冻结，不根据 development 结果调。长 horizon head 读取候选慢状态；local head 可读取 fast+slow。第一版不加 latent orthogonality、consistency 或 reconstruction loss。
 
-每个 anchor 从同一患者同一 session 选 5–10 个 donor；最少匹配：
+fixed grid 每 5 min 一个 anchor；future targets 用 cumulative/sparse builder 即时索引，不物化大张量。所有 target 不跨 gap、split 或 seizure onset。
 
-- local clock/time of day；
-- 最近 1/5/20/100 次事件率；
-- time since last event；
-- 最近 size/STOP 和 participation burden；
-- coverage、gap distance、session quantile。
+## 3. 主 baseline
 
-报告 donor 数、匹配残差和无 donor 比例。比较 correct state 与 donor 中位损失；随机全排列只保留作 easy-null 附录。
+`B_multiscale` 在 1/5/30/120 min 尺度构造 rate、time-since-last-event、size/STOP、participation、repertoire、band energy 的 EWMA，并加入 clock/session/coverage。线性 GLM 为主，小 MLP 为容量敏感性。
 
-### 4.3 多未来预测（承重）
+baseline 与 recurrent producer 必须使用相同 anchor、target、mask、normalization 和评分代码；不允许各自抽不同窗口后再相减。
 
-在 anchor (e) 冻结状态，不读取 (e+1\ldots e+h-1) 的真实事件，预测：
+## 4. 主 null 与诊断
 
-- event horizons：1/5/20/100/500；
-- physical horizons：1/5/30/120 min；覆盖足够者加 6/12 h。
+### 4.1 承重 null
 
-两类输出并行：
+- `B_multiscale` vs `B_multiscale + state`；
+- correct-time state vs within-session block circular shift，shift 严格大于 horizon。
 
-1. **direct horizon**：第 h 次未来事件的 mark/timing；
-2. **future block distribution**：未来 H 次或 T 分钟内的 event count、TRAIN-only repertoire cluster occupancy、cluster transition、participation field、size/STOP、delay/order、band energy/peak/cross-band-lag 分布。
+### 4.2 敏感性
 
-repertoire clusters 只用 TRAIN 事件建立；比较线性、Dirichlet/multinomial 与小神经 decoder。简单模型赢应保留为科学结果。
+- matched wrong-time：只粗匹配 session、time-of-day、coverage、recent rate；
+- event reset：1/100/1,000/full；
+- physical reset：5/30/120 min/full；
+- fast-only、slow-only、fast+slow 冻结读出；
+- trained memoryless producer。
 
-## 5. H2a 测量
+reset/latent 分解不承担慢状态主结论。不能把 K=100 与 full 不显著写成“100 次饱和”。
 
-分别报告：timing、participation NLL/AUC、group size/STOP、delay NLL、recruitment order、tied groups、same-prefix continuation、band energy/peak、cross-band lag。
+## 5. Session-preserving 训练和选择
 
-H2a 至少分三层：
-
-- 只改善 timing：rate-memory；
-- 改善 size/participation：extent state；
-- 改善 subset/order/continuation/multiband propagation，且跨多未来仍在：repertoire/network-expression state。
+- 按 recorded physical time 切 TRAIN/inner-validation/development-test。
+- batch 并行不同 sessions；同 session 内 chunk carry state，只 detach 不 reset。
+- checkpoint 由 TRAIN chronological inner-validation 的预注册组合目标选择；development-test 只评一次。
+- 3 seeds 全配置；预先固定的主配置可加到 5 seeds。seed 不作患者分母。
+- 先在固定 3 位长患者验收梯度、收敛和资源，再扩原 8 位语义复现，随后扩全部 development 可训练患者；不得按结果挑患者。
 
 ## 6. 执行计划
 
-### A0：warm fix closeout（立即）
+### A0：共同地基
 
-- 验证 split 两段显式 carry 与单次 uninterrupted pass 逐位一致；
-- validation/test 从 recorded session 起点 replay；
-- 结果写新 tag，旧 v0.1 结果不覆盖；
-- 因 validation checkpoint selection 受旧 bug 影响，v0.2 承重模型必须重训，不能只重算 test。
+1. 验证 causal warm-up、session carry、gap/seizure reset。
+2. 实现 physical-time split、5-min grid 和稀疏 future-target builder。
+3. 建立 `checkpoint_registry.json` schema 和 no-silent-fallback 校验。
 
-### A1：8患者修复复现
+### A1：三 producer
 
-固定原中期8位，3 seeds，先跑 persistent/memoryless/recent-summary。不是结果 gate；用于确认评估语义、资源和效应量。
+1. 构建 `B_multiscale` GLM/MLP。
+2. 以修复后 session-preserving 方式重训 `P_local`。
+3. 实现并训练 `P_slow`；确认 5/30/120 min heads 都有非零梯度和实际更新。
+4. 全部写入 registry；旧 v0.1 checkpoint 只作 plumbing，不作承重结果。
 
-### A2：matched wrong-time + fast/slow 分解
+### A2：A1/A2 主评估
 
-在 A1 checkpoint 上先做冻结后处理；匹配规则只看 anchor 以前。另做3位长患者 `n_streams=1/8` sensitivity。
+在同一 fixed-grid anchor 上计算 count 与 conditional-mark score；运行 correct-time/block-shift。输出 patient-first、有效不重叠物理窗和 seed spread。
 
-### A3：多未来和 cluster 分布
+### A3：H2a continuation
 
-先对8位×3 seeds 完成全部 horizon；随后不按结果筛患者，扩到27位可训练 development 患者。短记录患者自然缺失长 horizon，明确分母，不判阴性。
+在 event anchors 上运行 same-prefix continuation；前缀规则只用 TRAIN 冻结，报告每患者可匹配事件数和每个 endpoint。
 
-### A4：队列收口
+### A4：少量诊断和收口
 
-5 seeds 用于预先指定的承重患者/端点复现；3 seeds 队列仍完整报告。输出白话、技术、机器 JSON、逐患者 CSV、fast/slow 功能读出和完整状态 manifest。
+运行缩减 reset、fast/slow、memoryless、coarse matched donor；生成一张承重图和辅助图。白话报告必须说明当前找到的是 rate state、extent state 还是 repertoire state。
 
-## 7. 允许结论
+## 7. 首轮图和验收
 
-- reset/memoryless 阳性，一步为主：跨事件预测记忆。
-- slow-only 在 matched-time、多未来、真实时间轴上有增量：time-specific slow predictive state。
-- 多未来 subset/order/continuation 增量：slow repertoire state。
-- 只在 teacher-forced 下一步改善：predictive filter，不称慢状态。
-- K=100 与 full 未分开：未分辨更长记忆，不称饱和。
+唯一承重图：横轴 5/30/120 min，纵轴相对 `B_multiscale` 的 held-out future-block score；分面 count 与 conditional mark；曲线为 `P_local`、`P_slow`、correct-time、block-shift。same-prefix continuation 作为同图的小 panel 或紧邻补充 panel。
 
+验收分三层：
+
+- 工程：target/anchor/registry/session carry 正确；
+- 仪器：模型实际更新、block shift 可计算、有效独立时间窗足够；
+- 科学：`P_slow` 是否在 correct-time future block 超过 baseline/shift。
+
+阴性边界：`P_slow` 阴性只反驳当前输入、容量和 multi-horizon objective 下的 predictive state；不能写“脑内没有慢状态”。
+
+## 8. 允许结论
+
+- 只下一事件改善：short-range predictive filtering。
+- fixed-time count 改善、conditional mark 不改善：multiscale rate state。
+- conditional participation/extent 改善：network-expression/extent state。
+- same-prefix 后续触点/STOP 仍改善：state-dependent repertoire continuation。
+- correct-time 不胜 shift：有预测码但时刻特异性不足。
