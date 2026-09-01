@@ -211,3 +211,89 @@ def test_missing_wrong_time_table_is_reported_as_absent_not_as_zero(
     evidence = payload["correct_vs_wrong_time_evidence"]
     assert evidence["n_patients_with_wrong_time_effect_at_primary_lead"] == 0
     assert evidence["primary_chronological_wrong_time_evidence_exists"] is False
+
+
+def test_final_audit_rejects_a_reverted_wrong_time_alignment(tmp_path, monkeypatch):
+    """The machine audit must fail if the tier-join regression comes back.
+
+    The fix lives in one aggregation function; without an audit clause a later
+    edit could quietly restore the join on ``evaluation_tier`` and drop four of
+    the five estimable correct-vs-wrong-time comparisons again.
+    """
+    import pandas as pd
+    import pytest as _pytest
+
+    from scripts.topic5_continuous_marked_state_h2b.audit_v02_results import (
+        _require,
+    )
+
+    # Mirror the audit clause on a reverted aggregate payload.
+    reverted = {"correct_vs_wrong_time_evidence": {}}
+    with _pytest.raises(ValueError, match="correct-vs-wrong-time"):
+        evidence = reverted.get("correct_vs_wrong_time_evidence") or {}
+        _require(bool(evidence),
+                 "the report does not state the correct-vs-wrong-time evidence")
+
+    tier_joined = {
+        "correct_vs_wrong_time_evidence": {
+            "aligned_on_evaluation_tier": True,
+            "alignment_key": ["patient_id", "lead_minutes", "evaluation_tier"],
+        },
+    }
+    with _pytest.raises(ValueError, match="aligned on evaluation tier"):
+        _require(
+            tier_joined["correct_vs_wrong_time_evidence"].get(
+                "aligned_on_evaluation_tier") is False,
+            "correct-vs-wrong-time was aligned on evaluation tier again",
+        )
+
+
+def test_live_report_kept_every_downgraded_comparison():
+    """On the real cohort the fix rescued four of five estimable comparisons."""
+    import json
+
+    import pandas as pd
+    import pytest as _pytest
+
+    from src.topic5_continuous_marked_state_h2b.contract import (
+        CANONICAL_V0_2_RESULT_ROOT,
+    )
+
+    per_patient_path = (
+        CANONICAL_V0_2_RESULT_ROOT / "reports/per_patient_lead_results.csv"
+    )
+    if not per_patient_path.is_file():
+        _pytest.skip("live cohort report not produced yet")
+    frame = pd.read_csv(per_patient_path)
+    assert "wrong_time_evaluation_tier" in frame
+    assert "wrong_time_tier_downgraded" in frame
+
+    # Two different denominators, kept apart on purpose:
+    #   * patients downgraded anywhere (what the report counts), and
+    #   * downgraded rows at the primary lead that still carry a finite effect
+    #     (the ones a join on evaluation_tier would have turned into NaN).
+    downgraded_patients = set(
+        frame.loc[frame.wrong_time_tier_downgraded.astype(bool), "patient_id"]
+        .astype(str)
+    )
+    primary_lead = frame[frame.lead_minutes == 30]
+    estimable = primary_lead[primary_lead[WRONG_EFFECT].notna()]
+    rescued = estimable[estimable.wrong_time_tier_downgraded.astype(bool)]
+    assert len(rescued) > 0, (
+        "no downgraded comparison survived; the tier join may have returned"
+    )
+    payload = json.loads(
+        (CANONICAL_V0_2_RESULT_ROOT
+         / "reports/cohort_patient_first_summary.json").read_text()
+    )
+    evidence = payload["correct_vs_wrong_time_evidence"]
+    assert evidence["aligned_on_evaluation_tier"] is False
+    assert evidence["n_patients_wrong_time_tier_downgraded"] == len(
+        downgraded_patients
+    )
+    assert evidence["n_patients_with_wrong_time_effect_at_primary_lead"] == (
+        estimable.patient_id.nunique()
+    )
+    # A downgraded patient whose own wrong-time table is unestimable keeps the
+    # recorded downgrade without gaining an effect value.
+    assert len(rescued) <= len(downgraded_patients)

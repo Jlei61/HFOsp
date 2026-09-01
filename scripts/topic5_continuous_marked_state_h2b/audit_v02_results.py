@@ -498,8 +498,47 @@ def _audit_complete(root: Path, inventory: dict,
              "patient-first or H1-stratification contract drift")
     per_patient = pd.read_csv(root / "reports/per_patient_lead_results.csv")
     _require(not per_patient.duplicated(
-        ["patient_id", "lead_minutes", "evaluation_tier"]
+        ["patient_id", "lead_minutes"]
     ).any(), "patient-first output contains duplicate patient/lead rows")
+
+    # The wrong-time comparison is fitted on the donor-valid seizure subset, so a
+    # patient can sit one support tier lower there than on its primary table.
+    # Aligning the two tables on evaluation_tier silently dropped every such
+    # patient -- in this cohort four of the five estimable comparisons, including
+    # the only patient with a chronological split.  The alignment key, the
+    # separate tier column and the tier the effect is summarised under are all
+    # audited, because losing any one of them re-hides the same downgrade.
+    _require("wrong_time_evaluation_tier" in per_patient,
+             "the wrong-time support tier was not stored separately")
+    _require("wrong_time_tier_downgraded" in per_patient,
+             "the wrong-time tier downgrade flag is missing")
+    evidence = aggregate.get("correct_vs_wrong_time_evidence") or {}
+    _require(bool(evidence), "the report does not state the correct-vs-wrong-time evidence")
+    _require(evidence.get("aligned_on_evaluation_tier") is False,
+             "correct-vs-wrong-time was aligned on evaluation tier again")
+    _require(list(evidence.get("alignment_key") or []) == ["patient_id", "lead_minutes"],
+             "correct-vs-wrong-time alignment key drift")
+    _require("primary_chronological_wrong_time_evidence_exists" in evidence,
+             "the report does not say whether primary chronological "
+             "correct-vs-wrong-time evidence exists")
+    tier_columns = aggregate.get("effect_tier_columns") or {}
+    _require(tier_columns.get("correct_minus_wrong_time_conditional_log_loss")
+             == "wrong_time_evaluation_tier",
+             "the wrong-time effect is summarised under the primary tier")
+    summary = pd.read_csv(root / "reports/cohort_patient_first_summary.csv")
+    wrong_rows = summary[
+        summary["effect"] == "correct_minus_wrong_time_conditional_log_loss"
+    ]
+    if not wrong_rows.empty:
+        observed_tiers = set(wrong_rows["evaluation_tier"].astype(str))
+        declared_tiers = set(map(str, evidence.get("wrong_time_tiers_present") or []))
+        _require(observed_tiers.issubset(declared_tiers),
+                 f"wrong-time effect summarised at a tier its own table never "
+                 f"reached: {sorted(observed_tiers - declared_tiers)}")
+
+    stray = sorted(str(path.relative_to(root)) for path in (root / "fits").glob("_*"))
+    _require(not stray,
+             f"scratch directories were left inside the result tree: {stray}")
 
     phenotype = _json(root / "reports/phenotype_target_availability.json")
     _require(phenotype.get("target_reclustered") is False
@@ -590,6 +629,7 @@ def _audit_complete(root: Path, inventory: dict,
         "n_probe_subjects": len(probe_subjects),
         "n_probe_analyses": n_probe_analyses,
         "n_expected_probe_tasks": len(expected_probe_tasks),
+        "correct_vs_wrong_time_evidence": evidence,
         "probe_task_audits": probe_task_audits,
         "permutation_status_counts": permutation_status_counts,
         "n_patient_first_rows": len(per_patient),
