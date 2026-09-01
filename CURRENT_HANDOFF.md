@@ -34,6 +34,7 @@
 | 任务 | queue owner PID | 输出 | 日志 |
 |---|---|---|---|
 | producer 训练（162 job = 27 患者 × 2 producer × 3 seed） | **919885** | `/data/hfosp_group_event_state_v0_2/agent_a/producers/main/` | `/data/hfosp_group_event_state_v0_2/agent_a/logs/train_main.log` |
+| 下游全链（等训练 manifest 出现后自动跑 registry → 嵌套评估 → H2a → A4 → 图） | **953195** | 见各阶段 tag | `/data/hfosp_group_event_state_v0_2/agent_a/logs/chain_after_training.log` |
 
 - GPU：0 和 1，各 3 slot；单 job 实测峰值显存 0.76–2.93 GB。
 - 租约：`results/epi_prssm/group_event_state/v0_2/shared/resource_leases/agent_a_train_main.json`
@@ -78,7 +79,7 @@ $PY scripts/topic5_group_event_state/v02_train_producers.py \
 3. A4 缩减诊断：event reset 1/100/1000/full、physical reset 5/30/120 min/full、
    fast-only / slow-only、memoryless、粗匹配错时 donor。
 4. 承重图 + 两张辅助图 + `figures/README.md` + 目视验收
-   （`scripts/topic5_group_event_state/v02_after_training.sh` 已把 1–4 串好，一条命令跑完）。
+   （1–4 已由 `v02_after_training.sh` 串好，并已挂在训练完成后自动触发，PID 953195）。
 5. 写 registry producer 条目；补完 plain / technical 报告的结果段。
 6. 可选：`P_memoryless` seed 1（SP §4.2 敏感性臂，27 个 job）与
    `P_slow` seed 4/5（承重配置补到 5 seeds，54 个 job）。前者优先，后者按 GPU 时间决定。
