@@ -23,7 +23,12 @@ def _contract() -> dict:
             "candidate_radii": [0.1, 0.2],
             "predicted_B_protection_ratio": 1.1,
             "predicted_minimum_support_per_mode": 6.0,
-        }
+        },
+        "discrete_response_fallback": {
+            "enabled": True, "B_protection_ratio": 1.1,
+            "minimum_effective_support_per_mode": 3.0,
+            "maximum_candidates": 24,
+        },
     }
 
 
@@ -113,6 +118,76 @@ def test_nomination_rejects_forbidden_heldout_or_kmeans_input():
     aggregate["boundaries"]["natural_kmeans_used"] = True
     with pytest.raises(RuntimeError, match="forbidden"):
         nomination_blueprint(aggregate, _contract())
+
+
+def test_discrete_fallback_uses_measured_three_network_endpoint():
+    aggregate = _aggregate()
+    aggregate["robust_directions"] = {
+        "analysis_status": "NO_LOCALLY_LINEAR_COORDINATE",
+        "linear_eligible_coordinate_count": 0,
+    }
+    aggregate["response_tensor"]["amplitude"] = 0.15
+    aggregate["scored_runs"] = []
+    for seed in (1, 2, 3):
+        aggregate["scored_runs"].extend([
+            {
+                "candidate_id": "exact_dual_anchor", "seed": seed,
+                "run_status": "VALID", "channel": None,
+                "mode_index": None, "orientation": None,
+                "mode_0_mean": 2.0, "mode_1_mean": 1.0, "j14": 3.0,
+                "mode_0_effective_events": 3.0,
+                "mode_1_effective_events": 4.0,
+            },
+            {
+                "candidate_id": "mean_f02_p_a15", "seed": seed,
+                "run_status": "VALID", "channel": "mean",
+                "mode_index": 2, "orientation": 1,
+                "mode_0_mean": 1.8, "mode_1_mean": 0.9, "j14": 2.7,
+                "mode_0_effective_events": 4.0,
+                "mode_1_effective_events": 5.0,
+            },
+        ])
+    blueprints, audit = nomination_blueprint(aggregate, _contract())
+    assert [row["candidate_id"] for row in blueprints] == [
+        "direct_mean_f02_p_a15"
+    ]
+    assert audit["nomination_strategy"] == "measured_antithetic_endpoint"
+    assert audit["fit_network_seeds"] == [1, 2, 3]
+    direction = np.asarray(blueprints[0]["direction"])
+    assert direction[2] == 1.0
+    assert np.count_nonzero(direction) == 1
+
+
+def test_discrete_fallback_rejects_one_network_regression():
+    aggregate = _aggregate()
+    aggregate["robust_directions"] = {
+        "analysis_status": "NO_LOCALLY_LINEAR_COORDINATE",
+    }
+    aggregate["response_tensor"]["amplitude"] = 0.15
+    aggregate["scored_runs"] = []
+    for seed in (1, 2, 3):
+        aggregate["scored_runs"].extend([
+            {
+                "candidate_id": "exact_dual_anchor", "seed": seed,
+                "run_status": "VALID", "channel": None,
+                "mode_index": None, "orientation": None,
+                "mode_0_mean": 2.0, "mode_1_mean": 1.0, "j14": 3.0,
+                "mode_0_effective_events": 4.0,
+                "mode_1_effective_events": 4.0,
+            },
+            {
+                "candidate_id": "mean_f02_p_a15", "seed": seed,
+                "run_status": "VALID", "channel": "mean",
+                "mode_index": 2, "orientation": 1,
+                "mode_0_mean": 2.1 if seed == 3 else 1.8,
+                "mode_1_mean": 0.9, "j14": 2.7,
+                "mode_0_effective_events": 4.0,
+                "mode_1_effective_events": 4.0,
+            },
+        ])
+    blueprints, audit = nomination_blueprint(aggregate, _contract())
+    assert blueprints == []
+    assert audit["eligible_before_cap"] == 0
 
 
 def test_joint_direction_perturbs_both_continuous_fields_without_pathways():

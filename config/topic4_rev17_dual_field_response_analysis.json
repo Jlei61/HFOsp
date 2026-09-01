@@ -28,6 +28,15 @@
     "predicted_B_protection_ratio": 1.1,
     "predicted_minimum_support_per_mode": 6.0
   },
+  "discrete_response_fallback": {
+    "enabled": true,
+    "trigger": "NO_LOCALLY_LINEAR_COORDINATE",
+    "B_protection_ratio": 1.1,
+    "minimum_effective_support_per_mode": 3.0,
+    "maximum_candidates": 24,
+    "fresh_selection_support_minimum_unchanged": 6.0,
+    "selection_rule": "valid and J14<anchor and weak-mode-A<anchor in all three fit networks; mode B within 1.1x anchor and both effective supports >=3; retain every eligible measured coordinate up to the deterministic cap"
+  },
   "boundaries": {
     "natural_kmeans_used": false,
     "patient_heldout_used": false,

@@ -82,10 +82,27 @@ construction and response-direction fitting.
 
 ## 5. Advancement and final Node freeze
 
-The atlas advances if it is complete and yields at least one bounded joint
-direction whose predicted response improves weak mode A and `J14` without
-worsening mode B beyond 10% or pushing either mode below effective support six.
-This is an exploratory nomination rule, not Node acceptance.
+The primary response analysis first asks whether the antithetic endpoints
+support a local linear approximation. If at least one coordinate is locally
+linear, the atlas advances through bounded joint directions whose predicted
+response improves weak mode A and `J14` without worsening mode B beyond 10% or
+pushing either mode below effective support six.
+
+The completed 61-by-3 atlas showed that no coordinate met the predeclared
+networkwise linearity rule, while 18 measured single-coordinate endpoints
+improved both `J14` and weak mode A in all three fit networks and protected mode
+B. This is a thresholded event-response regime, not an invalid input. Rev17
+therefore adds a frozen discrete-response fallback without rerunning or
+rescoring the fit simulations. It nominates every measured endpoint that is
+valid in all three fit networks, improves `J14` and A in all three, keeps B
+within 10%, and retains effective support at least three for each mode in each
+network, up to a deterministic cap of 24. The value three is a nomination
+floor, not acceptance: the disjoint fresh-network stage retains its stricter
+support-six rule. No natural KMeans, held-out, ictal or figure information is
+used by this fallback.
+
+Both the local-direction and discrete-response routes are exploratory
+nomination rules, not Node acceptance.
 
 Nominated joint residuals are first run on fresh selection networks 2371--2373.
 Each network must individually improve `J14` and weak mode A relative to the

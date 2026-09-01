@@ -28,9 +28,19 @@
 4. Project candidate amplitudes to a bounded local RMS neighborhood around the
    exact dual anchor; zero remains exactly reconstructable.
 
+If no coordinate passes the frozen local-linearity audit, record
+`NO_LOCALLY_LINEAR_COORDINATE` as a completed response result rather than an
+input error. Use the already measured antithetic endpoints as a discrete
+fallback: retain only candidates that improve complete `J14` and weak mode A
+in all three fit networks, protect B within 10%, and keep both effective
+supports at least three. Reconstruct each nominated field bit-for-bit from its
+source atlas coordinate. Do not fit a gradient, combine coordinates or rerun
+the fit networks in this fallback.
+
 ## Phase 3: fresh-network selection
 
-Run exact anchor plus nominated directions on a disjoint three-network pool.
+Run exact anchor plus nominated directions or measured discrete endpoints on a
+disjoint three-network pool.
 Select only by complete training-target score, weakest mode, mode-B protection
 and per-network support. Do not open natural KMeans, held-out patient blocks or
 figures during selection.

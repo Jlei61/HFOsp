@@ -72,5 +72,19 @@ def test_direction_construction_never_reactivates_nonlinear_coordinate():
     tensor["linear_eligible_coordinates"] = list(range(1, 30))
     directions = construct_directions(tensor)
     for record in directions.values():
+        if not isinstance(record, dict):
+            continue
         if record.get("direction") is not None:
             assert np.asarray(record["direction"])[0] == 0.0
+
+
+def test_no_linear_coordinate_is_a_completed_response_not_an_exception():
+    tensor = response_tensor(_finite_rows(), amplitude=0.15)
+    tensor["linear_eligible_coordinates"] = []
+    directions = construct_directions(tensor)
+    assert directions["analysis_status"] == "NO_LOCALLY_LINEAR_COORDINATE"
+    assert directions["linear_eligible_coordinate_count"] == 0
+    assert not any(
+        isinstance(record, dict) and record.get("direction") is not None
+        for record in directions.values()
+    )

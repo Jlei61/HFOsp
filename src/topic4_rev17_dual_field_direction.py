@@ -131,8 +131,6 @@ def _masked_gradients(tensor: Mapping[str, Any]) -> tuple[dict[str, np.ndarray],
     shape = next(iter(dimensions))
     mask = np.zeros(shape[1], dtype=bool)
     mask[np.asarray(tensor["linear_eligible_coordinates"], dtype=int)] = True
-    if not np.any(mask):
-        raise RuntimeError("rev17 atlas has no locally linear coordinate")
     for name in gradients:
         gradients[name][:, ~mask] = 0.0
     return gradients, mask
@@ -245,6 +243,16 @@ def construct_directions(
     tensor: Mapping[str, Any], *, maximum_sparse_coordinates: int = 8,
 ) -> dict[str, Any]:
     gradients, mask = _masked_gradients(tensor)
+    if not np.any(mask):
+        return {
+            "analysis_status": "NO_LOCALLY_LINEAR_COORDINATE",
+            "linear_eligible_coordinate_count": 0,
+            "claim_boundary": (
+                "The antithetic atlas is complete, but its event-level response "
+                "is not locally linear at the frozen amplitude. No gradient "
+                "direction is inferred from these coordinates."
+            ),
+        }
 
     def mean_direction(name: str) -> dict[str, Any]:
         vector = -np.mean(gradients[name], axis=0)
@@ -259,6 +267,8 @@ def construct_directions(
         }
 
     directions = {
+        "analysis_status": "LOCALLY_LINEAR_DIRECTIONS_CONSTRUCTED",
+        "linear_eligible_coordinate_count": int(np.sum(mask)),
         "mean_a": mean_direction("A"),
         "mean_j14": mean_direction("J14"),
         "maximin_bprotected": maximin_direction(
@@ -281,6 +291,8 @@ def construct_directions(
         ),
     }
     for record in directions.values():
+        if not isinstance(record, Mapping):
+            continue
         if record.get("direction") is None:
             continue
         direction = np.asarray(record["direction"], dtype=float)
