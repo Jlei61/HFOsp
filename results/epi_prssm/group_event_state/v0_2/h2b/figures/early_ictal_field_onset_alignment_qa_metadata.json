@@ -1,0 +1,57 @@
+{
+  "figure": "early_ictal_field_onset_alignment_qa",
+  "question": "Does the peri-onset rise start at the EEG onset we assigned, on channels in the recorded order?",
+  "anchor": "eeg_onset_epoch (not clinical onset, not cache relt=0)",
+  "band": [
+    1.0,
+    45.0
+  ],
+  "colour": "diverging RdBu_r centred on 0; signed robust-z",
+  "colour_limit_z": 5.199170775413493,
+  "contact_order": "ascending first fast-activity crossing (z>=5, 60-100 Hz); never-recruited contacts last",
+  "selection_rule": "first eligible seizure of the first eligible subjects, alphabetically -- deterministic, not curated",
+  "panels": [
+    {
+      "subject": "epilepsiae_1073",
+      "seizure_index": 0,
+      "seizure_id": "107300100102",
+      "n_channels": 71,
+      "reference": "car"
+    },
+    {
+      "subject": "epilepsiae_1077",
+      "seizure_index": 0,
+      "seizure_id": "107700000102",
+      "n_channels": 121,
+      "reference": "car"
+    },
+    {
+      "subject": "epilepsiae_1096",
+      "seizure_index": 0,
+      "seizure_id": "109600000102",
+      "n_channels": 75,
+      "reference": "car"
+    },
+    {
+      "subject": "yuquan_chenziyang",
+      "seizure_index": 0,
+      "seizure_id": "chenziyang_sz_001",
+      "n_channels": 89,
+      "reference": "bipolar"
+    },
+    {
+      "subject": "yuquan_gaolan",
+      "seizure_index": 0,
+      "seizure_id": "gaolan_sz_001",
+      "n_channels": 114,
+      "reference": "bipolar"
+    },
+    {
+      "subject": "yuquan_pengzihang",
+      "seizure_index": 0,
+      "seizure_id": "pengzihang_sz_001",
+      "n_channels": 119,
+      "reference": "bipolar"
+    }
+  ]
+}

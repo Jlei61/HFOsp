@@ -1,0 +1,69 @@
+{
+  "tag": "plumbing_only",
+  "warning": "v0.1 stand-in trajectory; NOT a v0.2 producer and NOT a human result",
+  "subject": "epilepsiae_1146",
+  "arm": "a1_static_recent_history",
+  "seed": 1,
+  "field_key": "hfa_field_5s",
+  "n_episodes": 14,
+  "n_train_leads": 7,
+  "n_heldout_leads": 7,
+  "leads": {
+    "5min": {
+      "n_train_usable": 0,
+      "per_seizure": [],
+      "train_drop_reasons": [
+        "no_state_trajectory_at_anchor",
+        "no_state_trajectory_at_anchor",
+        "no_state_trajectory_at_anchor",
+        "no_state_trajectory_at_anchor",
+        "in_postictal",
+        "no_state_trajectory_at_anchor",
+        "no_state_trajectory_at_anchor"
+      ],
+      "status": "not_estimable_insufficient_train_anchors"
+    },
+    "30min": {
+      "n_train_usable": 0,
+      "per_seizure": [],
+      "train_drop_reasons": [
+        "no_state_trajectory_at_anchor",
+        "no_state_trajectory_at_anchor",
+        "no_state_trajectory_at_anchor",
+        "no_state_trajectory_at_anchor",
+        "in_postictal",
+        "no_state_trajectory_at_anchor",
+        "no_state_trajectory_at_anchor"
+      ],
+      "status": "not_estimable_insufficient_train_anchors"
+    },
+    "2h": {
+      "n_train_usable": 0,
+      "per_seizure": [],
+      "train_drop_reasons": [
+        "no_state_trajectory_at_anchor",
+        "no_state_trajectory_at_anchor",
+        "no_state_trajectory_at_anchor",
+        "in_postictal",
+        "no_state_trajectory_at_anchor",
+        "in_postictal",
+        "no_state_trajectory_at_anchor"
+      ],
+      "status": "not_estimable_insufficient_train_anchors"
+    },
+    "6h": {
+      "n_train_usable": 0,
+      "per_seizure": [],
+      "train_drop_reasons": [
+        "no_state_trajectory_at_anchor",
+        "no_state_trajectory_at_anchor",
+        "no_state_trajectory_at_anchor",
+        "no_state_trajectory_at_anchor",
+        "no_state_trajectory_at_anchor",
+        "in_postictal",
+        "no_state_trajectory_at_anchor"
+      ],
+      "status": "not_estimable_insufficient_train_anchors"
+    }
+  }
+}

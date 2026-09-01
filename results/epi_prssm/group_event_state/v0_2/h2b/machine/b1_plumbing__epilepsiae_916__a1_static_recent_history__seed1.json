@@ -1,0 +1,48 @@
+{
+  "tag": "plumbing_only",
+  "warning": "v0.1 stand-in trajectory; NOT a v0.2 producer and NOT a human result",
+  "subject": "epilepsiae_916",
+  "arm": "a1_static_recent_history",
+  "seed": 1,
+  "n_rows_total": 4356,
+  "n_rows_state_available": 877,
+  "n_train_rows": 438,
+  "n_eval_rows": 439,
+  "n_episodes": 40,
+  "n_heldout_episodes": 20,
+  "split_epoch": 1216145062.391602,
+  "state_dim": 96,
+  "max_state_age_sec": 3600.0,
+  "split_mode": "within_state_coverage_plumbing_split",
+  "plumbing_split_epoch": 1216828200.0,
+  "eval_events": 133,
+  "status": "ok",
+  "mean_log_score": {
+    "baseline": -0.614737708259439,
+    "baseline_plus_state": -0.6187307255774648
+  },
+  "brier_by_bin": {
+    "baseline": [
+      0.00917,
+      0.01801,
+      0.02686,
+      0.049,
+      0.05901,
+      0.03739
+    ],
+    "baseline_plus_state": [
+      0.00891,
+      0.01787,
+      0.0264,
+      0.05266,
+      0.0579,
+      0.03868
+    ]
+  },
+  "nested_increment_log_score": {
+    "mean_gain": -0.003993017318025642,
+    "median_gain": 2.2803428051782786e-05,
+    "n": 439,
+    "n_positive": 279
+  }
+}

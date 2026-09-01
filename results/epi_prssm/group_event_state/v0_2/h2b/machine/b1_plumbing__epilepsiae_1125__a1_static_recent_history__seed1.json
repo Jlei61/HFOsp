@@ -1,0 +1,19 @@
+{
+  "tag": "plumbing_only",
+  "warning": "v0.1 stand-in trajectory; NOT a v0.2 producer and NOT a human result",
+  "subject": "epilepsiae_1125",
+  "arm": "a1_static_recent_history",
+  "seed": 1,
+  "n_rows_total": 1703,
+  "n_rows_state_available": 679,
+  "n_train_rows": 339,
+  "n_eval_rows": 340,
+  "n_episodes": 14,
+  "n_heldout_episodes": 7,
+  "split_epoch": 1253132819.383789,
+  "state_dim": 96,
+  "max_state_age_sec": 3600.0,
+  "split_mode": "within_state_coverage_plumbing_split",
+  "plumbing_split_epoch": 1253471100.0,
+  "status": "train_has_no_event_variation"
+}

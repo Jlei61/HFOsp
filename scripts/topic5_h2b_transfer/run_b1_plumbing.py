@@ -36,6 +36,7 @@ if str(ROOT) not in sys.path:
 
 from sklearn.decomposition import PCA  # noqa: E402
 from sklearn.linear_model import LogisticRegression  # noqa: E402
+from sklearn.preprocessing import StandardScaler  # noqa: E402
 
 from src.topic5_h2b_transfer.attach import attach_state_to_anchors  # noqa: E402
 from src.topic5_h2b_transfer.risk_grid import (  # noqa: E402
@@ -43,6 +44,7 @@ from src.topic5_h2b_transfer.risk_grid import (  # noqa: E402
     HORIZON_EDGES_SECONDS,
     group_seizure_episodes,
 )
+from src.topic5_h2b_transfer.registry import read_registry, resolve_subject_arms  # noqa: E402
 from src.topic5_h2b_transfer.scoring import (  # noqa: E402
     brier_by_bin,
     discrete_time_log_score,
@@ -128,6 +130,9 @@ def hazards_for(model, X, rows, idx):
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--subject", required=True)
+    ap.add_argument("--producer", default=None,
+                    help="registry producer id; omit for the v0.1 plumbing_only stand-in")
+    ap.add_argument("--registry", type=Path, default=None)
     ap.add_argument("--arm", default="a1_static_recent_history")
     ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--crosswalk", type=Path, default=DEFAULT_OUT / "support/seizure_crosswalk.csv")
@@ -151,14 +156,40 @@ def main() -> None:
         raise SystemExit(f"{args.subject}: no held-out episode under the rolling origin")
     split_epoch = episodes[n_train_ep][0]["onset_epoch"]
 
-    run = V0_1_RUNS / f"{args.subject}__{args.arm}__seed{args.seed}"
-    if not (run / "test_states.npy").exists():
-        raise SystemExit(f"no v0.1 trajectory at {run}")
-    states = np.load(run / "test_states.npy")
-    t_abs = np.load(run / "test_series.npz")["t_abs"]
+    if args.producer:
+        reg = read_registry(args.registry) if args.registry else read_registry()
+        arms_r = resolve_subject_arms(reg, args.subject, seed=str(args.seed))
+        if args.producer not in arms_r:
+            raise SystemExit(f"producer {args.producer!r} not in registry {list(arms_r)}")
+        a = arms_r[args.producer]
+        if a.status != "ok":
+            out = {"subject": args.subject, "producer": args.producer,
+                   "status": "not_available", "reason": a.reason,
+                   "registry_version": reg.version}
+            d = args.out_root / "machine"; d.mkdir(parents=True, exist_ok=True)
+            (d / f"b1__{args.subject}__{args.producer}__seed{args.seed}.json").write_text(
+                json.dumps(out, indent=2))
+            print(json.dumps(out, indent=2)); return
+        states, t_abs = a.state, a.t_anchor
+        tag = "registry_producer"
+        warn = ""
+        provenance = {"producer": args.producer, "seed": a.seed,
+                      "source_commit": a.source_commit, "config_hash": a.config_hash,
+                      "checkpoint_hash": a.checkpoint_hash, "registry_version": reg.version}
+        max_age = 330.0
+    else:
+        run = V0_1_RUNS / f"{args.subject}__{args.arm}__seed{args.seed}"
+        if not (run / "test_states.npy").exists():
+            raise SystemExit(f"no v0.1 trajectory at {run}")
+        states = np.load(run / "test_states.npy")
+        t_abs = np.load(run / "test_series.npz")["t_abs"]
+        tag = "plumbing_only"
+        warn = "v0.1 stand-in trajectory; NOT a v0.2 producer and NOT a human result"
+        provenance = {"stand_in": f"v0.1 {args.arm} seed{args.seed}"}
+        max_age = MAX_STATE_AGE_SEC
 
     anchors = np.array([r["anchor_epoch"] for r in rows])
-    att = attach_state_to_anchors(anchors, t_abs, states, max_age_seconds=MAX_STATE_AGE_SEC)
+    att = attach_state_to_anchors(anchors, t_abs, states, max_age_seconds=max_age)
 
     Xb = baseline_features(rows)
     is_train = anchors < split_epoch
@@ -170,8 +201,7 @@ def main() -> None:
     train_mask = is_train & usable
     eval_mask = is_eval & usable
     out = {
-        "tag": "plumbing_only",
-        "warning": "v0.1 stand-in trajectory; NOT a v0.2 producer and NOT a human result",
+        "tag": tag, "warning": warn, "provenance": provenance,
         "subject": args.subject, "arm": args.arm, "seed": args.seed,
         "n_rows_total": len(rows),
         "n_rows_state_available": int(usable.sum()),
@@ -179,7 +209,7 @@ def main() -> None:
         "n_episodes": len(episodes), "n_heldout_episodes": len(episodes) - n_train_ep,
         "split_epoch": split_epoch,
         "state_dim": int(states.shape[1]),
-        "max_state_age_sec": MAX_STATE_AGE_SEC,
+        "max_state_age_sec": max_age,
     }
 
     out["split_mode"] = "seizure_rolling_origin"
@@ -203,23 +233,76 @@ def main() -> None:
         out["status"] = "insufficient_rows_for_plumbing"
         _write(out, args); return
 
-    pca = PCA(n_components=min(STATE_COMPONENTS, int(train_mask.sum()), states.shape[1]))
-    pca.fit(att.state[train_mask])  # TRAIN rows only
-    Xs = np.full((len(rows), pca.n_components_), 0.0)
-    Xs[usable] = pca.transform(att.state[usable])
+    # State capacity is selected on TRAIN, like C: eight components of a 96-dim
+    # state overfit a few thousand person-period rows, and the arm then fits
+    # worse than an intercept. Both the component count and the penalty are
+    # chosen inside TRAIN, so no evaluation row informs either.
     age = np.where(att.available, att.age_seconds, 0.0)[:, None]
-    Xfull = np.hstack([Xb, Xs, np.log1p(np.clip(age, 0, None))])
+
+    def build_state_block(k):
+        pca = PCA(n_components=min(k, int(train_mask.sum()), states.shape[1]))
+        pca.fit(att.state[train_mask])
+        Xs = np.zeros((len(rows), pca.n_components_))
+        Xs[usable] = pca.transform(att.state[usable])
+        return np.hstack([Xb, Xs, np.log1p(np.clip(age, 0, None))])
+
+    def fit_with_cv(X, rows, train_mask):
+        """Pick C by chronological CV inside TRAIN; no eval row informs it."""
+        tr_idx = np.flatnonzero(train_mask)
+        cut = tr_idx[int(0.7 * len(tr_idx))] if len(tr_idx) > 20 else None
+        best, best_c = -np.inf, 1.0
+        if cut is not None:
+            inner_tr = train_mask.copy(); inner_tr[cut:] = False
+            inner_va = train_mask.copy(); inner_va[:cut] = False
+            a = expand_person_period(X, rows, inner_tr)
+            b = expand_person_period(X, rows, inner_va)
+            if a is not None and b is not None and len(np.unique(a[1])) > 1:
+                for c in (0.003, 0.01, 0.03, 0.1, 0.3, 1.0):
+                    m = LogisticRegression(max_iter=3000, C=c).fit(a[0], a[1])
+                    pr = np.clip(m.predict_proba(b[0])[:, 1], 1e-6, 1 - 1e-6)
+                    ll = float(np.mean(b[1] * np.log(pr) + (1 - b[1]) * np.log1p(-pr)))
+                    if ll > best:
+                        best, best_c = ll, c
+        tr = expand_person_period(X, rows, train_mask)
+        return LogisticRegression(max_iter=3000, C=best_c).fit(tr[0], tr[1]), best_c, tr
+
+    def inner_score(X):
+        tr_idx = np.flatnonzero(train_mask)
+        if len(tr_idx) <= 20:
+            return -np.inf
+        cut = tr_idx[int(0.7 * len(tr_idx))]
+        itr = train_mask.copy(); itr[cut:] = False
+        iva = train_mask.copy(); iva[:cut] = False
+        a, b = expand_person_period(X, rows, itr), expand_person_period(X, rows, iva)
+        if a is None or b is None or len(np.unique(a[1])) < 2:
+            return -np.inf
+        best = -np.inf
+        for c in (0.003, 0.01, 0.03, 0.1, 0.3, 1.0):
+            m = LogisticRegression(max_iter=3000, C=c).fit(a[0], a[1])
+            pr = np.clip(m.predict_proba(b[0])[:, 1], 1e-6, 1 - 1e-6)
+            best = max(best, float(np.mean(b[1] * np.log(pr) + (1 - b[1]) * np.log1p(-pr))))
+        return best
+
+    candidates = {k: build_state_block(k) for k in (1, 2, 4, 8)}
+    k_star = max(candidates, key=lambda k: inner_score(
+        StandardScaler().fit(candidates[k][train_mask]).transform(candidates[k])))
+    Xfull = candidates[k_star]
+    scaler = StandardScaler().fit(Xfull[train_mask])
+    Xb_s = scaler.transform(Xfull)[:, :Xb.shape[1]]
+    Xfull_s = scaler.transform(Xfull)
 
     res = {}
-    for name, X in (("baseline", Xb), ("baseline_plus_state", Xfull)):
+    chosen_C = {}
+    arms_spec = (("intercept_only", np.zeros((len(rows), 0))),
+                 ("baseline", Xb_s), ("baseline_plus_state", Xfull_s))
+    for name, X in arms_spec:
         tr = expand_person_period(X, rows, train_mask)
         if tr is None:
             out["status"] = "no_person_period_rows"; _write(out, args); return
-        F, y, _own, _bin = tr
-        if len(np.unique(y)) < 2:
+        if len(np.unique(tr[1])) < 2:
             out["status"] = "train_has_no_event_variation"; _write(out, args); return
-        model = LogisticRegression(max_iter=2000, C=1.0)
-        model.fit(F, y)
+        model, c, tr = fit_with_cv(X, rows, train_mask)
+        chosen_C[name] = c
         idx = np.flatnonzero(eval_mask)
         H = hazards_for(model, X, rows, idx)
         ll = discrete_time_log_score(
@@ -236,12 +319,28 @@ def main() -> None:
         )
         res[name] = {"log_score": ll, "brier_by_bin": br}
 
+    # Engineering invariant: an arm that fits far worse than the intercept-only
+    # reference is an unusable fit, not evidence against the state. Reporting its
+    # negative increment as "the state hurts" would be a fabricated finding.
+    ref = float(np.mean(res["intercept_only"]["log_score"]))
+    worse = {k: bool(float(np.mean(v["log_score"])) - ref < -0.05)
+             for k, v in res.items() if k != "intercept_only"}
+    out["chosen_C"] = chosen_C
+    out["chosen_state_components"] = int(k_star)
+    out["mean_log_score_intercept_only"] = ref
+    out["arm_worse_than_intercept"] = worse
+
     inc = nested_increment(res["baseline"]["log_score"], res["baseline_plus_state"]["log_score"])
     out["eval_events"] = int(sum(1 for i in np.flatnonzero(eval_mask)
                                  if rows[i]["outcome_bin"] is not None))
     # A survival log score with no events in the evaluation set is not a weak
     # result, it is an uninformative one: nothing distinguishes the arms.
-    out["status"] = "ok" if out["eval_events"] > 0 else "ok_but_no_events_in_eval"
+    if out["eval_events"] == 0:
+        out["status"] = "ok_but_no_events_in_eval"
+    elif any(worse.values()):
+        out["status"] = "unusable_fit_worse_than_intercept"
+    else:
+        out["status"] = "ok"
     out["mean_log_score"] = {k: float(np.mean(v["log_score"])) for k, v in res.items()}
     out["brier_by_bin"] = {k: [None if not np.isfinite(x) else round(float(x), 5)
                                for x in v["brier_by_bin"]] for k, v in res.items()}
@@ -252,13 +351,17 @@ def main() -> None:
 def _write(out, args):
     d = args.out_root / "machine"
     d.mkdir(parents=True, exist_ok=True)
-    p = d / f"b1_plumbing__{args.subject}__{args.arm}__seed{args.seed}.json"
+    label = args.producer or args.arm
+    prefix = "b1" if args.producer else "b1_plumbing"
+    p = d / f"{prefix}__{args.subject}__{label}__seed{args.seed}.json"
     tmp = p.with_suffix(".json.tmp")
     tmp.write_text(json.dumps(out, indent=2, default=float))
     tmp.rename(p)
     print(json.dumps({k: v for k, v in out.items()
                       if k in ("subject", "status", "split_mode", "n_train_rows",
-                               "n_eval_rows", "eval_events",
+                               "n_eval_rows", "eval_events", "chosen_C",
+                               "chosen_state_components",
+                               "mean_log_score_intercept_only", "arm_worse_than_intercept",
                                "mean_log_score", "nested_increment_log_score")},
                      indent=2, default=float))
 

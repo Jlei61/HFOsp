@@ -1,0 +1,75 @@
+{
+  "tag": "registry_producer",
+  "warning": "",
+  "provenance": {
+    "producer": "P_local",
+    "seed": "3",
+    "source_commit": "180271628178e1b974ee1ea34178df029094dcf7",
+    "config_hash": "ed69ff73ec817f4e21501adfcae67b6381973afb40b25f1383273f2764f85567",
+    "checkpoint_hash": "ee8627836b6fdda04fb6dc50d40d2abfaf99f4ee07aa58bbf52444b417af87ff",
+    "registry_version": "group_event_state_v0_2_registry_1"
+  },
+  "subject": "epilepsiae_916",
+  "arm": "a1_static_recent_history",
+  "seed": 3,
+  "n_rows_total": 4356,
+  "n_rows_state_available": 4241,
+  "n_train_rows": 2004,
+  "n_eval_rows": 2237,
+  "n_episodes": 40,
+  "n_heldout_episodes": 20,
+  "split_epoch": 1216145062.391602,
+  "state_dim": 96,
+  "max_state_age_sec": 330.0,
+  "split_mode": "seizure_rolling_origin",
+  "chosen_C": {
+    "intercept_only": 0.1,
+    "baseline": 0.003,
+    "baseline_plus_state": 0.003
+  },
+  "chosen_state_components": 1,
+  "mean_log_score_intercept_only": -1.0719682297489255,
+  "arm_worse_than_intercept": {
+    "baseline": false,
+    "baseline_plus_state": false
+  },
+  "eval_events": 818,
+  "status": "ok",
+  "mean_log_score": {
+    "intercept_only": -1.0719682297489255,
+    "baseline": -1.0316569673852038,
+    "baseline_plus_state": -1.0314394492386953
+  },
+  "brier_by_bin": {
+    "intercept_only": [
+      0.0085,
+      0.01666,
+      0.02352,
+      0.04361,
+      0.07845,
+      0.21411
+    ],
+    "baseline": [
+      0.01386,
+      0.02051,
+      0.02587,
+      0.04128,
+      0.06626,
+      0.18936
+    ],
+    "baseline_plus_state": [
+      0.01321,
+      0.02013,
+      0.02565,
+      0.04131,
+      0.0673,
+      0.19306
+    ]
+  },
+  "nested_increment_log_score": {
+    "mean_gain": 0.0002175181465082382,
+    "median_gain": 0.0029524674043925336,
+    "n": 2237,
+    "n_positive": 1326
+  }
+}

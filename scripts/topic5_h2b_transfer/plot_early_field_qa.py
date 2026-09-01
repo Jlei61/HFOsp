@@ -94,12 +94,14 @@ def main() -> None:
             # contacts ordered by recruitment time; never-recruited last
             key = np.where(np.isfinite(tc), tc, np.inf)
             order = np.argsort(key, kind="stable")
-            im = ax.pcolormesh(rt, np.arange(tr.shape[0] + 1), tr[order],
+            im = ax.pcolormesh(rt, np.arange(tr.shape[0]), tr[order],
                                cmap="RdBu_r", vmin=-vmax, vmax=vmax,
-                               shading="flat", rasterized=True)
+                               shading="nearest", rasterized=True)
             ax.axvline(0.0, color="k", lw=1.1)
-            ax.set_xlim(rt[0], rt[-1])
-            ax.set_ylim(0, tr.shape[0])
+            # common limits so the panels are directly comparable; the two
+            # cohorts otherwise differ by a hop (-4.95 vs -5.00)
+            ax.set_xlim(-5.0, 15.0)
+            ax.set_ylim(-0.5, tr.shape[0] - 0.5)
             label = subject.split("_", 1)[1]
             # cohort name rides on the first panel of each column instead of an
             # overlay axes, which would sit on top of real data (§0.2)
@@ -112,7 +114,7 @@ def main() -> None:
             if ri == nrow - 1 or ri == len(chosen[c]) - 1:
                 ax.set_xlabel("time from EEG onset (s)")
             if ci == 0:
-                ax.set_ylabel("contacts\n(ordered by recruitment)", fontsize=7.5)
+                ax.set_ylabel("contacts\n(ordered by fast-activity arrival)", fontsize=7.5)
             ax.tick_params(labelsize=7)
 
     cax = fig.add_subplot(gs[:, -1])
