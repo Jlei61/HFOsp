@@ -154,15 +154,12 @@ class TrainConfig:
     amp: bool = True
     max_train_seconds: float = 3600.0
     min_epochs: int = 3
-    # Per-epoch validation warms the state over the last `warm_events` training
-    # events instead of replaying the whole stream.  The final test evaluation
-    # always replays the full chronological chain.
-    warm_events: int = 8192
-    # Final-evaluation warm-up length.  The state is relaxed with tau_slow up to
-    # 48 h, so a warm of this many events covers several hours of recording for
-    # every patient in the cohort; replaying a 235k-event stream three times per
-    # run would cost 25 minutes of pure warm-up and buy little.
-    eval_warm_events: int = 32768
+    # Compatibility fields retained in the result schema.  v0.2 requires an
+    # exact causal replay from the start of the currently observed session;
+    # positive caps are rejected in ``train_one`` because an event-count cap is
+    # neither a common physical-time warm-up nor a valid "full session" state.
+    warm_events: int = 0
+    eval_warm_events: int = 0
 
 
 def estimate_stats(
@@ -586,6 +583,8 @@ def run_sequence(
     loss_weights: Mapping[str, float] | None = None,
     grad_norms: list[float] | None = None,
     collect_endpoints: bool = False,
+    initial_state: tuple[Tensor, Tensor] | None = None,
+    initial_since_reset: int = 0,
 ) -> tuple[dict[str, float], dict[str, Any]]:
     """One causal pass over ``[lo, hi)`` of the patient's interictal stream."""
 
@@ -594,8 +593,13 @@ def run_sequence(
     states: list[np.ndarray] = []
     timing_collect: list[np.ndarray] = []
     derived: list[dict[str, np.ndarray]] = []
-    fast = slow = None
-    since_reset = 0
+    if initial_state is None:
+        fast = slow = None
+        since_reset = 0
+    else:
+        fast = initial_state[0].detach().to(device)
+        slow = initial_state[1].detach().to(device)
+        since_reset = int(initial_since_reset)
     extra: dict[str, Any] = {"n_events": 0, "state_norm": [], "slow_delta": []}
 
     for chunk_lo, chunk_hi, starts_session in seq.chunks(lo, hi, cfg.chunk_events):
@@ -717,7 +721,63 @@ def run_sequence(
     extra["state_norm"] = float(np.mean(extra["state_norm"])) if extra["state_norm"] else float("nan")
     extra["slow_delta"] = float(np.mean(extra["slow_delta"])) if extra["slow_delta"] else float("nan")
     extra["loss_totals"] = accum.totals()
+    if not model.baseline_only and fast is not None and slow is not None:
+        extra["final_state"] = (fast.detach(), slow.detach())
+        extra["final_since_reset"] = int(since_reset)
     return accum.means(), extra
+
+
+def _session_start_before(seq: SubjectSequence, position: int) -> int:
+    """Start of the recorded session containing ``position``.
+
+    A split may cut through a session.  Replaying from a fixed number of events
+    before that split silently changes the physical warm-up across patients and
+    cannot support a full-session state claim.
+    """
+
+    position = int(position)
+    if position <= 0:
+        return 0
+    starts = np.flatnonzero(seq.new_session[: position + 1])
+    return int(starts[-1]) if starts.size else 0
+
+
+def _causal_state_before(
+    model: GroupEventStateModel,
+    seq: SubjectSequence,
+    position: int,
+    device: torch.device,
+    cfg: TrainConfig,
+    *,
+    truncate_every: int = 0,
+) -> tuple[tuple[Tensor, Tensor] | None, int, int]:
+    """Replay the observed session up to ``position`` and return its carry.
+
+    The old implementation called a warm pass and then discarded its terminal
+    state because ``run_sequence`` initialised local state on every invocation.
+    This helper makes the hand-off explicit and reports the actual replay count.
+    """
+
+    if model.baseline_only:
+        return None, 0, 0
+    warm_lo = _session_start_before(seq, position)
+    if warm_lo >= position:
+        return None, 0, 0
+    _means, extra = run_sequence(
+        model,
+        seq,
+        warm_lo,
+        position,
+        device,
+        cfg,
+        train=False,
+        truncate_every=truncate_every,
+    )
+    return (
+        extra.get("final_state"),
+        int(extra.get("final_since_reset", 0)),
+        int(position - warm_lo),
+    )
 
 
 def _load_geometry(seq: SubjectSequence) -> Tensor | None:
@@ -811,6 +871,11 @@ def train_one(
     device: torch.device,
     out_dir: Path,
 ) -> dict[str, Any]:
+    if cfg.warm_events or cfg.eval_warm_events:
+        raise ValueError(
+            "group-event state v0.2 requires exact replay from the observed "
+            "session start; warm_events/eval_warm_events caps must both be 0"
+        )
     torch.manual_seed(seed)
     np.random.seed(seed)
     generator = torch.Generator().manual_seed(seed)
@@ -857,9 +922,20 @@ def train_one(
         )
         model.eval()
         with torch.no_grad():
-            warm_lo = max(train_lo, train_hi - cfg.warm_events)
-            _warm, _ = run_sequence(model, seq, warm_lo, train_hi, device, cfg, train=False)
-            val_means, val_extra = run_sequence(model, seq, val_lo, val_hi, device, cfg, train=False)
+            val_state, val_since_reset, _n_val_warm = _causal_state_before(
+                model, seq, val_lo, device, cfg
+            )
+            val_means, val_extra = run_sequence(
+                model,
+                seq,
+                val_lo,
+                val_hi,
+                device,
+                cfg,
+                train=False,
+                initial_state=val_state,
+                initial_since_reset=val_since_reset,
+            )
         val_total = float(np.nansum([val_means[k] for k in ENDPOINTS if k != "group_size"]))
         grad_norms.extend(epoch_grads)
         history.append(
@@ -934,14 +1010,17 @@ def train_one(
         results["tau_fast_seconds"] = [float(tau_f.min()), float(tau_f.median()), float(tau_f.max())]
         results["tau_slow_seconds"] = [float(tau_s.min()), float(tau_s.median()), float(tau_s.max())]
 
-    eval_warm_lo = max(train_lo, val_hi - cfg.eval_warm_events)
-    results["eval_warm_events"] = int(val_hi - eval_warm_lo)
     with torch.no_grad():
-        run_sequence(model, seq, eval_warm_lo, val_hi, device, cfg, train=False)  # warm
+        test_state, test_since_reset, n_eval_warm = _causal_state_before(
+            model, seq, test_lo, device, cfg
+        )
         test_means, test_extra = run_sequence(
             model, seq, test_lo, test_hi, device, cfg, train=False,
             collect_states=True, collect_endpoints=True,
+            initial_state=test_state, initial_since_reset=test_since_reset,
         )
+    results["eval_warm_events"] = int(n_eval_warm)
+    results["eval_warm_source"] = "recorded_session_start"
     results["test"] = test_means
     results["test_state_norm"] = test_extra["state_norm"]
 
@@ -1002,13 +1081,20 @@ def train_one(
             truncation["full_session"] = test_means
             continue
         with torch.no_grad():
-            # A warm pass only matters when the state is allowed to survive longer
-            # than the first chunk; with a reset every k <= chunk events the model
-            # cannot carry anything across the split anyway.
-            if k > cfg.chunk_events:
-                run_sequence(model, seq, eval_warm_lo, val_hi, device, cfg, train=False, truncate_every=k)
+            trunc_state, trunc_since_reset, _n_trunc_warm = _causal_state_before(
+                model, seq, test_lo, device, cfg, truncate_every=k
+            )
             means, _ = run_sequence(
-                model, seq, test_lo, test_hi, device, cfg, train=False, truncate_every=k
+                model,
+                seq,
+                test_lo,
+                test_hi,
+                device,
+                cfg,
+                train=False,
+                truncate_every=k,
+                initial_state=trunc_state,
+                initial_since_reset=trunc_since_reset,
             )
         truncation[f"reset_every_{k}"] = means
     results["history_truncation"] = truncation

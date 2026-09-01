@@ -388,3 +388,11 @@
   - 少 gate、多探索执行附录：`continuous_marked_state_h2b_cross_task_v0_3_exploration_addendum_2026-08-31.md`；A1/A2/T/M/D 改为 claim-specific evidence tiers，阴性不再全局阻断其他 development 探索。
   - 顺序固定为 state instrument qualification → 半合成 assay/power → nested prequential hazard → `tau_z` lag-response → decoder-metric OOS 流形—流场；不以 UMAP 或更多 checkpoint 替代前置 gate。
   - v0.3 明确是看过 v0.2 development 结果后的重设计，不是独立 confirmation；formal/sealed/H3/T2 继续关闭。
+
+- **2026-09-01 Group-Event State v0.2 三线纠偏与交接**：
+  - 共同合同：`group_event_state_v0_2_common_contract_2026-09-01.md`
+  - H1/H2a：`group_event_state_v0_2_h1_h2a_spec_plan_2026-09-01.md`
+  - H2b：`group_event_state_v0_2_h2b_spec_plan_2026-09-01.md`
+  - H3：`group_event_state_v0_2_h3_spec_plan_2026-09-01.md`
+  - 三 Agent 交接：`group_event_state_v0_2_three_agent_handoff_2026-09-01.md`
+  - 明确 fast/slow 只是架构先验；修复 v0.1 warm pass 丢弃终态的问题；H1 改用 matched wrong-time 与多未来块，H2b 改为逐事件 distance/hazard，H3 改为完整慢轨迹上的来源分解与人体 event perturbation。三条线并行探索，互不作结果 gate。

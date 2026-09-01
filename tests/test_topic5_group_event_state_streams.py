@@ -14,8 +14,10 @@ from src.topic5_group_event_state.train import (
     TrainConfig,
     _data_shape,
     build_arms,
+    _causal_state_before,
     run_sequence,
     run_streams,
+    train_one,
 )
 
 
@@ -145,3 +147,125 @@ def test_padded_stream_slots_contribute_no_observations(tmp_path):
     _means, extra = run_streams(model, seq, 0, 70, device, cfg, frozen)
     n_participation = extra["loss_totals"]["participation"][1]
     assert n_participation == pytest.approx(70 * seq.index["n_contacts"])
+
+
+def test_terminal_state_is_handed_to_the_next_causal_pass(tmp_path):
+    """Two adjacent calls with carry must equal one uninterrupted call.
+
+    This is the regression for the v0.1 warm-up bug: the old caller ran a warm
+    pass and discarded its terminal state before validation/test.
+    """
+
+    root = _write_fake_dataset(tmp_path / "fake_carry", n_events=160, n_sessions=1, seed=7)
+    seq = SubjectSequence(root)
+    device = torch.device("cpu")
+    arm = build_arms()["a3_delay_group_state"]
+    torch.manual_seed(4)
+    model = GroupEventStateModel(arm, _data_shape(seq), None, seq.history.shape[1])
+    model.eval()
+    cfg = TrainConfig(chunk_events=13, n_streams=1, amp=False)
+
+    with torch.no_grad():
+        _whole_means, whole = run_sequence(
+            model, seq, 0, 160, device, cfg, train=False, collect_states=True
+        )
+        _warm_means, warm = run_sequence(
+            model, seq, 0, 80, device, cfg, train=False, collect_states=True
+        )
+        _tail_means, tail = run_sequence(
+            model,
+            seq,
+            80,
+            160,
+            device,
+            cfg,
+            train=False,
+            collect_states=True,
+            initial_state=warm["final_state"],
+            initial_since_reset=warm["final_since_reset"],
+        )
+
+    joined = np.concatenate([warm["states"], tail["states"]], axis=0)
+    np.testing.assert_allclose(joined, whole["states"], rtol=1e-6, atol=1e-6)
+    joined_timing = np.concatenate([warm["timing_states"], tail["timing_states"]], axis=0)
+    np.testing.assert_allclose(joined_timing, whole["timing_states"], rtol=1e-6, atol=1e-6)
+
+
+def test_causal_warmup_replays_from_the_current_recorded_session_start(tmp_path):
+    root = _write_fake_dataset(tmp_path / "fake_session", n_events=192, n_sessions=2, seed=8)
+    seq = SubjectSequence(root)
+    device = torch.device("cpu")
+    arm = build_arms()["a3_delay_group_state"]
+    torch.manual_seed(5)
+    model = GroupEventStateModel(arm, _data_shape(seq), None, seq.history.shape[1])
+    model.eval()
+    cfg = TrainConfig(chunk_events=11, n_streams=1, amp=False)
+
+    # The second recorded session starts at event 96.  A split at event 150 must
+    # therefore replay exactly 54 events, independent of any arbitrary cap.
+    with torch.no_grad():
+        carry, since_reset, n_warm = _causal_state_before(
+            model, seq, 150, device, cfg
+        )
+        assert n_warm == 54
+        assert carry is not None
+        _tail_means, tail = run_sequence(
+            model,
+            seq,
+            150,
+            192,
+            device,
+            cfg,
+            train=False,
+            collect_states=True,
+            initial_state=carry,
+            initial_since_reset=since_reset,
+        )
+        _whole_means, whole = run_sequence(
+            model, seq, 96, 192, device, cfg, train=False, collect_states=True
+        )
+
+    np.testing.assert_allclose(tail["states"], whole["states"][54:], rtol=1e-6, atol=1e-6)
+
+
+def test_train_one_uses_session_replay_for_validation_and_test(tmp_path):
+    root = _write_fake_dataset(
+        tmp_path / "fake_train_one", n_events=72, n_contacts=3, n_sessions=1, seed=9
+    )
+    seq = SubjectSequence(root)
+    cfg = TrainConfig(
+        chunk_events=8,
+        n_streams=1,
+        amp=False,
+        max_epochs=1,
+        min_epochs=1,
+        max_train_seconds=60.0,
+    )
+    out_dir = tmp_path / "run"
+    out_dir.mkdir()
+    result = train_one(
+        seq,
+        build_arms()["a3_delay_group_state"],
+        seed=3,
+        cfg=cfg,
+        device=torch.device("cpu"),
+        out_dir=out_dir,
+    )
+    test_lo, _test_hi = seq.split_slice("test")
+    assert result["eval_warm_source"] == "recorded_session_start"
+    assert result["eval_warm_events"] == test_lo
+
+
+def test_train_one_rejects_event_count_warm_caps(tmp_path):
+    root = _write_fake_dataset(tmp_path / "fake_bad_warm", n_events=32, n_sessions=1, seed=10)
+    seq = SubjectSequence(root)
+    cfg = TrainConfig(warm_events=8, eval_warm_events=0, max_epochs=1, min_epochs=1)
+    with pytest.raises(ValueError, match="exact replay"):
+        train_one(
+            seq,
+            build_arms()["a3_delay_group_state"],
+            seed=1,
+            cfg=cfg,
+            device=torch.device("cpu"),
+            out_dir=tmp_path / "bad_run",
+        )
