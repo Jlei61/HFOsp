@@ -331,9 +331,18 @@ def main() -> None:
                     print(f"  {s}: FATAL"); traceback.print_exc()
                     results.append({"subject": s, "n_ok": 0, "n_dropped": 0, "fatal": True})
 
+    # The status table describes the whole cohort on disk, not just the subjects
+    # this invocation touched -- otherwise re-running a subset silently truncates
+    # it (observed: a 2-subject repair rewrote 271 rows down to 60).
     (args.out_root / "support").mkdir(parents=True, exist_ok=True)
+    on_disk = []
+    for jp in sorted((args.data_root / "early_field").glob("*.json")):
+        try:
+            on_disk.append(json.loads(jp.read_text()))
+        except Exception:
+            continue
     rows = []
-    for m in results:
+    for m in on_disk:
         for r in m.get("seizures", []):
             rows.append({"subject": m["subject"], "dataset": m.get("dataset", ""),
                          "reference": m.get("reference", ""), "n_channels": m.get("n_channels", 0),

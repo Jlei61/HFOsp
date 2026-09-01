@@ -49,6 +49,7 @@ from src.topic5_h2b_transfer.risk_grid import (  # noqa: E402
     lead_anchor_status,
     merge_spans,
 )
+from src.topic5_h2b_transfer.registry import read_registry, resolve_subject_arms  # noqa: E402
 from src.topic5_h2b_transfer.scoring import field_score  # noqa: E402
 
 MAIN_TREE = Path("/home/honglab/leijiaxin/HFOsp")
@@ -99,6 +100,10 @@ def choose_temperature(train_fields, train_states, grid=TEMPERATURE_GRID):
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--subject", required=True)
+    ap.add_argument("--producer", default=None,
+                    help="registry producer id (P_local / P_slow / B_multiscale). "
+                         "Omit to run the v0.1 plumbing_only stand-in.")
+    ap.add_argument("--registry", type=Path, default=None)
     ap.add_argument("--arm", default="a1_static_recent_history")
     ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--field-key", default=FIELD_KEY)
@@ -124,16 +129,47 @@ def main() -> None:
     train_leads = [ep[0] for ep in episodes[:n_train_ep]]
     held_leads = [ep[0] for ep in episodes[n_train_ep:]]
 
-    run = V0_1_RUNS / f"{args.subject}__{args.arm}__seed{args.seed}"
-    if not (run / "test_states.npy").exists():
-        raise SystemExit(f"no trajectory at {run}")
-    states = np.load(run / "test_states.npy")
-    t_abs = np.load(run / "test_series.npz")["t_abs"]
+    if args.producer:
+        reg = read_registry(args.registry) if args.registry else read_registry()
+        arms = resolve_subject_arms(reg, args.subject, seed=str(args.seed))
+        if args.producer not in arms:
+            raise SystemExit(f"producer {args.producer!r} not in registry {list(arms)}")
+        arm = arms[args.producer]
+        if arm.status != "ok":
+            # Contract: report, never fall back to a different producer.
+            out = {"subject": args.subject, "producer": args.producer,
+                   "status": "not_available", "reason": arm.reason,
+                   "registry_version": reg.version}
+            d = args.out_root / "machine"; d.mkdir(parents=True, exist_ok=True)
+            pth = d / f"b2_field__{args.subject}__{args.producer}__seed{args.seed}.json"
+            pth.write_text(json.dumps(out, indent=2))
+            print(json.dumps(out, indent=2)); return
+        states, t_abs = arm.state, arm.t_anchor
+        provenance = {"producer": args.producer, "seed": arm.seed,
+                      "source_commit": arm.source_commit, "config_hash": arm.config_hash,
+                      "checkpoint_hash": arm.checkpoint_hash,
+                      "anchor_path": arm.anchor_path,
+                      "registry_version": reg.version}
+        tag, warn = "registry_producer", ""
+        # the state lives on a 5-min grid, so the usable anchor is the grid point
+        # immediately preceding onset - lead
+        max_age = 330.0
+    else:
+        run = V0_1_RUNS / f"{args.subject}__{args.arm}__seed{args.seed}"
+        if not (run / "test_states.npy").exists():
+            raise SystemExit(f"no trajectory at {run}")
+        states = np.load(run / "test_states.npy")
+        t_abs = np.load(run / "test_series.npz")["t_abs"]
+        provenance = {"stand_in": f"v0.1 {args.arm} seed{args.seed}"}
+        tag, warn = "plumbing_only", ("v0.1 stand-in trajectory; NOT a v0.2 producer "
+                                      "and NOT a human result")
+        max_age = MAX_STATE_AGE_SEC
     spans = state_spans_for(args.subject)
 
     out = {
-        "tag": "plumbing_only",
-        "warning": "v0.1 stand-in trajectory; NOT a v0.2 producer and NOT a human result",
+        "tag": tag,
+        "warning": warn,
+        "provenance": provenance,
         "subject": args.subject, "arm": args.arm, "seed": args.seed,
         "field_key": args.field_key,
         "n_episodes": len(episodes), "n_train_leads": len(train_leads),
@@ -149,7 +185,7 @@ def main() -> None:
             if st != "ok":
                 return None, st
             a = attach_state_to_anchors(np.array([t]), t_abs, states,
-                                        max_age_seconds=MAX_STATE_AGE_SEC)
+                                        max_age_seconds=max_age)
             if not a.available[0]:
                 return None, "no_state_trajectory_at_anchor"
             return a.state[0], "ok"
@@ -216,7 +252,8 @@ def main() -> None:
 
     d = args.out_root / "machine"
     d.mkdir(parents=True, exist_ok=True)
-    p = d / f"b2_field__{args.subject}__{args.arm}__seed{args.seed}.json"
+    label = args.producer or args.arm
+    p = d / f"b2_field__{args.subject}__{label}__seed{args.seed}.json"
     tmp = p.with_suffix(".json.tmp")
     tmp.write_text(json.dumps(out, indent=2, default=float))
     tmp.rename(p)
