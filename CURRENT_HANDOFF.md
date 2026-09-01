@@ -66,7 +66,8 @@ $PY scripts/topic5_group_event_state/v02_train_producers.py \
 
 ## 4.1 实测资源（决定并发的依据）
 
-- 单 job 峰值显存 0.76–2.93 GB；每卡 3 个 slot（共 6 路）。
+- 单 job 峰值显存：中位 2.11 GB / p90 5.03 GB / **最大 6.77 GB**（前 80 个 job 实测）。
+  每卡 3 个 slot（共 6 路）；3×最坏 = 20.3 GB，对 24 GB 卡已贴住 4 GB 余量的边。
 - 单 job 独占一卡时 `epilepsiae_1073` 每 epoch ~60 s；6 路并发时 ~100 s
   → 聚合吞吐 ≈ 3.6 倍单 job。再往上堆很可能不升反降，因此**不**按"还有显存"继续加。
 - 大患者单 job 30–40 min，小患者 5–10 min；162 个 job 预计 **7–8 小时**。
