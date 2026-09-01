@@ -1,0 +1,35 @@
+{
+  "primary_postictal_exclusion_sec": 3600.0,
+  "arms": {
+    "30min": {
+      "n_episodes": 229,
+      "n_heldout_episodes": 106,
+      "heldout_with_anchor": {
+        "5min": 103,
+        "30min": 95,
+        "2h": 93,
+        "6h": 89
+      }
+    },
+    "60min_primary": {
+      "n_episodes": 209,
+      "n_heldout_episodes": 99,
+      "heldout_with_anchor": {
+        "5min": 98,
+        "30min": 89,
+        "2h": 79,
+        "6h": 75
+      }
+    },
+    "120min": {
+      "n_episodes": 174,
+      "n_heldout_episodes": 80,
+      "heldout_with_anchor": {
+        "5min": 80,
+        "30min": 75,
+        "2h": 51,
+        "6h": 52
+      }
+    }
+  }
+}
