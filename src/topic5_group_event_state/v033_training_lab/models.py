@@ -279,6 +279,7 @@ class FlexibleResidualStateModel(nn.Module):
         self.register_buffer("phi_mean", torch.zeros(write_dim))
         self.register_buffer("train_mean_state", torch.zeros(self.state.state_dim))
         self.register_buffer("train_state_scale", torch.ones(self.state.state_dim))
+        self.amp_encoder = False
 
     @property
     def state_dim(self) -> int:
@@ -289,8 +290,17 @@ class FlexibleResidualStateModel(nn.Module):
         return self.adapter.n_bins
 
     # ---------------------------------------------------------------- forward
+    def project(self, x_scaled: Tensor) -> Tensor:
+        """Encoder forward; bf16 autocast only here when ``amp_encoder`` is set on a CUDA tensor."""
+
+        if getattr(self, "amp_encoder", False) and x_scaled.is_cuda:
+            with torch.autocast("cuda", dtype=torch.bfloat16):
+                out = self.encoder(x_scaled)
+            return out.float()
+        return self.encoder(x_scaled)
+
     def writes(self, x_scaled: Tensor, train_event_mask: Tensor | None = None) -> Tensor:
-        phi = self.encoder(x_scaled)
+        phi = self.project(x_scaled)
         if train_event_mask is not None:
             mask = train_event_mask.to(torch.bool)
             mean = phi[mask].mean(dim=0)
@@ -306,7 +316,7 @@ class FlexibleResidualStateModel(nn.Module):
         mask = train_event_mask.to(torch.bool)
         if int(mask.sum()) == 0:
             raise ValueError("train mean needs at least one TRAIN event")
-        self.phi_mean.copy_(self.encoder(x_scaled[mask]).mean(dim=0).detach())
+        self.phi_mean.copy_(self.project(x_scaled[mask]).mean(dim=0).detach())
 
     def trajectory(self, x_scaled: Tensor, times: Tensor, segment_ids: Tensor,
                    train_event_mask: Tensor | None = None) -> tuple[Tensor, Tensor]:
