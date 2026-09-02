@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import torch
+import numpy as np
 
 from src.topic5_continuous_marked_state_r1.mark_likelihood import tied_group_mark_log_prob
+from src.topic5_group_event_state.v03.grammar import build_train_only_grammar
 from src.topic5_group_event_state.v03.point_process import interval_point_process_terms
 from src.topic5_group_event_state.v03.state import FixedTimescaleEventState, StateConfig
+from src.topic5_rank_distribution import FullHistorySequenceGRU
 
 
 def test_point_process_has_event_and_no_event_terms_and_masks_gaps():
@@ -66,3 +69,30 @@ def test_repeated_event_updates_remain_bounded_and_slower_modes_move_less():
     for _ in range(10_000):
         state = model.update(state, event)
     assert float(state.abs().max()) <= 1.01
+
+
+def test_primary_grammar_reads_legacy_architecture_but_not_legacy_weights(tmp_path):
+    old = FullHistorySequenceGRU(
+        8, hidden_size=8, contact_embedding_dim=8,
+        contact_encoder_hidden=8, local_offset_dim=2,
+    )
+    with torch.no_grad():
+        for parameter in old.parameters():
+            parameter.fill_(7.0)
+    checkpoint = tmp_path / "legacy.pt"
+    torch.save({
+        "model_kwargs": {
+            "hidden_size": 8,
+            "contact_embedding_dim": 8,
+            "contact_encoder_hidden": 8,
+            "local_offset_dim": 2,
+        },
+        "model_state": old.state_dict(),
+        "heldout_local_offset": torch.full((4, 2), 7.0),
+    }, checkpoint)
+    grammar = build_train_only_grammar(
+        checkpoint, np.zeros((4, 8), np.float32), state_dim=4
+    )
+    assert all(not torch.allclose(p, torch.full_like(p, 7.0)) for p in grammar.base.parameters())
+    assert torch.equal(grammar.local_offset, torch.zeros_like(grammar.local_offset))
+    assert any(p is grammar.local_offset for p in grammar.calibration_parameters)
