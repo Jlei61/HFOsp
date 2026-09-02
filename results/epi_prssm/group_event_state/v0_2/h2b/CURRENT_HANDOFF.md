@@ -16,9 +16,10 @@
 
 ## 1. 一句话现状
 
-支持度、目标、打分器、两条主任务的估计量都做完并跑通了，**而且已经接上 Agent A 的真 producer**。
-但目前 `P_local` / `P_slow` 只覆盖 **27 人里的 2 人**，所以**任何方向的结论都不能下**——
-现在能说的只有"这套东西能跑、分母有多大、什么样的阴性才算数"。
+**只验收工程层与分母层。** 一切"冻结状态能否预测发作"的科学陈述已撤回：
+读的是 raw latent 而非合同 `S_func`；`P_local`/`P_slow` 的 cell 跨 27–29 种配置不可采纳；
+`B_multiscale`、recent IED、block circular shift 三条对照未执行。
+B1 判为 assay not estimable。详见 `technical_report.md` §0。
 
 ---
 
@@ -29,7 +30,7 @@
 | worktree | `/tmp/hfosp_group_event_state_v02_b` |
 | branch | `codex/topic5-group-event-state-v02-b`（base `f0c9e075`） |
 | Python | `/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python`；线程全设 1 |
-| 测试 | **98 passed**；改动**纯增量**（只有新增文件，0 个既有文件被改） |
+| 测试 | **105 passed**；改动**纯增量**（只有新增文件，0 个既有文件被改） |
 
 **GPU：本线全程未申请。** 开工时 v0.1 队列占满两卡（99–100%），按工程附录不叠加；
 该队列已于 22:33:44 自然跑完（`ALL QUEUES DONE`, 162/162），**不是被我停的**。
@@ -39,9 +40,13 @@
 
 | producer | status | B 侧可用性 |
 |---|---|---|
-| `B_multiscale` | complete (27 人) | ❌ `not_available`——只存结果，不存逐时刻的 111 维特征（已提 additive 请求） |
-| `P_local` | partial (**2 人**) | ✅ 可读（916 三种子 / 253 一种子） |
-| `P_slow` | partial (**2 人**) | ✅ 可读（916 三种子 / 253 两种子） |
+| `B_multiscale` | complete (27) | ❌ 无逐时刻特征；且 `log_time_to_nearest_seizure` **含未来标签泄漏**，不得照搬导出 |
+| `P_local` | complete (27) | ❌ **不可采纳**——cell 跨 **29** 种配置（单 seed 内 10 种） |
+| `P_slow` | complete (27) | ❌ **不可采纳**——cell 跨 **27** 种配置（单 seed 内 9 种） |
+| `P_memoryless` | complete (27) | ⚠️ 配置同质、可读，但只是对照，单独无科学意义 |
+
+registry loader 已加**默认开启**的 fail-closed 校验（producer 内部配置同质性 + checkpoint 哈希）。
+另：registry 声明的 `source_commit` 比其 artifact **晚 5 小时**，不可能是产出它们的代码。
 
 ---
 
@@ -79,52 +84,50 @@
 
 ---
 
-## 5. B1 / B2 现状（仪器完成，结论未到）
+## 5. B1 / B2：结论已撤回
 
-### B1 生存
-接上真 producer 后第一批数是每行 1–2 nat 的增益——**那是拟合外推，不是发现**。
-三处 TRAIN-only 修正：特征标准化、岭系数按 TRAIN 内时序 CV 选、状态维度同法选。
-并**实装**工程不变量「远坏于截距基线的拟合记为不可估计」——它确实触发：
-修之前状态臂在 **9 格里有 6 格输给纯截距**。修之后 916 六格中五格可用，
-增益 **−0.034 ~ +0.043 跨零**；253（46 个事件）仍全部不可估计。
+两条主任务的仪器都已建成并跑通全队列（133 格、266 次运行、零失败），但**产出的数字全部撤回**：
 
-### B2 早期空间场
-估计量：用这位病人**自己**过去几次发作的场做加权平均，权重来自状态相似度；
-两臂**同一批场**，只差权重是否由状态给（均匀权重 = 病人平均场基线，是状态臂温度→∞ 的严格特例）。
-softmax 温度按 **TRAIN 内留一**选定后冻结。
-- 916（20 个留出事件，基线 ρ≈0.92）：增益 −0.027 ~ +0.008，贴零；**基线本身没余量**。
-- 253（**3 个**留出事件）：增益 −0.24 ~ +0.13，随种子乱跳 = 噪声。
+- **B2**（发作早期空间场）：曾报"未见超过静态基线的增量"。撤回——所依据的 `P_local`/`P_slow`
+  不可采纳，且读的是 raw latent 而非合同 `S_func`，关键对照亦未执行。
+- **B1**（离发作还有多久）：**assay not estimable**——133 格仅 11 格越过"不得差于纯截距"闸门，
+  19 人中 15 人零可用格。其负增量**不得**读作"状态有害"。
 
-**两位病人都不能用来说状态有用或没用。**
+**不得引用本阶段任何 `P_local` / `P_slow` 数字。**
 
 ---
 
 ## 6. 已修的、会伪造结论的错（记下来防复发）
 
-1. `np.savez` 会给文件名补 `.npz`，把「写临时文件再改名」的原子写打断 → 已封装 `save_npz_atomic` + 回归测试。
-2. 打分器原本要求「发作那一档必须被完整观测」→ 会**丢掉真实发作**（2.5 h 的发作 + 3 h 覆盖）。已放宽到正确判据。
-3. registry 读取器在「要 3 号种子、只有 1 号」时**悄悄给 1 号** → 伪造三次重复。已改为拒绝并列出可用种子。
-4. 重跑子集会把全队列 status 表**截断**（271 行 → 60 行）→ 已改为从盘上全部 JSON 重建。
-5. 我把「两次留出发作的相似度」写成"任何预测器的上限"——**同一张表当场证伪**，已在交付物里改正。
+1. `np.savez` 给文件名补 `.npz`，打断原子写 → 封装 `save_npz_atomic` + 回归测试。
+2. 打分器要求"发作档必须被完整观测" → **会丢掉真实发作**（2.5 h 发作 + 3 h 覆盖）。已放宽。
+3. registry 读取器在缺请求 seed 时**静默回退** → 伪造三次重复。已改为拒绝并列出可用 seed。
+4. 重跑子集**截断**全队列 status 表（271 → 60 行）→ 改为从盘上全部 JSON 重建。
+5. 把"两次留出发作相似度"写成"预测器上限" → 同一张表当场证伪，已更正。
+6. `eval_events` 报的是 5 min 网格行 → 916 上 1578 行仅 **40** 次发作；曾报 987 实为 **24**
+   （**虚报 41 倍**）。已拆分为行数 / 独立发作数。
+7. 温度网格最大 4.0、**不含**均匀权重 → "基线是严格嵌套特例"在模型选择中不成立。已加 `inf`。
+8. 首版 registry 校验规则**过严** → 把记账哈希差异当缺陷，154 cell 全被拒，掩盖真问题。已改。
 
 ---
 
 ## 7. 下一步
 
-1. 等 A 把 `P_local` / `P_slow` 铺到更多病人——**特别是静态基线低、有余量的那几位**
-   （1073 基线 0.08 / 1096 −0.04 / 1125 0.11 / 548 0.30）。916 基线 0.93 没余量，
-   在它身上得不到有信息的答案。
-2. `B_multiscale` 的逐时刻特征到位后，把它接成正式对照臂（issue 已提）。
-3. 922 那 8 次对拍偏低的原因仍未查明。
-4. 收口：承重两图（生存增量 vs 提前量、空间场增量 vs 提前量，每点标留出发作数）+ 双报告。
+1. 上游导出**冻结功能读出 `S_func`**（带名称、TRAIN 标准化统计、checkpoint hash）；主分析只读它。
+2. 上游统一 `P_local`/`P_slow` 的 cell 配置（或说明 27–29 种差异来源），并修正 registry provenance。
+3. 上游删除 `B_multiscale` 中一切由 `to_next` 派生的维度，重建**因果可用**基线后再导出。
+4. 本线补 recent/current IED 与 **block circular shift** 两条对照；
+   B1 补 calibration、seizure-level ranking、episode 内先汇总再 patient-first。
+5. `epilepsiae_922` target provenance 闭合前，按已预声明的排除敏感性并行报告。
 
 ## 8. 复现
 
 ```bash
+git worktree add /tmp/hfosp_group_event_state_v02_b codex/topic5-group-event-state-v02-b
 cd /tmp/hfosp_group_event_state_v02_b
 export OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1
 P=/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python
-$P -m pytest tests/test_topic5_h2b_*.py -q                       # 98 passed
+$P -m pytest tests/test_topic5_h2b_*.py -q                       # 105 passed
 $P scripts/topic5_h2b_transfer/build_seizure_crosswalk.py
 $P scripts/topic5_h2b_transfer/build_risk_sets.py
 $P scripts/topic5_h2b_transfer/build_early_ictal_field.py --workers 8 --skip-existing
