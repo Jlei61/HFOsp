@@ -136,3 +136,27 @@ def test_d7_blocks_never_cross_segments_and_span_at_most_block_length():
         assert bundle.t_anchor[member].max() - bundle.t_anchor[member].min() < 1800.0
     assert np.unique(blocks).size >= 2
     assert view.effective_independent_windows("inner_val") == bundle.effective_independent_windows("dev_val", 1800.0)
+
+
+def test_state_carry_and_target_segments_are_distinct_boundaries():
+    bundle, _ = make_toy_bundle(seed=7, planted_beta=0.0)
+    view = build_view(bundle)
+    # One state-carry unit can span two target segments, as happens across a
+    # seizure inside one continuously recorded session.
+    carry = np.zeros_like(view.anchor_segment)
+    target = np.asarray(view.anchor_segment).copy()
+    altered = replace(
+        view,
+        anchor_segment=carry,
+        event_segment=np.zeros_like(view.event_segment),
+        segment_bounds=np.array([[view.segment_bounds[:, 0].min(), view.segment_bounds[:, 1].max()]]),
+        target_segment=target,
+        target_segment_bounds=np.asarray(view.segment_bounds).copy(),
+        bundle=None,
+    )
+    idx = altered.phase_index["inner_val"]
+    assert np.unique(altered.anchor_segment[idx]).size == 1
+    assert np.array_equal(altered.bootstrap_segment(idx), target[idx])
+    for block in np.unique(altered.blocks("inner_val")):
+        member = idx[altered.blocks("inner_val") == block]
+        assert np.unique(target[member]).size == 1

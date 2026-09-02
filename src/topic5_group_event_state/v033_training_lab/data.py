@@ -65,6 +65,12 @@ class DataView:
     scaler_stats: dict[str, Any]
     h_meta: dict[str, Any] = field(default_factory=dict)
     bundle: Any = field(default=None, repr=False)
+    # State carry and target/evaluation boundaries are different in the human
+    # mainline: state carries across a seizure within a recorded session, while
+    # no future target or bootstrap block may cross that seizure.  Synthetic
+    # and legacy bundles can omit these and use the carry segment for both.
+    target_segment: np.ndarray | None = field(default=None, repr=False)
+    target_segment_bounds: np.ndarray | None = field(default=None, repr=False)
 
     # ------------------------------------------------------------------ sizes
     @property
@@ -92,8 +98,11 @@ class DataView:
 
         length = float(block_seconds or max(self.horizon, MIN_BLOCK_SECONDS))
         idx = self.phase_index[phase]
-        seg = self.anchor_segment[idx]
-        start = self.segment_bounds[seg, 0]
+        all_seg = self.anchor_segment if self.target_segment is None else np.asarray(self.target_segment)
+        all_bounds = self.segment_bounds if self.target_segment_bounds is None \
+            else np.asarray(self.target_segment_bounds)
+        seg = all_seg[idx]
+        start = all_bounds[seg, 0]
         local = np.floor((self.t_anchor[idx] - start) / length).astype(np.int64)
         key = seg.astype(np.int64) * (int(local.max()) + 2 if local.size else 1) + local
         _unique, inverse = np.unique(key, return_inverse=True)
@@ -134,8 +143,16 @@ class DataView:
             "effective_independent_windows": {p: self.effective_independent_windows(p) for p in self.phase_index},
             "h_source": self.h_source, "missing_h_bins": list(self.missing_h_bins),
             "split_hash": self.split_hash, "input_hash": self.input_hash, "scaling": self.scaling,
+            "state_carry_boundary": "event_segment/anchor_segment",
+            "target_boundary": ("anchor_segment" if self.target_segment is None else "target_segment"),
             "dev_test_exposed": False,
         }
+
+    def bootstrap_segment(self, idx: np.ndarray) -> np.ndarray:
+        """Target-segment labels for paired uncertainty; never state-carry ids."""
+
+        labels = self.anchor_segment if self.target_segment is None else np.asarray(self.target_segment)
+        return np.asarray(labels[np.asarray(idx, dtype=np.int64)], dtype=np.int64)
 
 
 # ------------------------------------------------------------------- helpers

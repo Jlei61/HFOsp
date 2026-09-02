@@ -158,7 +158,7 @@ def oracle_head_fit(trainable: Trainable, view: DataView, cfg: RecipeConfig, tru
         val_nll = nll(idx_val).cpu().numpy().astype(np.float64)
         train_nll = float(nll(idx_train).mean())
     h = trainable.h_only_nll(view, "inner_val")
-    gain = _paired_ci(h - val_nll, view.anchor_segment[val])
+    gain = _paired_ci(h - val_nll, view.bootstrap_segment(val))
     return {
         "pass": bool(gain["ci_low"] > 0), "gain_h_minus_oracle": gain, "inner_val_nll_oracle": float(val_nll.mean()),
         "inner_val_nll_h": float(h.mean()), "train_nll_oracle": train_nll, "steps": int(steps), "lr": float(lr),
@@ -331,7 +331,7 @@ def shift_null(trainable: Trainable, view: DataView, model: FlexibleResidualStat
     delta = nll_s - nll_c
     delta[~ok] = np.nan
     return {"fraction": float(fraction), "n_anchors": int(idx.size), "n_valid_donors": int(ok.sum()),
-            "delta_shifted_minus_correct": _paired_ci(delta, view.anchor_segment[idx]),
+            "delta_shifted_minus_correct": _paired_ci(delta, view.bootstrap_segment(idx)),
             "nll_correct_on_valid": float(nll_c[ok].mean()) if ok.any() else float("nan"),
             "nll_shifted_on_valid": float(nll_s[ok].mean()) if ok.any() else float("nan"),
             "definition": "inner-val anchor state replaced by a same-segment donor >= one horizon away; positive favours correct time"}
@@ -343,7 +343,7 @@ def blocked_inner_val_gain(trainable: Trainable, view: DataView, model: Flexible
     terms = _terms(trainable, view, model, "inner_val", device)
     nll_model = terms.nll.detach().cpu().numpy().astype(np.float64)
     h = trainable.h_only_nll(view, "inner_val")
-    ci = _paired_ci(h - nll_model, view.anchor_segment[idx])
+    ci = _paired_ci(h - nll_model, view.bootstrap_segment(idx))
     return {**ci, "n_anchors": int(idx.size), "n_blocks": int(np.unique(view.blocks("inner_val")).size),
             "effective_independent_windows": view.effective_independent_windows("inner_val"),
             "nll_h_mean": float(h.mean()), "nll_model_mean": float(nll_model.mean()),
@@ -364,7 +364,8 @@ def random_reservoir_delta(trainable: Trainable, view: DataView, cfg: RecipeConf
     nll_l = _terms(trainable, view, learned_model, "inner_val", device).nll.cpu().numpy().astype(np.float64)
     nll_r = _terms(trainable, view, random_model, "inner_val", device).nll.cpu().numpy().astype(np.float64)
     return {"status": "complete", "random_result": summary, "learned_inner_val_nll": float(nll_l.mean()),
-            "random_inner_val_nll": float(nll_r.mean()), "learned_minus_random": _paired_ci(nll_l - nll_r, view.anchor_segment[idx]),
+            "random_inner_val_nll": float(nll_r.mean()),
+            "learned_minus_random": _paired_ci(nll_l - nll_r, view.bootstrap_segment(idx)),
             "definition": "same recipe with a frozen random encoder; negative delta = trained encoder helps"}
 
 
