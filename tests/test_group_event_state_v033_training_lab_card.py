@@ -24,9 +24,9 @@ def _recipe_result(**over):
         "plateau": {"reached": True, "since_step": 40, "stale_validations": 3, "lr_reductions": 0},
         "best_validation": {"step": 40, "inner_val_nll": 9.0, "inner_val_nll_h": 9.3, "gain_h_minus_model": 0.3},
         "history": [
-            {"step": 10, "train_nll": 9.4, "inner_val_nll": 9.2, "grad_norm_by_group": {"adapter_w": 1.0},
+            {"step": 10, "train_nll": 9.4, "train_nll_h": 9.6, "inner_val_nll": 9.2, "grad_norm_by_group": {"adapter_w": 1.0},
              "update_norm_by_group": {"adapter_w": 0.01}, "lr_by_group": {"adapter_w": 1e-3}},
-            {"step": 40, "train_nll": 8.8, "inner_val_nll": 9.0, "grad_norm_by_group": {"adapter_w": 0.5},
+            {"step": 40, "train_nll": 8.8, "train_nll_h": 9.5, "inner_val_nll": 9.0, "grad_norm_by_group": {"adapter_w": 0.5},
              "update_norm_by_group": {"adapter_w": 0.005}, "lr_by_group": {"adapter_w": 1e-3}},
         ],
         "curves_path": "/tmp/curves.parquet", "checkpoint": "/tmp/checkpoint.pt", "checkpoint_sha256": "abc",
@@ -68,6 +68,8 @@ def test_c1_all_six_conditions_give_training_adequate_and_any_failure_gives_diag
              for s in range(3)]
     card = build_training_card(request=REQUEST, recipe_result=seeds[0], seed_results=seeds, t0=_t0(), diagnostics=_diag())
     assert card["evidence_label"] == "TRAINING-ADEQUATE" and card["adequacy_rule"] == ADEQUACY_RULE
+    assert card["curves"]["train_nll_h_first"] == 9.6
+    assert card["curves"]["train_nll_h_last"] == 9.5
     assert card["adequacy_reasons"] == []
     failures = {
         "tiny_overfit": dict(t0=_t0(tiny_slice_overfit={"pass": False, "gap_closed": 0.1, "threshold": 0.5})),

@@ -74,6 +74,16 @@ DEFAULT_SENTINEL = {"workload_class": "unmeasured", "uses_gpu": False, "peak_res
 SCRIPT = repo_root() / "scripts" / "run_group_event_state_v033_training_lab.py"
 
 
+def train_learned_on_train(curves: Mapping[str, Any]) -> bool | None:
+    """Whether the learned arm beats H-only on the same TRAIN anchors."""
+
+    learned = curves.get("train_nll_last")
+    baseline = curves.get("train_nll_h_last")
+    if learned is None or baseline is None:
+        return None
+    return float(learned) < float(baseline)
+
+
 # ------------------------------------------------------------------- units
 @dataclass
 class Unit:
@@ -650,8 +660,11 @@ class SearchDriver:
         obs = {
             "tiny_overfit_pass": (card.get("tiny_overfit") or {}).get("pass"),
             "all_groups_active": card.get("all_groups_active_before_selection"),
-            "train_learned": (curves.get("train_nll_last") is not None and curves.get("inner_val_nll_h") is not None
-                              and float(curves["train_nll_last"]) < float((t0 or {}).get("probe", {}).get("best_validation", {}).get("inner_val_nll_h", curves["inner_val_nll_h"]))),
+            # TRAIN must be compared with the H-only NLL on the same TRAIN
+            # anchors.  The previous code compared it with the inner-val H
+            # baseline, mixing populations and producing false "underfit"
+            # labels when their count levels differed.
+            "train_learned": train_learned_on_train(curves),
             "inner_val_gain_ci_low": gain.get("ci_low"),
             "synthetic_recovery_pass": (card.get("synthetic_recovery") or {}).get("pass"),
             "random_reservoir_equivalent": rr.get("ci_high") is not None and float(rr["ci_high"]) >= 0.0,

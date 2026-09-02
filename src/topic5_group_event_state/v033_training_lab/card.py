@@ -110,6 +110,7 @@ def build_training_card(
     curves = {
         "n_validations": len(history), "curves_path": recipe_result.get("curves_path"),
         "train_nll_first": first.get("train_nll"), "train_nll_last": last.get("train_nll"),
+        "train_nll_h_first": first.get("train_nll_h"), "train_nll_h_last": last.get("train_nll_h"),
         "inner_val_nll_first": first.get("inner_val_nll"), "inner_val_nll_last": last.get("inner_val_nll"),
         "inner_val_nll_best": (recipe_result.get("best_validation") or {}).get("inner_val_nll"),
         "inner_val_nll_h": (recipe_result.get("best_validation") or {}).get("inner_val_nll_h"),

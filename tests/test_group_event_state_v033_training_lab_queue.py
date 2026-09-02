@@ -23,12 +23,20 @@ from src.topic5_group_event_state.v033_training_lab.queue import (
     ingest_requests,
     oom_backoff,
     spawn_worker,
+    train_learned_on_train,
     write_agent_status,
 )
 from src.topic5_group_event_state.v033_training_lab.request import JobStatus
 
 REGISTERED = ("count_profile",)
 HEAD = "d" * 40
+
+
+def test_train_learned_compares_train_with_train_h_not_inner_validation_h():
+    curves = {"train_nll_last": 7.44, "train_nll_h_last": 7.52, "inner_val_nll_h": 7.28}
+    assert train_learned_on_train(curves) is True
+    assert train_learned_on_train({**curves, "train_nll_last": 7.60}) is False
+    assert train_learned_on_train({"train_nll_last": 7.44}) is None
 
 
 def _request(request_id="req_toy", kind="toy", **over):
