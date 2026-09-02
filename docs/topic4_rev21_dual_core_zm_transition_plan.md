@@ -45,11 +45,12 @@ patient held-out artifact in this stage.
 1. Generate the frozen 4 x 4 `(s_I,s_M)` grid.
 2. Run a small fixed paired seed set under systemd/nohup.
 3. Aggregate model-ictal morphology and the three separate interictal endpoints.
-   Calibrate complete-distribution distance with a same-N patient floor; for
-   KMeans/OOD use 128 paired Z/M-off resamples with the active event count in
-   every seed cell. Require both frozen directions before balanced alignment is
-   estimable. Preserve the original unequal-duration comparison as a
-   superseded audit only.
+   Calibrate all three retention endpoints with 128 paired Z/M-off resamples
+   using the active event count in every seed cell. Also report a same-N patient
+   floor for absolute complete-distribution match, but do not confuse that with
+   retention of the already-frozen partial-pass substrate. Require both frozen
+   directions before balanced alignment is estimable. Preserve the original
+   unequal-duration comparison as a superseded audit only.
 4. Do not use patient ictal data and do not add grid points after seeing output.
 5. Prefer a formally eligible, interictal-retained candidate. If none exists,
    carry exactly one interictal-retained, operational and numerically safe

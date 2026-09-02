@@ -176,3 +176,7 @@ def test_matched_retention_uses_same_cell_event_counts_without_count_gate(
     assert result["event_counts_by_cell"] == {"1:3": 4, "2:3": 4}
     assert result["pooled_event_count"] == 8
     assert result["retained"] is True
+    assert result["observed"][
+        "absolute_patient_distribution_within_floor"
+    ] is True
+    assert result["support"]["complete_distribution_matched_off"]["n"] == 8

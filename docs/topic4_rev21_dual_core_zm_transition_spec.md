@@ -196,10 +196,12 @@ The coarse and timescale screens instead use an event-count-matched retention
 calibration frozen after this estimability audit:
 
 1. pool the complete pre-transition families over the fixed paired seed cells;
-2. compare complete-distribution distance with a patient-training split floor
-   using the same pooled event count;
-3. for KMeans and OOD, sample the same number of events from each paired
-   Z/M-off cell, pool those samples and repeat 128 times with seed 21051;
+2. sample the same number of events from each paired Z/M-off cell, pool those
+   samples and repeat 128 times with seed 21051 for complete distribution,
+   KMeans and OOD;
+3. separately compare complete-distribution distance with a patient-training
+   split floor using the same pooled event count; this is the absolute patient
+   distribution benchmark, not the substrate-retention gate;
 4. require natural K=2, both frozen patient directions among readable in-support
    events, OOD no higher than the matched-off q95 and balanced alignment no
    lower than the matched-off q05.
@@ -209,7 +211,10 @@ unestimable below its frozen mathematical minimum of eight pooled events, and
 an unestimable candidate cannot be called retained. There is no per-network
 event minimum and no requirement for 20 events. The pooled screen is a
 development-stage capacity/retention assay; same-network dual-mode stability is
-reserved for the fresh confirmation matrix. The previous comparison against
+reserved for the fresh confirmation matrix. The frozen substrate itself is a
+partial patient-distribution match, so failure to enter the patient split-half
+floor is reported and cannot be hidden, but it is not newly promoted to a Z/M
+retention requirement. The previous comparison against
 full-length off support is retained in the artifact as a superseded audit and
 cannot determine selection.
 

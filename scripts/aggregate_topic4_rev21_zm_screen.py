@@ -199,6 +199,7 @@ def matched_interictal_retention(
     )
 
     rng = np.random.default_rng(int(seed))
+    null_complete = []
     null_ood = []
     null_alignment = []
     null_mode1_fraction = []
@@ -218,11 +219,18 @@ def matched_interictal_retention(
             continue
         onsets = np.concatenate(sampled_onsets)
         ranks = np.concatenate(sampled_ranks)
+        selection = score_complete_distribution(
+            onsets, np.ones(len(onsets), bool), contract=contract,
+            training_arrays=training_arrays,
+        )
         validation = score_validation_endpoints(
             onsets, ranks, np.ones(len(onsets), bool), contract=contract,
             training_arrays=training_arrays, classifier=classifier,
             kmeans_seed=int(kmeans_seed),
         )
+        null_complete.append(selection[
+            "complete_distribution_distance_training"
+        ])
         null_ood.append(validation["ood_all_returned"])
         null_two_direction.append(bool(
             validation["frozen_two_directions_present"]
@@ -240,6 +248,7 @@ def matched_interictal_retention(
     )
     support = {
         "complete_distribution_patient_floor": patient_floor,
+        "complete_distribution_matched_off": _quantiles(null_complete),
         "ood_matched_off": _quantiles(null_ood),
         "two_template_alignment_matched_off": _quantiles(null_alignment),
         "frozen_mode1_fraction_matched_off": _quantiles(null_mode1_fraction),
@@ -255,9 +264,11 @@ def matched_interictal_retention(
         "minimum_eight_pooled_events_for_natural_kmeans": bool(
             len(pooled_onsets) >= 8
         ),
-        "complete_distribution_within_matched_patient_floor": bool(
-            complete is not None and patient_floor.get("q95") is not None
-            and complete <= patient_floor["q95"]
+        "complete_distribution_retained_vs_matched_off": bool(
+            complete is not None
+            and support["complete_distribution_matched_off"]["q95"] is not None
+            and complete
+            <= support["complete_distribution_matched_off"]["q95"]
         ),
         "ood_within_matched_off_support": bool(
             support["ood_matched_off"]["q95"] is not None
@@ -279,7 +290,8 @@ def matched_interictal_retention(
     }
     deterioration = {}
     for name, value, limits, reverse in (
-        ("complete_distribution", complete, patient_floor, False),
+        ("complete_distribution", complete,
+         support["complete_distribution_matched_off"], False),
         ("ood", observed_validation["ood_all_returned"],
          support["ood_matched_off"], False),
         ("two_template_alignment", alignment,
@@ -310,6 +322,10 @@ def matched_interictal_retention(
             "two_template_alignment": alignment,
             "frozen_direction_counts": observed_counts,
             "frozen_mode1_fraction": observed_mode1,
+            "absolute_patient_distribution_within_floor": bool(
+                complete is not None and patient_floor.get("q95") is not None
+                and complete <= patient_floor["q95"]
+            ),
         },
         "support": support, "clauses": clauses,
         "retained": bool(all(clauses.values())),
