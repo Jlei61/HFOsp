@@ -77,12 +77,20 @@ ALLOWED_SCIENTIFIC_ROLES = {
     "development_only_dual_continuous_node_confirmation",
     "development_only_dual_continuous_node_global_screen",
     "development_only_frozen_dual_core_interictal_mechanism_atlas",
+    "development_only_frozen_dual_core_zm_transition",
 }
 
 
 def _validate_scientific_role(role: str) -> None:
     if str(role) not in ALLOWED_SCIENTIFIC_ROLES:
         raise RuntimeError("rev12-ND scientific role changed")
+
+
+def resolve_seed_pair(topology_seed: int, dynamics_seed: int | None) -> tuple[int, int]:
+    """Keep the historical one-seed path exact while permitting factorization."""
+    topology = int(topology_seed)
+    dynamics = topology if dynamics_seed is None else int(dynamics_seed)
+    return topology, dynamics
 
 
 def _segmentation_variants(event_unit: dict) -> list[dict]:
@@ -450,6 +458,11 @@ def main() -> None:
     parser.add_argument("--config", required=True, type=Path)
     parser.add_argument("--candidate-id", required=True)
     parser.add_argument("--seed", required=True, type=int)
+    parser.add_argument(
+        "--dynamics-seed", type=int,
+        help=("Simulator and spatial-OU seed. Defaults to --seed for exact "
+              "historical behavior; --seed remains the topology seed."),
+    )
     parser.add_argument("--expected-commit", required=True)
     parser.add_argument("--artifact-root", type=Path,
                         default=Path("/home/honglab/leijiaxin/HFOsp"))
@@ -460,14 +473,22 @@ def main() -> None:
     config_path = args.config.resolve()
     config = json.loads(config_path.read_text())
     _validate_scientific_role(config["scientific_role"])
+    topology_seed, dynamics_seed = resolve_seed_pair(args.seed, args.dynamics_seed)
     active_seeds = {
         int(seed) for key in (
             "canary_network_seeds", "fit_network_seeds",
             "selection_network_seeds", "confirmation_network_seeds",
         ) for seed in config["search"].get(key, [])
     }
-    if args.seed not in active_seeds:
+    if topology_seed not in active_seeds:
         parser.error("seed is outside every frozen rev12-ND pool")
+    declared_dynamics = {
+        int(seed) for key, values in config["search"].items()
+        if "dynamics_seed" in key and isinstance(values, list)
+        for seed in values
+    }
+    if declared_dynamics and dynamics_seed not in declared_dynamics:
+        parser.error("dynamics seed is outside every frozen dynamics pool")
 
     artifact_root = args.artifact_root.resolve()
     for record in config["inputs"].values():
@@ -504,7 +525,9 @@ def main() -> None:
         raise RuntimeError("rev12-ND runtime modules or config are not frozen")
 
     output_root = artifact_root / config["output_root"]
-    stem = f"{args.candidate_id}_seed_{args.seed}"
+    stem = f"{args.candidate_id}_seed_{topology_seed}"
+    if dynamics_seed != topology_seed:
+        stem += f"_dynamics_{dynamics_seed}"
     out_json = args.out_json or output_root / "workers" / f"{stem}.json"
     out_npz = args.out_npz or output_root / "workers" / f"{stem}.npz"
     cache_dir = artifact_root / config["network_cache"]
@@ -529,7 +552,7 @@ def main() -> None:
         "base_substrate_candidate_id", "node_baseline",
     ))
     substrate = build_substrate(
-        transition, base_candidate_id, args.seed, cache_dir=str(cache_dir),
+        transition, base_candidate_id, topology_seed, cache_dir=str(cache_dir),
         ee_dose=g_ee, etoi_dose=g_etoi,
         node_candidate_override=candidate["node_field"],
         node_depth_shrinkage=depth_shrinkage,
@@ -541,14 +564,14 @@ def main() -> None:
     )
     simulation = config["search"]["simulation"]
     substrate.params.T = float(simulation["duration_ms"])
-    substrate.net["rng"] = np.random.default_rng(args.seed)
+    substrate.net["rng"] = np.random.default_rng(dynamics_seed)
 
     result = simulate_kick(
         substrate.params, substrate.net, KICK_BOOST=0.0, t_kick=1e9,
         V_th_per_neuron=substrate.vtheta, slow=None,
         early_stop_runaway=bool(simulation["early_stop_runaway"]),
         external_e_rate_drive=make_external_drive(
-            substrate, transition["spatial_ou"], args.seed,
+            substrate, transition["spatial_ou"], dynamics_seed,
         ),
     )
     spikes = np.asarray(result["E_spk_bool"], bool)
@@ -1296,7 +1319,14 @@ def main() -> None:
         "scientific_role": config["scientific_role"],
         "candidate_id": args.candidate_id,
         "field_sha256": candidate["node_field"]["field_sha256"],
-        "seed": int(args.seed),
+        "seed": topology_seed,
+        "topology_seed": topology_seed,
+        "dynamics_seed": dynamics_seed,
+        "seed_semantics": {
+            "topology_seed": "neuron placement, realized graph and threshold realization",
+            "dynamics_seed": "simulator RNG and spatial-OU trajectory",
+            "common_random_numbers": bool(dynamics_seed == topology_seed),
+        },
         "simulation": {
             "duration_ms": float(simulation["duration_ms"]),
             "runaway_early_stop_ms": result.get("runaway_early_stop_ms"),
@@ -1353,7 +1383,8 @@ def main() -> None:
     atomic_write_json(_json_safe(payload), str(out_json))
     print(json.dumps({
         "status": payload["status"], "candidate": args.candidate_id,
-        "seed": args.seed, "n_returned": int(np.sum(returned)),
+        "topology_seed": topology_seed, "dynamics_seed": dynamics_seed,
+        "n_returned": int(np.sum(returned)),
         "n_source_maps": payload["source_topology"]["n_evaluable_returned_events"],
         "output": str(out_json),
     }, indent=2))
