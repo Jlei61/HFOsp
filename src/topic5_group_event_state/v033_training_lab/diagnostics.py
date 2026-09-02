@@ -403,7 +403,9 @@ def merge_seed_anchor_diagnostics(
 
     learned_median = np.median(learned, axis=0)
     random_median = np.median(random, axis=0)
-    shifted_median = np.nanmedian(np.where(ok[None, :], shifted, np.nan), axis=0)
+    shifted_median = np.full(h.shape, np.nan, dtype=np.float64)
+    if ok.any():
+        shifted_median[ok] = np.median(shifted[:, ok], axis=0)
     shift_delta = shifted_median - learned_median
     shift_delta[~ok] = np.nan
     return {
