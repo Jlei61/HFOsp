@@ -22,6 +22,7 @@ from src.topic5_group_event_state.v033_training_lab.queue import (
     execute_unit,
     ingest_requests,
     oom_backoff,
+    spawn_worker,
     write_agent_status,
 )
 from src.topic5_group_event_state.v033_training_lab.request import JobStatus
@@ -210,6 +211,28 @@ def test_k8_no_pkill_anywhere_in_the_training_lab():
     root = Path(__file__).resolve().parents[1] / "src" / "topic5_group_event_state" / "v033_training_lab"
     for path in root.glob("*.py"):
         assert "pkill" not in path.read_text(), path
+
+
+def test_spawn_worker_places_global_device_before_subcommand(tmp_path, monkeypatch):
+    captured = {}
+
+    class FakeProcess:
+        pid = 12345
+
+    def fake_popen(cmd, **kwargs):
+        captured["cmd"] = cmd
+        captured["kwargs"] = kwargs
+        return FakeProcess()
+
+    monkeypatch.setattr(
+        "src.topic5_group_event_state.v033_training_lab.queue.subprocess.Popen",
+        fake_popen,
+    )
+    info = spawn_worker(tmp_path / "unit.json", gpu=None, log_path=tmp_path / "worker.log")
+    cmd = info["cmd"]
+    assert cmd.index("--device") < cmd.index("worker")
+    assert cmd[cmd.index("--device") + 1] == "cpu"
+    assert cmd[cmd.index("worker") + 1:cmd.index("worker") + 3] == ["--unit", str(tmp_path / "unit.json")]
 
 
 def test_k7_agent_status_page_is_atomic_and_mirrored(tmp_path):

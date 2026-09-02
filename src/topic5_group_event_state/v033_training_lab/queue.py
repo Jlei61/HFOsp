@@ -687,7 +687,10 @@ def spawn_worker(unit_path: Path, *, gpu: int | None, log_path: Path) -> dict[st
         env["CUDA_VISIBLE_DEVICES"] = str(int(gpu))
         device = "cuda:0"
     env["PYTHONPATH"] = str(repo_root())
-    cmd = [PYTHON, str(SCRIPT), "worker", "--unit", str(unit_path), "--device", device]
+    # ``--device`` belongs to the top-level parser and therefore must precede
+    # the subcommand.  Putting it after ``worker`` makes argparse reject the
+    # process before worker_main can publish a terminal status.
+    cmd = [PYTHON, str(SCRIPT), "--device", device, "worker", "--unit", str(unit_path)]
     Path(log_path).parent.mkdir(parents=True, exist_ok=True)
     with open(log_path, "ab") as log:
         proc = subprocess.Popen(cmd, stdin=subprocess.DEVNULL, stdout=log, stderr=subprocess.STDOUT, env=env,
@@ -792,6 +795,16 @@ class Controller:
                     self.finished[uid] = JobStatus.STALE.value
                     if not (read_json(unit.result_path) or {}).get("status") == JobStatus.COMPLETE.value:
                         follow.append(unit)                      # resume: same unit, same out_dir (train_recipe resumes)
+                elif state == JobStatus.RUNNING.value and \
+                        now - float(rec.get("started_epoch", now)) > max(5.0, 2.0 * self.poll_seconds):
+                    # A worker that exits before publishing any terminal state
+                    # is a launch/runtime failure, not a long-running job.  Do
+                    # not leave the request falsely RUNNING until the much
+                    # longer stale-heartbeat timeout expires.
+                    write_unit_status(unit, JobStatus.FAILED.value, finished_epoch=now,
+                                      error="worker process exited without terminal status")
+                    del self.running[uid]
+                    self.finished[uid] = JobStatus.FAILED.value
                 elif state != JobStatus.RUNNING.value:
                     # process gone without a terminal status and heartbeat still fresh -> treat as failed exit
                     write_unit_status(unit, JobStatus.FAILED.value, finished_epoch=now, error="worker exited without status")
