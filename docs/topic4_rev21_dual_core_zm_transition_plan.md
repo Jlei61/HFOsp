@@ -36,6 +36,12 @@
 
 ## Stage 3: coarse Z/M access map
 
+The screen contains the Z/M-off candidate plus all 16 active candidates on the
+same `2 topology x 2 dynamics` cells. Report paired active-minus-off effects.
+Separately compare candidate aggregate endpoints with the q05--q95 support from
+Stage 2; use the explicit one-sided retention rule in the spec. Do not read the
+patient held-out artifact in this stage.
+
 1. Generate the frozen 4 x 4 `(s_I,s_M)` grid.
 2. Run a small fixed paired seed set under systemd/nohup.
 3. Aggregate model-ictal morphology and the three separate interictal endpoints.

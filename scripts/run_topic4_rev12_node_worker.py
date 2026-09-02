@@ -50,7 +50,10 @@ from src.topic4_node_dualmode import (  # noqa: E402
     spatiotemporal_cascade_labels,
 )
 from src.topic4_zm_ictal_transition import (  # noqa: E402
-    build_substrate, load_round_config, make_external_drive,
+    build_substrate, load_round_config, make_external_drive, make_slow,
+)
+from src.topic4_rev21_zm_transition import (  # noqa: E402
+    build_transition_readout, formal_interictal_stop_step,
 )
 import src.topic4_manual_dual_core  # noqa: E402,F401
 import src.topic4_rev20_dual_core_mechanism  # noqa: E402,F401
@@ -566,16 +569,53 @@ def main() -> None:
     simulation = config["search"]["simulation"]
     substrate.params.T = float(simulation["duration_ms"])
     substrate.net["rng"] = np.random.default_rng(dynamics_seed)
-
-    result = simulate_kick(
-        substrate.params, substrate.net, KICK_BOOST=0.0, t_kick=1e9,
-        V_th_per_neuron=substrate.vtheta, slow=None,
-        early_stop_runaway=bool(simulation["early_stop_runaway"]),
-        external_e_rate_drive=make_external_drive(
-            substrate, transition["spatial_ou"], dynamics_seed,
-        ),
+    slow_variables = candidate.get("slow_variables", {"mode": "off"})
+    slow = make_slow(
+        substrate, slow_variables, trace_weights_E=substrate.h_e,
     )
-    spikes = np.asarray(result["E_spk_bool"], bool)
+    drive = make_external_drive(
+        substrate, transition["spatial_ou"], dynamics_seed,
+    )
+    if slow is None:
+        # Keep this historical call literal: the second parity gate protects it.
+        result = simulate_kick(
+            substrate.params, substrate.net, KICK_BOOST=0.0, t_kick=1e9,
+            V_th_per_neuron=substrate.vtheta, slow=None,
+            early_stop_runaway=bool(simulation["early_stop_runaway"]),
+            external_e_rate_drive=drive,
+        )
+        transition_payload, transition_arrays = {}, {}
+    else:
+        from lfp import LFPRecorder
+
+        slow.enable_field_frames(max(
+            1, int(round(20.0 / float(substrate.engine["dt"]))),
+        ))
+        recorder = LFPRecorder(
+            substrate.params, substrate.net["pos"], substrate.net["labels"],
+            sites=substrate.contact_xy,
+        )
+        result = simulate_kick(
+            substrate.params, substrate.net, KICK_BOOST=0.0, t_kick=1e9,
+            V_th_per_neuron=substrate.vtheta, slow=slow,
+            lfp_recorder=recorder,
+            early_stop_runaway=bool(simulation["early_stop_runaway"]),
+            es_thresh_hz=float(simulation["es_thresh_hz"]),
+            es_dur_ms=float(simulation["es_dur_ms"]),
+            post_runaway_record_ms=float(simulation["post_runaway_record_ms"]),
+            external_e_rate_drive=drive,
+        )
+        transition_payload, transition_arrays = build_transition_readout(
+            result, substrate, slow, config,
+        )
+    full_spikes = np.asarray(result["E_spk_bool"], bool)
+    formal_stop_step = (
+        formal_interictal_stop_step(
+            result.get("runaway_early_stop_ms"), config,
+            dt_ms=float(substrate.engine["dt"]), total_steps=len(full_spikes),
+        ) if slow is not None else len(full_spikes)
+    )
+    spikes = full_spikes[:formal_stop_step]
     cmrun = substrate.extras["cmrun"]
     active, active_dt = cmrun.active_fraction(
         spikes, float(substrate.engine["dt"]), cmrun.BIN_MS,
@@ -1272,7 +1312,7 @@ def main() -> None:
             "sheet_activity_counts": movie["activity_counts"],
             "sheet_activity_frame_ms": np.asarray(movie["frame_ms"], float),
         }
-    del spikes
+    del spikes, full_spikes
 
     _atomic_npz(
         out_npz,
@@ -1314,6 +1354,7 @@ def main() -> None:
         ], np.float64),
         **movie_arrays,
         **cascade_arrays,
+        **transition_arrays,
     )
     payload = {
         "status": "REV12ND_NODE_WORKER_COMPLETE",
@@ -1331,6 +1372,16 @@ def main() -> None:
         "simulation": {
             "duration_ms": float(simulation["duration_ms"]),
             "runaway_early_stop_ms": result.get("runaway_early_stop_ms"),
+            "recorded_duration_ms": float(
+                len(result["rate_E"]) * float(substrate.engine["dt"])
+            ),
+            "formal_interictal_stop_ms": float(
+                formal_stop_step * float(substrate.engine["dt"])
+            ),
+            "post_runaway_record_ms": (
+                0.0 if slow is None
+                else float(simulation["post_runaway_record_ms"])
+            ),
             "wall_seconds": float(time.time() - started),
         },
         "events": event_rows,
@@ -1380,6 +1431,7 @@ def main() -> None:
         },
         "arrays": {"path": str(out_npz), "sha256": _sha256(out_npz)},
         "provenance": provenance,
+        **transition_payload,
     }
     atomic_write_json(_json_safe(payload), str(out_json))
     print(json.dumps({
