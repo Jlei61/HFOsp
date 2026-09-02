@@ -1,0 +1,46 @@
+{
+  "asset_id": "group_event_state_core_evidence",
+  "claim_boundary": {
+    "allowed": [
+      "the v0.3.2 paired residual-state pipeline runs end to end on three development patients",
+      "the null synthetic generator does not produce a stable false positive",
+      "the positive synthetic generator is not recovered reliably by the current assay"
+    ],
+    "forbidden": [
+      "a slow physiological state was found",
+      "a slow physiological state was excluded",
+      "the frozen state transfers to seizure risk",
+      "IEDs causally shape the state"
+    ]
+  },
+  "figures": {
+    "h1": {
+      "pdf": "results/group_event_state/core_evidence/figures/group_event_state_h1_future_blocks.pdf",
+      "pdf_sha256": "7edbce7f19ede21d17572ed4e5ab5cdc58fc39518960e85e5083b8926bf75eb1",
+      "png": "results/group_event_state/core_evidence/figures/group_event_state_h1_future_blocks.png",
+      "png_sha256": "6345aa488399db5221f9b289d69c58c0750ffbef8b8391e67bf5f59114a7648d"
+    },
+    "h2a": {
+      "pdf": "results/group_event_state/core_evidence/figures/group_event_state_h2a_repertoire.pdf",
+      "pdf_sha256": "2fbfbb55db921f40c4c41d8e75bda50877752f5f96a90544a92057e34470dfd8",
+      "png": "results/group_event_state/core_evidence/figures/group_event_state_h2a_repertoire.png",
+      "png_sha256": "2ed7f330aead6747766569417418012fe47b3fcc74e2d7a9dbfae26be8f9e4a3"
+    },
+    "h2b_h3": {
+      "pdf": "results/group_event_state/core_evidence/figures/group_event_state_h2b_h3_transfer_feedback.pdf",
+      "pdf_sha256": "33aa6d2e8ffc4ad74e4326c798c702b471bf68ad0a237adbd3c676b3722b35cd",
+      "png": "results/group_event_state/core_evidence/figures/group_event_state_h2b_h3_transfer_feedback.png",
+      "png_sha256": "e7a6accc53f29b9173d665100754656b517649600f4923b5a0bd43853808779f"
+    }
+  },
+  "font_floor_pt": 7.0,
+  "no_synthetic_observations_in_unrun_panels": true,
+  "paper_slot": "TBD",
+  "payload": "results/group_event_state/core_evidence/core_evidence_payload.json",
+  "payload_format": "group_event_state_core_evidence_v2",
+  "readme": "results/group_event_state/core_evidence/figures/README.md",
+  "source_commit": "9b4f456e6214bd84240019526af9c52083544a55",
+  "source_summary": null,
+  "statistical_grammar": "patient-first; positive gain supports hypothesis; missing is not zero",
+  "status": "v0_3_2_instrument_unstable_development"
+}

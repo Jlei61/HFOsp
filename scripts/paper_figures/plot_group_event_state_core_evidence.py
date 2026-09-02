@@ -105,11 +105,15 @@ def _rows_by_subject(rows: Iterable[dict[str, Any]]) -> dict[str, list[dict[str,
     return grouped
 
 
-def _tick_labels(rows: list[dict[str, Any]], field: str) -> list[str]:
+def _tick_labels(
+    rows: list[dict[str, Any]], field: str, horizons: tuple[int, ...]
+) -> list[str]:
     labels = []
-    for horizon in HORIZON_MINUTES:
+    for horizon in horizons:
         n = sum(
-            row["horizon_minutes"] == horizon and row.get(field) is not None
+            row["horizon_minutes"] == horizon
+            and row.get(field) is not None
+            and row.get("eligible", True)
             for row in rows
         )
         name = "2 h" if horizon == 120 else f"{horizon} min"
@@ -127,32 +131,51 @@ def _gain_panel(
     *,
     shared_ylim: tuple[float, float] | None = None,
     show_legend: bool = False,
+    horizons: tuple[int, ...] = HORIZON_MINUTES,
 ) -> None:
-    x = np.arange(len(HORIZON_MINUTES), dtype=float)
+    x = np.arange(len(horizons), dtype=float)
     values: list[float] = []
-    for alias, subject_rows in _rows_by_subject(rows).items():
-        lookup = {row["horizon_minutes"]: row.get(field) for row in subject_rows}
-        y = np.asarray([lookup.get(h) for h in HORIZON_MINUTES], dtype=object)
+    grouped = _rows_by_subject(rows)
+    for group_index, (alias, subject_rows) in enumerate(grouped.items()):
+        row_lookup = {row["horizon_minutes"]: row for row in subject_rows}
+        lookup = {h: row.get(field) for h, row in row_lookup.items()}
+        y = np.asarray([lookup.get(h) for h in horizons], dtype=object)
         finite = np.asarray([v is not None and np.isfinite(float(v)) for v in y])
         yf = np.asarray([float(v) if ok else np.nan for v, ok in zip(y, finite)])
         values.extend(yf[np.isfinite(yf)].tolist())
+        yf_line = np.asarray(
+            [
+                yi if np.isfinite(yi) and row_lookup[h].get("eligible", True) else np.nan
+                for h, yi in zip(horizons, yf)
+            ]
+        )
         ax.plot(
             x,
-            yf,
+            yf_line,
             color=colors[alias],
             lw=0.85,
             alpha=0.78,
-            marker="o",
-            ms=3.4,
             label=alias,
             zorder=3,
         )
+        point_offset = (group_index - (len(grouped) - 1) / 2) * 0.08 if len(horizons) == 1 else 0.0
+        for xi, horizon, yi in zip(x, horizons, yf):
+            if not np.isfinite(yi):
+                continue
+            eligible = row_lookup[horizon].get("eligible", True)
+            ax.scatter(
+                [xi + point_offset], [yi], s=17,
+                facecolor=colors[alias] if eligible else "white",
+                edgecolor=colors[alias], linewidth=0.75, zorder=4,
+            )
     medians = []
-    for horizon in HORIZON_MINUTES:
+    for horizon in horizons:
         vals = [
             float(row[field])
             for row in rows
-            if row["horizon_minutes"] == horizon and row.get(field) is not None
+            if row["horizon_minutes"] == horizon
+            and row.get(field) is not None
+            and row.get("eligible", True)
         ]
         medians.append(float(np.median(vals)) if vals else np.nan)
     ax.plot(x, medians, color=STATE, lw=2.1, marker="D", ms=3.7, zorder=5, label="median")
@@ -167,7 +190,7 @@ def _gain_panel(
     ax.text(
         0.98,
         0.96,
-        "supports state  ↑",
+        "favourable  ↑",
         transform=ax.transAxes,
         ha="right",
         va="top",
@@ -186,7 +209,9 @@ def _gain_panel(
             fontsize=8.0,
             fontweight="bold",
         )
-    ax.set_xticks(x, _tick_labels(rows, field))
+    if len(horizons) == 1:
+        ax.set_xlim(-0.42, 0.42)
+    ax.set_xticks(x, _tick_labels(rows, field, horizons))
     ax.set_ylabel(ylabel)
     ax.set_title(title, loc="left", fontweight="bold")
     if show_legend and values:
@@ -194,6 +219,13 @@ def _gain_panel(
             Line2D([0], [0], color=colors[a], marker="o", lw=0.8, ms=3.2, label=a)
             for a in colors
         ] + [Line2D([0], [0], color=STATE, marker="D", lw=2, ms=3.2, label="median")]
+        if any(not row.get("eligible", True) for row in rows):
+            handles.append(
+                Line2D(
+                    [0], [0], color="#777777", marker="o", markerfacecolor="white",
+                    lw=0, ms=3.5, label="ineligible",
+                )
+            )
         ax.legend(handles=handles, loc="lower left", ncol=2, handlelength=1.4, columnspacing=0.8)
     _finish_axis(ax)
 
@@ -245,7 +277,7 @@ def render_h1(payload: dict[str, Any], out_dir: Path) -> dict[str, Any]:
     colors = _subject_palette(payload)
     _gain_panel(
         axes[1], rows, "residual_gain_over_history", "Residual beyond history",
-        "H+S gain\nover H", colors,
+        "H+S gain\nover H", colors, show_legend=True,
     )
     _gain_panel(
         axes[2], rows, "correct_time_gain_over_shifted", "Time-specific state",
@@ -258,6 +290,8 @@ def render_h1(payload: dict[str, Any], out_dir: Path) -> dict[str, Any]:
     for letter, ax in zip("ABCD", axes):
         _panel(ax, letter)
     fig.subplots_adjust(left=0.04, right=0.995, bottom=0.18, top=0.91)
+    if payload.get("status", "").startswith("v0_3_2_instrument_unstable"):
+        fig.text(0.995, 0.025, "Development diagnostic; positive-control recovery 0/3", ha="right", fontsize=7.0, color="#707070")
     return _save(fig, out_dir, FIGURE_STEMS["h1"])
 
 
@@ -317,10 +351,13 @@ def render_h2a(payload: dict[str, Any], out_dir: Path) -> dict[str, Any]:
         _gain_panel(
             ax, subset, "gain_over_best_control", title, ylabel, colors,
             shared_ylim=shared_ylim, show_legend=endpoint == "continue",
+            horizons=(30,),
         )
     for letter, ax in zip("ABCD", axes):
         _panel(ax, letter)
     fig.subplots_adjust(left=0.042, right=0.99, bottom=0.18, top=0.91)
+    if payload.get("status", "").startswith("v0_3_2_instrument_unstable"):
+        fig.text(0.99, 0.025, "Development diagnostic; positive-control recovery 0/3", ha="right", fontsize=7.0, color="#707070")
     return _save(fig, out_dir, FIGURE_STEMS["h2a"])
 
 
@@ -445,16 +482,35 @@ def _atomic_json(path: Path, payload: dict[str, Any]) -> None:
     tmp.replace(path)
 
 
-def _write_readme(out_dir: Path) -> Path:
+def _write_readme(out_dir: Path, payload: dict[str, Any]) -> Path:
     path = out_dir / "figures" / "README.md"
+    v032 = payload.get("status", "").startswith("v0_3_2")
+    if v032:
+        h1_focus = (
+            "实心点为事前数据资格合格，空心点仅为 development 诊断；中位数只汇总实心点。"
+            "当前阳性合成定标未通过，因此图中人体数值只能说明这版模型的观测表现，不能作为慢状态成立或不存在的证据。"
+        )
+        h2_focus = (
+            "状态来自 30 分钟 count 任务并已冻结；grammar 只训练低容量 residual adapter。"
+            "当前阳性合成定标未通过，且任何选在训练预算末端的 arm 都必须标为优化未收口。"
+        )
+    else:
+        h1_focus = (
+            "v0.3.1 没有运行这三个 residual 对比，所以当前 panel 留空；"
+            "旧 S-vs-H 数字只保存在 payload 的 archival diagnostics 中，不能填入主图。"
+        )
+        h2_focus = (
+            "v0.3.1 的 state path 未可靠训练且缺少 H+S 配对，因此当前留空；"
+            "最终需要 contact subset 与 same-prefix continuation 的患者级增量稳定高于零。"
+        )
     path.write_text(
         "# Group-Event State core evidence\n\n"
         "### group_event_state_h1_future_blocks.png\n\n"
         "这张图回答 H1：在显式多尺度历史 H 已经进入每个模型之后，动态状态 S 是否还对未来 5、30、120 分钟的事件块提供增量。B 比较 H+S 与 H，C 比较正确时刻与 block-shifted S，D 比较动态 S 与 TRAIN 均值 S；纵轴均为正值支持 residual state。\n\n"
-        "**关注点**：v0.3.1 没有运行这三个 residual 对比，所以当前 panel 留空；旧 S-vs-H 数字只保存在 payload 的 archival diagnostics 中，不能填入主图。\n\n"
+        f"**关注点**：{h1_focus}\n\n"
         "### group_event_state_h2a_repertoire.png\n\n"
         "这张图回答 H2a：给定相同或相近的事件开头，H+S_correct 是否同时胜过 H、H+S_shifted 和 H+S_mean，进而改变事件继续/停止、继续时的招募规模以及具体触点集合。三个统计 panel 共用 y 轴。\n\n"
-        "**关注点**：v0.3.1 的 state path 未可靠训练且缺少 H+S 配对，因此当前留空；最终需要 contact subset 与 same-prefix continuation 的患者级增量稳定高于零。\n\n"
+        f"**关注点**：{h2_focus}\n\n"
         "### group_event_state_h2b_h3_transfer_feedback.png\n\n"
         "这张图预先固定跨任务与反馈机制的最终接口。A/B 分别放冻结间期状态对发作风险和发作早期空间场的增量；C 比较 no-feedback、count/rate feedback 与 mark-specific feedback；D 显示不同 IED 类型的有符号状态冲击。当前这些实验尚未运行，因此只显示坐标、对照方向和 not yet run，不填模拟数据。\n\n"
         "**关注点**：H2b 必须以 held-out seizure 为分母；H3 必须先控制共同 pre-event state，且冲击允许正负方向。\n"
@@ -495,11 +551,11 @@ def main() -> None:
         "h2a": render_h2a(payload, args.output_root),
         "h2b_h3": render_transfer_feedback(payload, args.output_root),
     }
-    readme = _write_readme(args.output_root)
+    readme = _write_readme(args.output_root, payload)
     metadata = {
         "asset_id": "group_event_state_core_evidence",
         "paper_slot": "TBD",
-        "status": "CANDIDATE_FRAMEWORK_V0_3_1_PRIMARY_ESTIMAND_NOT_RUN",
+        "status": payload.get("status", "CANDIDATE_FRAMEWORK"),
         "payload_format": payload["format"],
         "payload": str(payload_path),
         "source_summary": source_summary,

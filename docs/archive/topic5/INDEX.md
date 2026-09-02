@@ -1,5 +1,12 @@
 # Topic 5 Archive Index
 
+- **2026-09-02 Group-Event State v0.3.2 residual-state 阶段收口**：
+  [`白话版`](group_event_state_v0_3_2_closeout_plain_2026-09-02.md) ·
+  [`技术版`](group_event_state_v0_3_2_closeout_technical_2026-09-02.md) ·
+  [`模型设计`](group_event_state_v0_3_2_model_design_2026-09-02.md) ·
+  [`测量合同`](group_event_state_v0_3_2_measurement_contract_2026-09-02.md)。
+  27 人测量地基完成，三位 development 患者 × 三 seed 的 12 维 marked leaky state、H1 residual count 与冻结 H2a grammar probe 已跑齐；但预登记阳性合成恢复为 0/3，追加效应阶梯又表现为 2/3→3/3→1/3 的 seed 依赖和非单调性。唯一 30-min 合格患者的 H1 三项增量均为负；H2a contact subset 相对最强对照仅 1/3 患者有利。最终状态 `V0_3_2_INSTRUMENT_UNSTABLE_DEVELOPMENT_CLOSEOUT`：H1/H2a 未建立，不能作生物学阴性；H2b/H3/sealed partition 未运行。
+
 - **2026-09-02 Group-Event State v0.3.1 审阅后正式收口**：
   [`closeout`](group_event_state_v0_3_1_post_review_closeout_2026-09-02.md) ·
   [`白话版`](group_event_state_v0_3_pilot_plain_2026-09-02.md) ·

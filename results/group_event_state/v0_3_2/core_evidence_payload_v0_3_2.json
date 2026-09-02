@@ -1,0 +1,620 @@
+{
+  "claim_boundary": {
+    "allowed": [
+      "the v0.3.2 paired residual-state pipeline runs end to end on three development patients",
+      "the null synthetic generator does not produce a stable false positive",
+      "the positive synthetic generator is not recovered reliably by the current assay"
+    ],
+    "forbidden": [
+      "a slow physiological state was found",
+      "a slow physiological state was excluded",
+      "the frozen state transfers to seizure risk",
+      "IEDs causally shape the state"
+    ]
+  },
+  "format": "group_event_state_core_evidence_v2",
+  "h1_future_block": {
+    "gain_definition": "control NB NLL minus H+S_correct NLL; positive favours residual state",
+    "required_fields": [
+      "subject",
+      "horizon_minutes",
+      "residual_gain_over_history",
+      "correct_time_gain_over_shifted",
+      "dynamic_gain_over_mean",
+      "n_score_blocks"
+    ],
+    "rows": [
+      {
+        "alias": "P1",
+        "correct_time_gain_over_shifted": -0.008291568917607142,
+        "dynamic_gain_over_mean": -0.030955222081202754,
+        "eligibility_reasons": [],
+        "eligible": true,
+        "horizon_minutes": 5,
+        "n_score_blocks": 24,
+        "n_seeds_scored": 3,
+        "residual_gain_over_history": -0.030962320759834693,
+        "seed_ranges": {
+          "correct_time_gain_over_shifted": [
+            -0.0559912011160727,
+            0.02445685798396817
+          ],
+          "dynamic_gain_over_mean": [
+            -0.07621056976726039,
+            0.001531018778631271
+          ],
+          "residual_gain_over_history": [
+            -0.07621766844589233,
+            0.0015239200999993298
+          ]
+        },
+        "subject": "epilepsiae_1146"
+      },
+      {
+        "alias": "P1",
+        "correct_time_gain_over_shifted": -0.4433000362027222,
+        "dynamic_gain_over_mean": -0.32911101682450367,
+        "eligibility_reasons": [],
+        "eligible": true,
+        "horizon_minutes": 30,
+        "n_score_blocks": 20,
+        "n_seeds_scored": 3,
+        "residual_gain_over_history": -0.3291220171566139,
+        "seed_ranges": {
+          "correct_time_gain_over_shifted": [
+            -0.8024640713461942,
+            -0.1751309905475154
+          ],
+          "dynamic_gain_over_mean": [
+            -0.526360510054583,
+            -0.15485545179221114
+          ],
+          "residual_gain_over_history": [
+            -0.5263715103866933,
+            -0.1548664521243214
+          ]
+        },
+        "subject": "epilepsiae_1146"
+      },
+      {
+        "alias": "P1",
+        "correct_time_gain_over_shifted": null,
+        "dynamic_gain_over_mean": null,
+        "eligibility_reasons": [
+          "inner_val_blocks_120min=0<2",
+          "no_eligible_120min_anchor_in_inner_val",
+          "dev_val_blocks_120min=1<2",
+          "dev_test_blocks_120min=3<4"
+        ],
+        "eligible": false,
+        "horizon_minutes": 120,
+        "n_score_blocks": 0,
+        "n_seeds_scored": 0,
+        "residual_gain_over_history": null,
+        "seed_ranges": {
+          "correct_time_gain_over_shifted": null,
+          "dynamic_gain_over_mean": null,
+          "residual_gain_over_history": null
+        },
+        "subject": "epilepsiae_1146"
+      },
+      {
+        "alias": "P2",
+        "correct_time_gain_over_shifted": 0.16202391429913107,
+        "dynamic_gain_over_mean": 0.24565848182559868,
+        "eligibility_reasons": [],
+        "eligible": true,
+        "horizon_minutes": 5,
+        "n_score_blocks": 9,
+        "n_seeds_scored": 3,
+        "residual_gain_over_history": 0.24566064967086618,
+        "seed_ranges": {
+          "correct_time_gain_over_shifted": [
+            0.11421561908693471,
+            0.1860705156250258
+          ],
+          "dynamic_gain_over_mean": [
+            0.211490510357173,
+            0.2631236618736659
+          ],
+          "residual_gain_over_history": [
+            0.2114926782024405,
+            0.26312582971893334
+          ]
+        },
+        "subject": "yuquan_pengzihang"
+      },
+      {
+        "alias": "P2",
+        "correct_time_gain_over_shifted": 0.9606754640542056,
+        "dynamic_gain_over_mean": 1.4054822931801294,
+        "eligibility_reasons": [
+          "base_fit_blocks_30min=20<24",
+          "inner_val_blocks_30min=2<4",
+          "dev_val_blocks_30min=3<4",
+          "dev_test_blocks_30min=7<8"
+        ],
+        "eligible": false,
+        "horizon_minutes": 30,
+        "n_score_blocks": 8,
+        "n_seeds_scored": 3,
+        "residual_gain_over_history": 0.37960262665522476,
+        "seed_ranges": {
+          "correct_time_gain_over_shifted": [
+            0.6350460077952684,
+            1.1369319811119114
+          ],
+          "dynamic_gain_over_mean": [
+            1.3960877023578842,
+            1.416977343071078
+          ],
+          "residual_gain_over_history": [
+            0.37020803583297957,
+            0.3910976765461732
+          ]
+        },
+        "subject": "yuquan_pengzihang"
+      },
+      {
+        "alias": "P2",
+        "correct_time_gain_over_shifted": null,
+        "dynamic_gain_over_mean": null,
+        "eligibility_reasons": [
+          "base_fit_blocks_120min=4<8",
+          "inner_val_blocks_120min=0<2",
+          "no_eligible_120min_anchor_in_inner_val",
+          "dev_val_blocks_120min=0<2",
+          "no_eligible_120min_anchor_in_dev_val",
+          "dev_test_blocks_120min=1<4"
+        ],
+        "eligible": false,
+        "horizon_minutes": 120,
+        "n_score_blocks": 0,
+        "n_seeds_scored": 0,
+        "residual_gain_over_history": null,
+        "seed_ranges": {
+          "correct_time_gain_over_shifted": null,
+          "dynamic_gain_over_mean": null,
+          "residual_gain_over_history": null
+        },
+        "subject": "yuquan_pengzihang"
+      },
+      {
+        "alias": "P3",
+        "correct_time_gain_over_shifted": 0.06271953227624662,
+        "dynamic_gain_over_mean": 0.14576861650301928,
+        "eligibility_reasons": [],
+        "eligible": true,
+        "horizon_minutes": 5,
+        "n_score_blocks": 9,
+        "n_seeds_scored": 3,
+        "residual_gain_over_history": -0.7367503841672063,
+        "seed_ranges": {
+          "correct_time_gain_over_shifted": [
+            -0.12668212363448836,
+            0.42433508466955766
+          ],
+          "dynamic_gain_over_mean": [
+            0.005769291504757225,
+            0.4250648501610976
+          ],
+          "residual_gain_over_history": [
+            -0.8767497091654683,
+            -0.45745415050912797
+          ]
+        },
+        "subject": "yuquan_zhangkexuan"
+      },
+      {
+        "alias": "P3",
+        "correct_time_gain_over_shifted": -0.3674051545214309,
+        "dynamic_gain_over_mean": -0.2955050419467506,
+        "eligibility_reasons": [
+          "base_fit_blocks_30min=23<24"
+        ],
+        "eligible": false,
+        "horizon_minutes": 30,
+        "n_score_blocks": 8,
+        "n_seeds_scored": 3,
+        "residual_gain_over_history": -0.7876508529989413,
+        "seed_ranges": {
+          "correct_time_gain_over_shifted": [
+            -0.9973730295038448,
+            -0.003414254321840161
+          ],
+          "dynamic_gain_over_mean": [
+            -0.8933057196054505,
+            0.00412867679608565
+          ],
+          "residual_gain_over_history": [
+            -1.385451530657641,
+            -0.488017134256105
+          ]
+        },
+        "subject": "yuquan_zhangkexuan"
+      },
+      {
+        "alias": "P3",
+        "correct_time_gain_over_shifted": 4.414442571641669,
+        "dynamic_gain_over_mean": 4.793296558131146,
+        "eligibility_reasons": [
+          "base_fit_blocks_120min=4<8",
+          "inner_val_blocks_120min=1<2",
+          "dev_val_blocks_120min=1<2",
+          "dev_test_blocks_120min=2<4"
+        ],
+        "eligible": false,
+        "horizon_minutes": 120,
+        "n_score_blocks": 2,
+        "n_seeds_scored": 3,
+        "residual_gain_over_history": 4.793295133765154,
+        "seed_ranges": {
+          "correct_time_gain_over_shifted": [
+            -3.613314824292161,
+            10.142183282655727
+          ],
+          "dynamic_gain_over_mean": [
+            -12.085505440296515,
+            15.955355175443716
+          ],
+          "residual_gain_over_history": [
+            -12.085506864662507,
+            15.955353751077723
+          ]
+        },
+        "subject": "yuquan_zhangkexuan"
+      }
+    ],
+    "status": "run_but_not_scientifically_admissible_positive_control_failed"
+  },
+  "h2a_repertoire": {
+    "gain_definition": "best-control NLL minus H+S_correct NLL; positive favours correct dynamic state",
+    "required_fields": [
+      "subject",
+      "horizon_minutes",
+      "endpoint",
+      "gain_over_best_control",
+      "gain_over_history",
+      "gain_over_shifted",
+      "gain_over_mean",
+      "n_score_blocks"
+    ],
+    "rows": [
+      {
+        "alias": "P1",
+        "eligible": true,
+        "endpoint": "continue",
+        "gain_over_best_control": -1.864585058363927e-05,
+        "gain_over_history": 2.172985390104629e-05,
+        "gain_over_mean": 2.115965779887995e-05,
+        "gain_over_shifted": 1.8748472714866743e-05,
+        "horizon_minutes": 30,
+        "n_score_blocks": 17,
+        "n_seeds_scored": 3,
+        "seed_ranges": {
+          "gain_over_best_control": [
+            -0.00010663653985174207,
+            2.7046701450470006e-05
+          ],
+          "gain_over_history": [
+            1.2779900894707276e-05,
+            2.7046701450470006e-05
+          ],
+          "gain_over_mean": [
+            1.277989264862198e-05,
+            2.7046794097663627e-05
+          ],
+          "gain_over_shifted": [
+            -0.00010663653985174207,
+            0.00013128603227052782
+          ]
+        },
+        "subject": "epilepsiae_1146"
+      },
+      {
+        "alias": "P1",
+        "eligible": true,
+        "endpoint": "positive_size",
+        "gain_over_best_control": 9.749216387760003e-05,
+        "gain_over_history": 0.0018860046786290628,
+        "gain_over_mean": 0.0018803030362835637,
+        "gain_over_shifted": 0.0010175714898631382,
+        "horizon_minutes": 30,
+        "n_score_blocks": 17,
+        "n_seeds_scored": 3,
+        "seed_ranges": {
+          "gain_over_best_control": [
+            -0.001787395311726464,
+            0.0020446625615186897
+          ],
+          "gain_over_history": [
+            -0.001787395311726464,
+            0.007410200105773078
+          ],
+          "gain_over_mean": [
+            -0.0017873950799306233,
+            0.007393094582690133
+          ],
+          "gain_over_shifted": [
+            -0.0005385329472647417,
+            0.0020446625615186897
+          ]
+        },
+        "subject": "epilepsiae_1146"
+      },
+      {
+        "alias": "P1",
+        "eligible": true,
+        "endpoint": "subset",
+        "gain_over_best_control": -0.008457233122584793,
+        "gain_over_history": -0.002423775207113336,
+        "gain_over_mean": -0.002435664258621357,
+        "gain_over_shifted": -0.0024614263116877417,
+        "horizon_minutes": 30,
+        "n_score_blocks": 17,
+        "n_seeds_scored": 3,
+        "seed_ranges": {
+          "gain_over_best_control": [
+            -0.02110080834892061,
+            0.009586954078531055
+          ],
+          "gain_over_history": [
+            -0.021065134770340388,
+            0.014277269111739264
+          ],
+          "gain_over_mean": [
+            -0.02110080834892061,
+            0.014277273880110847
+          ],
+          "gain_over_shifted": [
+            -0.013857845097364823,
+            0.009586954078531055
+          ]
+        },
+        "subject": "epilepsiae_1146"
+      },
+      {
+        "alias": "P2",
+        "eligible": true,
+        "endpoint": "continue",
+        "gain_over_best_control": -0.0009394018193364436,
+        "gain_over_history": 0.0030671654916487475,
+        "gain_over_mean": 0.001968455849535214,
+        "gain_over_shifted": 0.0025078558421200003,
+        "horizon_minutes": 30,
+        "n_score_blocks": 9,
+        "n_seeds_scored": 3,
+        "seed_ranges": {
+          "gain_over_best_control": [
+            -0.008284940602277167,
+            0.0066261281794318064
+          ],
+          "gain_over_history": [
+            -0.008284940602277167,
+            0.016195488963056757
+          ],
+          "gain_over_mean": [
+            -0.008087546307042339,
+            0.01515230689081195
+          ],
+          "gain_over_shifted": [
+            0.0004050133819515876,
+            0.0066261281794318064
+          ]
+        },
+        "subject": "yuquan_pengzihang"
+      },
+      {
+        "alias": "P2",
+        "eligible": true,
+        "endpoint": "positive_size",
+        "gain_over_best_control": -0.007738427059784729,
+        "gain_over_history": -0.0023414958850449413,
+        "gain_over_mean": -0.007130265424391743,
+        "gain_over_shifted": 0.007025126629578067,
+        "horizon_minutes": 30,
+        "n_score_blocks": 9,
+        "n_seeds_scored": 3,
+        "seed_ranges": {
+          "gain_over_best_control": [
+            -0.01576203257348649,
+            0.0026852906258241554
+          ],
+          "gain_over_history": [
+            -0.007956580518430251,
+            0.0036735399337918225
+          ],
+          "gain_over_mean": [
+            -0.01576203257348649,
+            0.004509775532003116
+          ],
+          "gain_over_shifted": [
+            -0.0008856054977083305,
+            0.019275694760618377
+          ]
+        },
+        "subject": "yuquan_pengzihang"
+      },
+      {
+        "alias": "P2",
+        "eligible": true,
+        "endpoint": "subset",
+        "gain_over_best_control": -0.01385018787449462,
+        "gain_over_history": -0.013837858332489671,
+        "gain_over_mean": 0.021149535954698217,
+        "gain_over_shifted": 0.01541138415092018,
+        "horizon_minutes": 30,
+        "n_score_blocks": 9,
+        "n_seeds_scored": 3,
+        "seed_ranges": {
+          "gain_over_best_control": [
+            -0.03904928808753601,
+            0.007029106789874309
+          ],
+          "gain_over_history": [
+            -0.03904928808753601,
+            0.007029106789874309
+          ],
+          "gain_over_mean": [
+            -0.009530382325822161,
+            0.06553104472401863
+          ],
+          "gain_over_shifted": [
+            0.01087391455086467,
+            0.019158261426872603
+          ]
+        },
+        "subject": "yuquan_pengzihang"
+      },
+      {
+        "alias": "P3",
+        "eligible": true,
+        "endpoint": "continue",
+        "gain_over_best_control": -0.0018916307758922671,
+        "gain_over_history": -0.0004610961602829956,
+        "gain_over_mean": -0.0005140424403645298,
+        "gain_over_shifted": 0.003087351366349496,
+        "horizon_minutes": 30,
+        "n_score_blocks": 9,
+        "n_seeds_scored": 3,
+        "seed_ranges": {
+          "gain_over_best_control": [
+            -0.004910277508491443,
+            0.00209533476809251
+          ],
+          "gain_over_history": [
+            -0.0026998039195020606,
+            0.00209533476809251
+          ],
+          "gain_over_mean": [
+            -0.0028599495872778688,
+            0.0020981290067185036
+          ],
+          "gain_over_shifted": [
+            -0.004910277508491443,
+            0.00982553026150092
+          ]
+        },
+        "subject": "yuquan_zhangkexuan"
+      },
+      {
+        "alias": "P3",
+        "eligible": true,
+        "endpoint": "positive_size",
+        "gain_over_best_control": 0.003869818549699823,
+        "gain_over_history": 0.004856866044651403,
+        "gain_over_mean": 0.004967015963541534,
+        "gain_over_shifted": 0.005399630450691224,
+        "horizon_minutes": 30,
+        "n_score_blocks": 9,
+        "n_seeds_scored": 3,
+        "seed_ranges": {
+          "gain_over_best_control": [
+            -0.0010085861768892462,
+            0.012933008777530543
+          ],
+          "gain_over_history": [
+            -0.00031496695154182604,
+            0.012933221654962426
+          ],
+          "gain_over_mean": [
+            1.6062583989653574e-05,
+            0.012933008777530543
+          ],
+          "gain_over_shifted": [
+            -0.0010085861768892462,
+            0.014100156489375983
+          ]
+        },
+        "subject": "yuquan_zhangkexuan"
+      },
+      {
+        "alias": "P3",
+        "eligible": true,
+        "endpoint": "subset",
+        "gain_over_best_control": 0.004749648501592221,
+        "gain_over_history": 0.03756039971184872,
+        "gain_over_mean": 0.03792585187522671,
+        "gain_over_shifted": 0.013559602005627128,
+        "horizon_minutes": 30,
+        "n_score_blocks": 9,
+        "n_seeds_scored": 3,
+        "seed_ranges": {
+          "gain_over_best_control": [
+            -0.026102941951146597,
+            0.050817053445470384
+          ],
+          "gain_over_history": [
+            -0.010465165989547127,
+            0.0644243187823538
+          ],
+          "gain_over_mean": [
+            -0.010464561705690838,
+            0.06549941032464376
+          ],
+          "gain_over_shifted": [
+            -0.026102941951146597,
+            0.050817053445470384
+          ]
+        },
+        "subject": "yuquan_zhangkexuan"
+      }
+    ],
+    "same_prefix": {
+      "rows": [],
+      "status": "reported_as_later_continuation_in_closeout_json"
+    },
+    "status": "run_but_not_scientifically_admissible_positive_control_failed"
+  },
+  "h2b_transfer": {
+    "field_rows": [],
+    "risk_rows": [],
+    "status": "not_run"
+  },
+  "h3_feedback": {
+    "impulse_rows": [],
+    "model_rows": [],
+    "status": "not_run"
+  },
+  "horizons_minutes": [
+    5,
+    30,
+    120
+  ],
+  "source": {
+    "measurement_layer_nested": true,
+    "model_layer_nested": true,
+    "sealed_partition_opened": false,
+    "source_commit": "9b4f456e6214bd84240019526af9c52083544a55",
+    "summary_format": "group_event_state_v0_3_2_closeout_summary"
+  },
+  "status": "v0_3_2_instrument_unstable_development",
+  "training": [
+    {
+      "alias": "P1",
+      "n_seeds": 3,
+      "optimization_status": "development_diagnostic",
+      "selected_epochs": [],
+      "subject": "epilepsiae_1146"
+    },
+    {
+      "alias": "P2",
+      "n_seeds": 3,
+      "optimization_status": "development_diagnostic",
+      "selected_epochs": [],
+      "subject": "yuquan_pengzihang"
+    },
+    {
+      "alias": "P3",
+      "n_seeds": 3,
+      "optimization_status": "development_diagnostic",
+      "selected_epochs": [],
+      "subject": "yuquan_zhangkexuan"
+    }
+  ],
+  "v0_3_1_diagnostics": {
+    "count_rows": [],
+    "mark_rows": [],
+    "status": "archival_not_primary_estimand"
+  }
+}
