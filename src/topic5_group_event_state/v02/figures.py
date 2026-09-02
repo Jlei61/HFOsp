@@ -28,7 +28,7 @@ ARM_LABELS = {
     "P_local": "next-event model",
     "P_slow": "multi-horizon model",
     "shift": "same model, time-shifted state",
-    "memoryless": "no carried state",
+    "memoryless": "carries only the gap since the last event",
 }
 ARM_COLORS = {
     "P_local": "#1b7f79",     # teal
@@ -36,6 +36,12 @@ ARM_COLORS = {
     "shift": "#8a8a8a",       # grey
     "memoryless": "#5b5ea6",  # muted indigo
 }
+
+# A handful of patients sit orders of magnitude away from the rest, and letting
+# them set the y range hides the very comparison the figure exists for.  The axis
+# is clipped to this central span of the pooled per-patient values and the number
+# of points left outside is printed on the panel.
+SCATTER_CLIP_PERCENTILES = (2.0, 98.0)
 
 PANEL_TITLES = {
     "count": "How many events arrive",
@@ -76,6 +82,26 @@ def _style() -> None:
         "lines.linewidth": 1.6,
         "savefig.bbox": "tight",
     })
+
+
+def _robust_limits(values: np.ndarray, medians, los, his) -> tuple[float, float, int]:
+    """Axis span that shows the medians and the bulk of the scatter, not the tails."""
+
+    pool = np.asarray(values, dtype=float)
+    pool = pool[np.isfinite(pool)]
+    anchors = [v for v in list(medians) + list(los) + list(his) if np.isfinite(v)]
+    if pool.size == 0:
+        return (-1.0, 1.0, 0)
+    lo = float(np.percentile(pool, SCATTER_CLIP_PERCENTILES[0]))
+    hi = float(np.percentile(pool, SCATTER_CLIP_PERCENTILES[1]))
+    if anchors:
+        lo = min(lo, min(anchors))
+        hi = max(hi, max(anchors))
+    lo = min(lo, 0.0)
+    hi = max(hi, 0.0)
+    pad = 0.08 * max(hi - lo, 1e-9)
+    lo, hi = lo - pad, hi + pad
+    return lo, hi, int(((pool < lo) | (pool > hi)).sum())
 
 
 def _bootstrap_ci(values: np.ndarray, n_boot: int = 4000, seed: int = 0) -> tuple[float, float]:
@@ -208,6 +234,19 @@ def plot_future_block_figure(
                  "median_independent_windows": p.n_independent_windows_median}
                 for p, m, l, h in zip(points, med, lo, hi)
             ]
+        pooled = np.concatenate(
+            [p.values for pts in curves.values() for p in pts if p.values.size]
+            or [np.zeros(1)]
+        )
+        all_med = [m for k in curves for m in
+                   [float(np.median(p.values)) if p.values.size else np.nan
+                    for p in curves[k]]]
+        all_ci = [b for k in curves for p in curves[k] for b in _bootstrap_ci(p.values)]
+        ylo, yhi, n_out = _robust_limits(pooled, all_med, all_ci, all_ci)
+        ax.set_ylim(ylo, yhi)
+        if n_out:
+            ax.text(0.98, 0.02, f"{n_out} patient points outside", transform=ax.transAxes,
+                    ha="right", va="bottom", fontsize=6, color="#666666")
         ticks = []
         for i, h in enumerate(horizons):
             ref = next(iter(curves.values()))[i]
@@ -299,6 +338,12 @@ def _plot_prefix_panel(ax, prefix_results, arms, rng) -> dict[str, Any]:
         ax.errorbar(xs + dx, med, yerr=[np.array(med) - np.array(lo),
                                         np.array(hi) - np.array(med)],
                     color=colour, marker="o", ms=4, capsize=2, lw=1.6, zorder=3)
+    pooled = np.concatenate([v for v in sizes if v.size] or [np.zeros(1)])
+    ylo, yhi, n_out = _robust_limits(pooled, med, lo, hi)
+    ax.set_ylim(ylo, yhi)
+    if n_out:
+        ax.text(0.98, 0.02, f"{n_out} patient points outside", transform=ax.transAxes,
+                ha="right", va="bottom", fontsize=6, color="#666666")
     ax.set_xticks(xs)
     ax.set_xticklabels([PREFIX_LABELS[o] for o in outcomes], fontsize=6.5,
                        linespacing=1.35)

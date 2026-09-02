@@ -42,6 +42,11 @@ REPO_OUT = Path(
 DEFAULT_ARMS = {
     "P_local": "B+S(P_local_seed",
     "P_slow": "B+S(P_slow_seed",
+    # The control that decides the reading: its state is a function of the time
+    # since the last event and nothing else.  Leaving it off the figure would let
+    # a reader conclude "nothing helps anywhere" without seeing that a model
+    # carrying nothing does at least as well as the ones that carry history.
+    "memoryless": "B+S(P_memoryless_seed",
     # Only the load-bearing producer's shifted state; "B+shift" alone would
     # silently pool the two producers' nulls into one grey curve.
     "shift": "(S(P_slow_seed",
