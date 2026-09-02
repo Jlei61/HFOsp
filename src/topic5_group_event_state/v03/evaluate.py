@@ -305,8 +305,11 @@ def evaluate_open_loop(
         test_idx = indices["test"]
         state_test = anchor[test_idx]
         expected = _expected_count(model, state_test, horizon, device)
-        zero_state = np.zeros_like(state_test)
-        expected_zero = _expected_count(model, zero_state, horizon, device)
+        equilibrium_state = np.broadcast_to(
+            model.state.mean.detach().cpu().numpy(), state_test.shape
+        ).copy()
+        zero_state = np.zeros_like(state_test)  # neutral input of calibrated grammar
+        expected_zero = _expected_count(model, equilibrium_state, horizon, device)
         baseline_pred, baseline_fit = _fit_count_ridge(
             timeline.baseline.x[indices["train"]][:, baseline_keep], count["train"],
             timeline.baseline.x[indices["val"]][:, baseline_keep], count["val"],
@@ -359,6 +362,10 @@ def evaluate_open_loop(
                 } if donor_ok.any() else None,
             },
             "multiscale_count_fit": baseline_fit,
+            "state_free_definition": {
+                "count": "fixed dynamical equilibrium with TRAIN marginal intensity",
+                "mark": "zero state adapter input to the calibrated grammar",
+            },
             "n_future_event_pairs": int(correct_mark["n_event_pairs"]),
         }
         report["horizons"][key] = entry

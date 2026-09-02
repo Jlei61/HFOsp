@@ -96,3 +96,14 @@ def test_primary_grammar_reads_legacy_architecture_but_not_legacy_weights(tmp_pa
     assert all(not torch.allclose(p, torch.full_like(p, 7.0)) for p in grammar.base.parameters())
     assert torch.equal(grammar.local_offset, torch.zeros_like(grammar.local_offset))
     assert any(p is grammar.local_offset for p in grammar.calibration_parameters)
+
+
+def test_intensity_equilibrium_is_exactly_the_train_marginal_rate():
+    cfg = StateConfig(taus_seconds=(10.0, 100.0), channels_per_tau=1, event_dim=3)
+    model = FixedTimescaleEventState(cfg)
+    model.initialise_intensity_rate(events=50, observed_seconds=100.0)
+    with torch.no_grad():
+        model.mean.copy_(torch.tensor([3.0, -2.0]))
+        model.intensity_head.weight.copy_(torch.tensor([[4.0, -7.0]]))
+    equilibrium = model.mean.unsqueeze(0).repeat(4, 1)
+    assert torch.allclose(model.intensity(equilibrium), torch.full((4,), 0.5), atol=1e-7)

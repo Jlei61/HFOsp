@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import math
 from typing import Sequence
 
 import torch
@@ -54,7 +55,8 @@ class FixedTimescaleEventState(nn.Module):
             nn.Linear(cfg.update_hidden, 2 * cfg.state_dim),
         )
         self.intensity_norm = nn.LayerNorm(cfg.state_dim)
-        self.intensity_head = nn.Linear(cfg.state_dim, 1)
+        self.intensity_head = nn.Linear(cfg.state_dim, 1, bias=False)
+        self.register_buffer("log_base_rate", torch.tensor(math.log(1e-3)))
 
     def initial(self, batch: int, device: torch.device | str) -> Tensor:
         return (self.mean + self.initial_offset).unsqueeze(0).expand(batch, -1).to(device)
@@ -79,14 +81,25 @@ class FixedTimescaleEventState(nn.Module):
         return state_pre + fraction * (torch.tanh(candidate) - state_pre)
 
     def intensity(self, state: Tensor) -> Tensor:
-        return nn.functional.softplus(
-            self.intensity_head(self.intensity_norm(state)).squeeze(-1)
-        ) + float(self.cfg.min_intensity_per_second)
+        # The learned state is a signed modulation of the TRAIN marginal rate.
+        # Subtracting the same readout at the dynamical equilibrium guarantees
+        # lambda(mean) == base_rate.  Without this constraint a model trained on
+        # dense local intervals assigned an arbitrary, unseen intensity to its
+        # long-horizon equilibrium and made 2 h open-loop structurally invalid.
+        normalized = self.intensity_norm(state)
+        equilibrium = self.intensity_norm(
+            self.mean.unsqueeze(0).expand(state.shape[0], -1)
+        )
+        residual = (
+            self.intensity_head(normalized)
+            - self.intensity_head(equilibrium)
+        ).squeeze(-1).clamp(-5.0, 5.0)
+        return torch.exp(self.log_base_rate + residual).clamp_min(
+            float(self.cfg.min_intensity_per_second)
+        )
 
     @torch.no_grad()
     def initialise_intensity_rate(self, events: int, observed_seconds: float) -> None:
         rate = max(float(events) / max(float(observed_seconds), 1.0), 1e-6)
-        # inverse softplus, stable for the rates in this cohort
-        value = torch.log(torch.expm1(torch.tensor(rate).clamp_min(1e-8)))
-        self.intensity_head.bias.copy_(value.reshape_as(self.intensity_head.bias))
+        self.log_base_rate.copy_(torch.tensor(math.log(rate)))
         self.intensity_head.weight.mul_(0.01)

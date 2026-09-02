@@ -55,6 +55,27 @@ def main() -> None:
                 continue
             result = json.loads(result_path.read_text())
             opened = json.loads(open_path.read_text())
+            if result.get("source_commit") != manifest["source_commit"]:
+                raise ValueError(f"{subject}/{seed}: state source commit drift")
+            if opened.get("source_commit") != manifest["source_commit"]:
+                raise ValueError(f"{subject}/{seed}: evaluation source commit drift")
+            if grammar and grammar.get("source_commit") != manifest["source_commit"]:
+                raise ValueError(f"{subject}: grammar source commit drift")
+            if grammar and not grammar.get("outer_train_only", False):
+                raise ValueError(f"{subject}: grammar is not outer-TRAIN-only")
+            # Every recorded second of the split must enter survival exactly
+            # once (within float accumulation tolerance), and no gap may enter.
+            for split_name, split_result in (
+                ("train", result["history"][0]["train"]),
+                ("val", result["history"][0]["validation"]),
+                ("test", result["test"]),
+            ):
+                expected = float(result["recorded_seconds"][split_name])
+                observed = float(split_result["observed_seconds"])
+                if abs(expected - observed) > 1.0:
+                    raise ValueError(
+                        f"{subject}/{seed}/{split_name}: survival support {observed} != {expected}"
+                    )
             records.append({
                 "subject": subject,
                 "seed": seed,
