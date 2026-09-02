@@ -171,6 +171,24 @@ def validate_request(
     if request.input_view.get("materialized_arrays_only") is True and \
             request.scientific_target.get("bin_convention") != "left_closed_right_open_[t+a,t+b)":
         reasons.append("materialized count targets must use canonical [t+a,t+b) bins")
+    if is_human_view(request.input_view) and request.input_view.get("materialized_arrays_only") is True:
+        if kind != "R0":
+            reasons.append("the materialized human mainline currently supports R0 only")
+        required_paths = (
+            "artifact_path", "artifact_manifest", "evaluator_contract", "canonical_evaluator_release",
+        )
+        required_hashes = (
+            "artifact_sha256", "artifact_content_sha256", "artifact_manifest_sha256",
+            "evaluator_contract_sha256", "canonical_evaluator_release_sha256",
+        )
+        for name in required_paths:
+            if _empty(request.input_view.get(name)):
+                reasons.append(f"materialized human input_view needs {name}")
+        for name in required_hashes:
+            if not HEX64.fullmatch(str(request.input_view.get(name, ""))):
+                reasons.append(f"materialized human input_view.{name} must be a SHA256")
+        if str(request.input_hash) != str(request.input_view.get("artifact_sha256", "")):
+            reasons.append("human input_hash must equal input_view.artifact_sha256")
     if reasons:
         return {"status": JobStatus.INVALID_REQUEST.value, "reasons": reasons, "missing_fields": []}
     if is_human_view(request.input_view) and not release_present:                     # [Q4]

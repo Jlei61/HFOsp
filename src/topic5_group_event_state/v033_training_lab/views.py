@@ -25,6 +25,7 @@ from src.topic5_group_event_state.v032_model.data import SubjectBundle, load_sub
 from src.topic5_group_event_state.v032_model.features import TrainStandardizer
 
 from .data import DEFAULT_BINS, DataView, build_view, robust_scale_apply, robust_scale_fit
+from .human_view import HumanArtifactHeld, load_materialized_human_r0_view
 from .request import is_human_view
 from .synthetic import plant_residual_signal
 from .toy import toy_bundle
@@ -242,6 +243,11 @@ def view_for_request(request: Mapping[str, Any], *, release_present: bool, scali
     if is_human_view(iv):
         if not release_present:
             raise ViewHeld("human input view requested without V0_3_3_EXECUTION_RELEASE.json")
+        if kind == "R0" and iv.get("materialized_arrays_only") is True:
+            try:
+                return load_materialized_human_r0_view(request, bins=bins, scaling=scaling)
+            except HumanArtifactHeld as exc:
+                raise ViewHeld(str(exc)) from exc
         subject = str(iv["subject"])
         bundle = load_subject_bundle(subject, allow_provisional_h=False)
         if kind == "R0":
