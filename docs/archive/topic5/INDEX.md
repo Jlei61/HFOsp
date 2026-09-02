@@ -1,5 +1,19 @@
 # Topic 5 Archive Index
 
+- **2026-09-02 Group-Event State v0.2 H2b（Agent B）阶段性验收 / 历史版本封存**：
+  [`阶段封存`](group_event_state_v0_2_h2b_stage_closeout_2026-09-02.md)。
+  机器状态 `STAGE_CLOSED_ENGINEERING_ONLY__H2B_NOT_ESTABLISHED`。**只验收工程与分母层**：
+  按 recording code 的 274 次发作 crosswalk 逐 onset 零误差、成簇归并得 209 个独立事件 /
+  99 个 rolling-origin 留出、各提前量锚点 98/89/79/75、early-ictal 场按脑电起点重建并与
+  已验收缓存同锚点对拍中位 ρ=+0.9977。方法学副产：脑电起点在 145/168 次发作早于临床起点
+  （中位 5.0 s、最大 86.2 s）。预注册基准：静态"病人平均场"预测留出发作头 5 s 中位 ρ=+0.41、
+  最高 +0.93——将来任何状态须越过此线而非零。**所有涉及冻结状态预测发作的科学陈述均已撤回**
+  （读的是 raw latent 而非合同 `S_func`；`P_local`/`P_slow` 的 cell 跨 27–29 种配置不可采纳，
+  仅 memoryless 对照同质；`B_multiscale`、recent IED、block circular shift 三条对照未执行）。
+  B1 判为 assay not estimable（133 格仅 11 格越过截距闸门）。新增 registry fail-closed 校验闸门；
+  查出 `B_multiscale` 的 `log_time_to_nearest_seizure` 为未来标签泄漏；查出 registry 声明的
+  source commit 晚于其 artifact 5 小时。formal/sealed 与 paper-ready Fig1–Fig4 未触碰。
+
 - **2026-08-31 H2b frozen interictal-state cross-task transfer v0.3 探索收口**：
   [`白话版`](continuous_marked_state_h2b_cross_task_v0_3_plain_2026-08-31.md) ·
   [`技术版`](continuous_marked_state_h2b_cross_task_v0_3_technical_2026-08-31.md) ·
