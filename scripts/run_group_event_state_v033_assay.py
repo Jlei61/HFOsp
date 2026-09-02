@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import hashlib
 import json
 import os
 from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -81,6 +82,8 @@ def main() -> None:
                     default=["count_profile", "grammar"])
     ap.add_argument("--levels", nargs="+", type=int, choices=(0, 1, 2), default=[0, 1, 2])
     ap.add_argument("--n-steps", type=int, default=200)
+    ap.add_argument("--scaffold-lock", type=Path, default=None,
+                    help="optional outcome-blind JSON whose subjects must exactly match --subjects")
     ap.add_argument("--output-root", type=Path,
                     default=Path("/data/hfosp_group_event_state_v0_3_3/agent_a/assay"))
     ap.add_argument("--summary", type=Path,
@@ -90,6 +93,19 @@ def main() -> None:
         ap.error("replicates and workers must be positive")
 
     cfg = load_eval_config(args.config)
+    scaffold_lock = None
+    scaffold_lock_sha256 = None
+    if args.scaffold_lock is not None:
+        raw = args.scaffold_lock.read_bytes()
+        scaffold_lock = json.loads(raw)
+        locked = list(scaffold_lock.get("subjects", []))
+        if locked != list(args.subjects):
+            raise ValueError(f"--subjects must exactly match scaffold lock order: {locked}")
+        if scaffold_lock.get("selection_uses_seizure_outcomes") is not False:
+            raise ValueError("assay scaffold selection must be outcome-blind")
+        if scaffold_lock.get("sealed_partition_opened") is not False:
+            raise ValueError("assay scaffold lock must keep the sealed partition closed")
+        scaffold_lock_sha256 = hashlib.sha256(raw).hexdigest()
     commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
     specs = _cells(args.preset, args.replicates)
     run_contract = {
@@ -97,6 +113,7 @@ def main() -> None:
         "canonical_schema_version": C.SCHEMA_VERSION, "carry": "session",
         "horizon_seconds": float(args.horizon), "views": list(args.views),
         "levels": list(args.levels), "n_steps": int(args.n_steps),
+        "scaffold_lock_sha256": scaffold_lock_sha256,
     }
     replicate_dir = args.output_root / "replicates"
     replicate_dir.mkdir(parents=True, exist_ok=True)
@@ -140,6 +157,8 @@ def main() -> None:
         "source_commit": commit,
         "config_sha256": cfg["_config_sha256"],
         "preset": args.preset,
+        "scaffold_lock": ({"path": str(args.scaffold_lock), "sha256": scaffold_lock_sha256,
+                            "subjects": list(args.subjects)} if scaffold_lock is not None else None),
         "cadence": {
             "cli_replicates": int(args.replicates),
             "effective_replicates_per_cell": max(

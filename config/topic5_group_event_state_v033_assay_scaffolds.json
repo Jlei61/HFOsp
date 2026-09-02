@@ -1,0 +1,31 @@
+{
+  "format": "group_event_state_v0_3_3_assay_scaffold_lock",
+  "selection_time": "before multi-scaffold power results",
+  "selection_uses_seizure_outcomes": false,
+  "source_table": "/data/hfosp_group_event_state_v0_3_2/measurement/patient_learnability_table.csv",
+  "features_used": [
+    "dataset",
+    "n_contacts_vocab",
+    "valid_hours_total",
+    "events_per_valid_hour",
+    "contact_entropy_bits",
+    "30min coverage-block support"
+  ],
+  "subjects": [
+    "epilepsiae_818",
+    "epilepsiae_1096",
+    "epilepsiae_1146",
+    "yuquan_huangwanling",
+    "yuquan_zhangbichen"
+  ],
+  "rationale": {
+    "epilepsiae_818": "long recording, low event rate, small contact vocabulary",
+    "epilepsiae_1096": "long recording, high event rate, small contact vocabulary",
+    "epilepsiae_1146": "existing discrepancy/sentinel scaffold, intermediate support and 15 contacts",
+    "yuquan_huangwanling": "short admission, very high event rate, four contacts",
+    "yuquan_zhangbichen": "short admission, moderate event rate, largest contact vocabulary"
+  },
+  "power_requirement_rule": "for each endpoint/horizon and medium oracle-effect tier, take the maximum finite Level-0 required-block estimate across all five scaffolds; if any scaffold is nonfinite, keep power pending",
+  "evidence_scope": "synthetic estimator/score calibration on real time/support scaffolds only; no human target result",
+  "sealed_partition_opened": false
+}
