@@ -1,5 +1,9 @@
 # Topic 5 Archive Index
 
+- **2026-09-02 群体间期事件状态三张核心证据图合同**：
+  [`figure contract`](group_event_state_core_evidence_figure_contract_2026-09-02.md)。
+  先固定 H1 future-block、H2a state-dependent repertoire、H2b seizure transfer 与 H3 feedback 的最终画布和机器接口；当前 v0.3 三患者 pilot 只填真实 H1/H2a 读数，H2b/H3 保持 `not yet run`，不使用模拟占位。producer 为 `scripts/paper_figures/plot_group_event_state_core_evidence.py`，输出位于 `results/group_event_state/core_evidence/`，当前身份为 candidate framework，不进入 Fig1–Fig4 canonical。
+
 - **2026-08-31 H2b frozen interictal-state cross-task transfer v0.3 探索收口**：
   [`白话版`](continuous_marked_state_h2b_cross_task_v0_3_plain_2026-08-31.md) ·
   [`技术版`](continuous_marked_state_h2b_cross_task_v0_3_technical_2026-08-31.md) ·

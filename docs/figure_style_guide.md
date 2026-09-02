@@ -288,6 +288,15 @@ Topic 5 仍有多条探索线，只有已经进 paper-ready Fig3 的 field reado
 - **读法（三条承重边界）**：观测 rust 是否**离开蓝色 within-shaft null 带**并成 cluster。固定时间映射版 shared-matched 7 人中 3 人（E1084、E1146、E590）有至少一个 within-shaft cluster，2 人（E1084、E1146）有 maxT 窗；这是 per-subject 描述，不能升级成 cohort gate。⚠️(1) 高于 all-contact 不等于高于 within-shaft；(2) within-shaft null 分辨力依赖 shaft sizes，E583 仅 3/22 seizures，且修复后无 cluster/maxT；(3) 冻结 archive 的早期发作 cohort shared-field null（n=7, p=0.346）与这里的时间分辨逐人 null 是不同统计问题，不能互相替代。
 - **tier**：per-subject 素材，非 formal cohort spatial gate；不写 replay / timing-order / mechanism。
 
+### 5e. 群体间期事件状态核心证据（candidate framework）
+
+- **示范图**：`results/group_event_state/core_evidence/figures/` 下的 H1、H2a、H2b/H3 三张图；producer 为 `scripts/paper_figures/plot_group_event_state_core_evidence.py`。
+- **回答**：依次回答 future-block predictive state、state-dependent event repertoire、seizure transfer 与 IED feedback。三张图沿同一证据链组织，但每张只承担一个层级的科学问题。
+- **方向合同**：所有承重增量统一成“正值支持假设”；零线以上淡绿色只表示有利方向，不代替患者级统计。缺失点不连线、不补零，未运行 panel 明写 `not yet run`，禁止示例/模拟点占位。
+- **统计语法**：细线/点为患者，粗 rust 菱形为患者中位，tick 同时报可估患者数。H2b 以 held-out seizure 为分母；H3 先控制共同 pre-event state，并画有符号 impulse response。
+- **读法**：H1 必须在真实 30–120 min horizon 同时胜过 multiscale history 和 wrong-time null；H2a 必须把 STOP、positive size、contact subset 分开；H2b/H3 未跑时只锁接口，不得被读作阴性。
+- **版式**：180 mm 双栏，tick/label/legend ≥7 pt，同时交付 600 dpi PNG、矢量 PDF、metadata 与中文 README。当前是 candidate，不占用 Fig1–Fig4 canonical slot。
+
 ---
 
 ## 维护
