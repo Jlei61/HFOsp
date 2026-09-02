@@ -164,7 +164,17 @@ def refractory_manifest(tl: EvalTimeline, cfg: Mapping[str, Any]) -> dict[str, A
     dt_anchor = np.full(tl.grid.n_anchors, np.inf)
     dt_anchor[ok & same_seg] = tl.grid.t_anchor[ok & same_seg] - t[last[ok & same_seg]]
     anchors_inside_window = float(np.mean(dt_anchor < core + future_support)) if tl.grid.n_anchors else None
-    hist_edges = [core, 2 * core, 3 * core, 4 * core, 1.0, 2.0, 5.0, 10.0, 30.0, 60.0, 300.0]
+    # leak channel: the last pre-anchor event's feature window still open at the anchor AND the
+    # first target-window event starts inside that window (bounded to one event per anchor)
+    nxt = np.searchsorted(t, tl.grid.t_anchor, side="left")
+    nxt_ok = ok & same_seg & (nxt < t.size)
+    nxt_same = np.zeros_like(nxt_ok)
+    nxt_same[nxt_ok] = tl.event_segment[nxt[nxt_ok]] == tl.grid.segment_index[nxt_ok]
+    overlap_target = np.zeros(tl.grid.n_anchors, dtype=bool)
+    sel = nxt_ok & nxt_same
+    overlap_target[sel] = (t[nxt[sel]] - t[last[sel]]) < core + future_support
+    anchors_overlap_target = float(np.mean(overlap_target)) if tl.grid.n_anchors else None
+    hist_edges = sorted({round(v, 6) for v in (core, 2 * core, 3 * core, 4 * core, 1.0, 2.0, 5.0, 10.0, 30.0, 60.0, 300.0) if v > 0.0})
     hist = np.histogram(iei, bins=[0.0] + hist_edges + [np.inf])[0].tolist() if n else []
     return {
         "subject": tl.subject,
@@ -206,6 +216,8 @@ def refractory_manifest(tl: EvalTimeline, cfg: Mapping[str, Any]) -> dict[str, A
             "fraction_next_core_overlaps_context_only": frac(iei < core + float(meas["feature_window_post_seconds"])),
             "earliest_state_update_after_onset_seconds": core + future_support,
             "fraction_anchors_inside_previous_feature_window": anchors_inside_window,
+            "fraction_anchors_last_feature_window_overlaps_target": anchors_overlap_target,
+            "leak_bound": "at most the first target-window event per anchor; shared by H and S",
             "rule": (
                 "an event's content may enter the state no earlier than core_end + 0.75 s; an anchor "
                 "state may only use events whose feature window has closed before the anchor"

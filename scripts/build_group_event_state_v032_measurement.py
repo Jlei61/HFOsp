@@ -137,6 +137,8 @@ def main() -> None:
     eligibility = {s: r["eligibility"] for s, r in ok.items()}
     elig_payload = {**meta, "format": "group_event_state_v0_3_2_endpoint_eligibility",
                     "frozen_before_any_model_result": True, "patients": eligibility,
+                    # alias for the model agent's reader (payload.get("subjects", payload)[subject])
+                    "subjects": eligibility,
                     "cohort": {
                         "n_patients": len(eligibility),
                         "n_eligible_count_30min": sum(e["eligibility"]["count_30min_primary"]["eligible"] for e in eligibility.values()),

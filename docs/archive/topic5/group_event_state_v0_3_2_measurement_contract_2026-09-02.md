@@ -124,6 +124,11 @@ H   vs   H + S_correct   vs   H + S_shifted   vs   H + S_mean
 
 报告：`group_event_state_v0_3_2_measurement_plain_2026-09-02.md`、`group_event_state_v0_3_2_measurement_technical_2026-09-02.md`。
 
+## 8.1 合同修订记录
+
+- **rev1（2026-09-02，任何 H+S 比较运行之前）**：NB ridge 网格由 `1e-3…1e3` 扩为 `1e-3…1e5`。原因：只含 H 的首轮拟合中 27 人多数在 1e3 顶格（`ridge_at_edge=true`），说明网格没有覆盖 inner_val 的最优正则强度；网格对所有臂同等生效，不改变任何臂的相对地位。
+- **rev1 说明（H 的信息集）**：H 的特征使用 anchor 之前（onset 严格早于 anchor）的全部事件，与 Agent 1 的 anchor state 信息集一致，以保持配对公平；zero-phase filter 的 0.75 s 未来支持带来的"最后一个事件的波形特征可能覆盖目标窗首个事件"是 H 与 S 共有的、至多一个事件的泄漏通道，逐患者量化在 `detector_refractory_manifest.json`（`fraction_anchors_last_feature_window_overlaps_target`），在 300 s horizon 上必须并报。
+
 ## 9. 完成条件
 
 非 transductive support 与 eligibility 已冻结；所有 eligible 臂均能输出 score；无 test-time fit；无结果驱动的 NA / 删 seed；H 与 H+S 同分布同 anchors；frozen state 到达后完成 H1/H2a 配对评价；图与报告与机器 JSON 一致；targeted tests 通过；sealed partition、H2b、H3 不运行；提交并推送分支，不合并 main。
