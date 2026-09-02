@@ -20,6 +20,7 @@ if str(ROOT) not in sys.path:
 
 from src.topic5_group_event_state.v032_eval.contract import atomic_json  # noqa: E402
 from src.topic5_group_event_state.v033_evaluator import canonical as C  # noqa: E402
+from src.topic5_group_event_state.v033_evaluator import oracle as O  # noqa: E402
 
 
 def _load(path: Path) -> dict:
@@ -34,6 +35,9 @@ def _sentinel_summary(power: dict) -> dict:
         raise ValueError("canonical publication requires the reviewed sentinel summary")
     if power.get("human_targets_used") is not False or power.get("sealed_partition_opened") is not False:
         raise ValueError("sentinel must be synthetic-only with the sealed partition closed")
+    source_commit = str(power.get("source_commit", ""))
+    if len(source_commit) != 40 or any(ch not in "0123456789abcdef" for ch in source_commit):
+        raise ValueError("sentinel must carry a full source commit")
     views = {}
     for curve in power.get("curves", []):
         cells = curve.get("cells", [])
@@ -53,6 +57,7 @@ def _sentinel_summary(power: dict) -> dict:
     return {
         "status": "SENTINEL_PASS_D0_NO_FALSE_POSITIVES",
         "scope": "one-replicate diagnostic; not a final power curve",
+        "source_commit": source_commit,
         "views": views,
     }
 
@@ -100,6 +105,14 @@ def build_contract(*, power: dict, boundary: dict, discrepancy: dict,
             "primary_gain": "NLL(H) - NLL(H_plus_state)",
             "unmasked_nonfinite": "hard error",
             "paired_rows": "same anchors, targets, masks, weights, predictions and dispersions",
+        },
+        "phase_contract": {
+            "state_selection_phase": O.STATE_SELECTION_PHASE,
+            "development_evaluation_phase": O.EVALUATION_PHASE,
+            "reported_gain_uses": "dev_test_only",
+            "estimability_uses": "dev_test_only",
+            "dev_val_plus_dev_test": "descriptive_total_only_never_a_result_denominator",
+            "scope_note": "dev_test is development-consumed, not sealed or formal evaluation",
         },
         "implementation": {
             "evaluator_commit": subprocess.check_output(

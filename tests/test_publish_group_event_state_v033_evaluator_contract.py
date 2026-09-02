@@ -19,7 +19,7 @@ def _power(fp=0.0):
                  "gain_by_level": {}},
             ],
         })
-    return {"preset": "sentinel", "human_targets_used": False,
+    return {"preset": "sentinel", "source_commit": "a" * 40, "human_targets_used": False,
             "sealed_partition_opened": False, "curves": curves}
 
 
@@ -51,6 +51,9 @@ def test_contract_separates_evaluator_assay_and_human_evidence():
     assert out["count_profile"]["primary_dispersion"].startswith("one H-fitted")
     assert out["implementation"]["training_commit"] == "def"
     assert out["assay"]["status"] == "SENTINEL_PASS_D0_NO_FALSE_POSITIVES"
+    assert out["assay"]["source_commit"] == "a" * 40
+    assert out["phase_contract"]["reported_gain_uses"] == "dev_test_only"
+    assert out["phase_contract"]["estimability_uses"] == "dev_test_only"
     assert out["human_scientific_conclusion"] == "NONE"
     assert out["sealed_partition_opened"] is False
 
