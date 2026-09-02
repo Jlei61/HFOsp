@@ -12,6 +12,13 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 
+# The archived frozen-q / canary artifacts and the persistent-OU transition
+# artifacts share this schema, so one selection path serves both.
+ACCEPTED_STATUSES = (
+    "SPATIAL_ZQIM_HYBRID_CANARY_COMPLETE",
+    "SPATIAL_ZM_OU_TRANSITION_COMPLETE",
+)
+
 
 def _compact(path):
     payload = json.loads(path.read_text())
@@ -35,6 +42,24 @@ def _compact(path):
         json.dumps(parameter_contract, sort_keys=True,
                    separators=(",", ":")).encode("utf-8")
     ).hexdigest()
+    tonic = payload.get("criterion10_tonic_exclusion") or {}
+    tonic_detail = (tonic.get("detail") or {}).get("high_state") or {}
+    # Criterion 10 is part of the Fig5A gate.  A persistent-OU transition
+    # artifact must carry it and pass it -- a missing field there means the run
+    # predates the clause, not that the clause does not apply, so it fails
+    # closed.  The archived frozen-q canaries never had the clause and keep
+    # their historical nine-clause meaning.
+    nine_clause_pass = bool(classification.get("all_checks_pass", False))
+    is_transition = payload.get("status") == "SPATIAL_ZM_OU_TRANSITION_COMPLETE"
+    criterion10 = tonic.get("all_checks_pass", None)
+    full_gate_pass = bool(
+        nine_clause_pass
+        and (criterion10 is True if is_transition
+             else criterion10 is not False))
+    ou_applied = payload.get("applied_spatial_ou") or {}
+    ou_runtime = payload.get("ou_runtime_evidence") or {}
+    ou_stationarity = payload.get("ou_stationarity_across_transition") or {}
+    stability = payload.get("numerical_stability") or {}
     return {
         "path": str(path.relative_to(ROOT)),
         "seed": payload.get("seed"),
@@ -43,7 +68,12 @@ def _compact(path):
         "parameter_set_id": payload.get("parameter_set_id"),
         "parameter_contract_sha256": parameter_contract_sha256,
         "verdict": payload.get("verdict"),
-        "all_checks_pass": bool(classification.get("all_checks_pass", False)),
+        "all_checks_pass": full_gate_pass,
+        "nine_clause_lfp_gate_pass": nine_clause_pass,
+        "criterion10_tonic_exclusion_pass": tonic.get("all_checks_pass"),
+        "population_rate_modulation_depth": tonic_detail.get(
+            "modulation_depth"),
+        "population_rate_dominant_hz": tonic_detail.get("dominant_hz"),
         "n_checks_pass": int(sum(bool(value) for value in checks.values())),
         "n_checks": int(len(checks)),
         "failed_checks": sorted(key for key, value in checks.items() if not value),
@@ -98,6 +128,17 @@ def _compact(path):
         "median_peak_power_fraction": rhythm.get("median_peak_power_fraction"),
         "median_band_power_ratio_post_over_pre": rhythm.get(
             "median_band_power_ratio_post_over_pre"),
+        "n_rhythmic_contacts": payload.get("n_rhythmic_contacts"),
+        "ou_sigma_rate_per_ms": ou_applied.get("sigma_rate_per_ms"),
+        "ou_tau_ms": ou_applied.get("tau_ms"),
+        "ou_ell_mm": ou_applied.get("ell_mm"),
+        "ou_seed_offset": ou_applied.get("seed_offset"),
+        "ou_called_every_membrane_step": ou_runtime.get(
+            "called_every_membrane_step"),
+        "ou_sd_ratio_after_over_before": ou_stationarity.get(
+            "sd_ratio_after_over_before"),
+        "numerically_stable": stability.get("all_checks_pass"),
+        "ou_realisation_sha256": payload.get("ou_realisation_sha256"),
     }
 
 
@@ -115,6 +156,22 @@ def _rank(row):
         -value("median_peak_power_fraction", -1.0),
         str(row["path"]),
     )
+
+
+def _stationary_noise_evidence(row):
+    """A confirmation record must prove the noise ran and did not change.
+
+    ``None`` means the field was never recorded, which is exactly the situation
+    the runtime audit exists to rule out, so it fails rather than defaults.
+    """
+    ratio = row.get("ou_sd_ratio_after_over_before")
+    return {
+        "ou_called_every_membrane_step": row.get(
+            "ou_called_every_membrane_step") is True,
+        "ou_sd_stationary_across_transition": (
+            ratio is not None and 0.9 <= float(ratio) <= 1.1),
+        "numerically_stable": row.get("numerically_stable") is True,
+    }
 
 
 def _confirmation_families(rows, minimum_seeds):
@@ -136,10 +193,14 @@ def _confirmation_families(rows, minimum_seeds):
         single_frozen_config = len(contract_sha256) == 1
         all_completed_pass = bool(records) and all(
             row["all_checks_pass"] for row in records)
+        evidence = [_stationary_noise_evidence(row) for row in records]
+        all_noise_evidence_pass = bool(records) and all(
+            all(item.values()) for item in evidence)
         eligible = (
             len(seeds) >= int(minimum_seeds)
             and all_completed_pass
             and single_frozen_config
+            and all_noise_evidence_pass
         )
         families.append({
             "parameter_set_id": parameter_set_id,
@@ -148,6 +209,8 @@ def _confirmation_families(rows, minimum_seeds):
             "n_passed_seeds": len(passed_seeds),
             "passed_seeds": passed_seeds,
             "all_completed_seeds_pass": all_completed_pass,
+            "all_seeds_stationary_noise_and_stable": all_noise_evidence_pass,
+            "per_seed_noise_and_stability_evidence": evidence,
             "single_frozen_config": single_frozen_config,
             "parameter_contract_sha256": (
                 contract_sha256[0] if single_frozen_config else None),
@@ -175,17 +238,32 @@ def main():
         input_dir = ROOT / input_dir
     paths = sorted(input_dir.rglob("*.json"))
     rows = [_compact(path) for path in paths
-            if json.loads(path.read_text()).get("status")
-            == "SPATIAL_ZQIM_HYBRID_CANARY_COMPLETE"]
+            if json.loads(path.read_text()).get("status") in ACCEPTED_STATUSES]
     rows.sort(key=_rank)
     families = _confirmation_families(rows, args.minimum_confirmation_seeds)
     primary_family = next((family for family in families
                            if family["eligible_multi_seed_family"]), None)
     primary = None
     if primary_family is not None:
-        # The representative is the median seed, fixed without viewing pixels.
-        family_rows = primary_family["records"]
-        primary = family_rows[len(family_rows) // 2]
+        # The representative is the passing seed whose transition time is
+        # closest to the family median onset, fixed without viewing pixels.
+        family_rows = [row for row in primary_family["records"]
+                       if row["all_checks_pass"]
+                       and row["scientific_onset_ms"] is not None]
+        onsets = sorted(float(row["scientific_onset_ms"]) for row in family_rows)
+        median_onset = float(onsets[len(onsets) // 2]) if len(onsets) % 2 else (
+            0.5 * (onsets[len(onsets) // 2 - 1] + onsets[len(onsets) // 2]))
+        primary = min(family_rows, key=lambda row: (
+            abs(float(row["scientific_onset_ms"]) - median_onset),
+            int(row["seed"])))
+        primary_family["representative_selection"] = {
+            "rule": ("passing confirmation seed whose scientific onset is "
+                     "closest to the family median onset; ties broken by the "
+                     "smaller seed"),
+            "family_median_onset_ms": median_onset,
+            "representative_onset_ms": float(primary["scientific_onset_ms"]),
+            "image_pixels_used": False,
+        }
     payload = {
         "status": "SPATIAL_ZQIM_HYBRID_AGGREGATE_COMPLETE",
         "selection_used_image_pixels": False,

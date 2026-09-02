@@ -320,3 +320,107 @@ def classify_global_recruited_oscillation(*, onset_ms, rates, recruitment,
             "model-state morphology screen only; not a clinical seizure "
             "classifier, patient waveform fit, or mechanism identification"),
     }
+
+
+TONIC_GLOBAL_RUNAWAY_THRESHOLDS = {
+    "minimum_pre_transition_dwell_ms": 300.0,
+    "maximum_pre_median_rate_hz": 80.0,
+    "maximum_pre_q95_rate_hz": 120.0,
+    "minimum_post_median_rate_hz": 300.0,
+    "minimum_post_over_pre_rate_ratio": 4.0,
+    "minimum_median_active_E_fraction_20ms": 0.85,
+    "minimum_median_recruited_sheet_fraction_1mm": 0.85,
+    "minimum_joint_global_recruitment_duty": 0.80,
+    "minimum_observed_post_transition_ms": 1500.0,
+}
+
+
+def classify_global_tonic_runaway(
+    *,
+    onset_ms,
+    observed_post_transition_ms,
+    rates,
+    recruitment,
+    thresholds=None,
+):
+    """Accept the near-saturated tonic runaway requested for Fig. 5A.
+
+    This is deliberately a different endpoint from
+    :func:`classify_global_recruited_oscillation`.  It rewards a persistent,
+    globally recruited high-rate plateau and therefore does *not* inspect a
+    contact spectrum, a target frequency, or population-rate modulation depth.
+    The two classifiers are kept side by side so a tonic-positive result cannot
+    silently overwrite the later oscillation-negative audit.
+
+    The default thresholds describe the requested B0 morphology: a readable
+    300-ms low state, at least 1.5 s of recorded high state, a
+    refractory-ceiling-adjacent population rate, and near-complete recruitment
+    of both neurons and the spatial sheet.  Raw values are returned beside every
+    threshold so the gate is auditable rather than encoded only in a label.
+    """
+    locked = dict(TONIC_GLOBAL_RUNAWAY_THRESHOLDS)
+    if thresholds is not None:
+        unknown = sorted(set(thresholds).difference(locked))
+        if unknown:
+            raise ValueError(f"unknown tonic-runaway thresholds: {unknown}")
+        locked.update({key: float(value) for key, value in thresholds.items()})
+
+    observed = {
+        "pre_transition_dwell_ms": float(onset_ms),
+        "pre_median_rate_hz": float(rates["median_pre_hz"]),
+        "pre_q95_rate_hz": float(rates["q95_pre_hz"]),
+        "post_median_rate_hz": float(rates["median_post_hz"]),
+        "post_q05_rate_hz": float(rates["q05_post_hz"]),
+        "post_over_pre_rate_ratio": float(rates["median_ratio_post_over_pre"]),
+        "median_active_E_fraction_20ms": float(
+            recruitment["median_active_neuron_fraction_20ms"]),
+        "median_recruited_sheet_fraction_1mm": float(
+            recruitment["median_recruited_spatial_fraction_1mm"]),
+        "joint_global_recruitment_duty": float(
+            recruitment["joint_global_recruitment_duty"]),
+        "observed_post_transition_ms": float(observed_post_transition_ms),
+    }
+    checks = {
+        "readable_low_state_dwell": (
+            observed["pre_transition_dwell_ms"]
+            >= locked["minimum_pre_transition_dwell_ms"]),
+        "pre_state_below_runaway_threshold": (
+            observed["pre_median_rate_hz"]
+            <= locked["maximum_pre_median_rate_hz"]
+            and observed["pre_q95_rate_hz"]
+            < locked["maximum_pre_q95_rate_hz"]),
+        "post_rate_is_near_saturated_plateau": (
+            observed["post_median_rate_hz"]
+            >= locked["minimum_post_median_rate_hz"]
+            and observed["post_over_pre_rate_ratio"]
+            >= locked["minimum_post_over_pre_rate_ratio"]),
+        "near_complete_E_recruitment": (
+            observed["median_active_E_fraction_20ms"]
+            >= locked["minimum_median_active_E_fraction_20ms"]),
+        "near_complete_sheet_recruitment": (
+            observed["median_recruited_sheet_fraction_1mm"]
+            >= locked["minimum_median_recruited_sheet_fraction_1mm"]),
+        "global_plateau_is_sustained": (
+            observed["joint_global_recruitment_duty"]
+            >= locked["minimum_joint_global_recruitment_duty"]
+            and observed["observed_post_transition_ms"]
+            >= locked["minimum_observed_post_transition_ms"]),
+    }
+    passed = bool(all(checks.values()))
+    return {
+        "status": ("TONIC_GLOBAL_RUNAWAY" if passed
+                   else "NOT_TONIC_GLOBAL_RUNAWAY"),
+        "all_checks_pass": passed,
+        "checks": checks,
+        "observed": observed,
+        "thresholds": locked,
+        "explicitly_not_required": [
+            "30-80 Hz contact peak",
+            "deep population-rate modulation",
+            "periodic silencing and reactivation",
+        ],
+        "boundary": (
+            "model-state morphology screen for a near-saturated tonic runaway; "
+            "not a clinical seizure classifier, waveform fit, or patient-mechanism "
+            "identification"),
+    }
