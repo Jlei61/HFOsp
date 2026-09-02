@@ -54,3 +54,25 @@ def test_eligibility_rows_read_required_blocks_from_the_power_curve_or_flag_pend
     assert by[("h2b_seizure_risk", None)]["support_unit"] == "seizures_in_development_phases"
     for r in rows:
         assert not any(k in r for k in ("gain", "nll", "p_value")), "eligibility must never carry a result"
+
+
+def test_power_requirements_take_conservative_max_across_scaffolds_without_overwrite():
+    payload = {
+        "format": "curve", "source_commit": "abcdef123456",
+        "curves": [
+            {"view": "count_profile", "horizon_seconds": 1800, "subject": "low",
+             "effect_tiers": {"medium": {"required_blocks_level0": 8,
+                                           "required_blocks_by_level": {"0": 8},
+                                           "oracle_gain_median": 0.05}}},
+            {"view": "count_profile", "horizon_seconds": 1800, "subject": "high",
+             "effect_tiers": {"medium": {"required_blocks_level0": 15,
+                                           "required_blocks_by_level": {"0": 15},
+                                           "oracle_gain_median": 0.052}}},
+        ],
+    }
+    got = G.requirements_from_power_curves(payload)
+    row = got[("count_profile", 1800)]
+    assert row["required_blocks"] == 15
+    assert [x["subject"] for x in row["calibration_scaffolds"]] == ["low", "high"]
+    payload["curves"][1]["effect_tiers"]["medium"]["required_blocks_level0"] = None
+    assert G.requirements_from_power_curves(payload)[("count_profile", 1800)]["required_blocks"] is None

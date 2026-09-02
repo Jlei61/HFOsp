@@ -127,18 +127,40 @@ def eligibility_rows(subject: str, support: Mapping[str, Any],
 
 
 def requirements_from_power_curves(curves: Mapping[str, Any], *, tier: str = "medium") -> dict[tuple[str, int], dict[str, Any]]:
-    """``{(view, horizon): {required_blocks, source, tier}}`` from ``d0_d4_power_curve.json`` payloads."""
+    """Conservative requirements from all declared calibration scaffolds.
 
-    out: dict[tuple[str, int], dict[str, Any]] = {}
+    A single scaffold must never silently overwrite another scaffold.  For
+    each endpoint/horizon, the planning requirement is the maximum finite
+    Level-0 requirement across every declared scaffold.  If any scaffold has
+    no finite requirement, the endpoint remains power-pending.
+    """
+
+    grouped: dict[tuple[str, int], list[dict[str, Any]]] = {}
     for entry in curves.get("curves", []):
         tiers = entry.get("effect_tiers", {})
         chosen = tiers.get(tier)
         if not chosen:
             continue
-        out[(entry["view"], int(entry["horizon_seconds"]))] = {
+        key = (entry["view"], int(entry["horizon_seconds"]))
+        grouped.setdefault(key, []).append({
+            "subject": entry.get("subject"),
             "required_blocks": chosen.get("required_blocks_level0"),
             "required_blocks_by_level": chosen.get("required_blocks_by_level"),
-            "source": f"{curves.get('format')} @ {curves.get('source_commit', 'unknown')[:10]} scaffold {entry.get('subject')}",
-            "tier": tier, "oracle_gain_median": chosen.get("oracle_gain_median"),
+            "oracle_gain_median": chosen.get("oracle_gain_median"),
+        })
+    out: dict[tuple[str, int], dict[str, Any]] = {}
+    for key, scaffold_rows in grouped.items():
+        finite = [row["required_blocks"] for row in scaffold_rows if row.get("required_blocks") is not None]
+        all_finite = len(finite) == len(scaffold_rows)
+        out[key] = {
+            "required_blocks": int(max(finite)) if finite and all_finite else None,
+            "required_blocks_by_level": None,
+            "source": (
+                f"{curves.get('format')} @ {curves.get('source_commit', 'unknown')[:10]} "
+                f"conservative max across {len(scaffold_rows)} declared scaffolds"
+            ),
+            "tier": tier,
+            "aggregation_rule": "max finite required_blocks across all scaffolds; any nonfinite => pending",
+            "calibration_scaffolds": scaffold_rows,
         }
     return out
