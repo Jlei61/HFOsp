@@ -114,7 +114,7 @@ def edge_set_descriptors(
     strength: np.ndarray,
     nodes_xy_mm: np.ndarray,
     observation_operator: np.ndarray,
-) -> dict[str, float]:
+) -> dict[str, float | int | list[int]]:
     """Descriptors used to match a local control to the learned LR target."""
     selected = np.asarray(mask, bool)
     weight = np.asarray(strength, float) * selected
@@ -122,6 +122,8 @@ def edge_set_descriptors(
     target_weight = weight.sum(axis=1)
     source_nodes = selected.any(axis=0)
     target_nodes = selected.any(axis=1)
+    source_degree = selected.sum(axis=0).astype(int)
+    target_degree = selected.sum(axis=1).astype(int)
     xy = np.asarray(nodes_xy_mm, float)
     support = np.asarray(observation_operator, float).max(axis=0) > 1e-6
 
@@ -141,6 +143,10 @@ def edge_set_descriptors(
         "target_extent_mm": extent(target_weight),
         "supported_source_nodes": int((source_nodes & support).sum()),
         "supported_target_nodes": int((target_nodes & support).sum()),
+        # Sorted profiles match recurrent fan-out/fan-in heterogeneity without
+        # forcing a local control to reuse the nonlocal edge endpoints.
+        "source_degree_profile": np.sort(source_degree).tolist(),
+        "target_degree_profile": np.sort(target_degree).tolist(),
     }
 
 
@@ -167,6 +173,10 @@ def local_control_match_score(candidate: dict[str, float], target: dict[str, flo
     ):
         denominator = max(abs(float(target[key])), 1.0)
         ratios.append((float(candidate[key]) - float(target[key])) / denominator)
+    for key in ("source_degree_profile", "target_degree_profile"):
+        left = np.asarray(candidate[key], float)
+        right = np.asarray(target[key], float)
+        ratios.append(float(np.abs(left - right).sum() / max(1.0, right.sum())))
     return float(np.sqrt(np.mean(np.square(ratios))))
 
 
@@ -211,6 +221,14 @@ def match_local_control_subsets(
             and _within_relative(desc["target_extent_mm"], target_desc["target_extent_mm"], 0.70, 1.30)
             and _count_within(desc["supported_source_nodes"], target_desc["supported_source_nodes"])
             and _count_within(desc["supported_target_nodes"], target_desc["supported_target_nodes"])
+            and np.abs(
+                np.asarray(desc["source_degree_profile"], float)
+                - np.asarray(target_desc["source_degree_profile"], float)
+            ).sum() / max(1.0, sum(target_desc["source_degree_profile"])) <= 0.30
+            and np.abs(
+                np.asarray(desc["target_degree_profile"], float)
+                - np.asarray(target_desc["target_degree_profile"], float)
+            ).sum() / max(1.0, sum(target_desc["target_degree_profile"])) <= 0.30
         )
         if valid:
             accepted.append((local_control_match_score(desc, target_desc), mask, desc))

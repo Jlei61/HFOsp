@@ -2,7 +2,9 @@
 
 > 对应 spec：`docs/superpowers/specs/2026-08-13-topic5-patient-specific-multiscale-effective-scaffold-v0-5-design.md`
 >
-> 状态：**审阅修订完成，等待用户终审锁定；不启动正式训练。** v0.3 已由 commit
+> 状态：**SCIENTIFIC CLOSEOUT COMPLETE。A–H 已执行完成：531/531 正式训练、Stage F target-free freeze、17 人/167 seizures
+> locked internal benchmark、Figure 6/source data 与 standalone machine closeout audit 均完成；
+> 仅余 commit/push 与主线 figure registry 集成。** v0.3 已由 commit
 > `bd9d8621` 与 tag `topic5-lbss-full-tissue-v0.3-closeout` 独立冻结。
 
 ## 0｜v0.3 immutable closeout
@@ -18,8 +20,8 @@
 1. 从干净 base commit 新建 immutable execution worktree；复制代码到 `run_snapshot/` 并只读；
 2. target-free 进程只挂载 routing metadata；early-ictal energy values 通过权限或独立 mount 不可读；
 3. builder 对全部 masked-rank K=2 parent 自动应用 `min_joint_contacts=6`；
-4. 自动生成 34 人 contact-space、26 人/40 fits spatial 和 17 人/167 seizures expected intersection 的
-   inclusion/attrition 表；不得只硬编码 5 位 recovery patients；
+4. 自动生成 34 人 contact-space、28 人/42 fits spatial 和 17 人/167 seizures exact intersection 的
+   inclusion/attrition 表；不得只硬编码 recovery patients；
 5. 对 dataset、plane、H、split、event-lag sidecar 和 parent outputs 记录 SHA256；
 6. 输出小 montage observability QC 与 target-free cohort recovery 图。
 
@@ -27,10 +29,13 @@
 
 ## B｜Cache、train-only modes 与单元测试
 
-1. 生成 40-fit cache；旧 31 fits 的 rank/split arrays 与 v0.3 做逐位兼容审计；
-2. 每 outer fold 只用 train events 重建 K=2 modes、prefix posterior 与 templates；
+1. 生成 42-fit cache；旧 31 fits 的 rank/split arrays 与 v0.3 做逐位兼容审计；
+2. 每 fixed development training partition 只用 train events 重建 K=2 modes、prefix posterior 与
+   templates；modes 只作分层，不过滤任一 plane 的 prediction task；
 3. 构建 3 份 split-isolated suffix-pairing null mappings，分别绑定 3 个 suffix-null seeds；
 4. 冻结 prefix-template TA/TB、posterior mixture 和 train-prevalence mixture builders；
+   对 non-collinear 患者，oracle own_a/own_b all-event candidates 与 non-oracle A/B-aligned
+   train-mode components 必须分别构建，禁止将 geometry view 直接当作 mode component；
 5. 实现 H top-90%-mass support、front distance、local graph path distance 与 latency sidecar；
 6. 运行 spec §12 的全部承重单测。
 
@@ -54,25 +59,27 @@ rewiring 冒充重训 control。若 L1/L3 exposure 严重失衡，只删除 L3�
 1. 用非 f events 的 nested cross-fitting，为每个 outer test fold 构造 `J_p^{(-f)}`；
 2. mode-specific nonnegative local-wave slopes，数据不足时退化 pooled slope；beta=0 保留为
    `LOCAL_WAVE_UNSUPPORTED`；
-3. 计算 sparse exceedance-burden J、旧 median sensitivity、rank-only tau 与 violation fraction；
+3. 计算 event-mean sparse exceedance-burden J；原 event-median 已在 pre-training feasibility 中 28/28
+   退化为零，固定保留为 sensitivity，并并列报告 temporal-block median、nonzero-event fraction、
+   rank-only tau 与 violation fraction；
 4. 复用现有 L3 checkpoints，计算 prefix-template advantage 与连续 prefix entropy H 的关系；
 5. 对 recording block/session-heldout split 做 sensitivity；
-6. 冻结 26 人 J、distance denominators、NOT_IDENTIFIABLE reasons 和 primary interaction scorer。
+6. 冻结 28 人 J、distance denominators、NOT_IDENTIFIABLE reasons 和 primary interaction scorer；
+   近一维几何 2 人保留在完整 census，并固定一份去除敏感性。
 
-阶段图：代表患者 local-wave fit/OOF residual、26 人 J 分布、RNN-template advantage vs H。不得画成
+阶段图：代表患者 local-wave fit/OOF residual、28 人 J 分布、RNN-template advantage vs H。不得画成
 anatomical tract 或临床 recruitment latency。
 
 阶段反思：这一步回答测量是否有效，不因 J 分布或 interaction 方向改变模型、阈值或 cohort。
 
-## E｜正式 target-free 训练：321 units
+## E｜正式 target-free 训练：531 units
 
 正式 launch manifest 在启动前一次性列全：
 
 ```text
-Existing 31 fits: C-suffix x3 = 93
-Existing 31 fits: L2m x3      = 93
-Recovery 9 fits: L0/L1/L2m/L3/C-suffix x3 = 135
-Total = 321
+Exact shared reuse 11 fits: C-suffix/L2m x3 = 66
+Mandatory full retrain 31 fits: L0/L1/L2m/L3/C-suffix x3 = 465
+Total = 531
 ```
 
 1. nohup/tmux + immutable launcher；worker 数由实际显存/RSS smoke 冻结；
@@ -88,6 +95,10 @@ Recovery fits 的执行顺序固定为先完成 L3 并冻结 added mask，再按
 
 阶段图：训练收敛、L2m matching、suffix-null destruction、all/distal heldout metrics；patient-first。
 
+聚合时不得直接使用 unit 内继承自 v0.3 的 q50/q80 `distance_bins` 作为 primary；必须从原始
+`distance_decisions.json` 按冻结的 `r_local` 重算 local/nonlocal，并验证所有 arms/seeds 使用相同
+decision support。q50/q80 结果仅保留为 descriptive sensitivity。
+
 阶段反思：primary 是 `(L3-L2m) x J`，不是 L3 全队列必须获胜，也不根据阶段结果补新拓扑。
 
 ## F｜Target-free mechanism、gain 与所有 field 冻结
@@ -98,6 +109,8 @@ Recovery fits 的执行顺序固定为先完成 L3 并冻结 added mask，再按
 4. 做 same-mode/cross-mode/matched-random attenuation；
 5. 计算 shrinkage precedence、coarse endpoint density、contact-space influence 与 stability；
 6. 生成并冻结全部 intact、template、mixture、C-suffix、L2m、attenuated、gain-adjusted fields；
+   mixture freeze 必须另写 producer hash、14 位 own-view label parity、70 个 patient-arm repair rows，
+   并证明 oracle A/B vector hashes 未改变；
 7. 预生成 synchronized all-contact primary null index maps 与 geometry-eligible robustness null maps；
 8. 写 `MODEL_FIELD_MANIFEST.json`、`ATTENUATED_FIELD_MANIFEST.json`、scorer hash 和 target-access=0。
 
@@ -110,7 +123,8 @@ Recovery fits 的执行顺序固定为先完成 L3 并冻结 added mask，再按
 1. 校验 source tree、run snapshot、field/null manifests 与 hashes 后显式解封；
 2. 读取 17 人/167 seizures 的 0–10 s、1–150 Hz broadband energy values；
 3. 统一转 earlyness，计算 signed best-mode Spearman oracle repertoire correspondence；
-4. primary early test：`rho(J, C_L3-C_L2m)>0`，primary null 仅 synchronized all-contact；
+4. primary early test：`rho(J, C_L3-C_L2m)>0`；固定 100,000 次 patient-label permutation 与
+   5,000 次 synchronized all-contact coherent spatial-null interaction 组成联合主判据，两项都必须通过；
 5. 计算 train-prevalence mixture signed Spearman 和预定义 robustness endpoints/nulls；
 6. patient bootstrap 每次同时重算 J/Delta；报告 LOO、高 J leaveout、6–7-contact leaveout；
 7. 明确标记 `LOCKED_INTERNAL_MECHANISTIC_FOLLOWUP`，不写 independent confirmation。
@@ -135,7 +149,7 @@ Recovery fits 的执行顺序固定为先完成 L3 并冻结 added mask，再按
 -> B train-only modes/cache/tests
 -> C graph matching + detectability
 -> D cross-fitted J + contract freeze
--> E 321-unit training
+-> E 531-unit training
 -> F mechanism + every field/null frozen
 -> explicit target unseal
 -> G early-ictal scoring

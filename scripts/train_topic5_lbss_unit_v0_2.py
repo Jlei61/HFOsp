@@ -237,18 +237,42 @@ def train_unit(
     cfg: dict[str, Any],
     resume: bool = True,
     unit_root_name: str = "per_fit",
+    events_file_name: str | None = None,
+    fixed_added_mask_path: Path | None = None,
+    contract_label: str = "topic5_lbss_unit_v0_2",
 ) -> dict[str, Any]:
     started = time.time()
     cache = out_root / "cache" / fit_id
     plane = np.load(cache / "plane.npz", allow_pickle=False)
-    events = np.load(cache / "events.npz", allow_pickle=False)
+    events_path = cache / "events.npz"
+    events = np.load(events_path, allow_pickle=False)
     provenance = json.loads((cache / "provenance.json").read_text())
     observed_ranks = events["ranks"][events["split"] >= 0].copy()
     ranks = observed_ranks.copy()
     split = events["split"][events["split"] >= 0]
     mode = events["mode"][events["split"] >= 0]
     shuffle_audit = None
-    if arm == "C_L3_ORDER_SHUFFLED":
+    null_events_sha256 = None
+    if events_file_name is not None:
+        null_path = cache / events_file_name
+        null_events = np.load(null_path, allow_pickle=False)
+        if not np.array_equal(null_events["split"], events["split"]):
+            raise RuntimeError("suffix-null split does not match the frozen real split")
+        null_ranks = null_events["ranks"][events["split"] >= 0]
+        # The null changes train/validation information only. Every arm is
+        # evaluated against the exact same real heldout decisions.
+        train_validation = (split == 0) | (split == 1)
+        ranks[train_validation] = null_ranks[train_validation]
+        if not np.array_equal(ranks[split == 2], observed_ranks[split == 2]):
+            raise RuntimeError("suffix-null changed the heldout evaluation ranks")
+        null_events_sha256 = sha256_file(null_path)
+        shuffle_audit = {
+            "scope": "precomputed_suffix_pairing_train_and_validation_only",
+            "events_file_name": events_file_name,
+            "heldout_test_unchanged": True,
+            "null_events_sha256": null_events_sha256,
+        }
+    elif arm == "C_L3_ORDER_SHUFFLED":
         ranks, shuffle_audit = derange_training_validation_only(
             ranks, split, stable_seed(fit_id, 7717)
         )
@@ -263,9 +287,21 @@ def train_unit(
         plane["D_mm"], cfg["density"], cfg["added_fraction"],
         cfg["r_local_multiplier"],
     )
+    fixed_added_mask = None
+    graph_control = None
+    if fixed_added_mask_path is not None:
+        graph_control = np.load(fixed_added_mask_path, allow_pickle=False)
+        fixed_added_mask = graph_control["added_mask"].astype(np.uint8)
+    # v0.3 provenance used ``n_contacts``; the automated v0.5 census names
+    # the same exact denominator ``n_joint_contacts``.  Accept both schemas
+    # without changing the model or cohort definition.
+    n_contacts = int(
+        provenance["n_contacts"]
+        if "n_contacts" in provenance else provenance["n_joint_contacts"]
+    )
     model = LBSSModel(LBSSConfig(
         arm=arm,
-        n_contacts=int(provenance["n_contacts"]),
+        n_contacts=n_contacts,
         n_nodes=int(provenance["n_nodes"]),
         observation_operator=plane["H"],
         node_distance_mm=plane["D_mm"],
@@ -275,7 +311,35 @@ def train_unit(
         k_added=pools.k_added,
         seed=int(seed),
         state_dim=int(cfg["state_dim"]),
+        fixed_added_mask=fixed_added_mask,
     )).to(device)
+    initial_weight_match = None
+    if arm == "L2M_MACRO_MATCHED_RANDOM_LR":
+        if graph_control is None:
+            raise RuntimeError("L2M requires --fixed-added-mask-path")
+        if int(cfg["state_dim"]) != 1 or model.recurrent.shape[0] != 1:
+            raise RuntimeError("v0.5 exact initial-weight matching is frozen for state_dim=1 leaky RNN")
+        reference_initial = graph_control["reference_l3_initial_added_mask"].astype(bool)
+        target_added = model.added_mask.detach().cpu().numpy().astype(bool)
+        if int(reference_initial.sum()) != int(target_added.sum()):
+            raise RuntimeError("L2M and reference L3 initial added-edge counts differ")
+        with torch.no_grad():
+            source_values = model.recurrent[0][torch.as_tensor(reference_initial, device=device)].clone()
+            target_index = torch.as_tensor(target_added, device=device)
+            model.recurrent[0][target_index] = source_values
+            assigned = model.recurrent[0][target_index].detach().cpu().numpy()
+        reference_values = source_values.detach().cpu().numpy()
+        initial_weight_match = {
+            "exact_multiset": bool(np.array_equal(np.sort(reference_values), np.sort(assigned))),
+            "n_values": int(reference_values.size),
+            "reference_mean": float(reference_values.mean()),
+            "target_mean": float(assigned.mean()),
+            "reference_std": float(reference_values.std()),
+            "target_std": float(assigned.std()),
+            "graph_control_sha256": sha256_file(fixed_added_mask_path),
+        }
+        if not initial_weight_match["exact_multiset"]:
+            raise RuntimeError("L2M failed exact initial added-weight multiset matching")
     optimizer = torch.optim.Adam(model.parameters(), lr=float(cfg["lr"]))
 
     unit_dir = out_root / unit_root_name / fit_id / arm / f"seed{seed}"
@@ -422,13 +486,13 @@ def train_unit(
 
     graph = model.graph_snapshot()
     metrics = {
-        "contract": "topic5_lbss_unit_v0_2",
+        "contract": contract_label,
         "fit_id": fit_id,
         "subject": provenance["subject"],
         "scope": provenance["scope"],
         "arm": arm,
         "seed": int(seed),
-        "n_contacts": int(provenance["n_contacts"]),
+        "n_contacts": n_contacts,
         "n_nodes": int(provenance["n_nodes"]),
         "n_train": int(len(train_idx)),
         "n_validation": int(len(val_idx)),
@@ -454,6 +518,7 @@ def train_unit(
             "length_ratio_median": float(np.median(length_ratio)),
         },
         "shuffle_audit": shuffle_audit,
+        "initial_weight_match": initial_weight_match,
         "graph": {
             "local_edges": int(graph["local_mask"].sum()),
             "added_edges": int(graph["added_mask"].sum()),
@@ -469,7 +534,10 @@ def train_unit(
         "producer_hashes": {
             "trainer": sha256_file(Path(__file__).resolve()),
             "model": sha256_file(ROOT / "src/topic5_lbss_rnn_v0_2.py"),
-            "input_manifest": sha256_file(out_root / "INPUT_CACHE_MANIFEST.json"),
+            "input_manifest": sha256_file(
+                out_root / ("INPUT_CACHE_MANIFEST.json" if (out_root / "INPUT_CACHE_MANIFEST.json").exists()
+                            else "FULL_PARENT_CACHE_MANIFEST.json")
+            ),
             "run_contract": sha256_file(out_root / "RUN_CONTRACT.json"),
         },
     }
@@ -509,6 +577,9 @@ def main() -> None:
     )
     parser.add_argument("--no-resume", action="store_true")
     parser.add_argument("--unit-root-name", default="per_fit")
+    parser.add_argument("--events-file-name")
+    parser.add_argument("--fixed-added-mask-path", type=Path)
+    parser.add_argument("--contract-label", default="topic5_lbss_unit_v0_2")
     args = parser.parse_args()
     cfg = dict(DEFAULTS)
     if args.config_json is not None:
@@ -531,6 +602,10 @@ def main() -> None:
     metrics = train_unit(
         args.fit_id, args.arm, args.seed, args.out_root.resolve(), torch.device(args.device), cfg,
         resume=not args.no_resume, unit_root_name=args.unit_root_name,
+        events_file_name=args.events_file_name,
+        fixed_added_mask_path=(args.fixed_added_mask_path.resolve()
+                               if args.fixed_added_mask_path is not None else None),
+        contract_label=args.contract_label,
     )
     print(json.dumps({
         "fit_id": args.fit_id,

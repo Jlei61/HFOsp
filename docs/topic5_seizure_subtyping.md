@@ -43,7 +43,8 @@ state，并重新比较 local backbone、extra-local、random nonlocal、task-se
 
 **2026-08-12 full-tissue 间期与空间搜索结果**：21 人/31 fits 的 v0.3 latent nodes 中位 104，
 其中 zero-H nodes 中位 53（57.8%）；把 zero-H states 逐 rank 钳零后，21/21 患者的 held-out
-预测变差，中位 `+0.2684 nats/decision`，说明 contact 之间和直接读出区外的组织状态确实参与计算。
+预测变差，中位 `+0.2684 nats/decision`，说明 contact 之间和直接读出区外的组织状态被模型使用。
+该 clamp 是 diagnostic engagement audit，不是 matched lesion，不能写成这些 nodes 的必要性已被证明。
 465/465 正式单元中，local-only 相对 no-recurrence 为 20/21 改善，真实 L3 相对 order-shuffle
 为 21/21 改善；但 task-selected nonlocal 相对 local-only、extra-local 和 random-nonlocal 均无
 选择性增量。预先限定的 13 档 target-free 空间/训练 screen 及两档 matched confirmation 也未找到
@@ -62,15 +63,88 @@ task-selected nonlocal topology 特异性。**模型矩阵始终称为 patient-s
 propagation scaffold，不称 anatomical/white-matter connectivity；0–10 s broadband energy
 称 early-ictal field receipt/correspondence，不等同于 tissue recruitment into ictal core。
 
-**2026-08-13 v0.5 状态（仅合同与 target-free feasibility，尚无正式训练结果）**：已知因旧
-`joint contacts >=8` 被挡掉的 5 位患者/9 fits，在不读取 early-ictal energy values 的审计中均可按
-6-contact 下限构造 full-tissue geometry；但正式 builder 仍须自动扫描整个 parent cohort，预计
-26 人/40 fits 与 17 人/167 seizures 不能提前当成完成分母。v0.5 的唯一 target-free primary 改为
-患者 nonlocality `J_lat` 与 heldout distal `L3-L2m` 增益的 interaction；`L2m` 是匹配 directed
-degree、reciprocity 和完整 distance bins 后从头训练的 random-nonlocal control。Early-ictal 目标
-固定为 0–10 s、1–150 Hz broadband energy field，使用 signed best-mode Spearman oracle repertoire
-correspondence；它是 locked internal mechanistic follow-up，不是独立确认。正式训练预算至少 321
-units，等待用户终审锁定 spec/plan 后才启动。
+**2026-08-14 v0.5 收口状态（SCIENTIFIC CLOSEOUT COMPLETE）**：full-parent builder 扫描全部 34 位
+K=2 parent，正式 spatial 分母为 **28 人/42 fits**，locked early-ictal benchmark 为
+**17 人/167 seizures**。531/531 正式训练单元、Stage F target-free attenuation/gain/field freeze、
+synchronized null maps、Figure 6/source data 与 machine closeout audit 均完成。唯一 target-free
+primary——cross-fitted nonlocality `J_lat` 与 heldout distal `L3-L2m` gain 的 interaction——未确认
+（rho=0.168041，单侧 permutation P=0.194108，95% CI `[-0.272649,0.573713]`）；真实 prefix–suffix
+association 改善总体预测
+（+0.02368 nats，24/28，P=3.16e-5），但不是 distal-specific。locked internal early-ictal D1
+为未支持（median null-relative margin=+0.2118, P=0.2019）；early `(L3−L2m)×J` 为未支持，D2 shortcut-specific cross-state contribution 为未支持。该 benchmark 是 locked internal mechanistic follow-up，不是独立确认；broadband energy field 也不是 arrival/recruitment order。
+第一次 target scoring 在读取 values 后因把非普遍可构造的 matched-local attenuation 错当成全员必备
+condition 而 fail-closed；修复仅按预冻结 manifest 接受逐患者已有条件，没有重训、补 field/null 或
+改变 primary。该 post-unseal 工程事件已完整留痕，最终独立 closeout audit 为 50/50 PASS。
+解封前额外审计发现 non-collinear 患者的 non-oracle mixture 不能把 own_a/own_b 两个 all-event
+geometry fields 直接当作两个 mode components；最终链已改为只用 A/B-aligned train-mode fields 加权，
+同时保持 oracle own_a/own_b candidates、全部 checkpoint 和 target-free primary 不变。该修复必须在
+物理 embargo 内完成并通过 70/70 patient-arm hash audit 后才允许 target unseal。
+
+**2026-08-14 复审补正（reporting-only，不改任何 estimand/cohort/endpoint）**：三条 spec 条款在
+冻结 adjudicator 里没落实，已按 `SECONDARY_REPORTING_ADDENDUM.json` 补齐，三项都是单调收紧。
+（一）spec §10.3 要求 early-ictal secondary/robustness 按 claim family 报 Holm，冻结 adjudicator 只
+对两项 D2 family 做了；补做后，该族里唯一名义显著的 `L3−C-suffix` cross-state 增量（中位 `+0.0357`，
+原始 `P=0.019`）在三种族定义下 Holm `P` 分别为 `0.191 / 0.230 / 0.057`，**均不成立**，只能写成
+hypothesis-generating 方向性观察，禁止以原始 `P` 单独呈现。（二）spec §9.5 的四套几何合格 robustness
+spatial null 此前算了未汇总：D1 在 within-shaft / distance-bin / spectral / variogram 下全部未支持，
+且 margin 下降主要来自可用患者子集不同而非零模型更严（同批患者的 all-contact margin 同样下降，
+spectral 子集上转负），即 D1 的正向方向由撑不起严格空间零模型的几何子集承载。（三）spec §7.3 的
+`J` 在 event-mean 修复后仍严重贴地：28 人中 10 人恰好为 0、共享同一 mid-rank，20/28 低于最大值的
+1%，只有 19 个不同取值；因此唯一 target-free primary 的阴性受 moderator 分辨率上限约束，
+只能写"在当前 `J` 分辨率下没看到这种耦合"，不得写成"不存在这种耦合"。
+
+Figure package 已通过同状态视觉和 machine audit，但在主线 `paper_figure_registry` 分配
+`asset_id/paper_slot/status/canonical_path` 前固定为 `CANDIDATE_PENDING_MAIN_REGISTRY_INTEGRATION`。
+该登记门不改变科学收口，但禁止仅凭目录名把它称为 canonical Figure 6。
+
+**Topic 5.2 latent propagation landscape v0.2（2026-08-14 SCIENTIFIC CLOSEOUT COMPLETE）**：
+28 patients / 42 fits / 630 checkpoint cells 与 119,655 个完整 `q=(h,r,k)` reference states 已全量完成，
+C1–C7 没有使用统计停止树。raw hidden states 可解码 progress 与 continuous future field，局部 dynamics
+也能运输两类 fitted directions；但 real order 没有比 C-suffix 更早 commitment，teacher-forced/closed-loop
+轨迹都没有向 conditional manifold 收敛，预注册 `2x2` perturbation double dissociation 未通过。
+唯一完整支持的是 C4：L0/L1/L2m/L3 的 finite-time response fields 高度相似，说明可辨识对象更接近
+topology-convergent computation，而不是精确 static graph。
+
+本轮发现 progress output 的预注册语义方向错误：`v_data_prog` 是 earlyness field，而正 hidden tangent
+指向 later phase。原 C3/C5 primary 保持未支持；target-free post-hoc laterness sensitivity 的 heldout
+spatial/identity margins 为正，只能作为下一轮新冻结验证的依据，不能事后救回 primary。C6 因现有 SNN
+只有 E1146 diagnostic-only 而 `NOT_IDENTIFIABLE`，field values 未打开；C7 在全部 target-free hashes 冻结后
+完成 17 patients / 167 seizures fixed exploratory scoring，progress laterness 与 future-field 均未确认。
+E3 暂不直接启动，应先确认 progress laterness orientation。完整报告见
+`docs/archive/topic5/latent_propagation_landscape_v0_2_closeout_2026-08-14.md`；spec 与 plan 分别见
+`docs/superpowers/specs/2026-08-14-topic5-latent-propagation-landscape-v0-2-design.md` 和
+`docs/superpowers/plans/2026-08-14-topic5-latent-propagation-landscape-v0-2.md`。
+
+**Topic 5.2 dynamical motif RNN v0.1-r2（2026-08-16 EXECUTION COMPLETE）**：420/420 正式单元
+（28 患者 × 4 主模型 × 3 seed + 3 个 M3 对照，0 failed，19.30 GPU-hours）在
+**只读植入几何的 `GEOMETRY_ONLY_PCA2` frame** 上完成——该 frame 的换用是必需的，
+因为父代平面第一坐标轴与 TA/TB 传播轴逐位相同，在其上问"模型能否自行发现走廊"是循环论证。
+朴素说：把"活动在一块组织上均匀摊开"依次改成"拉成走廊"（各向异性）、
+"按事件自己的早期位移推一把"（局部方向）、"沿该方向单向接力"（轴向前馈瞬态），
+在 140,938 个 model-unseen 事件上的 held-out 增益**中位全部精确为 0**，
+Holm 后 p 0.23–0.91；三个 M3 对照（更强更慢 / 对称耦合 / 打乱轴序三角）与前馈臂
+**数值同一**（四者强度都学成 0），因此"分不开"不等于"等价"。
+独立 dose-response（calibration 选一点、held-out 只读该点）给出关于零点的碗形剖面。
+
+本轮**最具解释力的一条是负结果的成因**：与一个**无传播**的 contact-pair 读出对比
+（同一批 model-unseen 事件、同一 `evaluate()`），递归通路在 **STOP 判断上 28/28 患者更好**
+（median 0.028，p = 7.5e-9），在 **next-contact 上 21/28 患者更差**（median 0.029，p = 0.025）——
+三种 motif 都是在给一条不承担空间选择的通路加方向。⚠️静态臂含两个 C×C 矩阵、
+17/28 患者参数更多，"结构 vs 容量"本轮不可分。
+
+**G1/G2 只能记 `NOT_DETECTED_UNDERPOWERED`，不得记为排除**：合成可辨识性图
+（60 cell，触点级椭圆输运生成、同一流水线）显示真值非零时 **28/66 读数选中精确 0**、
+符号仅 31/66，而真值为零时最坏可报 **+0.3157** 的假增益（95 分位 |增益| 0.0489）。
+真实队列 `β` 范围 [−0.0038, +0.0049] 小于该 band 一个数量级，但 `η` 范围 [−0.0340, +0.0408]
+**落在 band 之内**，故 `η` 的逐患者非零不构成信号。G5（发作早期场复用间期 motif 基底）
+主判据为负（median ΔE = −2.34，3/17，p = 0.999）。G6 为本轮唯一正向线索：
+事件内时间代理在控制 rank 步长后仍与触点间距离相关（偏相关中位 +0.132，27/28 患者为正），
+而本轮全部模型只用序号、完全丢弃该变量。
+记录在案的缺口：`PARENT_FROZEN_FRAME` 敏感性臂与 self-feeding 未训练、发作 S2 分支 `NOT_RUN`、
+合成图 14/60 cell 拟合失败。完整报告见
+`docs/archive/topic5/dynamical_motif_rnn_v0_1_{plain_report,technical_closeout}_2026-08-16.md`；
+spec 与 plan（含同日 ERRATUM）见
+`docs/superpowers/{specs/2026-08-16-topic5-dynamical-motif-rnn-v0-1-design.md,plans/2026-08-16-topic5-dynamical-motif-rnn-v0-1.md}`。
 
 ---
 
@@ -99,6 +173,14 @@ units，等待用户终审锁定 spec/plan 后才启动。
   FDR q=0.029），主指标宽带功率止于粗层。**这是符号自由的轴/梯度共线，不是"发作沿间期路线逐点重放"。**
   primary 只有宽带一条，B 线（EI-like）/ hfa / ramp 是次级 / 灵敏度读出。
   详见 §3.0 + 归档 `docs/archive/topic5/axis_alignment_AB_result_2026-06-14.md`（含 handoff）。
+- **条件性时间间隔上的传播 motif 比较（2026-08-19，探索性旁支）**：在**已知下一个传播目的地**的
+  条件下预测相邻两步的谱时间间隔——传播距离与目标触点的稳定时间偏好已解释主要可预测成分
+  （各 26/28 位患者，符号检验 p<0.001），四种递归 motif（均匀扩散 / 轴向走廊 / 方向输运 /
+  轴向前馈）**均未提供稳健增量**（相对固定参照全部跨零，符号检验 0.185–0.572）。
+  链条内部只有"走廊相对均匀扩散"是弱探索性且对优化起点敏感。
+  **该分析不评价这些 motif 对未来空间传播方向、终点、后续场或事件分布的作用**，
+  也不能读作"四种 motif 没有区别"。归档
+  `docs/archive/topic5/motif_time_targets_v0_3_2026-08-19.md`。
 - **V3p preictal-only 轨迹（2026-07-05，完整硬门阴性，已整合 2026-07-12）**：只看 EEG onset 前
   −120~−10 s，检验沿轴组织是否减弱、非轴向连锁流或最易放大模态是否随 onset 临近持续爬升。
   narrow 主队列、`broad_expanded` 敏感性扩展和 `broad_core` 策展核心均为 tier 0，完整个体支持为 0；

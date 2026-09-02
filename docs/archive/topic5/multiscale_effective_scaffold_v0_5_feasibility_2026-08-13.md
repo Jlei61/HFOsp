@@ -1,7 +1,10 @@
 # Topic 5.1 v0.5 多尺度有效传播 scaffold：target-free feasibility
 
 日期：2026-08-13
-状态：**5 位已知 recovery patients 的定向 feasibility PASS；未读取 early-ictal energy values；正式分母仍须由全 parent cohort 自动 builder 冻结**
+状态：**历史 feasibility 记录，已被正式 full-parent builder supersede。** 本文的 5 位定向审计和
+`26 patients / 40 fits` 只记录启动前可行性，不再是当前分母。正式 target-free builder 随后自动扫描
+全部 34 位 K=2 parent，冻结为 **28 patients / 42 fits**；正式训练按终审合同扩展并完成
+**531/531 units**。本文原始数值保留作 provenance，不得在后续报告中当作当前结果引用。
 
 ## 1. 为什么做这个 audit
 
@@ -59,7 +62,9 @@ latency、事件数不足或设计矩阵退化才标 `NOT_IDENTIFIABLE`。
 - patient nonlocality index；
 - 从头训练的 macro-matched random-nonlocal `L2m` control。
 
-正式补训预算按修订合同固定为至少 321 units；frozen rewiring 只作 perturbation，不能替代 L2m。
+本文阶段曾估计正式补训预算至少 321 units；full-parent census 与严格重训/复用规则冻结后，正式
+launch manifest 更新为 531 units 并已全部完成。frozen rewiring 仍只作 perturbation，不能替代
+从头训练的 L2m。
 Early-target unseal 等待 v0.5 spec/plan 终审锁定。E1 latency RNN、E2 state gain 和 E3
 susceptibility factorial 均不在本阶段直接启动。
 

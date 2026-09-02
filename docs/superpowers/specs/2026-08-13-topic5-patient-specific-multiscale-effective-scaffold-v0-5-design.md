@@ -1,6 +1,8 @@
 # Topic 5.1 患者特异多尺度有效传播 scaffold v0.5
 
-> 状态：**审阅修订完成，等待用户终审锁定；未启动正式训练。** 只承接已冻结的
+> 状态：**SCIENTIFIC CLOSEOUT COMPLETE。A–H 全流程完成：531/531 正式训练单元、Stage F target-free field/attenuation freeze、
+> 17 人/167 seizures locked internal benchmark、Figure 6 与 machine closeout audit 均完成；
+> 仅余 commit/push 与主线 figure registry 集成。** 只承接已冻结的
 > `topic5-lbss-full-tissue-v0.3-closeout`，不改写 v0.3 数值，不扩 architecture zoo。
 > v0.5 是 target 已在项目历史中看过后的 `locked internal mechanistic follow-up`，不是
 > independent validation、prospective confirmation 或 unseen-test confirmation。
@@ -18,7 +20,7 @@ nonlocal topology 普遍优于 matched controls。v0.5 不再问“哪张拓扑�
 
 ### 1.1 Primary：target-free nonlocality interaction
 
-在预计 26 位 full-tissue spatial 患者上，以完全 heldout 的间期 distal contact prediction 为
+在自动 census 冻结的 28 位 full-tissue spatial 患者上，以完全 heldout 的间期 distal contact prediction 为
 primary。令高值表示更好：
 
 \[
@@ -99,13 +101,19 @@ axonal delay。
 
 正式 builder 必须对整个 masked-rank K=2 parent cohort 自动应用 `min_joint_contacts=6`，而不是只
 手工恢复已知的 5 人。每位患者写出 inclusion/exclusion reason，并证明没有其他满足合同的患者被
-遗漏。当前 target-free feasibility 仅证明 E1077、E1096、E1125、E139、E635 的 9 个 recovery
-fits 工程可行；正式分母仍须由 builder 再冻结：
+遗漏。自动 builder 已在未读取 target values 的条件下冻结正式分母：
 
 ```text
-expected spatial cohort: 26 patients / 40 fits
-expected early-ictal intersection: 17 patients / 167 seizures
+parent K=2 cohort: 34 patients
+spatial cohort: 28 patients / 42 fits
+existing v0.3 overlap: 21 patients / 31 fits
+new/recovery: 7 patients / 11 fits
+early-ictal intersection: 17 patients / 167 seizures
 ```
+
+新增于旧手工 recovery 清单之外的 `epilepsiae_583` 与 `yuquan_zhangjiaqi` 必须保留。自动几何
+QC 将 `epilepsiae_139` 与 `yuquan_zhangjiaqi` 标为近一维；两者进入完整 census，另做去除
+`DEGENERATE_ONE_DIMENSIONAL` 的固定 sensitivity，不因结果方向事后排除。
 
 dataset、plane、H、split、`event_lag_raw` sidecar 均记录路径和 SHA256。
 
@@ -171,7 +179,12 @@ Distance bins 使用该 fit 的 nonlocal candidate pool 在 train-only geometry 
 最多运行 100 个独立 restarts、每个 10,000 次 degree-preserving directed double-edge swaps；只有
 同时满足 exact degree、reciprocity 和 bin counts 且 mask 不等于 L3 时才合格。全部 restarts 失败的
 fit 标为 `GRAPH_NULL_NOT_CONSTRUCTIBLE`，保留 L3 描述结果但不进入 L3−L2m primary；不得事后合并
-distance bins。Primary 报告全部 26 人 census 与实际 J/L2m identifiable denominator。
+distance bins。Primary 报告全部 28 人 census 与实际 J/L2m identifiable denominator，并并列报告
+去除两位近一维几何患者的预定义 sensitivity。
+
+为避免只交换极少数 edges 的 cosmetic null，另冻结 `pairing_disruption_fraction >= 0.25`。该阈值只
+要求四分之一 source–target pairs 被破坏，不替代上述 exact macro matching；若 exact constraints 下
+达不到该阈值，同样标记 `GRAPH_NULL_NOT_CONSTRUCTIBLE`，不得放宽 degree、reciprocity 或 distance bins。
 
 训练后 frozen macro rewiring 仍可作为 causal perturbation，但**不是** topology-selection null，也
 不能决定是否补训 L2m。
@@ -192,6 +205,19 @@ distance bins。Primary 报告全部 26 人 census 与实际 J/L2m identifiable 
 每个 outer training fold 内重新拟合 K=2 TA/TB templates；heldout suffix 不参与 clustering、template、
 prefix posterior、mode-specific local-wave slope 或 flow bundle。跨 fold label alignment 只比较 train
 templates。全数据 TA/TB labels 仅作 descriptive phenotype。
+
+TA/TB labels 不再筛选任何 arm 的 train/validation/test events。`own_a` 与 `own_b` 是两种冻结
+retrospective geometry views；两者都训练并评价该患者的全部合格事件。train-only modes 只用于
+template baseline、prefix uncertainty、mode-specific flow 和 slope 分层。这样既不读取 heldout suffix，
+也不会因后段缺少某一 mode 制造空 validation/test denominator。
+
+这里必须区分两个不同聚合对象。Oracle repertoire candidates 对 shared 患者来自同一 fit 的两个
+train-only modes；对 non-collinear 患者继续保留 `own_a` 与 `own_b` 两个 all-event geometry fields，
+直到 per-seizure best-mode 评分后才聚合。Non-oracle train-prevalence mixture 则必须按 **mode** 聚合：
+从 `own_a` 只取与 A 对齐的 train-only mode、从 `own_b` 只取与 B 对齐的 train-only mode，再按
+train-only prevalence 加权。禁止把两个 all-event geometry fields 直接当成两个 mode components。
+两条 own views 的 mode labels/templates/counts 必须逐位一致；修复 mixture 时四个 oracle A/B vector
+hash 必须不变。
 
 ### 6.2 Primary suffix-pairing null
 
@@ -243,6 +269,11 @@ d^{front}_{ei}=\operatorname{median}_{c\in N_{e,t+1}}
 且 `d_front > r_local`。Local-wave regression 使用 local graph path length。不得把单边 nonlocal
 threshold 与累积 path length 当作同一个量。
 
+训练单元为兼容 v0.3 仍可写出 train-distance q50/q80 三分箱，但它们只作描述性诊断。正式
+`Delta_II` 和 attenuation double-dissociation 必须从每单元保存的相同 heldout decision rows 重新按
+`d_front <= r_local` 与 `d_front > r_local` 二分；所有 arms/seeds 的 `(event, rank, distance)` support
+hash 必须逐 fit 相同。每位患者至少 20 个 nonlocal heldout decisions 才进入 interaction inference。
+
 H support 先按权重保留累计质量前 90%；primary path distance 使用支持对距离的 weighted 10th
 quantile，raw minimum 仅作 sensitivity，避免极小 H 长尾权重制造虚假近路。
 
@@ -282,13 +313,16 @@ z_{ei}=-\frac{t'_{ei}-\hat t^{local}_{ei}}{\sigma_{p,train}},
 
 \[
 \boxed{
-J_p^{lat}=\operatorname{median}_e
+J_p^{lat}=\operatorname{mean}_e
 \left[\frac{1}{|D_e|}\sum_{i\in D_e}(z_{ei}-1)_+\right].
 }
 \]
 
-它同时保留异常早到比例和幅度，不会被多数正常 distal contacts 的 median 压成零。旧
-median-of-medians、`1-tau_b` 和 near-late/far-early violation fraction 为 sensitivity。
+它同时保留异常早到比例和幅度。原冻结的 event-median 版本在正式 RNN 训练前的 target-free
+feasibility 中出现 28/28 患者精确为零，因此按 `J_ESTIMAND_PREFREEZE_REPAIR.json` 修订为 event-mean；
+原 event-median 保留并明确标记为退化 sensitivity。10 个时间连续 block 的 burden-mean 再取中位数、
+nonzero-event fraction、`1-tau_b` 和 near-late/far-early violation fraction 为 robustness。该修订发生在
+任何 v0.5 RNN 结果和 early-ictal target 读取之前，不得再根据后续结果改变。
 
 对 early-ictal interaction，J 使用全体 interictal events 的严格 out-of-fold residual 汇总，因为
 early target 属另一状态；仍不得在拟合 J 时读取 early target。
@@ -394,7 +428,8 @@ C^{mixture}_{psa}=\rho_S(\bar e_{pa},y_{ps}).
 \]
 
 `pi_train` 只由 interictal train events 决定。Prefix-template TA/TB fields 与 train-prevalence mixture
-field 在 unseal 前一并冻结。
+field 在 unseal 前一并冻结。对 non-collinear 患者，`e_TA/e_TB` 在该式中指 A/B-aligned train-mode
+components，而不是未经 mode 分层的 own_a/own_b all-event oracle candidates；后者只用于 §9.2。
 
 ### 9.4 Robustness endpoints
 
@@ -452,7 +487,9 @@ Patient-label permutation 使用固定 100,000 draws；若实际 eligible n 足�
 ### 10.3 Early-ictal family
 
 - 唯一 primary：`rho(J, Delta_EI)>0`，其中 C 是 signed best-mode Spearman oracle repertoire
-  correspondence，primary null 为 synchronized all-contact permutation；
+  correspondence；patient-label permutation 检验患者级 J–增量关联，synchronized all-contact
+  permutation 则在每个 draw 内重复 maxAB、患者内 seizure folding 和 L3−L2m，再形成该 interaction
+  的 coherent spatial-null。两者是联合主判据，取两项单侧 P 的较大值，必须同时通过；
 - non-oracle mixture、direct L3−L2m、L3−C-suffix/L0/L1 和四个其他 endpoints 为 secondary/
   robustness；
 - 不为每个 endpoint/null 单独追逐星号；按预定义 claim family 报 Holm 或 simultaneous interval。
@@ -460,16 +497,22 @@ Patient-label permutation 使用固定 100,000 draws；若实际 eligible n 足�
 Early interaction 同样使用固定 100,000 次 patient-label permutation；seizure-level values 先在患者内
 聚合，不进入 permutation 的独立样本单位。
 
+Primary spatial null 使用冻结的 5,000 个 synchronized all-contact draws。对每一 draw，先在每个
+seizure 内重做 A/B best-mode oracle，再在患者内逐 draw 取 seizure median，随后计算
+`rho(J, null_L3-null_L2m)`。不得只减去各 arm 的 marginal null median，也不得在解封后选择两种
+null 中较有利的一种。
+
 ## 11. 正式训练预算
 
-最小完整合同为 321 units：
+自动全 parent census与旧 cache 逐位审计后，最小完整合同为 531 units。旧 20 个 `own_a/own_b`
+fits 的 `keep` 曾使用全记录 adaptive-cluster labels，不能复用；11 个 shared fits 的 geometry、ranks
+和 split 与 v0.3 逐位相同，可复用 L0/L1/L3：
 
 | Scope | Arms | Units |
 |---|---|---:|
-| existing 31 fits | C-suffix x3 | 93 |
-| existing 31 fits | L2m x3 | 93 |
-| recovery 9 fits | L0/L1/L2m/L3/C-suffix x3 | 135 |
-| **total** |  | **321** |
+| exact shared reuse 11 fits | C-suffix/L2m x3 | 66 |
+| mandatory full retrain 31 fits | L0/L1/L2m/L3/C-suffix x3 | 465 |
+| **total** |  | **531** |
 
 旧 L2 保留 sensitivity。不得把 L2m 设成 frozen-rewiring 先阳性才运行的条件分支。若 L1/L3
 candidate audit 严重不平衡，则删除 L3−L1 机制解释，不在当前 run 动态升级到 507 units。

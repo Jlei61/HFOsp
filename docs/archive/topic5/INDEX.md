@@ -6,11 +6,35 @@
 
 ## 主线（network-axis pivot）
 
-### `multiscale_effective_scaffold_v0_5_feasibility_2026-08-13.md` — **v0.5 只完成 target-free recovery feasibility；正式合同待终审，尚无训练结果**
-- 已知缺失的 5 位患者/9 fits 在 `min_joint_contacts=6` 下均可构造 full-tissue H、zero-H nodes、强连通 local backbone 和足量 nonlocal pool；未读取 early-ictal energy values。
-- 这只是定向 feasibility，不是正式 cohort census。正式 builder 必须自动扫描整个 parent cohort；预计 26 人/40 fits 与 17 人/167 seizures 仍待 builder、cache 和训练 smoke 冻结。
-- 修订后的唯一 target-free primary 是 `(L3-L2m) x J_lat`；L2m 必须匹配 L3 的 directed degree、reciprocity 和完整距离分箱后从头训练。Early-ictal 只作已知 target 上的 locked internal mechanistic follow-up。
-- Spec：`docs/superpowers/specs/2026-08-13-topic5-patient-specific-multiscale-effective-scaffold-v0-5-design.md`；plan：`docs/superpowers/plans/2026-08-13-topic5-patient-specific-multiscale-effective-scaffold-v0-5.md`。
+### `ecog_physical_neighbourhood_rnn_v0_1_closeout_2026-08-16.md` — **真实 ECoG 物理邻接是有条件的训练归纳偏置；训练后局部入边未显示在线必要性**
+- 两位 8×8 ECoG 患者分开报告（E958 64 触点 / 163,438 事件为主，E1084 63 触点 / 7,918 事件为预设复制）。四邻接正式矩阵 384/384、held-out 扩展指标 384/384、自由生成场 24/24、原始双向区域删边 12/12、修复版首次进入删边 6/6、八邻接 192/192、一次内部更新 192/192，closeout 审计 PASS 22/22。
+- **训练价值**：E958 相对 31 张度数配平的错位网格 −0.13345 nats、31/31、exact p=0.03125（该检验 p 下限）；E1084 −0.02588、28/31、p=0.125，未跨门槛，**不得写"跨两患者复制"**。优势严格集中在"下一触点位于上下左右紧邻"一档（E958 −0.5273 / E1084 −0.1901，均 31/31），更远三档反而略差；四距离箱 Holm 后 0.125，属方向一致的次要证据。**该优势是架构条件性的**：内部更新从 2 次减到 1 次后 E958 优势消失（+0.00048、15/31、p=0.531）；八邻接不改判定。
+- **在线必要性**：修复后的直接检验（只削弱区域外→区域内有向入边，只评价首次进入决策，32 组配平分散边对照 + 20,000 次 patch×seed 分层随机化）E958 −0.00364 p=0.718、E1084 −0.09012 p=1.0，均不支持；原始双向 `SYMMETRIC_ISOLATION` 结果（E958 +0.014 p=0.124、E1084 −0.247 p=1.0）原样保留，其负号**不得**解释为局部连接有保护作用。白话版报告见 `ecog_physical_neighbourhood_rnn_v0_1_plain_report_2026-08-16.md`。
+
+### `shared_functional_computation_necessity_v0_2_closeout_2026-08-16.md` — **outcome-blind 最终版：响应收敛保留；共同低秩成分 necessity 未支持**
+- v0.1 的共同方向未读留出 target，但删除中心和 support gate 使用了留出事件完整后半段派生量，故旧数值作废。v0.2 只用训练阶段 phase curve 作为中心并全量重跑：630/630 训练算子、168/168 留一方向、504/504 单方向删除、504/504 累计删除全部完成。
+- 删除共同方向的未来触点预测损失 dose AUC 中位 `+0.000878`；相对同范数无关方向 `−0.000561`；相对打乱后半段网络方向 `+0.000050`。三项 CI 均跨 0、Holm P 分别为 `0.302/0.781/0.552`，仅 1/4 待测网络满足完整方向要求。
+- 累计删除前 2–3 条共同方向未恢复选择性损害。Figure 6 主图保持不变，v0.2 阴性结果进入 supplement。当前可写“不同连接设计产生可留一外推、与留出传播统计对齐的相似响应”，不可写“多个网络依赖同一个必要低秩计算”。
+
+### `shared_functional_computation_necessity_v0_1_closeout_2026-08-16.md` — **SUPERSEDED**
+- 仅保留 P0 泄漏发现前的执行 provenance；数值与结论不得引用，统一使用 v0.2。
+
+### `latent_propagation_landscape_v0_2_closeout_2026-08-14.md` — **SCIENTIFIC CLOSEOUT COMPLETE；C4 支持，C1/C2/C3/C5 未完整闭合，C6 不可辨识，C7 exploratory 未确认**
+- 28 patients / 42 fits / 630 checkpoint cells 全量执行，119,655 个完整 `q=(h,r,k)` reference states；C1–C7 均按独立 claim family 运行，没有 `P` 值停止树。Spec：`docs/superpowers/specs/2026-08-14-topic5-latent-propagation-landscape-v0-2-design.md`；plan：`docs/superpowers/plans/2026-08-14-topic5-latent-propagation-landscape-v0-2.md`。
+- hidden state 可解码 progress 与 continuous future field，局部 dynamics 运输两类方向；但 real order 不比 C-suffix 更早 commitment，轨迹不向 conditional manifold 收敛，预注册 `2x2` 双重解离未通过。唯一完整支持的层级是 C4：不同 real-order topologies 收敛到相似 finite-time functional responses。
+- C5 的预注册 progress output 是 earlyness，而正 hidden tangent 指向 later phase，形成语义符号冲突。target-free post-hoc laterness sensitivity 的 spatial/identity margins 为强正向，但不能救回 C3/C5；下一步应先做新冻结的 laterness validation，再决定 E3。
+- SNN sources 只有 E1146 diagnostic-only，C6 为 `NOT_IDENTIFIABLE` 且 field values 未打开。17 patients / 167 seizures 的 C7 固定 exploratory scoring 中，progress laterness margin `+0.0476`、field `+0.0179`，均未确认。候选九面板图通过 PNG/PDF/SVG 同状态验收，但未进入 paper registry。
+
+### `multiscale_effective_scaffold_v0_5_closeout_2026-08-14.md` — **SCIENTIFIC CLOSEOUT COMPLETE；28 人/42 fits + 17 人/167 seizures**
+- 531/531 target-free training units、504 attenuation targets、126 matched-local searches、gain/field/null freeze、locked internal scoring、Figure 6/source data 和 machine closeout audit 已完成；仅余 commit/push 与主线 figure registry 集成。
+- 真实 prefix–suffix association 改善总体 heldout contact NLL（24/28，`P=3.16e-5`），但 task-selected nonlocal 相对 L2m 的 distal 优势及 `J×gain` interaction 未确认。
+- 17/167 early-ictal D1 为未支持；primary early interaction 为未支持；D2 shortcut-specific contribution 为未支持。只称 locked internal mechanistic follow-up，不称 independent confirmation。
+- 收口报告 §9 为 2026-08-14 复审的 reporting-only 补正：early-ictal secondary family 补 Holm 后无一成立（`L3−C-suffix` 原始 `P=0.019` → Holm `0.057–0.230`）；D1 在四套 robustness spatial null 下全部未支持；`J` 修复后仍有 10/28 恰好为零，唯一 primary 的阴性受 moderator 分辨率约束。
+- Figure package 已完成同状态视觉与 machine audit，但在主线 semantic registry 集成前固定为 `CANDIDATE_PENDING_MAIN_REGISTRY_INTEGRATION`，不能由目录名自行升级为 canonical Figure 6。
+
+### `multiscale_effective_scaffold_v0_5_feasibility_2026-08-13.md` — **历史 5 人 recovery feasibility；已被 full-parent census supersede**
+- 该文档保留旧 5 位患者/9 fits 的 target-free feasibility provenance；其中预期 26 人/40 fits 与至少 321 units 不再是正式分母或预算。
+- 正式 census/训练应引用上一条的 28 人/42 fits 与 531/531 units。Spec：`docs/superpowers/specs/2026-08-13-topic5-patient-specific-multiscale-effective-scaffold-v0-5-design.md`；plan：`docs/superpowers/plans/2026-08-13-topic5-patient-specific-multiscale-effective-scaffold-v0-5.md`。
 
 ### `lbss_full_tissue_spatial_search_closeout_2026-08-12.md` — **完整组织平面与 early-ictal 收口：局部 recurrence 足够；跨状态对应正向但不具 nonlocal 特异性**
 - 21 人/31 fits 的 latent mesh 修正为完整组织域：nodes 中位 104，zero-H nodes 中位 53（57.8%）；钳零这些未观测 nodes 后 21/21 患者留出预测变差，排除了模型仅在 contacts 附近计算的解释。

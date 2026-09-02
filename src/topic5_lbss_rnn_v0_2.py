@@ -24,6 +24,7 @@ LBSS_ARMS = (
     "L0_LOCAL_ONLY",
     "L1_LOCAL_PLUS_LEARNED_EXTRA_LOCAL",
     "L2_LOCAL_PLUS_RANDOM_LR",
+    "L2M_MACRO_MATCHED_RANDOM_LR",
     "L3_LOCAL_PLUS_LEARNED_LR",
     "C_L3_ORDER_SHUFFLED",
 )
@@ -189,6 +190,7 @@ class LBSSConfig:
     state_dim: int = 1
     stop_hidden: int = 16
     new_edge_grace_intervals: int = 1
+    fixed_added_mask: np.ndarray | None = None
 
     def __post_init__(self) -> None:
         if self.arm not in LBSS_ARMS:
@@ -240,6 +242,19 @@ class LBSSModel(WEModel):
         elif config.arm == "L1_LOCAL_PLUS_LEARNED_EXTRA_LOCAL":
             pool = extra
             added = source_balanced_sample(pool, int(config.k_added), int(config.seed) + 1701)
+        elif config.arm == "L2M_MACRO_MATCHED_RANDOM_LR":
+            pool = nonlocal_pool
+            if config.fixed_added_mask is None:
+                raise ValueError("L2M requires a frozen fixed_added_mask")
+            added = np.asarray(config.fixed_added_mask, dtype=np.uint8)
+            if added.shape != expected:
+                raise ValueError("fixed_added_mask must align to n_nodes")
+            if int(added.sum()) != int(config.k_added):
+                raise ValueError("fixed_added_mask must contain exactly k_added edges")
+            if np.any(added & ~nonlocal_pool):
+                raise ValueError("fixed_added_mask contains an edge outside nonlocal_pool")
+            if np.any(np.diag(added)):
+                raise ValueError("fixed_added_mask cannot contain self edges")
         else:
             pool = nonlocal_pool
             # L2, L3 and order-shuffle deliberately share this exact mask.
