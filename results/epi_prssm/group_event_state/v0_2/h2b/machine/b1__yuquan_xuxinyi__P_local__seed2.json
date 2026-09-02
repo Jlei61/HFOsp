@@ -1,7 +1,26 @@
 {
+  "tag": "registry_producer",
+  "warning": "",
+  "provenance": {
+    "producer": "P_local",
+    "seed": "2",
+    "source_commit": "5f5d010225806f3ea9822f67eecd1bb826277850",
+    "config_hash": "ed69ff73ec817f4e21501adfcae67b6381973afb40b25f1383273f2764f85567",
+    "checkpoint_hash": "8f74ac555baa2ff37a4b99c91932c5097a5c7c1b9b4ad09423a6e60f443641a6",
+    "registry_version": "group_event_state_v0_2_registry_1"
+  },
   "subject": "yuquan_xuxinyi",
-  "producer": "P_local",
-  "status": "not_available",
-  "reason": "this producer's cells span 29 different configurations; they cannot be pooled as one arm until the producer explains why",
-  "registry_version": "group_event_state_v0_2_registry_1"
+  "arm": "a1_static_recent_history",
+  "seed": 2,
+  "n_rows_total": 275,
+  "n_rows_state_available": 267,
+  "n_train_rows": 267,
+  "n_eval_rows": 0,
+  "n_episodes": 3,
+  "n_heldout_episodes": 1,
+  "split_epoch": 1567321786.9625,
+  "state_dim": 96,
+  "max_state_age_sec": 330.0,
+  "split_mode": "seizure_rolling_origin",
+  "status": "insufficient_rows_for_plumbing"
 }

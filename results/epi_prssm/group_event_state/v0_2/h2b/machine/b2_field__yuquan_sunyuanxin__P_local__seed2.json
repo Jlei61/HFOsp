@@ -1,7 +1,105 @@
 {
+  "tag": "registry_producer",
+  "warning": "",
+  "provenance": {
+    "producer": "P_local",
+    "seed": "2",
+    "source_commit": "5f5d010225806f3ea9822f67eecd1bb826277850",
+    "config_hash": "ed69ff73ec817f4e21501adfcae67b6381973afb40b25f1383273f2764f85567",
+    "checkpoint_hash": "8f74ac555baa2ff37a4b99c91932c5097a5c7c1b9b4ad09423a6e60f443641a6",
+    "anchor_path": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_sunyuanxin/P_local/seed2/anchor_state.npz",
+    "registry_version": "group_event_state_v0_2_registry_1"
+  },
   "subject": "yuquan_sunyuanxin",
-  "producer": "P_local",
-  "status": "not_available",
-  "reason": "this producer's cells span 29 different configurations; they cannot be pooled as one arm until the producer explains why",
-  "registry_version": "group_event_state_v0_2_registry_1"
+  "arm": "a1_static_recent_history",
+  "seed": 2,
+  "field_key": "hfa_field_5s",
+  "n_episodes": 5,
+  "n_train_leads": 3,
+  "n_heldout_leads": 2,
+  "leads": {
+    "5min": {
+      "n_train_usable": 3,
+      "per_seizure": [
+        {
+          "seizure_id": "sunyuanxin_sz_006",
+          "status": "ok",
+          "baseline": 0.4725,
+          "state": 0.5612
+        },
+        {
+          "seizure_id": "sunyuanxin_sz_008",
+          "status": "ok",
+          "baseline": 0.5706,
+          "state": 0.5095
+        }
+      ],
+      "train_drop_reasons": [],
+      "temperature": 0.05,
+      "train_loo_score": 0.1586,
+      "n_scored": 2,
+      "status": "ok",
+      "median_baseline": 0.5215,
+      "median_state": 0.5353,
+      "median_increment": 0.0138,
+      "n_positive": 1
+    },
+    "30min": {
+      "n_train_usable": 3,
+      "per_seizure": [
+        {
+          "seizure_id": "sunyuanxin_sz_006",
+          "status": "ok",
+          "baseline": 0.4725,
+          "state": 0.5854
+        },
+        {
+          "seizure_id": "sunyuanxin_sz_008",
+          "status": "ok",
+          "baseline": 0.5706,
+          "state": 0.4986
+        }
+      ],
+      "train_drop_reasons": [],
+      "temperature": 0.05,
+      "train_loo_score": 0.1672,
+      "n_scored": 2,
+      "status": "ok",
+      "median_baseline": 0.5215,
+      "median_state": 0.542,
+      "median_increment": 0.0204,
+      "n_positive": 1
+    },
+    "2h": {
+      "n_train_usable": 2,
+      "per_seizure": [
+        {
+          "seizure_id": "sunyuanxin_sz_006",
+          "status": "no_temperature_train_too_small",
+          "baseline": 0.579
+        },
+        {
+          "seizure_id": "sunyuanxin_sz_008",
+          "status": "no_temperature_train_too_small",
+          "baseline": 0.5472
+        }
+      ],
+      "train_drop_reasons": [
+        "in_postictal"
+      ],
+      "temperature": null,
+      "train_loo_score": null,
+      "n_scored": 0,
+      "status": "not_estimable_no_scored_heldout"
+    },
+    "6h": {
+      "n_train_usable": 1,
+      "per_seizure": [],
+      "train_drop_reasons": [
+        "no_state_coverage",
+        "no_state_coverage"
+      ],
+      "status": "not_estimable_insufficient_train_anchors"
+    }
+  }
 }

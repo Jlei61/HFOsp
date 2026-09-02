@@ -2,6 +2,6 @@
   "subject": "yuquan_zhangkexuan",
   "producer": "P_slow",
   "status": "not_available",
-  "reason": "this producer's cells span 27 different configurations; they cannot be pooled as one arm until the producer explains why",
+  "reason": "this cell trained at chunk_events/batch_segments (32, 2), while the rest of this producer used (128, 8); an OOM-degraded cell is not the same arm",
   "registry_version": "group_event_state_v0_2_registry_1"
 }

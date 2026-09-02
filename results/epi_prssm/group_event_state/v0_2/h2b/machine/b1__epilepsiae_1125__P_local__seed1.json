@@ -1,7 +1,77 @@
 {
+  "tag": "registry_producer",
+  "warning": "",
+  "provenance": {
+    "producer": "P_local",
+    "seed": "1",
+    "source_commit": "5f5d010225806f3ea9822f67eecd1bb826277850",
+    "config_hash": "ed69ff73ec817f4e21501adfcae67b6381973afb40b25f1383273f2764f85567",
+    "checkpoint_hash": "8f74ac555baa2ff37a4b99c91932c5097a5c7c1b9b4ad09423a6e60f443641a6",
+    "registry_version": "group_event_state_v0_2_registry_1"
+  },
   "subject": "epilepsiae_1125",
-  "producer": "P_local",
-  "status": "not_available",
-  "reason": "this producer's cells span 29 different configurations; they cannot be pooled as one arm until the producer explains why",
-  "registry_version": "group_event_state_v0_2_registry_1"
+  "arm": "a1_static_recent_history",
+  "seed": 1,
+  "n_rows_total": 1703,
+  "n_rows_state_available": 1662,
+  "n_train_rows": 315,
+  "n_eval_rows": 1347,
+  "n_episodes": 14,
+  "n_heldout_episodes": 7,
+  "split_epoch": 1253132819.383789,
+  "state_dim": 96,
+  "max_state_age_sec": 330.0,
+  "split_mode": "seizure_rolling_origin",
+  "chosen_C": {
+    "intercept_only": 1.0,
+    "baseline": 1.0,
+    "baseline_plus_state": 0.3
+  },
+  "chosen_state_components": 8,
+  "mean_log_score_intercept_only": -2.5521477310205145,
+  "arm_worse_than_intercept": {
+    "baseline": true,
+    "baseline_plus_state": false
+  },
+  "eval_event_rows": 222,
+  "eval_distinct_seizures": 6,
+  "eval_events": 6,
+  "status": "unusable_fit_worse_than_intercept",
+  "mean_log_score": {
+    "intercept_only": -2.5521477310205145,
+    "baseline": -17.30693342783155,
+    "baseline_plus_state": -1.514608797459268
+  },
+  "brier_by_bin": {
+    "intercept_only": [
+      0.00523,
+      0.0113,
+      0.01913,
+      0.04667,
+      0.13159,
+      0.78019
+    ],
+    "baseline": [
+      0.44739,
+      0.53167,
+      0.60057,
+      0.70157,
+      0.8063,
+      0.88342
+    ],
+    "baseline_plus_state": [
+      0.03507,
+      0.04429,
+      0.05352,
+      0.07086,
+      0.10522,
+      0.16532
+    ]
+  },
+  "nested_increment_log_score": {
+    "mean_gain": 15.792324630372283,
+    "median_gain": 16.215776135702242,
+    "n": 1347,
+    "n_positive": 1194
+  }
 }

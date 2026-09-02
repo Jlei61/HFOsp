@@ -1,7 +1,68 @@
 {
+  "tag": "registry_producer",
+  "warning": "",
+  "provenance": {
+    "producer": "P_local",
+    "seed": "1",
+    "source_commit": "5f5d010225806f3ea9822f67eecd1bb826277850",
+    "config_hash": "ed69ff73ec817f4e21501adfcae67b6381973afb40b25f1383273f2764f85567",
+    "checkpoint_hash": "8f74ac555baa2ff37a4b99c91932c5097a5c7c1b9b4ad09423a6e60f443641a6",
+    "anchor_path": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhangkexuan/P_local/seed1/anchor_state.npz",
+    "registry_version": "group_event_state_v0_2_registry_1"
+  },
   "subject": "yuquan_zhangkexuan",
-  "producer": "P_local",
-  "status": "not_available",
-  "reason": "this producer's cells span 29 different configurations; they cannot be pooled as one arm until the producer explains why",
-  "registry_version": "group_event_state_v0_2_registry_1"
+  "arm": "a1_static_recent_history",
+  "seed": 1,
+  "field_key": "hfa_field_5s",
+  "n_episodes": 3,
+  "n_train_leads": 2,
+  "n_heldout_leads": 1,
+  "leads": {
+    "5min": {
+      "n_train_usable": 2,
+      "per_seizure": [
+        {
+          "seizure_id": "zhangkexuan_sz_005",
+          "status": "no_temperature_train_too_small",
+          "baseline": 0.3207
+        }
+      ],
+      "train_drop_reasons": [],
+      "temperature": null,
+      "train_loo_score": null,
+      "n_scored": 0,
+      "status": "not_estimable_no_scored_heldout"
+    },
+    "30min": {
+      "n_train_usable": 2,
+      "per_seizure": [
+        {
+          "seizure_id": "zhangkexuan_sz_005",
+          "status": "no_temperature_train_too_small",
+          "baseline": 0.3207
+        }
+      ],
+      "train_drop_reasons": [],
+      "temperature": null,
+      "train_loo_score": null,
+      "n_scored": 0,
+      "status": "not_estimable_no_scored_heldout"
+    },
+    "2h": {
+      "n_train_usable": 1,
+      "per_seizure": [],
+      "train_drop_reasons": [
+        "no_state_coverage"
+      ],
+      "status": "not_estimable_insufficient_train_anchors"
+    },
+    "6h": {
+      "n_train_usable": 1,
+      "per_seizure": [],
+      "train_drop_reasons": [
+        "no_state_coverage"
+      ],
+      "status": "not_estimable_insufficient_train_anchors"
+    }
+  }
 }

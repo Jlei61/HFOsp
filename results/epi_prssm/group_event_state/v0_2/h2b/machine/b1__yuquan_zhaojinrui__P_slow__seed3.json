@@ -1,7 +1,77 @@
 {
+  "tag": "registry_producer",
+  "warning": "",
+  "provenance": {
+    "producer": "P_slow",
+    "seed": "3",
+    "source_commit": "5f5d010225806f3ea9822f67eecd1bb826277850",
+    "config_hash": "617a6705e6c35ffb855e2838c11a52d1f7c24a4e0df796c11872e7e292ee9001",
+    "checkpoint_hash": "7789739184db119918efc896de48d818411df0d75cc3ae9cf83daea8f27470d6",
+    "registry_version": "group_event_state_v0_2_registry_1"
+  },
   "subject": "yuquan_zhaojinrui",
-  "producer": "P_slow",
-  "status": "not_available",
-  "reason": "this producer's cells span 27 different configurations; they cannot be pooled as one arm until the producer explains why",
-  "registry_version": "group_event_state_v0_2_registry_1"
+  "arm": "a1_static_recent_history",
+  "seed": 3,
+  "n_rows_total": 276,
+  "n_rows_state_available": 268,
+  "n_train_rows": 181,
+  "n_eval_rows": 87,
+  "n_episodes": 3,
+  "n_heldout_episodes": 1,
+  "split_epoch": 1565857660.942,
+  "state_dim": 96,
+  "max_state_age_sec": 330.0,
+  "split_mode": "seizure_rolling_origin",
+  "chosen_C": {
+    "intercept_only": 0.03,
+    "baseline": 0.03,
+    "baseline_plus_state": 0.03
+  },
+  "chosen_state_components": 4,
+  "mean_log_score_intercept_only": -0.47521626981814424,
+  "arm_worse_than_intercept": {
+    "baseline": true,
+    "baseline_plus_state": true
+  },
+  "eval_event_rows": 0,
+  "eval_distinct_seizures": 0,
+  "eval_events": 0,
+  "status": "ok_but_no_events_in_eval",
+  "mean_log_score": {
+    "intercept_only": -0.47521626981814424,
+    "baseline": -2.345380428210007,
+    "baseline_plus_state": -2.061805548068659
+  },
+  "brier_by_bin": {
+    "intercept_only": [
+      0.00615,
+      0.00699,
+      0.00801,
+      0.01159,
+      0.01294,
+      0.03778
+    ],
+    "baseline": [
+      0.11116,
+      0.12406,
+      0.14121,
+      0.19042,
+      0.22118,
+      0.31538
+    ],
+    "baseline_plus_state": [
+      0.08492,
+      0.09507,
+      0.10929,
+      0.15302,
+      0.19213,
+      0.35714
+    ]
+  },
+  "nested_increment_log_score": {
+    "mean_gain": 0.28357488014134824,
+    "median_gain": 0.33408974962350424,
+    "n": 87,
+    "n_positive": 62
+  }
 }
