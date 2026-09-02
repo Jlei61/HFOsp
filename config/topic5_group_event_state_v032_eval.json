@@ -101,9 +101,6 @@
   },
   "nb_glm": {
     "ridge_grid": [
-      0.001,
-      0.01,
-      0.1,
       1.0,
       10.0,
       100.0,
@@ -120,7 +117,8 @@
       6.0
     ],
     "dispersion_rule": "per_arm_ml_on_fit_rows_then_frozen; shared_alpha_from_H reported as sensitivity",
-    "ridge_grid_revision": "2026-09-02 rev1: extended to 1e5 because the first H-only fit hit the 1e3 edge for most patients; changed before any H+S comparison was run"
+    "ridge_grid_revision": "2026-09-02 rev1: extended to 1e5 (edge hits). rev2: floor raised to 1.0 and linear predictor clamped to the fit-row range +-1 nat after H-only fits with ridge<1 produced eta up to 30 on dev_test (collinear standardised columns cancel in-sample, not out-of-sample); both rules apply to every arm identically and were fixed before any H+S comparison was run",
+    "eta_clamp_margin_nats": 1.0
   },
   "arms": [
     "H",
@@ -173,8 +171,8 @@
     "patience": 3,
     "lr": 0.003,
     "adapter_lr": 0.002,
-    "adapter_max_epochs": 8,
-    "adapter_patience": 2,
+    "adapter_max_epochs": 20,
+    "adapter_patience": 4,
     "weight_decay": 0.0001,
     "max_events_per_epoch": 40000,
     "prefix_min_occurrences": 20,

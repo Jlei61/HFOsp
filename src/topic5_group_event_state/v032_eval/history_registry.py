@@ -68,7 +68,7 @@ def fit_history_for_patient(tl: EvalTimeline, cfg: Mapping[str, Any], design: H1
                     fit = select_and_refit(
                         x, y, fit_rows=fit_rows, select_rows=select_rows, refit_rows=refit_rows,
                         ridge_grid=nb["ridge_grid"], alpha_log_bounds=tuple(nb["alpha_log_bounds"]),
-                        max_iter=int(nb["max_irls_iter"]),
+                        max_iter=int(nb["max_irls_iter"]), eta_clamp_margin=nb.get("eta_clamp_margin_nats", 1.0),
                     )
                     spec["selection"] = "inner_val"
                 else:
@@ -82,7 +82,7 @@ def fit_history_for_patient(tl: EvalTimeline, cfg: Mapping[str, Any], design: H1
                     fit = select_and_refit(
                         x, y, fit_rows=fit_rows, select_rows=fit_rows[:1], refit_rows=refit_rows,
                         ridge_grid=(ridge,), alpha_log_bounds=tuple(nb["alpha_log_bounds"]),
-                        max_iter=int(nb["max_irls_iter"]),
+                        max_iter=int(nb["max_irls_iter"]), eta_clamp_margin=nb.get("eta_clamp_margin_nats", 1.0),
                     )
                     spec["selection"] = "inherited_from_1800s_no_inner_val_window"
             except (RuntimeError, np.linalg.LinAlgError, ValueError) as exc:
@@ -106,6 +106,7 @@ def fit_history_for_patient(tl: EvalTimeline, cfg: Mapping[str, Any], design: H1
                     "mean_predicted": finite_or_none(model.predict_mu(x[idx]).mean()) if idx.size else None,
                     "intercept_only_mean_nb_nll": finite_or_none(
                         intercept_ref.nll(np.zeros((idx.size, 1)), y[idx]).mean()) if idx.size else None,
+                    "eta_clamp_fraction": model.clamp_fraction(x[idx]) if idx.size else None,
                 }
             spec.update({
                 "status": "ok",

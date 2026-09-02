@@ -134,6 +134,7 @@ def score_arms(
                 ridge_grid=nb["ridge_grid"], alpha_log_bounds=tuple(nb["alpha_log_bounds"]),
                 fixed_alpha=(fixed_alpha if (dispersion_rule == "shared_H_alpha" and arm != reference_arm) else None),
                 max_iter=int(nb["max_irls_iter"]),
+                eta_clamp_margin=nb.get("eta_clamp_margin_nats", 1.0),
             )
         except (RuntimeError, np.linalg.LinAlgError, ValueError) as exc:
             entry["status"] = "solver_failure"
@@ -169,8 +170,11 @@ def score_arms(
                 phase: {
                     "mean_observed": finite_or_none(np.nanmean(y[rows[phase]])) if rows[phase].size else None,
                     "mean_predicted": finite_or_none(np.nanmean(scores[phase]["mu"])) if rows[phase].size else None,
+                    "eta_clamp_fraction": (model.clamp_fraction(x[rows[phase][finite[rows[phase]]]])
+                                           if finite[rows[phase]].any() else None),
                 } for phase in SCORE_PHASES
             },
+            "eta_fit_range": list(model.eta_fit_range_),
         })
         out["arms"][arm] = entry
     return out
@@ -186,8 +190,12 @@ def _mean_over_shifts(arms: Mapping[str, Any], phase: str, n_rows: int) -> tuple
     if not stack:
         return np.full(n_rows, np.nan), used
     arr = np.stack(stack, axis=0)
-    with np.errstate(all="ignore"):
-        mean = np.nanmean(arr, axis=0)
+    finite = np.isfinite(arr)
+    count = finite.sum(axis=0)
+    total = np.where(finite, arr, 0.0).sum(axis=0)
+    mean = np.full(n_rows, np.nan)
+    ok = count > 0
+    mean[ok] = total[ok] / count[ok]
     return mean, used
 
 

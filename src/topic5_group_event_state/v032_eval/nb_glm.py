@@ -53,11 +53,17 @@ class NegativeBinomialRidge:
     fixed_alpha: float | None = None
     x_mean: np.ndarray | None = None
     x_scale: np.ndarray | None = None
+    x_min: np.ndarray | None = None
+    x_max: np.ndarray | None = None
+    eta_clamp_margin: float | None = 1.0
     coef_: np.ndarray = field(default=None, repr=False)
     intercept_: float = field(default=None, repr=False)
     alpha_: float = field(default=None, repr=False)
     x_mean_: np.ndarray = field(default=None, repr=False)
     x_scale_: np.ndarray = field(default=None, repr=False)
+    x_min_: np.ndarray = field(default=None, repr=False)
+    x_max_: np.ndarray = field(default=None, repr=False)
+    eta_fit_range_: tuple[float, float] = field(default=None, repr=False)
     converged_: bool = field(default=False, repr=False)
     n_iter_: int = field(default=0, repr=False)
     n_fit_rows_: int = field(default=0, repr=False)
@@ -65,7 +71,13 @@ class NegativeBinomialRidge:
 
     # -- standardisation -------------------------------------------------------
     def _standardise(self, x: np.ndarray) -> np.ndarray:
-        z = (np.asarray(x, dtype=np.float64) - self.x_mean_) / self.x_scale_
+        # Chronological splits always score the *latest* data, so a feature can leave the
+        # range seen in fitting.  Winsorising to the fit-row range bounds the log-linear
+        # extrapolation for every arm alike; the bounds come from fit rows only.
+        raw = np.asarray(x, dtype=np.float64)
+        if self.x_min_ is not None and self.x_max_ is not None:
+            raw = np.clip(raw, self.x_min_, self.x_max_)
+        z = (raw - self.x_mean_) / self.x_scale_
         return np.nan_to_num(z, nan=0.0, posinf=0.0, neginf=0.0)
 
     def _penalised_loglik(self, z: np.ndarray, y: np.ndarray, beta: np.ndarray,
@@ -128,6 +140,8 @@ class NegativeBinomialRidge:
         else:
             scale = x.std(axis=0)
             self.x_scale_ = np.where(scale > 1e-9, scale, 1.0)
+        self.x_min_ = np.asarray(self.x_min, dtype=np.float64) if self.x_min is not None else x.min(axis=0)
+        self.x_max_ = np.asarray(self.x_max, dtype=np.float64) if self.x_max is not None else x.max(axis=0)
         z = self._standardise(x)
         mean_y = max(float(y.mean()), 1e-8)
         var_y = float(y.var()) if y.size > 1 else mean_y
@@ -158,6 +172,8 @@ class NegativeBinomialRidge:
                 break
         self.coef_ = beta[1:].copy()
         self.intercept_ = float(beta[0])
+        eta_fit = np.clip(beta[0] + z @ beta[1:], -ETA_CLIP, ETA_CLIP)
+        self.eta_fit_range_ = (float(eta_fit.min()), float(eta_fit.max()))
         self.alpha_ = float(alpha)
         self.converged_ = bool(converged)
         self.n_iter_ = len(self.fit_history_)
@@ -167,7 +183,22 @@ class NegativeBinomialRidge:
     def linear_predictor(self, x: np.ndarray) -> np.ndarray:
         if self.coef_ is None:
             raise RuntimeError("model is not fitted")
-        return np.clip(self.intercept_ + self._standardise(x) @ self.coef_, -ETA_CLIP, ETA_CLIP)
+        eta = np.clip(self.intercept_ + self._standardise(x) @ self.coef_, -ETA_CLIP, ETA_CLIP)
+        if self.eta_clamp_margin is not None and self.eta_fit_range_ is not None:
+            # The linear predictor may not leave the range it took on the fit rows by more
+            # than the margin: a log-linear model must not forecast rates it never fitted.
+            lo, hi = self.eta_fit_range_
+            eta = np.clip(eta, lo - float(self.eta_clamp_margin), hi + float(self.eta_clamp_margin))
+        return eta
+
+    def clamp_fraction(self, x: np.ndarray) -> float:
+        """Fraction of rows whose predictor hit the fit-range clamp (audit only)."""
+
+        raw = np.clip(self.intercept_ + self._standardise(x) @ self.coef_, -ETA_CLIP, ETA_CLIP)
+        if self.eta_clamp_margin is None or self.eta_fit_range_ is None or raw.size == 0:
+            return 0.0
+        lo, hi = self.eta_fit_range_
+        return float(np.mean((raw < lo - self.eta_clamp_margin) | (raw > hi + self.eta_clamp_margin)))
 
     def predict_mu(self, x: np.ndarray) -> np.ndarray:
         return np.exp(self.linear_predictor(x))
@@ -185,10 +216,14 @@ class NegativeBinomialRidge:
             "alpha": float(self.alpha_),
             "x_mean": self.x_mean_.tolist(),
             "x_scale": self.x_scale_.tolist(),
+            "x_min": self.x_min_.tolist(),
+            "x_max": self.x_max_.tolist(),
             "converged": bool(self.converged_),
             "n_iter": int(self.n_iter_),
             "n_fit_rows": int(self.n_fit_rows_),
             "fixed_alpha": None if self.fixed_alpha is None else float(self.fixed_alpha),
+            "eta_fit_range": list(self.eta_fit_range_),
+            "eta_clamp_margin": self.eta_clamp_margin,
         }
 
 
@@ -203,6 +238,7 @@ def select_and_refit(
     alpha_log_bounds: tuple[float, float] = (-9.0, 6.0),
     fixed_alpha: float | None = None,
     max_iter: int = 50,
+    eta_clamp_margin: float | None = 1.0,
 ) -> dict[str, Any]:
     """Fit on ``fit_rows``, choose ridge on ``select_rows``, refit on ``refit_rows``.
 
@@ -221,6 +257,8 @@ def select_and_refit(
     x_mean = x[fit_rows].mean(axis=0)
     scale = x[fit_rows].std(axis=0)
     x_scale = np.where(scale > 1e-9, scale, 1.0)
+    x_min = x[fit_rows].min(axis=0)
+    x_max = x[fit_rows].max(axis=0)
     grid = [float(v) for v in ridge_grid]
     path: list[dict[str, Any]] = []
     failures: list[dict[str, Any]] = []
@@ -229,7 +267,8 @@ def select_and_refit(
         try:
             model = NegativeBinomialRidge(
                 ridge=ridge, max_iter=max_iter, alpha_log_bounds=alpha_log_bounds,
-                fixed_alpha=fixed_alpha, x_mean=x_mean, x_scale=x_scale,
+                fixed_alpha=fixed_alpha, x_mean=x_mean, x_scale=x_scale, x_min=x_min, x_max=x_max,
+                eta_clamp_margin=eta_clamp_margin,
             ).fit(x[fit_rows], y[fit_rows])
             score = float(model.nll(x[select_rows], y[select_rows]).mean())
         except (np.linalg.LinAlgError, FloatingPointError, ValueError) as exc:
@@ -246,7 +285,8 @@ def select_and_refit(
     selected = best[1]
     model = NegativeBinomialRidge(
         ridge=selected, max_iter=max_iter, alpha_log_bounds=alpha_log_bounds,
-        fixed_alpha=fixed_alpha, x_mean=x_mean, x_scale=x_scale,
+        fixed_alpha=fixed_alpha, x_mean=x_mean, x_scale=x_scale, x_min=x_min, x_max=x_max,
+        eta_clamp_margin=eta_clamp_margin,
     ).fit(x[refit_rows], y[refit_rows])
     return {
         "model": model,

@@ -127,6 +127,8 @@ H   vs   H + S_correct   vs   H + S_shifted   vs   H + S_mean
 ## 8.1 合同修订记录
 
 - **rev1（2026-09-02，任何 H+S 比较运行之前）**：NB ridge 网格由 `1e-3…1e3` 扩为 `1e-3…1e5`。原因：只含 H 的首轮拟合中 27 人多数在 1e3 顶格（`ridge_at_edge=true`），说明网格没有覆盖 inner_val 的最优正则强度；网格对所有臂同等生效，不改变任何臂的相对地位。
+- **rev2（2026-09-02，仍在任何 H+S 比较之前）**：ridge 网格下限提高到 1.0（`1,10,…,1e5`），并对所有臂加同一条安全规则——线性预测子在评分行上不得超出拟合行取值范围 ±1 nat（`eta_clamp_margin_nats`）。原因：只含 H 的拟合中 `ridge<1` 在 inner_val 上偶然被选中后，共线的标准化列在拟合行内互相抵消、在 dev_test 上却把 log μ 推到 30（`yuquan_pengzihang` H_rate dev_test NLL 1254 nats/anchor）。两条规则对每个臂完全相同，命中比例逐臂记录在 `eta_clamp_fraction`。
+- **rev3（首个 H2a 运行只作优化审计并作废）**：首位患者的 8/8 adapter 臂都在第 8 个 epoch 预算边缘，inner loss 仍单调下降；该运行不能作为科学读数。所有 H2a 臂统一改为最多 20 epochs、patience 4，并显式报告 `selected_at_budget_edge`，随后从头重跑。调整依据只看收敛曲线，不看 dev_test 效应方向。
 - **rev1 说明（H 的信息集）**：H 的特征使用 anchor 之前（onset 严格早于 anchor）的全部事件，与 Agent 1 的 anchor state 信息集一致，以保持配对公平；zero-phase filter 的 0.75 s 未来支持带来的"最后一个事件的波形特征可能覆盖目标窗首个事件"是 H 与 S 共有的、至多一个事件的泄漏通道，逐患者量化在 `detector_refractory_manifest.json`（`fraction_anchors_last_feature_window_overlaps_target`），在 300 s horizon 上必须并报。
 
 ## 9. 完成条件

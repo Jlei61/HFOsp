@@ -196,6 +196,9 @@ class HistoryFeatureBuilder:
         sess_start = np.asarray([inputs.session_start[sess_of_seg.get(int(s), int(s))] if sess_of_seg.get(int(s)) in inputs.session_start else inputs.segment_start[int(s)] for s in seg], dtype=np.float64)
         add(np.log1p(np.clip(into_seg, 0.0, None)), ["log_seconds_into_segment"])
         add(np.log1p(np.clip(q - sess_start, 0.0, None)), ["log_seconds_into_session"])
+        # This is a real, interpretable drift covariate.  The GLM's TRAIN-range
+        # winsorisation prevents unbounded extrapolation without deleting the
+        # scientific control from H.
         add((q - float(inputs.recording_start)) / SECONDS_PER_DAY, ["days_since_recording_start"])
         add(np.log1p(n_before), ["log_events_so_far_in_segment"])
         if variant == "H_rate":

@@ -206,3 +206,14 @@ def test_predefined_shifts_never_cross_sessions():
         donor = spec["donor_index"]
         valid = donor >= 0
         assert (session[valid] == session[donor[valid]]).all()
+
+
+def test_nb_ridge_winsorises_out_of_range_features_to_the_fit_range():
+    rng = np.random.default_rng(5)
+    x = rng.normal(size=(400, 2))
+    y = rng.poisson(np.exp(1.0 + 0.5 * x[:, 0]))
+    model = NegativeBinomialRidge(ridge=1e-3).fit(x, y)
+    far = np.array([[50.0, 0.0]])          # far outside the fit range
+    edge = np.array([[x[:, 0].max(), 0.0]])
+    assert np.allclose(model.predict_mu(far), model.predict_mu(edge))
+    assert np.allclose(model.x_min_, x.min(axis=0)) and np.allclose(model.x_max_, x.max(axis=0))
