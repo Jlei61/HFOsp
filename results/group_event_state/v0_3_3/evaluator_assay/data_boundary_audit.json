@@ -1,0 +1,1475 @@
+{
+  "cohort": {
+    "all_hard_reset_equals_v032_last_event_pos": true,
+    "all_kept_equals_in_target_segments": true,
+    "all_matches_v032_eligibility": true,
+    "n_anchors_total": 27588,
+    "n_anchors_where_variants_differ": 50,
+    "n_events_excluded_seizure_or_postictal": 198737,
+    "n_ok": 27,
+    "n_subjects": 27
+  },
+  "config_sha256": "85662dc32671dc4afff8fa418defc6fac91129872ff5ecc9ee2aeb70ce43a21d",
+  "contract": {
+    "clauses": {
+      "B1": "target window [t,t+h) lies inside one target segment (session cut at seizure onset, postictal exclusion removed) and inside one partition phase",
+      "B2": "events inside [onset, max(offset,onset)+postictal) never update the state",
+      "B3": "mainline: across a seizure inside one recorded session the state keeps its autonomous decay (no reset)",
+      "B4": "a recorded gap / session edge is a hard reset (state starts from 0)",
+      "B5": "hard reset at seizure onset (v0.3.2 segment carry) is the named sensitivity variant, never the default"
+    },
+    "default_variant": "mainline",
+    "variants": {
+      "mainline": {
+        "role": "default",
+        "seizure_and_immediate_postictal_events": "excluded_from_state_update_autonomous_flow_continues",
+        "state_reset_at": "recorded_gap_or_session_edge_only",
+        "target_windows": "inside_one_target_segment_and_one_partition_phase"
+      },
+      "sensitivity_hard_seizure_reset": {
+        "role": "sensitivity_only",
+        "seizure_and_immediate_postictal_events": "excluded_from_state_update",
+        "state_reset_at": "recorded_gap_or_session_edge_or_seizure_onset",
+        "target_windows": "inside_one_target_segment_and_one_partition_phase"
+      }
+    }
+  },
+  "evidence_label": "DIAGNOSTIC (data contract audit; no scientific result)",
+  "format": "group_event_state_v0_3_3_data_boundary_audit",
+  "generated": "2026-09-02T23:18:59+08:00",
+  "sealed_partition_opened": false,
+  "source_commit": "37e24a1890800a7c604602a8dcdadd7f2c150d5d",
+  "subjects": [
+    {
+      "anchors": {
+        "all_inside_a_target_segment": true,
+        "n_grid": 2472,
+        "per_horizon": {
+          "1800": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 18,
+            "n_invalid_segment_end_or_gap_or_seizure": 168,
+            "n_valid_target_window": 2286
+          },
+          "300": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 3,
+            "n_invalid_segment_end_or_gap_or_seizure": 31,
+            "n_valid_target_window": 2438
+          },
+          "7200": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 57,
+            "n_invalid_segment_end_or_gap_or_seizure": 587,
+            "n_valid_target_window": 1828
+          }
+        }
+      },
+      "carry": {
+        "fraction_anchors_where_variants_differ": 0.0,
+        "hard_reset_variant_equals_v032_last_event_pos": true,
+        "n_anchors_where_variants_differ": 0,
+        "n_anchors_with_history_hard_reset": 2472,
+        "n_anchors_with_history_mainline": 2472,
+        "n_post_seizure_target_segments_in_same_session": 13
+      },
+      "events": {
+        "kept_equals_in_target_segments": true,
+        "n_excluded_seizure_or_postictal_inside_sessions": 9872,
+        "n_in_target_segments": 184335,
+        "n_inside_sessions": 194207,
+        "n_interictal_stream": 194207,
+        "n_kept_by_v032_timeline": 184335,
+        "n_outside_sessions": 0,
+        "no_updating_event_inside_seizure_or_postictal": true
+      },
+      "excluded_seizure_postictal_seconds_in_sessions": 62833.69921851158,
+      "n_seizures": 17,
+      "n_sessions": 18,
+      "n_target_segments": 31,
+      "postictal_exclusion_seconds": 3600.0,
+      "recorded_seconds_in_sessions": 806530.0,
+      "status": "ok",
+      "subject": "epilepsiae_1073",
+      "target_segment_seconds": 750007.2089853287
+    },
+    {
+      "anchors": {
+        "all_inside_a_target_segment": true,
+        "n_grid": 2065,
+        "per_horizon": {
+          "1800": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 13,
+            "n_invalid_segment_end_or_gap_or_seizure": 138,
+            "n_valid_target_window": 1914
+          },
+          "300": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 3,
+            "n_invalid_segment_end_or_gap_or_seizure": 23,
+            "n_valid_target_window": 2039
+          },
+          "7200": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 38,
+            "n_invalid_segment_end_or_gap_or_seizure": 486,
+            "n_valid_target_window": 1541
+          }
+        }
+      },
+      "carry": {
+        "fraction_anchors_where_variants_differ": 0.001937046004842615,
+        "hard_reset_variant_equals_v032_last_event_pos": true,
+        "n_anchors_where_variants_differ": 4,
+        "n_anchors_with_history_hard_reset": 2061,
+        "n_anchors_with_history_mainline": 2065,
+        "n_post_seizure_target_segments_in_same_session": 9
+      },
+      "events": {
+        "kept_equals_in_target_segments": true,
+        "n_excluded_seizure_or_postictal_inside_sessions": 4201,
+        "n_in_target_segments": 51948,
+        "n_inside_sessions": 56155,
+        "n_interictal_stream": 56155,
+        "n_kept_by_v032_timeline": 51948,
+        "n_outside_sessions": 0,
+        "no_updating_event_inside_seizure_or_postictal": true
+      },
+      "excluded_seizure_postictal_seconds_in_sessions": 33136.50488233566,
+      "n_seizures": 9,
+      "n_sessions": 15,
+      "n_target_segments": 23,
+      "postictal_exclusion_seconds": 3600.0,
+      "recorded_seconds_in_sessions": 659182.0,
+      "status": "ok",
+      "subject": "epilepsiae_1077",
+      "target_segment_seconds": 625940.4951176643
+    },
+    {
+      "anchors": {
+        "all_inside_a_target_segment": true,
+        "n_grid": 1755,
+        "per_horizon": {
+          "1800": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 18,
+            "n_invalid_segment_end_or_gap_or_seizure": 131,
+            "n_valid_target_window": 1606
+          },
+          "300": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 3,
+            "n_invalid_segment_end_or_gap_or_seizure": 22,
+            "n_valid_target_window": 1730
+          },
+          "7200": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 57,
+            "n_invalid_segment_end_or_gap_or_seizure": 460,
+            "n_valid_target_window": 1238
+          }
+        }
+      },
+      "carry": {
+        "fraction_anchors_where_variants_differ": 0.0,
+        "hard_reset_variant_equals_v032_last_event_pos": true,
+        "n_anchors_where_variants_differ": 0,
+        "n_anchors_with_history_hard_reset": 1743,
+        "n_anchors_with_history_mainline": 1743,
+        "n_post_seizure_target_segments_in_same_session": 8
+      },
+      "events": {
+        "kept_equals_in_target_segments": true,
+        "n_excluded_seizure_or_postictal_inside_sessions": 23718,
+        "n_in_target_segments": 198536,
+        "n_inside_sessions": 222254,
+        "n_interictal_stream": 222254,
+        "n_kept_by_v032_timeline": 198536,
+        "n_outside_sessions": 0,
+        "no_updating_event_inside_seizure_or_postictal": true
+      },
+      "excluded_seizure_postictal_seconds_in_sessions": 33487.142578125,
+      "n_seizures": 9,
+      "n_sessions": 15,
+      "n_target_segments": 23,
+      "postictal_exclusion_seconds": 3600.0,
+      "recorded_seconds_in_sessions": 566866.0,
+      "status": "ok",
+      "subject": "epilepsiae_1096",
+      "target_segment_seconds": 533378.857421875
+    },
+    {
+      "anchors": {
+        "all_inside_a_target_segment": true,
+        "n_grid": 1682,
+        "per_horizon": {
+          "1800": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 18,
+            "n_invalid_segment_end_or_gap_or_seizure": 122,
+            "n_valid_target_window": 1542
+          },
+          "300": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 3,
+            "n_invalid_segment_end_or_gap_or_seizure": 21,
+            "n_valid_target_window": 1658
+          },
+          "7200": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 72,
+            "n_invalid_segment_end_or_gap_or_seizure": 422,
+            "n_valid_target_window": 1188
+          }
+        }
+      },
+      "carry": {
+        "fraction_anchors_where_variants_differ": 0.0,
+        "hard_reset_variant_equals_v032_last_event_pos": true,
+        "n_anchors_where_variants_differ": 0,
+        "n_anchors_with_history_hard_reset": 1682,
+        "n_anchors_with_history_mainline": 1682,
+        "n_post_seizure_target_segments_in_same_session": 11
+      },
+      "events": {
+        "kept_equals_in_target_segments": true,
+        "n_excluded_seizure_or_postictal_inside_sessions": 7229,
+        "n_in_target_segments": 62675,
+        "n_inside_sessions": 69904,
+        "n_interictal_stream": 69904,
+        "n_kept_by_v032_timeline": 62675,
+        "n_outside_sessions": 0,
+        "no_updating_event_inside_seizure_or_postictal": true
+      },
+      "excluded_seizure_postictal_seconds_in_sessions": 48033.00000190735,
+      "n_seizures": 14,
+      "n_sessions": 10,
+      "n_target_segments": 21,
+      "postictal_exclusion_seconds": 3600.0,
+      "recorded_seconds_in_sessions": 558018.0,
+      "status": "ok",
+      "subject": "epilepsiae_1125",
+      "target_segment_seconds": 509984.99999809265
+    },
+    {
+      "anchors": {
+        "all_inside_a_target_segment": true,
+        "n_grid": 673,
+        "per_horizon": {
+          "1800": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 18,
+            "n_invalid_segment_end_or_gap_or_seizure": 152,
+            "n_valid_target_window": 503
+          },
+          "300": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 3,
+            "n_invalid_segment_end_or_gap_or_seizure": 27,
+            "n_valid_target_window": 643
+          },
+          "7200": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 25,
+            "n_invalid_segment_end_or_gap_or_seizure": 362,
+            "n_valid_target_window": 286
+          }
+        }
+      },
+      "carry": {
+        "fraction_anchors_where_variants_differ": 0.017830609212481426,
+        "hard_reset_variant_equals_v032_last_event_pos": true,
+        "n_anchors_where_variants_differ": 12,
+        "n_anchors_with_history_hard_reset": 618,
+        "n_anchors_with_history_mainline": 630,
+        "n_post_seizure_target_segments_in_same_session": 12
+      },
+      "events": {
+        "kept_equals_in_target_segments": true,
+        "n_excluded_seizure_or_postictal_inside_sessions": 14655,
+        "n_in_target_segments": 29628,
+        "n_inside_sessions": 44283,
+        "n_interictal_stream": 44283,
+        "n_kept_by_v032_timeline": 29628,
+        "n_outside_sessions": 0,
+        "no_updating_event_inside_seizure_or_postictal": true
+      },
+      "excluded_seizure_postictal_seconds_in_sessions": 96192.83007454872,
+      "n_seizures": 26,
+      "n_sessions": 15,
+      "n_target_segments": 27,
+      "postictal_exclusion_seconds": 3600.0,
+      "recorded_seconds_in_sessions": 283691.0,
+      "status": "ok",
+      "subject": "epilepsiae_1146",
+      "target_segment_seconds": 208988.50488376617
+    },
+    {
+      "anchors": {
+        "all_inside_a_target_segment": true,
+        "n_grid": 3014,
+        "per_horizon": {
+          "1800": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 18,
+            "n_invalid_segment_end_or_gap_or_seizure": 126,
+            "n_valid_target_window": 2870
+          },
+          "300": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 3,
+            "n_invalid_segment_end_or_gap_or_seizure": 21,
+            "n_valid_target_window": 2990
+          },
+          "7200": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 40,
+            "n_invalid_segment_end_or_gap_or_seizure": 442,
+            "n_valid_target_window": 2532
+          }
+        }
+      },
+      "carry": {
+        "fraction_anchors_where_variants_differ": 0.0,
+        "hard_reset_variant_equals_v032_last_event_pos": true,
+        "n_anchors_where_variants_differ": 0,
+        "n_anchors_with_history_hard_reset": 3011,
+        "n_anchors_with_history_mainline": 3011,
+        "n_post_seizure_target_segments_in_same_session": 6
+      },
+      "events": {
+        "kept_equals_in_target_segments": true,
+        "n_excluded_seizure_or_postictal_inside_sessions": 6392,
+        "n_in_target_segments": 68564,
+        "n_inside_sessions": 74956,
+        "n_interictal_stream": 74956,
+        "n_kept_by_v032_timeline": 68564,
+        "n_outside_sessions": 0,
+        "no_updating_event_inside_seizure_or_postictal": true
+      },
+      "excluded_seizure_postictal_seconds_in_sessions": 25877.773438215256,
+      "n_seizures": 7,
+      "n_sessions": 15,
+      "n_target_segments": 21,
+      "postictal_exclusion_seconds": 3600.0,
+      "recorded_seconds_in_sessions": 936371.0,
+      "status": "ok",
+      "subject": "epilepsiae_253",
+      "target_segment_seconds": 910493.2265617847
+    },
+    {
+      "anchors": {
+        "all_inside_a_target_segment": true,
+        "n_grid": 627,
+        "per_horizon": {
+          "1800": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 12,
+            "n_invalid_segment_end_or_gap_or_seizure": 91,
+            "n_valid_target_window": 524
+          },
+          "300": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 3,
+            "n_invalid_segment_end_or_gap_or_seizure": 16,
+            "n_valid_target_window": 608
+          },
+          "7200": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 46,
+            "n_invalid_segment_end_or_gap_or_seizure": 297,
+            "n_valid_target_window": 284
+          }
+        }
+      },
+      "carry": {
+        "fraction_anchors_where_variants_differ": 0.0,
+        "hard_reset_variant_equals_v032_last_event_pos": true,
+        "n_anchors_where_variants_differ": 0,
+        "n_anchors_with_history_hard_reset": 627,
+        "n_anchors_with_history_mainline": 627,
+        "n_post_seizure_target_segments_in_same_session": 5
+      },
+      "events": {
+        "kept_equals_in_target_segments": true,
+        "n_excluded_seizure_or_postictal_inside_sessions": 9501,
+        "n_in_target_segments": 32981,
+        "n_inside_sessions": 42482,
+        "n_interictal_stream": 42482,
+        "n_kept_by_v032_timeline": 32981,
+        "n_outside_sessions": 0,
+        "no_updating_event_inside_seizure_or_postictal": true
+      },
+      "excluded_seizure_postictal_seconds_in_sessions": 27589.13476753235,
+      "n_seizures": 15,
+      "n_sessions": 11,
+      "n_target_segments": 16,
+      "postictal_exclusion_seconds": 3600.0,
+      "recorded_seconds_in_sessions": 220445.0,
+      "status": "ok",
+      "subject": "epilepsiae_384",
+      "target_segment_seconds": 192855.86523246765
+    },
+    {
+      "anchors": {
+        "all_inside_a_target_segment": true,
+        "n_grid": 1161,
+        "per_horizon": {
+          "1800": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 12,
+            "n_invalid_segment_end_or_gap_or_seizure": 214,
+            "n_valid_target_window": 935
+          },
+          "300": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 2,
+            "n_invalid_segment_end_or_gap_or_seizure": 39,
+            "n_valid_target_window": 1120
+          },
+          "7200": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 31,
+            "n_invalid_segment_end_or_gap_or_seizure": 598,
+            "n_valid_target_window": 532
+          }
+        }
+      },
+      "carry": {
+        "fraction_anchors_where_variants_differ": 0.019810508182601206,
+        "hard_reset_variant_equals_v032_last_event_pos": true,
+        "n_anchors_where_variants_differ": 23,
+        "n_anchors_with_history_hard_reset": 1127,
+        "n_anchors_with_history_mainline": 1150,
+        "n_post_seizure_target_segments_in_same_session": 27
+      },
+      "events": {
+        "kept_equals_in_target_segments": true,
+        "n_excluded_seizure_or_postictal_inside_sessions": 5921,
+        "n_in_target_segments": 18333,
+        "n_inside_sessions": 24254,
+        "n_interictal_stream": 24254,
+        "n_kept_by_v032_timeline": 18333,
+        "n_outside_sessions": 0,
+        "no_updating_event_inside_seizure_or_postictal": true
+      },
+      "excluded_seizure_postictal_seconds_in_sessions": 144936.74511551857,
+      "n_seizures": 31,
+      "n_sessions": 15,
+      "n_target_segments": 42,
+      "postictal_exclusion_seconds": 3600.0,
+      "recorded_seconds_in_sessions": 503881.0,
+      "status": "ok",
+      "subject": "epilepsiae_548",
+      "target_segment_seconds": 360836.3925793171
+    },
+    {
+      "anchors": {
+        "all_inside_a_target_segment": true,
+        "n_grid": 688,
+        "per_horizon": {
+          "1800": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 18,
+            "n_invalid_segment_end_or_gap_or_seizure": 40,
+            "n_valid_target_window": 630
+          },
+          "300": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 3,
+            "n_invalid_segment_end_or_gap_or_seizure": 7,
+            "n_valid_target_window": 678
+          },
+          "7200": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 56,
+            "n_invalid_segment_end_or_gap_or_seizure": 129,
+            "n_valid_target_window": 503
+          }
+        }
+      },
+      "carry": {
+        "fraction_anchors_where_variants_differ": 0.0,
+        "hard_reset_variant_equals_v032_last_event_pos": true,
+        "n_anchors_where_variants_differ": 0,
+        "n_anchors_with_history_hard_reset": 687,
+        "n_anchors_with_history_mainline": 687,
+        "n_post_seizure_target_segments_in_same_session": 1
+      },
+      "events": {
+        "kept_equals_in_target_segments": true,
+        "n_excluded_seizure_or_postictal_inside_sessions": 1161,
+        "n_in_target_segments": 9769,
+        "n_inside_sessions": 10930,
+        "n_interictal_stream": 10930,
+        "n_kept_by_v032_timeline": 9769,
+        "n_outside_sessions": 0,
+        "no_updating_event_inside_seizure_or_postictal": true
+      },
+      "excluded_seizure_postictal_seconds_in_sessions": 10446.206053733826,
+      "n_seizures": 22,
+      "n_sessions": 6,
+      "n_target_segments": 7,
+      "postictal_exclusion_seconds": 3600.0,
+      "recorded_seconds_in_sessions": 215990.0,
+      "status": "ok",
+      "subject": "epilepsiae_583",
+      "target_segment_seconds": 208571.77734422684
+    },
+    {
+      "anchors": {
+        "all_inside_a_target_segment": true,
+        "n_grid": 2017,
+        "per_horizon": {
+          "1800": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 18,
+            "n_invalid_segment_end_or_gap_or_seizure": 155,
+            "n_valid_target_window": 1844
+          },
+          "300": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 3,
+            "n_invalid_segment_end_or_gap_or_seizure": 28,
+            "n_valid_target_window": 1986
+          },
+          "7200": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 61,
+            "n_invalid_segment_end_or_gap_or_seizure": 518,
+            "n_valid_target_window": 1438
+          }
+        }
+      },
+      "carry": {
+        "fraction_anchors_where_variants_differ": 0.001487357461576599,
+        "hard_reset_variant_equals_v032_last_event_pos": true,
+        "n_anchors_where_variants_differ": 3,
+        "n_anchors_with_history_hard_reset": 1963,
+        "n_anchors_with_history_mainline": 1966,
+        "n_post_seizure_target_segments_in_same_session": 8
+      },
+      "events": {
+        "kept_equals_in_target_segments": true,
+        "n_excluded_seizure_or_postictal_inside_sessions": 1446,
+        "n_in_target_segments": 7543,
+        "n_inside_sessions": 8989,
+        "n_interictal_stream": 8989,
+        "n_kept_by_v032_timeline": 7543,
+        "n_outside_sessions": 0,
+        "no_updating_event_inside_seizure_or_postictal": true
+      },
+      "excluded_seizure_postictal_seconds_in_sessions": 172066.76074647903,
+      "n_seizures": 9,
+      "n_sessions": 22,
+      "n_target_segments": 28,
+      "postictal_exclusion_seconds": 3600.0,
+      "recorded_seconds_in_sessions": 786271.0,
+      "status": "ok",
+      "subject": "epilepsiae_818",
+      "target_segment_seconds": 614204.239253521
+    },
+    {
+      "anchors": {
+        "all_inside_a_target_segment": true,
+        "n_grid": 4297,
+        "per_horizon": {
+          "1800": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 18,
+            "n_invalid_segment_end_or_gap_or_seizure": 323,
+            "n_valid_target_window": 3956
+          },
+          "300": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 3,
+            "n_invalid_segment_end_or_gap_or_seizure": 59,
+            "n_valid_target_window": 4235
+          },
+          "7200": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 64,
+            "n_invalid_segment_end_or_gap_or_seizure": 1054,
+            "n_valid_target_window": 3179
+          }
+        }
+      },
+      "carry": {
+        "fraction_anchors_where_variants_differ": 0.0016290435187340006,
+        "hard_reset_variant_equals_v032_last_event_pos": true,
+        "n_anchors_where_variants_differ": 7,
+        "n_anchors_with_history_hard_reset": 4290,
+        "n_anchors_with_history_mainline": 4297,
+        "n_post_seizure_target_segments_in_same_session": 35
+      },
+      "events": {
+        "kept_equals_in_target_segments": true,
+        "n_excluded_seizure_or_postictal_inside_sessions": 14479,
+        "n_in_target_segments": 72253,
+        "n_inside_sessions": 86732,
+        "n_interictal_stream": 86732,
+        "n_kept_by_v032_timeline": 72253,
+        "n_outside_sessions": 0,
+        "no_updating_event_inside_seizure_or_postictal": true
+      },
+      "excluded_seizure_postictal_seconds_in_sessions": 251698.34374690056,
+      "n_seizures": 52,
+      "n_sessions": 24,
+      "n_target_segments": 59,
+      "postictal_exclusion_seconds": 3600.0,
+      "recorded_seconds_in_sessions": 1527396.0,
+      "status": "ok",
+      "subject": "epilepsiae_916",
+      "target_segment_seconds": 1308094.3710970879
+    },
+    {
+      "anchors": {
+        "all_inside_a_target_segment": true,
+        "n_grid": 919,
+        "per_horizon": {
+          "1800": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 13,
+            "n_invalid_segment_end_or_gap_or_seizure": 150,
+            "n_valid_target_window": 756
+          },
+          "300": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 3,
+            "n_invalid_segment_end_or_gap_or_seizure": 28,
+            "n_valid_target_window": 888
+          },
+          "7200": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 27,
+            "n_invalid_segment_end_or_gap_or_seizure": 469,
+            "n_valid_target_window": 423
+          }
+        }
+      },
+      "carry": {
+        "fraction_anchors_where_variants_differ": 0.0,
+        "hard_reset_variant_equals_v032_last_event_pos": true,
+        "n_anchors_where_variants_differ": 0,
+        "n_anchors_with_history_hard_reset": 919,
+        "n_anchors_with_history_mainline": 919,
+        "n_post_seizure_target_segments_in_same_session": 21
+      },
+      "events": {
+        "kept_equals_in_target_segments": true,
+        "n_excluded_seizure_or_postictal_inside_sessions": 63724,
+        "n_in_target_segments": 171142,
+        "n_inside_sessions": 234976,
+        "n_interictal_stream": 234976,
+        "n_kept_by_v032_timeline": 171142,
+        "n_outside_sessions": 0,
+        "no_updating_event_inside_seizure_or_postictal": true
+      },
+      "excluded_seizure_postictal_seconds_in_sessions": 121575.84765768051,
+      "n_seizures": 29,
+      "n_sessions": 8,
+      "n_target_segments": 29,
+      "postictal_exclusion_seconds": 3600.0,
+      "recorded_seconds_in_sessions": 398134.0,
+      "status": "ok",
+      "subject": "epilepsiae_922",
+      "target_segment_seconds": 285361.018553257
+    },
+    {
+      "anchors": {
+        "all_inside_a_target_segment": true,
+        "n_grid": 2464,
+        "per_horizon": {
+          "1800": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 9,
+            "n_invalid_segment_end_or_gap_or_seizure": 148,
+            "n_valid_target_window": 2307
+          },
+          "300": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 3,
+            "n_invalid_segment_end_or_gap_or_seizure": 25,
+            "n_valid_target_window": 2436
+          },
+          "7200": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 18,
+            "n_invalid_segment_end_or_gap_or_seizure": 575,
+            "n_valid_target_window": 1871
+          }
+        }
+      },
+      "carry": {
+        "fraction_anchors_where_variants_differ": 0.0,
+        "hard_reset_variant_equals_v032_last_event_pos": true,
+        "n_anchors_where_variants_differ": 0,
+        "n_anchors_with_history_hard_reset": 2463,
+        "n_anchors_with_history_mainline": 2463,
+        "n_post_seizure_target_segments_in_same_session": 8
+      },
+      "events": {
+        "kept_equals_in_target_segments": true,
+        "n_excluded_seizure_or_postictal_inside_sessions": 9665,
+        "n_in_target_segments": 155587,
+        "n_inside_sessions": 165252,
+        "n_interictal_stream": 165252,
+        "n_kept_by_v032_timeline": 155587,
+        "n_outside_sessions": 0,
+        "no_updating_event_inside_seizure_or_postictal": true
+      },
+      "excluded_seizure_postictal_seconds_in_sessions": 58429.500000953674,
+      "n_seizures": 16,
+      "n_sessions": 18,
+      "n_target_segments": 26,
+      "postictal_exclusion_seconds": 3600.0,
+      "recorded_seconds_in_sessions": 788814.0,
+      "status": "ok",
+      "subject": "epilepsiae_958",
+      "target_segment_seconds": 746798.4785137177
+    },
+    {
+      "anchors": {
+        "all_inside_a_target_segment": true,
+        "n_grid": 287,
+        "per_horizon": {
+          "1800": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 18,
+            "n_invalid_segment_end_or_gap_or_seizure": 6,
+            "n_valid_target_window": 263
+          },
+          "300": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 3,
+            "n_invalid_segment_end_or_gap_or_seizure": 1,
+            "n_valid_target_window": 283
+          },
+          "7200": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 72,
+            "n_invalid_segment_end_or_gap_or_seizure": 24,
+            "n_valid_target_window": 191
+          }
+        }
+      },
+      "carry": {
+        "fraction_anchors_where_variants_differ": 0.0,
+        "hard_reset_variant_equals_v032_last_event_pos": true,
+        "n_anchors_where_variants_differ": 0,
+        "n_anchors_with_history_hard_reset": 287,
+        "n_anchors_with_history_mainline": 287,
+        "n_post_seizure_target_segments_in_same_session": 0
+      },
+      "events": {
+        "kept_equals_in_target_segments": true,
+        "n_excluded_seizure_or_postictal_inside_sessions": 0,
+        "n_in_target_segments": 27632,
+        "n_inside_sessions": 27632,
+        "n_interictal_stream": 27632,
+        "n_kept_by_v032_timeline": 27632,
+        "n_outside_sessions": 0,
+        "no_updating_event_inside_seizure_or_postictal": true
+      },
+      "excluded_seizure_postictal_seconds_in_sessions": 0.0,
+      "n_seizures": 0,
+      "n_sessions": 1,
+      "n_target_segments": 1,
+      "postictal_exclusion_seconds": 3600.0,
+      "recorded_seconds_in_sessions": 86400.05999994278,
+      "status": "ok",
+      "subject": "yuquan_chengshuai",
+      "target_segment_seconds": 86400.05999994278
+    },
+    {
+      "anchors": {
+        "all_inside_a_target_segment": true,
+        "n_grid": 274,
+        "per_horizon": {
+          "1800": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 15,
+            "n_invalid_segment_end_or_gap_or_seizure": 12,
+            "n_valid_target_window": 247
+          },
+          "300": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 3,
+            "n_invalid_segment_end_or_gap_or_seizure": 2,
+            "n_valid_target_window": 269
+          },
+          "7200": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 51,
+            "n_invalid_segment_end_or_gap_or_seizure": 48,
+            "n_valid_target_window": 175
+          }
+        }
+      },
+      "carry": {
+        "fraction_anchors_where_variants_differ": 0.0,
+        "hard_reset_variant_equals_v032_last_event_pos": true,
+        "n_anchors_where_variants_differ": 0,
+        "n_anchors_with_history_hard_reset": 274,
+        "n_anchors_with_history_mainline": 274,
+        "n_post_seizure_target_segments_in_same_session": 1
+      },
+      "events": {
+        "kept_equals_in_target_segments": true,
+        "n_excluded_seizure_or_postictal_inside_sessions": 736,
+        "n_in_target_segments": 8873,
+        "n_inside_sessions": 9609,
+        "n_interictal_stream": 9609,
+        "n_kept_by_v032_timeline": 8873,
+        "n_outside_sessions": 0,
+        "no_updating_event_inside_seizure_or_postictal": true
+      },
+      "excluded_seizure_postictal_seconds_in_sessions": 3600.0,
+      "n_seizures": 1,
+      "n_sessions": 1,
+      "n_target_segments": 2,
+      "postictal_exclusion_seconds": 3600.0,
+      "recorded_seconds_in_sessions": 86400.10349988937,
+      "status": "ok",
+      "subject": "yuquan_chenziyang",
+      "target_segment_seconds": 82800.10349988937
+    },
+    {
+      "anchors": {
+        "all_inside_a_target_segment": true,
+        "n_grid": 232,
+        "per_horizon": {
+          "1800": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 13,
+            "n_invalid_segment_end_or_gap_or_seizure": 30,
+            "n_valid_target_window": 189
+          },
+          "300": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 3,
+            "n_invalid_segment_end_or_gap_or_seizure": 5,
+            "n_valid_target_window": 224
+          },
+          "7200": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 48,
+            "n_invalid_segment_end_or_gap_or_seizure": 118,
+            "n_valid_target_window": 66
+          }
+        }
+      },
+      "carry": {
+        "fraction_anchors_where_variants_differ": 0.004310344827586207,
+        "hard_reset_variant_equals_v032_last_event_pos": true,
+        "n_anchors_where_variants_differ": 1,
+        "n_anchors_with_history_hard_reset": 231,
+        "n_anchors_with_history_mainline": 232,
+        "n_post_seizure_target_segments_in_same_session": 4
+      },
+      "events": {
+        "kept_equals_in_target_segments": true,
+        "n_excluded_seizure_or_postictal_inside_sessions": 1240,
+        "n_in_target_segments": 6177,
+        "n_inside_sessions": 7417,
+        "n_interictal_stream": 7417,
+        "n_kept_by_v032_timeline": 6177,
+        "n_outside_sessions": 0,
+        "no_updating_event_inside_seizure_or_postictal": true
+      },
+      "excluded_seizure_postictal_seconds_in_sessions": 15099.970500469208,
+      "n_seizures": 4,
+      "n_sessions": 1,
+      "n_target_segments": 5,
+      "postictal_exclusion_seconds": 3600.0,
+      "recorded_seconds_in_sessions": 86400.08100008965,
+      "status": "ok",
+      "subject": "yuquan_gaolan",
+      "target_segment_seconds": 71300.11049962044
+    },
+    {
+      "anchors": {
+        "all_inside_a_target_segment": true,
+        "n_grid": 311,
+        "per_horizon": {
+          "1800": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 18,
+            "n_invalid_segment_end_or_gap_or_seizure": 6,
+            "n_valid_target_window": 287
+          },
+          "300": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 3,
+            "n_invalid_segment_end_or_gap_or_seizure": 1,
+            "n_valid_target_window": 307
+          },
+          "7200": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 72,
+            "n_invalid_segment_end_or_gap_or_seizure": 24,
+            "n_valid_target_window": 215
+          }
+        }
+      },
+      "carry": {
+        "fraction_anchors_where_variants_differ": 0.0,
+        "hard_reset_variant_equals_v032_last_event_pos": true,
+        "n_anchors_where_variants_differ": 0,
+        "n_anchors_with_history_hard_reset": 311,
+        "n_anchors_with_history_mainline": 311,
+        "n_post_seizure_target_segments_in_same_session": 0
+      },
+      "events": {
+        "kept_equals_in_target_segments": true,
+        "n_excluded_seizure_or_postictal_inside_sessions": 0,
+        "n_in_target_segments": 5468,
+        "n_inside_sessions": 5468,
+        "n_interictal_stream": 5468,
+        "n_kept_by_v032_timeline": 5468,
+        "n_outside_sessions": 0,
+        "no_updating_event_inside_seizure_or_postictal": true
+      },
+      "excluded_seizure_postictal_seconds_in_sessions": 0.0,
+      "n_seizures": 0,
+      "n_sessions": 1,
+      "n_target_segments": 1,
+      "postictal_exclusion_seconds": 3600.0,
+      "recorded_seconds_in_sessions": 93600.05999994278,
+      "status": "ok",
+      "subject": "yuquan_hanyuxuan",
+      "target_segment_seconds": 93600.05999994278
+    },
+    {
+      "anchors": {
+        "all_inside_a_target_segment": true,
+        "n_grid": 287,
+        "per_horizon": {
+          "1800": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 18,
+            "n_invalid_segment_end_or_gap_or_seizure": 6,
+            "n_valid_target_window": 263
+          },
+          "300": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 3,
+            "n_invalid_segment_end_or_gap_or_seizure": 1,
+            "n_valid_target_window": 283
+          },
+          "7200": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 72,
+            "n_invalid_segment_end_or_gap_or_seizure": 24,
+            "n_valid_target_window": 191
+          }
+        }
+      },
+      "carry": {
+        "fraction_anchors_where_variants_differ": 0.0,
+        "hard_reset_variant_equals_v032_last_event_pos": true,
+        "n_anchors_where_variants_differ": 0,
+        "n_anchors_with_history_hard_reset": 287,
+        "n_anchors_with_history_mainline": 287,
+        "n_post_seizure_target_segments_in_same_session": 0
+      },
+      "events": {
+        "kept_equals_in_target_segments": true,
+        "n_excluded_seizure_or_postictal_inside_sessions": 0,
+        "n_in_target_segments": 107062,
+        "n_inside_sessions": 107062,
+        "n_interictal_stream": 107062,
+        "n_kept_by_v032_timeline": 107062,
+        "n_outside_sessions": 0,
+        "no_updating_event_inside_seizure_or_postictal": true
+      },
+      "excluded_seizure_postictal_seconds_in_sessions": 0.0,
+      "n_seizures": 0,
+      "n_sessions": 1,
+      "n_target_segments": 1,
+      "postictal_exclusion_seconds": 3600.0,
+      "recorded_seconds_in_sessions": 86400.06100010872,
+      "status": "ok",
+      "subject": "yuquan_huangwanling",
+      "target_segment_seconds": 86400.06100010872
+    },
+    {
+      "anchors": {
+        "all_inside_a_target_segment": true,
+        "n_grid": 221,
+        "per_horizon": {
+          "1800": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 17,
+            "n_invalid_segment_end_or_gap_or_seizure": 27,
+            "n_valid_target_window": 177
+          },
+          "300": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 3,
+            "n_invalid_segment_end_or_gap_or_seizure": 5,
+            "n_valid_target_window": 213
+          },
+          "7200": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 39,
+            "n_invalid_segment_end_or_gap_or_seizure": 77,
+            "n_valid_target_window": 105
+          }
+        }
+      },
+      "carry": {
+        "fraction_anchors_where_variants_differ": 0.0,
+        "hard_reset_variant_equals_v032_last_event_pos": true,
+        "n_anchors_where_variants_differ": 0,
+        "n_anchors_with_history_hard_reset": 221,
+        "n_anchors_with_history_mainline": 221,
+        "n_post_seizure_target_segments_in_same_session": 4
+      },
+      "events": {
+        "kept_equals_in_target_segments": true,
+        "n_excluded_seizure_or_postictal_inside_sessions": 8734,
+        "n_in_target_segments": 36314,
+        "n_inside_sessions": 45048,
+        "n_interictal_stream": 45048,
+        "n_kept_by_v032_timeline": 36314,
+        "n_outside_sessions": 0,
+        "no_updating_event_inside_seizure_or_postictal": true
+      },
+      "excluded_seizure_postictal_seconds_in_sessions": 30347.224999904633,
+      "n_seizures": 8,
+      "n_sessions": 1,
+      "n_target_segments": 5,
+      "postictal_exclusion_seconds": 3600.0,
+      "recorded_seconds_in_sessions": 86400.0190000534,
+      "status": "ok",
+      "subject": "yuquan_pengzihang",
+      "target_segment_seconds": 68041.90900015831
+    },
+    {
+      "anchors": {
+        "all_inside_a_target_segment": true,
+        "n_grid": 223,
+        "per_horizon": {
+          "1800": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 18,
+            "n_invalid_segment_end_or_gap_or_seizure": 30,
+            "n_valid_target_window": 175
+          },
+          "300": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 3,
+            "n_invalid_segment_end_or_gap_or_seizure": 5,
+            "n_valid_target_window": 215
+          },
+          "7200": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 57,
+            "n_invalid_segment_end_or_gap_or_seizure": 117,
+            "n_valid_target_window": 49
+          }
+        }
+      },
+      "carry": {
+        "fraction_anchors_where_variants_differ": 0.0,
+        "hard_reset_variant_equals_v032_last_event_pos": true,
+        "n_anchors_where_variants_differ": 0,
+        "n_anchors_with_history_hard_reset": 223,
+        "n_anchors_with_history_mainline": 223,
+        "n_post_seizure_target_segments_in_same_session": 4
+      },
+      "events": {
+        "kept_equals_in_target_segments": true,
+        "n_excluded_seizure_or_postictal_inside_sessions": 1421,
+        "n_in_target_segments": 3634,
+        "n_inside_sessions": 5055,
+        "n_interictal_stream": 5055,
+        "n_kept_by_v032_timeline": 3634,
+        "n_outside_sessions": 0,
+        "no_updating_event_inside_seizure_or_postictal": true
+      },
+      "excluded_seizure_postictal_seconds_in_sessions": 28466.34149980545,
+      "n_seizures": 8,
+      "n_sessions": 1,
+      "n_target_segments": 5,
+      "postictal_exclusion_seconds": 3600.0,
+      "recorded_seconds_in_sessions": 86400.10349988937,
+      "status": "ok",
+      "subject": "yuquan_sunyuanxin",
+      "target_segment_seconds": 68305.87549996376
+    },
+    {
+      "anchors": {
+        "all_inside_a_target_segment": true,
+        "n_grid": 271,
+        "per_horizon": {
+          "1800": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 18,
+            "n_invalid_segment_end_or_gap_or_seizure": 19,
+            "n_valid_target_window": 234
+          },
+          "300": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 3,
+            "n_invalid_segment_end_or_gap_or_seizure": 4,
+            "n_valid_target_window": 264
+          },
+          "7200": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 72,
+            "n_invalid_segment_end_or_gap_or_seizure": 66,
+            "n_valid_target_window": 133
+          }
+        }
+      },
+      "carry": {
+        "fraction_anchors_where_variants_differ": 0.0,
+        "hard_reset_variant_equals_v032_last_event_pos": true,
+        "n_anchors_where_variants_differ": 0,
+        "n_anchors_with_history_hard_reset": 271,
+        "n_anchors_with_history_mainline": 271,
+        "n_post_seizure_target_segments_in_same_session": 3
+      },
+      "events": {
+        "kept_equals_in_target_segments": true,
+        "n_excluded_seizure_or_postictal_inside_sessions": 513,
+        "n_in_target_segments": 9132,
+        "n_inside_sessions": 9645,
+        "n_interictal_stream": 9645,
+        "n_kept_by_v032_timeline": 9132,
+        "n_outside_sessions": 0,
+        "no_updating_event_inside_seizure_or_postictal": true
+      },
+      "excluded_seizure_postictal_seconds_in_sessions": 10847.024999856949,
+      "n_seizures": 3,
+      "n_sessions": 1,
+      "n_target_segments": 4,
+      "postictal_exclusion_seconds": 3600.0,
+      "recorded_seconds_in_sessions": 93600.0,
+      "status": "ok",
+      "subject": "yuquan_xuxinyi",
+      "target_segment_seconds": 82752.97500014305
+    },
+    {
+      "anchors": {
+        "all_inside_a_target_segment": true,
+        "n_grid": 250,
+        "per_horizon": {
+          "1800": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 12,
+            "n_invalid_segment_end_or_gap_or_seizure": 12,
+            "n_valid_target_window": 226
+          },
+          "300": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 2,
+            "n_invalid_segment_end_or_gap_or_seizure": 2,
+            "n_valid_target_window": 246
+          },
+          "7200": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 48,
+            "n_invalid_segment_end_or_gap_or_seizure": 48,
+            "n_valid_target_window": 154
+          }
+        }
+      },
+      "carry": {
+        "fraction_anchors_where_variants_differ": 0.0,
+        "hard_reset_variant_equals_v032_last_event_pos": true,
+        "n_anchors_where_variants_differ": 0,
+        "n_anchors_with_history_hard_reset": 250,
+        "n_anchors_with_history_mainline": 250,
+        "n_post_seizure_target_segments_in_same_session": 1
+      },
+      "events": {
+        "kept_equals_in_target_segments": true,
+        "n_excluded_seizure_or_postictal_inside_sessions": 563,
+        "n_in_target_segments": 7808,
+        "n_inside_sessions": 8371,
+        "n_interictal_stream": 8371,
+        "n_kept_by_v032_timeline": 7808,
+        "n_outside_sessions": 0,
+        "no_updating_event_inside_seizure_or_postictal": true
+      },
+      "excluded_seizure_postictal_seconds_in_sessions": 3600.0,
+      "n_seizures": 1,
+      "n_sessions": 1,
+      "n_target_segments": 2,
+      "postictal_exclusion_seconds": 3600.0,
+      "recorded_seconds_in_sessions": 79200.00600004196,
+      "status": "ok",
+      "subject": "yuquan_zhangbichen",
+      "target_segment_seconds": 75600.00600004196
+    },
+    {
+      "anchors": {
+        "all_inside_a_target_segment": true,
+        "n_grid": 294,
+        "per_horizon": {
+          "1800": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 18,
+            "n_invalid_segment_end_or_gap_or_seizure": 12,
+            "n_valid_target_window": 264
+          },
+          "300": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 3,
+            "n_invalid_segment_end_or_gap_or_seizure": 2,
+            "n_valid_target_window": 289
+          },
+          "7200": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 72,
+            "n_invalid_segment_end_or_gap_or_seizure": 48,
+            "n_valid_target_window": 174
+          }
+        }
+      },
+      "carry": {
+        "fraction_anchors_where_variants_differ": 0.0,
+        "hard_reset_variant_equals_v032_last_event_pos": true,
+        "n_anchors_where_variants_differ": 0,
+        "n_anchors_with_history_hard_reset": 294,
+        "n_anchors_with_history_mainline": 294,
+        "n_post_seizure_target_segments_in_same_session": 0
+      },
+      "events": {
+        "kept_equals_in_target_segments": true,
+        "n_excluded_seizure_or_postictal_inside_sessions": 0,
+        "n_in_target_segments": 48494,
+        "n_inside_sessions": 48494,
+        "n_interictal_stream": 48494,
+        "n_kept_by_v032_timeline": 48494,
+        "n_outside_sessions": 0,
+        "no_updating_event_inside_seizure_or_postictal": true
+      },
+      "excluded_seizure_postictal_seconds_in_sessions": 0.0,
+      "n_seizures": 0,
+      "n_sessions": 2,
+      "n_target_segments": 2,
+      "postictal_exclusion_seconds": 3600.0,
+      "recorded_seconds_in_sessions": 88838.12700009346,
+      "status": "ok",
+      "subject": "yuquan_zhangjiaqi",
+      "target_segment_seconds": 88838.12700009346
+    },
+    {
+      "anchors": {
+        "all_inside_a_target_segment": true,
+        "n_grid": 297,
+        "per_horizon": {
+          "1800": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 18,
+            "n_invalid_segment_end_or_gap_or_seizure": 6,
+            "n_valid_target_window": 273
+          },
+          "300": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 3,
+            "n_invalid_segment_end_or_gap_or_seizure": 1,
+            "n_valid_target_window": 293
+          },
+          "7200": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 72,
+            "n_invalid_segment_end_or_gap_or_seizure": 24,
+            "n_valid_target_window": 201
+          }
+        }
+      },
+      "carry": {
+        "fraction_anchors_where_variants_differ": 0.0,
+        "hard_reset_variant_equals_v032_last_event_pos": true,
+        "n_anchors_where_variants_differ": 0,
+        "n_anchors_with_history_hard_reset": 297,
+        "n_anchors_with_history_mainline": 297,
+        "n_post_seizure_target_segments_in_same_session": 0
+      },
+      "events": {
+        "kept_equals_in_target_segments": true,
+        "n_excluded_seizure_or_postictal_inside_sessions": 86,
+        "n_in_target_segments": 6100,
+        "n_inside_sessions": 6196,
+        "n_interictal_stream": 6196,
+        "n_kept_by_v032_timeline": 6100,
+        "n_outside_sessions": 0,
+        "no_updating_event_inside_seizure_or_postictal": true
+      },
+      "excluded_seizure_postictal_seconds_in_sessions": 28800.0,
+      "n_seizures": 8,
+      "n_sessions": 1,
+      "n_target_segments": 1,
+      "postictal_exclusion_seconds": 3600.0,
+      "recorded_seconds_in_sessions": 93600.0134999752,
+      "status": "ok",
+      "subject": "yuquan_zhangjinhan",
+      "target_segment_seconds": 89529.06150007248
+    },
+    {
+      "anchors": {
+        "all_inside_a_target_segment": true,
+        "n_grid": 248,
+        "per_horizon": {
+          "1800": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 18,
+            "n_invalid_segment_end_or_gap_or_seizure": 24,
+            "n_valid_target_window": 206
+          },
+          "300": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 3,
+            "n_invalid_segment_end_or_gap_or_seizure": 4,
+            "n_valid_target_window": 241
+          },
+          "7200": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 71,
+            "n_invalid_segment_end_or_gap_or_seizure": 85,
+            "n_valid_target_window": 92
+          }
+        }
+      },
+      "carry": {
+        "fraction_anchors_where_variants_differ": 0.0,
+        "hard_reset_variant_equals_v032_last_event_pos": true,
+        "n_anchors_where_variants_differ": 0,
+        "n_anchors_with_history_hard_reset": 248,
+        "n_anchors_with_history_mainline": 248,
+        "n_post_seizure_target_segments_in_same_session": 3
+      },
+      "events": {
+        "kept_equals_in_target_segments": true,
+        "n_excluded_seizure_or_postictal_inside_sessions": 2667,
+        "n_in_target_segments": 15490,
+        "n_inside_sessions": 18157,
+        "n_interictal_stream": 18157,
+        "n_kept_by_v032_timeline": 15490,
+        "n_outside_sessions": 0,
+        "no_updating_event_inside_seizure_or_postictal": true
+      },
+      "excluded_seizure_postictal_seconds_in_sessions": 21689.03400015831,
+      "n_seizures": 6,
+      "n_sessions": 1,
+      "n_target_segments": 4,
+      "postictal_exclusion_seconds": 3600.0,
+      "recorded_seconds_in_sessions": 86400.1099998951,
+      "status": "ok",
+      "subject": "yuquan_zhangkexuan",
+      "target_segment_seconds": 75529.10999965668
+    },
+    {
+      "anchors": {
+        "all_inside_a_target_segment": true,
+        "n_grid": 272,
+        "per_horizon": {
+          "1800": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 14,
+            "n_invalid_segment_end_or_gap_or_seizure": 24,
+            "n_valid_target_window": 234
+          },
+          "300": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 3,
+            "n_invalid_segment_end_or_gap_or_seizure": 4,
+            "n_valid_target_window": 265
+          },
+          "7200": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 32,
+            "n_invalid_segment_end_or_gap_or_seizure": 81,
+            "n_valid_target_window": 159
+          }
+        }
+      },
+      "carry": {
+        "fraction_anchors_where_variants_differ": 0.0,
+        "hard_reset_variant_equals_v032_last_event_pos": true,
+        "n_anchors_where_variants_differ": 0,
+        "n_anchors_with_history_hard_reset": 272,
+        "n_anchors_with_history_mainline": 272,
+        "n_post_seizure_target_segments_in_same_session": 3
+      },
+      "events": {
+        "kept_equals_in_target_segments": true,
+        "n_excluded_seizure_or_postictal_inside_sessions": 10813,
+        "n_in_target_segments": 70289,
+        "n_inside_sessions": 81102,
+        "n_interictal_stream": 81102,
+        "n_kept_by_v032_timeline": 70289,
+        "n_outside_sessions": 0,
+        "no_updating_event_inside_seizure_or_postictal": true
+      },
+      "excluded_seizure_postictal_seconds_in_sessions": 18383.111999988556,
+      "n_seizures": 5,
+      "n_sessions": 1,
+      "n_target_segments": 4,
+      "postictal_exclusion_seconds": 3600.0,
+      "recorded_seconds_in_sessions": 93600.07800006866,
+      "status": "ok",
+      "subject": "yuquan_zhaojinrui",
+      "target_segment_seconds": 82578.02400016785
+    },
+    {
+      "anchors": {
+        "all_inside_a_target_segment": true,
+        "n_grid": 287,
+        "per_horizon": {
+          "1800": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 18,
+            "n_invalid_segment_end_or_gap_or_seizure": 6,
+            "n_valid_target_window": 263
+          },
+          "300": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 3,
+            "n_invalid_segment_end_or_gap_or_seizure": 1,
+            "n_valid_target_window": 283
+          },
+          "7200": {
+            "matches_v032_eligibility": true,
+            "n_invalid_phase_crossing": 72,
+            "n_invalid_segment_end_or_gap_or_seizure": 24,
+            "n_valid_target_window": 191
+          }
+        }
+      },
+      "carry": {
+        "fraction_anchors_where_variants_differ": 0.0,
+        "hard_reset_variant_equals_v032_last_event_pos": true,
+        "n_anchors_where_variants_differ": 0,
+        "n_anchors_with_history_hard_reset": 287,
+        "n_anchors_with_history_mainline": 287,
+        "n_post_seizure_target_segments_in_same_session": 0
+      },
+      "events": {
+        "kept_equals_in_target_segments": true,
+        "n_excluded_seizure_or_postictal_inside_sessions": 0,
+        "n_in_target_segments": 23142,
+        "n_inside_sessions": 23142,
+        "n_interictal_stream": 23142,
+        "n_kept_by_v032_timeline": 23142,
+        "n_outside_sessions": 0,
+        "no_updating_event_inside_seizure_or_postictal": true
+      },
+      "excluded_seizure_postictal_seconds_in_sessions": 0.0,
+      "n_seizures": 0,
+      "n_sessions": 1,
+      "n_target_segments": 1,
+      "postictal_exclusion_seconds": 3600.0,
+      "recorded_seconds_in_sessions": 86400.04999995232,
+      "status": "ok",
+      "subject": "yuquan_zhourongxuan",
+      "target_segment_seconds": 86400.04999995232
+    }
+  ]
+}
