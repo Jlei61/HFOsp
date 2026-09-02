@@ -1,0 +1,112 @@
+{
+  "format": "group_event_state_v0_3_2_eval_config",
+  "version": "0.3.2",
+  "frozen_on": "2026-09-02",
+  "source_commit_baseline": "4c2ed958",
+  "dataset_root": "/data/hfosp_group_event_state_v0_1/dataset",
+  "session_inventory": "/home/honglab/leijiaxin/HFOsp/results/epi_prssm/group_event_state/v0_1/contiguous_session_inventory.csv",
+  "legacy_grammar_root": "/home/honglab/leijiaxin/HFOsp/results/topic5_interictal_rank_distribution",
+  "data_root": "/data/hfosp_group_event_state_v0_3_2",
+  "partition": {
+    "phase_names": ["base_fit", "inner_val", "dev_val", "dev_test"],
+    "boundary_fractions": [0.60, 0.70, 0.80],
+    "refit_phase": "base_refit",
+    "refit_covers": ["base_fit", "inner_val"],
+    "primary_report_phase": "dev_test",
+    "secondary_report_phase": "dev_val",
+    "dev_test_status": "consumed_in_v0_3_1_development_score_only",
+    "sealed_partition_opened": false
+  },
+  "timeline": {
+    "postictal_exclusion_seconds": 3600.0,
+    "min_segment_seconds": 300.0,
+    "anchor_grid_seconds": 300.0,
+    "min_warmup_seconds": 300.0,
+    "horizons_seconds": [300.0, 1800.0, 7200.0],
+    "primary_horizon_seconds": 1800.0,
+    "secondary_horizon_seconds": 7200.0,
+    "embedding_components": 8,
+    "embedding_seed": 0
+  },
+  "measurement": {
+    "vocab_min_events": 5,
+    "feature_window_pre_seconds": 0.25,
+    "feature_window_post_seconds": 0.25,
+    "filter_pad_seconds": 0.5,
+    "detector_min_gap_seconds": 0.020,
+    "legacy_detector": {
+      "rel_thresh": 2.0,
+      "abs_thresh": 2.0,
+      "min_gap_ms": 20,
+      "min_last_ms": 50,
+      "max_last_ms": 200,
+      "refine_rule": "channel_count > mean + 1.0 * std over full record",
+      "pack_rule": "co-activation >= 0.5 of picked channels; fixed cut_t core"
+    }
+  },
+  "eligibility": {
+    "count_30min": {"base_fit_blocks": 24, "inner_val_blocks": 4, "dev_val_blocks": 4, "dev_test_blocks": 8, "dev_test_events": 100},
+    "count_120min": {"base_fit_blocks": 8, "inner_val_blocks": 2, "dev_val_blocks": 2, "dev_test_blocks": 4},
+    "h2a": {"min_vocab_contacts": 4, "base_fit_events": 2000, "dev_test_positive_k_events": 200, "support_stability": 0.99},
+    "seizure_cluster_gap_seconds": 14400.0
+  },
+  "history": {
+    "lookback_seconds": [300.0, 1800.0, 7200.0],
+    "ewma_tau_seconds": [300.0, 1800.0, 7200.0],
+    "field_tau_seconds": [300.0, 7200.0],
+    "standardization_phase": "base_fit"
+  },
+  "nb_glm": {
+    "ridge_grid": [0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0],
+    "selection_phase": "inner_val",
+    "fit_phase": "base_fit",
+    "refit_phase": "base_refit",
+    "max_irls_iter": 50,
+    "alpha_log_bounds": [-9.0, 6.0],
+    "dispersion_rule": "per_arm_ml_on_fit_rows_then_frozen; shared_alpha_from_H reported as sensitivity"
+  },
+  "arms": ["H", "H+S_correct", "H+S_shifted", "H+S_mean", "H+random_reservoir", "H+times_only", "H+linear_marked_ema"],
+  "history_variants": ["H_rate", "H_strong"],
+  "primary_history": "H_strong",
+  "shift": {
+    "n_shifts": 5,
+    "fraction_denominator": 6,
+    "min_gap_over_horizon_seconds": 300.0,
+    "unit": "session"
+  },
+  "controls": {
+    "reservoir_dim": 12,
+    "reservoir_taus_seconds": [300.0, 1800.0, 7200.0],
+    "reservoir_seed": 20260902,
+    "linear_ema_taus_seconds": [300.0, 1800.0, 7200.0]
+  },
+  "inference": {
+    "block_seconds_min": 1800.0,
+    "bootstrap_replicates": 2000,
+    "bootstrap_seed": 20260902,
+    "seed_combination": "mean_within_patient",
+    "cohort_statistics": ["patient_median", "exact_sign_test", "wilcoxon_signed_rank"]
+  },
+  "grammar": {
+    "batch": 256,
+    "max_epochs": 10,
+    "patience": 3,
+    "lr": 0.003,
+    "adapter_lr": 0.002,
+    "adapter_max_epochs": 8,
+    "adapter_patience": 2,
+    "weight_decay": 0.0001,
+    "max_events_per_epoch": 40000,
+    "prefix_min_occurrences": 20,
+    "min_fit_events": 100,
+    "min_inner_events": 20
+  },
+  "runtime": {
+    "python": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+    "ld_library_path": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/lib",
+    "omp_num_threads": 1,
+    "mkl_num_threads": 1,
+    "status_interval_seconds": 600,
+    "registry_poll_seconds": 300
+  }
+}
