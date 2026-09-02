@@ -30,6 +30,16 @@ def _atomic_json(path: Path, payload: dict) -> None:
             os.unlink(temporary)
 
 
+def arrays_equal(left: np.ndarray, right: np.ndarray) -> bool:
+    """Compare all persisted dtypes while treating floating NaNs as equal."""
+    left, right = np.asarray(left), np.asarray(right)
+    if left.shape != right.shape:
+        return False
+    if left.dtype.kind in "fc" and right.dtype.kind in "fc":
+        return bool(np.array_equal(left, right, equal_nan=True))
+    return bool(np.array_equal(left, right))
+
+
 def compare_npz(reference_path: Path, candidate_path: Path) -> dict:
     with np.load(reference_path, allow_pickle=False) as reference, np.load(
             candidate_path, allow_pickle=False) as candidate:
@@ -42,8 +52,7 @@ def compare_npz(reference_path: Path, candidate_path: Path) -> dict:
             rows[key] = {
                 "shape_equal": left.shape == right.shape,
                 "dtype_equal": left.dtype == right.dtype,
-                "array_equal": bool(left.shape == right.shape
-                                    and np.array_equal(left, right, equal_nan=True)),
+                "array_equal": arrays_equal(left, right),
             }
         return {
             "reference_only_keys": sorted(reference_keys - candidate_keys),

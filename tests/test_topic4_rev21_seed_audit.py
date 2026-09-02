@@ -1,6 +1,15 @@
 import numpy as np
 
 from scripts.aggregate_topic4_rev21_seed_audit import crossed_variance
+from scripts.audit_topic4_rev21_seed_parity import arrays_equal
+
+
+def test_parity_comparator_supports_strings_and_floating_nans():
+    assert arrays_equal(np.asarray(["ICL1", "SCL1"]),
+                        np.asarray(["ICL1", "SCL1"]))
+    assert not arrays_equal(np.asarray(["ICL1"]), np.asarray(["ICL2"]))
+    assert arrays_equal(np.asarray([1.0, np.nan]),
+                        np.asarray([1.0, np.nan]))
 
 
 def test_crossed_variance_attributes_pure_topology_effect():
