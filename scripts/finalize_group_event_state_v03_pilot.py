@@ -45,7 +45,7 @@ def _fmt(value: float | None, digits: int = 4) -> str:
 def _poisson_nll(count: np.ndarray, mean: np.ndarray) -> np.ndarray:
     y = np.asarray(count, dtype=np.float64)
     mu = np.clip(np.asarray(mean, dtype=np.float64), 1e-8, None)
-    lgamma = np.vectorize(math.lgamma)(y + 1.0)
+    lgamma = np.vectorize(math.lgamma, otypes=[float])(y + 1.0)
     return mu - y * np.log(mu) + lgamma
 
 
@@ -112,6 +112,8 @@ def main() -> None:
             phase_label = partition.labels_of(timeline.grid.t_anchor)
             for h_i, horizon in enumerate(timeline.config.horizons_seconds):
                 key = f"{int(horizon)}s"
+                if opened["horizons"][key].get("status") != "ok":
+                    continue
                 train_idx = np.flatnonzero(
                     (phase_label == 1)
                     & timeline.grid.eligible[:, h_i]
@@ -159,7 +161,11 @@ def main() -> None:
         rows = [r for r in records if r["subject"] == subject]
         h_out = {}
         for horizon in HORIZONS:
-            h_rows = [r["open_loop"]["horizons"][horizon] for r in rows]
+            h_rows = [
+                r["open_loop"]["horizons"][horizon]
+                for r in rows
+                if r["open_loop"]["horizons"][horizon].get("status") == "ok"
+            ]
             def contrast(endpoint, a, b):
                 return _med([
                     x[endpoint][a] - x[endpoint][b]
@@ -175,6 +181,7 @@ def main() -> None:
                 ])
             h_out[horizon] = {
                 "n_seeds": len(h_rows),
+                "n_insufficient_coverage_seeds": len(rows) - len(h_rows),
                 "count_correct_minus_multiscale": admissible_count_contrast(
                     "correct_state", "multiscale_history"
                 ),

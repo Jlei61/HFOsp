@@ -31,7 +31,15 @@ from .pilot import (
 def _poisson_nll(count: np.ndarray, mean: np.ndarray) -> np.ndarray:
     y = np.asarray(count, dtype=np.float64)
     mu = np.clip(np.asarray(mean, dtype=np.float64), 1e-8, None)
-    return mu - y * np.log(mu) + np.vectorize(math.lgamma)(y + 1.0)
+    return mu - y * np.log(mu) + np.vectorize(math.lgamma, otypes=[float])(y + 1.0)
+
+
+def _nested_horizon_coverage(indices: Mapping[str, np.ndarray]) -> dict[str, Any]:
+    counts = {name: int(np.asarray(value).size) for name, value in indices.items()}
+    return {
+        "status": "ok" if all(value > 0 for value in counts.values()) else "insufficient_coverage",
+        "n_anchors_by_phase": counts,
+    }
 
 
 def _eligible_baseline_columns(names: tuple[str, ...]) -> np.ndarray:
@@ -339,6 +347,19 @@ def evaluate_open_loop(
             ).astype(np.int64)
             for name, idx in indices.items()
         }
+        key = f"{int(horizon)}s"
+        coverage = _nested_horizon_coverage(indices)
+        if coverage["status"] != "ok":
+            report["horizons"][key] = {
+                "status": "insufficient_coverage",
+                "horizon_seconds": float(horizon),
+                "n_anchors_by_phase": coverage["n_anchors_by_phase"],
+                "reason": (
+                    "at least one nested phase has no complete within-segment "
+                    "future window; shorter horizons remain independently estimable"
+                ),
+            }
+            continue
         test_idx = indices["dev_test"]
         state_test = anchor[test_idx]
         expected = _expected_count(model, state_test, horizon, device)
@@ -376,9 +397,9 @@ def evaluate_open_loop(
             model, timeline, test_idx[donor_ok], shifted_states[donor_ok], h_i,
             device=device,
         )
-        key = f"{int(horizon)}s"
         actual = count["dev_test"]
         entry = {
+            "status": "ok",
             "horizon_seconds": float(horizon),
             "n_development_test_anchors": int(test_idx.size),
             "n_shift_matched_anchors": int(donor_ok.sum()),

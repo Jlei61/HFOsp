@@ -9,6 +9,10 @@ from src.topic5_group_event_state.v03.grammar import (
     build_train_only_grammar,
     factorized_size_log_prob,
 )
+from src.topic5_group_event_state.v03.evaluate import (
+    _nested_horizon_coverage,
+    _poisson_nll,
+)
 from src.topic5_group_event_state.v03.partition import nested_time_partition
 from src.topic5_group_event_state.v03.pilot import _physical_event_chunks
 from src.topic5_group_event_state.v03.point_process import interval_point_process_terms
@@ -200,3 +204,23 @@ def test_state_free_grammar_really_disables_all_state_adapters(tmp_path):
     )
     assert torch.equal(a["size_logits"], b["size_logits"])
     assert torch.equal(a["contact_logits"], b["contact_logits"])
+
+
+def test_empty_long_horizon_is_reported_without_invalidating_shorter_horizons():
+    coverage = _nested_horizon_coverage(
+        {
+            "state_train": np.arange(5),
+            "dev_val": np.array([], dtype=np.int64),
+            "dev_test": np.arange(2),
+        }
+    )
+    assert coverage == {
+        "status": "insufficient_coverage",
+        "n_anchors_by_phase": {"state_train": 5, "dev_val": 0, "dev_test": 2},
+    }
+    assert _poisson_nll(np.array([]), np.array([])).size == 0
+
+    complete = _nested_horizon_coverage(
+        {"state_train": np.arange(2), "dev_val": np.arange(1), "dev_test": np.arange(3)}
+    )
+    assert complete["status"] == "ok"
