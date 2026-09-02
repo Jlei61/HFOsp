@@ -52,6 +52,7 @@ PILOT_SUBJECTS = (
     "yuquan_pengzihang",
     "yuquan_zhangkexuan",
 )
+SOURCE_COMMIT = os.environ.get("GROUP_EVENT_STATE_SOURCE_COMMIT", "unknown")
 
 
 @dataclass(frozen=True)
@@ -289,6 +290,7 @@ def calibrate_grammar(
             "inner_fit_events": int(fit.size),
             "inner_validation_events": int(inner.size),
             "config": asdict(cfg),
+            "source_commit": SOURCE_COMMIT,
         },
     )
     report = {
@@ -302,6 +304,7 @@ def calibrate_grammar(
         "checkpoint_sha256": _sha256(checkpoint_out),
         "contact_order_validated": True,
         "outer_train_only": True,
+        "source_commit": SOURCE_COMMIT,
     }
     _atomic_json(report_out, report)
     return report
@@ -807,6 +810,7 @@ def train_state_model(
             "model_state": model.state_dict(),
             "config": asdict(cfg),
             "state_config": asdict(model.state.cfg),
+            "source_commit": SOURCE_COMMIT,
             "grammar_checkpoint": str(grammar_checkpoint),
             "grammar_checkpoint_sha256": _sha256(grammar_checkpoint),
         },
@@ -830,6 +834,7 @@ def train_state_model(
             for name in ("train", "val", "test")
         },
         "sealed_partition_opened": False,
+        "source_commit": SOURCE_COMMIT,
     }
     _atomic_json(report_out, report)
     _atomic_json(out_dir / "progress.json", {**report, "status": "complete"})

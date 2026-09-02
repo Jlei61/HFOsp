@@ -19,6 +19,7 @@ from src.topic5_group_event_state.v02.subject import load_subject_timeline
 from .pilot import (
     DATASET_ROOT,
     PilotConfig,
+    SOURCE_COMMIT,
     _atomic_json,
     _group_count,
     _to_device,
@@ -286,6 +287,7 @@ def evaluate_open_loop(
         ),
         "horizons": {},
         "sealed_partition_opened": False,
+        "source_commit": SOURCE_COMMIT,
     }
     baseline_keep = _eligible_baseline_columns(timeline.baseline.names)
     for h_i, horizon in enumerate(timeline.config.horizons_seconds):
