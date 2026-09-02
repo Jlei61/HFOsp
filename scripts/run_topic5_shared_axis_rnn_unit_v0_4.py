@@ -469,16 +469,23 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         lr=float(training["learning_rate"]),
         weight_decay=float(training["weight_decay"]),
     )
-    if args.model == "structured_rank_shuffle":
+    if args.model == "shared_axis_rank_shuffle":
         train_groups = groups.copy()
         train_groups[fit60] = within_event_rank_shuffle(
             groups[fit60], seed=args.seed
         )
     else:
         train_groups = groups
+    if args.model == "shared_axis_rank_shuffle" and np.array_equal(
+        train_groups[fit60], groups[fit60]
+    ):
+        raise RuntimeError(
+            "rank-shuffle arm did not change fit60; refusing to train a control "
+            "that is bit-identical to the main arm"
+        )
     shuffle_hash = (
         sha256_array(train_groups[fit60])
-        if args.model == "structured_rank_shuffle"
+        if args.model == "shared_axis_rank_shuffle"
         else None
     )
     resolved = {

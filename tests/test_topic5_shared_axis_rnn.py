@@ -1,4 +1,5 @@
 import numpy as np
+from pathlib import Path
 import pytest
 import torch
 
@@ -298,4 +299,37 @@ def test_cpu_and_gpu_agree():
     for field in cpu_value:
         torch.testing.assert_close(
             cpu_value[field], gpu_value[field].cpu(), atol=2e-6, rtol=2e-6
+        )
+
+
+# --------------------------------------------------- experimental-condition
+def test_rank_shuffle_arm_actually_changes_the_training_data():
+    """The v0.4 runner once branched on the v0.3 model name, so selecting the
+    shuffle arm trained on unshuffled data and produced a null shuffle hash.
+    The model's maths were all correct; only the experimental condition was
+    silently absent.  This pins the condition itself."""
+
+    import re
+
+    source = (
+        Path(__file__).resolve().parents[1]
+        / "scripts/run_topic5_shared_axis_rnn_unit_v0_4.py"
+    ).read_text()
+    branches = re.findall(r'args\.model == "([a-z_]*rank_shuffle)"', source)
+    assert branches, "the runner no longer branches on a rank-shuffle model name"
+    assert set(branches) == {"shared_axis_rank_shuffle"}, branches
+    assert "structured_rank_shuffle" not in source
+
+    from scripts.run_topic5_shared_axis_rnn_unit_v0_4 import within_event_rank_shuffle
+
+    groups = np.asarray(
+        [[0, 0, 1, 2, -1, -1], [0, 1, 2, 3, -1, -1], [0, 1, 1, 2, 3, -1]],
+        dtype=np.int16,
+    )
+    shuffled = within_event_rank_shuffle(groups, seed=11)
+    assert not np.array_equal(shuffled, groups), "shuffle left the data unchanged"
+    np.testing.assert_array_equal(shuffled >= 0, groups >= 0)
+    for before, after in zip(groups, shuffled):
+        np.testing.assert_array_equal(
+            np.sort(before[before >= 0]), np.sort(after[after >= 0])
         )
