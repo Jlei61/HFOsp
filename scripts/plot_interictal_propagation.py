@@ -938,6 +938,7 @@ def _plot_cluster_boundaries(
     label_box: bool = False,
     boundary_band: bool = False,
     label_names: List[str] | None = None,
+    label_colors: List[str] | None = None,
     label_y_offset: float = 0.15,
 ) -> None:
     if labels_sorted.size == 0:
@@ -978,11 +979,16 @@ def _plot_cluster_boundaries(
             if label_names is not None and label_idx < len(label_names)
             else f"C{int(cluster_id)}"
         )
+        label_color = (
+            label_colors[label_idx]
+            if label_colors is not None and label_idx < len(label_colors)
+            else line_color
+        )
         ax.text(
             cursor + count / 2.0,
             n_ch + label_y_offset,
             f"{label_text} (n={count})",
-            color=line_color,
+            color=label_color,
             ha="center",
             va="bottom",
             fontsize=label_fontsize,
@@ -1061,6 +1067,8 @@ def _plot_cluster_rank_fig4(
     invert_yaxis: bool = True,
     show_ylabels: bool = True,
     marker_size: float = 6.0,
+    line_colors: List[str] | None = None,
+    label_names: List[str] | None = None,
 ) -> None:
     """Per-cluster mean rank line + shaded mean +/- std band on fixed channel order."""
     n_ch = len(channel_order)
@@ -1070,7 +1078,10 @@ def _plot_cluster_rank_fig4(
     unique_k = np.unique(labels)
     n_k = len(unique_k)
     _base_colors = ["#1f77b4", "#d62728", "#2ca02c", "#ff7f0e", "#9467bd", "#8c564b", "#e377c2", "#17becf"]
-    line_colors = [_base_colors[i % len(_base_colors)] for i in range(n_k)]
+    if line_colors is None:
+        line_colors = [_base_colors[i % len(_base_colors)] for i in range(n_k)]
+    elif len(line_colors) < n_k:
+        raise ValueError("line_colors must cover every displayed cluster")
     y_pos = np.arange(n_ch, dtype=float)
 
     for ki, cid in enumerate(unique_k):
@@ -1095,7 +1106,11 @@ def _plot_cluster_rank_fig4(
         ax.plot(
             means[valid], y_pos[valid],
             "-o", color=line_colors[ki], lw=2.5, ms=marker_size, zorder=10,
-            label=f"C{int(cid)} (n={int(mask_cluster.sum())})",
+            label=(
+                f"{label_names[ki]} (n={int(mask_cluster.sum())})"
+                if label_names is not None and ki < len(label_names)
+                else f"C{int(cid)} (n={int(mask_cluster.sum())})"
+            ),
         )
 
     ax.set_yticks(y_pos)

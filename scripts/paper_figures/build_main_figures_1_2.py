@@ -122,20 +122,85 @@ def _compose_complete_layout(
     return [str(png.relative_to(ROOT)), str(pdf.relative_to(ROOT))]
 
 
+def _assert_fig1_rank_colorbar_contract(metadata: dict) -> None:
+    """Keep the heatmap colorbar label visually separate from right-hand rank plots."""
+    from scripts.paper_figures import plot_fig1_interictal_hfo_temporal_scaffold as fig1
+
+    for panel_id in ("c", "e"):
+        rank_colorbar = metadata.get("panels", {}).get(panel_id, {}).get("rank_colorbar", {})
+        if (
+            rank_colorbar.get("title") != fig1.FIG1_RANK_COLORBAR_TITLE
+            or rank_colorbar.get("placement") != "horizontal title above colorbar"
+            or rank_colorbar.get("side_label_removed") is not True
+        ):
+            raise RuntimeError(
+                f"Canonical Fig1-{panel_id.upper()} colorbar contract violated: "
+                "the rank label must sit horizontally above the colorbar, not beside "
+                "the right-hand rank plot"
+            )
+
+
+def _assert_fig1e_contract(metadata: dict) -> None:
+    """Fail closed when TA/TB semantic colors drift or reverse."""
+    from scripts.paper_figures import plot_fig1_interictal_hfo_temporal_scaffold as fig1
+
+    colors = metadata.get("panels", {}).get("e", {}).get("template_semantic_colors")
+    if colors != fig1.FIG1E_TEMPLATE_COLORS:
+        raise RuntimeError(
+            "Canonical Fig1-E contract violated: TA must be red #B2182B and "
+            "TB must be blue #2166AC in both labels and mean-rank profiles"
+        )
+    if metadata.get("panels", {}).get("e", {}).get("template_labels_bold") is not True:
+        raise RuntimeError("Canonical Fig1-E contract violated: TA/TB labels must be bold")
+
+
+def _assert_fig1c_contract(metadata: dict) -> None:
+    """Keep Day/Night in a standalone title-row legend, not the xlabel."""
+    daynight = metadata.get("panels", {}).get("c", {}).get("daynight_legend", {})
+    if (
+        daynight.get("labels") != ["Day", "Night"]
+        or daynight.get("placement")
+        != "same title row as patient label, upper-right of heatmap"
+        or daynight.get("removed_from_xlabel") is not True
+    ):
+        raise RuntimeError(
+            "Canonical Fig1-C contract violated: Day/Night must have a standalone "
+            "title-row legend and must not be written in the xlabel"
+        )
+
+
 def _assert_fig1f_contract(metadata: dict) -> None:
     """Fail closed if a future Figure 1 rebuild restores the superseded gray text."""
+    from scripts.paper_figures import plot_fig1_interictal_hfo_temporal_scaffold as fig1
+
     uplift = metadata.get("panels", {}).get("f", {}).get("uplift", {})
     inset = uplift.get("paired_distribution_inset", {})
+    legend_frame = uplift.get("dataset_legend_frame", {})
     if (
         metadata.get("schema_version") != FIG1_CANONICAL_SCHEMA
         or uplift.get("gray_summary_text_removed") is not True
         or inset.get("n_paired") != uplift.get("n")
         or inset.get("reference_grammar")
         != "Supplementary Fig. 2 raw-vs-synchronized HFO AUC"
+        or inset.get("layout_bounds_axes_fraction") != fig1.FIG1F_INSET_BOUNDS
+        or inset.get("layout_aspect") != "narrow portrait inset, not square"
+        or inset.get("ylabel_fontsize_points")
+        != fig1.FIG1F_INSET_YLABEL_FONTSIZE
+        or inset.get("tick_label_fontsize_points")
+        != fig1.FIG1F_INSET_TICK_FONTSIZE
+        or inset.get("x_tick_labels") != ["Single", "Multi"]
+        or inset.get("x_tick_label_meanings")
+        != {"Single": "single-template MI", "Multi": "multi-cluster MI"}
+        or inset.get("x_tick_labels_single_line") is not True
+        or legend_frame.get("visible") is not True
+        or legend_frame.get("rendered_fontsize_points") != 12.0
+        or legend_frame.get("marker_size_points") != 5.0
     ):
         raise RuntimeError(
             "Canonical Fig1-F contract violated: require the paired single-template "
-            "vs multi-cluster MI inset and forbid the former gray summary text"
+            "vs multi-cluster MI inset with readable labels in a narrow portrait "
+            "layout with compact single-line x labels, a compact framed dataset legend, "
+            "and forbid the former gray summary text"
         )
 
 
@@ -150,6 +215,9 @@ def build_figure1() -> dict:
         c1_exemplar_label="Epilepsiae E7",
         max_events=2000,
     )
+    _assert_fig1_rank_colorbar_contract(metadata)
+    _assert_fig1c_contract(metadata)
+    _assert_fig1e_contract(metadata)
     _assert_fig1f_contract(metadata)
     figures = FIG1_ROOT / "figures"
     complete = _compose_complete_layout(

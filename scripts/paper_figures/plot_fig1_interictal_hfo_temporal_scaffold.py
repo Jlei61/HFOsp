@@ -38,6 +38,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
 from matplotlib.lines import Line2D
+from matplotlib.patches import Patch
 import numpy as np
 
 
@@ -72,6 +73,11 @@ SOZ_JSON = {
 }
 EPI_ROC_COLOR = "#7A3E87"
 EPI_STAT_COLOR = "#B07A74"
+FIG1E_TEMPLATE_COLORS = {"TA": "#B2182B", "TB": "#2166AC"}
+FIG1_RANK_COLORBAR_TITLE = "Heatmap rank\nFirst → Last"
+FIG1F_INSET_BOUNDS = [0.68, 0.13, 0.28, 0.36]
+FIG1F_INSET_YLABEL_FONTSIZE = 9.0
+FIG1F_INSET_TICK_FONTSIZE = 8.0
 
 
 def _panel_label(ax: plt.Axes, label: str, x: float = -0.08, y: float = 1.08) -> None:
@@ -379,7 +385,18 @@ def _place_panel_c_colorbar(fig: plt.Figure, image, ax_cbar: plt.Axes) -> None:
     cbar = fig.colorbar(image, cax=ax_cbar, orientation="vertical")
     pos = ax_cbar.get_position()
     ax_cbar.set_position([pos.x0 - 0.018, pos.y0, pos.width, pos.height])
-    cbar.set_label("First → Last", fontsize=10.5)
+    cbar.set_label("")
+    cbar.ax.text(
+        0.5,
+        1.035,
+        FIG1_RANK_COLORBAR_TITLE,
+        transform=cbar.ax.transAxes,
+        ha="center",
+        va="bottom",
+        fontsize=9.5,
+        linespacing=0.95,
+        clip_on=False,
+    )
     cbar.ax.tick_params(labelsize=8.5, length=2)
 
 
@@ -436,6 +453,10 @@ def _draw_fig1e_cluster_row(
     ax_mean_dummy = fig.add_subplot(right[1], sharex=ax_mean)
     ax_mean_dummy.axis("off")
     ax_cluster_dummy.axis("off")
+    semantic_names = cluster_label_names or ["TA", "TB"]
+    semantic_colors = cluster_colors or [
+        FIG1E_TEMPLATE_COLORS[name] for name in semantic_names
+    ]
     ranks = arr["ranks"]
     bools = arr["bools"]
     channel_order = arr["channel_order"]
@@ -486,10 +507,13 @@ def _draw_fig1e_cluster_row(
         label_fontsize=cluster_label_fontsize,
         label_box=False,
         boundary_band=False,
-        label_names=cluster_label_names or ["TA", "TB"],
-        label_colors=cluster_colors,
+        label_names=semantic_names,
+        label_colors=semantic_colors,
         label_y_offset=0.5,
     )
+    for text in ax_cluster.texts:
+        if text.get_text().split(maxsplit=1)[0] in semantic_names:
+            text.set_fontweight("bold")
     if show_heatmap_xlabel:
         ax_cluster.set_xlabel("Population events (clustered)", fontsize=10.5)
     else:
@@ -512,8 +536,8 @@ def _draw_fig1e_cluster_row(
         invert_yaxis=False,
         show_ylabels=False,
         marker_size=3.5,
-        line_colors=cluster_colors,
-        label_names=mean_profile_label_names,
+        line_colors=semantic_colors,
+        label_names=mean_profile_label_names or semantic_names,
     )
     if show_mean_xlabel:
         ax_mean.set_xlabel("Rank", fontsize=10.5)
@@ -547,6 +571,7 @@ def _draw_fig1e_cluster_row(
         "cluster_boundary": cluster_boundary,
         "gap_half_width": gap_half_width,
         "image": im,
+        "template_semantic_colors": dict(zip(semantic_names, semantic_colors)),
     }
 
 
@@ -585,10 +610,7 @@ def _render_temporal_order_panel(
     ax_raw.tick_params(axis="x", labelbottom=False)
     ax_raw.set_xlabel("")
     propagation_plot._plot_daynight_strip(ax_strip, arr["day_mask"])
-    ax_strip.set_xlabel(
-        "Population events (time-ordered)  ·  strip: day (white) / night (black)",
-        fontsize=10.5,
-    )
+    ax_strip.set_xlabel("Population events (time-ordered)", fontsize=10.5)
     propagation_plot._plot_rank_histogram(
         ax_dist,
         ranks,
@@ -613,6 +635,21 @@ def _render_temporal_order_panel(
         fontsize=9.5,
         fontweight="bold",
     )
+    ax_raw.legend(
+        handles=[
+            Patch(facecolor="white", edgecolor="0.25", linewidth=0.8, label="Day"),
+            Patch(facecolor="black", edgecolor="black", linewidth=0.8, label="Night"),
+        ],
+        loc="lower right",
+        bbox_to_anchor=(0.78, 1.025),
+        ncol=2,
+        frameon=False,
+        fontsize=8.5,
+        handlelength=1.2,
+        handletextpad=0.4,
+        columnspacing=0.9,
+        borderaxespad=0.0,
+    )
     files = _save_panel(fig, output_dir, "fig1-panelc")
     return {
         "panel_id": "c",
@@ -623,6 +660,11 @@ def _render_temporal_order_panel(
         "axis_label_fontsize_points": 10.5,
         "channel_label_fontsize_points": 9.5,
         "colorbar_label_fontsize_points": 10.5,
+        "rank_colorbar": {
+            "title": FIG1_RANK_COLORBAR_TITLE,
+            "placement": "horizontal title above colorbar",
+            "side_label_removed": True,
+        },
         "panel_column_order": ["event_heatmap", "colorbar", "rank_summary"],
         "record": f"results/interictal_propagation_masked/per_subject/{arr['dataset']}_{arr['subject']}.json",
         "public_patient_label": display_label,
@@ -630,6 +672,11 @@ def _render_temporal_order_panel(
         "displayed_events": int(arr["display_events"].size),
         "masked_features": True,
         "daynight_strip": True,
+        "daynight_legend": {
+            "labels": ["Day", "Night"],
+            "placement": "same title row as patient label, upper-right of heatmap",
+            "removed_from_xlabel": True,
+        },
         "masked_mi_mean": arr["mi_mean"],
         "rank_distribution_helper": "scripts/plot_interictal_propagation.py::_plot_rank_histogram",
     }
@@ -666,6 +713,13 @@ def _render_clustered_template_panel(
             "gap_half_width_events": gap_half_width,
         },
         "masked_features": True,
+        "template_semantic_colors": drawn["template_semantic_colors"],
+        "template_labels_bold": True,
+        "rank_colorbar": {
+            "title": FIG1_RANK_COLORBAR_TITLE,
+            "placement": "horizontal title above colorbar",
+            "side_label_removed": True,
+        },
         "chosen_k": arr["chosen_k"],
         "within_cluster_tau": arr["within_cluster_tau"],
         "overall_tau": arr["overall_tau"],
@@ -755,7 +809,7 @@ def _plot_uplift_distribution_inset(
         rgb = np.asarray(matplotlib.colors.to_rgb(color), dtype=float)
         return tuple(rgb + (1.0 - rgb) * amount)
 
-    inset = ax.inset_axes([0.61, 0.15, 0.35, 0.30], zorder=6)
+    inset = ax.inset_axes(FIG1F_INSET_BOUNDS, zorder=6)
     inset.set_facecolor("white")
     for record, single_value, multi_value in zip(records, overall_arr, within_arr):
         dataset_color = colors[str(record["dataset"])]
@@ -830,10 +884,19 @@ def _plot_uplift_distribution_inset(
     )
     inset.set_xlim(-0.42, 1.42)
     inset.set_ylim(0.0, max(0.90, bracket_y + 0.055))
-    inset.set_xticks([0, 1], ["Single\ntemplate", "Multi-\ncluster"])
+    inset.set_xticks([0, 1])
+    inset.set_xticklabels(["Single", "Multi"])
     inset.set_yticks([0.0, 0.4, 0.8])
-    inset.set_ylabel("MI", fontsize=7.5, labelpad=1.5)
-    inset.tick_params(axis="both", labelsize=6.5, length=2.0, width=0.65, pad=1.0)
+    inset.set_ylabel(
+        "MI", fontsize=FIG1F_INSET_YLABEL_FONTSIZE, labelpad=2.0,
+    )
+    inset.tick_params(
+        axis="both",
+        labelsize=FIG1F_INSET_TICK_FONTSIZE,
+        length=2.4,
+        width=0.75,
+        pad=1.5,
+    )
     inset.spines[["top", "right"]].set_visible(False)
     inset.spines[["left", "bottom"]].set_linewidth(0.65)
 
@@ -851,6 +914,16 @@ def _plot_uplift_distribution_inset(
         "significance_label": p_text,
         "display": "paired subject points and lines, mean bars, and paired Wilcoxon bracket",
         "reference_grammar": "Supplementary Fig. 2 raw-vs-synchronized HFO AUC",
+        "layout_bounds_axes_fraction": FIG1F_INSET_BOUNDS,
+        "layout_aspect": "narrow portrait inset, not square",
+        "ylabel_fontsize_points": FIG1F_INSET_YLABEL_FONTSIZE,
+        "tick_label_fontsize_points": FIG1F_INSET_TICK_FONTSIZE,
+        "x_tick_labels": ["Single", "Multi"],
+        "x_tick_label_meanings": {
+            "Single": "single-template MI",
+            "Multi": "multi-cluster MI",
+        },
+        "x_tick_labels_single_line": True,
     }
 
 
@@ -878,17 +951,25 @@ def _plot_uplift(ax: plt.Axes, records: list[dict]) -> dict:
     paired_distribution = _plot_uplift_distribution_inset(
         ax, records, overall_arr, within_arr,
     )
-    ax.legend(
+    legend = ax.legend(
         handles=[
-            Line2D([0], [0], marker="o", linestyle="none", markerfacecolor=colors["yuquan"], markeredgecolor="white", markersize=6, label="Yuquan"),
-            Line2D([0], [0], marker="o", linestyle="none", markerfacecolor=colors["epilepsiae"], markeredgecolor="white", markersize=6, label="Epilepsiae"),
+            Line2D([0], [0], marker="o", linestyle="none", markerfacecolor=colors["yuquan"], markeredgecolor="white", markersize=5, label="Yuquan"),
+            Line2D([0], [0], marker="o", linestyle="none", markerfacecolor=colors["epilepsiae"], markeredgecolor="white", markersize=5, label="Epilepsiae"),
         ],
         loc="upper right",
-        frameon=False,
-        fontsize=15,
-        handletextpad=0.35,
+        frameon=True,
+        facecolor="white",
+        edgecolor="0.55",
+        framealpha=0.92,
+        fancybox=False,
+        fontsize=12,
+        handlelength=0.8,
+        handletextpad=0.25,
+        labelspacing=0.25,
+        borderpad=0.25,
         borderaxespad=0.35,
     )
+    legend.get_frame().set_linewidth(0.8)
     ax.set_aspect("equal", adjustable="box")
     _style_axis(ax)
     ax.tick_params(axis="both", labelsize=16, length=6.0, width=1.3)
@@ -907,6 +988,15 @@ def _plot_uplift(ax: plt.Axes, records: list[dict]) -> dict:
         "paired_distribution_inset": paired_distribution,
         "axis_limits_start_at_zero": True,
         "dataset_legend": True,
+        "dataset_legend_frame": {
+            "visible": True,
+            "facecolor": "white",
+            "edgecolor": "0.55",
+            "linewidth": 0.8,
+            "producer_fontsize_points": 12.0,
+            "rendered_fontsize_points": 12.0,
+            "marker_size_points": 5.0,
+        },
     }
 
 
@@ -946,7 +1036,7 @@ Figure 1A 是作者手绘示意图，不由代码生成，也不保存在本目�
 
 展示 Epilepsiae E7 的 masked 时间顺序热图、原始 overlapping rank ridgeline 与 day/night strip。
 
-**关注点**：非参与触点必须保持空白；day/night strip 与事件时间顺序严格对齐。
+**关注点**：非参与触点必须保持空白；day/night strip 与事件时间顺序严格对齐；Day/Night 使用黑白方块在患者标题同一行单独画 legend，xlabel 只保留 `Population events (time-ordered)`；colorbar 使用顶部水平标题 `Heatmap rank / First → Last`。
 
 ### fig1-paneld.png / .pdf
 
@@ -958,13 +1048,13 @@ Figure 1A 是作者手绘示意图，不由代码生成，也不保存在本目�
 
 将同一位 Epilepsiae E7 的全量 6,556 个有效事件按 masked KMeans k=2 的 TA/TB 标签重排，并展示两类 mean-rank 轮廓。
 
-**关注点**：TA/TB 两个 n 之和必须等于 6,556；两类之间使用白底灰色斜线断带并截断 x 轴线。
+**关注点**：TA/TB 两个 n 之和必须等于 6,556；TA/TB 顶部标签必须粗体显示，TA 固定为红色 `#B2182B`，TB 固定为蓝色 `#2166AC`，并与右侧 mean-rank 曲线一致；colorbar 标题固定放在色条上方。
 
 ### fig1-panelf.png / .pdf
 
 Overall 与 within-template MI 配对散点，量化分模板后的 matching uplift。底层数值仍来自 masked `overall_tau` / `within_cluster_tau_mean` rank-concordance fields，但图面统一使用 MI 简写。右下小 panel 复用补充图 HFO AUC 的配对语法，以患者连线、均值柱和配对 Wilcoxon 括号直接比较 single-template 与 multi-cluster MI。
 
-**关注点**：两轴从 0 开始；对角线下方保留灰区；右上角图例解释蓝色 Yuquan、棕色 Epilepsiae；右下不再放灰色摘要字，而应显示 40 名患者的配对 MI 分布和显著性括号。
+**关注点**：两轴从 0 开始；对角线下方保留灰区；右上角 Yuquan/Epilepsiae 图例必须使用较小字号并带白底细边框；右下不再放灰色摘要字，而应以窄竖向、非方形布局显示 40 名患者的配对 MI 分布和显著性括号。x 轴用居中的单行短标签 `Single` / `Multi`，分别表示 single-template MI / multi-cluster MI。
 
 ### fig1-complete-layout.png / .pdf
 
@@ -1022,6 +1112,11 @@ def build(
             "required_visual": "paired subject lines and points, mean bars, and paired Wilcoxon bracket in the lower-right inset",
             "forbidden_visual": "gray median-delta summary text in the lower-right region",
             "statistics": "two-sided paired Wilcoxon on adaptive_cluster.overall_tau vs adaptive_cluster.within_cluster_tau_mean",
+        },
+        "panele_canonical_contract": {
+            "contract_id": "fig1e_ta_red_tb_blue_semantic_colors_v1",
+            "template_semantic_colors": FIG1E_TEMPLATE_COLORS,
+            "required_visual": "TA labels and mean-rank profile are red; TB labels and mean-rank profile are blue",
         },
         "claim_scope": "Interictal HFO population events exhibit recurrent patient-specific temporal organization.",
         "forbidden_upgrade": "This figure alone does not establish a shared 3D propagation axis.",
