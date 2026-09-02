@@ -121,12 +121,15 @@ def conditional_bernoulli_logpmf_torch(logits: torch.Tensor, subset: torch.Tenso
     joint = torch.where(x, logp, log1mp).sum(dim=1)
     k = x.sum(dim=1)
     kmax = int(k.max()) if e else 0
-    dp = torch.full((e, kmax + 1), neg, dtype=torch.float64)
+    dp = torch.full((e, kmax + 1), neg, dtype=torch.float64, device=lg.device)
     dp[:, 0] = 0.0
     for j in range(c):
         stay = dp + log1mp[:, j:j + 1]
         if kmax:
-            take = torch.cat([torch.full((e, 1), neg, dtype=torch.float64), dp[:, :-1] + logp[:, j:j + 1]], dim=1)
+            take = torch.cat([
+                torch.full((e, 1), neg, dtype=torch.float64, device=lg.device),
+                dp[:, :-1] + logp[:, j:j + 1],
+            ], dim=1)
             dp = torch.logaddexp(stay, take)
         else:
             dp = stay
