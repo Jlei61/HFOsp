@@ -106,7 +106,13 @@ def main() -> None:
                 levels = [float(item["level"]) for item in rows]
                 x = _coordinate(levels, curve["reference_level"], grouped)
                 screen = [_metric(item, "screen", metric) for item in rows]
-                valid = np.asarray([item is not None for item in screen], bool)
+                eligible = np.asarray([
+                    bool(item.get("screen_eligible", True)) for item in rows
+                ], bool)
+                valid = np.asarray([
+                    value is not None and keep
+                    for value, keep in zip(screen, eligible)
+                ], bool)
                 if np.any(valid):
                     mean = np.asarray([
                         np.nan if item is None else item["mean"] for item in screen
@@ -128,6 +134,40 @@ def main() -> None:
                         x[valid], low[valid], high[valid], color=color,
                         alpha=0.10, linewidth=0, zorder=1,
                     )
+                invalid_points = []
+                for item, position, value, keep in zip(rows, x, screen, eligible):
+                    if keep or value is None:
+                        continue
+                    display_mean = (
+                        min(float(value["mean"]), 0.97)
+                        if limits[1] == 1 else float(value["mean"])
+                    )
+                    axis.scatter(
+                        position, display_mean, marker="x", s=28,
+                        linewidth=1.2, color="#777777", zorder=5,
+                    )
+                    reasons = list(item.get("screen_invalid_reasons", []))
+                    invalid_points.append({
+                        "candidate_id": item["candidate_id"],
+                        "level": item["level"],
+                        "mean": value["mean"],
+                        "reasons": reasons,
+                    })
+                    if row_index == 2 and any(
+                            reason.startswith("RUNAWAY_") for reason in reasons):
+                        axis.annotate(
+                            "runaway", (position, display_mean),
+                            xytext=(0, -12), textcoords="offset points",
+                            ha="center", va="top", fontsize=6.5,
+                            color="#666666",
+                        )
+                    elif row_index == 2 and value["mean"] >= 0.99:
+                        axis.annotate(
+                            "no events", (position, display_mean),
+                            xytext=(0, -12), textcoords="offset points",
+                            ha="center", va="top", fontsize=6.5,
+                            color="#666666",
+                        )
                 confirmations = []
                 for item, position in zip(rows, x):
                     confirm = _metric(item, "confirmation", metric)
@@ -153,6 +193,7 @@ def main() -> None:
                     "normalized_x": x.tolist(),
                     "selected_candidate_id": curve["selected_candidate_id"],
                     "confirmation": confirmations,
+                    "invalid_screen_points": invalid_points,
                 })
             if row_index == 0:
                 axis.set_title(group_title, weight="bold", fontsize=11)
@@ -190,7 +231,7 @@ def main() -> None:
     )
     figure.text(
         0.985, 0.965,
-        "open circles: 4-network screen   diamonds: 12-network confirmation",
+        "open circles: 4-network screen   diamonds: 12-network confirmation   gray x: ineligible",
         fontsize=8, ha="right", va="top", color="#444444",
     )
 
@@ -211,7 +252,7 @@ def main() -> None:
     (output / "metadata.json").write_text(json.dumps(metadata, indent=2) + "\n")
     (output / "README.md").write_text("""### dualcore_mechanism_response_atlas.png
 
-冻结二值双-core Node 场后逐次只改变一个模型坐标。每列分别汇总 Node 底物、learned E→E/E→I/Joint 通路表达、EE 长轴方向和长短轴比；三行依次是 held-out 完整事件分布距离、自然 KMeans 与冻结患者方向的 balanced alignment、以及以全部 returned causal families 为分母的 OOD。空心圆和浅带是 4-network screen；菱形是仅对训练分布选中的水平做的 12-network confirmation；灰带是患者同样事件数的自采样地板。
+冻结二值双-core Node 场后逐次只改变一个模型坐标。每列分别汇总 Node 底物、learned E→E/E→I/Joint 通路表达、EE 长轴方向和长短轴比；三行依次是 held-out 完整事件分布距离、自然 KMeans 与冻结患者方向的 balanced alignment、以及以全部 returned causal families 为分母的 OOD。空心圆和浅带是 4-network screen；菱形是仅对训练分布选中的水平做的 12-network confirmation；灰叉表示存在 runaway 或至少一个网络不可估计、因而不进入连续响应曲线；灰带是患者同样事件数的自采样地板。
 
 **关注点**：先找能在不压低事件产率的前提下把完整分布距离拉向灰带的参数，再看同一变化是否保留双模板一致性并降低 OOD；只改善其中一项属于 trade-off。
 """)

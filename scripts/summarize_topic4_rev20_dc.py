@@ -158,11 +158,20 @@ def summarize(config: dict, manifest: dict, selection: dict,
         identifier = candidate["candidate_id"]
         if identifier not in screen_rows:
             raise RuntimeError(f"screen candidate missing: {identifier}")
+        selection_audit = selection.get("candidate_summaries", {}).get(
+            identifier, {}
+        )
         candidates[identifier] = {
             "candidate_id": identifier,
             "family": candidate["family"],
             "level": candidate["level"],
             "is_reference": bool(candidate["is_reference"]),
+            "screen_eligible": bool(
+                selection_audit.get("selection_eligible", True)
+            ),
+            "screen_invalid_reasons": list(
+                selection_audit.get("invalid_reasons", [])
+            ),
             "selected_for_confirmation": identifier in selection["candidate_ids"],
             "screen": _candidate_summary(
                 screen_rows[identifier], reference_rows=screen_rows[reference_id],

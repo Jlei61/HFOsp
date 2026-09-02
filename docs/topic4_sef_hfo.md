@@ -43,6 +43,15 @@
 > 患者间期活动 / 复现了双模板 repertoire"。结果与全部数字见
 > `docs/archive/topic4/sef_hfo/data_driven_snn_cohort_formal_result_2026-08-16.md`，
 > 冻结与预检见同目录 `..._canary_and_formal_freeze_2026-08-15.md`。
+>
+> **冻结双-core 单因素机制图（2026-09-02，单患者 development）：** 停止连续自由场后，固定二值
+> `dualcore_s39` Node 场，以 31×4 screen（只用患者训练完整分布选水平）和 9×12 新种子确认，分别
+> 检验 held-out 完整分布、自然 KMeans 双模板一致性和 OOD。`Joint=1.25` 是唯一三项同时改善的候选：
+> 完整距离 1.299→0.994、balanced alignment 0.800→0.861、OOD 0.417→0.228；但事件数减少，
+> 且距离仍远高于 patient matched floor q95=0.337。单独 `EE=0.75` 或 aspect=3.0 会进一步降低
+> 距离/OOD，却削弱第二模板；aspect=4.0 在 screen 4/4 runaway。结论是**连接几何/联合通路调节控制
+> repertoire，Node 窄幅强度调节不是主要杠杆；完整患者分布仍未恢复**。详见
+> `docs/archive/topic4/sef_hfo/rev20_dc_dual_core_mechanism_atlas_result_2026-09-02.md`。
 
 ---
 

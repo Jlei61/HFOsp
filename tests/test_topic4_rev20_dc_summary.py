@@ -36,6 +36,12 @@ def test_response_atlas_keeps_screen_and_confirmation_separate():
         "reference_candidate_id": "ref",
         "candidate_ids": ["ref", "gain_low"],
         "family_winners": {"node_gain": {"candidate_id": "gain_low"}},
+        "candidate_summaries": {
+            "gain_high": {
+                "selection_eligible": False,
+                "invalid_reasons": ["RUNAWAY_SEED_2"],
+            },
+        },
     }
     screen_rows = []
     for seed in (1, 2):
@@ -65,5 +71,9 @@ def test_response_atlas_keeps_screen_and_confirmation_separate():
     assert low["confirmation"]["paired_delta_vs_reference"][
         "heldout_complete_distribution"
     ]["mean"] < 0
+    assert payload["candidates"]["gain_high"]["screen_eligible"] is False
+    assert payload["candidates"]["gain_high"]["screen_invalid_reasons"] == [
+        "RUNAWAY_SEED_2"
+    ]
     curve = payload["family_curves"]["node_gain"]
     assert [row["level"] for row in curve["rows"]] == [0.75, 1.0, 1.25]
