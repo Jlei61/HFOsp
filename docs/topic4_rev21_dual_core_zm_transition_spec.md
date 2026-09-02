@@ -208,6 +208,12 @@ This order is frozen before the scan. No weighted patient-ictal objective is
 used. At most one work point enters confirmation on a fresh
 `3 topology x 4 dynamics` matrix.
 
+Confirmation is called multi-seed robust only when at least 8 of the 12 fresh
+topology-by-dynamics cells satisfy `MODEL_ICTAL_ELIGIBLE_REV21`, with at least
+2 eligible dynamics realizations in at least 2 of the 3 topology seeds, and the
+three aggregate interictal endpoints remain inside the independent Z/M-off
+support. This is the only confirmation gate; there is no event-count gate.
+
 If no point passes both state and retention criteria, the result is
 `NO_CROSS_STATE_WORKPOINT_IN_FROZEN_ZM_GRID`. A model-ictal-only candidate may
 be displayed as a mechanism boundary but cannot become the primary Fig.5

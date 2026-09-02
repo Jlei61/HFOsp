@@ -459,6 +459,11 @@ def _event_contact_readout(*, events: list[dict], envelope: np.ndarray,
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True, type=Path)
+    parser.add_argument(
+        "--candidate-manifest", type=Path,
+        help=("Frozen candidate library for this phase. Defaults to the "
+              "manifest declared by --config."),
+    )
     parser.add_argument("--candidate-id", required=True)
     parser.add_argument("--seed", required=True, type=int)
     parser.add_argument(
@@ -499,7 +504,10 @@ def main() -> None:
         path = _resolve(artifact_root, record["path"])
         if _sha256(path) != record["sha256"]:
             raise RuntimeError(f"input hash changed: {record['path']}")
-    manifest_path = artifact_root / config["candidate_manifest"]
+    manifest_path = (
+        args.candidate_manifest.resolve() if args.candidate_manifest
+        else artifact_root / config["candidate_manifest"]
+    )
     manifest = json.loads(manifest_path.read_text())
     if manifest.get("config_sha256") != _sha256(config_path):
         raise RuntimeError("rev12-ND candidate manifest is stale")
@@ -521,6 +529,8 @@ def main() -> None:
         "config_sha256_at_expected_commit": _config_at_commit(
             config_path, expected_commit,
         ),
+        "candidate_manifest_path": str(manifest_path),
+        "candidate_manifest_sha256": _sha256(manifest_path),
         "systemd_unit": os.environ.get("REV12ND_SYSTEMD_UNIT"),
     })
     if (provenance["runtime_modules_dirty"]

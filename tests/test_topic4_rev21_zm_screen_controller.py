@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 
 from scripts.run_topic4_rev21_zm_screen_controller import (
-    CANARY_CANDIDATES, build_jobs,
+    CANARY_CANDIDATES, _launch, build_jobs,
 )
 
 
@@ -51,3 +51,45 @@ def test_timescale_grid_uses_the_same_four_seed_cells(tmp_path):
     assert len(jobs) == 9 * 4
     assert len({(job["topology_seed"], job["dynamics_seed"])
                 for job in jobs}) == 4
+
+
+def test_confirmation_uses_fresh_three_by_four_seed_matrix(tmp_path):
+    config, manifest = _inputs()
+    confirmation = {"candidates": manifest["candidates"][:4]}
+    jobs = build_jobs(
+        config, confirmation, tmp_path, "confirmation", "d" * 40,
+    )
+    assert len(jobs) == 4 * 3 * 4
+    assert len({job["topology_seed"] for job in jobs}) == 3
+    assert len({job["dynamics_seed"] for job in jobs}) == 4
+
+
+def test_launcher_passes_phase_specific_candidate_manifest(monkeypatch, tmp_path):
+    captured = {}
+
+    def fake_run(command, **kwargs):
+        captured["command"] = command
+        captured["kwargs"] = kwargs
+
+    monkeypatch.setattr(
+        "scripts.run_topic4_rev21_zm_screen_controller.subprocess.run", fake_run,
+    )
+    job = {
+        "candidate_id": "candidate",
+        "topology_seed": 1,
+        "dynamics_seed": 2,
+        "unit": "unit",
+        "json": tmp_path / "out.json",
+        "npz": tmp_path / "out.npz",
+        "status_path": tmp_path / "status",
+        "log": tmp_path / "log",
+    }
+    manifest = tmp_path / "phase-manifest.json"
+    _launch(
+        job, config_path=tmp_path / "config.json",
+        candidate_manifest=manifest, artifact_root=tmp_path,
+        commit="e" * 40, phase="timescale",
+    )
+    command = captured["command"]
+    index = command.index("--candidate-manifest")
+    assert command[index + 1] == str(manifest)

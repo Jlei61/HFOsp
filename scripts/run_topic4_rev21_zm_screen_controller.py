@@ -110,8 +110,17 @@ def build_jobs(config: dict, manifest: dict, output_root: Path, phase: str,
             for topology in config["search"]["fit_network_seeds"]
             for dynamics in config["search"]["fit_dynamics_seeds"]
         ]
+    elif phase == "confirmation":
+        candidates = [row["candidate_id"] for row in manifest["candidates"]]
+        pairs = [
+            (int(topology), int(dynamics))
+            for topology in config["search"]["confirmation_network_seeds"]
+            for dynamics in config["search"]["confirmation_dynamics_seeds"]
+        ]
     else:
-        raise ValueError("phase must be canary, coarse or timescale")
+        raise ValueError(
+            "phase must be canary, coarse, timescale or confirmation"
+        )
     missing = sorted(set(candidates) - candidate_ids)
     if missing:
         raise RuntimeError(f"screen candidates absent from manifest: {missing}")
@@ -134,7 +143,7 @@ def build_jobs(config: dict, manifest: dict, output_root: Path, phase: str,
 
 
 def _launch(job: dict, *, config_path: Path, artifact_root: Path,
-            commit: str, phase: str) -> None:
+            candidate_manifest: Path, commit: str, phase: str) -> None:
     job["status_path"].parent.mkdir(parents=True, exist_ok=True)
     command = [
         "systemd-run", "--user", f"--unit={job['unit']}", "--collect",
@@ -148,7 +157,9 @@ def _launch(job: dict, *, config_path: Path, artifact_root: Path,
          f"dynamics={job['dynamics_seed']}"), commit,
         "/usr/bin/time", "-v", str(PYTHON),
         str(ROOT / "scripts/run_topic4_rev12_node_worker.py"),
-        "--config", str(config_path), "--candidate-id", job["candidate_id"],
+        "--config", str(config_path),
+        "--candidate-manifest", str(candidate_manifest),
+        "--candidate-id", job["candidate_id"],
         "--seed", str(job["topology_seed"]),
         "--dynamics-seed", str(job["dynamics_seed"]),
         "--expected-commit", commit, "--artifact-root", str(artifact_root),
@@ -160,8 +171,10 @@ def _launch(job: dict, *, config_path: Path, artifact_root: Path,
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=Path, required=True)
-    parser.add_argument("--phase", choices=("canary", "coarse", "timescale"),
-                        required=True)
+    parser.add_argument(
+        "--phase", choices=("canary", "coarse", "timescale", "confirmation"),
+        required=True,
+    )
     parser.add_argument("--candidate-manifest", type=Path)
     parser.add_argument("--expected-commit", required=True)
     parser.add_argument("--artifact-root", type=Path,
@@ -238,8 +251,11 @@ def main() -> None:
             if slots <= 0:
                 break
             if state == "pending":
-                _launch(job, config_path=config_path, artifact_root=artifact_root,
-                        commit=commit, phase=args.phase)
+                _launch(
+                    job, config_path=config_path, artifact_root=artifact_root,
+                    candidate_manifest=manifest_path, commit=commit,
+                    phase=args.phase,
+                )
                 slots -= 1
         _atomic_json(status_path, payload)
         time.sleep(interval)

@@ -443,11 +443,13 @@ def make_slow(substrate, zm_cfg, *, trace_weights_E=None):
     if zm_cfg.get("mode", "off") == "off":
         return None
     passive = bool(zm_cfg.get("passive", False))
-    if not (zm_cfg.get("use_z") and zm_cfg.get("use_m")):
-        raise RuntimeError("the active Z/M arm must use Z and M together")
+    use_z = bool(zm_cfg.get("use_z"))
+    use_m = bool(zm_cfg.get("use_m"))
+    if not (use_z or use_m):
+        raise RuntimeError("an active slow-variable arm must enable Z or M")
     slow = MZSlowVars(
         substrate.n_e + substrate.n_i, substrate.params.V_th,
-        MZSlowVarsConfig(use_z=True, use_m=True,
+        MZSlowVarsConfig(use_z=use_z, use_m=use_m,
                          I_th_EI=float(zm_cfg["I_th_EI"]),
                          tau_z=float(zm_cfg["tau_z"]),
                          tau_adp=float(zm_cfg["tau_adp"]),
