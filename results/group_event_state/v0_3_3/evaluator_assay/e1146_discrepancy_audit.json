@@ -1,0 +1,729 @@
+{
+  "audit": {
+    "all_published_reproduced": true,
+    "canonical_rescore_means": {
+      "eval_predictions_per_arm_dispersion": -0.6527761316853059,
+      "eval_predictions_shared_H_dispersion": -0.32912201715661443,
+      "eval_state_glm_vs_model_H_shared_registry_dispersion": -0.33245724893649004,
+      "model_predictions_per_arm_dispersion": 0.12772139103887922,
+      "model_predictions_shared_H_dispersion": -0.0040885210318990575,
+      "model_predictions_shared_adapter_dispersion": -0.003617312143498056
+    },
+    "first_divergence": "prediction_H",
+    "first_divergence_by_seed": [
+      "prediction_H",
+      "prediction_H",
+      "prediction_H"
+    ],
+    "model_side_decomposition_means": {
+      "dispersion_component_h_minus_mean": 0.13133871027853636,
+      "dynamic_component_mean_minus_correct": -0.0036172916052264075
+    },
+    "n_seeds": 3,
+    "per_seed": [
+      {
+        "canonical_rescore": {
+          "eval_predictions_per_arm_dispersion": {
+            "direction": "favours_control",
+            "gain": -0.2667426708615324,
+            "mean_nll_control": 7.146174365129086,
+            "mean_nll_treated": 7.412917035990619,
+            "n_rows_used": 113
+          },
+          "eval_predictions_shared_H_dispersion": {
+            "direction": "favours_control",
+            "gain": -0.15486645212431993,
+            "mean_nll_control": 7.146174365129086,
+            "mean_nll_treated": 7.301040817253406,
+            "n_rows_used": 113
+          },
+          "eval_state_glm_vs_model_H_shared_registry_dispersion": {
+            "direction": "favours_control",
+            "gain": -0.157912516512715,
+            "mean_nll_control": 7.145719669410066,
+            "mean_nll_treated": 7.303632185922781,
+            "n_rows_used": 113
+          },
+          "model_predictions_per_arm_dispersion": {
+            "direction": "favours_treated",
+            "gain": 0.06901501127374561,
+            "mean_nll_control": 7.145719669410066,
+            "mean_nll_treated": 7.07670465813632,
+            "n_rows_used": 113
+          },
+          "model_predictions_shared_H_dispersion": {
+            "direction": "favours_control",
+            "gain": -0.004632895621570289,
+            "mean_nll_control": 7.145719669410066,
+            "mean_nll_treated": 7.150352565031637,
+            "n_rows_used": 113
+          },
+          "model_predictions_shared_adapter_dispersion": {
+            "direction": "favours_control",
+            "gain": -0.004347789289590722,
+            "mean_nll_control": 7.072356868846729,
+            "mean_nll_treated": 7.07670465813632,
+            "n_rows_used": 113
+          }
+        },
+        "counterfactual_chain": [
+          {
+            "direction": "favours_treated",
+            "gain": 0.06901501127374561,
+            "n_rows": 113,
+            "swap": "none"
+          },
+          {
+            "direction": "favours_treated",
+            "gain": 0.07181347708776732,
+            "n_rows": 113,
+            "swap": "prediction_H"
+          },
+          {
+            "direction": "favours_control",
+            "gain": -0.07383247532281177,
+            "n_rows": 113,
+            "swap": "prediction_H_plus_state"
+          },
+          {
+            "direction": "favours_control",
+            "gain": -0.15486645212431993,
+            "n_rows": 113,
+            "swap": "dispersion"
+          }
+        ],
+        "first_divergence": "prediction_H",
+        "model_side_decomposition": {
+          "dispersion_component_h_minus_mean": 0.07336280831193502,
+          "dynamic_component_mean_minus_correct": -0.004347773779810002,
+          "note": "H+mean(S_train) has modulation exactly 0, so H - mean isolates the adapter's re-estimated dispersion; mean - correct isolates the dynamic state under the adapter's dispersion"
+        },
+        "reproduction": {
+          "all_reproduced": true,
+          "eval_per_arm_gain": {
+            "abs_diff_mean": 3.774758283725532e-15,
+            "canonical": -0.2667426708615324,
+            "max_row_abs_diff_nll_H_plus_state": 2.708944180085382e-13,
+            "published": -0.26674267086152864,
+            "reproduced": true,
+            "row_tolerance": 1e-08
+          },
+          "eval_shared_gain": {
+            "abs_diff_mean": 1.4710455076283324e-15,
+            "canonical": -0.15486645212431993,
+            "max_row_abs_diff_nll_H": 3.765876499528531e-13,
+            "max_row_abs_diff_nll_H_plus_state": 3.1175062531474396e-13,
+            "published": -0.1548664521243214,
+            "reproduced": true,
+            "row_tolerance": 1e-08
+          },
+          "model_h_minus_correct": {
+            "abs_diff_mean": 2.325837940297948e-08,
+            "canonical": 0.06901501127374561,
+            "max_row_abs_diff_nll_H": 2.4803308846799155e-06,
+            "max_row_abs_diff_nll_H_plus_state": 2.9134637813399422e-06,
+            "note": "model-side rows were stored as float32 after a float64 computation; row tolerance absorbs the cast",
+            "published": 0.06901503453212501,
+            "reproduced": true,
+            "row_tolerance": 1e-05
+          }
+        },
+        "seed": 20260902,
+        "sign_flip_origin": "prediction_H_plus_state",
+        "steps": [
+          {
+            "checkpoint_sha256_eval": "30cd5c654820fd023e37c74675e512d4c4023570c5e1a4065a833e05ef15717e",
+            "checkpoint_sha256_model": "30cd5c654820fd023e37c74675e512d4c4023570c5e1a4065a833e05ef15717e",
+            "diverges": false,
+            "eval_commit": "89e55a587f0d7e06c05d4c9e8592c33c95da357a",
+            "frozen_arrays_sha256_eval": "1ed238064f1c71e82872828a83fb26cc8729e8622c506fc443bc2e8a4372e4a9",
+            "frozen_arrays_sha256_model": "1ed238064f1c71e82872828a83fb26cc8729e8622c506fc443bc2e8a4372e4a9",
+            "model_commit": "374dad4d0dc67428a4a5413b452ace5531289103",
+            "note": "same checkpoint and same frozen-state arrays feed both branches; the branches differ downstream",
+            "registry_commit": "89e55a587f0d7e06c05d4c9e8592c33c95da357a",
+            "step": "checkpoint"
+          },
+          {
+            "diverges": false,
+            "n_common": 113,
+            "n_eval": 113,
+            "n_model": 113,
+            "step": "anchor_set",
+            "times_agree_on_common": true
+          },
+          {
+            "diverges": false,
+            "max_abs_delta_count": 0.0,
+            "mean_count_model": 171.7787610619469,
+            "n_common": 113,
+            "step": "target"
+          },
+          {
+            "construction_eval": "H_strong NB ridge GLM refit inside the H1 evaluation run",
+            "construction_model": "registry log_mu_H (H_strong NB ridge GLM frozen at registry build)",
+            "diverges": true,
+            "max_abs_delta_log_mu": 0.06383915568383802,
+            "mean_abs_delta_log_mu": 0.04166271959680343,
+            "mean_nll_H_eval_rows": 7.146174365129057,
+            "mean_nll_H_model_rows": 7.145719625253593,
+            "mean_predicted_mu_eval": 274.1029742107147,
+            "mean_predicted_mu_model": 286.64222153980234,
+            "n_features_eval": 126,
+            "n_features_model": 125,
+            "step": "prediction_H",
+            "tolerance_log_mu": 1e-06
+          },
+          {
+            "construction_eval": "new NB ridge GLM on [H_strong features (+) 12 raw anchor-state columns], fit base_fit, ridge selected on inner_val, refit on base_refit; coefficients, intercept and dispersion re-estimated -- not the checkpoint's readout",
+            "construction_model": "checkpoint readout: log_mu_H(registry) + alpha * w^T S~ (S~ TRAIN-standardised anchor state)",
+            "diverges": true,
+            "eval_state_contribution_rms": 0.13816716724780725,
+            "max_abs_delta_log_mu_vs_eval_per_arm": 0.429197267350518,
+            "max_abs_delta_log_mu_vs_eval_shared": 0.4286270872431621,
+            "mean_predicted_mu_eval_shared": 272.79242817269994,
+            "mean_predicted_mu_model": 279.2179225294609,
+            "model_modulation_mean": -0.03098346385280643,
+            "model_modulation_rms": 0.06870317783126356,
+            "step": "prediction_H_plus_state",
+            "tolerance_log_mu": 1e-06
+          },
+          {
+            "abs_delta_log_r_H": 0.0018171305302258078,
+            "abs_delta_log_r_H_plus_state": 0.11329754504149825,
+            "diverges": true,
+            "intercept_H_eval": 4.940805116617312,
+            "intercept_H_plus_state_eval_per_arm": 4.931731855566644,
+            "intercept_H_plus_state_eval_shared": 4.93392748555365,
+            "intercept_model": "none (residual readout has no free intercept; modulation mean reported in prediction step)",
+            "log_r_H_eval": 0.5953658659721859,
+            "log_r_H_model": 0.5971829965024117,
+            "log_r_H_plus_state_eval_per_arm": 0.6515730849165288,
+            "log_r_H_plus_state_model": 0.5382755398750305,
+            "rule_eval": "shared_H_alpha primary (both arms use the refit H alpha); per_arm reported as sensitivity",
+            "rule_model": "per_arm (H: registry log r; H+S: adapter-trained log r)",
+            "rules_differ": true,
+            "step": "dispersion_intercept",
+            "tolerance_log_r": 1e-06
+          },
+          {
+            "block_eval": "1800 s bins within segment (bootstrap only)",
+            "block_model": "moving blocks of 6 consecutive anchors within segment (bootstrap only)",
+            "diverges": false,
+            "note": "blocks only enter the bootstrap CI, not the point estimate",
+            "step": "weight",
+            "uncertainty_definition_differs": true,
+            "weight_eval": "unit weight per anchor (unweighted mean)",
+            "weight_model": "unit weight per anchor (unweighted mean)"
+          },
+          {
+            "diverges": false,
+            "eval": "arithmetic mean of per-seed mean gains within patient",
+            "model": "arithmetic mean of per-seed mean contrasts within patient",
+            "step": "seed_aggregation"
+          },
+          {
+            "diverges": false,
+            "eval": "NLL(control=H) - NLL(treated=H+S_correct), mean over finite pairs; positive favours the state",
+            "model": "NLL(H) - NLL(H+S_correct), mean over anchors; positive favours the state",
+            "step": "score_sign_reduction"
+          }
+        ],
+        "subject": "epilepsiae_1146"
+      },
+      {
+        "canonical_rescore": {
+          "eval_predictions_per_arm_dispersion": {
+            "direction": "favours_control",
+            "gain": -0.8822627939685056,
+            "mean_nll_control": 7.146174365129086,
+            "mean_nll_treated": 8.028437159097592,
+            "n_rows_used": 113
+          },
+          "eval_predictions_shared_H_dispersion": {
+            "direction": "favours_control",
+            "gain": -0.5263715103866944,
+            "mean_nll_control": 7.146174365129086,
+            "mean_nll_treated": 7.67254587551578,
+            "n_rows_used": 113
+          },
+          "eval_state_glm_vs_model_H_shared_registry_dispersion": {
+            "direction": "favours_control",
+            "gain": -0.5300329262414916,
+            "mean_nll_control": 7.145719669410066,
+            "mean_nll_treated": 7.6757525956515575,
+            "n_rows_used": 113
+          },
+          "model_predictions_per_arm_dispersion": {
+            "direction": "favours_treated",
+            "gain": 0.12232178625610822,
+            "mean_nll_control": 7.145719669410066,
+            "mean_nll_treated": 7.023397883153957,
+            "n_rows_used": 113
+          },
+          "model_predictions_shared_H_dispersion": {
+            "direction": "favours_control",
+            "gain": -0.04413093109937345,
+            "mean_nll_control": 7.145719669410066,
+            "mean_nll_treated": 7.189850600509439,
+            "n_rows_used": 113
+          },
+          "model_predictions_shared_adapter_dispersion": {
+            "direction": "favours_control",
+            "gain": -0.03895546760051084,
+            "mean_nll_control": 6.984442415553447,
+            "mean_nll_treated": 7.023397883153957,
+            "n_rows_used": 113
+          }
+        },
+        "counterfactual_chain": [
+          {
+            "direction": "favours_treated",
+            "gain": 0.12232178625610822,
+            "n_rows": 113,
+            "swap": "none"
+          },
+          {
+            "direction": "favours_treated",
+            "gain": 0.12512025207012994,
+            "n_rows": 113,
+            "swap": "prediction_H"
+          },
+          {
+            "direction": "favours_control",
+            "gain": -0.30476905446767555,
+            "n_rows": 113,
+            "swap": "prediction_H_plus_state"
+          },
+          {
+            "direction": "favours_control",
+            "gain": -0.5263715103866944,
+            "n_rows": 113,
+            "swap": "dispersion"
+          }
+        ],
+        "first_divergence": "prediction_H",
+        "model_side_decomposition": {
+          "dispersion_component_h_minus_mean": 0.16127723930156337,
+          "dynamic_component_mean_minus_correct": -0.038955437398589816,
+          "note": "H+mean(S_train) has modulation exactly 0, so H - mean isolates the adapter's re-estimated dispersion; mean - correct isolates the dynamic state under the adapter's dispersion"
+        },
+        "reproduction": {
+          "all_reproduced": true,
+          "eval_per_arm_gain": {
+            "abs_diff_mean": 0.0,
+            "canonical": -0.8822627939685056,
+            "max_row_abs_diff_nll_H_plus_state": 3.9879211044535623e-13,
+            "published": -0.8822627939685056,
+            "reproduced": true,
+            "row_tolerance": 1e-08
+          },
+          "eval_shared_gain": {
+            "abs_diff_mean": 1.1102230246251565e-15,
+            "canonical": -0.5263715103866944,
+            "max_row_abs_diff_nll_H": 3.765876499528531e-13,
+            "max_row_abs_diff_nll_H_plus_state": 4.005684672847565e-13,
+            "published": -0.5263715103866933,
+            "reproduced": true,
+            "row_tolerance": 1e-08
+          },
+          "model_h_minus_correct": {
+            "abs_diff_mean": 1.5646865331175874e-08,
+            "canonical": 0.12232178625610822,
+            "max_row_abs_diff_nll_H": 2.4803308846799155e-06,
+            "max_row_abs_diff_nll_H_plus_state": 3.2615666754054473e-06,
+            "note": "model-side rows were stored as float32 after a float64 computation; row tolerance absorbs the cast",
+            "published": 0.12232180190297355,
+            "reproduced": true,
+            "row_tolerance": 1e-05
+          }
+        },
+        "seed": 20260903,
+        "sign_flip_origin": "prediction_H_plus_state",
+        "steps": [
+          {
+            "checkpoint_sha256_eval": "36252b587cbd342ac8d9113cff7ab35bf419bfde415039af94aa54019159fd9a",
+            "checkpoint_sha256_model": "36252b587cbd342ac8d9113cff7ab35bf419bfde415039af94aa54019159fd9a",
+            "diverges": false,
+            "eval_commit": "89e55a587f0d7e06c05d4c9e8592c33c95da357a",
+            "frozen_arrays_sha256_eval": "2a1c0ed70ab19fe603d94a9465bf0ddecc08212a22167bf0947fcd41c8b526f7",
+            "frozen_arrays_sha256_model": "2a1c0ed70ab19fe603d94a9465bf0ddecc08212a22167bf0947fcd41c8b526f7",
+            "model_commit": "374dad4d0dc67428a4a5413b452ace5531289103",
+            "note": "same checkpoint and same frozen-state arrays feed both branches; the branches differ downstream",
+            "registry_commit": "89e55a587f0d7e06c05d4c9e8592c33c95da357a",
+            "step": "checkpoint"
+          },
+          {
+            "diverges": false,
+            "n_common": 113,
+            "n_eval": 113,
+            "n_model": 113,
+            "step": "anchor_set",
+            "times_agree_on_common": true
+          },
+          {
+            "diverges": false,
+            "max_abs_delta_count": 0.0,
+            "mean_count_model": 171.7787610619469,
+            "n_common": 113,
+            "step": "target"
+          },
+          {
+            "construction_eval": "H_strong NB ridge GLM refit inside the H1 evaluation run",
+            "construction_model": "registry log_mu_H (H_strong NB ridge GLM frozen at registry build)",
+            "diverges": true,
+            "max_abs_delta_log_mu": 0.06383915568383802,
+            "mean_abs_delta_log_mu": 0.04166271959680343,
+            "mean_nll_H_eval_rows": 7.146174365129057,
+            "mean_nll_H_model_rows": 7.145719625253593,
+            "mean_predicted_mu_eval": 274.1029742107147,
+            "mean_predicted_mu_model": 286.64222153980234,
+            "n_features_eval": 126,
+            "n_features_model": 125,
+            "step": "prediction_H",
+            "tolerance_log_mu": 1e-06
+          },
+          {
+            "construction_eval": "new NB ridge GLM on [H_strong features (+) 12 raw anchor-state columns], fit base_fit, ridge selected on inner_val, refit on base_refit; coefficients, intercept and dispersion re-estimated -- not the checkpoint's readout",
+            "construction_model": "checkpoint readout: log_mu_H(registry) + alpha * w^T S~ (S~ TRAIN-standardised anchor state)",
+            "diverges": true,
+            "eval_state_contribution_rms": 0.32572512703912165,
+            "max_abs_delta_log_mu_vs_eval_per_arm": 0.9022633501144894,
+            "max_abs_delta_log_mu_vs_eval_shared": 0.9662603618835983,
+            "mean_predicted_mu_eval_shared": 252.0014200108345,
+            "mean_predicted_mu_model": 289.67821384464344,
+            "model_modulation_mean": 0.012221883883518456,
+            "model_modulation_rms": 0.03790349341305731,
+            "step": "prediction_H_plus_state",
+            "tolerance_log_mu": 1e-06
+          },
+          {
+            "abs_delta_log_r_H": 0.0018171305302258078,
+            "abs_delta_log_r_H_plus_state": 0.27495516148909493,
+            "diverges": true,
+            "intercept_H_eval": 4.940805116617312,
+            "intercept_H_plus_state_eval_per_arm": 4.911034533639219,
+            "intercept_H_plus_state_eval_shared": 4.916503203272204,
+            "intercept_model": "none (residual readout has no free intercept; modulation mean reported in prediction step)",
+            "log_r_H_eval": 0.5953658659721859,
+            "log_r_H_model": 0.5971829965024117,
+            "log_r_H_plus_state_eval_per_arm": 0.7364851912628071,
+            "log_r_H_plus_state_model": 0.46153002977371216,
+            "rule_eval": "shared_H_alpha primary (both arms use the refit H alpha); per_arm reported as sensitivity",
+            "rule_model": "per_arm (H: registry log r; H+S: adapter-trained log r)",
+            "rules_differ": true,
+            "step": "dispersion_intercept",
+            "tolerance_log_r": 1e-06
+          },
+          {
+            "block_eval": "1800 s bins within segment (bootstrap only)",
+            "block_model": "moving blocks of 6 consecutive anchors within segment (bootstrap only)",
+            "diverges": false,
+            "note": "blocks only enter the bootstrap CI, not the point estimate",
+            "step": "weight",
+            "uncertainty_definition_differs": true,
+            "weight_eval": "unit weight per anchor (unweighted mean)",
+            "weight_model": "unit weight per anchor (unweighted mean)"
+          },
+          {
+            "diverges": false,
+            "eval": "arithmetic mean of per-seed mean gains within patient",
+            "model": "arithmetic mean of per-seed mean contrasts within patient",
+            "step": "seed_aggregation"
+          },
+          {
+            "diverges": false,
+            "eval": "NLL(control=H) - NLL(treated=H+S_correct), mean over finite pairs; positive favours the state",
+            "model": "NLL(H) - NLL(H+S_correct), mean over anchors; positive favours the state",
+            "step": "score_sign_reduction"
+          }
+        ],
+        "subject": "epilepsiae_1146"
+      },
+      {
+        "canonical_rescore": {
+          "eval_predictions_per_arm_dispersion": {
+            "direction": "favours_control",
+            "gain": -0.8093229302258794,
+            "mean_nll_control": 7.146174365129086,
+            "mean_nll_treated": 7.9554972953549665,
+            "n_rows_used": 113
+          },
+          "eval_predictions_shared_H_dispersion": {
+            "direction": "favours_control",
+            "gain": -0.30612808895882887,
+            "mean_nll_control": 7.146174365129086,
+            "mean_nll_treated": 7.452302454087915,
+            "n_rows_used": 113
+          },
+          "eval_state_glm_vs_model_H_shared_registry_dispersion": {
+            "direction": "favours_control",
+            "gain": -0.3094263040552636,
+            "mean_nll_control": 7.145719669410066,
+            "mean_nll_treated": 7.4551459734653305,
+            "n_rows_used": 113
+          },
+          "model_predictions_per_arm_dispersion": {
+            "direction": "favours_treated",
+            "gain": 0.19182737558678378,
+            "mean_nll_control": 7.145719669410066,
+            "mean_nll_treated": 6.953892293823282,
+            "n_rows_used": 113
+          },
+          "model_predictions_shared_H_dispersion": {
+            "direction": "favours_treated",
+            "gain": 0.036498263625246566,
+            "mean_nll_control": 7.145719669410066,
+            "mean_nll_treated": 7.10922140578482,
+            "n_rows_used": 113
+          },
+          "model_predictions_shared_adapter_dispersion": {
+            "direction": "favours_treated",
+            "gain": 0.0324513204596074,
+            "mean_nll_control": 6.986343614282889,
+            "mean_nll_treated": 6.953892293823282,
+            "n_rows_used": 113
+          }
+        },
+        "counterfactual_chain": [
+          {
+            "direction": "favours_treated",
+            "gain": 0.19182737558678378,
+            "n_rows": 113,
+            "swap": "none"
+          },
+          {
+            "direction": "favours_treated",
+            "gain": 0.1946258414008055,
+            "n_rows": 113,
+            "swap": "prediction_H"
+          },
+          {
+            "direction": "favours_control",
+            "gain": -0.1121593412390223,
+            "n_rows": 113,
+            "swap": "prediction_H_plus_state"
+          },
+          {
+            "direction": "favours_control",
+            "gain": -0.30612808895882887,
+            "n_rows": 113,
+            "swap": "dispersion"
+          }
+        ],
+        "first_divergence": "prediction_H",
+        "model_side_decomposition": {
+          "dispersion_component_h_minus_mean": 0.15937608322211072,
+          "dynamic_component_mean_minus_correct": 0.032451336362720594,
+          "note": "H+mean(S_train) has modulation exactly 0, so H - mean isolates the adapter's re-estimated dispersion; mean - correct isolates the dynamic state under the adapter's dispersion"
+        },
+        "reproduction": {
+          "all_reproduced": true,
+          "eval_per_arm_gain": {
+            "abs_diff_mean": 4.9960036108132044e-15,
+            "canonical": -0.8093229302258794,
+            "max_row_abs_diff_nll_H_plus_state": 3.765876499528531e-13,
+            "published": -0.8093229302258844,
+            "reproduced": true,
+            "row_tolerance": 1e-08
+          },
+          "eval_shared_gain": {
+            "abs_diff_mean": 1.8318679906315083e-15,
+            "canonical": -0.30612808895882887,
+            "max_row_abs_diff_nll_H": 3.765876499528531e-13,
+            "max_row_abs_diff_nll_H_plus_state": 4.005684672847565e-13,
+            "published": -0.30612808895882704,
+            "reproduced": true,
+            "row_tolerance": 1e-08
+          },
+          "model_h_minus_correct": {
+            "abs_diff_mean": 4.399804751087366e-08,
+            "canonical": 0.19182737558678378,
+            "max_row_abs_diff_nll_H": 2.4803308846799155e-06,
+            "max_row_abs_diff_nll_H_plus_state": 2.8740488779988027e-06,
+            "note": "model-side rows were stored as float32 after a float64 computation; row tolerance absorbs the cast",
+            "published": 0.1918274195848313,
+            "reproduced": true,
+            "row_tolerance": 1e-05
+          }
+        },
+        "seed": 20260904,
+        "sign_flip_origin": "prediction_H_plus_state",
+        "steps": [
+          {
+            "checkpoint_sha256_eval": "a53d6c9868a6b97044b60ab9269f8ba7662bd36fc0a4c643e5d7bc082e4f63a7",
+            "checkpoint_sha256_model": "a53d6c9868a6b97044b60ab9269f8ba7662bd36fc0a4c643e5d7bc082e4f63a7",
+            "diverges": false,
+            "eval_commit": "89e55a587f0d7e06c05d4c9e8592c33c95da357a",
+            "frozen_arrays_sha256_eval": "c16c415d6825bd21034fd109aa3e33de6527b9313ab44c2e1c357ac589ad9fc5",
+            "frozen_arrays_sha256_model": "c16c415d6825bd21034fd109aa3e33de6527b9313ab44c2e1c357ac589ad9fc5",
+            "model_commit": "374dad4d0dc67428a4a5413b452ace5531289103",
+            "note": "same checkpoint and same frozen-state arrays feed both branches; the branches differ downstream",
+            "registry_commit": "89e55a587f0d7e06c05d4c9e8592c33c95da357a",
+            "step": "checkpoint"
+          },
+          {
+            "diverges": false,
+            "n_common": 113,
+            "n_eval": 113,
+            "n_model": 113,
+            "step": "anchor_set",
+            "times_agree_on_common": true
+          },
+          {
+            "diverges": false,
+            "max_abs_delta_count": 0.0,
+            "mean_count_model": 171.7787610619469,
+            "n_common": 113,
+            "step": "target"
+          },
+          {
+            "construction_eval": "H_strong NB ridge GLM refit inside the H1 evaluation run",
+            "construction_model": "registry log_mu_H (H_strong NB ridge GLM frozen at registry build)",
+            "diverges": true,
+            "max_abs_delta_log_mu": 0.06383915568383802,
+            "mean_abs_delta_log_mu": 0.04166271959680343,
+            "mean_nll_H_eval_rows": 7.146174365129057,
+            "mean_nll_H_model_rows": 7.145719625253593,
+            "mean_predicted_mu_eval": 274.1029742107147,
+            "mean_predicted_mu_model": 286.64222153980234,
+            "n_features_eval": 126,
+            "n_features_model": 125,
+            "step": "prediction_H",
+            "tolerance_log_mu": 1e-06
+          },
+          {
+            "construction_eval": "new NB ridge GLM on [H_strong features (+) 12 raw anchor-state columns], fit base_fit, ridge selected on inner_val, refit on base_refit; coefficients, intercept and dispersion re-estimated -- not the checkpoint's readout",
+            "construction_model": "checkpoint readout: log_mu_H(registry) + alpha * w^T S~ (S~ TRAIN-standardised anchor state)",
+            "diverges": true,
+            "eval_state_contribution_rms": 0.22085906079097675,
+            "max_abs_delta_log_mu_vs_eval_per_arm": 0.6946493146891188,
+            "max_abs_delta_log_mu_vs_eval_shared": 0.5805789071636247,
+            "mean_predicted_mu_eval_shared": 242.0662426045871,
+            "mean_predicted_mu_model": 280.460013059259,
+            "model_modulation_mean": -0.017950951525595334,
+            "model_modulation_rms": 0.07036615832086553,
+            "step": "prediction_H_plus_state",
+            "tolerance_log_mu": 1e-06
+          },
+          {
+            "abs_delta_log_r_H": 0.0018171305302258078,
+            "abs_delta_log_r_H_plus_state": 0.32813940707752387,
+            "diverges": true,
+            "intercept_H_eval": 4.940805116617312,
+            "intercept_H_plus_state_eval_per_arm": 4.903114275863947,
+            "intercept_H_plus_state_eval_shared": 4.910921112074858,
+            "intercept_model": "none (residual readout has no free intercept; modulation mean reported in prediction step)",
+            "log_r_H_eval": 0.5953658659721859,
+            "log_r_H_model": 0.5971829965024117,
+            "log_r_H_plus_state_eval_per_arm": 0.7914103693158356,
+            "log_r_H_plus_state_model": 0.46327096223831177,
+            "rule_eval": "shared_H_alpha primary (both arms use the refit H alpha); per_arm reported as sensitivity",
+            "rule_model": "per_arm (H: registry log r; H+S: adapter-trained log r)",
+            "rules_differ": true,
+            "step": "dispersion_intercept",
+            "tolerance_log_r": 1e-06
+          },
+          {
+            "block_eval": "1800 s bins within segment (bootstrap only)",
+            "block_model": "moving blocks of 6 consecutive anchors within segment (bootstrap only)",
+            "diverges": false,
+            "note": "blocks only enter the bootstrap CI, not the point estimate",
+            "step": "weight",
+            "uncertainty_definition_differs": true,
+            "weight_eval": "unit weight per anchor (unweighted mean)",
+            "weight_model": "unit weight per anchor (unweighted mean)"
+          },
+          {
+            "diverges": false,
+            "eval": "arithmetic mean of per-seed mean gains within patient",
+            "model": "arithmetic mean of per-seed mean contrasts within patient",
+            "step": "seed_aggregation"
+          },
+          {
+            "diverges": false,
+            "eval": "NLL(control=H) - NLL(treated=H+S_correct), mean over finite pairs; positive favours the state",
+            "model": "NLL(H) - NLL(H+S_correct), mean over anchors; positive favours the state",
+            "step": "score_sign_reduction"
+          }
+        ],
+        "subject": "epilepsiae_1146"
+      }
+    ],
+    "published_means": {
+      "eval_per_arm_gain": -0.6527761316853062,
+      "eval_shared_gain": -0.3291220171566139,
+      "model_h_minus_correct": 0.12772141867330997
+    },
+    "seeds": [
+      20260902,
+      20260903,
+      20260904
+    ],
+    "sign_flip_origin_by_seed": [
+      "prediction_H_plus_state",
+      "prediction_H_plus_state",
+      "prediction_H_plus_state"
+    ],
+    "subject": "epilepsiae_1146"
+  },
+  "canonical_schema_version": "group_event_state_v0_3_3_canonical_per_anchor_1",
+  "canonical_tolerance_nats": 1e-06,
+  "evidence_label": "DIAGNOSTIC (engineering audit of v0.3.2 artefacts; no human result is asserted)",
+  "format": "group_event_state_v0_3_3_e1146_discrepancy_audit",
+  "generated": "2026-09-02T23:16:55+08:00",
+  "read_only_inputs_sha256": {
+    "20260902": {
+      "eval_h1_arrays_npz": "efc7969c7d477b314f2743b87897e492a73c3480d35e1df95fd499c68f40681a",
+      "eval_h1_result_json": "b1e0ce63a9e200ba4c2dea8553c32dfe552c01a8d9152f1099cffd4282831868",
+      "model_evaluation_json": "1a83c1f6450ee34ad77901a50e4a5ee5496fcd5b4df85dcbe7de41fc85913c55",
+      "model_result_json": "b4a2f772599f37082a6583bc87f7744b26aa2606d2c692f51201ac301ee27bfc"
+    },
+    "20260903": {
+      "eval_h1_arrays_npz": "5ca57c199148ace4924cc63d9f3704b38262102ce0358331b9795b8443900ab2",
+      "eval_h1_result_json": "41584d17db0c7edbcf8c144d48204932da695b52d72d94a5d9592b2381452283",
+      "model_evaluation_json": "b9011009ac8ad14723cff142dfdc958bc6d1e848cc6ca7cbf4756f0d0dc8d735",
+      "model_result_json": "6e5e8b6f0fdce8b5d9ddc4a64a2366ee7fecffeac8a902492e92fecb07a90b32"
+    },
+    "20260904": {
+      "eval_h1_arrays_npz": "e89c4715f05359025a4286f10e554998a47669d590c92a712c249ec4dce4e917",
+      "eval_h1_result_json": "aeb6cc084b225f27ff372e2cfa0d09fd7ed8182a617164044c4f4fe1ada23811",
+      "model_evaluation_json": "498e8350faefaaf61754a42785ac45c54df48369aace482c42db92c63de6b266",
+      "model_result_json": "b54aa4d970f97abb9de15dbdead444e133dcbafbf30925c164c64f8fc8cd4f4e"
+    },
+    "history_baseline_registry_json": "edcc9029253edcf8d97e86485e7d744c5513c61f988841b08e1138aba2c95657"
+  },
+  "sealed_partition_opened": false,
+  "source_commit": "a84dec97810726f4ff313d8942884e44014c3ec4",
+  "step_order": [
+    "checkpoint",
+    "anchor_set",
+    "target",
+    "prediction_H",
+    "prediction_H_plus_state",
+    "dispersion_intercept",
+    "weight",
+    "seed_aggregation",
+    "score_sign_reduction"
+  ],
+  "summary": {
+    "allowed_conclusions": [
+      "v0.3.2 的 +0.1277 与 −0.3291 不是同一比较的两个答案；它们对同一 checkpoint/anchor 使用了不同的 prediction_H、不同的 prediction_H_plus_state 构造和不同的 dispersion 规则。",
+      "v0.3.3 canonical evaluator 规则：训练/评价/画图必须评分 checkpoint 自己的预测；dispersion 规则显式声明；任何 GLM probe 必须作为单独命名的臂报告。"
+    ],
+    "engineering_consistency": [
+      "同一 checkpoint、同一 113 个 dev_test anchor、同一 count 目标，两条路径逐行一致；分叉从 prediction_H 开始：model 侧用 registry 冻结的 H_strong（125 特征，commit 89e55a587f），eval 侧在 H1 运行里重新拟合 H_strong（126 特征，含 days_since_recording_start，commit 89e55a587f）。",
+      "该 H 差异本身很小（max |Δlog μ_H| = 0.0638，dev_test 平均 NLL 7.1457 vs 7.1462），不足以翻转符号。",
+      "符号翻转发生在 prediction_H_plus_state：model 侧的 H+S_correct 是 checkpoint 自己的读出 log μ_H + α wᵀS̃（调制 RMS ≈ 0.04–0.07 nats），eval 侧的 H+S_correct 是一个重新拟合的 NB ridge GLM（H_strong ⊕ 12 列原始 anchor state，系数/截距/dispersion 全部重估），二者不是同一个预测器。",
+      "两个公开数字都被 canonical evaluator 从各自的逐 anchor 行逐行复现（all_published_reproduced=True）；评分公式一致，分歧完全在被评分的预测和 dispersion 规则。"
+    ],
+    "forbidden_conclusions": [
+      "不能说 E1146 上存在或不存在 30 分钟 count 增量的状态——本审计只解释两条路径为何不同。",
+      "不能把 +0.1277 当作状态证据（它是 dispersion 重估），也不能把 −0.3291 当作 checkpoint 阴性（它评分的是另一个模型）。"
+    ],
+    "what_the_numbers_mean": [
+      "model 侧 +0.1277 几乎全部来自 dispersion 重估：H 用 registry log r=0.597，adapter 训练出更小的 log r，H − mean(S_train) 臂（调制恒为 0）= +0.1313，而 mean − correct（真正的动态贡献）= -0.0036。",
+      "把 checkpoint 自己的预测放在共享 H dispersion 下用 canonical evaluator 评分，动态状态的增量为 -0.0041 nats/anchor（三 seed 均值）；这才是 v0.3.2 对 E1146 '正确时刻状态是否有增量' 的可比读数。",
+      "eval 侧 −0.3291（shared alpha）/ −0.6528（per-arm）度量的是：给 GLM 加 12 列原始 state 后在 80–100% 段外推变差，这是一个 probe 结果，不是 checkpoint 读出的结果。"
+    ]
+  }
+}
