@@ -205,6 +205,36 @@ def test_k2_k6_k7_controller_respects_slots_release_and_writes_the_status_page(t
     assert (shared / "resource_leases" / "agent_b.json").exists()
 
 
+def test_controller_sums_request_ceilings_but_enforces_each_request_limit(tmp_path):
+    shared, agent = _roots(tmp_path)
+    (shared / "job_requests" / "science_a.json").write_text(json.dumps(_request("req_a")))
+    (shared / "job_requests" / "science_b.json").write_text(json.dumps(_request("req_b")))
+    spawned: list[dict] = []
+
+    def fake_spawner(unit_path, *, gpu, log_path):
+        unit = json.loads(Path(unit_path).read_text())
+        spawned.append(unit)
+        return {"pid": os.getpid(), "pgid": os.getpgid(0)}
+
+    healthy = {
+        "snapshot_epoch": 0.0, "gpus": [], "mem_total_gib": 256.0, "mem_available_gib": 240.0,
+        "load1": 0.0, "cores": 80, "iowait_pct": 0.0, "disk_free_gib": 100.0, "disk_path": str(tmp_path),
+    }
+    ctl = Controller(
+        shared, agent, registered=REGISTERED, head_commit=HEAD, release_present=lambda: False,
+        spawner=fake_spawner,
+        lease={"max_workers": 2, "gpu_ids": [], "max_gpu_workers": 0,
+               "threads_per_worker": 1, "lease_source": "test"},
+        results_index=tmp_path / "index", snapshotter=lambda: healthy,
+    )
+    first = ctl.step()
+    second = ctl.step()
+    assert first["spawned"] == 1 and second["spawned"] == 1
+    assert {row["request_id"] for row in spawned} == {"req_a", "req_b"}
+    assert max(sum(row["request_id"] == rid for row in spawned) for rid in ("req_a", "req_b")) == 1
+    assert second["slots"] == 2 and second["running"] == 2
+
+
 def test_k2_completed_unit_with_same_job_key_is_skipped(tmp_path):
     out = tmp_path / "unit_out"
     out.mkdir()

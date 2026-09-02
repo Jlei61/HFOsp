@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import numpy as np
 import pytest
 
 from src.topic5_group_event_state.v033_training_lab.card import (
@@ -10,8 +11,10 @@ from src.topic5_group_event_state.v033_training_lab.card import (
     adequacy,
     assert_card_has_no_dev_test,
     build_training_card,
+    representative_seed_result,
     seed_dispersion,
 )
+from src.topic5_group_event_state.v033_training_lab.diagnostics import merge_seed_anchor_diagnostics
 
 
 def _recipe_result(**over):
@@ -75,9 +78,9 @@ def test_c1_all_six_conditions_give_training_adequate_and_any_failure_gives_diag
         "tiny_overfit": dict(t0=_t0(tiny_slice_overfit={"pass": False, "gap_closed": 0.1, "threshold": 0.5})),
         "synthetic_recovery": dict(diagnostics=_diag(synthetic_recovery={"pass": False, "source": "x", "beta": 0.7})),
         "blocked_inner_val_gain": dict(diagnostics=_diag(blocked_inner_val_gain={"mean": 0.0, "ci_low": -0.1, "ci_high": 0.1})),
-        "selected_in_warmup": dict(recipe_result=_recipe_result(selected_in_warmup=True)),
-        "selected_at_budget_edge": dict(recipe_result=_recipe_result(selected_at_budget_edge=True)),
-        "all_groups_active_before_selection": dict(recipe_result=_recipe_result(all_groups_active_before_selection=False)),
+        "selected_in_warmup": dict(seed_results=[*seeds[:2], _recipe_result(seed=9, selected_in_warmup=True)]),
+        "selected_at_budget_edge": dict(seed_results=[*seeds[:2], _recipe_result(seed=9, selected_at_budget_edge=True)]),
+        "all_groups_active_before_selection": dict(seed_results=[*seeds[:2], _recipe_result(seed=9, all_groups_active_before_selection=False)]),
     }
     for name, over in failures.items():
         kwargs = dict(request=REQUEST, recipe_result=seeds[0], seed_results=seeds, t0=_t0(), diagnostics=_diag())
@@ -101,6 +104,30 @@ def test_c2_seed_dispersion_needs_at_least_two_seeds():
     assert d["selected_step"]["min"] == 40 and d["selected_step"]["max"] == 60
     single = seed_dispersion(seeds[:1])
     assert single["n_seeds"] == 1 and single["insufficient_seeds"] is True
+
+
+def test_card_uses_medoid_seed_for_curves_and_seed_merged_diagnostics_are_order_invariant():
+    seeds = [
+        _recipe_result(seed=10, best_validation={"inner_val_nll": 12.0, "gain_h_minus_model": -2.0}),
+        _recipe_result(seed=11, best_validation={"inner_val_nll": 9.8, "gain_h_minus_model": 0.2}),
+        _recipe_result(seed=12, best_validation={"inner_val_nll": 9.7, "gain_h_minus_model": 0.3}),
+    ]
+    assert representative_seed_result(seeds)["seed"] == 11
+    n = 24
+    h = np.full(n, 10.0)
+    learned = [np.full(n, 10.2), np.full(n, 9.8), np.full(n, 9.7)]
+    shifted = [row + 0.1 for row in learned]
+    random = [row + 0.2 for row in learned]
+    kwargs = dict(h_nll=h, learned_nll=learned, shifted_nll=shifted, random_nll=random,
+                  shift_valid=np.ones(n, dtype=bool), segments=np.repeat(np.arange(4), 6))
+    merged = merge_seed_anchor_diagnostics(**kwargs)
+    reversed_merged = merge_seed_anchor_diagnostics(
+        **{**kwargs, "learned_nll": learned[::-1], "shifted_nll": shifted[::-1], "random_nll": random[::-1]}
+    )
+    assert merged["blocked_inner_val_gain"]["mean"] == pytest.approx(0.2)
+    assert merged["shift_null"]["delta_shifted_minus_correct"]["mean"] == pytest.approx(0.1)
+    assert merged["random_reservoir_delta"]["learned_minus_random"]["mean"] == pytest.approx(-0.2)
+    assert merged["blocked_inner_val_gain"] == reversed_merged["blocked_inner_val_gain"]
 
 
 def test_c3_card_carries_every_required_field_and_is_not_canonical_by_default():

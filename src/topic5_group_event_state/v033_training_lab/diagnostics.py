@@ -20,7 +20,7 @@ from dataclasses import replace
 import math
 from pathlib import Path
 import tempfile
-from typing import Any
+from typing import Any, Mapping, Sequence
 
 import numpy as np
 import torch
@@ -34,7 +34,7 @@ from src.topic5_group_event_state.v033_evaluator import canonical as C
 from .data import DataView
 from .models import FlexibleResidualStateModel
 from .objective import Trainable
-from .paths import atomic_write_json
+from .paths import atomic_write_json, atomic_write_npz, file_hash
 from .synthetic import SOURCE as SYNTHETIC_SOURCE, plant_residual_signal
 from .trainer import RecipeConfig, load_trained, train_recipe
 
@@ -367,6 +367,182 @@ def random_reservoir_delta(trainable: Trainable, view: DataView, cfg: RecipeConf
             "random_inner_val_nll": float(nll_r.mean()),
             "learned_minus_random": _paired_ci(nll_l - nll_r, view.bootstrap_segment(idx)),
             "definition": "same recipe with a frozen random encoder; negative delta = trained encoder helps"}
+
+
+def merge_seed_anchor_diagnostics(
+    *,
+    h_nll: np.ndarray,
+    learned_nll: Sequence[np.ndarray],
+    shifted_nll: Sequence[np.ndarray],
+    random_nll: Sequence[np.ndarray],
+    shift_valid: np.ndarray,
+    segments: np.ndarray,
+) -> dict[str, Any]:
+    """Merge optimization seeds before estimating uncertainty.
+
+    A recipe is selected by the median across final seeds.  The corresponding
+    diagnostic estimand is therefore the per-anchor median across those same
+    seeds, followed by the existing within-segment moving-block bootstrap.
+    Reducing one arbitrarily named seed first can reverse the patient result.
+    """
+
+    learned = np.asarray(learned_nll, dtype=np.float64)
+    shifted = np.asarray(shifted_nll, dtype=np.float64)
+    random = np.asarray(random_nll, dtype=np.float64)
+    h = np.asarray(h_nll, dtype=np.float64)
+    seg = np.asarray(segments, dtype=np.int64)
+    ok = np.asarray(shift_valid, dtype=bool)
+    if learned.ndim != 2 or learned.shape[0] < 2:
+        raise ValueError("multi-seed diagnostics need at least two completed seeds")
+    if shifted.shape != learned.shape or random.shape != learned.shape:
+        raise ValueError("learned, shifted and random NLL arrays must have the same seed x anchor shape")
+    if h.shape != learned.shape[1:] or seg.shape != h.shape or ok.shape != h.shape:
+        raise ValueError("baseline, segments and shift mask must align to the anchor axis")
+    if not np.isfinite(learned).all() or not np.isfinite(random).all():
+        raise ValueError("learned/random seed arrays contain non-finite values")
+
+    learned_median = np.median(learned, axis=0)
+    random_median = np.median(random, axis=0)
+    shifted_median = np.nanmedian(np.where(ok[None, :], shifted, np.nan), axis=0)
+    shift_delta = shifted_median - learned_median
+    shift_delta[~ok] = np.nan
+    return {
+        "seed_merge_rule": "median per anchor across final seeds, then within-target-segment moving-block bootstrap",
+        "n_seeds": int(learned.shape[0]),
+        "blocked_inner_val_gain": _paired_ci(h - learned_median, seg),
+        "shift_null": {
+            "delta_shifted_minus_correct": _paired_ci(shift_delta, seg),
+            "n_valid_donors": int(ok.sum()),
+            "n_anchors": int(h.size),
+            "definition": "seed-median inner-val NLL; same-segment block-circular wrong-time state; positive favours correct time",
+        },
+        "random_reservoir_delta": {
+            "status": "complete",
+            "learned_minus_random": _paired_ci(learned_median - random_median, seg),
+            "definition": "seed-median NLL; same recipe/seed with frozen random encoder; negative favours learned encoder",
+        },
+        "arrays": {
+            "h_nll": h,
+            "learned_nll_by_seed": learned,
+            "shifted_nll_by_seed": shifted,
+            "random_nll_by_seed": random,
+            "learned_nll_seed_median": learned_median,
+            "shifted_nll_seed_median": shifted_median,
+            "random_nll_seed_median": random_median,
+            "shift_valid": ok.astype(np.uint8),
+            "bootstrap_segment": seg,
+        },
+    }
+
+
+def multi_seed_card_diagnostics(
+    trainable: Trainable,
+    view: DataView,
+    cfg: RecipeConfig,
+    seed_dirs: Sequence[Path],
+    *,
+    device: torch.device,
+    out_dir: Path,
+    fraction: float = 0.5,
+) -> dict[str, Any]:
+    """Run card diagnostics for every final seed and merge before bootstrap.
+
+    Random-reservoir controls are trained with the matching recipe and seed.
+    All source checkpoints and the per-anchor audit arrays are hashed.  This
+    function only reads TRAIN/inner-validation through ``DataView``.
+    """
+
+    dirs = [Path(path) for path in seed_dirs]
+    if len(dirs) < 2:
+        raise ValueError("multi-seed card diagnostics need at least two seed directories")
+    idx = view.phase_index["inner_val"]
+    donor = block_circular_donor(
+        view.t_anchor, view.anchor_segment, idx, horizon=view.horizon, fraction=float(fraction)
+    )
+    ok = donor >= 0
+    learned_rows: list[np.ndarray] = []
+    shifted_rows: list[np.ndarray] = []
+    random_rows: list[np.ndarray] = []
+    per_seed: list[dict[str, Any]] = []
+    random_root = Path(out_dir) / "random_reservoir_by_seed"
+    for seed_dir in dirs:
+        result_path = seed_dir / "result.json"
+        if not result_path.exists():
+            raise ValueError(f"missing final-seed result: {result_path}")
+        import json
+        result = json.loads(result_path.read_text())
+        if result.get("status") != "complete":
+            raise ValueError(f"final seed is not complete: {result_path}")
+        seed = int(result["seed"])
+        learned_model = load_trained(seed_dir, trainable, view, device)
+        correct = _terms(trainable, view, learned_model, "inner_val", device)
+        learned = correct.nll.detach().cpu().numpy().astype(np.float64)
+        shifted_state = correct.state_raw.clone()
+        if ok.any():
+            src = torch.from_numpy(donor[ok]).to(device)
+            dst = torch.from_numpy(np.flatnonzero(ok)).to(device)
+            shifted_state[dst] = correct.state_raw[src]
+        shifted_terms = _terms(
+            trainable, view, learned_model, "inner_val", device, state_override=shifted_state
+        )
+        shifted = shifted_terms.nll.detach().cpu().numpy().astype(np.float64)
+        shifted[~ok] = np.nan
+
+        random_dir = random_root / f"seed_{seed}" / "run"
+        random_result = train_recipe(
+            trainable, view, cfg, seed, device=device, out_dir=random_dir, arm="random_reservoir"
+        )
+        if random_result.get("status") != "complete":
+            raise RuntimeError(f"random-reservoir control failed for seed {seed}: {random_result.get('status')}")
+        random_model = load_trained(random_dir, trainable, view, device)
+        random = _terms(trainable, view, random_model, "inner_val", device).nll.detach().cpu().numpy().astype(np.float64)
+
+        learned_rows.append(learned)
+        shifted_rows.append(shifted)
+        random_rows.append(random)
+        per_seed.append({
+            "seed": seed,
+            "learned_checkpoint": str(seed_dir / "checkpoint.pt"),
+            "learned_checkpoint_sha256": file_hash(seed_dir / "checkpoint.pt"),
+            "random_checkpoint": str(random_dir / "checkpoint.pt"),
+            "random_checkpoint_sha256": file_hash(random_dir / "checkpoint.pt"),
+            "learned_gain_h_minus_model": _paired_ci(
+                trainable.h_only_nll(view, "inner_val") - learned, view.bootstrap_segment(idx)
+            ),
+            "shifted_minus_correct": _paired_ci(shifted - learned, view.bootstrap_segment(idx)),
+            "learned_minus_random": _paired_ci(learned - random, view.bootstrap_segment(idx)),
+            "random_selected_step": random_result.get("selected_step"),
+        })
+
+    merged = merge_seed_anchor_diagnostics(
+        h_nll=trainable.h_only_nll(view, "inner_val"),
+        learned_nll=learned_rows,
+        shifted_nll=shifted_rows,
+        random_nll=random_rows,
+        shift_valid=ok,
+        segments=view.bootstrap_segment(idx),
+    )
+    merged["blocked_inner_val_gain"].update({
+        "n_anchors": int(idx.size),
+        "n_blocks": int(np.unique(view.blocks("inner_val")).size),
+        "effective_independent_windows": view.effective_independent_windows("inner_val"),
+        "nll_h_mean": float(trainable.h_only_nll(view, "inner_val").mean()),
+        "definition": "H-only NLL minus seed-median model NLL on inner-val; within-target-segment moving-block bootstrap",
+    })
+    arrays = merged.pop("arrays")
+    audit_path = Path(out_dir) / "multi_seed_card_diagnostics.npz"
+    atomic_write_npz(audit_path, arrays)
+    return {
+        **merged,
+        "per_seed": per_seed,
+        "audit_arrays_path": str(audit_path),
+        "audit_arrays_sha256": file_hash(audit_path),
+        "n_anchors": int(idx.size),
+        "n_blocks": int(np.unique(view.blocks("inner_val")).size),
+        "effective_independent_windows": view.effective_independent_windows("inner_val"),
+        "development_evaluation_read": False,
+        "sealed_partition_opened": False,
+    }
 
 
 def synthetic_recovery(trainable: Trainable, view: DataView, cfg: RecipeConfig, seed: int, *, device: torch.device,

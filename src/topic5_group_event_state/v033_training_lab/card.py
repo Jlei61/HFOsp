@@ -79,6 +79,32 @@ def seed_dispersion(seed_results: Sequence[Mapping[str, Any]]) -> dict[str, Any]
     }
 
 
+def representative_seed_result(seed_results: Sequence[Mapping[str, Any]]) -> Mapping[str, Any]:
+    """Return the completed seed closest to the patient-level median score.
+
+    Search ranks a recipe by the median across final seeds.  Using ``seed_0``
+    to build the card silently changes that estimand and can reverse the sign.
+    The representative row is therefore the medoid of the final-seed
+    validation scores; seed-merged diagnostics still carry the actual verdict.
+    """
+
+    complete = [row for row in seed_results if row.get("status") == "complete"]
+    if not complete:
+        raise ValueError("a training card needs at least one completed seed")
+    values = np.asarray([
+        float((row.get("best_validation") or {}).get("inner_val_nll", np.nan))
+        for row in complete
+    ], dtype=np.float64)
+    if not np.isfinite(values).all():
+        raise ValueError("completed seed is missing a finite inner-validation score")
+    median = float(np.median(values))
+    order = sorted(
+        range(len(complete)),
+        key=lambda index: (abs(float(values[index]) - median), int(complete[index].get("seed", index))),
+    )
+    return complete[order[0]]
+
+
 def adequacy(card: Mapping[str, Any]) -> tuple[str, dict[str, Any]]:
     """[C1] Evaluate the six conditions; every failed one is named."""
 
@@ -105,6 +131,8 @@ def build_training_card(
     diagnostics: Mapping[str, Any],
     search_summary: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
+    if seed_results:
+        recipe_result = representative_seed_result(seed_results)
     history = list(recipe_result.get("history") or [])
     first, last = (history[0] if history else {}), (history[-1] if history else {})
     curves = {
@@ -126,6 +154,8 @@ def build_training_card(
     if request is not None:
         request_ref = {k: request.get(k) for k in ("request_id", "scientific_target", "input_view", "state_architecture",
                                                     "split_hash", "input_hash", "science_code_commit", "requested_by")}
+    seed_summary = seed_dispersion(seed_results)
+    complete_seeds = [row for row in seed_results if row.get("status") == "complete"]
     card: dict[str, Any] = {
         "format": CARD_FORMAT, "created_epoch": time.time(), "request": request_ref,
         "recipe": recipe_result.get("config"), "config_hash": recipe_result.get("config_hash"),
@@ -136,7 +166,9 @@ def build_training_card(
         "subject": recipe_result.get("subject"),
         "h_source": recipe_result.get("h_source"), "arm": recipe_result.get("arm"),
         "curves": curves, "best_step": recipe_result.get("selected_step"), "plateau": recipe_result.get("plateau"),
-        "seed_dispersion": seed_dispersion(seed_results), "gradient_update": gradient_update,
+        "seed_dispersion": seed_summary, "gradient_update": gradient_update,
+        "representative_seed": int(recipe_result.get("seed", -1)),
+        "seed_merge_rule": "median across final seeds, then patient; representative curves use the medoid seed",
         "clipping_fraction": recipe_result.get("clipping_fraction"),
         "first_active_step": recipe_result.get("first_active_step"),
         "state_variance_rank": diagnostics.get("state_variance_rank"),
@@ -144,9 +176,11 @@ def build_training_card(
         "shift_null": diagnostics.get("shift_null"), "output_modulation": diagnostics.get("state_output_modulation"),
         "tiny_overfit": t0.get("tiny_slice_overfit"), "synthetic_recovery": diagnostics.get("synthetic_recovery"),
         "blocked_inner_val_gain": diagnostics.get("blocked_inner_val_gain"),
-        "selected_in_warmup": bool(recipe_result.get("selected_in_warmup")),
-        "selected_at_budget_edge": bool(recipe_result.get("selected_at_budget_edge")),
-        "all_groups_active_before_selection": bool(recipe_result.get("all_groups_active_before_selection")),
+        "selected_in_warmup": any(bool(row.get("selected_in_warmup")) for row in complete_seeds),
+        "selected_at_budget_edge": any(bool(row.get("selected_at_budget_edge")) for row in complete_seeds),
+        "all_groups_active_before_selection": bool(complete_seeds) and all(
+            bool(row.get("all_groups_active_before_selection")) for row in complete_seeds
+        ),
         "t0": {k: v for k, v in t0.items() if k != "tiny_slice_overfit"},
         "diagnostics": {k: v for k, v in diagnostics.items()
                         if k not in ("state_variance_rank", "random_reservoir_delta", "shift_null",

@@ -34,12 +34,10 @@ from typing import Any, Callable, Mapping, Sequence
 import numpy as np
 import torch
 
-from .card import build_training_card
+from .card import build_training_card, representative_seed_result
 from .diagnostics import (
-    blocked_inner_val_gain,
-    random_reservoir_delta,
+    multi_seed_card_diagnostics,
     run_t0,
-    shift_null,
     state_output_modulation,
     state_variance_rank,
     synthetic_recovery,
@@ -366,18 +364,25 @@ def execute_unit(unit: Unit, *, device: str = "cpu", release_present: bool | Non
             cfg = recipe_from_dict(unit.params["recipe"])
             if cfg.scaling != view.scaling:
                 view, view_meta = view_for_request(request, release_present=release, scaling=cfg.scaling)
-            learned_dir = Path(unit.params["learned_dir"])
+            seed_dirs = [Path(p) for p in unit.params.get("seed_dirs", [])]
+            seeds = [read_json(path / "result.json") or {} for path in seed_dirs]
+            representative = representative_seed_result(seeds)
+            by_seed = {int(row.get("seed")): path for row, path in zip(seeds, seed_dirs)}
+            learned_dir = by_seed[int(representative["seed"])]
             learned = read_json(learned_dir / "result.json") or {}
-            seeds = [read_json(Path(p) / "result.json") or {} for p in unit.params.get("seed_dirs", [])]
             model = load_trained(learned_dir, trainable, view, dev)
+            merged = multi_seed_card_diagnostics(
+                trainable, view, cfg, seed_dirs, device=dev, out_dir=out_dir,
+            )
             diagnostics = {
-                "blocked_inner_val_gain": blocked_inner_val_gain(trainable, view, model, device=dev),
-                "shift_null": shift_null(trainable, view, model, device=dev),
+                "blocked_inner_val_gain": merged["blocked_inner_val_gain"],
+                "shift_null": merged["shift_null"],
                 "state_variance_rank": state_variance_rank(trainable, view, model, device=dev),
                 "state_output_modulation": state_output_modulation(trainable, view, model, device=dev),
-                "random_reservoir_delta": random_reservoir_delta(trainable, view, cfg, seed, device=dev, out_dir=out_dir,
-                                                                 learned_dir=learned_dir),
-                "synthetic_recovery": synthetic_recovery(trainable, view, cfg, seed, device=dev, out_dir=out_dir,
+                "random_reservoir_delta": merged["random_reservoir_delta"],
+                "multi_seed_diagnostics": {k: v for k, v in merged.items()
+                                           if k not in ("blocked_inner_val_gain", "shift_null", "random_reservoir_delta")},
+                "synthetic_recovery": synthetic_recovery(trainable, view, cfg, int(representative["seed"]), device=dev, out_dir=out_dir,
                                                          beta=float(unit.params.get("synthetic_beta", 0.7))),
             }
             t0 = read_json(Path(unit.params["t0_path"])) or {}
@@ -644,7 +649,7 @@ class SearchDriver:
         cfg = recipe_from_dict(inc["recipe"])
         search_summary = {"incumbent": {k: v for k, v in inc.items() if k != "recipe"}, "stop_reason": st["stop_reason"],
                           "n_batches": len(st["batches"])}
-        params = {"recipe": inc["recipe"], "seed": self._seed_for(0), "learned_dir": str(Path(inc["run_dir"]) / "seed_0" / "run"),
+        params = {"recipe": inc["recipe"], "seed": self._seed_for(0),
                   "seed_dirs": inc["seed_dirs"], "t0_path": st["t0_path"], "search_summary": search_summary,
                   "scaling": inc["recipe"].get("scaling", "zscore")}
         return [self._unit("card", "card", params, card_dir, seed=self._seed_for(0), config_hash=cfg.config_hash(),
@@ -872,10 +877,19 @@ class Controller:
         workload = pending[0].workload_class if pending else "cpu_train_fixed_leaky"
         sentinel = self.sentinel_for(workload)
         threads = int(lease.get("threads_per_worker", 1))
-        ceilings = [int(r.get("resource_ceiling", {}).get("max_workers", 10 ** 6)) for r in
-                    (read_json(self.agent_root / "requests" / rid / "request.json") or {} for rid in request_status)]
-        plan = plan_concurrency(snap, sentinel, lease, pending=len(pending), threads=threads,
-                                ceiling=min(ceilings) if ceilings else None, my_running_threads=len(self.running) * threads)
+        request_limits: dict[str, int] = {}
+        for rid, status in ingested.items():
+            if status not in (JobStatus.PENDING.value, JobStatus.RUNNING.value):
+                continue
+            payload = read_json(self.agent_root / "requests" / rid / "request.json") or {}
+            request_limits[rid] = max(int(payload.get("resource_ceiling", {}).get("max_workers", 0)), 0)
+        # A request ceiling is per request, not a global ceiling.  Taking the
+        # minimum here made two independent max_workers=1 requests serialize.
+        # The global request-derived ceiling is their sum; spawning below still
+        # enforces each individual limit.
+        request_total_ceiling = sum(request_limits.values()) if request_limits else None
+        plan = plan_concurrency(snap, sentinel, lease, pending=len(pending) + len(self.running), threads=threads,
+                                ceiling=request_total_ceiling, my_running_threads=len(self.running) * threads)
         # ramp: one slot at a time after two stable cycles (supervisor runbook §4.2)
         self.stable_cycles = self.stable_cycles + 1 if plan["slots"] >= self.current_cap else 0
         if self.stable_cycles >= 2 and self.current_cap < plan["slots"]:
@@ -885,13 +899,23 @@ class Controller:
         free = max(allowed - len(self.running), 0)
         gpu_ids = [int(g) for g in lease.get("gpu_ids", [])]
         gpu_in_use = [rec.get("gpu") for rec in self.running.values() if rec.get("gpu") is not None]
+        running_by_request: dict[str, int] = {}
+        for rec in self.running.values():
+            rid = rec["unit"].request_id
+            running_by_request[rid] = running_by_request.get(rid, 0) + 1
         spawned = 0
-        for unit in pending[:free]:
+        for unit in pending:
+            if spawned >= free:
+                break
+            request_limit = request_limits.get(unit.request_id, 0)
+            if running_by_request.get(unit.request_id, 0) >= request_limit:
+                continue
             gpu = None
             if unit.workload_class.startswith("gpu") and gpu_ids:
                 gpu = min(gpu_ids, key=lambda g: gpu_in_use.count(g))
                 gpu_in_use.append(gpu)
             self._spawn(unit, gpu)
+            running_by_request[unit.request_id] = running_by_request.get(unit.request_id, 0) + 1
             spawned += 1
         self._persist_running()
         counts = {"pending": max(len(pending) - spawned, 0), "running": len(self.running), "spawned_this_step": spawned,
