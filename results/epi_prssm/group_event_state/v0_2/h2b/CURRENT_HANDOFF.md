@@ -1,7 +1,16 @@
 # Agent B (H2b seizure transfer) — CURRENT_HANDOFF
 
-状态：**B0 完成；B1/B2 仪器完成并已接上真 producer；科学结论一条都还不能下**
-最后更新：2026-09-01
+状态：**阶段性验收已封存（历史版本），worktree 已关闭**
+机器状态：`STAGE_CLOSED_ENGINEERING_ONLY__H2B_NOT_ESTABLISHED`
+最后更新：2026-09-02
+
+> **封存说明**：本阶段只验收**工程层与分母层**；一切涉及"冻结状态能否预测发作"的科学陈述
+> **均已撤回**（原因见 `technical_report.md` §0 与阶段封存归档）。
+> 归档：`docs/archive/topic5/group_event_state_v0_2_h2b_stage_closeout_2026-09-02.md`
+> 分支 `codex/topic5-group-event-state-v02-b` 保留为历史记录，**未合并 main**。
+> worktree `/tmp/hfosp_group_event_state_v02_b` 已移除；
+> 大产物仍在 `/data/hfosp_group_event_state_v0_2/agent_b/`（22 MB）。
+> 恢复方式：`git worktree add <path> codex/topic5-group-event-state-v02-b`
 
 ---
 
