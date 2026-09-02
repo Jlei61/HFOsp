@@ -28,7 +28,7 @@
 
 | asset_id | paper_slot | status | canonical_path | producer / 说明 |
 |---|---|---|---|---|
-| `interictal_hfo_temporal_scaffold` | Fig1-B–F | `LOCKED` | `results/paper-ready-figure/fig1/figures/` | 无角标的 B1/B2、C、D、E、F 独立输出 + 带 B–F 角标的 `fig1-complete-layout`；Fig1-A 为作者手绘 |
+| `interictal_hfo_temporal_scaffold` | Fig1-B–F | `LOCKED` | `results/paper-ready-figure/fig1/figures/` | 无角标的 B1/B2、C、D、E、F 独立输出 + 带 B–F 角标的 `fig1-complete-layout`；Fig1-A 为作者手绘。Fig1-F 自 2026-09-02 锁定为 v5：主散点右下必须是 single-template vs multi-cluster MI 配对 inset（患者连线、均值柱、paired Wilcoxon 括号），不得退回灰色 median ΔMI 小字 |
 | `interictal_spatial_scaffold` | Fig2-A–F | `CANDIDATE` | `results/paper-ready-figure/fig2/figures/` | B/E/F 默认读取 `all_event_timing_plus_space_no_hard_qc_v1`：B 为 26 人 held-out 方向比较，E 为 4 例显示，F 为完整 18 人 shared-plane 队列；A/C/D 保持原 canonical 版本 |
 | `ictal_field_scaffold` | Fig3-A–F | `LOCKED` | `results/paper-ready-figure/fig3/figures/` | A/B 保持原 raw/TFR 与四频带 signal context；C–F 默认读取 `all_event_timing_plus_space_no_hard_qc_v1` 重算源，D 为 n=17/16/11，F 为 17-subject A/B heatmap |
 | `working_subject_snn_fig4` | Fig4-A–G | `CANDIDATE` | `results/paper-ready-figure/fig4/figures/` | 当前工作版：A/B 为 E1146 setup，C 已替换为 12 张新网络上的 Node / +EE / +E-to-I / +EE+EI 冻结终点确认，D/E 为双向读出，F/G 为 validation；整图仍是跨阶段组合，当前不是最终锁图 |
