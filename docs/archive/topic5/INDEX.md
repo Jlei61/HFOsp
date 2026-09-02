@@ -399,3 +399,10 @@
   - 可直接执行的 A/B/C handoff：`group_event_state_v0_2_agent_{a,b,c}_handoff_2026-09-01.md`
   - 三种 producer 并列进入 registry：`B_multiscale`、一步 `P_local`、直接优化 5/30/120 min future block 的 `P_slow`。慢状态以固定物理时间上的功能预测定义，不以 `z_slow` 名称或 reset 定义。
   - A 建立 predictive state；B 以 fixed-grid survival 和 early ictal field/path 判断是否为癫痫易感状态；C 显式比较 common-drive、count/rate feedback、mark-specific feedback。三线互不作结果 gate，H3 首轮不扩大为大网格。
+
+- **2026-09-02 Group-Event State v0.3 marked-point-process 架构修订**：
+  - Scientific Spec + 执行计划：`group_event_state_v0_3_pretrained_decoder_backbone_spec_plan_2026-09-02.md`
+  - v0.2 的 96 维端到端多任务模型保留为 `P_local_multitask` 基线；v0.3 将一次事件内部 fast grammar 与跨事件状态分开，并用 marked temporal point-process timing/survival likelihood 显式利用有效记录中的无事件证据。
+  - 旧 34 人 × 3 seeds `FullHistorySequenceGRU` 只作 outer-TRAIN 初始化和 transductive supportive arm；primary 先在新 fixed-cardinality conditional-Bernoulli likelihood 下校准无状态 `grammar-v0.3`，再冻结 grammar 并训练 gated low-rank state adapter。
+  - 状态使用 2/10/30/120/720 min fixed decay bank，输入完整群体事件 token；event-only 为 primary，background-only 与 fused 为独立实验轴。主损失收缩为 IED timing/survival、group size/observed STOP、contact identity conditional on size。
+  - 独立 seizure-risk decoder 只读取冻结的 interictal-only state，使用单调离散 survival hazard；30 min 为 primary horizon。联合 seizure fine-tune 只能作 supervised extension。
