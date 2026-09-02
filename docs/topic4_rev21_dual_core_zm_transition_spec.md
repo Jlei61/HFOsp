@@ -186,18 +186,32 @@ Event rate, onset latency and estimability are sidecars. A lower OOD caused by
 event suppression, unreadability or one-cluster collapse is a tradeoff, not an
 improvement.
 
-The 12-cell Z/M-off orthogonal audit defines the substrate reference
-distribution. The coarse screen additionally runs Z/M-off on the same four
-topology/dynamics cells as every active candidate. For each endpoint it reports
-both (i) the paired candidate-minus-off difference and (ii) the candidate
-aggregate relative to the 5th--95th percentile of the independent 12-cell off
-reference. A candidate is `INTERICTAL_SUBSTRATE_RETAINED` only when all three
-aggregate endpoints are estimable and lie on the admissible side of that 90%
-reference support: distribution distance and OOD no higher than q95, and
-two-template alignment no lower than q05. Pooled two-cluster presence is
-required, but no per-network minimum event count is imposed. Paired differences
-remain effect estimates and cannot by themselves rescue an out-of-support
-candidate.
+The 12-cell Z/M-off orthogonal audit describes seed dependence but is not used
+as an unequal-duration retention threshold. Active trajectories often enter the
+high state after 3--4 s, whereas matched Z/M-off trajectories run for 20 s.
+Comparing their raw endpoint distributions would therefore confound Z/M with
+the number of observed interictal families.
+
+The coarse and timescale screens instead use an event-count-matched retention
+calibration frozen after this estimability audit:
+
+1. pool the complete pre-transition families over the fixed paired seed cells;
+2. compare complete-distribution distance with a patient-training split floor
+   using the same pooled event count;
+3. for KMeans and OOD, sample the same number of events from each paired
+   Z/M-off cell, pool those samples and repeat 128 times with seed 21051;
+4. require natural K=2, both frozen patient directions among readable in-support
+   events, OOD no higher than the matched-off q95 and balanced alignment no
+   lower than the matched-off q05.
+
+This is not a biological minimum-event gate. Natural KMeans is simply
+unestimable below its frozen mathematical minimum of eight pooled events, and
+an unestimable candidate cannot be called retained. There is no per-network
+event minimum and no requirement for 20 events. The pooled screen is a
+development-stage capacity/retention assay; same-network dual-mode stability is
+reserved for the fresh confirmation matrix. The previous comparison against
+full-length off support is retained in the artifact as a superseded audit and
+cannot determine selection.
 
 ## 8. Work-point selection
 
@@ -227,8 +241,12 @@ remain mandatory at timescale aggregation and confirmation.
 Confirmation is called multi-seed robust only when at least 8 of the 12 fresh
 topology-by-dynamics cells satisfy `MODEL_ICTAL_ELIGIBLE_REV21`, with at least
 2 eligible dynamics realizations in at least 2 of the 3 topology seeds, and the
-three aggregate interictal endpoints remain inside the independent Z/M-off
-support. This is the only confirmation gate; there is no event-count gate.
+three event-count-matched aggregate interictal endpoints remain admissible.
+Both frozen patient directions must also be represented in the pooled returned
+families. Per-cell mode counts and the number of individual networks expressing
+both modes are reported as confirmation sidecars rather than silently replaced
+by pooled KMeans. This is the only confirmation gate; there is no fixed
+event-count gate.
 
 If no timescale point passes both state and retention criteria, the result is
 `NO_CROSS_STATE_WORKPOINT_IN_FROZEN_ZM_GRID`. A near-state or model-ictal-only

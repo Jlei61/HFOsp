@@ -93,6 +93,18 @@ def _prototype_matrix(model_ranks, mapped_labels, patient_ranks,
     return matrix
 
 
+def frozen_direction_support(labels, readable, ood) -> dict:
+    """Count only readable in-support events in the frozen patient directions."""
+    labels = np.asarray(labels, int)
+    valid = np.asarray(readable, bool) & ~np.asarray(ood, bool) & (labels >= 0)
+    counts = np.bincount(labels[valid], minlength=2)[:2]
+    return {
+        "frozen_direction_counts": counts.astype(int).tolist(),
+        "frozen_two_directions_present": bool(np.all(counts > 0)),
+        "frozen_direction_labeled_events": int(np.sum(counts)),
+    }
+
+
 def score_complete_distribution(onsets, returned, *, contract: Mapping,
                                 training_arrays: Mapping) -> dict:
     """Selection-only score with no classifier, KMeans, OOD or held-out input."""
@@ -143,8 +155,13 @@ def score_validation_endpoints(
     readable = np.sum(np.isfinite(values), axis=1) >= 3
     support_ood = np.asarray(assigned["ood"], bool)
     all_ood = ~readable | support_ood
+    direction = frozen_direction_support(
+        assigned["labels"], readable, support_ood,
+    )
+    direction_labels = np.asarray(assigned["labels"], int).copy()
+    direction_labels[all_ood] = -1
     natural = natural_kmeans(
-        rank_values, np.asarray(assigned["labels"], int),
+        rank_values, direction_labels,
         random_state=int(kmeans_seed),
     )
     validation = {
@@ -156,6 +173,7 @@ def score_validation_endpoints(
             float(np.mean(support_ood[readable])) if np.any(readable) else 1.0
         ),
         "natural_kmeans_status": natural["status"],
+        **direction,
     }
     if natural["status"] == "OK":
         valid = np.asarray(natural["valid_event_mask"], bool)
@@ -178,14 +196,16 @@ def score_validation_endpoints(
             rank_values[valid], mapped,
             reference_ranks, reference_labels,
         )
+        balanced = (
+            natural["direction_balanced_alignment"]
+            if direction["frozen_two_directions_present"] else None
+        )
         validation.update({
             "cluster_counts": np.bincount(mapped, minlength=2).tolist(),
             "two_clusters_present": bool(np.all(
                 np.bincount(mapped, minlength=2) > 0
             )),
-            "direction_balanced_alignment": natural[
-                "direction_balanced_alignment"
-            ],
+            "direction_balanced_alignment": balanced,
             "direction_purity": natural["direction_purity"],
             "kmeans_seed_ami_median": natural["kmeans_seed_ami_median"],
             "silhouette": natural["silhouette"],

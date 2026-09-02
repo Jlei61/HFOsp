@@ -2,7 +2,7 @@ import numpy as np
 
 from scripts.freeze_topic4_rev20_dc_selection import freeze_selection
 from src.topic4_rev20_dual_core_endpoint import (
-    complete_distribution_distance, reference_embedding,
+    complete_distribution_distance, frozen_direction_support, reference_embedding,
     score_complete_distribution,
 )
 from src.topic4_shaft_aware import build_contact_contract, build_event_features
@@ -143,3 +143,16 @@ def test_selection_freeze_rejects_open_validation_and_uses_distance_only():
         assert "forbidden validation" in str(error)
     else:
         raise AssertionError("validation leakage was not rejected")
+
+
+def test_frozen_direction_support_requires_both_readable_in_support_modes():
+    one = frozen_direction_support(
+        [0, 0, 1], [True, True, True], [False, False, True],
+    )
+    assert one["frozen_direction_counts"] == [2, 0]
+    assert one["frozen_two_directions_present"] is False
+    both = frozen_direction_support(
+        [0, 0, 1], [True, True, True], [False, False, False],
+    )
+    assert both["frozen_direction_counts"] == [2, 1]
+    assert both["frozen_two_directions_present"] is True

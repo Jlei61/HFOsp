@@ -1,8 +1,9 @@
+import numpy as np
 import pytest
 
 from scripts.aggregate_topic4_rev21_zm_screen import (
-    _neighbor_scores, model_ictal_or_control, qualification_shortfall,
-    reference_support, summarize_candidate,
+    _neighbor_scores, matched_interictal_retention, model_ictal_or_control,
+    qualification_shortfall, reference_support, summarize_candidate,
 )
 
 
@@ -121,3 +122,57 @@ def test_zm_off_is_explicitly_not_scored_but_active_missing_state_fails():
     assert state["eligible"] is False
     with pytest.raises(RuntimeError):
         model_ictal_or_control({"candidate_id": "active"})
+
+
+def test_matched_retention_uses_same_cell_event_counts_without_count_gate(
+        monkeypatch):
+    def arrays(n):
+        return {
+            "event_returned": np.ones(n, bool),
+            "onsets": np.zeros((n, 3), float),
+            "ranks": np.tile(np.arange(3), (n, 1)).astype(float),
+        }
+
+    monkeypatch.setattr(
+        "scripts.aggregate_topic4_rev21_zm_screen.score_complete_distribution",
+        lambda onsets, returned, **kwargs: {
+            "complete_distribution_distance_training": 0.4,
+            "n_returned_families": int(np.sum(returned)),
+        },
+    )
+    monkeypatch.setattr(
+        "scripts.aggregate_topic4_rev21_zm_screen.score_validation_endpoints",
+        lambda onsets, ranks, returned, **kwargs: {
+            "ood_all_returned": 0.1,
+            "natural_kmeans_status": "OK",
+            "two_clusters_present": True,
+            "cluster_counts": [len(onsets) - 1, 1],
+            "direction_balanced_alignment": 0.8,
+            "frozen_direction_counts": [len(onsets) - 1, 1],
+            "frozen_two_directions_present": True,
+        },
+    )
+    monkeypatch.setattr(
+        "scripts.aggregate_topic4_rev21_zm_screen.matched_patient_floor",
+        lambda *args, **kwargs: {
+            "draws": 8, "q05": 0.2, "q50": 0.3, "q95": 0.5,
+        },
+    )
+    monkeypatch.setattr(
+        "scripts.aggregate_topic4_rev21_zm_screen.contract_groups",
+        lambda contract: {},
+    )
+    monkeypatch.setattr(
+        "scripts.aggregate_topic4_rev21_zm_screen.embedding_from_training_arrays",
+        lambda arrays: {},
+    )
+    candidate = {(1, 3): arrays(4), (2, 3): arrays(4)}
+    off = {(1, 3): arrays(20), (2, 3): arrays(20)}
+    training = {"patient_train_onsets": np.zeros((30, 3))}
+    result = matched_interictal_retention(
+        candidate, off, contract={}, training_arrays=training,
+        classifier={}, kmeans_seed=0, draws=8, seed=4,
+    )
+    assert result["event_counts_by_cell"] == {"1:3": 4, "2:3": 4}
+    assert result["pooled_event_count"] == 8
+    assert result["retained"] is True

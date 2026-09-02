@@ -45,6 +45,11 @@ patient held-out artifact in this stage.
 1. Generate the frozen 4 x 4 `(s_I,s_M)` grid.
 2. Run a small fixed paired seed set under systemd/nohup.
 3. Aggregate model-ictal morphology and the three separate interictal endpoints.
+   Calibrate complete-distribution distance with a same-N patient floor; for
+   KMeans/OOD use 128 paired Z/M-off resamples with the active event count in
+   every seed cell. Require both frozen directions before balanced alignment is
+   estimable. Preserve the original unequal-duration comparison as a
+   superseded audit only.
 4. Do not use patient ictal data and do not add grid points after seeing output.
 5. Prefer a formally eligible, interictal-retained candidate. If none exists,
    carry exactly one interictal-retained, operational and numerically safe
@@ -55,8 +60,9 @@ patient held-out artifact in this stage.
 
 1. Around the frozen coarse candidate, run the 3 x 3
    `(tau_z,tau_adp)` grid while preserving integrated M strength.
-2. Apply the frozen lexicographic selection rule and the original full state
-   criteria. Near-state status from Stage 3 has no confirmatory standing.
+2. Apply the frozen lexicographic selection rule, the original full state
+   criteria and the same event-count-matched retention calibration. Near-state
+   status from Stage 3 has no confirmatory standing.
 3. Freeze one finalist before confirmation only if it is formally eligible and
    retains all three interictal endpoints.
 
@@ -65,7 +71,8 @@ patient held-out artifact in this stage.
 1. Run the finalist on a fresh `3 topology x 4 dynamics` matrix.
 2. Run matched Z/M-off, Z-only and M-only controls on the same matrix.
 3. Report paired network/dynamics contrasts and estimability, with no event as a
-   valid outcome.
+   valid outcome. Report per-cell frozen-direction counts and distinguish pooled
+   dual-mode capacity from dual-mode expression within individual networks.
 4. Freeze `WORKPOINT_FROZEN.json` only if model-ictal and interictal-retention
    requirements both hold.
 

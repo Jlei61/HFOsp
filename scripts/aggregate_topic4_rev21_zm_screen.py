@@ -18,8 +18,14 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from src.topic4_rev20_dual_core_endpoint import (  # noqa: E402
+    embedding_from_training_arrays, matched_patient_floor,
     score_complete_distribution, score_validation_endpoints,
 )
+from src.topic4_shaft_aware import contract_groups  # noqa: E402
+
+
+MATCHED_RETENTION_DRAWS = 128
+MATCHED_RETENTION_SEED = 21051
 
 
 def _sha256(path: Path) -> str:
@@ -131,6 +137,191 @@ def reference_support(endpoint_matrices: dict) -> dict:
             "q95": float(np.quantile(values, 0.95)),
         }
     return output
+
+
+def _quantiles(values) -> dict:
+    finite = _finite(values)
+    return {
+        "n": int(len(finite)),
+        "q05": float(np.quantile(finite, 0.05)) if len(finite) else None,
+        "q50": float(np.quantile(finite, 0.50)) if len(finite) else None,
+        "q95": float(np.quantile(finite, 0.95)) if len(finite) else None,
+    }
+
+
+def _returned_tables(arrays: dict) -> tuple[np.ndarray, np.ndarray]:
+    returned = np.asarray(arrays["event_returned"], bool)
+    return (
+        np.asarray(arrays["onsets"], float)[returned],
+        np.asarray(arrays["ranks"], float)[returned],
+    )
+
+
+def matched_interictal_retention(
+        candidate_by_cell: dict, off_by_cell: dict, *, contract: dict,
+        training_arrays: dict, classifier: dict, kmeans_seed: int,
+        draws: int = MATCHED_RETENTION_DRAWS,
+        seed: int = MATCHED_RETENTION_SEED) -> dict:
+    """Calibrate short pre-transition samples without an event-count gate."""
+    if set(candidate_by_cell) != set(off_by_cell):
+        raise RuntimeError("candidate and Z/M-off seed cells do not match")
+    keys = sorted(candidate_by_cell)
+    candidate_onsets = []
+    candidate_ranks = []
+    counts = {}
+    off_tables = {}
+    for key in keys:
+        onsets, ranks = _returned_tables(candidate_by_cell[key])
+        off_onsets, off_ranks = _returned_tables(off_by_cell[key])
+        if len(onsets) > len(off_onsets):
+            raise RuntimeError("candidate has more events than its matched off cell")
+        counts[f"{key[0]}:{key[1]}"] = int(len(onsets))
+        candidate_onsets.append(onsets)
+        candidate_ranks.append(ranks)
+        off_tables[key] = (off_onsets, off_ranks)
+    pooled_onsets = np.concatenate(candidate_onsets)
+    pooled_ranks = np.concatenate(candidate_ranks)
+    returned = np.ones(len(pooled_onsets), bool)
+    observed_selection = score_complete_distribution(
+        pooled_onsets, returned, contract=contract,
+        training_arrays=training_arrays,
+    )
+    observed_validation = score_validation_endpoints(
+        pooled_onsets, pooled_ranks, returned, contract=contract,
+        training_arrays=training_arrays, classifier=classifier,
+        kmeans_seed=int(kmeans_seed),
+    )
+    groups = contract_groups(contract)
+    embedding = embedding_from_training_arrays(training_arrays)
+    patient_floor = matched_patient_floor(
+        training_arrays["patient_train_onsets"], len(pooled_onsets),
+        groups=groups, embedding=embedding, draws=int(draws), seed=int(seed),
+    )
+
+    rng = np.random.default_rng(int(seed))
+    null_ood = []
+    null_alignment = []
+    null_mode1_fraction = []
+    null_two_direction = []
+    for _ in range(int(draws)):
+        sampled_onsets = []
+        sampled_ranks = []
+        for key in keys:
+            n = counts[f"{key[0]}:{key[1]}"]
+            off_onsets, off_ranks = off_tables[key]
+            if n == 0:
+                continue
+            chosen = rng.choice(len(off_onsets), n, replace=False)
+            sampled_onsets.append(off_onsets[chosen])
+            sampled_ranks.append(off_ranks[chosen])
+        if not sampled_onsets:
+            continue
+        onsets = np.concatenate(sampled_onsets)
+        ranks = np.concatenate(sampled_ranks)
+        validation = score_validation_endpoints(
+            onsets, ranks, np.ones(len(onsets), bool), contract=contract,
+            training_arrays=training_arrays, classifier=classifier,
+            kmeans_seed=int(kmeans_seed),
+        )
+        null_ood.append(validation["ood_all_returned"])
+        null_two_direction.append(bool(
+            validation["frozen_two_directions_present"]
+        ))
+        direction_counts = validation["frozen_direction_counts"]
+        if sum(direction_counts):
+            null_mode1_fraction.append(direction_counts[1] / sum(direction_counts))
+        alignment = validation.get("direction_balanced_alignment")
+        if alignment is not None:
+            null_alignment.append(alignment)
+
+    observed_counts = observed_validation["frozen_direction_counts"]
+    observed_mode1 = (
+        observed_counts[1] / sum(observed_counts) if sum(observed_counts) else None
+    )
+    support = {
+        "complete_distribution_patient_floor": patient_floor,
+        "ood_matched_off": _quantiles(null_ood),
+        "two_template_alignment_matched_off": _quantiles(null_alignment),
+        "frozen_mode1_fraction_matched_off": _quantiles(null_mode1_fraction),
+        "matched_off_two_direction_probability": (
+            float(np.mean(null_two_direction)) if null_two_direction else None
+        ),
+    }
+    complete = observed_selection[
+        "complete_distribution_distance_training"
+    ]
+    alignment = observed_validation.get("direction_balanced_alignment")
+    clauses = {
+        "minimum_eight_pooled_events_for_natural_kmeans": bool(
+            len(pooled_onsets) >= 8
+        ),
+        "complete_distribution_within_matched_patient_floor": bool(
+            complete is not None and patient_floor.get("q95") is not None
+            and complete <= patient_floor["q95"]
+        ),
+        "ood_within_matched_off_support": bool(
+            support["ood_matched_off"]["q95"] is not None
+            and observed_validation["ood_all_returned"]
+            <= support["ood_matched_off"]["q95"]
+        ),
+        "natural_two_clusters_present": bool(
+            observed_validation.get("two_clusters_present", False)
+        ),
+        "both_frozen_patient_directions_present": bool(
+            observed_validation["frozen_two_directions_present"]
+        ),
+        "kmeans_alignment_within_matched_off_support": bool(
+            alignment is not None
+            and support["two_template_alignment_matched_off"]["q05"] is not None
+            and alignment
+            >= support["two_template_alignment_matched_off"]["q05"]
+        ),
+    }
+    deterioration = {}
+    for name, value, limits, reverse in (
+        ("complete_distribution", complete, patient_floor, False),
+        ("ood", observed_validation["ood_all_returned"],
+         support["ood_matched_off"], False),
+        ("two_template_alignment", alignment,
+         support["two_template_alignment_matched_off"], True),
+    ):
+        if value is None or limits.get("q05") is None or limits.get("q95") is None:
+            deterioration[name] = None
+            continue
+        width = max(float(limits["q95"]) - float(limits["q05"]), 1e-12)
+        raw = (
+            float(limits["q50"]) - float(value) if reverse
+            else float(value) - float(limits["q50"])
+        )
+        deterioration[name] = float(raw / width)
+    finite_deterioration = [
+        value for value in deterioration.values() if value is not None
+    ]
+    return {
+        "schema_id": "topic4_rev21_event_count_matched_retention_v2",
+        "draws": int(draws), "seed": int(seed),
+        "event_counts_by_cell": counts,
+        "pooled_event_count": int(len(pooled_onsets)),
+        "observed": {
+            "complete_distribution": complete,
+            "ood": observed_validation["ood_all_returned"],
+            "natural_kmeans_status": observed_validation["natural_kmeans_status"],
+            "cluster_counts": observed_validation.get("cluster_counts"),
+            "two_template_alignment": alignment,
+            "frozen_direction_counts": observed_counts,
+            "frozen_mode1_fraction": observed_mode1,
+        },
+        "support": support, "clauses": clauses,
+        "retained": bool(all(clauses.values())),
+        "standardized_deterioration": deterioration,
+        "worst_standardized_deterioration": (
+            max(finite_deterioration) if finite_deterioration else None
+        ),
+        "boundary": (
+            "pooled development-screen evidence with per-cell event-count-matched "
+            "off resampling; not same-network two-mode confirmation"
+        ),
+    }
 
 
 def summarize_candidate(candidate_id: str, cells: list[dict], off_lookup: dict,
@@ -335,6 +526,7 @@ def main() -> None:
 
     cells = []
     arrays_by_candidate = {}
+    arrays_by_candidate_cell = {}
     for path in sorted((output_root / "coarse/workers").glob("*.json")):
         worker = json.loads(path.read_text())
         arrays = _load_npz(Path(worker["arrays"]["path"]))
@@ -359,6 +551,9 @@ def main() -> None:
         }
         cells.append(row)
         arrays_by_candidate.setdefault(worker["candidate_id"], []).append(arrays)
+        arrays_by_candidate_cell.setdefault(worker["candidate_id"], {})[
+            (int(worker["topology_seed"]), int(worker["dynamics_seed"]))
+        ] = arrays
     grouped = {}
     for row in cells:
         grouped.setdefault(row["candidate_id"], []).append(row)
@@ -386,10 +581,32 @@ def main() -> None:
                 kmeans_seed=int(config["validation"]["natural_kmeans_seed"]),
             ),
         }
-        summaries.append(summarize_candidate(
+        summary = summarize_candidate(
             candidate_id, rows, off_lookup, support, pooled,
             levels[candidate_id],
-        ))
+        )
+        if isinstance(levels[candidate_id], dict):
+            matched = matched_interictal_retention(
+                arrays_by_candidate_cell[candidate_id],
+                arrays_by_candidate_cell["rev21_zm_off"],
+                contract=contract, training_arrays=training,
+                classifier=classifier,
+                kmeans_seed=int(config["validation"]["natural_kmeans_seed"]),
+            )
+            summary["legacy_full_length_reference_retention"] = {
+                "retained": summary["interictal_substrate_retained"],
+                "support": summary["off_reference_support"],
+                "role": "superseded audit; confounded by event-count mismatch",
+            }
+            summary["event_count_matched_retention"] = matched
+            summary["interictal_substrate_retained"] = matched["retained"]
+            summary["standardized_deterioration"] = matched[
+                "standardized_deterioration"
+            ]
+            summary["worst_standardized_deterioration"] = matched[
+                "worst_standardized_deterioration"
+            ]
+        summaries.append(summary)
     _neighbor_scores(summaries)
     active = [row for row in summaries if isinstance(row["level"], dict)]
     ranked = sorted(active, key=lambda row: (
@@ -430,7 +647,7 @@ def main() -> None:
         status = "NO_TIMESCALE_SEED_IN_FROZEN_ZM_AMPLITUDE_GRID"
         seed_role = None
     payload = {
-        "schema_id": "topic4_rev21_zm_coarse_aggregate_v1",
+        "schema_id": "topic4_rev21_zm_coarse_aggregate_v2",
         "status": status,
         "reference_support": support,
         "per_cell": cells,
@@ -443,7 +660,14 @@ def main() -> None:
         "patient_heldout_opened": False,
         "patient_ictal_inputs_read": False,
         "selection_unit": "topology_by_dynamics_seed_cell",
-        "pooled_role": "two-cluster presence diagnostic only",
+        "pooled_role": (
+            "event-count-matched development retention screen; not same-network "
+            "two-mode confirmation"
+        ),
+        "retention_calibration": (
+            "patient matched-N complete-distribution floor plus per-cell "
+            "event-count-matched paired Z/M-off KMeans/OOD null"
+        ),
     }
     output = output_root / "coarse/aggregate.json"
     _atomic_json(output, payload)
