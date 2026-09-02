@@ -26,6 +26,7 @@ if str(ROOT) not in sys.path:
 
 from src.topic5_group_event_state.v032_eval.contract import atomic_json, load_eval_config  # noqa: E402
 from src.topic5_group_event_state.v033_evaluator import canonical as C  # noqa: E402
+from src.topic5_group_event_state.v033_evaluator import oracle as O  # noqa: E402
 from src.topic5_group_event_state.v033_evaluator import power as P  # noqa: E402
 from src.topic5_group_event_state.v033_evaluator.scaffold import load_real_scaffold  # noqa: E402
 
@@ -113,6 +114,8 @@ def main() -> None:
         "canonical_schema_version": C.SCHEMA_VERSION, "carry": "session",
         "horizon_seconds": float(args.horizon), "views": list(args.views),
         "levels": list(args.levels), "n_steps": int(args.n_steps),
+        "state_selection_phase": O.STATE_SELECTION_PHASE,
+        "score_phase": O.EVALUATION_PHASE,
         "scaffold_lock_sha256": scaffold_lock_sha256,
     }
     replicate_dir = args.output_root / "replicates"

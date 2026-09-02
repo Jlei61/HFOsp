@@ -74,6 +74,10 @@ def test_level0_count_detects_planted_state_and_reports_no_gain_under_d0():
     sc, d1 = _data("D1", beta_count=0.7)
     res = O.run_level(sc, d1, view="count", level=0, horizon=1800.0, seed=0)
     assert res["view"] == "count" and res["level"] == 0
+    assert res["score_phase"] == "dev_test"
+    assert res["state_selection_phase"] == "dev_val"
+    assert res["n_development_evaluation_rows"] == sc.anchor_rows("dev_test", 1800.0).size
+    assert set(res["table"]["split"].tolist()) == {"dev_test"}
     assert res["gain"] > 0 and res["ci_lower"] > 0
     assert res["table_meta"]["schema_version"] == C.SCHEMA_VERSION
     recomputed = C.paired_gain(res["table"])["gain"]

@@ -30,7 +30,9 @@ def test_support_blocks_come_from_coverage_segments_not_sessions():
     manual = sum(int(np.floor((min(s.stop_epoch, hi) - max(s.start_epoch, lo)) / 1800.0))
                  for s in segments if min(s.stop_epoch, hi) > max(s.start_epoch, lo))
     assert sup["blocks"]["1800"]["dev_test"] == manual
-    assert sup["blocks"]["1800"]["development"] == sup["blocks"]["1800"]["dev_val"] + sup["blocks"]["1800"]["dev_test"]
+    assert sup["blocks"]["1800"]["development"] == sup["blocks"]["1800"]["dev_test"]
+    assert sup["blocks"]["1800"]["development_evaluation"] == sup["blocks"]["1800"]["dev_test"]
+    assert sup["blocks"]["1800"]["development_total"] == sup["blocks"]["1800"]["dev_val"] + sup["blocks"]["1800"]["dev_test"]
     assert sup["n_sessions"] == 2 and sup["blocks"]["1800"]["development"] != sup["n_sessions"]
     assert sup["grammar_positive_anchors"]["1800"]["development"] <= sup["anchors"]["1800"]["development"]
     assert sup["h2a_positive_k_events"]["dev_test"] == int((group_count[partition.labels_of(events) == 3] >= 2).sum())
@@ -46,12 +48,16 @@ def test_eligibility_rows_read_required_blocks_from_the_power_curve_or_flag_pend
     rows = G.eligibility_rows("toy", sup, requirements)
     by = {(r["endpoint"], r["horizon_seconds"]): r for r in rows}
     row = by[("count_profile", 1800)]
-    assert row["required_blocks"] == 8 and row["available_development_blocks"] == sup["blocks"]["1800"]["development"]
-    assert row["estimable"] == (row["available_development_blocks"] >= 8)
+    assert row["required_blocks"] == 8
+    assert row["available_development_evaluation_blocks"] == sup["blocks"]["1800"]["dev_test"]
+    assert row["available_development_blocks"] == row["available_development_evaluation_blocks"]
+    assert row["estimable"] == (row["available_development_evaluation_blocks"] >= 8)
     pending = by[("conditional_grammar", 1800)]
     assert pending["required_blocks"] is None and pending["estimable"] is None and pending["status"] == "power_curve_pending"
     assert by[("h2a_event_anchor", None)]["support_unit"] == "positive_k_events"
-    assert by[("h2b_seizure_risk", None)]["support_unit"] == "seizures_in_development_phases"
+    assert by[("h2b_seizure_risk", None)]["support_unit"] == "seizures_in_development_evaluation"
+    assert by[("h2a_event_anchor", None)]["available_development_positive_k_events"] == sup["h2a_positive_k_events"]["dev_test"]
+    assert by[("h2b_seizure_risk", None)]["available_development_seizures"] == sup["seizures"]["by_phase"]["dev_test"]
     for r in rows:
         assert not any(k in r for k in ("gain", "nll", "p_value")), "eligibility must never carry a result"
 

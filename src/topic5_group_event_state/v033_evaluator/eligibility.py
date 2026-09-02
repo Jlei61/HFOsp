@@ -16,13 +16,14 @@ import numpy as np
 
 from src.topic5_group_event_state.v032_eval.partition import EVAL_PHASES
 
-DEVELOPMENT_PHASES = ("dev_val", "dev_test")
+STATE_SELECTION_PHASE = "dev_val"
+DEVELOPMENT_EVALUATION_PHASE = "dev_test"
 ENDPOINTS: tuple[dict[str, Any], ...] = (
     {"endpoint": "count_profile", "view": "count_profile", "horizons": (1800,), "support_unit": "independent_blocks", "exploratory": False},
     {"endpoint": "conditional_grammar", "view": "grammar", "horizons": (300, 1800), "support_unit": "independent_blocks", "exploratory": False},
     {"endpoint": "count_120min_exploratory", "view": "count", "horizons": (7200,), "support_unit": "independent_blocks", "exploratory": True},
     {"endpoint": "h2a_event_anchor", "view": None, "horizons": (None,), "support_unit": "positive_k_events", "exploratory": False},
-    {"endpoint": "h2b_seizure_risk", "view": None, "horizons": (None,), "support_unit": "seizures_in_development_phases", "exploratory": False},
+    {"endpoint": "h2b_seizure_risk", "view": None, "horizons": (None,), "support_unit": "seizures_in_development_evaluation", "exploratory": False},
 )
 
 
@@ -36,7 +37,12 @@ def _blocks_by_phase(segments: Sequence[Any], partition: Any, horizon: float) ->
             if b > a:
                 total += int(math.floor((b - a) / float(horizon)))
         out[phase] = total
-    out["development"] = sum(out[p] for p in DEVELOPMENT_PHASES)
+    out["state_selection"] = out[STATE_SELECTION_PHASE]
+    out["development_evaluation"] = out[DEVELOPMENT_EVALUATION_PHASE]
+    out["development_total"] = out[STATE_SELECTION_PHASE] + out[DEVELOPMENT_EVALUATION_PHASE]
+    # Compatibility alias is intentionally the evaluation-only count.  Older
+    # consumers must fail conservative rather than silently add tuning support.
+    out["development"] = out["development_evaluation"]
     return out
 
 
@@ -57,13 +63,19 @@ def subject_support_from_arrays(*, segments: Sequence[Any], partition: Any, grid
             counts = (grid.window_hi[rows, h_i] - grid.window_lo[rows, h_i]) if rows.size else np.zeros(0, np.int64)
             a_phase[phase] = int(rows.size)
             p_phase[phase] = int((counts > 0).sum())
-        a_phase["development"] = sum(a_phase[p] for p in DEVELOPMENT_PHASES)
-        p_phase["development"] = sum(p_phase[p] for p in DEVELOPMENT_PHASES)
+        for values in (a_phase, p_phase):
+            values["state_selection"] = values[STATE_SELECTION_PHASE]
+            values["development_evaluation"] = values[DEVELOPMENT_EVALUATION_PHASE]
+            values["development_total"] = values[STATE_SELECTION_PHASE] + values[DEVELOPMENT_EVALUATION_PHASE]
+            values["development"] = values["development_evaluation"]
         anchors[key], positive[key] = a_phase, p_phase
     events = {name: int((event_labels == i).sum()) for i, name in enumerate(EVAL_PHASES)}
     positive_k = {name: int(((event_labels == i) & (gc >= 2)).sum()) for i, name in enumerate(EVAL_PHASES)}
-    events["development"] = sum(events[p] for p in DEVELOPMENT_PHASES)
-    positive_k["development"] = sum(positive_k[p] for p in DEVELOPMENT_PHASES)
+    for values in (events, positive_k):
+        values["state_selection"] = values[STATE_SELECTION_PHASE]
+        values["development_evaluation"] = values[DEVELOPMENT_EVALUATION_PHASE]
+        values["development_total"] = values[STATE_SELECTION_PHASE] + values[DEVELOPMENT_EVALUATION_PHASE]
+        values["development"] = values["development_evaluation"]
     sz_phase = {name: 0 for name in EVAL_PHASES}
     for sz in seizures:
         sz_phase[partition.phase_of(float(sz["onset_epoch"]))] += 1
@@ -73,8 +85,19 @@ def subject_support_from_arrays(*, segments: Sequence[Any], partition: Any, grid
         "recorded_seconds_by_phase": dict(partition.recorded_seconds),
         "blocks": blocks, "anchors": anchors, "grammar_positive_anchors": positive,
         "events": events, "h2a_positive_k_events": positive_k,
-        "seizures": {"n_total": len(seizures), "by_phase": sz_phase,
-                     "development": sum(sz_phase[p] for p in DEVELOPMENT_PHASES)},
+        "seizures": {
+            "n_total": len(seizures), "by_phase": sz_phase,
+            "state_selection": sz_phase[STATE_SELECTION_PHASE],
+            "development_evaluation": sz_phase[DEVELOPMENT_EVALUATION_PHASE],
+            "development_total": sz_phase[STATE_SELECTION_PHASE] + sz_phase[DEVELOPMENT_EVALUATION_PHASE],
+            "development": sz_phase[DEVELOPMENT_EVALUATION_PHASE],
+        },
+        "phase_semantics": {
+            "state_selection": STATE_SELECTION_PHASE,
+            "development_evaluation": DEVELOPMENT_EVALUATION_PHASE,
+            "development_alias": "development_evaluation_only",
+            "development_total": "descriptive_only_never_used_for_estimability",
+        },
         "support_source": "real window builder: build_carry_segments target segments ∩ recorded-time partition",
     }
 
@@ -95,11 +118,15 @@ def eligibility_rows(subject: str, support: Mapping[str, Any],
                                    "exploratory": spec["exploratory"], "reasons": []}
             if spec["support_unit"] == "independent_blocks":
                 key = str(int(horizon))
-                row["available_development_blocks"] = support["blocks"][key]["development"]
+                available = support["blocks"][key]["development_evaluation"]
+                row["available_development_evaluation_blocks"] = available
+                row["available_development_blocks"] = available
                 row["available_blocks_by_phase"] = dict(support["blocks"][key])
-                row["available_development_anchors"] = support["anchors"][key]["development"]
+                row["available_development_evaluation_anchors"] = support["anchors"][key]["development_evaluation"]
+                row["available_development_anchors"] = row["available_development_evaluation_anchors"]
                 if spec["view"] == "grammar":
-                    row["available_development_positive_anchors"] = support["grammar_positive_anchors"][key]["development"]
+                    row["available_development_evaluation_positive_anchors"] = support["grammar_positive_anchors"][key]["development_evaluation"]
+                    row["available_development_positive_anchors"] = row["available_development_evaluation_positive_anchors"]
                 req = requirements.get((spec["view"], int(horizon)))
                 if req is None or req.get("required_blocks") is None:
                     row.update({"required_blocks": None, "requirement_source": None, "estimable": None,
@@ -107,18 +134,24 @@ def eligibility_rows(subject: str, support: Mapping[str, Any],
                     row["reasons"].append("no medium-effect power curve for this view/horizon yet")
                 else:
                     need = int(req["required_blocks"])
-                    ok = row["available_development_blocks"] >= need
+                    ok = row["available_development_evaluation_blocks"] >= need
                     row.update({"required_blocks": need, "requirement_source": req.get("source"),
                                 "requirement_tier": req.get("tier"), "estimable": bool(ok),
                                 "status": "estimable" if ok else "not_estimable"})
                     if not ok:
-                        row["reasons"].append(f"development_blocks={row['available_development_blocks']}<{need}")
+                        row["reasons"].append(
+                            f"development_evaluation_blocks={row['available_development_evaluation_blocks']}<{need}"
+                        )
             elif spec["support_unit"] == "positive_k_events":
-                row.update({"available_development_positive_k_events": support["h2a_positive_k_events"]["development"],
+                available = support["h2a_positive_k_events"]["development_evaluation"]
+                row.update({"available_development_evaluation_positive_k_events": available,
+                            "available_development_positive_k_events": available,
                             "available_by_phase": dict(support["h2a_positive_k_events"]),
                             "required_blocks": None, "estimable": None, "status": "support_described_only"})
             else:
-                row.update({"available_development_seizures": support["seizures"]["development"],
+                available = support["seizures"]["development_evaluation"]
+                row.update({"available_development_evaluation_seizures": available,
+                            "available_development_seizures": available,
                             "available_by_phase": dict(support["seizures"]["by_phase"]),
                             "n_seizures_total": support["seizures"]["n_total"],
                             "required_blocks": None, "estimable": None, "status": "support_described_only"})

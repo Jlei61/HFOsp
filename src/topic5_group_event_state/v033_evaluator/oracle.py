@@ -6,8 +6,9 @@
     Level 2  visible mark channel (+ real tokens)          -> train encoder + bank + readout
 
 Heads and readouts are fitted on TRAIN (base_fit) rows, Level 2 early-stops on
-inner_val, and every gain is scored on the development rows (dev_val ∪ dev_test)
-through the canonical evaluator (O1, O3).  The H arm always receives the same
+inner_val, and every gain is scored only on the selection-independent
+development-evaluation rows (dev_test).  The state-selection rows (dev_val) never enter a reported
+gain or its independent-block denominator.  The H arm always receives the same
 TRAIN-only recalibration (intercept + dispersion) as the state arm so a gain is
 never an intercept artefact (O2).  The primary detection statistic is the
 shared-H-dispersion gain (dynamic contribution only); the per-arm-dispersion gain
@@ -40,7 +41,8 @@ VIEWS = ("count_profile", "count", "grammar")
 PRIMARY_VIEWS = ("count_profile", "grammar")
 TRAIN_PHASE = "base_fit"
 SELECT_PHASE = "inner_val"
-DEV_PHASES = ("dev_val", "dev_test")
+STATE_SELECTION_PHASE = "dev_val"
+EVALUATION_PHASE = "dev_test"
 LOG_R_BOUNDS = (math.log(0.05), math.log(1e5))
 BOOTSTRAP_RESAMPLES = 1000
 LEVEL2_HIDDEN = 16
@@ -177,8 +179,10 @@ def grammar_logits(head: dict[str, Any], states: np.ndarray | None) -> np.ndarra
 
 
 # --------------------------------------------------------------------------- rows, blocks, helpers
-def _dev_rows(scaffold: Scaffold, horizon: float) -> np.ndarray:
-    return np.sort(np.concatenate([scaffold.anchor_rows(p, horizon) for p in DEV_PHASES]))
+def _evaluation_rows(scaffold: Scaffold, horizon: float) -> np.ndarray:
+    """Selection-independent development-evaluation rows; never include state-selection rows."""
+
+    return scaffold.anchor_rows(EVALUATION_PHASE, horizon)
 
 
 def _anchor_segment(scaffold: Scaffold) -> np.ndarray:
@@ -434,7 +438,7 @@ def _score_count(scaffold: Scaffold, data: SyntheticData, *, horizon: float, row
                  pred_hs_free_dispersion: np.ndarray | None = None, log_r_hs_free: float | None = None,
                  seed: int) -> dict[str, Any]:
     y = data.counts[int(horizon)][rows]
-    common = dict(subject=scaffold.subject, seed=seed, checkpoint_hash=f"oracle:{label}", split="dev_val+dev_test",
+    common = dict(subject=scaffold.subject, seed=seed, checkpoint_hash=f"oracle:{label}", split=EVALUATION_PHASE,
                   anchor_time=scaffold.t_anchor[rows], target=y, prediction_H=pred_h, prediction_H_plus_state=pred_hs,
                   mask=None, weight=None, eligibility="target_window_valid", evidence_label="DIAGNOSTIC_SYNTHETIC")
     shared = C.build_per_anchor_table(dispersion=log_r_h, dispersion_rule="shared", **common)
@@ -496,7 +500,7 @@ def _score_count_profile(scaffold: Scaffold, data: SyntheticData, *, rows: np.nd
         extra["H_plus_state_free_dispersion"] = C.nb_nll(
             y, pred_hs_free, np.asarray(log_r_hs_free, dtype=np.float64).reshape(1, 3)).sum(axis=1)
     table = C.build_per_anchor_table_from_scores(
-        subject=scaffold.subject, seed=seed, checkpoint_hash=f"oracle:{label}", split="dev_val+dev_test",
+        subject=scaffold.subject, seed=seed, checkpoint_hash=f"oracle:{label}", split=EVALUATION_PHASE,
         anchor_time=scaffold.t_anchor[rows], target=y.sum(axis=1),
         per_anchor_nll={"H": nll_h, "H_plus_state": nll_hs},
         score_family="nb_disjoint_count_profile", mask=None, weight=None,
@@ -554,12 +558,17 @@ def run_level(scaffold: Scaffold, data: SyntheticData, *, view: str, level: int,
         raise ValueError("unknown view or level")
     h_key = int(horizon)
     train_rows = scaffold.anchor_rows(TRAIN_PHASE, horizon)
-    dev_rows = _dev_rows(scaffold, horizon)
+    dev_rows = _evaluation_rows(scaffold, horizon)
     train_events = scaffold.event_rows(TRAIN_PHASE)
     blocks = _blocks(scaffold, dev_rows, horizon)
     log_mu_h = np.asarray(scaffold.log_mu_h[h_key], dtype=np.float64)
-    result: dict[str, Any] = {"view": view, "level": level, "horizon_seconds": float(horizon), "seed": int(seed),
-                              "dgp": data.as_meta(), "n_train_rows": int(train_rows.size), "n_dev_rows": int(dev_rows.size)}
+    result: dict[str, Any] = {
+        "view": view, "level": level, "horizon_seconds": float(horizon), "seed": int(seed),
+        "dgp": data.as_meta(), "n_train_rows": int(train_rows.size),
+        "n_development_evaluation_rows": int(dev_rows.size),
+        "state_selection_phase": STATE_SELECTION_PHASE,
+        "score_phase": EVALUATION_PHASE,
+    }
     if view == "count_profile":
         y = np.asarray(data.count_profile, dtype=np.int64)
         profile_h = np.asarray(data.log_mu_profile_h, dtype=np.float64)
@@ -647,7 +656,7 @@ def run_level(scaffold: Scaffold, data: SyntheticData, *, view: str, level: int,
         logits_hs = grammar_logits(head, s[dev_rows])
         scores = _grammar_block_scores(scaffold, data, horizon=horizon, rows=dev_rows, logits_h=logits_h, logits_hs=logits_hs)
         table = C.build_per_anchor_table_from_scores(
-            subject=scaffold.subject, seed=seed, checkpoint_hash=f"oracle:L{level}", split="dev_val+dev_test",
+            subject=scaffold.subject, seed=seed, checkpoint_hash=f"oracle:L{level}", split=EVALUATION_PHASE,
             anchor_time=scaffold.t_anchor[dev_rows], target=scores["n_future"],
             per_anchor_nll={"H": scores["block_H"], "H_plus_state": scores["block_H_plus_state"]},
             score_family="conditional_subset_nll", mask=scores["n_future"] > 0, weight=None,
