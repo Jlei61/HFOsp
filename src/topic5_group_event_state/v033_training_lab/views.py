@@ -173,8 +173,9 @@ def _materialized_synthetic_view(
     feature_names = tuple(str(v) for v in metadata.get("event_feature_names_r0", []))
     if len(feature_names) != features.shape[1]:
         raise ValueError("materialized event feature names do not match feature width")
+    synthetic_subject = str(request.get("request_id", "materialized_synthetic")).replace("-", "_")
     view = DataView(
-        subject="synthetic_sn_count_sentinel_v3", bins=bins, horizon=max(b for _a, b in bins),
+        subject=synthetic_subject, bins=bins, horizon=max(b for _a, b in bins),
         event_times=event_time, event_segment=event_segment,
         x_scaled=np.ascontiguousarray(x_scaled), train_event_mask=train_event,
         t_anchor=anchor_time, anchor_segment=anchor_segment, last_event_pos=last,
