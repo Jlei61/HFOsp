@@ -1,5 +1,17 @@
 # Topic 5 Archive Index
 
+- **2026-09-02 Group-Event State v0.2 全程序整体收口（A+B+C）**：
+  [`程序收口`](group_event_state_v0_2_program_closeout_2026-09-02.md)。
+  机器状态 `V0_2_CLOSED__ENGINEERING_COMPLETE__NO_HYPOTHESIS_ESTABLISHED_OR_REFUTED`。
+  三条线均满格执行（A 27/27、B 133 格 266 运行、C 486/486 + 81/81×3），**H1/H2a/H2b/H3 无一被建立或推翻**。
+  全程序唯一干净读数：`P_local` vs `P_memoryless`（实际训练配置逐患者 27/27 匹配）显示
+  **跨事件携带历史改善下一次事件到达时间**，中位 +0.0774、21/27、sign p=0.0059 —— 仅限短程 predictive memory。
+  跨线共因缺陷：`B_multiscale` 含未来发作变量（`log_time_to_nearest_seizure`）；189 个 cell 实际用 13 个
+  commit 而 registry 只声明一个且晚于 artifact 5 小时；`P_slow` 按 anchor 而非物理时间等权；
+  12 格 OOM 降配；B/C 均把 observer 后验更新放在生理状态位置。可复用：274 次零误差 crosswalk、
+  209 独立事件 / 99 留出、脑电起点比临床早（145/168，中位 5.0 s、最大 86.2 s）、
+  静态病人平均场基线 ρ=+0.41（最高 +0.93，v0.3 须越过此线而非零）。
+
 - **2026-09-02 Group-Event State v0.2 H2b（Agent B）阶段性验收 / 历史版本封存**：
   [`阶段封存`](group_event_state_v0_2_h2b_stage_closeout_2026-09-02.md)。
   机器状态 `STAGE_CLOSED_ENGINEERING_ONLY__H2B_NOT_ESTABLISHED`。**只验收工程与分母层**：

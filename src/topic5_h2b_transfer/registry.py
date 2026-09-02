@@ -47,6 +47,10 @@ class Arm:
     checkpoint_hash: str = ""
     anchor_path: str = ""
     verified: bool = False
+    commit: str = ""
+    chunk_events: int | None = None
+    batch_segments: int | None = None
+    provenance_flags: tuple[str, ...] = ()
 
 
 def read_registry(path: Path | str = DEFAULT_REGISTRY) -> Registry:
@@ -86,26 +90,63 @@ def _sha256(path: Path) -> str:
     return h.hexdigest()
 
 
+def _training_record(info: Mapping[str, Any]) -> dict:
+    """The substantive training facts, read from the run's own result.json.
+
+    ``config_hash`` proved to hash things that are not the training
+    configuration -- 57 distinct hashes over 18 distinct real
+    ``(chunk_events, batch_segments, commit)`` combinations -- so verifying on
+    it refused every cell for a bookkeeping difference. What actually matters is
+    what the run recorded about itself.
+    """
+
+    ap = info.get("anchor_state")
+    if not ap:
+        return {}
+    rp = Path(str(ap)).parent / "result.json"
+    if not rp.exists():
+        return {}
+    try:
+        d = json.loads(rp.read_text())
+    except Exception:
+        return {}
+    return {"chunk_events": d.get("chunk_events"),
+            "batch_segments": d.get("batch_segments"),
+            "commit": str(d.get("commit", ""))[:8]}
+
+
+def _modal_training_config(entry: Mapping[str, Any]) -> tuple:
+    counts: dict[tuple, int] = {}
+    for v in (entry.get("subjects", {}) or {}).values():
+        if not isinstance(v, Mapping):
+            continue
+        for i in v.values():
+            if not (isinstance(i, Mapping) and "anchor_state" in i):
+                continue
+            r = _training_record(i)
+            k = (r.get("chunk_events"), r.get("batch_segments"))
+            if k != (None, None):
+                counts[k] = counts.get(k, 0) + 1
+    return max(counts, key=counts.get) if counts else ()
+
+
 def _verify_cell(entry: Mapping[str, Any], info: Mapping[str, Any]) -> str:
     """Return "" when the cell is admissible, else why it is not.
 
-    "complete" in a registry is a writer's assertion, not provenance. What can
-    actually be checked from here is checked, and anything that fails makes the
-    arm unavailable rather than merely annotated (P0-2, 2026-09-02 review).
+    "complete" in a registry is a writer's assertion, not provenance. Two things
+    are checked: whether the run's own recorded batch/chunk match what the rest
+    of this producer used (an OOM-degraded cell is not the same arm), and
+    whether a declared checkpoint hash matches the file. Differing commits are
+    flagged, not refused -- they need the producer to say whether the code
+    changed materially, which is not decidable from here.
     """
 
-    # Heterogeneity AMONG the producer's own cells is the defect: cells trained
-    # under different configurations cannot be pooled as one arm. A cell hash
-    # that merely differs from the producer-level bookkeeping hash is not.
-    cfgs = {
-        str(i.get("config_hash", ""))
-        for v in (entry.get("subjects", {}) or {}).values() if isinstance(v, Mapping)
-        for i in v.values() if isinstance(i, Mapping) and "anchor_state" in i
-    }
-    cfgs.discard("")
-    if len(cfgs) > 1:
-        return (f"this producer's cells span {len(cfgs)} different configurations; "
-                "they cannot be pooled as one arm until the producer explains why")
+    modal = _modal_training_config(entry)
+    rec = _training_record(info)
+    got = (rec.get("chunk_events"), rec.get("batch_segments"))
+    if modal and got != (None, None) and got != modal:
+        return (f"this cell trained at chunk_events/batch_segments {got}, while the rest "
+                f"of this producer used {modal}; an OOM-degraded cell is not the same arm")
     declared = str(info.get("checkpoint_sha256", ""))
     ck = info.get("checkpoint")
     if declared and ck:
@@ -160,10 +201,25 @@ def resolve_subject_arms(
                 out[pid] = Arm(status="not_available", reason=why, seed=chosen,
                                anchor_path=str(ap), **common)
                 continue
+        rec = _training_record(info)
+        flags = []
+        commits = set()
+        for v in (entry.get("subjects", {}) or {}).values():
+            if isinstance(v, Mapping):
+                for i in v.values():
+                    if isinstance(i, Mapping) and "anchor_state" in i:
+                        c = _training_record(i).get("commit")
+                        if c:
+                            commits.add(c)
+        if len(commits) > 1:
+            flags.append(f"producer spans {len(commits)} training commits while the "
+                         f"registry advertises one")
         try:
             z = np.load(ap)
             out[pid] = Arm(
                 status="ok", seed=chosen, anchor_path=str(ap), verified=bool(verify),
+                commit=rec.get("commit", ""), chunk_events=rec.get("chunk_events"),
+                batch_segments=rec.get("batch_segments"), provenance_flags=tuple(flags),
                 state=z["state"], t_anchor=z["t_anchor"],
                 split_index=z["split_index"] if "split_index" in z else None,
                 session_id=z["session_id"] if "session_id" in z else None,
