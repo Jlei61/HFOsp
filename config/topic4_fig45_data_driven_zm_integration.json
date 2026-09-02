@@ -1,17 +1,19 @@
 {
-  "schema_version": "topic4_fig45_data_driven_zm_integration_v1",
+  "schema_version": "topic4_fig45_data_driven_zm_integration_v2",
   "scientific_role": "paper_ready_figure_4_5_source_contract",
   "artifact_root": "/data/hfosp_topic4_fig45_artifacts",
-  "artifact_state": "NOT_LOCKED",
+  "artifact_state": "FIG5A_TONIC_LOCKED_FIG4_AND_FULL_FIG5_PENDING",
   "source_commits": {
     "data_driven_zm": "799f5ccc0312c1ba382de92f49b7f989829ab15d",
+    "spatial_zm_ou_tonic_closeout": "1292e064d5092ca72a9711a8c3dfc37b78558c1b",
     "dual_core_development": "26bc4338edaf0b158e4ad633f9fc58a9724994a1",
     "main_at_integration_start": "46dbcbc230d3495dad40f44df73f9e515be51321"
   },
   "figures": {
     "fig4": {
       "model_id": "data_driven_node_local_connectivity",
-      "status": "CANDIDATE_PARTIAL_SUPPORT",
+      "status": "CANDIDATE_PARTIAL_SUPPORT_NO_LOCKED_PAPER_ARTIFACT",
+      "artifact_locked": false,
       "scientific_role": "interictal_propagation_substrate",
       "artifact_subdir": "fig4/data_driven_node_local_connectivity",
       "producers": [
@@ -30,12 +32,15 @@
       "model_id": "data_driven_node_local_connectivity_plus_zm",
       "inherits_frozen_substrate_from": "data_driven_node_local_connectivity",
       "added_state_variables": ["Z", "M"],
-      "status": "BLOCKED_NO_ELIGIBLE_ARTIFACT",
+      "status": "FIG5A_TONIC_LOCKED_FULL_LIFECYCLE_INCOMPLETE",
+      "artifact_locked": false,
       "scientific_role": "within-model transition and recovery assay",
       "artifact_subdir": "fig5/data_driven_node_local_connectivity_plus_zm",
       "producers": [
         "scripts/audit_topic4_zm_exact_fig4_carryover.py",
-        "scripts/paper_figures/plot_fig5_data_driven_zm_main.py"
+        "scripts/paper_figures/plot_fig5_data_driven_zm_main.py",
+        "scripts/aggregate_topic4_spatial_zm_ou_tonic.py",
+        "scripts/paper_figures/plot_fig5a_spatial_zm_ou_tonic.py"
       ],
       "required_gates": [
         "exact_fig4_substrate_carryover",
@@ -44,6 +49,29 @@
         "at_least_three_fresh_seeds",
         "same_state_png_pdf_visual_qa"
       ],
+      "unsatisfied_full_figure_gates": [
+        "exact_fig4_substrate_carryover_to_a_locked_fig4_artifact",
+        "recovery"
+      ],
+      "locked_panels": {
+        "fig5a_tonic_global_high": {
+          "status": "LOCKED_PROSPECTIVE_THREE_SEED_CONFIRMATION",
+          "endpoint": "persistent near-saturated tonic global-high transition",
+          "artifact_subdir": "fig5/data_driven_node_local_connectivity_plus_zm/paper_ready_fig5a/figures",
+          "confirmation_family": "tonic_b0_v2",
+          "confirmation_seeds": [1841, 1842, 1843],
+          "passed_seeds": 3,
+          "parameter_contract_sha256": "2d630cab9f558ed0f0f1095df7821d3a4c2cee0cef586669d68051171205ac15",
+          "required_artifacts": {
+            "fig5a-spatial-zm-ou-tonic-global-runaway.png": "dea4e98d01b47aaab2a129afb741f49399a95f9d56644a0010d78262ebcbf8ea",
+            "fig5a-spatial-zm-ou-tonic-global-runaway.pdf": "e4c332cd343f8a94157d39d0ca645000497968b563425bde555f84e340e46d55",
+            "fig5a-spatial-zm-ou-tonic-global-runaway.svg": "72b7cdc5f9911939e8e452f2200e6eebf99831c6682b3f24f1ad643b393fce51",
+            "fig5a-spatial-zm-ou-tonic-metadata.json": "ae5c1bc057e6ec4ab64256e57c6f0f80dda70ff170908262b1574d6710743f2f",
+            "README.md": "d306ee0bfeec983ea2c85f2bcf5afa811e19ab6c1883d1033590fd4c155e2148"
+          },
+          "scientific_boundary": "model-internal tonic/global-high transition only; no recovery, termination, clinical seizure reproduction, patient mechanism, or biological causality claim"
+        }
+      },
       "claim_boundary": "model-internal transition candidate only; no clinical seizure reproduction or biological causality claim"
     }
   },
@@ -59,8 +87,8 @@
     }
   },
   "deferred_lines": {
-    "node_rev18_rev19": "ACTIVE_RUN_DO_NOT_IMPORT_UNTIL_FINAL_ARTIFACT",
-    "spatial_zm_ou_followup": "DIRTY_DEVELOPMENT_WORKTREE_NOT_INCLUDED",
+    "node_rev18_rev19": "ARCHIVED_PRE_REV20_HISTORY; REV20_REMAINS_ACTIVE",
+    "spatial_zm_ou_followup": "FIG5A_TONIC_LOCKED; FULL_RECOVERY_LIFECYCLE_NOT_ESTABLISHED",
     "m4_adaptation_episode": "ARCHIVED_CARRIER_RECOVERY_GATE_FAILED",
     "patient_specific_cohort_v2": "ARCHIVED_INCOMPLETE_RUN",
     "rnn": "SEPARATE_REPOSITORY"

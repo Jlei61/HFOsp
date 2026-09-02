@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 from typing import Any
@@ -11,7 +12,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_CONTRACT = ROOT / "config/topic4_fig45_data_driven_zm_integration.json"
-EXPECTED_SCHEMA = "topic4_fig45_data_driven_zm_integration_v1"
+EXPECTED_SCHEMA = "topic4_fig45_data_driven_zm_integration_v2"
 
 
 def _is_within(path: Path, parent: Path) -> bool:
@@ -22,6 +23,14 @@ def _is_within(path: Path, parent: Path) -> bool:
     return True
 
 
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
 def validate_contract(
     contract: dict[str, Any],
     *,
@@ -30,6 +39,7 @@ def validate_contract(
     require_artifacts: bool = False,
 ) -> dict[str, Any]:
     errors: list[str] = []
+    locked_panels: list[str] = []
     if contract.get("schema_version") != EXPECTED_SCHEMA:
         errors.append("unexpected schema_version")
 
@@ -54,8 +64,32 @@ def validate_contract(
                 producer_path = repo_root / producer
                 if producer.startswith("results/") or not producer_path.is_file():
                     errors.append(f"{figure_id}: invalid producer {producer}")
-            if require_artifacts and not (configured_root / figure["artifact_subdir"]).is_dir():
-                errors.append(f"{figure_id}: artifact directory is missing")
+            if figure.get("artifact_locked") and not (
+                configured_root / figure["artifact_subdir"]
+            ).is_dir():
+                errors.append(f"{figure_id}: locked artifact directory is missing")
+
+        fig5_root = configured_root / fig5["artifact_subdir"]
+        for panel_id, panel in fig5.get("locked_panels", {}).items():
+            panel_key = f"fig5.{panel_id}"
+            panel_root = configured_root / panel.get("artifact_subdir", "")
+            if not _is_within(panel_root, fig5_root):
+                errors.append(f"{panel_key}: artifact_subdir must be inside Fig5")
+                continue
+            seeds = panel.get("confirmation_seeds", [])
+            if len(set(seeds)) < 3 or panel.get("passed_seeds") != len(set(seeds)):
+                errors.append(f"{panel_key}: three unique passing confirmation seeds required")
+            artifact_errors = False
+            for relative_name, expected_sha256 in panel.get("required_artifacts", {}).items():
+                artifact = panel_root / relative_name
+                if not artifact.is_file():
+                    errors.append(f"{panel_key}: missing artifact {relative_name}")
+                    artifact_errors = True
+                elif _sha256(artifact) != expected_sha256:
+                    errors.append(f"{panel_key}: sha256 mismatch for {relative_name}")
+                    artifact_errors = True
+            if not artifact_errors and panel.get("required_artifacts"):
+                locked_panels.append(panel_key)
 
     policy = contract.get("repository_policy", {})
     if policy.get("runtime_products") != "EXTERNAL_ONLY":
@@ -64,23 +98,28 @@ def validate_contract(
     if "results/" not in forbidden:
         errors.append("results/ must be forbidden from the main integration commit")
 
+    figure_artifacts_ready = {
+        figure_id: bool(figure.get("artifact_locked"))
+        and (configured_root / figure["artifact_subdir"]).is_dir()
+        for figure_id, figure in figures.items()
+    }
     artifacts_ready = (
-        configured_root.is_dir()
-        and all(
-            (configured_root / row["artifact_subdir"]).is_dir()
-            for row in figures.values()
-        )
-        if set(figures) == {"fig4", "fig5"}
-        else False
+        set(figure_artifacts_ready) == {"fig4", "fig5"}
+        and all(figure_artifacts_ready.values())
     )
+    if require_artifacts and not artifacts_ready:
+        errors.append("full Fig4/Fig5 artifact set is not locked")
     status = "INVALID" if errors else (
         "CONTRACT_VALID_ARTIFACTS_READY" if artifacts_ready
+        else "CONTRACT_VALID_PARTIALLY_LOCKED" if locked_panels
         else "CONTRACT_VALID_ARTIFACTS_PENDING"
     )
     return {
         "status": status,
         "artifact_root": str(configured_root),
         "artifacts_ready": artifacts_ready,
+        "figure_artifacts_ready": figure_artifacts_ready,
+        "locked_panels": locked_panels,
         "errors": errors,
     }
 
