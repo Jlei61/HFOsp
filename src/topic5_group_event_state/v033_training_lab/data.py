@@ -100,7 +100,9 @@ class DataView:
         return inverse.astype(np.int64)
 
     def effective_independent_windows(self, phase: str) -> int:
-        return int(self.bundle.effective_independent_windows(PHASES[phase], self.horizon))
+        if self.bundle is not None and hasattr(self.bundle, "effective_independent_windows"):
+            return int(self.bundle.effective_independent_windows(PHASES[phase], self.horizon))
+        return int(np.unique(self.blocks(phase)).size)
 
     # --------------------------------------------------------------- weights
     def lookback_event_counts(self, phase: str, lookback_seconds: float) -> np.ndarray:

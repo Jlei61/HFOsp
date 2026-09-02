@@ -280,6 +280,7 @@ class FlexibleResidualStateModel(nn.Module):
         self.register_buffer("train_mean_state", torch.zeros(self.state.state_dim))
         self.register_buffer("train_state_scale", torch.ones(self.state.state_dim))
         self.amp_encoder = False
+        self.checkpointing = False
 
     @property
     def state_dim(self) -> int:
@@ -293,11 +294,25 @@ class FlexibleResidualStateModel(nn.Module):
     def project(self, x_scaled: Tensor) -> Tensor:
         """Encoder forward; bf16 autocast only here when ``amp_encoder`` is set on a CUDA tensor."""
 
+        if getattr(self, "checkpointing", False) and torch.is_grad_enabled() and x_scaled.requires_grad is False:
+            x_scaled = x_scaled.detach().requires_grad_(False)
+        encoder = self.encoder
+        if getattr(self, "checkpointing", False) and torch.is_grad_enabled():
+            from torch.utils.checkpoint import checkpoint
+
+            def run(inp: Tensor) -> Tensor:
+                return encoder(inp)
+
+            if getattr(self, "amp_encoder", False) and x_scaled.is_cuda:
+                with torch.autocast("cuda", dtype=torch.bfloat16):
+                    out = checkpoint(run, x_scaled, use_reentrant=False)
+                return out.float()
+            return checkpoint(run, x_scaled, use_reentrant=False)
         if getattr(self, "amp_encoder", False) and x_scaled.is_cuda:
             with torch.autocast("cuda", dtype=torch.bfloat16):
-                out = self.encoder(x_scaled)
+                out = encoder(x_scaled)
             return out.float()
-        return self.encoder(x_scaled)
+        return encoder(x_scaled)
 
     def writes(self, x_scaled: Tensor, train_event_mask: Tensor | None = None) -> Tensor:
         phi = self.project(x_scaled)

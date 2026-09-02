@@ -19,6 +19,7 @@ import resource
 import shutil
 import subprocess
 import time
+from datetime import datetime, timezone
 from typing import Any, Callable, Mapping
 
 from .paths import V033_ROOT, atomic_write_json
@@ -31,8 +32,8 @@ DISK_MIN_GIB = 10.0
 IOWAIT_MAX_PCT = 30.0
 SAFETY_FACTOR = 1.25
 GIB = float(1 << 30)
-DEFAULT_LEASE: dict[str, Any] = {"max_workers": 2, "gpu_ids": [0, 1], "max_gpu_workers": 2, "threads_per_worker": 1,
-                                 "lease_source": "default_conservative"}
+DEFAULT_LEASE: dict[str, Any] = {"max_workers": 0, "gpu_ids": [], "max_gpu_workers": 0, "threads_per_worker": 1,
+                                 "lease_source": "fail_closed_no_active_grant", "active": False}
 SUPERVISOR_GRANT_NAME = "supervisor_grant_agent_b.json"
 AGENT_LEASE_NAME = "agent_b.json"
 
@@ -176,17 +177,35 @@ def plan_concurrency(snap: Mapping[str, Any], sentinel: Mapping[str, Any], lease
 
 # ------------------------------------------------------------------- leases
 def read_supervisor_lease(shared_root: Path) -> dict[str, Any]:
-    """[R4] The supervisor's grant for agent_b, or the conservative default (labelled)."""
+    """[R4] Return launch capacity only for a valid, active, unexpired supervisor grant."""
 
     path = Path(shared_root) / "resource_leases" / SUPERVISOR_GRANT_NAME
     if not path.exists():
-        return dict(DEFAULT_LEASE)
+        return {**DEFAULT_LEASE, "reason": "missing supervisor grant"}
     try:
         payload = json.loads(path.read_text())
     except json.JSONDecodeError:
-        return {**DEFAULT_LEASE, "lease_source": "default_conservative_unreadable_grant"}
+        return {**DEFAULT_LEASE, "lease_source": "fail_closed_unreadable_grant",
+                "reason": "unreadable supervisor grant"}
+    status = str(payload.get("status", ""))
+    expires = payload.get("expires_at")
+    try:
+        expires_epoch = datetime.fromisoformat(str(expires)).astimezone(timezone.utc).timestamp()
+    except (TypeError, ValueError):
+        expires_epoch = float("-inf")
+    active = status.startswith("ACTIVE") and expires_epoch > time.time()
+    if not active:
+        return {**DEFAULT_LEASE, "lease_source": str(path), "grant": payload,
+                "reason": f"inactive or expired supervisor grant: {status or 'MISSING_STATUS'}"}
+    gpu_ids = [int(v) for v in payload.get("gpu_ids", [])]
     lease = dict(DEFAULT_LEASE)
-    lease.update({k: v for k, v in payload.items() if k in ("max_workers", "gpu_ids", "max_gpu_workers", "threads_per_worker")})
+    lease.update({
+        "max_workers": max(int(payload.get("max_workers", 0)), 0),
+        "gpu_ids": gpu_ids,
+        "max_gpu_workers": max(int(payload.get("max_jobs_per_gpu_before_sentinel_review", 1)), 0) * len(gpu_ids),
+        "threads_per_worker": max(int(payload.get("threads_per_worker", 1)), 1),
+        "active": True,
+    })
     lease["lease_source"] = str(path)
     lease["grant"] = payload
     return lease

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import os
 from pathlib import Path
 import subprocess
@@ -72,7 +73,7 @@ def release_candidates(repo: Path | None = None) -> list[Path]:
 
 
 def release_status(candidates: Sequence[Path] | None = None) -> dict[str, Any]:
-    """[Q7] Absent from every candidate path -> ``present=False``; never inferred."""
+    """[Q7] Validate the complete development release; mere file presence is not authority."""
 
     for path in list(candidates) if candidates is not None else release_candidates():
         path = Path(path)
@@ -82,7 +83,37 @@ def release_status(candidates: Sequence[Path] | None = None) -> dict[str, Any]:
             except json.JSONDecodeError as exc:
                 return {"present": False, "path": str(path), "payload": None,
                         "reason": f"unreadable release file: {exc}"}
-            return {"present": True, "path": str(path), "payload": payload, "reason": "found"}
+            reasons: list[str] = []
+            if payload.get("format") != "group_event_state_v0_3_3_execution_release":
+                reasons.append("unexpected release format")
+            if payload.get("status") != "ACTIVE_DEVELOPMENT_ONLY":
+                reasons.append("release is not ACTIVE_DEVELOPMENT_ONLY")
+            if payload.get("user_approved") is not True or payload.get("sealed") is not False:
+                reasons.append("release must be user-approved and unsealed")
+            scope = payload.get("scope")
+            if not isinstance(scope, dict) or scope.get("development_only") is not True \
+                    or scope.get("sealed_partition_opened") is not False:
+                reasons.append("release scope does not authorize unsealed development only")
+            base = str(payload.get("base_commit", ""))
+            if len(base) != 40 or any(ch not in "0123456789abcdef" for ch in base):
+                reasons.append("release base_commit is not a full git SHA")
+            for name in ("spec", "plan"):
+                node = payload.get(name)
+                if not isinstance(node, dict) or not node.get("path") or not node.get("sha256"):
+                    reasons.append(f"release {name} identity is incomplete")
+                    continue
+                source = repo_root() / str(node["path"])
+                if not source.exists():
+                    reasons.append(f"release {name} file is missing")
+                    continue
+                digest = hashlib.sha256(source.read_bytes()).hexdigest()
+                if digest != str(node["sha256"]) or digest != str(payload.get(f"{name}_sha256", "")):
+                    reasons.append(f"release {name} hash mismatch")
+            if reasons:
+                return {"present": False, "valid": False, "path": str(path), "payload": payload,
+                        "reason": "; ".join(reasons)}
+            return {"present": True, "valid": True, "path": str(path), "payload": payload,
+                    "reason": "validated development release"}
     return {"present": False, "path": None, "payload": None, "reason": "no release file"}
 
 

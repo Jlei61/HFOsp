@@ -45,7 +45,10 @@ CATEGORICAL: dict[str, tuple[Any, ...]] = {
     "dropout": (0.0, 0.1),
     "write_width": (2, 4, 8),
     "time_bank": tuple(TIME_BANKS.values()),
-    "dispersion": ("frozen", "low_lr"),
+    # H_mark dispersion belongs to the frozen baseline contract.  ``low_lr``
+    # remains available as an explicit diagnostic recipe, but is not selected
+    # during the scientific search.
+    "dispersion": ("frozen",),
     "sampling": ("anchor_balanced", "event_balanced"),
 }
 GATED_EXTRA: dict[str, tuple[Any, ...]] = {

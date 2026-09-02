@@ -74,14 +74,20 @@ def test_r3_low_disk_or_high_iowait_forbids_new_jobs():
     assert io["slots"] == 0 and io["binding"] == "iowait"
 
 
-def test_r4_missing_supervisor_lease_falls_back_to_the_conservative_default(tmp_path):
+def test_r4_missing_or_inactive_supervisor_lease_fails_closed(tmp_path):
     lease = read_supervisor_lease(tmp_path)
-    assert lease["lease_source"] == "default_conservative" and lease["max_workers"] == DEFAULT_LEASE["max_workers"] == 2
+    assert lease["lease_source"] == "fail_closed_no_active_grant" and lease["max_workers"] == DEFAULT_LEASE["max_workers"] == 0
     grant = tmp_path / "resource_leases" / "supervisor_grant_agent_b.json"
     grant.parent.mkdir(parents=True)
-    grant.write_text(json.dumps({"max_workers": 6, "gpu_ids": [1], "max_gpu_workers": 3, "threads_per_worker": 2}))
+    grant.write_text(json.dumps({"status": "HOLD", "expires_at": "2099-01-01T00:00:00+00:00",
+                                 "max_workers": 6, "gpu_ids": [1], "threads_per_worker": 2}))
     lease = read_supervisor_lease(tmp_path)
-    assert lease["lease_source"] == str(grant) and lease["max_workers"] == 6 and lease["gpu_ids"] == [1]
+    assert lease["max_workers"] == 0 and lease["active"] is False
+    grant.write_text(json.dumps({"status": "ACTIVE_SENTINEL_ONLY", "expires_at": "2099-01-01T00:00:00+00:00",
+                                 "max_workers": 1, "gpu_ids": [1], "threads_per_worker": 2,
+                                 "max_jobs_per_gpu_before_sentinel_review": 1}))
+    lease = read_supervisor_lease(tmp_path)
+    assert lease["lease_source"] == str(grant) and lease["max_workers"] == 1 and lease["gpu_ids"] == [1]
     path = write_agent_lease(tmp_path, {"running_units": 1, "gpu_workers": {"1": 1}})
     payload = json.loads(path.read_text())
     assert payload["agent"] == "agent_b" and payload["pid"] > 0 and "heartbeat_epoch" in payload

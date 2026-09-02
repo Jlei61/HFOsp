@@ -123,13 +123,16 @@ def build_training_card(
     }
     request_ref = None
     if request is not None:
-        request_ref = {k: request.get(k) for k in ("request_id", "scientific_target", "input_view", "state_family",
-                                                    "split_hash", "input_hash", "code_commit", "requested_by")}
+        request_ref = {k: request.get(k) for k in ("request_id", "scientific_target", "input_view", "state_architecture",
+                                                    "split_hash", "input_hash", "science_code_commit", "requested_by")}
     card: dict[str, Any] = {
         "format": CARD_FORMAT, "created_epoch": time.time(), "request": request_ref,
         "recipe": recipe_result.get("config"), "config_hash": recipe_result.get("config_hash"),
         "split_hash": recipe_result.get("split_hash"), "input_hash": recipe_result.get("input_hash"),
-        "code_commit": recipe_result.get("source_commit"), "subject": recipe_result.get("subject"),
+        "code_commit": recipe_result.get("source_commit"),
+        "trainer_code_commit": recipe_result.get("source_commit"),
+        "science_code_commit": None if request is None else request.get("science_code_commit"),
+        "subject": recipe_result.get("subject"),
         "h_source": recipe_result.get("h_source"), "arm": recipe_result.get("arm"),
         "curves": curves, "best_step": recipe_result.get("selected_step"), "plateau": recipe_result.get("plateau"),
         "seed_dispersion": seed_dispersion(seed_results), "gradient_update": gradient_update,

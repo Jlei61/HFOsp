@@ -64,6 +64,7 @@ class RecipeConfig:
     validate_every: int = 10
     patience: int = 10
     amp_encoder: bool = False
+    checkpointing: bool = False
     plateau_factor: float = 0.5
     plateau_patience: int = 5
     improvement_tol: float = 1e-6
@@ -262,6 +263,7 @@ def train_recipe(
     tensors = trainable.tensors(view, device)
     model = trainable.build(cfg.arch, view, seed).to(device)
     model.amp_encoder = bool(cfg.amp_encoder)
+    model.checkpointing = bool(cfg.checkpointing)
     encoder_frozen = arm == "random_reservoir"
     if encoder_frozen:
         for p in model.encoder.parameters():
