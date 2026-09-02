@@ -487,7 +487,8 @@ def main() -> None:
         if "dynamics_seed" in key and isinstance(values, list)
         for seed in values
     }
-    if declared_dynamics and dynamics_seed not in declared_dynamics:
+    if (args.dynamics_seed is not None and declared_dynamics
+            and dynamics_seed not in declared_dynamics):
         parser.error("dynamics seed is outside every frozen dynamics pool")
 
     artifact_root = args.artifact_root.resolve()
