@@ -340,6 +340,23 @@ def matched_interictal_retention(
     }
 
 
+def replace_retention_with_matched(summary: dict, matched: dict) -> None:
+    """Preserve the old audit while making matched retention authoritative."""
+    summary["legacy_full_length_reference_retention"] = {
+        "retained": summary["interictal_substrate_retained"],
+        "support": summary["off_reference_support"],
+        "role": "superseded audit; confounded by event-count mismatch",
+    }
+    summary["event_count_matched_retention"] = matched
+    summary["interictal_substrate_retained"] = matched["retained"]
+    summary["standardized_deterioration"] = matched[
+        "standardized_deterioration"
+    ]
+    summary["worst_standardized_deterioration"] = matched[
+        "worst_standardized_deterioration"
+    ]
+
+
 def summarize_candidate(candidate_id: str, cells: list[dict], off_lookup: dict,
                         support: dict, pooled: dict, level) -> dict:
     complete = _finite([
@@ -609,19 +626,7 @@ def main() -> None:
                 classifier=classifier,
                 kmeans_seed=int(config["validation"]["natural_kmeans_seed"]),
             )
-            summary["legacy_full_length_reference_retention"] = {
-                "retained": summary["interictal_substrate_retained"],
-                "support": summary["off_reference_support"],
-                "role": "superseded audit; confounded by event-count mismatch",
-            }
-            summary["event_count_matched_retention"] = matched
-            summary["interictal_substrate_retained"] = matched["retained"]
-            summary["standardized_deterioration"] = matched[
-                "standardized_deterioration"
-            ]
-            summary["worst_standardized_deterioration"] = matched[
-                "worst_standardized_deterioration"
-            ]
+            replace_retention_with_matched(summary, matched)
         summaries.append(summary)
     _neighbor_scores(summaries)
     active = [row for row in summaries if isinstance(row["level"], dict)]

@@ -15,8 +15,8 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from scripts.aggregate_topic4_rev21_zm_screen import (  # noqa: E402
-    _atomic_json, _load_npz, _resolve, _sha256, reference_support,
-    summarize_candidate,
+    _atomic_json, _load_npz, _resolve, _sha256, matched_interictal_retention,
+    reference_support, replace_retention_with_matched, summarize_candidate,
 )
 from src.topic4_rev20_dual_core_endpoint import (  # noqa: E402
     score_complete_distribution, score_validation_endpoints,
@@ -123,11 +123,13 @@ def main() -> None:
     reference_level = references[0]["level"]
 
     coarse_off = {}
+    coarse_off_arrays = {}
     for path in sorted((output_root / "coarse/workers").glob(
             "rev21_zm_off_topology_*_dynamics_*.json")):
         worker = json.loads(path.read_text())
         arrays = _load_npz(Path(worker["arrays"]["path"]))
         key = (int(worker["topology_seed"]), int(worker["dynamics_seed"]))
+        coarse_off_arrays[key] = arrays
         coarse_off[key] = {
             "selection": score_complete_distribution(
                 arrays["onsets"], arrays["event_returned"],
@@ -145,6 +147,7 @@ def main() -> None:
 
     cells = []
     arrays_by_candidate: dict[str, list[dict]] = {}
+    arrays_by_candidate_cell: dict[str, dict[tuple[int, int], dict]] = {}
     for path in sorted((output_root / "timescale/workers").glob("*.json")):
         worker = json.loads(path.read_text())
         arrays = _load_npz(Path(worker["arrays"]["path"]))
@@ -169,6 +172,9 @@ def main() -> None:
             "worker_json": str(path),
         })
         arrays_by_candidate.setdefault(worker["candidate_id"], []).append(arrays)
+        arrays_by_candidate_cell.setdefault(worker["candidate_id"], {})[
+            (int(worker["topology_seed"]), int(worker["dynamics_seed"]))
+        ] = arrays
     grouped: dict[str, list[dict]] = {}
     for row in cells:
         grouped.setdefault(row["candidate_id"], []).append(row)
@@ -199,6 +205,13 @@ def main() -> None:
             candidate_id, rows, coarse_off, support, pooled,
             levels[candidate_id],
         )
+        matched = matched_interictal_retention(
+            arrays_by_candidate_cell[candidate_id], coarse_off_arrays,
+            contract=contract, training_arrays=training,
+            classifier=classifier,
+            kmeans_seed=int(config["validation"]["natural_kmeans_seed"]),
+        )
+        replace_retention_with_matched(summary, matched)
         summary["log_distance_from_reference"] = timescale_log_distance(
             levels[candidate_id], reference_level,
         )
@@ -211,7 +224,7 @@ def main() -> None:
         and row["interictal_substrate_retained"]
     ]
     payload = {
-        "schema_id": "topic4_rev21_zm_timescale_aggregate_v1",
+        "schema_id": "topic4_rev21_zm_timescale_aggregate_v2",
         "status": ("REV21_TIMESCALE_HAS_CONFIRMATION_FINALIST"
                    if eligible_retained else
                    "NO_CROSS_STATE_WORKPOINT_IN_FROZEN_TIMESCALE_GRID"),
@@ -225,7 +238,14 @@ def main() -> None:
         "patient_heldout_opened": False,
         "patient_ictal_inputs_read": False,
         "selection_unit": "topology_by_dynamics_seed_cell",
-        "pooled_role": "two-cluster presence diagnostic only",
+        "pooled_role": (
+            "event-count-matched development retention screen; not same-network "
+            "two-mode confirmation"
+        ),
+        "retention_calibration": (
+            "patient matched-N absolute distribution floor plus per-cell "
+            "event-count-matched paired Z/M-off retention null"
+        ),
     }
     output = output_root / "timescale/aggregate.json"
     _atomic_json(output, payload)
