@@ -140,7 +140,17 @@ def main() -> None:
         "source_commit": commit,
         "config_sha256": cfg["_config_sha256"],
         "preset": args.preset,
-        "cadence": {"requested_replicates": int(args.replicates), "n_completed": len(results)},
+        "cadence": {
+            "cli_replicates": int(args.replicates),
+            "effective_replicates_per_cell": max(
+                (sum(1 for candidate in specs
+                     if (candidate.kind, candidate.beta_count, candidate.beta_grammar)
+                     == (spec.kind, spec.beta_count, spec.beta_grammar)) for spec in specs),
+                default=0,
+            ),
+            "n_cells": len({(spec.kind, spec.beta_count, spec.beta_grammar) for spec in specs}),
+            "n_completed_jobs": len(results),
+        },
         "views": list(args.views), "levels": list(args.levels), "horizon_seconds": float(args.horizon),
         "curves": curves,
         "evidence_label": "DIAGNOSTIC_SYNTHETIC_ASSAY_ONLY",
