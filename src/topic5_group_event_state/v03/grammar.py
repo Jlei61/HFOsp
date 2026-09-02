@@ -1,9 +1,10 @@
-"""Patient-specific contact grammar with an exact tied-group likelihood.
+"""Patient-specific contact grammar with a product-form tied-group likelihood.
 
 The legacy decoder supplies a useful contact scaffold and within-event GRU, but
 its old categorical action likelihood is not the v0.3 scientific instrument.
-This wrapper calibrates group size/STOP and contact logits on outer TRAIN under
-the exact unordered-without-replacement likelihood.  After calibration every
+This wrapper calibrates group size/STOP and contact logits on a calibration
+prefix under an exactly normalised *product-form conditional K-subset* model.
+It is not an arbitrary distribution over unordered sets.  After calibration every
 grammar parameter is frozen; small state adapters remain trainable and gradient
 flows through the frozen operations to the cross-event state producer.
 """
@@ -33,8 +34,81 @@ class GrammarInputs:
     local_offset: Tensor
 
 
+@dataclass(frozen=True)
+class FactorizedSizeTerms:
+    """The single K=0..N categorical rewritten as continue, K|continue.
+
+    This is an algebraic factorisation of one distribution, not a second STOP
+    head.  It lets reports distinguish termination from positive extent without
+    double counting either term.
+    """
+
+    continue_step_log_prob: Tensor
+    positive_size_step_log_prob: Tensor
+    active_step: Tensor
+    select_step: Tensor
+
+
+def factorized_size_log_prob(
+    group_ids: Tensor,
+    group_count: Tensor,
+    size_logits: Tensor,
+    node_mask: Tensor,
+) -> FactorizedSizeTerms:
+    """Factor a K=0..N categorical into STOP/continue and K|continue."""
+
+    batch, n_contacts = group_ids.shape
+    n_steps = size_logits.shape[1]
+    recruited = torch.zeros_like(node_mask, dtype=torch.bool)
+    continue_logp = size_logits.new_zeros((batch, n_steps))
+    positive_logp = size_logits.new_zeros((batch, n_steps))
+    active_step = torch.zeros((batch, n_steps), dtype=torch.bool, device=group_ids.device)
+    select_step = torch.zeros_like(active_step)
+    size_index = torch.arange(n_contacts + 1, device=group_ids.device).view(1, -1)
+    for step in range(n_steps):
+        active = step <= group_count
+        selecting = step < group_count
+        if not bool(active.any()):
+            break
+        eligible = node_mask & ~recruited
+        eligible_count = eligible.sum(-1)
+        valid_size = size_index <= eligible_count.unsqueeze(-1)
+        unreachable = torch.finfo(size_logits.dtype).min / 4.0
+        masked = torch.where(
+            valid_size,
+            size_logits[:, step],
+            torch.full_like(size_logits[:, step], unreachable),
+        )
+        logp = torch.log_softmax(masked, dim=-1)
+        log_continue = torch.logsumexp(logp[:, 1:], dim=-1)
+        binary_target = torch.where(selecting, log_continue, logp[:, 0])
+        continue_logp[:, step] = torch.where(
+            active, binary_target, torch.zeros_like(binary_target)
+        )
+        target = (group_ids == step) & node_mask
+        target_size = target.sum(-1)
+        safe_continue = torch.where(
+            selecting, log_continue, torch.zeros_like(log_continue)
+        )
+        conditional = (
+            logp.gather(-1, target_size.unsqueeze(-1)).squeeze(-1) - safe_continue
+        )
+        positive_logp[:, step] = torch.where(
+            selecting, conditional, torch.zeros_like(conditional)
+        )
+        active_step[:, step] = active
+        select_step[:, step] = selecting
+        recruited = recruited | target
+    return FactorizedSizeTerms(
+        continue_step_log_prob=continue_logp,
+        positive_size_step_log_prob=positive_logp,
+        active_step=active_step,
+        select_step=select_step,
+    )
+
+
 class FrozenContactGrammar(nn.Module):
-    """Exact tied-group decoder around a legacy patient-specific GRU scaffold."""
+    """Product-form tied-group decoder around a patient-specific GRU scaffold."""
 
     def __init__(
         self,
@@ -139,6 +213,8 @@ class FrozenContactGrammar(nn.Module):
         group_ids: Tensor,
         group_count: Tensor,
         state: Tensor,
+        *,
+        use_state_adapter: bool = True,
     ) -> tuple[TiedMarkTerms, Mapping[str, Tensor]]:
         if group_ids.ndim != 2 or group_ids.shape[1] != self.n_contacts:
             raise ValueError("group_ids has wrong shape")
@@ -149,9 +225,10 @@ class FrozenContactGrammar(nn.Module):
         embedding, encoder_input = self.base._encode(features, offset)
         h = self.base._initial_hidden(embedding, mask)
         s = self.state_norm(state)
-        h = h + torch.sigmoid(self.initial_gate) * self.state_to_initial(s)
-        state_query = torch.sigmoid(self.query_gate) * self.state_to_query(s)
-        state_size = torch.sigmoid(self.size_gate) * self.state_to_size(s)
+        adapter = 1.0 if use_state_adapter else 0.0
+        h = h + adapter * torch.sigmoid(self.initial_gate) * self.state_to_initial(s)
+        state_query = adapter * torch.sigmoid(self.query_gate) * self.state_to_query(s)
+        state_size = adapter * torch.sigmoid(self.size_gate) * self.state_to_size(s)
 
         recruited = torch.zeros_like(mask)
         n_steps = int(group_count.max().detach().cpu()) + 1
@@ -192,10 +269,17 @@ class FrozenContactGrammar(nn.Module):
         terms = tied_group_mark_log_prob(
             group_ids.long(), group_count.long(), size_logits, contact_logits, mask
         )
+        factorized = factorized_size_log_prob(
+            group_ids.long(), group_count.long(), size_logits, mask
+        )
         return terms, {
             "contact_logits": contact_logits,
             "size_logits": size_logits,
             "hidden": torch.stack(hidden_steps, dim=1),
+            "continue_step_log_prob": factorized.continue_step_log_prob,
+            "positive_size_step_log_prob": factorized.positive_size_step_log_prob,
+            "active_step": factorized.active_step,
+            "select_step": factorized.select_step,
         }
 
 

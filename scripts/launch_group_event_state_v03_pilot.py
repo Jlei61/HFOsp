@@ -66,7 +66,8 @@ def main() -> None:
                 "command": [
                     args.python, str(runner), "--mode", "train", "--subject", subject,
                     "--seed", str(seed), "--device", "cuda:0", "--output-root", str(root),
-                    "--max-epochs", str(args.max_epochs), "--chunk-events", "64",
+                    "--max-epochs", str(args.max_epochs),
+                    "--chunk-events", "1024", "--chunk-seconds", "1800",
                 ],
             })
             tasks.append({

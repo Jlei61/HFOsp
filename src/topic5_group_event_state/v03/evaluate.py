@@ -24,6 +24,7 @@ from .pilot import (
     _group_count,
     _to_device,
     build_model,
+    nested_partition,
 )
 
 
@@ -187,6 +188,7 @@ def _score_future_marks(
     *,
     device: torch.device,
     batch_size: int = 256,
+    use_state_adapter: bool = True,
 ) -> dict[str, Any]:
     """Autonomous state flow; actual future event marks are only scoring targets."""
 
@@ -198,13 +200,15 @@ def _score_future_marks(
         pair_anchor.extend([local] * (hi - lo))
         pair_event.extend(range(lo, hi))
     n_anchor = anchor_indices.size
-    size_sum = np.zeros(n_anchor, dtype=np.float64)
+    continue_sum = np.zeros(n_anchor, dtype=np.float64)
+    positive_size_sum = np.zeros(n_anchor, dtype=np.float64)
     subset_sum = np.zeros(n_anchor, dtype=np.float64)
     active_sum = np.zeros(n_anchor, dtype=np.float64)
     select_sum = np.zeros(n_anchor, dtype=np.float64)
     if not pair_event:
         return {
-            "size_nll_per_step": np.full(n_anchor, np.nan),
+            "continue_nll_per_step": np.full(n_anchor, np.nan),
+            "positive_size_nll_per_group": np.full(n_anchor, np.nan),
             "subset_nll_per_group": np.full(n_anchor, np.nan),
             "n_event_pairs": 0,
         }
@@ -231,14 +235,34 @@ def _score_future_marks(
         flowed = model.state.evolve(base, dt)
         ids = torch.from_numpy(raw_ids[sl]).to(device).long()
         count = torch.from_numpy(counts[sl]).to(device).long()
-        terms, _ = model.grammar(ids, count, flowed)
-        np.add.at(size_sum, a_local, -terms.group_size_step_log_prob.sum(-1).cpu().numpy())
+        terms, outputs = model.grammar(
+            ids, count, flowed, use_state_adapter=use_state_adapter
+        )
+        np.add.at(
+            continue_sum,
+            a_local,
+            -outputs["continue_step_log_prob"].sum(-1).cpu().numpy(),
+        )
+        np.add.at(
+            positive_size_sum,
+            a_local,
+            -outputs["positive_size_step_log_prob"].sum(-1).cpu().numpy(),
+        )
         np.add.at(subset_sum, a_local, -terms.subset_step_log_prob.sum(-1).cpu().numpy())
         np.add.at(active_sum, a_local, terms.active_step.sum(-1).cpu().numpy())
         np.add.at(select_sum, a_local, terms.select_step.sum(-1).cpu().numpy())
     return {
-        "size_nll_per_step": np.divide(
-            size_sum, active_sum, out=np.full_like(size_sum, np.nan), where=active_sum > 0
+        "continue_nll_per_step": np.divide(
+            continue_sum,
+            active_sum,
+            out=np.full_like(continue_sum, np.nan),
+            where=active_sum > 0,
+        ),
+        "positive_size_nll_per_group": np.divide(
+            positive_size_sum,
+            select_sum,
+            out=np.full_like(positive_size_sum, np.nan),
+            where=select_sum > 0,
         ),
         "subset_nll_per_group": np.divide(
             subset_sum, select_sum, out=np.full_like(subset_sum, np.nan), where=select_sum > 0
@@ -265,6 +289,7 @@ def evaluate_open_loop(
         return json.loads(report_path.read_text())
     seq = SubjectSequence(DATASET_ROOT / subject)
     timeline = load_subject_timeline(subject)
+    partition = nested_partition(timeline)
     model = build_model(subject, seq, grammar_checkpoint, seed=seed, device=device)
     payload = torch.load(checkpoint, map_location="cpu", weights_only=False)
     model.load_state_dict(payload["model_state"], strict=True)
@@ -282,19 +307,31 @@ def evaluate_open_loop(
         "seed": seed,
         "status": "complete",
         "open_loop_definition": (
-            "state at each fixed test anchor is evolved in real time without "
+            "state at each fixed development-test anchor is evolved in real time without "
             "reading future events; actual future counts and marks are targets only"
         ),
         "horizons": {},
+        "nested_boundary_epochs": partition.boundary_epochs.tolist(),
+        "development_test_only": True,
+        "subset_likelihood_scope": (
+            "exact normalization only within the product-form conditional "
+            "K-subset family, not an arbitrary unordered-set distribution"
+        ),
         "sealed_partition_opened": False,
         "source_commit": SOURCE_COMMIT,
     }
     baseline_keep = _eligible_baseline_columns(timeline.baseline.names)
     for h_i, horizon in enumerate(timeline.config.horizons_seconds):
-        masks = {
-            name: timeline.anchor_mask(name, h_i)
-            for name in ("train", "val", "test")
-        }
+        phase_label = partition.labels_of(timeline.grid.t_anchor)
+        phase_index = {"state_train": 1, "dev_val": 2, "dev_test": 3}
+        masks = {}
+        for name, label in phase_index.items():
+            _lo, phase_hi = partition.bounds(name)
+            masks[name] = (
+                (phase_label == label)
+                & timeline.grid.eligible[:, h_i]
+                & (timeline.grid.t_anchor + float(horizon) <= phase_hi + 1e-6)
+            )
         indices = {name: np.flatnonzero(mask) for name, mask in masks.items()}
         count = {
             name: (
@@ -302,7 +339,7 @@ def evaluate_open_loop(
             ).astype(np.int64)
             for name, idx in indices.items()
         }
-        test_idx = indices["test"]
+        test_idx = indices["dev_test"]
         state_test = anchor[test_idx]
         expected = _expected_count(model, state_test, horizon, device)
         equilibrium_state = np.broadcast_to(
@@ -311,8 +348,8 @@ def evaluate_open_loop(
         zero_state = np.zeros_like(state_test)  # neutral input of calibrated grammar
         expected_zero = _expected_count(model, equilibrium_state, horizon, device)
         baseline_pred, baseline_fit = _fit_count_ridge(
-            timeline.baseline.x[indices["train"]][:, baseline_keep], count["train"],
-            timeline.baseline.x[indices["val"]][:, baseline_keep], count["val"],
+            timeline.baseline.x[indices["state_train"]][:, baseline_keep], count["state_train"],
+            timeline.baseline.x[indices["dev_val"]][:, baseline_keep], count["dev_val"],
             timeline.baseline.x[test_idx][:, baseline_keep],
         )
         donor = _block_shift_donor(timeline, test_idx, horizon)
@@ -327,17 +364,23 @@ def evaluate_open_loop(
             model, timeline, test_idx, state_test, h_i, device=device
         )
         zero_mark = _score_future_marks(
-            model, timeline, test_idx, zero_state, h_i, device=device
+            model,
+            timeline,
+            test_idx,
+            zero_state,
+            h_i,
+            device=device,
+            use_state_adapter=False,
         )
         shift_mark = _score_future_marks(
             model, timeline, test_idx[donor_ok], shifted_states[donor_ok], h_i,
             device=device,
         )
         key = f"{int(horizon)}s"
-        actual = count["test"]
+        actual = count["dev_test"]
         entry = {
             "horizon_seconds": float(horizon),
-            "n_test_anchors": int(test_idx.size),
+            "n_development_test_anchors": int(test_idx.size),
             "n_shift_matched_anchors": int(donor_ok.sum()),
             "count_poisson_nll": {
                 "correct_state": float(_poisson_nll(actual, expected).mean()),
@@ -349,37 +392,42 @@ def evaluate_open_loop(
             },
             "mark_nll": {
                 "correct_state": {
-                    "size": float(np.nanmean(correct_mark["size_nll_per_step"])),
+                    "continue": float(np.nanmean(correct_mark["continue_nll_per_step"])),
+                    "positive_size": float(np.nanmean(correct_mark["positive_size_nll_per_group"])),
                     "subset": float(np.nanmean(correct_mark["subset_nll_per_group"])),
                 },
                 "state_free": {
-                    "size": float(np.nanmean(zero_mark["size_nll_per_step"])),
+                    "continue": float(np.nanmean(zero_mark["continue_nll_per_step"])),
+                    "positive_size": float(np.nanmean(zero_mark["positive_size_nll_per_group"])),
                     "subset": float(np.nanmean(zero_mark["subset_nll_per_group"])),
                 },
                 "block_shifted_state": {
-                    "size": float(np.nanmean(shift_mark["size_nll_per_step"])),
+                    "continue": float(np.nanmean(shift_mark["continue_nll_per_step"])),
+                    "positive_size": float(np.nanmean(shift_mark["positive_size_nll_per_group"])),
                     "subset": float(np.nanmean(shift_mark["subset_nll_per_group"])),
                 } if donor_ok.any() else None,
             },
             "multiscale_count_fit": baseline_fit,
             "state_free_definition": {
                 "count": "fixed dynamical equilibrium with TRAIN marginal intensity",
-                "mark": "zero state adapter input to the calibrated grammar",
+                "mark": "calibrated grammar with every state adapter disabled",
             },
             "n_future_event_pairs": int(correct_mark["n_event_pairs"]),
         }
         report["horizons"][key] = entry
         prefix = f"h{int(horizon)}"
         arrays.update({
-            f"{prefix}_test_anchor_index": test_idx,
+            f"{prefix}_development_test_anchor_index": test_idx,
             f"{prefix}_count_true": actual,
             f"{prefix}_count_expected_state": expected,
             f"{prefix}_count_expected_state_free": expected_zero,
             f"{prefix}_count_expected_multiscale": baseline_pred,
             f"{prefix}_shift_donor_local": donor,
-            f"{prefix}_correct_size_nll": correct_mark["size_nll_per_step"],
+            f"{prefix}_correct_continue_nll": correct_mark["continue_nll_per_step"],
+            f"{prefix}_correct_positive_size_nll": correct_mark["positive_size_nll_per_group"],
             f"{prefix}_correct_subset_nll": correct_mark["subset_nll_per_group"],
-            f"{prefix}_state_free_size_nll": zero_mark["size_nll_per_step"],
+            f"{prefix}_state_free_continue_nll": zero_mark["continue_nll_per_step"],
+            f"{prefix}_state_free_positive_size_nll": zero_mark["positive_size_nll_per_group"],
             f"{prefix}_state_free_subset_nll": zero_mark["subset_nll_per_group"],
         })
     out_dir.mkdir(parents=True, exist_ok=True)

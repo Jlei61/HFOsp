@@ -12,7 +12,12 @@ from torch import Tensor, nn
 
 @dataclass(frozen=True)
 class StateConfig:
-    taus_seconds: tuple[float, ...] = (120.0, 600.0, 1800.0, 7200.0, 43200.0)
+    # Primary bank is deliberately fixed and slow.  The within-event grammar
+    # already owns the fast contact-sequence dynamics; these modes represent
+    # cross-event memory at interpretable physical scales.  Learnable taus are
+    # a later sensitivity, never evidence that a physiological constant was
+    # identified.
+    taus_seconds: tuple[float, ...] = (300.0, 1800.0, 7200.0, 21600.0)
     channels_per_tau: int = 4
     event_dim: int = 64
     update_hidden: int = 64

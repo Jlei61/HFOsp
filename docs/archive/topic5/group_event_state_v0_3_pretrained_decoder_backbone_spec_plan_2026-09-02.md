@@ -1,7 +1,7 @@
 # Group-Event State v0.3：Marked point process 状态骨干与双任务迁移
 
 **日期：** 2026-09-02  
-**状态：** `REVISED_SCIENTIFIC_SPEC_AND_EXECUTION_PLAN`  
+**状态：** `V0_3_1_NESTED_PILOT_CONTRACT`
 **版本关系：** v0.2 的 96 维端到端多任务网络降为 `P_local_multitask` 基线；v0.3 是新的主架构。旧结果不混入新模型选择，正式/封存分区继续关闭。
 
 ## 0. 核心问题
@@ -45,15 +45,9 @@
 
 ### 1.2 第一版数值实现
 
-群体事件约每几秒一次，1 分钟二分类 hazard 会接近饱和，因此 primary 不使用“每分钟有/无事件”。
+primary 直接在相邻真实事件时刻之间积分 intensity，并把每个有效记录段末尾的无事件尾巴纳入 survival likelihood；不使用容易饱和的一分钟二元标签。积分只跨连续有效 coverage，绝不跨记录 gap、发作或 postictal 排除段。
 
-第一版采用有效观测小格上的 piecewise-constant intensity/count likelihood：
-
-\[
-N_j\sim\operatorname{Poisson}(\lambda_j\Delta_j),\qquad r_j=1,
-\]
-
-其中无事件小格的 \(N_j=0\) 自动提供 survival evidence，同一小格多个事件也不会丢失。默认约 1 秒网格；若 TRAIN 上占用率过高，再缩到 250–500 ms。步长只由 TRAIN 决定并冻结。
+同时在固定物理时间 anchor 上加入 5、30、120 min future-count Poisson loss。前者训练局部 timing 与 silence，后者明确要求状态保存对未来一片事件分布有用的信息。两类 loss 分开报告，不混成 accuracy。
 
 ## 2. 状态骨干
 
@@ -66,13 +60,13 @@ v0.3 不再使用 `64 fast + 32 slow = 96` 作为主状态。
 
 ### 2.2 真实时间 flow
 
-保留真实时间衰减，但不让每个维度自由学习一个容易互相替代的 \(\tau\)。pilot 使用固定 log-spaced bank：
+保留真实时间衰减，但不让每个维度自由学习一个容易互相替代的 \(\tau\)。pilot 使用固定 slow bank：
 
 \[
-\tau\in\{2,10,30,120,720\}\ \mathrm{min},
+\tau\in\{5,30,120,360\}\ \mathrm{min},
 \]
 
-每个尺度 4 个通道，共 20 个 nominal dimensions：
+每个尺度 4 个通道，共 16 个 nominal dimensions：
 
 \[
 S_e^-=\mu+\exp(-\Delta t_e/\tau)\odot(S_{e-1}^+-\mu).
@@ -86,7 +80,7 @@ S_e^+=S_e^-+U_\theta(S_e^-,X_e,B_e).
 
 这里的 update 首先解释为 observer 获得新信息后的状态估计更新，不自动解释为 IED 对生理系统的因果推动。
 
-20 维只是容量设置。报告状态协方差谱、participation ratio、adapter effective rank 和跨 seed 子空间一致性，不给单个 latent coordinate 生理命名。
+16 维只是小型容量设置，不是 16 个自由生理时间常数。learnable \(\tau\) 只作为后续 sensitivity；主分析不给单个 latent coordinate 生理命名。
 
 ### 2.3 事件 token
 
@@ -116,7 +110,7 @@ multiband/delay 可以进入 event encoder，但第一版不把所有端点都�
 
 ### 3.1 旧 checkpoint 的角色
 
-现有 `FullHistorySequenceGRU` 有 34 人 × 3 seeds = 102 个 checkpoint，学习了事件内部 prefix → next contact/STOP 的 grammar。它们可用于：
+现有资产的准确说法是：**34 位患者的 inference bundles，每位重复 3 个优化 seeds**；不是 102 个独立患者或 102 个独立预训练任务。旧 `FullHistorySequenceGRU` 学习过事件内部 prefix → next contact/STOP grammar，可用于：
 
 - 初始化新 grammar；
 - 验证旧语法可复现；
@@ -124,31 +118,39 @@ multiband/delay 可以进入 event encoder，但第一版不把所有端点都�
 
 它们不能直接作为 primary，因为旧参数化和新 likelihood 不一致，而且任何看过当前 outer-test 时段统计的 checkpoint 都会形成 transductive 风险。
 
-### 3.2 Primary grammar-v0.3
+### 3.2 Primary grammar-v0.3：严格嵌套时间合同
 
-对每个 outer chronological split：
+每位患者按累计有效记录时间固定分成：
 
-1. 只用 outer TRAIN 初始化/训练 contact grammar；
-2. 所有归一化、contact statistics、坏道支持集和校准只看 outer TRAIN；
-3. inner validation 选择 epoch、正则和 adapter capacity；
-4. outer TEST 只评分一次。
+```text
+0–16%  grammar fit
+16–20% grammar inner-validation
+20–70% interictal state training
+70–80% development validation
+80–100% development test（只评分一次）
+```
 
-旧 checkpoint 只作 TRAIN 内初始化。若旧 package 与该 split 不兼容，则按同架构在 outer TRAIN 重训，不得静默读取 test。
+patient offset、event/contact normalization、group-size statistics 和 calibration bias 都只能来自前 16%；grammar epoch 只由 16–20% 选择。state checkpoint 只由 70–80% 选择。最后 20% 不参与 normalization、超参数或 early stopping。
+
+旧 checkpoint 在 primary 中**只提供网络宽度等架构超参数，不加载任何 learned weight 或 patient offset**。因此本 pilot 是“新 product-form grammar + 新 state”的探索性仪器，不宣称复现旧 scoring；旧 checkpoint parity 是独立辅助路线。
+
+contact vocabulary 应来自不依赖未来事件的固定硬件 montage。当前缓存仍来自旧全记录 refine/packing 的触点筛选，因此本轮只能达到“模型层嵌套干净、上游测量层 transductive”的 development 级别。正式扩队列前必须用固定 montage 或 calibration-prefix 重建 vocabulary；这个限制不能靠模型内 split 消除。
 
 ### 3.3 新 tied-group likelihood
 
 旧 logits 不能直接改名为新的概率量。应先在无状态条件下得到校准合格的 `grammar-v0.3`，再冻结 grammar 并训练状态。
 
-每个 prefix step：
+每个 prefix step 只定义一个 \(K=0,\ldots,N\) categorical，并按下面方式等价分解报告：
 
-1. size head 输出下一 tied-group 大小 \(K\)；\(K=0\) 唯一表示 observed STOP；
-2. 给定 \(K>0\)，contact 权重使用 exact fixed-cardinality conditional-Bernoulli likelihood：
+1. 先报告 continue vs STOP，其中 \(K=0\) 唯一表示 observed STOP；
+2. 若继续，再报告 \(K\mid K>0\)；
+3. 给定 \(K>0\)，contact 权重使用 product-form fixed-cardinality likelihood：
 
 \[
 p(A\mid K)=\frac{\prod_{i\in A}w_i}{e_K(w_{\mathcal C_e})},\qquad |A|=K.
 \]
 
-它在“给定大小后除 cardinality 约束外条件独立”的模型内精确归一化、无序、无放回；不宣称是任意交互集合分布。
+ESP 只保证它在“给定大小后为 product-form 权重”的模型族内精确归一化、无序、无放回；不宣称是任意无序集合分布的 exact likelihood。
 
 STOP 不再另建第二个 Bernoulli，避免重复计数。
 
@@ -179,8 +181,8 @@ q_{e,k}=q_{\mathrm{base}}(h_{e,k})+\alpha_q A_q\widetilde S_e^-,
 \]
 
 \[
-\ell_{K=0}=\ell_{K=0,\mathrm{base}}+
-\alpha_{\mathrm{stop}}a_{\mathrm{stop}}^\top\widetilde S_e^-.
+\boldsymbol\ell_{K}=\boldsymbol\ell_{K,\mathrm{base}}+
+\alpha_{K}A_{K}\widetilde S_e^-.
 \]
 
 - grammar 参数 `requires_grad_(False)` 并进入 `eval()`；
@@ -200,13 +202,16 @@ q_{e,k}=q_{\mathrm{base}}(h_{e,k})+\alpha_q A_q\widetilde S_e^-,
 \mathcal L_{\mathrm{state}}=
 \mathcal L_{\mathrm{IED\ timing/survival}}
 +\beta_1\mathcal L_{\mathrm{group\ size/STOP}}
-+\beta_2\mathcal L_{\mathrm{contact\ identity}\mid K}.
++\beta_2\mathcal L_{\mathrm{contact\ identity}\mid K}
++\sum_{H\in\{5,30,120\}\mathrm{min}}\gamma_H\mathcal L_{\mathrm{future\ count},H}.
 \]
 
 - timing/survival 训练模型使用完整有效时间，而不只是事件行；
+- intensity 写成患者 state-training period 平均事件率上的有符号状态调制，并约束动力学平衡点精确回到该平均率；不能让从未被训练访问的 latent 平衡点在 2 小时 open-loop 时产生任意事件率；
+- pilot 以真实相邻事件区间做细粒度 survival 积分，而不是用会在本队列饱和的一分钟二元格；
 - mark loss 使用事件发生前的 \(S(t_e^-)\)；
 - event waveform 只能在事件结束后更新下一状态；
-- delay、multiband、future count 作为 open-loop probes 或小权重 sensitivity，不再同时成为承重主头；
+- future count 是小权重但预注册的慢状态训练目标；delay、multiband 仍作为 open-loop probes；
 - 不加入 seizure loss、waveform reconstruction 或 latent consistency 来定义 primary interictal state。
 
 ## 6. 慢状态的功能评估
@@ -258,6 +263,12 @@ matched wrong-time donor 只作辅助，避免把真正状态通过过度 matchi
 \]
 
 累计风险从条件 hazard 计算，天然满足时间单调性。primary horizon 固定为 30 分钟，其他 horizon 描绘风险曲线。
+
+\[
+P(T\le H)=1-\prod_{j\le H}(1-h_j).
+\]
+
+不训练五个互相独立的 binary heads。评价以每位患者的 Brier/Brier skill、survival log score 和 reliability 为主，AUROC/敏感度只作 secondary；不能把所有 grid anchors 混成一个跨患者分母。
 
 baseline 至少包括：
 
@@ -322,15 +333,16 @@ baseline 至少包括：
 
 ### Phase 0：split 与 exposure 底座
 
-- 建 chronological outer/inner split；
+- 建 16/4/50/10/20 的 nested physical-time split；
+- 审计旧 patient offset、归一化、vocabulary、size prior、checkpoint selection 与 detector/template 来源；
 - 建有效观测 exposure mask、time-varying contact support 和 seizure/gap boundary；
 - 用 TRAIN 选择 timing 网格；
 - 锁定 event onset、feature-window end、\(S^-\)/\(S^+\) 语义。
 
 ### Phase 1：grammar-v0.3
 
-- 旧 checkpoint 仅作 TRAIN 内初始化；
-- 在 outer TRAIN 下拟合 size/STOP 与 conditional set calibration；
+- 旧 checkpoint 只读架构超参数，不加载 learned weights；
+- 在 calibration fit prefix 拟合 grammar，在 prefix tail 选 epoch；
 - held-out 检查 grammar calibration；
 - 冻结成每患者 inference bundle；
 - 旧 transductive checkpoint 仅作 supportive arm。
@@ -338,7 +350,9 @@ baseline 至少包括：
 ### Phase 2：marked state pilot
 
 - 实现 count/intensity survival likelihood；
-- 实现 event-only 20 维 fixed-timescale state；
+- 实现 event-only 16 维 fixed slow-timescale state；
+- TBPTT 同时限制最多 1024 events 和 30 min，chunk 边界 carry+detach、不 reset；每个 segment 前 5 min 只 burn-in，不计 loss；每个 epoch 从 segment boundary 重放；
+- 加入固定 anchor 的 5/30/120 min future-count loss；
 - 实现 gated low-rank adapter；
 - 3 位预定义患者 × 3 seeds；
 - 检查 state 相对同容量 \(H(t)\)、open-loop horizon 和状态有效秩。
@@ -378,10 +392,14 @@ baseline 至少包括：
 工程上必须确认：
 
 - invalid exposure 不进入 survival；
-- outer TEST 未参与 grammar/state 训练或选择；
+- development test 未参与 grammar/state normalization、训练或选择；
+- patient calibration、state training、development validation/test 时间区间严格不重叠；
+- 当前全记录触点筛选必须被机器审计标为 upstream transductive，不得伪装成完全 nested；
 - adapter 关闭时复现 frozen grammar；
 - frozen grammar 权重不更新，但 state/adapter 有梯度；
 - \(K=0\) 只计算一次 STOP；
+- continue、positive size 和 product-form subset 三项分别输出；
+- TBPTT chunk 同时满足物理时间和事件数上限，边界 detach 但不 reset；
 - coverage mask 真正改变 likelihood support；
 - event feature window 不泄漏到 pre-event state。
 
