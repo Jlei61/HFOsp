@@ -60,7 +60,7 @@
 | [interictal_propagation_masked/rank_displacement/figures/](interictal_propagation_masked/rank_displacement/figures/) | 连续 swap 几何（displacement / cardinality / SOZ overlap） |
 | [interictal_propagation_masked/template_anchoring/figures/](interictal_propagation_masked/template_anchoring/figures/) | endpoint 几何 + 模板对几何 |
 | [interictal_propagation_masked/template_share_switching/figures/](interictal_propagation_masked/template_share_switching/figures/) | 发作前后窗口的模板占比 + 切换 |
-| [paper-ready-figure/fig1/figures/](paper-ready-figure/fig1/figures/) | **Figure 1 canonical outputs**：无角标的 B1/B2、C、D、E、F 独立 PNG/PDF + 带 B–F 字母的 `fig1-complete-layout`；A 为作者手绘。 |
+| [paper-ready-figure/fig1/figures/](paper-ready-figure/fig1/figures/) | **Figure 1 canonical outputs**：无角标的 B1/B2、C、D、E、F 独立 PNG/PDF + 带 B–F 字母的 `fig1-complete-layout`；A 为作者手绘。Fig1-F canonical v5 固定使用 single-template vs multi-cluster MI 的配对分布 inset，不再使用右下灰色 median ΔMI 小字。 |
 | [paper-ready-figure/fig2/figures/](paper-ready-figure/fig2/figures/) | **Figure 2 canonical outputs**：无角标的 A–F 独立 PNG/PDF + 带 A–F 字母的 `fig2-complete-layout`；A 为局部电极几何→平面投影→TA/TB 场，C–F 合同见登记表。 |
 
 **传播（旧版 phantom-contaminated，部分未重跑——引用前确认是否已有 masked 对应）**

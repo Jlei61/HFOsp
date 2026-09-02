@@ -28,7 +28,7 @@
 
 | asset_id | paper_slot | status | canonical_path | producer / 说明 |
 |---|---|---|---|---|
-| `interictal_hfo_temporal_scaffold` | Fig1-B–F | `LOCKED` | `results/paper-ready-figure/fig1/figures/` | 无角标的 B1/B2、C、D、E、F 独立输出 + 带 B–F 角标的 `fig1-complete-layout`；Fig1-A 为作者手绘 |
+| `interictal_hfo_temporal_scaffold` | Fig1-B–F | `LOCKED` | `results/paper-ready-figure/fig1/figures/` | 无角标的 B1/B2、C、D、E、F 独立输出 + 带 B–F 角标的 `fig1-complete-layout`；Fig1-A 为作者手绘。Fig1-F 自 2026-09-02 锁定为 v5：主散点右下必须是 single-template vs multi-cluster MI 配对 inset（患者连线、均值柱、paired Wilcoxon 括号），不得退回灰色 median ΔMI 小字 |
 | `interictal_spatial_scaffold` | Fig2-A–F | `CANDIDATE` | `results/paper-ready-figure/fig2/figures/` | 无角标的 A–F 独立输出 + 带 A–F 角标的 `fig2-complete-layout`；A 为局部电极几何→平面投影→TA/TB 场 |
 | `ictal_field_scaffold` | Fig3-A–F | `LOCKED` | `results/paper-ready-figure/fig3/figures/` | 无角标 A–F 独立 PNG/PDF + 带 A–F 角标的 `fig3-complete-layout`；A raw/TFR，B 四频带，C TA field↔early-ictal broadband，D onset-gradient cohort n=17/16/11，E 单病例时程，F 17-subject A/B heatmap |
 | `working_subject_snn_fig4` | Fig4-A–G | `CANDIDATE` | `results/paper-ready-figure/fig4/figures/` | 当前工作版：A/B 为 E1146 setup，C 已替换为 12 张新网络上的 Node / +EE / +E-to-I / +EE+EI 冻结终点确认，D/E 为双向读出，F/G 为 validation；整图仍是跨阶段组合，当前不是最终锁图 |

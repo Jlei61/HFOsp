@@ -740,6 +740,120 @@ def _render_mi_panel(output_dir: Path, records: list[dict]) -> dict:
     }
 
 
+def _plot_uplift_distribution_inset(
+    ax: plt.Axes,
+    records: list[dict],
+    overall_arr: np.ndarray,
+    within_arr: np.ndarray,
+) -> dict:
+    """Draw the compact paired MI summary used by the supplementary HFO-AUC panel."""
+    import scipy.stats as st
+
+    colors = {"yuquan": COL_YQ, "epilepsiae": EPI_STAT_COLOR}
+
+    def _lighten(color: str, amount: float = 0.62) -> tuple[float, float, float]:
+        rgb = np.asarray(matplotlib.colors.to_rgb(color), dtype=float)
+        return tuple(rgb + (1.0 - rgb) * amount)
+
+    inset = ax.inset_axes([0.61, 0.15, 0.35, 0.30], zorder=6)
+    inset.set_facecolor("white")
+    for record, single_value, multi_value in zip(records, overall_arr, within_arr):
+        dataset_color = colors[str(record["dataset"])]
+        inset.plot(
+            [0, 1],
+            [single_value, multi_value],
+            color="0.38",
+            lw=0.45,
+            alpha=0.46,
+            zorder=1,
+        )
+        inset.scatter(
+            [0, 1],
+            [single_value, multi_value],
+            s=8.5,
+            color=[_lighten(dataset_color), dataset_color],
+            edgecolor="white",
+            linewidth=0.25,
+            alpha=0.86,
+            zorder=3,
+        )
+
+    means = [float(np.mean(overall_arr)), float(np.mean(within_arr))]
+    inset.bar(
+        [0, 1],
+        means,
+        width=0.58,
+        color=["#D9D9D9", "#8AA0AA"],
+        alpha=0.62,
+        edgecolor="none",
+        zorder=0,
+    )
+    inset.hlines(means, [-0.23, 0.77], [0.23, 1.23], color="black", lw=1.05, zorder=4)
+
+    try:
+        test = st.wilcoxon(within_arr, overall_arr, alternative="two-sided", method="auto")
+        statistic = float(test.statistic)
+        p_value = float(test.pvalue)
+    except ValueError:
+        statistic = float("nan")
+        p_value = float("nan")
+    if not np.isfinite(p_value):
+        p_text = "n.s."
+    elif p_value < 0.001:
+        p_text = "***"
+    elif p_value < 0.01:
+        p_text = "**"
+    elif p_value < 0.05:
+        p_text = "*"
+    else:
+        p_text = "n.s."
+
+    bracket_y = float(max(np.max(overall_arr), np.max(within_arr)) + 0.035)
+    cap = 0.012
+    inset.plot(
+        [0, 0, 1, 1],
+        [bracket_y - cap, bracket_y, bracket_y, bracket_y - cap],
+        color="black",
+        lw=0.75,
+        clip_on=False,
+        zorder=5,
+    )
+    inset.text(
+        0.5,
+        bracket_y + 0.008,
+        p_text,
+        ha="center",
+        va="bottom",
+        fontsize=8.0,
+        fontweight="bold" if "*" in p_text else "normal",
+        clip_on=False,
+    )
+    inset.set_xlim(-0.42, 1.42)
+    inset.set_ylim(0.0, max(0.90, bracket_y + 0.055))
+    inset.set_xticks([0, 1], ["Single\ntemplate", "Multi-\ncluster"])
+    inset.set_yticks([0.0, 0.4, 0.8])
+    inset.set_ylabel("MI", fontsize=7.5, labelpad=1.5)
+    inset.tick_params(axis="both", labelsize=6.5, length=2.0, width=0.65, pad=1.0)
+    inset.spines[["top", "right"]].set_visible(False)
+    inset.spines[["left", "bottom"]].set_linewidth(0.65)
+
+    return {
+        "n_paired": int(len(records)),
+        "single_template_mean": means[0],
+        "single_template_median": float(np.median(overall_arr)),
+        "multi_cluster_mean": means[1],
+        "multi_cluster_median": float(np.median(within_arr)),
+        "mean_delta": float(np.mean(within_arr - overall_arr)),
+        "median_delta": float(np.median(within_arr - overall_arr)),
+        "n_improved": int(np.sum(within_arr > overall_arr)),
+        "wilcoxon_two_sided_statistic": statistic,
+        "wilcoxon_two_sided_p": p_value,
+        "significance_label": p_text,
+        "display": "paired subject points and lines, mean bars, and paired Wilcoxon bracket",
+        "reference_grammar": "Supplementary Fig. 2 raw-vs-synchronized HFO AUC",
+    }
+
+
 def _plot_uplift(ax: plt.Axes, records: list[dict]) -> dict:
     colors = {"yuquan": COL_YQ, "epilepsiae": EPI_STAT_COLOR}
     overall = []
@@ -757,20 +871,12 @@ def _plot_uplift(ax: plt.Axes, records: list[dict]) -> dict:
     ax.plot([0, hi], [0, hi], ls="--", lw=0.9, color="0.55", zorder=1)
     ax.set_xlim(0.0, hi)
     ax.set_ylim(0.0, hi)
-    ax.set_xlabel("Overall MI", fontsize=10)
-    ax.set_ylabel("Within-template MI", fontsize=10)
+    ax.set_xlabel("Overall MI", fontsize=18)
+    ax.set_ylabel("Within-template MI", fontsize=18)
     median_uplift = float(np.median(within_arr - overall_arr))
     n_above = int(np.sum(within_arr > overall_arr))
-    ax.set_title("Template-aware MI uplift", fontsize=10.5, pad=7)
-    ax.text(
-        0.96,
-        0.055,
-        f"median ΔMI = {median_uplift:+.3f}",
-        transform=ax.transAxes,
-        ha="right",
-        va="bottom",
-        fontsize=8.5,
-        color="0.35",
+    paired_distribution = _plot_uplift_distribution_inset(
+        ax, records, overall_arr, within_arr,
     )
     ax.legend(
         handles=[
@@ -779,12 +885,16 @@ def _plot_uplift(ax: plt.Axes, records: list[dict]) -> dict:
         ],
         loc="upper right",
         frameon=False,
-        fontsize=8.5,
+        fontsize=15,
         handletextpad=0.35,
         borderaxespad=0.35,
     )
     ax.set_aspect("equal", adjustable="box")
     _style_axis(ax)
+    ax.tick_params(axis="both", labelsize=16, length=6.0, width=1.3)
+    for spine in ax.spines.values():
+        if spine.get_visible():
+            spine.set_linewidth(max(1.2, float(spine.get_linewidth())))
     return {
         "n": int(len(records)),
         "median_uplift": median_uplift,
@@ -793,6 +903,8 @@ def _plot_uplift(ax: plt.Axes, records: list[dict]) -> dict:
         "display_labels": ["Overall MI", "Within-template MI"],
         "underlying_fields": ["adaptive_cluster.overall_tau", "adaptive_cluster.within_cluster_tau_mean"],
         "gray_below_diagonal_region": True,
+        "gray_summary_text_removed": True,
+        "paired_distribution_inset": paired_distribution,
         "axis_limits_start_at_zero": True,
         "dataset_legend": True,
     }
@@ -801,6 +913,7 @@ def _plot_uplift(ax: plt.Axes, records: list[dict]) -> dict:
 def _render_uplift_panel(output_dir: Path, records: list[dict]) -> dict:
     fig, ax = plt.subplots(figsize=(3.9, 3.9), facecolor="white")
     summary = _plot_uplift(ax, records)
+    fig.subplots_adjust(left=0.20, right=0.97, bottom=0.19, top=0.84)
     files = _save_panel(fig, output_dir, "fig1-panelf")
     return {
         "panel_id": "f",
@@ -849,9 +962,9 @@ Figure 1A 是作者手绘示意图，不由代码生成，也不保存在本目�
 
 ### fig1-panelf.png / .pdf
 
-Overall 与 within-template MI 配对散点，量化分模板后的 matching uplift。底层数值仍来自 masked `overall_tau` / `within_cluster_tau_mean` rank-concordance fields，但图面统一使用 MI 简写。画布只显示 median ΔMI，cohort 计数留给 caption/正文。
+Overall 与 within-template MI 配对散点，量化分模板后的 matching uplift。底层数值仍来自 masked `overall_tau` / `within_cluster_tau_mean` rank-concordance fields，但图面统一使用 MI 简写。右下小 panel 复用补充图 HFO AUC 的配对语法，以患者连线、均值柱和配对 Wilcoxon 括号直接比较 single-template 与 multi-cluster MI。
 
-**关注点**：两轴从 0 开始；对角线下方恢复灰区；右上角图例解释蓝色 Yuquan、棕色 Epilepsiae；统计文字移入无数据的右下灰区。
+**关注点**：两轴从 0 开始；对角线下方保留灰区；右上角图例解释蓝色 Yuquan、棕色 Epilepsiae；右下不再放灰色摘要字，而应显示 40 名患者的配对 MI 分布和显著性括号。
 
 ### fig1-complete-layout.png / .pdf
 
@@ -902,7 +1015,14 @@ def build(
     outputs = [f for panel in panels.values() for f in panel["files"]]
 
     metadata = {
-        "schema_version": "paper_figure1_independent_panels_v4",
+        "schema_version": "paper_figure1_independent_panels_v5",
+        "panelf_canonical_contract": {
+            "contract_id": "fig1f_single_template_vs_multi_cluster_paired_inset_v1",
+            "locked_on": "2026-09-02",
+            "required_visual": "paired subject lines and points, mean bars, and paired Wilcoxon bracket in the lower-right inset",
+            "forbidden_visual": "gray median-delta summary text in the lower-right region",
+            "statistics": "two-sided paired Wilcoxon on adaptive_cluster.overall_tau vs adaptive_cluster.within_cluster_tau_mean",
+        },
         "claim_scope": "Interictal HFO population events exhibit recurrent patient-specific temporal organization.",
         "forbidden_upgrade": "This figure alone does not establish a shared 3D propagation axis.",
         "producer": "scripts/paper_figures/plot_fig1_interictal_hfo_temporal_scaffold.py",

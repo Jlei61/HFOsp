@@ -18,6 +18,7 @@ if str(ROOT) not in sys.path:
 PAPER_ROOT = ROOT / "results/paper-ready-figure"
 FIG1_ROOT = PAPER_ROOT / "fig1"
 FIG2_ROOT = PAPER_ROOT / "fig2"
+FIG1_CANONICAL_SCHEMA = "paper_figure1_independent_panels_v5"
 FIG2C_ACCEPTED_SCHEMA = "fig2c_interictal_event_envelope_field_candidate_v10"
 
 
@@ -112,6 +113,23 @@ def _compose_complete_layout(
     return [str(png.relative_to(ROOT)), str(pdf.relative_to(ROOT))]
 
 
+def _assert_fig1f_contract(metadata: dict) -> None:
+    """Fail closed if a future Figure 1 rebuild restores the superseded gray text."""
+    uplift = metadata.get("panels", {}).get("f", {}).get("uplift", {})
+    inset = uplift.get("paired_distribution_inset", {})
+    if (
+        metadata.get("schema_version") != FIG1_CANONICAL_SCHEMA
+        or uplift.get("gray_summary_text_removed") is not True
+        or inset.get("n_paired") != uplift.get("n")
+        or inset.get("reference_grammar")
+        != "Supplementary Fig. 2 raw-vs-synchronized HFO AUC"
+    ):
+        raise RuntimeError(
+            "Canonical Fig1-F contract violated: require the paired single-template "
+            "vs multi-cluster MI inset and forbid the former gray summary text"
+        )
+
+
 def build_figure1() -> dict:
     from scripts.paper_figures import plot_fig1_interictal_hfo_temporal_scaffold as fig1
 
@@ -123,6 +141,7 @@ def build_figure1() -> dict:
         c1_exemplar_label="Epilepsiae E7",
         max_events=2000,
     )
+    _assert_fig1f_contract(metadata)
     figures = FIG1_ROOT / "figures"
     complete = _compose_complete_layout(
         figures_dir=figures,
