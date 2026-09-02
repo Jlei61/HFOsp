@@ -1,0 +1,191 @@
+{
+  "cells": [
+    {
+      "carrying_producer": "P_slow",
+      "control": "P_memoryless (state = a function of dt alone)",
+      "endpoint": "count",
+      "horizon_seconds": 300.0,
+      "median_advantage_of_carrying": -0.00879493720828628,
+      "n_carrying_better": 11,
+      "n_subjects": 26,
+      "p_sign": 0.557197093963623
+    },
+    {
+      "carrying_producer": "P_local",
+      "control": "P_memoryless (state = a function of dt alone)",
+      "endpoint": "count",
+      "horizon_seconds": 300.0,
+      "median_advantage_of_carrying": 0.005173140031404344,
+      "n_carrying_better": 15,
+      "n_subjects": 26,
+      "p_sign": 0.557197093963623
+    },
+    {
+      "carrying_producer": "P_slow",
+      "control": "P_memoryless (state = a function of dt alone)",
+      "endpoint": "count",
+      "horizon_seconds": 1800.0,
+      "median_advantage_of_carrying": -0.00014600316516055756,
+      "n_carrying_better": 12,
+      "n_subjects": 27,
+      "p_sign": 0.7011080384254456
+    },
+    {
+      "carrying_producer": "P_local",
+      "control": "P_memoryless (state = a function of dt alone)",
+      "endpoint": "count",
+      "horizon_seconds": 1800.0,
+      "median_advantage_of_carrying": -4.939111968216281e-05,
+      "n_carrying_better": 13,
+      "n_subjects": 27,
+      "p_sign": 1.0
+    },
+    {
+      "carrying_producer": "P_slow",
+      "control": "P_memoryless (state = a function of dt alone)",
+      "endpoint": "count",
+      "horizon_seconds": 7200.0,
+      "median_advantage_of_carrying": -0.0008665506964931069,
+      "n_carrying_better": 7,
+      "n_subjects": 23,
+      "p_sign": 0.0931396484375
+    },
+    {
+      "carrying_producer": "P_local",
+      "control": "P_memoryless (state = a function of dt alone)",
+      "endpoint": "count",
+      "horizon_seconds": 7200.0,
+      "median_advantage_of_carrying": -0.0005071945596206717,
+      "n_carrying_better": 7,
+      "n_subjects": 23,
+      "p_sign": 0.0931396484375
+    },
+    {
+      "carrying_producer": "P_slow",
+      "control": "P_memoryless (state = a function of dt alone)",
+      "endpoint": "participation",
+      "horizon_seconds": 300.0,
+      "median_advantage_of_carrying": -0.0009829583546667742,
+      "n_carrying_better": 7,
+      "n_subjects": 27,
+      "p_sign": 0.0191572904586792
+    },
+    {
+      "carrying_producer": "P_local",
+      "control": "P_memoryless (state = a function of dt alone)",
+      "endpoint": "participation",
+      "horizon_seconds": 300.0,
+      "median_advantage_of_carrying": -0.0010397459955551192,
+      "n_carrying_better": 10,
+      "n_subjects": 27,
+      "p_sign": 0.24778856337070465
+    },
+    {
+      "carrying_producer": "P_slow",
+      "control": "P_memoryless (state = a function of dt alone)",
+      "endpoint": "participation",
+      "horizon_seconds": 1800.0,
+      "median_advantage_of_carrying": -0.000713113030831547,
+      "n_carrying_better": 6,
+      "n_subjects": 27,
+      "p_sign": 0.005924612283706665
+    },
+    {
+      "carrying_producer": "P_local",
+      "control": "P_memoryless (state = a function of dt alone)",
+      "endpoint": "participation",
+      "horizon_seconds": 1800.0,
+      "median_advantage_of_carrying": -0.0011582015760491227,
+      "n_carrying_better": 8,
+      "n_subjects": 27,
+      "p_sign": 0.052238985896110535
+    },
+    {
+      "carrying_producer": "P_slow",
+      "control": "P_memoryless (state = a function of dt alone)",
+      "endpoint": "participation",
+      "horizon_seconds": 7200.0,
+      "median_advantage_of_carrying": 4.627743969642939e-05,
+      "n_carrying_better": 15,
+      "n_subjects": 23,
+      "p_sign": 0.21003961563110352
+    },
+    {
+      "carrying_producer": "P_local",
+      "control": "P_memoryless (state = a function of dt alone)",
+      "endpoint": "participation",
+      "horizon_seconds": 7200.0,
+      "median_advantage_of_carrying": 0.000695767442883577,
+      "n_carrying_better": 15,
+      "n_subjects": 23,
+      "p_sign": 0.21003961563110352
+    },
+    {
+      "carrying_producer": "P_slow",
+      "control": "P_memoryless (state = a function of dt alone)",
+      "endpoint": "continuous",
+      "horizon_seconds": 300.0,
+      "median_advantage_of_carrying": -0.002871968790558288,
+      "n_carrying_better": 3,
+      "n_subjects": 27,
+      "p_sign": 4.9233436584472656e-05
+    },
+    {
+      "carrying_producer": "P_local",
+      "control": "P_memoryless (state = a function of dt alone)",
+      "endpoint": "continuous",
+      "horizon_seconds": 300.0,
+      "median_advantage_of_carrying": -0.0017207581568594588,
+      "n_carrying_better": 10,
+      "n_subjects": 27,
+      "p_sign": 0.24778856337070465
+    },
+    {
+      "carrying_producer": "P_slow",
+      "control": "P_memoryless (state = a function of dt alone)",
+      "endpoint": "continuous",
+      "horizon_seconds": 1800.0,
+      "median_advantage_of_carrying": -0.001557307969327626,
+      "n_carrying_better": 5,
+      "n_subjects": 27,
+      "p_sign": 0.0015137195587158203
+    },
+    {
+      "carrying_producer": "P_local",
+      "control": "P_memoryless (state = a function of dt alone)",
+      "endpoint": "continuous",
+      "horizon_seconds": 1800.0,
+      "median_advantage_of_carrying": -0.0007144608608560254,
+      "n_carrying_better": 9,
+      "n_subjects": 27,
+      "p_sign": 0.12207812070846558
+    },
+    {
+      "carrying_producer": "P_slow",
+      "control": "P_memoryless (state = a function of dt alone)",
+      "endpoint": "continuous",
+      "horizon_seconds": 7200.0,
+      "median_advantage_of_carrying": -0.0013769666161429495,
+      "n_carrying_better": 9,
+      "n_subjects": 23,
+      "p_sign": 0.4048728942871094
+    },
+    {
+      "carrying_producer": "P_local",
+      "control": "P_memoryless (state = a function of dt alone)",
+      "endpoint": "continuous",
+      "horizon_seconds": 7200.0,
+      "median_advantage_of_carrying": -0.0005511913255082934,
+      "n_carrying_better": 9,
+      "n_subjects": 23,
+      "p_sign": 0.4048728942871094
+    }
+  ],
+  "question": "Does a producer that carries history beat one whose state is a function of the time since the last event and nothing else?",
+  "state_variance_explained_by_dt_median": {
+    "P_local": 0.16638756275888533,
+    "P_memoryless": 0.9987086758784254,
+    "P_slow": 0.14784284270892756
+  },
+  "why_the_block_shift_null_cannot_answer_it": "Shifting a state within its session destroys both the link to the following block and the anchor's own time-since-last-event, so a shifted arm loses two things at once and cannot separate them."
+}

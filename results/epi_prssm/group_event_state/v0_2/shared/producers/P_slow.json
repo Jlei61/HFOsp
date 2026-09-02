@@ -1,0 +1,1557 @@
+{
+  "anchor_grid_minutes": 5.0,
+  "checkpoint_hash": "7789739184db119918efc896de48d818411df0d75cc3ae9cf83daea8f27470d6",
+  "config_hash": "617a6705e6c35ffb855e2838c11a52d1f7c24a4e0df796c11872e7e292ee9001",
+  "dataset_root": "/data/hfosp_group_event_state_v0_1/dataset",
+  "event_update": true,
+  "feedback_model": "observer_only",
+  "model_family": "group_event_recurrent",
+  "notes": {
+    "anchor_state_rows": "one row per fixed 5-min anchor of the full grid",
+    "event_state_rows": "one row per interictal event in a carry segment",
+    "future_loss_weights_example": {
+      "future_0": 9.147597221582789,
+      "future_1": 7.722720729262732,
+      "future_2": 3.421644928894615
+    },
+    "missing_cells": [],
+    "n_subjects": 27,
+    "seed_policy": "3 seeds for the core producers; P_memoryless is a pre-registered seed-1 sensitivity arm and is complete at one seed",
+    "seeds": [
+      1,
+      2,
+      3
+    ],
+    "state_layout": "columns [z_fast | z_slow]; d_fast/d_slow in each result.json"
+  },
+  "physical_dt": true,
+  "producer_id": "P_slow",
+  "selection_objective": "TRAIN chronological inner-validation: the training objective itself (local endpoints excluding group_size, plus each horizon's future-block terms at their frozen weights).  No seizure label and no development-test number enters checkpoint selection.",
+  "source_commit": "54845f4dc73e73b58ba1bc45860f21f74451c130",
+  "status": "complete",
+  "subjects": {
+    "epilepsiae_1073": {
+      "1": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1073/P_slow/seed1/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1073/P_slow/seed1/checkpoint.pt",
+        "checkpoint_sha256": "b78099582a2a475dce3b3b19b1a2f2d1412de54a0f798cb1e43ad0a0d5fb09c1",
+        "config_hash": "cc165acbe637bf5e9fadd303b4f91f2121737dac36b3ed553c63371fa577f95f",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1073/P_slow/seed1/event_state.npz",
+        "n_epochs_run": 11,
+        "param_update_magnitude": {
+          "encoder": 0.014704028826222848,
+          "future": 0.48623544512172095,
+          "heads": 0.19323839338831028,
+          "state": 0.09289040038427117
+        },
+        "peak_memory_reserved_gb": 2.113929216,
+        "selected_epoch": 6,
+        "stop_reason": "early_stopping",
+        "train_seconds": 1034.7
+      },
+      "2": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1073/P_slow/seed2/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1073/P_slow/seed2/checkpoint.pt",
+        "checkpoint_sha256": "412b85f4a88f2167add41ecc0117643176aa3448c9d712a20753b03b23a47521",
+        "config_hash": "35b80b35fb73ded0aad961ceaa730a4a9f8bd75bfc5d439f68610ea653ecf8f5",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1073/P_slow/seed2/event_state.npz",
+        "n_epochs_run": 12,
+        "param_update_magnitude": {
+          "encoder": 0.016169242137625484,
+          "future": 0.4938443195446525,
+          "heads": 0.21420641321328915,
+          "state": 0.1086981137417404
+        },
+        "peak_memory_reserved_gb": 2.113929216,
+        "selected_epoch": 7,
+        "stop_reason": "early_stopping",
+        "train_seconds": 1115.3
+      },
+      "3": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1073/P_slow/seed3/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1073/P_slow/seed3/checkpoint.pt",
+        "checkpoint_sha256": "92e8cd5dcc0365200ef0db40490e50d3b79617d32b32a007e8913dca5d61207f",
+        "config_hash": "b4f984fef72ff66f0a1802509190649338b27f96f7ca921c77ae3053828fdd63",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1073/P_slow/seed3/event_state.npz",
+        "n_epochs_run": 13,
+        "param_update_magnitude": {
+          "encoder": 0.025914567572521915,
+          "future": 0.5622770053061156,
+          "heads": 0.23219307153365684,
+          "state": 0.13493352146031648
+        },
+        "peak_memory_reserved_gb": 2.113929216,
+        "selected_epoch": 8,
+        "stop_reason": "early_stopping",
+        "train_seconds": 1155.9
+      }
+    },
+    "epilepsiae_1077": {
+      "1": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1077/P_slow/seed1/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1077/P_slow/seed1/checkpoint.pt",
+        "checkpoint_sha256": "4075fa19cf508a7477baedffa3dd08e9cbf1d3ea88be615bc33d0438f6b52b19",
+        "config_hash": "a4784cf21523e0d9d307c2108a2213c6ac749259397fb5b93036537570d9d20c",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1077/P_slow/seed1/event_state.npz",
+        "n_epochs_run": 22,
+        "param_update_magnitude": {
+          "encoder": 0.02291573584728631,
+          "future": 0.5016776957647585,
+          "heads": 0.20585515912782743,
+          "state": 0.13457131098729713
+        },
+        "peak_memory_reserved_gb": 2.168455168,
+        "selected_epoch": 17,
+        "stop_reason": "early_stopping",
+        "train_seconds": 457.4
+      },
+      "2": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1077/P_slow/seed2/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1077/P_slow/seed2/checkpoint.pt",
+        "checkpoint_sha256": "e3228787b9b3a7a6a869de4552734d74651a8fd7c36a2371c4b186fa04551b37",
+        "config_hash": "02a4e5c3d624a4ce4fb91be47ce3c885cefcba04da6e468edd2c88343ce201ce",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1077/P_slow/seed2/event_state.npz",
+        "n_epochs_run": 6,
+        "param_update_magnitude": {
+          "encoder": 0.0067246833743045825,
+          "future": 0.17527325993897488,
+          "heads": 0.07079248100597776,
+          "state": 0.04014554617442329
+        },
+        "peak_memory_reserved_gb": 2.168455168,
+        "selected_epoch": 1,
+        "stop_reason": "early_stopping",
+        "train_seconds": 152.7
+      },
+      "3": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1077/P_slow/seed3/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1077/P_slow/seed3/checkpoint.pt",
+        "checkpoint_sha256": "85b87dae473eeaee409954306be098b6b579c82cbd7e02c421cd1fae228e95e3",
+        "config_hash": "a2d4d4bb526251a30292aedd5fd896507e8703c957679078755e8850cc3f84f8",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1077/P_slow/seed3/event_state.npz",
+        "n_epochs_run": 24,
+        "param_update_magnitude": {
+          "encoder": 0.027856663751761487,
+          "future": 0.5074289654630478,
+          "heads": 0.2155900545761602,
+          "state": 0.16403121568528928
+        },
+        "peak_memory_reserved_gb": 2.168455168,
+        "selected_epoch": 23,
+        "stop_reason": "max_epochs",
+        "train_seconds": 528.0
+      }
+    },
+    "epilepsiae_1096": {
+      "1": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1096/P_slow/seed1/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1096/P_slow/seed1/checkpoint.pt",
+        "checkpoint_sha256": "814a52e83967fc70d8a43a744a3260e70049a0427872093f3106908403748d15",
+        "config_hash": "a4784cf21523e0d9d307c2108a2213c6ac749259397fb5b93036537570d9d20c",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1096/P_slow/seed1/event_state.npz",
+        "n_epochs_run": 16,
+        "param_update_magnitude": {
+          "encoder": 0.011897121875423286,
+          "future": 0.731656006475088,
+          "heads": 0.32031400044604225,
+          "state": 0.11277344450889726
+        },
+        "peak_memory_reserved_gb": 2.445279232,
+        "selected_epoch": 11,
+        "stop_reason": "early_stopping",
+        "train_seconds": 2335.7
+      },
+      "2": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1096/P_slow/seed2/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1096/P_slow/seed2/checkpoint.pt",
+        "checkpoint_sha256": "15afd4fb2a603ece8edf497022c11bebbe41f3f38f5f9b53465a935d4e940d93",
+        "config_hash": "02a4e5c3d624a4ce4fb91be47ce3c885cefcba04da6e468edd2c88343ce201ce",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1096/P_slow/seed2/event_state.npz",
+        "n_epochs_run": 8,
+        "param_update_magnitude": {
+          "encoder": 0.007369272581239031,
+          "future": 0.33949911092945734,
+          "heads": 0.17796320101323226,
+          "state": 0.1131356409933499
+        },
+        "peak_memory_reserved_gb": 2.445279232,
+        "selected_epoch": 3,
+        "stop_reason": "early_stopping",
+        "train_seconds": 1222.0
+      },
+      "3": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1096/P_slow/seed3/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1096/P_slow/seed3/checkpoint.pt",
+        "checkpoint_sha256": "8a9e09cd0f6fb6af2d13370a560249409a9f06bbe766d7facff3ade8c388512b",
+        "config_hash": "a2d4d4bb526251a30292aedd5fd896507e8703c957679078755e8850cc3f84f8",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1096/P_slow/seed3/event_state.npz",
+        "n_epochs_run": 9,
+        "param_update_magnitude": {
+          "encoder": 0.0072927176424097025,
+          "future": 0.41029448320644507,
+          "heads": 0.16910110986913518,
+          "state": 0.10319653241404717
+        },
+        "peak_memory_reserved_gb": 2.447376384,
+        "selected_epoch": 4,
+        "stop_reason": "early_stopping",
+        "train_seconds": 1380.7
+      }
+    },
+    "epilepsiae_1125": {
+      "1": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1125/P_slow/seed1/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1125/P_slow/seed1/checkpoint.pt",
+        "checkpoint_sha256": "b276dfa413cd6fd5edf1b38cdb165a65c1cfdd662cb6b10c4fc7cfc19c08d5db",
+        "config_hash": "be72089b2e9de77f96e9a629ee6b746824f71b94b92e87d8e8b7556e2e5c027e",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1125/P_slow/seed1/event_state.npz",
+        "n_epochs_run": 11,
+        "param_update_magnitude": {
+          "encoder": 0.007033096521235829,
+          "future": 0.4303148085414893,
+          "heads": 0.14262985103092835,
+          "state": 0.09473431289997364
+        },
+        "peak_memory_reserved_gb": 3.175088128,
+        "selected_epoch": 6,
+        "stop_reason": "early_stopping",
+        "train_seconds": 364.1
+      },
+      "2": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1125/P_slow/seed2/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1125/P_slow/seed2/checkpoint.pt",
+        "checkpoint_sha256": "2ebd399e2c6c74776f3cd1af0ca962118734b911cb58eb99195b121e2e9625a8",
+        "config_hash": "67410db563a60b444ca46e7509a86bfc63dfced1c7b33fb3926595d84ec660d3",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1125/P_slow/seed2/event_state.npz",
+        "n_epochs_run": 9,
+        "param_update_magnitude": {
+          "encoder": 0.007397153693410218,
+          "future": 0.3651830385172945,
+          "heads": 0.12731266491142235,
+          "state": 0.09736747433418283
+        },
+        "peak_memory_reserved_gb": 3.175088128,
+        "selected_epoch": 4,
+        "stop_reason": "early_stopping",
+        "train_seconds": 330.5
+      },
+      "3": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1125/P_slow/seed3/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1125/P_slow/seed3/checkpoint.pt",
+        "checkpoint_sha256": "a2d803b4179fcedb278c3a3dff96c66a42bc5f208ba6ddc06114fca88fa97292",
+        "config_hash": "94dd7a53f3a35cc6652ed1c9cf4f48c08a4e5c10632ecdea31640dea858d8f4d",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1125/P_slow/seed3/event_state.npz",
+        "n_epochs_run": 11,
+        "param_update_magnitude": {
+          "encoder": 0.0064362056807907055,
+          "future": 0.3787048813702329,
+          "heads": 0.15164472331235063,
+          "state": 0.09342691262460442
+        },
+        "peak_memory_reserved_gb": 3.175088128,
+        "selected_epoch": 6,
+        "stop_reason": "early_stopping",
+        "train_seconds": 407.8
+      }
+    },
+    "epilepsiae_1146": {
+      "1": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1146/P_slow/seed1/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1146/P_slow/seed1/checkpoint.pt",
+        "checkpoint_sha256": "b9941fcd31cf100cdf706130a11c5270464f9d5786cd7f5e682b082b736b2416",
+        "config_hash": "be72089b2e9de77f96e9a629ee6b746824f71b94b92e87d8e8b7556e2e5c027e",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1146/P_slow/seed1/event_state.npz",
+        "n_epochs_run": 24,
+        "param_update_magnitude": {
+          "encoder": 0.010089337491084685,
+          "future": 0.481825515839017,
+          "heads": 0.17199746777849997,
+          "state": 0.11466273051639377
+        },
+        "peak_memory_reserved_gb": 5.773459456,
+        "selected_epoch": 23,
+        "stop_reason": "max_epochs",
+        "train_seconds": 528.1
+      },
+      "2": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1146/P_slow/seed2/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1146/P_slow/seed2/checkpoint.pt",
+        "checkpoint_sha256": "ebad53d8b7c277d9208a563dbbf9232892cbc0eaaa2c8b4a2a676563ac42359f",
+        "config_hash": "67410db563a60b444ca46e7509a86bfc63dfced1c7b33fb3926595d84ec660d3",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1146/P_slow/seed2/event_state.npz",
+        "n_epochs_run": 8,
+        "param_update_magnitude": {
+          "encoder": 0.0038503570491807055,
+          "future": 0.19728646359922514,
+          "heads": 0.07966888794773763,
+          "state": 0.060483468323224404
+        },
+        "peak_memory_reserved_gb": 5.773459456,
+        "selected_epoch": 3,
+        "stop_reason": "early_stopping",
+        "train_seconds": 180.7
+      },
+      "3": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1146/P_slow/seed3/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1146/P_slow/seed3/checkpoint.pt",
+        "checkpoint_sha256": "877fb4254e7292cf18c566a6071302e38275f6e6bc31e6fbedd81a34f76e8201",
+        "config_hash": "94dd7a53f3a35cc6652ed1c9cf4f48c08a4e5c10632ecdea31640dea858d8f4d",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_1146/P_slow/seed3/event_state.npz",
+        "n_epochs_run": 24,
+        "param_update_magnitude": {
+          "encoder": 0.013214186888031535,
+          "future": 0.6136503821593454,
+          "heads": 0.18321765540947502,
+          "state": 0.16263269193806046
+        },
+        "peak_memory_reserved_gb": 5.773459456,
+        "selected_epoch": 23,
+        "stop_reason": "max_epochs",
+        "train_seconds": 571.9
+      }
+    },
+    "epilepsiae_253": {
+      "1": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_253/P_slow/seed1/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_253/P_slow/seed1/checkpoint.pt",
+        "checkpoint_sha256": "28565f2a8d8d46204028758f05ee0ea15a3b1c1ecba3901c4c5aa04839490842",
+        "config_hash": "0fb864d554bf59c6f7fec5710440532a25588f322d783d03f10fa032a5cb2171",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_253/P_slow/seed1/event_state.npz",
+        "n_epochs_run": 9,
+        "param_update_magnitude": {
+          "encoder": 0.013425453231990942,
+          "future": 0.3702662962045665,
+          "heads": 0.08070079692302158,
+          "state": 0.08938242707089673
+        },
+        "peak_memory_reserved_gb": 2.16006656,
+        "selected_epoch": 4,
+        "stop_reason": "early_stopping",
+        "train_seconds": 253.1
+      },
+      "2": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_253/P_slow/seed2/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_253/P_slow/seed2/checkpoint.pt",
+        "checkpoint_sha256": "e0a7d75b1f82afee3392d43eb6ec5631e0699f0882cb6785302c45c11f9b2245",
+        "config_hash": "4c471a2546f15d1fe615e762c567e089fcd42607cf3ebdd1a53684a969b68653",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_253/P_slow/seed2/event_state.npz",
+        "n_epochs_run": 7,
+        "param_update_magnitude": {
+          "encoder": 0.011542258027382098,
+          "future": 0.3062767830421814,
+          "heads": 0.06496062192772477,
+          "state": 0.06812546959996718
+        },
+        "peak_memory_reserved_gb": 2.16006656,
+        "selected_epoch": 2,
+        "stop_reason": "early_stopping",
+        "train_seconds": 208.4
+      },
+      "3": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_253/P_slow/seed3/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_253/P_slow/seed3/checkpoint.pt",
+        "checkpoint_sha256": "ac2014ef71dee1ca6384e33eed52b2e0684f74a492ccc7670113fd1dd87cc1cc",
+        "config_hash": "78246cd781be6f8cef68d28ba63fa97efcae6d13870388c14d192194510ee986",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_253/P_slow/seed3/event_state.npz",
+        "n_epochs_run": 12,
+        "param_update_magnitude": {
+          "encoder": 0.012784261736225343,
+          "future": 0.43517603596605803,
+          "heads": 0.09651240053615169,
+          "state": 0.09632047643484976
+        },
+        "peak_memory_reserved_gb": 2.16006656,
+        "selected_epoch": 7,
+        "stop_reason": "early_stopping",
+        "train_seconds": 376.5
+      }
+    },
+    "epilepsiae_384": {
+      "1": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_384/P_slow/seed1/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_384/P_slow/seed1/checkpoint.pt",
+        "checkpoint_sha256": "6dc24b50e16fa49f36e5c0e4a55ba626ab9221cc5992cc2b6c9666756605eca1",
+        "config_hash": "be72089b2e9de77f96e9a629ee6b746824f71b94b92e87d8e8b7556e2e5c027e",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_384/P_slow/seed1/event_state.npz",
+        "n_epochs_run": 10,
+        "param_update_magnitude": {
+          "encoder": 0.015376109692218627,
+          "future": 0.3273472678232104,
+          "heads": 0.1526457842182591,
+          "state": 0.1012389611677487
+        },
+        "peak_memory_reserved_gb": 3.888119808,
+        "selected_epoch": 5,
+        "stop_reason": "early_stopping",
+        "train_seconds": 420.2
+      },
+      "2": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_384/P_slow/seed2/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_384/P_slow/seed2/checkpoint.pt",
+        "checkpoint_sha256": "e75a1a2003170ff311bb709139403f664dda813f238c4df00f681170749e22ed",
+        "config_hash": "67410db563a60b444ca46e7509a86bfc63dfced1c7b33fb3926595d84ec660d3",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_384/P_slow/seed2/event_state.npz",
+        "n_epochs_run": 11,
+        "param_update_magnitude": {
+          "encoder": 0.00918913469729093,
+          "future": 0.2773170320593405,
+          "heads": 0.12265432112264922,
+          "state": 0.07675340911132728
+        },
+        "peak_memory_reserved_gb": 3.888119808,
+        "selected_epoch": 6,
+        "stop_reason": "early_stopping",
+        "train_seconds": 419.4
+      },
+      "3": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_384/P_slow/seed3/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_384/P_slow/seed3/checkpoint.pt",
+        "checkpoint_sha256": "87857259fc2d98927bf495bd101e1a42d9bd8ed7c641daa1cb3e10821bf05a21",
+        "config_hash": "d3c77b29f2a863b0d6d9c56add47d6c2ddb8d4d08bbb3796a9a5f8035fc683ce",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_384/P_slow/seed3/event_state.npz",
+        "n_epochs_run": 16,
+        "param_update_magnitude": {
+          "encoder": 0.013073996985691942,
+          "future": 0.47479533460618556,
+          "heads": 0.1790686895557874,
+          "state": 0.12317841613619245
+        },
+        "peak_memory_reserved_gb": 3.888119808,
+        "selected_epoch": 11,
+        "stop_reason": "early_stopping",
+        "train_seconds": 557.7
+      }
+    },
+    "epilepsiae_548": {
+      "1": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_548/P_slow/seed1/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_548/P_slow/seed1/checkpoint.pt",
+        "checkpoint_sha256": "9e5d5e405415bad59ce365f60abe4c218b11303b3d85ce958deb8085fb3beff1",
+        "config_hash": "8f78ba427ce5b8c6bc7b8b4e1a11aea2f8e7a077b4d848a92d793366f4291812",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_548/P_slow/seed1/event_state.npz",
+        "n_epochs_run": 11,
+        "param_update_magnitude": {
+          "encoder": 0.007201846587353735,
+          "future": 0.2946599731057522,
+          "heads": 0.09286799375153491,
+          "state": 0.0545383607372397
+        },
+        "peak_memory_reserved_gb": 5.0331648,
+        "selected_epoch": 6,
+        "stop_reason": "early_stopping",
+        "train_seconds": 128.4
+      },
+      "2": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_548/P_slow/seed2/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_548/P_slow/seed2/checkpoint.pt",
+        "checkpoint_sha256": "d110a8a6aa3f4420d7c1bacba62a21074cc42924fab64d12356b96ee383b9563",
+        "config_hash": "29f607660c7e6ad36da38f7175de907178daca8094d2923f44aaf802de899e27",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_548/P_slow/seed2/event_state.npz",
+        "n_epochs_run": 6,
+        "param_update_magnitude": {
+          "encoder": 0.0023918118710552125,
+          "future": 0.1155933166203228,
+          "heads": 0.04358718559172014,
+          "state": 0.023535581971541923
+        },
+        "peak_memory_reserved_gb": 5.0331648,
+        "selected_epoch": 1,
+        "stop_reason": "early_stopping",
+        "train_seconds": 64.8
+      },
+      "3": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_548/P_slow/seed3/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_548/P_slow/seed3/checkpoint.pt",
+        "checkpoint_sha256": "8114c4d139e60adc432bc3e56b8cdfc716a3d06161dd6a8bddf712aedbcc72f1",
+        "config_hash": "d3c77b29f2a863b0d6d9c56add47d6c2ddb8d4d08bbb3796a9a5f8035fc683ce",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_548/P_slow/seed3/event_state.npz",
+        "n_epochs_run": 11,
+        "param_update_magnitude": {
+          "encoder": 0.009217487763078635,
+          "future": 0.28957608942961316,
+          "heads": 0.09944214415747357,
+          "state": 0.062127247832929035
+        },
+        "peak_memory_reserved_gb": 5.0331648,
+        "selected_epoch": 6,
+        "stop_reason": "early_stopping",
+        "train_seconds": 118.1
+      }
+    },
+    "epilepsiae_583": {
+      "1": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_583/P_slow/seed1/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_583/P_slow/seed1/checkpoint.pt",
+        "checkpoint_sha256": "13f3ed6ef80f2e7c60da99d99d5d8767db202694e815e8872c2ca3f8c03ea01f",
+        "config_hash": "8f78ba427ce5b8c6bc7b8b4e1a11aea2f8e7a077b4d848a92d793366f4291812",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_583/P_slow/seed1/event_state.npz",
+        "n_epochs_run": 12,
+        "param_update_magnitude": {
+          "encoder": 0.011714053386443497,
+          "future": 0.3876929356308537,
+          "heads": 0.13914202326851746,
+          "state": 0.10104501528575113
+        },
+        "peak_memory_reserved_gb": 2.675965952,
+        "selected_epoch": 7,
+        "stop_reason": "early_stopping",
+        "train_seconds": 212.0
+      },
+      "2": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_583/P_slow/seed2/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_583/P_slow/seed2/checkpoint.pt",
+        "checkpoint_sha256": "6bde793d92b0f4ac02a3ae7fb2b7802c985c3decea5c873ef0ec88057cd35165",
+        "config_hash": "29f607660c7e6ad36da38f7175de907178daca8094d2923f44aaf802de899e27",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_583/P_slow/seed2/event_state.npz",
+        "n_epochs_run": 21,
+        "param_update_magnitude": {
+          "encoder": 0.013284868926173601,
+          "future": 0.535233434743423,
+          "heads": 0.16779669232418815,
+          "state": 0.11166648486093393
+        },
+        "peak_memory_reserved_gb": 2.675965952,
+        "selected_epoch": 16,
+        "stop_reason": "early_stopping",
+        "train_seconds": 344.3
+      },
+      "3": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_583/P_slow/seed3/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_583/P_slow/seed3/checkpoint.pt",
+        "checkpoint_sha256": "f747a664987a45f9e586e169cafd6562be4583d39aa4acd5d828147ec110d17a",
+        "config_hash": "d3c77b29f2a863b0d6d9c56add47d6c2ddb8d4d08bbb3796a9a5f8035fc683ce",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_583/P_slow/seed3/event_state.npz",
+        "n_epochs_run": 24,
+        "param_update_magnitude": {
+          "encoder": 0.01626027984308087,
+          "future": 0.6215687467086967,
+          "heads": 0.20006262409619183,
+          "state": 0.15040052088274114
+        },
+        "peak_memory_reserved_gb": 2.675965952,
+        "selected_epoch": 23,
+        "stop_reason": "max_epochs",
+        "train_seconds": 408.6
+      }
+    },
+    "epilepsiae_818": {
+      "1": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_818/P_slow/seed1/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_818/P_slow/seed1/checkpoint.pt",
+        "checkpoint_sha256": "76f3b88f8bc856821fb9a83ab275ffecf6335fdbe11969e811fb18909c6f0b2a",
+        "config_hash": "8f78ba427ce5b8c6bc7b8b4e1a11aea2f8e7a077b4d848a92d793366f4291812",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_818/P_slow/seed1/event_state.npz",
+        "n_epochs_run": 24,
+        "param_update_magnitude": {
+          "encoder": 0.011913101669342625,
+          "future": 0.5096023391162441,
+          "heads": 0.1793740930051755,
+          "state": 0.10371176017838037
+        },
+        "peak_memory_reserved_gb": 1.98180864,
+        "selected_epoch": 23,
+        "stop_reason": "max_epochs",
+        "train_seconds": 166.7
+      },
+      "2": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_818/P_slow/seed2/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_818/P_slow/seed2/checkpoint.pt",
+        "checkpoint_sha256": "beb81f40a3a525b9533dd875f09833af55629ce1bcc147d350fb7d155bbf594c",
+        "config_hash": "29f607660c7e6ad36da38f7175de907178daca8094d2923f44aaf802de899e27",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_818/P_slow/seed2/event_state.npz",
+        "n_epochs_run": 24,
+        "param_update_magnitude": {
+          "encoder": 0.009897521191181174,
+          "future": 0.51284221050328,
+          "heads": 0.17301737232486866,
+          "state": 0.09780983925552053
+        },
+        "peak_memory_reserved_gb": 1.98180864,
+        "selected_epoch": 22,
+        "stop_reason": "max_epochs",
+        "train_seconds": 165.3
+      },
+      "3": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_818/P_slow/seed3/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_818/P_slow/seed3/checkpoint.pt",
+        "checkpoint_sha256": "c38ed9c448fc1c0c2394fdd812f4758c4f5e613896593902c0cbdef637a8e57b",
+        "config_hash": "d3c77b29f2a863b0d6d9c56add47d6c2ddb8d4d08bbb3796a9a5f8035fc683ce",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_818/P_slow/seed3/event_state.npz",
+        "n_epochs_run": 24,
+        "param_update_magnitude": {
+          "encoder": 0.010661783575614724,
+          "future": 0.5057470776232197,
+          "heads": 0.17244762654271917,
+          "state": 0.0978777785970531
+        },
+        "peak_memory_reserved_gb": 1.98180864,
+        "selected_epoch": 23,
+        "stop_reason": "max_epochs",
+        "train_seconds": 190.4
+      }
+    },
+    "epilepsiae_916": {
+      "1": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_916/P_slow/seed1/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_916/P_slow/seed1/checkpoint.pt",
+        "checkpoint_sha256": "110af22f419a383ff2669762473a4d81c58cd0664f2088198d0bfdd2a63aedfd",
+        "config_hash": "8bcc5e61d9ab338e4177547b06a4ac6b533b6fd4ac24b1a15a5e119d8f80b465",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_916/P_slow/seed1/event_state.npz",
+        "n_epochs_run": 13,
+        "param_update_magnitude": {
+          "encoder": 0.008864119830606658,
+          "future": 0.4429270861091844,
+          "heads": 0.15661071188649311,
+          "state": 0.12216132934577151
+        },
+        "peak_memory_reserved_gb": 2.017460224,
+        "selected_epoch": 8,
+        "stop_reason": "early_stopping",
+        "train_seconds": 398.3
+      },
+      "2": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_916/P_slow/seed2/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_916/P_slow/seed2/checkpoint.pt",
+        "checkpoint_sha256": "ae8bf136d0e964606bd90296d0b31cef0db500ce071aed4a615372fd4f155731",
+        "config_hash": "96c0232595b359dcac8bc084691246d277f4a9e08f0c25773ad574a93a3dd796",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_916/P_slow/seed2/event_state.npz",
+        "n_epochs_run": 11,
+        "param_update_magnitude": {
+          "encoder": 0.007755429021001417,
+          "future": 0.4224290285779801,
+          "heads": 0.15957235579124807,
+          "state": 0.1020671971294795
+        },
+        "peak_memory_reserved_gb": 2.017460224,
+        "selected_epoch": 6,
+        "stop_reason": "early_stopping",
+        "train_seconds": 339.1
+      },
+      "3": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_916/P_slow/seed3/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_916/P_slow/seed3/checkpoint.pt",
+        "checkpoint_sha256": "294363f13f7fb528347f40a530c18a30e6064b431446b50d33a4c40e47e3a50b",
+        "config_hash": "03d4eeab066c507358a977b4eaf48c5cf5bb3bd3684a7de314baabaad8f694d9",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_916/P_slow/seed3/event_state.npz",
+        "n_epochs_run": 19,
+        "param_update_magnitude": {
+          "encoder": 0.010799282927170577,
+          "future": 0.5437345361062864,
+          "heads": 0.20628259444656957,
+          "state": 0.14631247748328743
+        },
+        "peak_memory_reserved_gb": 2.019557376,
+        "selected_epoch": 14,
+        "stop_reason": "early_stopping",
+        "train_seconds": 559.8
+      }
+    },
+    "epilepsiae_922": {
+      "1": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_922/P_slow/seed1/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_922/P_slow/seed1/checkpoint.pt",
+        "checkpoint_sha256": "e19e9893710bf49a4542c1b5e07ea2ab4969078246a432b24ac363b536ef7d89",
+        "config_hash": "8f78ba427ce5b8c6bc7b8b4e1a11aea2f8e7a077b4d848a92d793366f4291812",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_922/P_slow/seed1/event_state.npz",
+        "n_epochs_run": 17,
+        "param_update_magnitude": {
+          "encoder": 0.014112357357988582,
+          "future": 0.40074066650944573,
+          "heads": 0.21166316040999783,
+          "state": 0.139528784409128
+        },
+        "peak_memory_reserved_gb": 2.965372928,
+        "selected_epoch": 12,
+        "stop_reason": "early_stopping",
+        "train_seconds": 1415.7
+      },
+      "2": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_922/P_slow/seed2/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_922/P_slow/seed2/checkpoint.pt",
+        "checkpoint_sha256": "f439b99fc4c82258e83690f2f80b992bc48d896f4cec03483b2bd4bb4fafaabe",
+        "config_hash": "29f607660c7e6ad36da38f7175de907178daca8094d2923f44aaf802de899e27",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_922/P_slow/seed2/event_state.npz",
+        "n_epochs_run": 18,
+        "param_update_magnitude": {
+          "encoder": 0.016556891566123142,
+          "future": 0.42238126981256613,
+          "heads": 0.19138566844217125,
+          "state": 0.14125979435435015
+        },
+        "peak_memory_reserved_gb": 2.965372928,
+        "selected_epoch": 13,
+        "stop_reason": "early_stopping",
+        "train_seconds": 1430.4
+      },
+      "3": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_922/P_slow/seed3/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_922/P_slow/seed3/checkpoint.pt",
+        "checkpoint_sha256": "1072e76d27aa7030174031c67528ecfd850b3ab1de95fe2d02bc5e86d441bef6",
+        "config_hash": "d3c77b29f2a863b0d6d9c56add47d6c2ddb8d4d08bbb3796a9a5f8035fc683ce",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_922/P_slow/seed3/event_state.npz",
+        "n_epochs_run": 15,
+        "param_update_magnitude": {
+          "encoder": 0.01495756218683575,
+          "future": 0.41290084316421116,
+          "heads": 0.2050279710909066,
+          "state": 0.13611201895145297
+        },
+        "peak_memory_reserved_gb": 2.965372928,
+        "selected_epoch": 10,
+        "stop_reason": "early_stopping",
+        "train_seconds": 1333.2
+      }
+    },
+    "epilepsiae_958": {
+      "1": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_958/P_slow/seed1/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_958/P_slow/seed1/checkpoint.pt",
+        "checkpoint_sha256": "3b5091836eee2c6d3907abea5aee5ffa200f567e067988feb42886363e6c5f40",
+        "config_hash": "8f78ba427ce5b8c6bc7b8b4e1a11aea2f8e7a077b4d848a92d793366f4291812",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_958/P_slow/seed1/event_state.npz",
+        "n_epochs_run": 16,
+        "param_update_magnitude": {
+          "encoder": 0.01736948008560653,
+          "future": 0.7454036455093234,
+          "heads": 0.27704629442660755,
+          "state": 0.18543404561983798
+        },
+        "peak_memory_reserved_gb": 6.138363904,
+        "selected_epoch": 11,
+        "stop_reason": "early_stopping",
+        "train_seconds": 1539.1
+      },
+      "2": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_958/P_slow/seed2/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_958/P_slow/seed2/checkpoint.pt",
+        "checkpoint_sha256": "8b2df64e9d9b0ddbef0b38b9141ce538875dfcc627e669c9a0d51b7b1a9281fd",
+        "config_hash": "29f607660c7e6ad36da38f7175de907178daca8094d2923f44aaf802de899e27",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_958/P_slow/seed2/event_state.npz",
+        "n_epochs_run": 19,
+        "param_update_magnitude": {
+          "encoder": 0.014306165031724178,
+          "future": 0.7022807846193599,
+          "heads": 0.2348474504429162,
+          "state": 0.17145804533780568
+        },
+        "peak_memory_reserved_gb": 6.138363904,
+        "selected_epoch": 14,
+        "stop_reason": "early_stopping",
+        "train_seconds": 1736.0
+      },
+      "3": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_958/P_slow/seed3/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_958/P_slow/seed3/checkpoint.pt",
+        "checkpoint_sha256": "4632ef66c223962b6ffdbf7031b97e3ea22f9f18bbb5174c5cbf7c2dd420cc3f",
+        "config_hash": "d3c77b29f2a863b0d6d9c56add47d6c2ddb8d4d08bbb3796a9a5f8035fc683ce",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_958/P_slow/seed3/event_state.npz",
+        "n_epochs_run": 20,
+        "param_update_magnitude": {
+          "encoder": 0.01199550659028366,
+          "future": 0.659919667158173,
+          "heads": 0.22604583303426903,
+          "state": 0.14970252276196105
+        },
+        "peak_memory_reserved_gb": 6.138363904,
+        "selected_epoch": 15,
+        "stop_reason": "early_stopping",
+        "train_seconds": 1884.4
+      }
+    },
+    "yuquan_chengshuai": {
+      "1": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_chengshuai/P_slow/seed1/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_chengshuai/P_slow/seed1/checkpoint.pt",
+        "checkpoint_sha256": "0593aa049857ee7bced32a8a4ce13b7684fe8c3083180f9e0af804091c403a85",
+        "config_hash": "8f78ba427ce5b8c6bc7b8b4e1a11aea2f8e7a077b4d848a92d793366f4291812",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_chengshuai/P_slow/seed1/event_state.npz",
+        "n_epochs_run": 10,
+        "param_update_magnitude": {
+          "encoder": 0.0160424213083221,
+          "future": 0.3414033316214739,
+          "heads": 0.21712169222708358,
+          "state": 0.09926246512713882
+        },
+        "peak_memory_reserved_gb": 6.767509504,
+        "selected_epoch": 5,
+        "stop_reason": "early_stopping",
+        "train_seconds": 781.1
+      },
+      "2": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_chengshuai/P_slow/seed2/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_chengshuai/P_slow/seed2/checkpoint.pt",
+        "checkpoint_sha256": "c34fba7d1a915f3a6eaf736181e5a90ded6d758a410406b9b8343257268202bb",
+        "config_hash": "29f607660c7e6ad36da38f7175de907178daca8094d2923f44aaf802de899e27",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_chengshuai/P_slow/seed2/event_state.npz",
+        "n_epochs_run": 15,
+        "param_update_magnitude": {
+          "encoder": 0.01504115441914757,
+          "future": 0.4829205634691849,
+          "heads": 0.2801121935698009,
+          "state": 0.1332293804591368
+        },
+        "peak_memory_reserved_gb": 6.767509504,
+        "selected_epoch": 10,
+        "stop_reason": "early_stopping",
+        "train_seconds": 1201.4
+      },
+      "3": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_chengshuai/P_slow/seed3/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_chengshuai/P_slow/seed3/checkpoint.pt",
+        "checkpoint_sha256": "6f2fc5378ffab970c1ff7dd9ccea2fe18ba351169390ff538b21af3097801cdb",
+        "config_hash": "d3c77b29f2a863b0d6d9c56add47d6c2ddb8d4d08bbb3796a9a5f8035fc683ce",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_chengshuai/P_slow/seed3/event_state.npz",
+        "n_epochs_run": 12,
+        "param_update_magnitude": {
+          "encoder": 0.013281684093327676,
+          "future": 0.4379941610709524,
+          "heads": 0.23839914152969902,
+          "state": 0.13558695930693082
+        },
+        "peak_memory_reserved_gb": 6.767509504,
+        "selected_epoch": 7,
+        "stop_reason": "early_stopping",
+        "train_seconds": 976.8
+      }
+    },
+    "yuquan_chenziyang": {
+      "1": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_chenziyang/P_slow/seed1/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_chenziyang/P_slow/seed1/checkpoint.pt",
+        "checkpoint_sha256": "53e45b375be9f0d7948b0e713a72d6366fbb079e76ad1822ef773e2f89f11a07",
+        "config_hash": "4a92886dc40871cd101138b38ba969bf52be270341131928075cfe7f60c6eabe",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_chenziyang/P_slow/seed1/event_state.npz",
+        "n_epochs_run": 8,
+        "param_update_magnitude": {
+          "encoder": 0.006971496895557834,
+          "future": 0.2718269110912366,
+          "heads": 0.11864433476153512,
+          "state": 0.05384735802986635
+        },
+        "peak_memory_reserved_gb": 7.426015232,
+        "selected_epoch": 3,
+        "stop_reason": "early_stopping",
+        "train_seconds": 263.5
+      },
+      "2": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_chenziyang/P_slow/seed2/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_chenziyang/P_slow/seed2/checkpoint.pt",
+        "checkpoint_sha256": "158378dbd96d8f634fcf365b740ddabf863b615108b49fc4bb2bff6c2ca42583",
+        "config_hash": "4c682edd48c957c7703a3d25b6ea5e700dd123aaca3e2bfe3c0040fab6f841f4",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_chenziyang/P_slow/seed2/event_state.npz",
+        "n_epochs_run": 7,
+        "param_update_magnitude": {
+          "encoder": 0.006960136463310552,
+          "future": 0.22705178879939888,
+          "heads": 0.10059874851158035,
+          "state": 0.05195560955628797
+        },
+        "peak_memory_reserved_gb": 7.426015232,
+        "selected_epoch": 2,
+        "stop_reason": "early_stopping",
+        "train_seconds": 208.9
+      },
+      "3": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_chenziyang/P_slow/seed3/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_chenziyang/P_slow/seed3/checkpoint.pt",
+        "checkpoint_sha256": "3837fa2ecaccfde8be27e9fc6797dce88f48d0a0cafec182e17dc2dd318d9c35",
+        "config_hash": "a7026a4d4820914c6da9f2d2885c48a87bed919320c75fc9fbbc79006e5da8bf",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_chenziyang/P_slow/seed3/event_state.npz",
+        "n_epochs_run": 9,
+        "param_update_magnitude": {
+          "encoder": 0.008200786690986239,
+          "future": 0.2781102209803708,
+          "heads": 0.1393707561281148,
+          "state": 0.0639658111332282
+        },
+        "peak_memory_reserved_gb": 7.426015232,
+        "selected_epoch": 4,
+        "stop_reason": "early_stopping",
+        "train_seconds": 271.7
+      }
+    },
+    "yuquan_gaolan": {
+      "1": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_gaolan/P_slow/seed1/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_gaolan/P_slow/seed1/checkpoint.pt",
+        "checkpoint_sha256": "5602505d4667748faf5e429f7fa3a6c1cf4e5e6659988293c8883077fc31ed81",
+        "config_hash": "4a92886dc40871cd101138b38ba969bf52be270341131928075cfe7f60c6eabe",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_gaolan/P_slow/seed1/event_state.npz",
+        "n_epochs_run": 24,
+        "param_update_magnitude": {
+          "encoder": 0.023547501274386484,
+          "future": 0.4307890304476584,
+          "heads": 0.21965324074156098,
+          "state": 0.09086910176317092
+        },
+        "peak_memory_reserved_gb": 8.89192448,
+        "selected_epoch": 22,
+        "stop_reason": "max_epochs",
+        "train_seconds": 250.1
+      },
+      "2": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_gaolan/P_slow/seed2/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_gaolan/P_slow/seed2/checkpoint.pt",
+        "checkpoint_sha256": "87c1557b0d39fe5acc4e3a2f068f3e100b8ebb77719124b266d4d024562f8dac",
+        "config_hash": "4c682edd48c957c7703a3d25b6ea5e700dd123aaca3e2bfe3c0040fab6f841f4",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_gaolan/P_slow/seed2/event_state.npz",
+        "n_epochs_run": 12,
+        "param_update_magnitude": {
+          "encoder": 0.013621022144955813,
+          "future": 0.18045830179366332,
+          "heads": 0.13094521469366144,
+          "state": 0.05019898221401912
+        },
+        "peak_memory_reserved_gb": 8.89192448,
+        "selected_epoch": 7,
+        "stop_reason": "early_stopping",
+        "train_seconds": 129.0
+      },
+      "3": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_gaolan/P_slow/seed3/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_gaolan/P_slow/seed3/checkpoint.pt",
+        "checkpoint_sha256": "fe6593eab2672e76f583eb4ebc786819483036ccfc19dd1ead140445f9565d6f",
+        "config_hash": "a7026a4d4820914c6da9f2d2885c48a87bed919320c75fc9fbbc79006e5da8bf",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_gaolan/P_slow/seed3/event_state.npz",
+        "n_epochs_run": 11,
+        "param_update_magnitude": {
+          "encoder": 0.012897074320135055,
+          "future": 0.16455797373234693,
+          "heads": 0.11164236953767641,
+          "state": 0.046822166831285233
+        },
+        "peak_memory_reserved_gb": 8.89192448,
+        "selected_epoch": 6,
+        "stop_reason": "early_stopping",
+        "train_seconds": 127.1
+      }
+    },
+    "yuquan_hanyuxuan": {
+      "1": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_hanyuxuan/P_slow/seed1/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_hanyuxuan/P_slow/seed1/checkpoint.pt",
+        "checkpoint_sha256": "3a696261ff52f3d8708258691971c454d216348467cdcf913d454bd8c997a0ec",
+        "config_hash": "4a92886dc40871cd101138b38ba969bf52be270341131928075cfe7f60c6eabe",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_hanyuxuan/P_slow/seed1/event_state.npz",
+        "n_epochs_run": 12,
+        "param_update_magnitude": {
+          "encoder": 0.006891397473856385,
+          "future": 0.4274712666304381,
+          "heads": 0.142217747897953,
+          "state": 0.1033696661332299
+        },
+        "peak_memory_reserved_gb": 8.099201024,
+        "selected_epoch": 7,
+        "stop_reason": "early_stopping",
+        "train_seconds": 266.4
+      },
+      "2": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_hanyuxuan/P_slow/seed2/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_hanyuxuan/P_slow/seed2/checkpoint.pt",
+        "checkpoint_sha256": "99d9993228a956be518762e828b4243f1e06368cf4c1615fa81426bb433fbdf3",
+        "config_hash": "4c682edd48c957c7703a3d25b6ea5e700dd123aaca3e2bfe3c0040fab6f841f4",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_hanyuxuan/P_slow/seed2/event_state.npz",
+        "n_epochs_run": 6,
+        "param_update_magnitude": {
+          "encoder": 0.00310901705349963,
+          "future": 0.21143998271957457,
+          "heads": 0.06476535139204131,
+          "state": 0.043518033356143744
+        },
+        "peak_memory_reserved_gb": 10.070523904,
+        "selected_epoch": 1,
+        "stop_reason": "early_stopping",
+        "train_seconds": 142.0
+      },
+      "3": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_hanyuxuan/P_slow/seed3/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_hanyuxuan/P_slow/seed3/checkpoint.pt",
+        "checkpoint_sha256": "243e7d07a25e39476112b3efdaca2442963008fc59aa46d69360ae60bf7cdf8e",
+        "config_hash": "626291521909d844d31758232672378ac47aeeafa3d17d95b545fef077b7e103",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_hanyuxuan/P_slow/seed3/event_state.npz",
+        "n_epochs_run": 15,
+        "param_update_magnitude": {
+          "encoder": 0.006432165106465184,
+          "future": 0.3403402172605168,
+          "heads": 0.1438971735788538,
+          "state": 0.08314619790776936
+        },
+        "peak_memory_reserved_gb": 16.647192576,
+        "selected_epoch": 10,
+        "stop_reason": "early_stopping",
+        "train_seconds": 335.1
+      }
+    },
+    "yuquan_huangwanling": {
+      "1": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_huangwanling/P_slow/seed1/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_huangwanling/P_slow/seed1/checkpoint.pt",
+        "checkpoint_sha256": "6a6289857fb3bcca20871f68a53388508db5f920ae6ba90c546d88be34226457",
+        "config_hash": "4a92886dc40871cd101138b38ba969bf52be270341131928075cfe7f60c6eabe",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_huangwanling/P_slow/seed1/event_state.npz",
+        "n_epochs_run": 6,
+        "param_update_magnitude": {
+          "encoder": 0.01772284629607572,
+          "future": 0.16447551140372685,
+          "heads": 0.17114566159488853,
+          "state": 0.06851580028740246
+        },
+        "peak_memory_reserved_gb": 2.692743168,
+        "selected_epoch": 1,
+        "stop_reason": "early_stopping",
+        "train_seconds": 1653.6
+      },
+      "2": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_huangwanling/P_slow/seed2/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_huangwanling/P_slow/seed2/checkpoint.pt",
+        "checkpoint_sha256": "c1fc17d03efa94bd9dcfc4a1528e4406579de16cd8a4070d438da21c187f67ac",
+        "config_hash": "79beea1fe1177dc74209e40c7ebe776d698f4a379a2a09c95ba24a53c3c2c399",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_huangwanling/P_slow/seed2/event_state.npz",
+        "n_epochs_run": 7,
+        "param_update_magnitude": {
+          "encoder": 0.02074654330200681,
+          "future": 0.17387813269755367,
+          "heads": 0.21089909675156712,
+          "state": 0.08147564428717011
+        },
+        "peak_memory_reserved_gb": 2.692743168,
+        "selected_epoch": 2,
+        "stop_reason": "early_stopping",
+        "train_seconds": 1910.9
+      },
+      "3": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_huangwanling/P_slow/seed3/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_huangwanling/P_slow/seed3/checkpoint.pt",
+        "checkpoint_sha256": "7b24156dd60be5f23744c9c5bd77c31bedf6c32504e6ca2a0e640334260854e5",
+        "config_hash": "d3db008e5b54fc28eca1d16cbf48bf826400a8cd41159e87131d523cbeab44ab",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_huangwanling/P_slow/seed3/event_state.npz",
+        "n_epochs_run": 14,
+        "param_update_magnitude": {
+          "encoder": 0.056362442603910094,
+          "future": 0.32010236903751216,
+          "heads": 0.3354300519116516,
+          "state": 0.18415225903872184
+        },
+        "peak_memory_reserved_gb": 2.692743168,
+        "selected_epoch": 9,
+        "stop_reason": "early_stopping",
+        "train_seconds": 3684.2
+      }
+    },
+    "yuquan_pengzihang": {
+      "1": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_pengzihang/P_slow/seed1/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_pengzihang/P_slow/seed1/checkpoint.pt",
+        "checkpoint_sha256": "066a9deea67d648559875c5a5e8403c0aa8f6641dba8d5f0ff154cfb38c617e0",
+        "config_hash": "376f7c3ab9f6f5b75719405194d8511c0e593868dce68e2099e5bf33a9f568c7",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_pengzihang/P_slow/seed1/event_state.npz",
+        "n_epochs_run": 10,
+        "param_update_magnitude": {
+          "encoder": 0.028165455454097748,
+          "future": 0.3269998677681887,
+          "heads": 0.26081542105227135,
+          "state": 0.10355857746618781
+        },
+        "peak_memory_reserved_gb": 10.106175488,
+        "selected_epoch": 5,
+        "stop_reason": "early_stopping",
+        "train_seconds": 779.7
+      },
+      "2": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_pengzihang/P_slow/seed2/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_pengzihang/P_slow/seed2/checkpoint.pt",
+        "checkpoint_sha256": "f51bee0a2666aaa431cbc14de09674d9d81dde4dd26264500fd97c2e0369bb14",
+        "config_hash": "79beea1fe1177dc74209e40c7ebe776d698f4a379a2a09c95ba24a53c3c2c399",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_pengzihang/P_slow/seed2/event_state.npz",
+        "n_epochs_run": 14,
+        "param_update_magnitude": {
+          "encoder": 0.04377732520047888,
+          "future": 0.3257526814687236,
+          "heads": 0.251619042864787,
+          "state": 0.1238434958455814
+        },
+        "peak_memory_reserved_gb": 9.602859008,
+        "selected_epoch": 9,
+        "stop_reason": "early_stopping",
+        "train_seconds": 1063.4
+      },
+      "3": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_pengzihang/P_slow/seed3/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_pengzihang/P_slow/seed3/checkpoint.pt",
+        "checkpoint_sha256": "0ef538f29bdca8df2ec53aa4bbd9144afde701c89e87ab27198ca1ffb384e38b",
+        "config_hash": "d3db008e5b54fc28eca1d16cbf48bf826400a8cd41159e87131d523cbeab44ab",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_pengzihang/P_slow/seed3/event_state.npz",
+        "n_epochs_run": 15,
+        "param_update_magnitude": {
+          "encoder": 0.04431345314148418,
+          "future": 0.33710946072420267,
+          "heads": 0.2753756938790486,
+          "state": 0.12949479964637717
+        },
+        "peak_memory_reserved_gb": 10.106175488,
+        "selected_epoch": 10,
+        "stop_reason": "early_stopping",
+        "train_seconds": 1175.4
+      }
+    },
+    "yuquan_sunyuanxin": {
+      "1": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_sunyuanxin/P_slow/seed1/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_sunyuanxin/P_slow/seed1/checkpoint.pt",
+        "checkpoint_sha256": "e3783e649b90f0ac4af57ab7ae25e6f07fa030ede4947ea7093696bbacb695e0",
+        "config_hash": "376f7c3ab9f6f5b75719405194d8511c0e593868dce68e2099e5bf33a9f568c7",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_sunyuanxin/P_slow/seed1/event_state.npz",
+        "n_epochs_run": 16,
+        "param_update_magnitude": {
+          "encoder": 0.009027482694802571,
+          "future": 0.21417644080951764,
+          "heads": 0.149437755126009,
+          "state": 0.0686864528334155
+        },
+        "peak_memory_reserved_gb": 4.481613824,
+        "selected_epoch": 11,
+        "stop_reason": "early_stopping",
+        "train_seconds": 73.0
+      },
+      "2": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_sunyuanxin/P_slow/seed2/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_sunyuanxin/P_slow/seed2/checkpoint.pt",
+        "checkpoint_sha256": "305af5ca624f9813f1fd2212535d799ebd70bd2f74cbf1bccade8467c0e4394f",
+        "config_hash": "79beea1fe1177dc74209e40c7ebe776d698f4a379a2a09c95ba24a53c3c2c399",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_sunyuanxin/P_slow/seed2/event_state.npz",
+        "n_epochs_run": 23,
+        "param_update_magnitude": {
+          "encoder": 0.009391089921980433,
+          "future": 0.2583434367170825,
+          "heads": 0.12907982673399432,
+          "state": 0.05616771506548032
+        },
+        "peak_memory_reserved_gb": 8.50395136,
+        "selected_epoch": 18,
+        "stop_reason": "early_stopping",
+        "train_seconds": 116.8
+      },
+      "3": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_sunyuanxin/P_slow/seed3/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_sunyuanxin/P_slow/seed3/checkpoint.pt",
+        "checkpoint_sha256": "705726c201bc10e8ec87393d55ecc7fa44561d8dd5c9436a79ddf6b364fbfd7c",
+        "config_hash": "d3db008e5b54fc28eca1d16cbf48bf826400a8cd41159e87131d523cbeab44ab",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_sunyuanxin/P_slow/seed3/event_state.npz",
+        "n_epochs_run": 24,
+        "param_update_magnitude": {
+          "encoder": 0.013502082675877327,
+          "future": 0.3048967061133276,
+          "heads": 0.18254240911232142,
+          "state": 0.09200647912578849
+        },
+        "peak_memory_reserved_gb": 5.228199936,
+        "selected_epoch": 20,
+        "stop_reason": "max_epochs",
+        "train_seconds": 107.7
+      }
+    },
+    "yuquan_xuxinyi": {
+      "1": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_xuxinyi/P_slow/seed1/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_xuxinyi/P_slow/seed1/checkpoint.pt",
+        "checkpoint_sha256": "0f6f5ced72a05136f49a109851c082290fbd6eb3bea72560a6c9600078535611",
+        "config_hash": "376f7c3ab9f6f5b75719405194d8511c0e593868dce68e2099e5bf33a9f568c7",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_xuxinyi/P_slow/seed1/event_state.npz",
+        "n_epochs_run": 11,
+        "param_update_magnitude": {
+          "encoder": 0.00686964884164207,
+          "future": 0.2370486242960677,
+          "heads": 0.09211192169655259,
+          "state": 0.05436819662781053
+        },
+        "peak_memory_reserved_gb": 9.107931136,
+        "selected_epoch": 6,
+        "stop_reason": "early_stopping",
+        "train_seconds": 198.7
+      },
+      "2": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_xuxinyi/P_slow/seed2/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_xuxinyi/P_slow/seed2/checkpoint.pt",
+        "checkpoint_sha256": "663ac98c90311971a3cd8ca9b97870af4670ca6676d802ee4449cb49fcb2ef0b",
+        "config_hash": "79beea1fe1177dc74209e40c7ebe776d698f4a379a2a09c95ba24a53c3c2c399",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_xuxinyi/P_slow/seed2/event_state.npz",
+        "n_epochs_run": 21,
+        "param_update_magnitude": {
+          "encoder": 0.0130470359973079,
+          "future": 0.36238889223606735,
+          "heads": 0.14473544054146775,
+          "state": 0.08926076380215507
+        },
+        "peak_memory_reserved_gb": 9.107931136,
+        "selected_epoch": 16,
+        "stop_reason": "early_stopping",
+        "train_seconds": 393.2
+      },
+      "3": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_xuxinyi/P_slow/seed3/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_xuxinyi/P_slow/seed3/checkpoint.pt",
+        "checkpoint_sha256": "104890de10b41a04a268f653af7977c3087b06da3add8d31cc3c50edbb15bb72",
+        "config_hash": "d3db008e5b54fc28eca1d16cbf48bf826400a8cd41159e87131d523cbeab44ab",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_xuxinyi/P_slow/seed3/event_state.npz",
+        "n_epochs_run": 7,
+        "param_update_magnitude": {
+          "encoder": 0.004575454416470747,
+          "future": 0.15070726725878447,
+          "heads": 0.0541899053962474,
+          "state": 0.03275105586303485
+        },
+        "peak_memory_reserved_gb": 9.107931136,
+        "selected_epoch": 2,
+        "stop_reason": "early_stopping",
+        "train_seconds": 133.7
+      }
+    },
+    "yuquan_zhangbichen": {
+      "1": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhangbichen/P_slow/seed1/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhangbichen/P_slow/seed1/checkpoint.pt",
+        "checkpoint_sha256": "d20a266066864a2dacef4d7f890548f1436a92e8eb4b2c7356f5db58dde209b8",
+        "config_hash": "3d0324064ceaeeebcdbbc07c64484949288e6b65a2a307bb9bbd815026e801c9",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhangbichen/P_slow/seed1/event_state.npz",
+        "n_epochs_run": 5,
+        "param_update_magnitude": {
+          "encoder": 0.0018292049408147044,
+          "future": 0.1683008078290052,
+          "heads": 0.08755355177767768,
+          "state": 0.035625556567140025
+        },
+        "peak_memory_reserved_gb": 4.46693376,
+        "selected_epoch": 0,
+        "stop_reason": "early_stopping",
+        "train_seconds": 149.8
+      },
+      "2": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhangbichen/P_slow/seed2/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhangbichen/P_slow/seed2/checkpoint.pt",
+        "checkpoint_sha256": "6276b15d987d6fed5998a3fc365c723b2f826e94d5dbd56231aecab56c60ed41",
+        "config_hash": "c20ea473a734f9fcb6e9a99eebc5992b9b9e470435dcfa5126a711a145e4a949",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhangbichen/P_slow/seed2/event_state.npz",
+        "n_epochs_run": 5,
+        "param_update_magnitude": {
+          "encoder": 0.0027007213207108417,
+          "future": 0.17464900359625868,
+          "heads": 0.08732828407796923,
+          "state": 0.037949817414975606
+        },
+        "peak_memory_reserved_gb": 4.46693376,
+        "selected_epoch": 0,
+        "stop_reason": "early_stopping",
+        "train_seconds": 157.1
+      },
+      "3": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhangbichen/P_slow/seed3/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhangbichen/P_slow/seed3/checkpoint.pt",
+        "checkpoint_sha256": "7aca36aa7ab040f9ff7be116dac5316fb7b6ac5524ec448599f8de48670bc7d2",
+        "config_hash": "626291521909d844d31758232672378ac47aeeafa3d17d95b545fef077b7e103",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhangbichen/P_slow/seed3/event_state.npz",
+        "n_epochs_run": 5,
+        "param_update_magnitude": {
+          "encoder": 0.001868323684673296,
+          "future": 0.13363331604844944,
+          "heads": 0.04710275218456093,
+          "state": 0.03150220949811744
+        },
+        "peak_memory_reserved_gb": 10.603200512,
+        "selected_epoch": 0,
+        "stop_reason": "early_stopping",
+        "train_seconds": 175.0
+      }
+    },
+    "yuquan_zhangjiaqi": {
+      "1": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhangjiaqi/P_slow/seed1/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhangjiaqi/P_slow/seed1/checkpoint.pt",
+        "checkpoint_sha256": "f316f895bbb0bd4c89ec75ca250ae4b7af9b4cadfcd434bd3aed4ded42fc8743",
+        "config_hash": "3d0324064ceaeeebcdbbc07c64484949288e6b65a2a307bb9bbd815026e801c9",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhangjiaqi/P_slow/seed1/event_state.npz",
+        "n_epochs_run": 17,
+        "param_update_magnitude": {
+          "encoder": 0.050229817135524164,
+          "future": 0.6049567969956805,
+          "heads": 0.3632221242812256,
+          "state": 0.15753230432327034
+        },
+        "peak_memory_reserved_gb": 4.091543552,
+        "selected_epoch": 12,
+        "stop_reason": "early_stopping",
+        "train_seconds": 1419.9
+      },
+      "2": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhangjiaqi/P_slow/seed2/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhangjiaqi/P_slow/seed2/checkpoint.pt",
+        "checkpoint_sha256": "d077298894f4c9dba4ad0e8eb475a4834e6de8bfca1150982ed8819565d70c48",
+        "config_hash": "c20ea473a734f9fcb6e9a99eebc5992b9b9e470435dcfa5126a711a145e4a949",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhangjiaqi/P_slow/seed2/event_state.npz",
+        "n_epochs_run": 11,
+        "param_update_magnitude": {
+          "encoder": 0.034189368786867895,
+          "future": 0.33319829787483407,
+          "heads": 0.23431203430890518,
+          "state": 0.09737671871954946
+        },
+        "peak_memory_reserved_gb": 4.091543552,
+        "selected_epoch": 6,
+        "stop_reason": "early_stopping",
+        "train_seconds": 930.2
+      },
+      "3": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhangjiaqi/P_slow/seed3/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhangjiaqi/P_slow/seed3/checkpoint.pt",
+        "checkpoint_sha256": "d2dd30ae70739ead756191e351de2acbafb58b1373f8d2b2387fc81f79aa9ad3",
+        "config_hash": "626291521909d844d31758232672378ac47aeeafa3d17d95b545fef077b7e103",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhangjiaqi/P_slow/seed3/event_state.npz",
+        "n_epochs_run": 6,
+        "param_update_magnitude": {
+          "encoder": 0.01368584424467975,
+          "future": 0.19256134441669917,
+          "heads": 0.09980004364500619,
+          "state": 0.04844868196197404
+        },
+        "peak_memory_reserved_gb": 4.091543552,
+        "selected_epoch": 1,
+        "stop_reason": "early_stopping",
+        "train_seconds": 538.5
+      }
+    },
+    "yuquan_zhangjinhan": {
+      "1": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhangjinhan/P_slow/seed1/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhangjinhan/P_slow/seed1/checkpoint.pt",
+        "checkpoint_sha256": "c5429ce459bdf926ae09e0937eb01c995e39edfff8ed8b94d774ebde2c078163",
+        "config_hash": "3d0324064ceaeeebcdbbc07c64484949288e6b65a2a307bb9bbd815026e801c9",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhangjinhan/P_slow/seed1/event_state.npz",
+        "n_epochs_run": 7,
+        "param_update_magnitude": {
+          "encoder": 0.0064802496572389555,
+          "future": 0.17288138551956014,
+          "heads": 0.0788733066642702,
+          "state": 0.04293085987275697
+        },
+        "peak_memory_reserved_gb": 2.933915648,
+        "selected_epoch": 2,
+        "stop_reason": "early_stopping",
+        "train_seconds": 110.4
+      },
+      "2": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhangjinhan/P_slow/seed2/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhangjinhan/P_slow/seed2/checkpoint.pt",
+        "checkpoint_sha256": "11e44f454694ff3626c4805eedcc79359b6e8aba2609c96868365b174fe28fbf",
+        "config_hash": "c20ea473a734f9fcb6e9a99eebc5992b9b9e470435dcfa5126a711a145e4a949",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhangjinhan/P_slow/seed2/event_state.npz",
+        "n_epochs_run": 9,
+        "param_update_magnitude": {
+          "encoder": 0.007323684173529714,
+          "future": 0.21907955143187285,
+          "heads": 0.11047218990429998,
+          "state": 0.050400411732091636
+        },
+        "peak_memory_reserved_gb": 2.933915648,
+        "selected_epoch": 4,
+        "stop_reason": "early_stopping",
+        "train_seconds": 145.0
+      },
+      "3": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhangjinhan/P_slow/seed3/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhangjinhan/P_slow/seed3/checkpoint.pt",
+        "checkpoint_sha256": "92cd62b8f431c2a09d5d9ce5e9ffbaef6efff1d7884307c982a7148a0f7ce60b",
+        "config_hash": "626291521909d844d31758232672378ac47aeeafa3d17d95b545fef077b7e103",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhangjinhan/P_slow/seed3/event_state.npz",
+        "n_epochs_run": 12,
+        "param_update_magnitude": {
+          "encoder": 0.011038513171901233,
+          "future": 0.2738885040407056,
+          "heads": 0.14992597058903182,
+          "state": 0.06912982465880767
+        },
+        "peak_memory_reserved_gb": 2.933915648,
+        "selected_epoch": 7,
+        "stop_reason": "early_stopping",
+        "train_seconds": 193.0
+      }
+    },
+    "yuquan_zhangkexuan": {
+      "1": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhangkexuan/P_slow/seed1/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhangkexuan/P_slow/seed1/checkpoint.pt",
+        "checkpoint_sha256": "3ab2a467e1d0a71be25989941b8ed7af80553e2aa34a5307c224974356239780",
+        "config_hash": "3d0324064ceaeeebcdbbc07c64484949288e6b65a2a307bb9bbd815026e801c9",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhangkexuan/P_slow/seed1/event_state.npz",
+        "n_epochs_run": 10,
+        "param_update_magnitude": {
+          "encoder": 0.007166928569600085,
+          "future": 0.2715889994433387,
+          "heads": 0.12900759084109487,
+          "state": 0.07957492695443899
+        },
+        "peak_memory_reserved_gb": 11.783897088,
+        "selected_epoch": 5,
+        "stop_reason": "early_stopping",
+        "train_seconds": 308.6
+      },
+      "2": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhangkexuan/P_slow/seed2/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhangkexuan/P_slow/seed2/checkpoint.pt",
+        "checkpoint_sha256": "e89f4575a8855c79c421f5849babf2a96586ab82b5ce60d0db252e6c3ceb2607",
+        "config_hash": "c20ea473a734f9fcb6e9a99eebc5992b9b9e470435dcfa5126a711a145e4a949",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhangkexuan/P_slow/seed2/event_state.npz",
+        "n_epochs_run": 7,
+        "param_update_magnitude": {
+          "encoder": 0.013016476227637705,
+          "future": 0.28167421997150094,
+          "heads": 0.17529335723828843,
+          "state": 0.11298826929475549
+        },
+        "peak_memory_reserved_gb": 3.871342592,
+        "selected_epoch": 2,
+        "stop_reason": "early_stopping",
+        "train_seconds": 308.1
+      },
+      "3": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhangkexuan/P_slow/seed3/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhangkexuan/P_slow/seed3/checkpoint.pt",
+        "checkpoint_sha256": "824010476706469c547a5d96df6d8d6127dfb10ec651beb04c74574b421ae3f9",
+        "config_hash": "626291521909d844d31758232672378ac47aeeafa3d17d95b545fef077b7e103",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhangkexuan/P_slow/seed3/event_state.npz",
+        "n_epochs_run": 12,
+        "param_update_magnitude": {
+          "encoder": 0.009039011215965146,
+          "future": 0.3327593949876269,
+          "heads": 0.1779053735052403,
+          "state": 0.09396849183651963
+        },
+        "peak_memory_reserved_gb": 7.501512704,
+        "selected_epoch": 7,
+        "stop_reason": "early_stopping",
+        "train_seconds": 384.1
+      }
+    },
+    "yuquan_zhaojinrui": {
+      "1": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhaojinrui/P_slow/seed1/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhaojinrui/P_slow/seed1/checkpoint.pt",
+        "checkpoint_sha256": "851c28f2d2887eae00011e56bb468d963a0f57340ec41063ebf4f2d5c84f862c",
+        "config_hash": "3d0324064ceaeeebcdbbc07c64484949288e6b65a2a307bb9bbd815026e801c9",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhaojinrui/P_slow/seed1/event_state.npz",
+        "n_epochs_run": 12,
+        "param_update_magnitude": {
+          "encoder": 0.014522847657606081,
+          "future": 0.33419504405696465,
+          "heads": 0.24286383906404885,
+          "state": 0.12902190090494456
+        },
+        "peak_memory_reserved_gb": 3.615490048,
+        "selected_epoch": 7,
+        "stop_reason": "early_stopping",
+        "train_seconds": 1216.4
+      },
+      "2": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhaojinrui/P_slow/seed2/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhaojinrui/P_slow/seed2/checkpoint.pt",
+        "checkpoint_sha256": "0ebd1f59f637243bb132365c2fecf9d374b95175cd1447963ee5ad0674dedf51",
+        "config_hash": "c20ea473a734f9fcb6e9a99eebc5992b9b9e470435dcfa5126a711a145e4a949",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhaojinrui/P_slow/seed2/event_state.npz",
+        "n_epochs_run": 14,
+        "param_update_magnitude": {
+          "encoder": 0.01444186528333257,
+          "future": 0.34084570953035653,
+          "heads": 0.23961585249969758,
+          "state": 0.11870753737723794
+        },
+        "peak_memory_reserved_gb": 3.615490048,
+        "selected_epoch": 9,
+        "stop_reason": "early_stopping",
+        "train_seconds": 1391.5
+      },
+      "3": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhaojinrui/P_slow/seed3/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhaojinrui/P_slow/seed3/checkpoint.pt",
+        "checkpoint_sha256": "50085ed95ccfaa1643cf32e515bb9fb82d35eabea3241943066bc28362848f89",
+        "config_hash": "626291521909d844d31758232672378ac47aeeafa3d17d95b545fef077b7e103",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhaojinrui/P_slow/seed3/event_state.npz",
+        "n_epochs_run": 8,
+        "param_update_magnitude": {
+          "encoder": 0.011290057130206959,
+          "future": 0.2728201257178923,
+          "heads": 0.19278407489716493,
+          "state": 0.09784130034405894
+        },
+        "peak_memory_reserved_gb": 3.615490048,
+        "selected_epoch": 3,
+        "stop_reason": "early_stopping",
+        "train_seconds": 802.5
+      }
+    },
+    "yuquan_zhourongxuan": {
+      "1": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhourongxuan/P_slow/seed1/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhourongxuan/P_slow/seed1/checkpoint.pt",
+        "checkpoint_sha256": "5f09975319d59d3444ac9e2239f01cb8b36c1b3fb531a0acdc36f3a27ac12555",
+        "config_hash": "3d0324064ceaeeebcdbbc07c64484949288e6b65a2a307bb9bbd815026e801c9",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhourongxuan/P_slow/seed1/event_state.npz",
+        "n_epochs_run": 10,
+        "param_update_magnitude": {
+          "encoder": 0.027003220082620585,
+          "future": 0.30215956439371056,
+          "heads": 0.17975603471135643,
+          "state": 0.08382177513394659
+        },
+        "peak_memory_reserved_gb": 2.373976064,
+        "selected_epoch": 5,
+        "stop_reason": "early_stopping",
+        "train_seconds": 573.6
+      },
+      "2": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhourongxuan/P_slow/seed2/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhourongxuan/P_slow/seed2/checkpoint.pt",
+        "checkpoint_sha256": "5f2ccb64c6c0e682ab70334cc36e8d687e9cfe72420857f758597ba168cf1501",
+        "config_hash": "c20ea473a734f9fcb6e9a99eebc5992b9b9e470435dcfa5126a711a145e4a949",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhourongxuan/P_slow/seed2/event_state.npz",
+        "n_epochs_run": 10,
+        "param_update_magnitude": {
+          "encoder": 0.03293610392534785,
+          "future": 0.34722852706975127,
+          "heads": 0.1954128989851255,
+          "state": 0.09828623406213978
+        },
+        "peak_memory_reserved_gb": 2.373976064,
+        "selected_epoch": 5,
+        "stop_reason": "early_stopping",
+        "train_seconds": 572.4
+      },
+      "3": {
+        "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhourongxuan/P_slow/seed3/anchor_state.npz",
+        "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhourongxuan/P_slow/seed3/checkpoint.pt",
+        "checkpoint_sha256": "a90f5cbd6e2b7fba7297915b104ab22d320aebb20cf4141f3b8396d17730e179",
+        "config_hash": "626291521909d844d31758232672378ac47aeeafa3d17d95b545fef077b7e103",
+        "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_zhourongxuan/P_slow/seed3/event_state.npz",
+        "n_epochs_run": 8,
+        "param_update_magnitude": {
+          "encoder": 0.022906897093303267,
+          "future": 0.2805952087756029,
+          "heads": 0.1434349967459246,
+          "state": 0.07213814028793865
+        },
+        "peak_memory_reserved_gb": 2.373976064,
+        "selected_epoch": 3,
+        "stop_reason": "early_stopping",
+        "train_seconds": 456.1
+      }
+    }
+  },
+  "target_builder_hash": "bbcbf3756ba19ffbe8dcd3f425c8b5d3ddb2ec30cae05c27b7182908e7425e7e",
+  "timeline_config_hash": "d0e34bac9f9ead01e53d329ef93bc5772deaf801129ebe578f1c455a43f4780b",
+  "training_objective": [
+    "next_event",
+    "future_5m",
+    "future_30m",
+    "future_120m"
+  ],
+  "uses_background": false,
+  "uses_multiband": true,
+  "uses_waveform": true
+}

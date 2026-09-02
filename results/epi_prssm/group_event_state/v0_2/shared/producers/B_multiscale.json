@@ -1,0 +1,113 @@
+{
+  "anchor_grid_minutes": 5.0,
+  "checkpoint_hash": "not_applicable_closed_form_features",
+  "config_hash": "87aa769158e23db4c121fe5252fa29136467de05b7a129d07e5397a8947a656c",
+  "dataset_root": "/data/hfosp_group_event_state_v0_1/dataset",
+  "event_update": false,
+  "feedback_model": "none",
+  "model_family": "multiscale_ewma_glm",
+  "notes": {
+    "features": "1/5/30/120 min EWMA of rate, size/STOP, participation field, repertoire embedding and band energy, plus clock, session geometry and seizure bookkeeping",
+    "n_subjects": 27,
+    "seizure_times_note": "baseline nuisance model only; never an input to a representation producer",
+    "uses_seizure_times": true
+  },
+  "physical_dt": true,
+  "producer_id": "B_multiscale",
+  "selection_objective": "ridge chosen per endpoint family by chronological CV inside TRAIN; no development-test number enters the choice",
+  "source_commit": "54845f4dc73e73b58ba1bc45860f21f74451c130",
+  "status": "complete",
+  "subjects": {
+    "epilepsiae_1073": {
+      "result": "/data/hfosp_group_event_state_v0_2/agent_a/future_block/baseline_only/per_subject/epilepsiae_1073.json"
+    },
+    "epilepsiae_1077": {
+      "result": "/data/hfosp_group_event_state_v0_2/agent_a/future_block/baseline_only/per_subject/epilepsiae_1077.json"
+    },
+    "epilepsiae_1096": {
+      "result": "/data/hfosp_group_event_state_v0_2/agent_a/future_block/baseline_only/per_subject/epilepsiae_1096.json"
+    },
+    "epilepsiae_1125": {
+      "result": "/data/hfosp_group_event_state_v0_2/agent_a/future_block/baseline_only/per_subject/epilepsiae_1125.json"
+    },
+    "epilepsiae_1146": {
+      "result": "/data/hfosp_group_event_state_v0_2/agent_a/future_block/baseline_only/per_subject/epilepsiae_1146.json"
+    },
+    "epilepsiae_253": {
+      "result": "/data/hfosp_group_event_state_v0_2/agent_a/future_block/baseline_only/per_subject/epilepsiae_253.json"
+    },
+    "epilepsiae_384": {
+      "result": "/data/hfosp_group_event_state_v0_2/agent_a/future_block/baseline_only/per_subject/epilepsiae_384.json"
+    },
+    "epilepsiae_548": {
+      "result": "/data/hfosp_group_event_state_v0_2/agent_a/future_block/baseline_only/per_subject/epilepsiae_548.json"
+    },
+    "epilepsiae_583": {
+      "result": "/data/hfosp_group_event_state_v0_2/agent_a/future_block/baseline_only/per_subject/epilepsiae_583.json"
+    },
+    "epilepsiae_818": {
+      "result": "/data/hfosp_group_event_state_v0_2/agent_a/future_block/baseline_only/per_subject/epilepsiae_818.json"
+    },
+    "epilepsiae_916": {
+      "result": "/data/hfosp_group_event_state_v0_2/agent_a/future_block/baseline_only/per_subject/epilepsiae_916.json"
+    },
+    "epilepsiae_922": {
+      "result": "/data/hfosp_group_event_state_v0_2/agent_a/future_block/baseline_only/per_subject/epilepsiae_922.json"
+    },
+    "epilepsiae_958": {
+      "result": "/data/hfosp_group_event_state_v0_2/agent_a/future_block/baseline_only/per_subject/epilepsiae_958.json"
+    },
+    "yuquan_chengshuai": {
+      "result": "/data/hfosp_group_event_state_v0_2/agent_a/future_block/baseline_only/per_subject/yuquan_chengshuai.json"
+    },
+    "yuquan_chenziyang": {
+      "result": "/data/hfosp_group_event_state_v0_2/agent_a/future_block/baseline_only/per_subject/yuquan_chenziyang.json"
+    },
+    "yuquan_gaolan": {
+      "result": "/data/hfosp_group_event_state_v0_2/agent_a/future_block/baseline_only/per_subject/yuquan_gaolan.json"
+    },
+    "yuquan_hanyuxuan": {
+      "result": "/data/hfosp_group_event_state_v0_2/agent_a/future_block/baseline_only/per_subject/yuquan_hanyuxuan.json"
+    },
+    "yuquan_huangwanling": {
+      "result": "/data/hfosp_group_event_state_v0_2/agent_a/future_block/baseline_only/per_subject/yuquan_huangwanling.json"
+    },
+    "yuquan_pengzihang": {
+      "result": "/data/hfosp_group_event_state_v0_2/agent_a/future_block/baseline_only/per_subject/yuquan_pengzihang.json"
+    },
+    "yuquan_sunyuanxin": {
+      "result": "/data/hfosp_group_event_state_v0_2/agent_a/future_block/baseline_only/per_subject/yuquan_sunyuanxin.json"
+    },
+    "yuquan_xuxinyi": {
+      "result": "/data/hfosp_group_event_state_v0_2/agent_a/future_block/baseline_only/per_subject/yuquan_xuxinyi.json"
+    },
+    "yuquan_zhangbichen": {
+      "result": "/data/hfosp_group_event_state_v0_2/agent_a/future_block/baseline_only/per_subject/yuquan_zhangbichen.json"
+    },
+    "yuquan_zhangjiaqi": {
+      "result": "/data/hfosp_group_event_state_v0_2/agent_a/future_block/baseline_only/per_subject/yuquan_zhangjiaqi.json"
+    },
+    "yuquan_zhangjinhan": {
+      "result": "/data/hfosp_group_event_state_v0_2/agent_a/future_block/baseline_only/per_subject/yuquan_zhangjinhan.json"
+    },
+    "yuquan_zhangkexuan": {
+      "result": "/data/hfosp_group_event_state_v0_2/agent_a/future_block/baseline_only/per_subject/yuquan_zhangkexuan.json"
+    },
+    "yuquan_zhaojinrui": {
+      "result": "/data/hfosp_group_event_state_v0_2/agent_a/future_block/baseline_only/per_subject/yuquan_zhaojinrui.json"
+    },
+    "yuquan_zhourongxuan": {
+      "result": "/data/hfosp_group_event_state_v0_2/agent_a/future_block/baseline_only/per_subject/yuquan_zhourongxuan.json"
+    }
+  },
+  "target_builder_hash": "bbcbf3756ba19ffbe8dcd3f425c8b5d3ddb2ec30cae05c27b7182908e7425e7e",
+  "timeline_config_hash": "d0e34bac9f9ead01e53d329ef93bc5772deaf801129ebe578f1c455a43f4780b",
+  "training_objective": [
+    "future_5m",
+    "future_30m",
+    "future_120m"
+  ],
+  "uses_background": false,
+  "uses_multiband": true,
+  "uses_waveform": false
+}

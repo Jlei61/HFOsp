@@ -1,0 +1,73 @@
+{
+  "byte_identical_seed_groups": [],
+  "future_loss_weights": {
+    "120m": {
+      "max": 53.25182443959493,
+      "median": 3.5618846990316557,
+      "min": 0.291481187970868
+    },
+    "30m": {
+      "max": 58.10551247094583,
+      "median": 5.800513822852382,
+      "min": 0.3245301933347874
+    },
+    "5m": {
+      "max": 73.5131389547925,
+      "median": 7.815578397659483,
+      "min": 0.649957145420943
+    }
+  },
+  "n_runs": 189,
+  "n_runs_that_selected_their_last_epoch": 14,
+  "n_runs_with_a_nonfinite_step": 0,
+  "n_runs_with_an_oom_retry": 12,
+  "n_subject_producer_groups_with_byte_identical_seeds": 0,
+  "n_subjects": 27,
+  "note": "A run that selected its own last epoch never saw the validation objective turn, so its stopping point is a budget, not a convergence; those are counted separately.  Byte-identical seeds would mean one fit counted several times (EI 2).",
+  "param_update_magnitude": {
+    "encoder": {
+      "max": 0.06194240482110737,
+      "median": 0.011038513171901233,
+      "min": 0.0
+    },
+    "future": {
+      "max": 0.9154481603075902,
+      "median": 0.33830428582683003,
+      "min": 0.07317388044581224
+    },
+    "heads": {
+      "max": 0.6114488101190514,
+      "median": 0.17975603471135643,
+      "min": 0.03409398696372071
+    },
+    "state": {
+      "max": 0.29232341793339545,
+      "median": 0.09165350559436448,
+      "min": 0.0009994754081389036
+    }
+  },
+  "peak_memory_reserved_gb": {
+    "max": 18.777899008,
+    "median": 2.921332736,
+    "min": 0.757071872
+  },
+  "producers": [
+    "P_local",
+    "P_memoryless",
+    "P_slow"
+  ],
+  "stop_reasons": {
+    "early_stopping": 162,
+    "max_epochs": 27
+  },
+  "tau_slow_median_seconds": {
+    "max": 14369.1357421875,
+    "median": 11632.0537109375,
+    "min": 7842.20751953125
+  },
+  "train_seconds": {
+    "max": 3684.2,
+    "median": 398.3,
+    "min": 22.2
+  }
+}
