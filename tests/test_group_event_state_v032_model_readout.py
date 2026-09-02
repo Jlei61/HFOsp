@@ -23,8 +23,9 @@ def test_r1_nb_log_prob_matches_scipy_pointwise():
     log_r = torch.tensor(math.log(3.5))
     got = nb_log_prob(y, mu, log_r)
     r = 3.5
-    ref = stats.nbinom.logpmf(y.numpy(), r, r / (r + mu.numpy()))
-    assert np.allclose(got.numpy(), ref, atol=1e-4)
+    y64, mu64 = y.numpy().astype(np.float64), mu.numpy().astype(np.float64)
+    ref = stats.nbinom.logpmf(y64, r, r / (r + mu64))  # float64 reference (float32 gammaln is 1e-3 off)
+    assert np.allclose(got.numpy(), ref, atol=1e-5)
 
 
 def test_r2_dispersion_mle_recovers_simulated_r():
