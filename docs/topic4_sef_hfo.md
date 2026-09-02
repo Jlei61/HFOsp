@@ -52,6 +52,15 @@
 > 距离/OOD，却削弱第二模板；aspect=4.0 在 screen 4/4 runaway。结论是**连接几何/联合通路调节控制
 > repertoire，Node 窄幅强度调节不是主要杠杆；完整患者分布仍未恢复**。详见
 > `docs/archive/topic4/sef_hfo/rev20_dc_dual_core_mechanism_atlas_result_2026-09-02.md`。
+>
+> **冻结 dual-core 的 Z/M 跨状态结果（2026-09-03，development）：** 先把随机性拆成
+> `3 topology × 4 dynamics`，12/12 单元均有自然 K=2，但完整距离、alignment、OOD 和事件数均有
+> 很强的 topology×dynamics interaction。随后在 `Joint=1.25` 上完成 4×4 Z/M 幅度图与 3×3 时间
+> 常数图。较快 `tau_z=3 s` 能稳定抬高触点频率，但只有 1/36 个 timescale 单元达到模型发作资格，
+> 且该参数点合计只有 4 个发作前完整事件、只出现一个冻结方向；较慢时间尺度可保留间期底物，却没有
+> model-ictal 合格单元。状态为 `NO_CROSS_STATE_WORKPOINT_IN_FROZEN_TIMESCALE_GRID`；未跑 confirmation、
+> 未打开患者发作 target、未生成 Fig.5。详见
+> `docs/archive/topic4/sef_hfo/rev21_dual_core_zm_cross_state_result_2026-09-03.md`。
 
 ---
 
