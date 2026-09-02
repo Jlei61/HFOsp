@@ -46,6 +46,7 @@
 - **没有** state-to-state 混合、没有 LayerNorm、没有可学习 τ、状态模块 0 个可训练参数（审计项）。
 - 轨迹用 chunked-cumsum 闭式精确计算（float64 内部、float32 输出），对 `u` 的梯度**不截断**（120 min 尺度的 credit assignment 完整）。TBPTT 的 chunk-detach 只作为审计开关存在。
 - anchor 状态：`S_a = exp(−(t_a − t_last)/τ)·S⁺_last`（同 segment 内最后一个严格早于 anchor 的事件；没有则 0）。
+- **读出前的 TRAIN-only 固定均值/尺度（实现后补记，2026-09-02 晚）**：τ=2 h 的积分器持有 rate×τ ≈ 10²–10³ 次事件写入，原始 `S` 量级悬殊，未标准化的 `α·wᵀS` 读出条件极差（toy 上训练损失在 70 步后单调回升）。因此读出使用 `S̃ = (S − mean_train)/scale_train`，统计量取自 state_train anchors。训练前向中该统计量（以及 φ 的 TRAIN 均值）是当前全批次 TRAIN 集的**可微**函数（等价于对整个 TRAIN 集做一次确定性 BatchNorm；detach 版本会让梯度与目标不一致，toy 上表现为损失回升），评估/回放/导出一律使用冻结进 checkpoint 的 TRAIN buffer。它不是 per-time LayerNorm：不按样本归一化，不改变各 τ 的名义时间常数。
 
 ### 3.2 triage 对照：repaired RNN
 同一 `X_e`、同一标准化、同一 τ 衰减、同一 residual adapter、同一 NB loss 与优化器分组，仅把写入换成旧 v0.3 的 gated 更新：`[g, c] = U_θ([S⁻, e_e])`，`S⁺ = S⁻ + σ(g)·frac(τ)·(tanh(c) − S⁻)`，`e_e ∈ R^16` 来自同族 MLP。修复项：去掉所有 LayerNorm、TRAIN-only 固定标准化、H 上的 residual 读出、α 非零初始化。逐事件顺序计算（segments 并行 padding），梯度同样不截断。
@@ -65,6 +66,8 @@
 1. `H`；2. `H+S_correct`；3. `H+S_shifted`（segment 内 block-circular 半段移位，donor 与本 anchor 至少相隔一个 horizon；副本：1/4、3/4 移位）；4. `H+mean(S_train)`；5. `H+S_random`（同结构、encoder 随机冻结、只训 adapter 的 random reservoir）。
 对比量为逐 anchor 配对 NB NLL 差（nats/anchor），报告均值、segment 内 moving-block bootstrap CI、favourable segments 数、seeds 中位数、effective independent windows。
 
+**臂定义的两点后果（实现后补记）**：(i) 因为读出使用 TRAIN 中心化的 `S̃` 且没有自由截距，`H+mean(S_train)` 的调制恒为 0，该臂 = `log μ_H` 配以 H+S 模型学到的 dispersion；因此 `mean − correct` 度量的是"固定 dispersion 下动态状态的贡献"，`H − mean` 度量的是 dispersion 差异。(ii) 为了仍能量化"只做截距重校准能赚多少"，增加辅助臂 `H + c`（`c` 在 state_train anchors 上用 `r_H` 做一维 NB MLE），它对应非中心化设计里会被 `α·wᵀmean(S)` 吸收的份额。
+
 ## 6. Synthetic assays（真实时刻 + coverage + event token）
 
 - 隐藏分量：固定随机 `g(X_e) = tanh(W_g X_e + b_g) ∈ R^4`，τ_g = 1800 s 的 leaky 轨迹，anchor 处随机线性组合后按 TRAIN 标准化得 `z_a`。
@@ -79,6 +82,10 @@
 `state_functional_diagnostics.json`：single-segment overfit；dynamic / TRAIN-mean / random S 输出差异；adapter logit RMS；‖α w‖ Jacobian；temporal variance + effective rank；event-write RMS vs autonomous-decay RMS；trained vs init 轨迹变化；S → H 线性重建 R²。
 
 ## 8. 与 Agent 2 的接口
+
+**实际接口（2026-09-02 17:23 registry 出现后确认）**：Agent 2 的分区是 base_fit 0–60% / inner_val 60–70% / dev_val 70–80% / dev_test 80–100%（0.7、0.8 两个边界与本侧 nested 分区完全重合）；`H_strong` 是 NB2 ridge GLM（base_fit 拟合、inner_val 选 ridge、0–70% refit），registry 为 `patients[subject].horizons["1800"/"300"/"7200"].arrays` → npz(`anchor_time`, `log_mu_h`, `count`, `eligible`, `anchor_phase`)，另有 `nb_log_dispersion = log r`。三位患者的 anchor 网格与本侧逐点相同（673/221/248）。Agent 2 会把本侧 `anchor_state` 作为特征列并入其 GLM 重新拟合各臂，因此它消费的是冻结状态数组而不是本侧的 `α,w`。本侧 state_train（20–70%）与其 inner_val（60–70%）重叠：只影响其对 S 臂 ridge 的选择（偏保守方向），不触及 dev_val/dev_test 评分；registry 元数据中显式写出 `state_train_recorded_fraction=[0.2,0.7]`。
+
+**事前 eligibility（Agent 2 冻结）**：30 min 主终点仅 `epilepsiae_1146` 合格；`yuquan_pengzihang`、`yuquan_zhangkexuan` 不合格（block 数不足）；120 min 三人均不合格；5 min 三人只能称短程。三人仍全部运行（用户要求），所有汇总标注资格。
 
 - 读：`/data/hfosp_group_event_state_v0_3_2/shared/history_baseline_registry.json`、`endpoint_eligibility.json`。读取器只做对齐校验（anchor 时刻/分区一致、无 dev_test 拟合声明），不改 H 与 eligibility 定义。
 - 缺席时：先完成模型、synthetic、单测、schema；后台定时轮询。synthetic/单测/single-segment overfit 使用 **provisional local H**（`B_multiscale` 去 seizure 列后的 NB ridge，state_train 拟合、dev_val 选 ridge），所有产物打 `h_source=provisional_local` 标记；三患者正式开发实验要求 `h_source=agent2_registry`，若最终仍缺席则以 provisional 运行并在报告里明确“待 Agent 2 H 替换”。

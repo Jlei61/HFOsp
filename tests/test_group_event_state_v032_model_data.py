@@ -126,3 +126,26 @@ def test_d4_agent2_registry_arrays_align_on_anchor_time(tmp_path):
     assert load_endpoint_eligibility(tmp_path / "none.json", "toy") is None
     (tmp_path / "e.json").write_text(json.dumps({"subjects": {"toy": {"7200": {"eligible": False}}}}))
     assert load_endpoint_eligibility(tmp_path / "e.json", "toy") == {"7200": {"eligible": False}}
+
+
+def test_d5_reader_prefers_patients_mapping_and_tolerates_subject_name_lists(tmp_path):
+    t_anchor = np.array([0.0, 300.0, 600.0])
+    npz = tmp_path / "p_1800.npz"
+    np.savez(npz, anchor_time=t_anchor, log_mu_h=np.array([1.0, 2.0, 3.0]))
+    registry = {
+        "format": "group_event_state_v0_3_2_history_baseline_registry",
+        "subjects": ["toy"],  # a name list, as a cohort index might be
+        "patients": {"toy": {"horizons": {"1800": {"arrays": str(npz), "nb_log_dispersion": 0.7,
+                                                    "status": "ok"}}}},
+    }
+    path = tmp_path / "history_baseline_registry.json"
+    path.write_text(json.dumps(registry))
+    base, reason = load_agent2_history_baseline(path, "toy", t_anchor, (1800.0,))
+    assert base is not None, reason
+    assert np.allclose(base.log_mu[1800], [1.0, 2.0, 3.0]) and base.nb_log_dispersion[1800] == 0.7
+    assert base.meta["registry_format"] == "group_event_state_v0_3_2_history_baseline_registry"
+    # a horizon whose fit failed upstream must not be silently used
+    registry["patients"]["toy"]["horizons"]["1800"]["status"] = "solver_failure"
+    path.write_text(json.dumps(registry))
+    failed, reason = load_agent2_history_baseline(path, "toy", t_anchor, (1800.0,))
+    assert failed is None and "status" in reason

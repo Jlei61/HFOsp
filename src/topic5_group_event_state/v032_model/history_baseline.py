@@ -125,9 +125,13 @@ def load_agent2_history_baseline(
         registry = json.loads(path.read_text())
     except json.JSONDecodeError as exc:
         return None, f"unreadable registry {path}: {exc}"
-    subjects = registry.get("subjects", registry)
-    entry = subjects.get(subject)
-    if entry is None:
+    patients = registry.get("patients")
+    if not isinstance(patients, dict):
+        patients = registry.get("subjects")
+    if not isinstance(patients, dict):
+        patients = registry
+    entry = patients.get(subject)
+    if not isinstance(entry, dict):
         return None, f"subject {subject} absent from registry"
     per_horizon = entry.get("horizons", entry)
     t_mine = np.asarray(t_anchor, dtype=np.float64)
@@ -140,6 +144,9 @@ def load_agent2_history_baseline(
         spec = per_horizon.get(key) or per_horizon.get(f"{key}s") or per_horizon.get(float(horizon))
         if spec is None:
             return None, f"horizon {key} absent for {subject}"
+        status = spec.get("status", "ok")
+        if status not in ("ok", "complete"):
+            return None, f"upstream status {status!r} for {subject} horizon {key}: {spec.get('reason', '')}"
         arrays_path = spec.get("arrays") or spec.get("path") or spec.get("npz")
         if arrays_path is None or not Path(arrays_path).exists():
             return None, f"arrays file missing for {subject} horizon {key}"

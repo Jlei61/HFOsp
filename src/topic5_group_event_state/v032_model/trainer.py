@@ -32,7 +32,10 @@ ARMS = ("learned", "random_reservoir")
 
 
 # --------------------------------------------------------------------------- tensors
-def bundle_tensors(bundle: SubjectBundle, device: torch.device) -> dict[str, Tensor]:
+def bundle_tensors(
+    bundle: SubjectBundle, device: torch.device, *, horizon: float | None = None
+) -> dict[str, Tensor]:
+    train_idx = np.flatnonzero(bundle.anchor_mask("state_train", horizon or bundle.horizons[1]))
     return {
         "x_std": torch.from_numpy(np.ascontiguousarray(bundle.x_std)).to(device, torch.float32),
         "times": torch.from_numpy(bundle.event_times).to(device, torch.float64),
@@ -40,7 +43,16 @@ def bundle_tensors(bundle: SubjectBundle, device: torch.device) -> dict[str, Ten
         "train_event_mask": torch.from_numpy(bundle.train_event_mask()).to(device),
         "t_anchor": torch.from_numpy(bundle.t_anchor).to(device, torch.float64),
         "last_event_pos": torch.from_numpy(bundle.last_event_pos).to(device, torch.long),
+        "train_anchor_time": torch.from_numpy(bundle.t_anchor[train_idx]).to(device, torch.float64),
+        "train_last_event_pos": torch.from_numpy(bundle.last_event_pos[train_idx]).to(device, torch.long),
     }
+
+
+def refresh_statistics(model: ResidualStateModel, t: dict[str, Tensor]) -> None:
+    model.refresh_train_statistics(
+        t["x_std"], t["train_event_mask"], t["times"], t["segment"],
+        t["train_anchor_time"], t["train_last_event_pos"],
+    )
 
 
 def parameter_sha256(model: torch.nn.Module) -> str:
@@ -61,19 +73,29 @@ def anchor_terms(
     tensors: dict[str, Tensor] | None = None,
     state_override: Tensor | None = None,
     return_trajectory: bool = False,
+    differentiable_statistics: bool = False,
 ) -> dict[str, Any]:
-    """Per-anchor NB terms of ``H+S`` for one nested phase (FP32 outputs)."""
+    """Per-anchor NB terms of ``H+S`` for one nested phase (FP32 outputs).
 
-    t = tensors or bundle_tensors(bundle, device)
+    ``differentiable_statistics`` is the training forward: ``phase`` must be
+    ``state_train`` and the TRAIN normalisation statistics are computed from the
+    same batch with gradient (their detached values refresh the buffers).
+    """
+
+    t = tensors or bundle_tensors(bundle, device, horizon=horizon)
     idx = np.flatnonzero(bundle.anchor_mask(phase, horizon))
     h_i = bundle.horizon_index(horizon)
-    pre, post = model.trajectory(t["x_std"], t["times"], t["segment"])
+    if differentiable_statistics and phase != "state_train":
+        raise ValueError("differentiable TRAIN statistics are only defined on the state_train pass")
+    train_mask = t["train_event_mask"] if differentiable_statistics else None
+    pre, post = model.trajectory(t["x_std"], t["times"], t["segment"], train_mask)
     idx_t = torch.from_numpy(idx).to(device)
     state = model.anchor_states(post, t["times"], t["t_anchor"][idx_t], t["last_event_pos"][idx_t])
+    train_state = state if differentiable_statistics else None
     if state_override is not None:
         state = state_override.to(state.dtype)
     log_mu_h = torch.from_numpy(bundle.log_mu_h(horizon)[idx]).to(device, torch.float32)
-    log_mu = model.log_mu(log_mu_h, state)
+    log_mu = model.log_mu(log_mu_h, state, train_state)
     y = torch.from_numpy(bundle.counts[idx, h_i]).to(device, torch.float32)
     nll = -nb_log_prob(y, torch.exp(log_mu), model.adapter.log_r)
     out = {"idx": idx, "state": state.to(torch.float32), "log_mu": log_mu, "nll": nll,
@@ -201,7 +223,7 @@ def train_residual_model(
 
     torch.manual_seed(int(seed))
     np.random.seed(int(seed) % (2**32))
-    tensors = bundle_tensors(bundle, device)
+    tensors = bundle_tensors(bundle, device, horizon=horizon)
     log_r_h, log_r_h_source = resolve_log_r_h(bundle, horizon)
     model = build_model(cfg, in_dim=bundle.x_std.shape[1], log_r_init=log_r_h, seed=seed).to(device)
     encoder_frozen = arm == "random_reservoir"
@@ -258,8 +280,8 @@ def train_residual_model(
     for step in range(start_step + 1, cfg.max_steps + 1):
         model.train()
         model.adapter.set_alpha_trainable(step > cfg.alpha_freeze_steps)
-        model.refresh_train_mean(tensors["x_std"], tensors["train_event_mask"])
-        terms = anchor_terms(model, bundle, phase="state_train", horizon=horizon, device=device, tensors=tensors)
+        terms = anchor_terms(model, bundle, phase="state_train", horizon=horizon, device=device,
+                             tensors=tensors, differentiable_statistics=True)
         loss = terms["nll"].mean()
         optimizer.zero_grad(set_to_none=True)
         loss.backward()
@@ -273,7 +295,7 @@ def train_residual_model(
         validate = step % cfg.validate_every == 0 or step == cfg.max_steps
         if validate:
             model.eval()
-            model.refresh_train_mean(tensors["x_std"], tensors["train_event_mask"])
+            refresh_statistics(model, tensors)
             with torch.no_grad():
                 val = anchor_terms(model, bundle, phase="dev_val", horizon=horizon, device=device, tensors=tensors)
                 val_nll = float(val["nll"].mean())
@@ -317,12 +339,10 @@ def train_residual_model(
 
     if best_state is None:
         raise RuntimeError("training never produced a finite validation value")
+    # best_state carries phi_mean and the TRAIN anchor-state mean/scale that were
+    # in force when the selected validation value was computed.
     model.load_state_dict(best_state, strict=True)
     model.eval()
-    with torch.no_grad():
-        model.train_mean_state.copy_(
-            train_mean_anchor_state(model, bundle, horizon=horizon, device=device, tensors=tensors)
-        )
     validation_steps = [row["step"] for row in history]
     selected_first = bool(validation_steps and best_step == validation_steps[0])
     at_edge = bool(step >= cfg.max_steps and best_step == validation_steps[-1])
