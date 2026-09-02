@@ -108,8 +108,15 @@ def run_sentinel(workload_class: str, fn: Callable[[], Mapping[str, Any] | None]
     torch = None
     if uses_gpu:
         import torch  # noqa: WPS433
-        torch.cuda.reset_peak_memory_stats(torch.device(device))
-        torch.cuda.synchronize(torch.device(device))
+        dev = torch.device(device)
+        if not torch.cuda.is_available():
+            raise RuntimeError(f"GPU sentinel requested on {device}, but CUDA is unavailable")
+        # PyTorch 2.5 may reject reset_peak_memory_stats before the CUDA
+        # context exists.  Explicitly select/initialise the requested device.
+        torch.cuda.set_device(dev)
+        torch.empty(0, device=dev)
+        torch.cuda.reset_peak_memory_stats(dev)
+        torch.cuda.synchronize(dev)
     r0, w0 = _proc_io()
     rss_before = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * 1024.0 / GIB
     started = time.time()
