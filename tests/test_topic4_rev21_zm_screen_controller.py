@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 
 from scripts.run_topic4_rev21_zm_screen_controller import (
-    CANARY_CANDIDATES, _launch, build_jobs,
+    CANARY_CANDIDATES, _complete, _launch, build_jobs,
 )
 
 
@@ -93,3 +93,31 @@ def test_launcher_passes_phase_specific_candidate_manifest(monkeypatch, tmp_path
     command = captured["command"]
     index = command.index("--candidate-manifest")
     assert command[index + 1] == str(manifest)
+
+
+def test_complete_rejects_artifact_from_an_old_phase_manifest(tmp_path):
+    npz = tmp_path / "out.npz"
+    npz.write_bytes(b"artifact")
+    import hashlib
+    digest = hashlib.sha256(npz.read_bytes()).hexdigest()
+    job = {
+        "candidate_id": "candidate", "topology_seed": 1,
+        "dynamics_seed": 2, "json": tmp_path / "out.json", "npz": npz,
+        "expected_commit": "a" * 40,
+        "candidate_manifest_sha256": "b" * 64,
+    }
+    payload = {
+        "status": "REV12ND_NODE_WORKER_COMPLETE",
+        "candidate_id": "candidate", "topology_seed": 1,
+        "dynamics_seed": 2, "model_ictal_rev21": {},
+        "arrays": {"sha256": digest},
+        "provenance": {
+            "expected_git_commit": "a" * 40,
+            "candidate_manifest_sha256": "c" * 64,
+        },
+    }
+    job["json"].write_text(json.dumps(payload))
+    assert not _complete(job)
+    payload["provenance"]["candidate_manifest_sha256"] = "b" * 64
+    job["json"].write_text(json.dumps(payload))
+    assert _complete(job)

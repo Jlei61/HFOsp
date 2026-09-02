@@ -64,6 +64,7 @@ def _complete(job: dict) -> bool:
         return False
     try:
         payload = json.loads(job["json"].read_text())
+        provenance = payload.get("provenance", {})
         return (
             payload.get("status") == COMPLETE_STATUS
             and payload.get("candidate_id") == job["candidate_id"]
@@ -71,6 +72,9 @@ def _complete(job: dict) -> bool:
             and payload.get("dynamics_seed") == job["dynamics_seed"]
             and "model_ictal_rev21" in payload
             and payload.get("arrays", {}).get("sha256") == _sha256(job["npz"])
+            and provenance.get("expected_git_commit") == job["expected_commit"]
+            and provenance.get("candidate_manifest_sha256")
+            == job["candidate_manifest_sha256"]
         )
     except (OSError, ValueError, KeyError):
         return False
@@ -198,6 +202,10 @@ def main() -> None:
         raise RuntimeError("rev21 candidate manifest is stale")
     output_root = artifact_root / config["output_root"]
     jobs = build_jobs(config, manifest, output_root, args.phase, commit)
+    manifest_sha256 = _sha256(manifest_path)
+    for job in jobs:
+        job["expected_commit"] = commit
+        job["candidate_manifest_sha256"] = manifest_sha256
     resources = config["resources"]
     maximum_workers = min(
         int(resources["maximum_workers_after_rss_measurement"]), len(jobs),
