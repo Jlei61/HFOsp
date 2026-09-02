@@ -1,75 +1,7 @@
 {
-  "tag": "registry_producer",
-  "warning": "",
-  "provenance": {
-    "producer": "P_local",
-    "seed": "2",
-    "source_commit": "54845f4dc73e73b58ba1bc45860f21f74451c130",
-    "config_hash": "ed69ff73ec817f4e21501adfcae67b6381973afb40b25f1383273f2764f85567",
-    "checkpoint_hash": "8f74ac555baa2ff37a4b99c91932c5097a5c7c1b9b4ad09423a6e60f443641a6",
-    "registry_version": "group_event_state_v0_2_registry_1"
-  },
   "subject": "yuquan_zhaojinrui",
-  "arm": "a1_static_recent_history",
-  "seed": 2,
-  "n_rows_total": 276,
-  "n_rows_state_available": 268,
-  "n_train_rows": 181,
-  "n_eval_rows": 87,
-  "n_episodes": 3,
-  "n_heldout_episodes": 1,
-  "split_epoch": 1565857660.942,
-  "state_dim": 96,
-  "max_state_age_sec": 330.0,
-  "split_mode": "seizure_rolling_origin",
-  "chosen_C": {
-    "intercept_only": 0.03,
-    "baseline": 0.03,
-    "baseline_plus_state": 0.03
-  },
-  "chosen_state_components": 2,
-  "mean_log_score_intercept_only": -0.47521626981814424,
-  "arm_worse_than_intercept": {
-    "baseline": true,
-    "baseline_plus_state": true
-  },
-  "eval_events": 0,
-  "status": "ok_but_no_events_in_eval",
-  "mean_log_score": {
-    "intercept_only": -0.47521626981814424,
-    "baseline": -2.345380428210007,
-    "baseline_plus_state": -2.0703728029320643
-  },
-  "brier_by_bin": {
-    "intercept_only": [
-      0.00615,
-      0.00699,
-      0.00801,
-      0.01159,
-      0.01294,
-      0.03778
-    ],
-    "baseline": [
-      0.11116,
-      0.12406,
-      0.14121,
-      0.19042,
-      0.22118,
-      0.31538
-    ],
-    "baseline_plus_state": [
-      0.08774,
-      0.09856,
-      0.11307,
-      0.15631,
-      0.186,
-      0.31572
-    ]
-  },
-  "nested_increment_log_score": {
-    "mean_gain": 0.2750076252779424,
-    "median_gain": 0.2905397292354266,
-    "n": 87,
-    "n_positive": 80
-  }
+  "producer": "P_local",
+  "status": "not_available",
+  "reason": "this producer's cells span 29 different configurations; they cannot be pooled as one arm until the producer explains why",
+  "registry_version": "group_event_state_v0_2_registry_1"
 }

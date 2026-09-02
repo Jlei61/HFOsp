@@ -1,75 +1,7 @@
 {
-  "tag": "registry_producer",
-  "warning": "",
-  "provenance": {
-    "producer": "P_slow",
-    "seed": "3",
-    "source_commit": "54845f4dc73e73b58ba1bc45860f21f74451c130",
-    "config_hash": "617a6705e6c35ffb855e2838c11a52d1f7c24a4e0df796c11872e7e292ee9001",
-    "checkpoint_hash": "7789739184db119918efc896de48d818411df0d75cc3ae9cf83daea8f27470d6",
-    "registry_version": "group_event_state_v0_2_registry_1"
-  },
   "subject": "epilepsiae_1077",
-  "arm": "a1_static_recent_history",
-  "seed": 3,
-  "n_rows_total": 2088,
-  "n_rows_state_available": 2046,
-  "n_train_rows": 1475,
-  "n_eval_rows": 571,
-  "n_episodes": 9,
-  "n_heldout_episodes": 4,
-  "split_epoch": 1228693660.041992,
-  "state_dim": 96,
-  "max_state_age_sec": 330.0,
-  "split_mode": "seizure_rolling_origin",
-  "chosen_C": {
-    "intercept_only": 0.3,
-    "baseline": 0.003,
-    "baseline_plus_state": 0.003
-  },
-  "chosen_state_components": 1,
-  "mean_log_score_intercept_only": -0.8530103356021825,
-  "arm_worse_than_intercept": {
-    "baseline": true,
-    "baseline_plus_state": true
-  },
-  "eval_events": 164,
-  "status": "unusable_fit_worse_than_intercept",
-  "mean_log_score": {
-    "intercept_only": -0.8530103356021825,
-    "baseline": -1.0111144043292568,
-    "baseline_plus_state": -1.0115310055238724
-  },
-  "brier_by_bin": {
-    "intercept_only": [
-      0.00527,
-      0.01073,
-      0.01664,
-      0.03535,
-      0.07067,
-      0.28269
-    ],
-    "baseline": [
-      0.0068,
-      0.01198,
-      0.01763,
-      0.03572,
-      0.07062,
-      0.33471
-    ],
-    "baseline_plus_state": [
-      0.00686,
-      0.01203,
-      0.01768,
-      0.03573,
-      0.07061,
-      0.3343
-    ]
-  },
-  "nested_increment_log_score": {
-    "mean_gain": -0.00041660119461566945,
-    "median_gain": 0.00014253109800588248,
-    "n": 571,
-    "n_positive": 289
-  }
+  "producer": "P_slow",
+  "status": "not_available",
+  "reason": "this producer's cells span 27 different configurations; they cannot be pooled as one arm until the producer explains why",
+  "registry_version": "group_event_state_v0_2_registry_1"
 }

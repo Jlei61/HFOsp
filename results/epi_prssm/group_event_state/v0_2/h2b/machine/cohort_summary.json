@@ -1,67 +1,13 @@
 {
   "b2_early_field": {
-    "P_local": {
-      "5min": {
-        "n_patients": 13,
-        "median": 0.0013,
-        "n_positive": 7,
-        "sign_test_p": 1.0,
-        "loo_median_min": 0.00055,
-        "loo_median_max": 0.00185,
-        "label": "median per-patient increment in field score",
-        "n_heldout_episodes_scored": 81,
-        "n_cells": 19,
-        "n_cells_not_estimable": 6,
-        "median_seed_spread": 0.0467
-      },
-      "30min": {
-        "n_patients": 13,
-        "median": -0.0058,
-        "n_positive": 5,
-        "sign_test_p": 0.5811,
-        "loo_median_min": -0.00735,
-        "loo_median_max": -0.0049,
-        "label": "median per-patient increment in field score",
-        "n_heldout_episodes_scored": 73,
-        "n_cells": 19,
-        "n_cells_not_estimable": 6,
-        "median_seed_spread": 0.0628
-      },
-      "2h": {
-        "n_patients": 12,
-        "median": -0.00035,
-        "n_positive": 6,
-        "sign_test_p": 1.0,
-        "loo_median_min": -0.0014,
-        "loo_median_max": 0.0007,
-        "label": "median per-patient increment in field score",
-        "n_heldout_episodes_scored": 65,
-        "n_cells": 19,
-        "n_cells_not_estimable": 7,
-        "median_seed_spread": 0.0143
-      },
-      "6h": {
-        "n_patients": 12,
-        "median": -0.00145,
-        "n_positive": 5,
-        "sign_test_p": 0.7744,
-        "loo_median_min": -0.0015,
-        "loo_median_max": -0.0014,
-        "label": "median per-patient increment in field score",
-        "n_heldout_episodes_scored": 61,
-        "n_cells": 19,
-        "n_cells_not_estimable": 7,
-        "median_seed_spread": 0.02365
-      }
-    },
     "P_memoryless": {
       "5min": {
         "n_patients": 13,
-        "median": -0.0013,
-        "n_positive": 6,
-        "sign_test_p": 1.0,
-        "loo_median_min": -0.0016,
-        "loo_median_max": -0.0005,
+        "median": 0.0,
+        "n_positive": 5,
+        "sign_test_p": 0.5811,
+        "loo_median_min": 0.0,
+        "loo_median_max": 0.0,
         "label": "median per-patient increment in field score",
         "n_heldout_episodes_scored": 81,
         "n_cells": 19,
@@ -70,11 +16,11 @@
       },
       "30min": {
         "n_patients": 13,
-        "median": 0.0005,
-        "n_positive": 7,
-        "sign_test_p": 1.0,
-        "loo_median_min": -0.0024,
-        "loo_median_max": 0.0009,
+        "median": 0.0,
+        "n_positive": 4,
+        "sign_test_p": 0.2668,
+        "loo_median_min": 0.0,
+        "loo_median_max": 0.0,
         "label": "median per-patient increment in field score",
         "n_heldout_episodes_scored": 73,
         "n_cells": 19,
@@ -83,11 +29,11 @@
       },
       "2h": {
         "n_patients": 12,
-        "median": 0.0019,
-        "n_positive": 7,
+        "median": 0.0,
+        "n_positive": 5,
         "sign_test_p": 0.7744,
-        "loo_median_min": 0.0007,
-        "loo_median_max": 0.0031,
+        "loo_median_min": 0.0,
+        "loo_median_max": 0.0,
         "label": "median per-patient increment in field score",
         "n_heldout_episodes_scored": 65,
         "n_cells": 19,
@@ -96,86 +42,20 @@
       },
       "6h": {
         "n_patients": 12,
-        "median": -0.00055,
-        "n_positive": 5,
-        "sign_test_p": 0.7744,
-        "loo_median_min": -0.001,
-        "loo_median_max": -0.0001,
-        "label": "median per-patient increment in field score",
-        "n_heldout_episodes_scored": 61,
-        "n_cells": 19,
-        "n_cells_not_estimable": 7,
-        "median_seed_spread": null
-      }
-    },
-    "P_slow": {
-      "5min": {
-        "n_patients": 13,
-        "median": -0.0017,
-        "n_positive": 5,
-        "sign_test_p": 0.5811,
-        "loo_median_min": -0.00365,
-        "loo_median_max": -0.0013,
-        "label": "median per-patient increment in field score",
-        "n_heldout_episodes_scored": 81,
-        "n_cells": 19,
-        "n_cells_not_estimable": 6,
-        "median_seed_spread": 0.0224
-      },
-      "30min": {
-        "n_patients": 13,
-        "median": -0.0026,
-        "n_positive": 5,
-        "sign_test_p": 0.5811,
-        "loo_median_min": -0.0027,
-        "loo_median_max": -0.0014,
-        "label": "median per-patient increment in field score",
-        "n_heldout_episodes_scored": 73,
-        "n_cells": 19,
-        "n_cells_not_estimable": 6,
-        "median_seed_spread": 0.0129
-      },
-      "2h": {
-        "n_patients": 12,
-        "median": -0.0027,
-        "n_positive": 5,
-        "sign_test_p": 0.7744,
-        "loo_median_min": -0.0035,
-        "loo_median_max": -0.0019,
-        "label": "median per-patient increment in field score",
-        "n_heldout_episodes_scored": 65,
-        "n_cells": 19,
-        "n_cells_not_estimable": 7,
-        "median_seed_spread": 0.0151
-      },
-      "6h": {
-        "n_patients": 12,
-        "median": -0.00025,
-        "n_positive": 5,
-        "sign_test_p": 0.7744,
-        "loo_median_min": -0.0005,
+        "median": 0.0,
+        "n_positive": 3,
+        "sign_test_p": 0.146,
+        "loo_median_min": 0.0,
         "loo_median_max": 0.0,
         "label": "median per-patient increment in field score",
         "n_heldout_episodes_scored": 61,
         "n_cells": 19,
         "n_cells_not_estimable": 7,
-        "median_seed_spread": 0.01055
+        "median_seed_spread": null
       }
     }
   },
   "b1_survival": {
-    "P_local": {
-      "n_patients": 2,
-      "median": -0.00177,
-      "n_positive": 1,
-      "sign_test_p": 1.0,
-      "loo_median_min": -0.00376,
-      "loo_median_max": 0.00022,
-      "label": "median per-patient increment in survival log score",
-      "n_eval_events": 864,
-      "n_cells": 19,
-      "n_cells_not_estimable": 17
-    },
     "P_memoryless": {
       "n_patients": 3,
       "median": -0.00855,
@@ -184,19 +64,7 @@
       "loo_median_min": -0.02079,
       "loo_median_max": -0.00744,
       "label": "median per-patient increment in survival log score",
-      "n_eval_events": 987,
-      "n_cells": 19,
-      "n_cells_not_estimable": 16
-    },
-    "P_slow": {
-      "n_patients": 3,
-      "median": 0.01574,
-      "n_positive": 2,
-      "sign_test_p": 1.0,
-      "loo_median_min": -0.00057,
-      "loo_median_max": 0.07563,
-      "label": "median per-patient increment in survival log score",
-      "n_eval_events": 1037,
+      "n_eval_events": 24,
       "n_cells": 19,
       "n_cells_not_estimable": 16
     }

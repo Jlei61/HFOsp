@@ -12,6 +12,7 @@ Provenance travels with each arm -- source commit, config hash, checkpoint hash
 from __future__ import annotations
 
 from dataclasses import dataclass
+import hashlib
 import json
 from pathlib import Path
 from typing import Any, Mapping
@@ -45,6 +46,7 @@ class Arm:
     config_hash: str = ""
     checkpoint_hash: str = ""
     anchor_path: str = ""
+    verified: bool = False
 
 
 def read_registry(path: Path | str = DEFAULT_REGISTRY) -> Registry:
@@ -76,12 +78,57 @@ def _pick_seed(seeds: Mapping[str, Any], seed: str | None) -> tuple[str | None, 
     return None, None, f"seed {seed!r} not available for this subject (have {sorted(keys)})"
 
 
+def _sha256(path: Path) -> str:
+    h = hashlib.sha256()
+    with path.open("rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def _verify_cell(entry: Mapping[str, Any], info: Mapping[str, Any]) -> str:
+    """Return "" when the cell is admissible, else why it is not.
+
+    "complete" in a registry is a writer's assertion, not provenance. What can
+    actually be checked from here is checked, and anything that fails makes the
+    arm unavailable rather than merely annotated (P0-2, 2026-09-02 review).
+    """
+
+    # Heterogeneity AMONG the producer's own cells is the defect: cells trained
+    # under different configurations cannot be pooled as one arm. A cell hash
+    # that merely differs from the producer-level bookkeeping hash is not.
+    cfgs = {
+        str(i.get("config_hash", ""))
+        for v in (entry.get("subjects", {}) or {}).values() if isinstance(v, Mapping)
+        for i in v.values() if isinstance(i, Mapping) and "anchor_state" in i
+    }
+    cfgs.discard("")
+    if len(cfgs) > 1:
+        return (f"this producer's cells span {len(cfgs)} different configurations; "
+                "they cannot be pooled as one arm until the producer explains why")
+    declared = str(info.get("checkpoint_sha256", ""))
+    ck = info.get("checkpoint")
+    if declared and ck:
+        p = Path(str(ck))
+        if not p.exists():
+            return f"declared checkpoint_sha256 but checkpoint missing: {p}"
+        if _sha256(p) != declared:
+            return "checkpoint_sha256 does not match the checkpoint on disk"
+    return ""
+
+
 def resolve_subject_arms(
     registry: Registry,
     subject: str,
     seed: str | None = None,
+    verify: bool = True,
 ) -> dict[str, Arm]:
-    """One :class:`Arm` per registered producer -- loaded, or reported as missing."""
+    """One :class:`Arm` per registered producer -- loaded, or reported as missing.
+
+    ``verify`` defaults to True so a caller who forgets it gets the strict
+    behaviour; pass False only for explicitly-labelled diagnostics, and the
+    resulting arms carry ``verified=False`` so the output says so.
+    """
 
     out: dict[str, Arm] = {}
     for pid, entry in registry.producers.items():
@@ -107,10 +154,16 @@ def resolve_subject_arms(
                            reason=f"anchor_state file missing: {ap}",
                            seed=chosen, anchor_path=str(ap), **common)
             continue
+        if verify:
+            why = _verify_cell(entry, info)
+            if why:
+                out[pid] = Arm(status="not_available", reason=why, seed=chosen,
+                               anchor_path=str(ap), **common)
+                continue
         try:
             z = np.load(ap)
             out[pid] = Arm(
-                status="ok", seed=chosen, anchor_path=str(ap),
+                status="ok", seed=chosen, anchor_path=str(ap), verified=bool(verify),
                 state=z["state"], t_anchor=z["t_anchor"],
                 split_index=z["split_index"] if "split_index" in z else None,
                 session_id=z["session_id"] if "session_id" in z else None,

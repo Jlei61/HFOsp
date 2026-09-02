@@ -42,6 +42,8 @@ def state_similarity_weights(
     sims = np.zeros(R.shape[0])
     if qn > 0 and ok.any():
         sims[ok] = (R[ok] @ q) / (Rn[ok] * qn)
+    if not np.isfinite(temperature):
+        return np.full(R.shape[0], 1.0 / R.shape[0])  # uniform: the baseline itself
     z = sims / max(float(temperature), 1e-12)
     z -= z.max()
     w = np.exp(z)

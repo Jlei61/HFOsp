@@ -121,3 +121,94 @@ def test_provenance_travels_with_every_arm(tmp_path):
     arm = resolve_subject_arms(read_registry(reg), "s1")["P_slow"]
     assert arm.source_commit == "abc123"
     assert arm.config_hash == "cfg"
+
+
+# --- P0-2: "complete" is not provenance. Verify, fail closed. ----------------
+
+
+def _anchor_with(tmp_path, name, **extra):
+    p = _anchor(tmp_path, name)
+    return p
+
+
+def test_cells_of_one_producer_spanning_several_configs_are_refused(tmp_path):
+    """OOM retries changed chunk/batch per cell while one producer id is advertised.
+
+    Cells trained under different configurations cannot be pooled as one arm.
+    A cell hash that merely differs from the producer-level bookkeeping hash is
+    NOT the defect -- heterogeneity *among the cells* is.
+    """
+    reg = _reg(tmp_path, {
+        "P_slow": {"producer_id": "P_slow", "status": "complete", "config_hash": "PRODUCER",
+                   "subjects": {"s1": {"1": {"anchor_state": str(_anchor(tmp_path, "a")),
+                                             "config_hash": "CFG_A"}},
+                                "s2": {"1": {"anchor_state": str(_anchor(tmp_path, "b")),
+                                             "config_hash": "CFG_B"}}}},
+    })
+    arm = resolve_subject_arms(read_registry(reg), "s1", verify=True)["P_slow"]
+    assert arm.status == "not_available"
+    assert "configuration" in arm.reason
+
+
+def test_a_producer_whose_cells_share_one_config_is_admissible(tmp_path):
+    """Homogeneous cells stay usable even if the producer-level hash differs."""
+    reg = _reg(tmp_path, {
+        "P_memoryless": {"producer_id": "P_memoryless", "status": "complete",
+                         "config_hash": "BOOKKEEPING",
+                         "subjects": {"s1": {"1": {"anchor_state": str(_anchor(tmp_path, "a")),
+                                                   "config_hash": "SAME"}},
+                                      "s2": {"1": {"anchor_state": str(_anchor(tmp_path, "b")),
+                                                   "config_hash": "SAME"}}}},
+    })
+    arm = resolve_subject_arms(read_registry(reg), "s1", verify=True)["P_memoryless"]
+    assert arm.status == "ok"
+
+
+def test_a_declared_checkpoint_hash_that_does_not_match_is_refused(tmp_path):
+    ck = tmp_path / "ck.pt"
+    ck.write_bytes(b"not the checkpoint you think")
+    reg = _reg(tmp_path, {
+        "P_slow": {"producer_id": "P_slow", "status": "complete",
+                   "subjects": {"s1": {"1": {"anchor_state": str(_anchor(tmp_path, "a")),
+                                            "checkpoint": str(ck),
+                                            "checkpoint_sha256": "0" * 64}}}},
+    })
+    arm = resolve_subject_arms(read_registry(reg), "s1", verify=True)["P_slow"]
+    assert arm.status == "not_available"
+    assert "checkpoint_sha256" in arm.reason
+
+
+def test_a_cell_that_verifies_is_loaded_and_says_so(tmp_path):
+    reg = _reg(tmp_path, {
+        "P_slow": {"producer_id": "P_slow", "status": "complete", "config_hash": "C",
+                   "subjects": {"s1": {"1": {"anchor_state": str(_anchor(tmp_path, "a")),
+                                            "config_hash": "C"}}}},
+    })
+    arm = resolve_subject_arms(read_registry(reg), "s1", verify=True)["P_slow"]
+    assert arm.status == "ok"
+    assert arm.verified is True
+
+
+def test_verification_can_be_switched_off_for_diagnostics_but_is_recorded(tmp_path):
+    reg = _reg(tmp_path, {
+        "P_slow": {"producer_id": "P_slow", "status": "complete",
+                   "subjects": {"s1": {"1": {"anchor_state": str(_anchor(tmp_path, "a")),
+                                             "config_hash": "CFG_A"}},
+                                "s2": {"1": {"anchor_state": str(_anchor(tmp_path, "b")),
+                                             "config_hash": "CFG_B"}}}},
+    })
+    arm = resolve_subject_arms(read_registry(reg), "s1", verify=False)["P_slow"]
+    assert arm.status == "ok"
+    assert arm.verified is False
+
+
+def test_verification_is_on_by_default(tmp_path):
+    """Fail closed: a caller who forgets the flag gets the strict behaviour."""
+    reg = _reg(tmp_path, {
+        "P_slow": {"producer_id": "P_slow", "status": "complete",
+                   "subjects": {"s1": {"1": {"anchor_state": str(_anchor(tmp_path, "a")),
+                                             "config_hash": "CFG_A"}},
+                                "s2": {"1": {"anchor_state": str(_anchor(tmp_path, "b")),
+                                             "config_hash": "CFG_B"}}}},
+    })
+    assert resolve_subject_arms(read_registry(reg), "s1")["P_slow"].status == "not_available"

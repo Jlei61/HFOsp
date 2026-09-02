@@ -111,13 +111,13 @@
           "seizure_id": "92201700102",
           "status": "ok",
           "baseline": 0.2296,
-          "state": 0.2311
+          "state": 0.2296
         },
         {
           "seizure_id": "92201800102",
           "status": "ok",
           "baseline": 0.5874,
-          "state": 0.5879
+          "state": 0.5874
         },
         {
           "seizure_id": "92202000102",
@@ -127,31 +127,31 @@
           "seizure_id": "92202100102",
           "status": "ok",
           "baseline": 0.7554,
-          "state": 0.7564
+          "state": 0.7554
         },
         {
           "seizure_id": "92202200102",
           "status": "ok",
           "baseline": 0.579,
-          "state": 0.5767
+          "state": 0.579
         },
         {
           "seizure_id": "92202300102",
           "status": "ok",
           "baseline": 0.5797,
-          "state": 0.5804
+          "state": 0.5797
         },
         {
           "seizure_id": "92200001102",
           "status": "ok",
           "baseline": 0.645,
-          "state": 0.6439
+          "state": 0.645
         },
         {
           "seizure_id": "92200101102",
           "status": "ok",
           "baseline": 0.6204,
-          "state": 0.6208
+          "state": 0.6204
         },
         {
           "seizure_id": "92200201102",
@@ -161,7 +161,7 @@
           "seizure_id": "92200501102",
           "status": "ok",
           "baseline": 0.7581,
-          "state": 0.7587
+          "state": 0.7581
         }
       ],
       "train_drop_reasons": [
@@ -170,14 +170,14 @@
         "in_postictal",
         "in_postictal"
       ],
-      "temperature": 4.0,
-      "train_loo_score": 0.7245,
+      "temperature": Infinity,
+      "train_loo_score": 0.7252,
       "n_scored": 8,
       "status": "ok",
       "median_baseline": 0.6039,
-      "median_state": 0.6044,
-      "median_increment": 0.0005,
-      "n_positive": 6
+      "median_state": 0.6039,
+      "median_increment": 0.0,
+      "n_positive": 0
     },
     "2h": {
       "n_train_usable": 7,

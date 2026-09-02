@@ -25,7 +25,7 @@
           "seizure_id": "95800401102",
           "status": "ok",
           "baseline": 0.6901,
-          "state": 0.8447
+          "state": 0.6901
         },
         {
           "seizure_id": "95800901102",
@@ -35,24 +35,24 @@
           "seizure_id": "95801001102",
           "status": "ok",
           "baseline": 0.4131,
-          "state": 0.388
+          "state": 0.4131
         },
         {
           "seizure_id": "95801101102",
           "status": "ok",
           "baseline": 0.278,
-          "state": 0.3373
+          "state": 0.278
         }
       ],
       "train_drop_reasons": [],
-      "temperature": 0.05,
-      "train_loo_score": 0.7781,
+      "temperature": Infinity,
+      "train_loo_score": 0.7788,
       "n_scored": 3,
       "status": "ok",
       "median_baseline": 0.4131,
-      "median_state": 0.388,
-      "median_increment": 0.0593,
-      "n_positive": 2
+      "median_state": 0.4131,
+      "median_increment": 0.0,
+      "n_positive": 0
     },
     "30min": {
       "n_train_usable": 4,
@@ -133,7 +133,7 @@
           "seizure_id": "95800401102",
           "status": "ok",
           "baseline": 0.6901,
-          "state": 0.6919
+          "state": 0.6901
         },
         {
           "seizure_id": "95800901102",
@@ -143,24 +143,24 @@
           "seizure_id": "95801001102",
           "status": "ok",
           "baseline": 0.4131,
-          "state": 0.4148
+          "state": 0.4131
         },
         {
           "seizure_id": "95801101102",
           "status": "ok",
           "baseline": 0.278,
-          "state": 0.2793
+          "state": 0.278
         }
       ],
       "train_drop_reasons": [],
-      "temperature": 4.0,
-      "train_loo_score": 0.777,
+      "temperature": Infinity,
+      "train_loo_score": 0.7788,
       "n_scored": 3,
       "status": "ok",
       "median_baseline": 0.4131,
-      "median_state": 0.4148,
-      "median_increment": 0.0016,
-      "n_positive": 3
+      "median_state": 0.4131,
+      "median_increment": 0.0,
+      "n_positive": 0
     }
   }
 }

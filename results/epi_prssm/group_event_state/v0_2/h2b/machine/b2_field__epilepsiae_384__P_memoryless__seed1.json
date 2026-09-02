@@ -61,7 +61,7 @@
           "seizure_id": "38400101102",
           "status": "ok",
           "baseline": 0.5613,
-          "state": 0.5709
+          "state": 0.5613
         },
         {
           "seizure_id": "38400201102",
@@ -71,24 +71,24 @@
           "seizure_id": "38400301102",
           "status": "ok",
           "baseline": 0.7369,
-          "state": 0.7418
+          "state": 0.7369
         },
         {
           "seizure_id": "38400401102",
           "status": "ok",
           "baseline": 0.6479,
-          "state": 0.6457
+          "state": 0.6479
         }
       ],
       "train_drop_reasons": [],
-      "temperature": 4.0,
-      "train_loo_score": 0.6023,
+      "temperature": Infinity,
+      "train_loo_score": 0.6127,
       "n_scored": 3,
       "status": "ok",
       "median_baseline": 0.6479,
-      "median_state": 0.6457,
-      "median_increment": 0.0049,
-      "n_positive": 2
+      "median_state": 0.6479,
+      "median_increment": 0.0,
+      "n_positive": 0
     },
     "2h": {
       "n_train_usable": 3,
@@ -105,26 +105,26 @@
           "seizure_id": "38400301102",
           "status": "ok",
           "baseline": 0.7814,
-          "state": 0.7822
+          "state": 0.7814
         },
         {
           "seizure_id": "38400401102",
           "status": "ok",
           "baseline": 0.6213,
-          "state": 0.6275
+          "state": 0.6213
         }
       ],
       "train_drop_reasons": [
         "in_postictal"
       ],
-      "temperature": 4.0,
-      "train_loo_score": 0.6168,
+      "temperature": Infinity,
+      "train_loo_score": 0.6192,
       "n_scored": 2,
       "status": "ok",
       "median_baseline": 0.7014,
-      "median_state": 0.7048,
-      "median_increment": 0.0035,
-      "n_positive": 2
+      "median_state": 0.7014,
+      "median_increment": 0.0,
+      "n_positive": 0
     },
     "6h": {
       "n_train_usable": 3,

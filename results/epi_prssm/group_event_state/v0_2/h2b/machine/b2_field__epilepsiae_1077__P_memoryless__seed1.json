@@ -101,38 +101,38 @@
           "seizure_id": "107700401102",
           "status": "ok",
           "baseline": 0.0617,
-          "state": 0.0629
+          "state": 0.0617
         },
         {
           "seizure_id": "107700501102",
           "status": "ok",
           "baseline": 0.3388,
-          "state": 0.3339
+          "state": 0.3388
         },
         {
           "seizure_id": "107700601102",
           "status": "ok",
           "baseline": 0.1879,
-          "state": 0.188
+          "state": 0.1879
         },
         {
           "seizure_id": "107700701102",
           "status": "ok",
           "baseline": 0.077,
-          "state": 0.0752
+          "state": 0.077
         }
       ],
       "train_drop_reasons": [
         "no_state_trajectory_at_anchor"
       ],
-      "temperature": 4.0,
-      "train_loo_score": 0.1096,
+      "temperature": Infinity,
+      "train_loo_score": 0.1107,
       "n_scored": 4,
       "status": "ok",
       "median_baseline": 0.1324,
-      "median_state": 0.1316,
-      "median_increment": -0.0008,
-      "n_positive": 2
+      "median_state": 0.1324,
+      "median_increment": 0.0,
+      "n_positive": 0
     },
     "6h": {
       "n_train_usable": 4,
@@ -141,13 +141,13 @@
           "seizure_id": "107700401102",
           "status": "ok",
           "baseline": 0.1294,
-          "state": 0.1251
+          "state": 0.1294
         },
         {
           "seizure_id": "107700501102",
           "status": "ok",
           "baseline": 0.0993,
-          "state": 0.1129
+          "state": 0.0993
         },
         {
           "seizure_id": "107700601102",
@@ -157,20 +157,20 @@
           "seizure_id": "107700701102",
           "status": "ok",
           "baseline": -0.1411,
-          "state": -0.1412
+          "state": -0.1411
         }
       ],
       "train_drop_reasons": [
         "no_state_coverage"
       ],
-      "temperature": 4.0,
-      "train_loo_score": 0.0758,
+      "temperature": Infinity,
+      "train_loo_score": 0.0793,
       "n_scored": 3,
       "status": "ok",
       "median_baseline": 0.0993,
-      "median_state": 0.1129,
-      "median_increment": -0.0001,
-      "n_positive": 1
+      "median_state": 0.0993,
+      "median_increment": 0.0,
+      "n_positive": 0
     }
   }
 }

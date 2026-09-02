@@ -192,13 +192,13 @@
           "seizure_id": "112500101102",
           "status": "ok",
           "baseline": 0.2514,
-          "state": 0.2316
+          "state": 0.2514
         },
         {
           "seizure_id": "112500201102",
           "status": "ok",
           "baseline": 0.3114,
-          "state": 0.3131
+          "state": 0.3114
         },
         {
           "seizure_id": "112500301102",
@@ -216,27 +216,27 @@
           "seizure_id": "112500003102",
           "status": "ok",
           "baseline": 0.0909,
-          "state": 0.0926
+          "state": 0.0909
         },
         {
           "seizure_id": "112500103102",
           "status": "ok",
           "baseline": -0.0882,
-          "state": -0.0946
+          "state": -0.0882
         }
       ],
       "train_drop_reasons": [
         "no_state_coverage",
         "no_state_coverage"
       ],
-      "temperature": 4.0,
-      "train_loo_score": 0.0759,
+      "temperature": Infinity,
+      "train_loo_score": 0.0763,
       "n_scored": 4,
       "status": "ok",
       "median_baseline": 0.1711,
-      "median_state": 0.1621,
-      "median_increment": -0.0023,
-      "n_positive": 2
+      "median_state": 0.1711,
+      "median_increment": 0.0,
+      "n_positive": 0
     }
   }
 }

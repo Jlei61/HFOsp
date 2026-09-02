@@ -67,6 +67,7 @@ def load_risk_rows(path: Path):
             "anchor_epoch": float(r["anchor_epoch"]),
             "outcome_bin": (int(r["outcome_bin"]) if r["outcome_bin"] != "" else None),
             "censored": r["censored"] == "1",
+            "next_seizure_id": r["next_seizure_id"],
             "last_observed_bin": int(r["last_observed_bin"]),
             "time_since_prev_seizure_sec": (float(r["time_since_prev_seizure_sec"])
                                             if r["time_since_prev_seizure_sec"] != "" else None),
@@ -331,8 +332,13 @@ def main() -> None:
     out["arm_worse_than_intercept"] = worse
 
     inc = nested_increment(res["baseline"]["log_score"], res["baseline_plus_state"]["log_score"])
-    out["eval_events"] = int(sum(1 for i in np.flatnonzero(eval_mask)
-                                 if rows[i]["outcome_bin"] is not None))
+    # A 5-min grid row is not a seizure: many consecutive rows point at the same
+    # next seizure. Report both, and never let the row count pose as sample size
+    # ("event rows 不冒充样本量", common contract §10).
+    _ev_rows = [i for i in np.flatnonzero(eval_mask) if rows[i]["outcome_bin"] is not None]
+    out["eval_event_rows"] = int(len(_ev_rows))
+    out["eval_distinct_seizures"] = int(len({rows[i]["next_seizure_id"] for i in _ev_rows}))
+    out["eval_events"] = out["eval_distinct_seizures"]  # the honest denominator
     # A survival log score with no events in the evaluation set is not a weak
     # result, it is an uninformative one: nothing distinguishes the arms.
     if out["eval_events"] == 0:

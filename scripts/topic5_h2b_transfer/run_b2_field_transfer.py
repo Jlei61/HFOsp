@@ -59,7 +59,11 @@ DEFAULT_OUT = ROOT / "results/epi_prssm/group_event_state/v0_2/h2b"
 DEFAULT_DATA = Path("/data/hfosp_group_event_state_v0_2/agent_b")
 
 LEADS = ((5 * 60.0, "5min"), (30 * 60.0, "30min"), (2 * 3600.0, "2h"), (6 * 3600.0, "6h"))
-TEMPERATURE_GRID = (0.05, 0.1, 0.25, 0.5, 1.0, 4.0)
+# math.inf makes the uniform-weight baseline a literal member of the grid, so
+# "the baseline is a strict nested special case" is true of the model selection
+# and not merely of the algebra. Without it the grid topped out at tau=4.0,
+# which is within 3% of uniform but never equal to it.
+TEMPERATURE_GRID = (0.05, 0.1, 0.25, 0.5, 1.0, 4.0, float("inf"))
 MAX_STATE_AGE_SEC = 3600.0
 FIELD_KEY = "hfa_field_5s"          # H2b spec §1 primary
 FIELD_KEY_SENS = "hfa_field_10s"    # sensitivity

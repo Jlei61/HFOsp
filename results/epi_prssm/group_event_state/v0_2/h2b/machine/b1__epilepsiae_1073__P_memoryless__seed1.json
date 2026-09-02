@@ -33,12 +33,14 @@
     "baseline": true,
     "baseline_plus_state": true
   },
-  "eval_events": 219,
+  "eval_event_rows": 219,
+  "eval_distinct_seizures": 5,
+  "eval_events": 5,
   "status": "unusable_fit_worse_than_intercept",
   "mean_log_score": {
     "intercept_only": -0.6239122389260962,
     "baseline": -0.7452474348897701,
-    "baseline_plus_state": -0.7448270560078399
+    "baseline_plus_state": -0.7448270560078379
   },
   "brier_by_bin": {
     "intercept_only": [
@@ -67,8 +69,8 @@
     ]
   },
   "nested_increment_log_score": {
-    "mean_gain": 0.000420378881930147,
-    "median_gain": -5.188159503164368e-05,
+    "mean_gain": 0.0004203788819321213,
+    "median_gain": -5.188159503172825e-05,
     "n": 1568,
     "n_positive": 673
   }

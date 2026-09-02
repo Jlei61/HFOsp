@@ -25,7 +25,7 @@
           "seizure_id": "114601600102",
           "status": "ok",
           "baseline": 0.461,
-          "state": 0.4537
+          "state": 0.461
         },
         {
           "seizure_id": "114601700102",
@@ -35,7 +35,7 @@
           "seizure_id": "114601800102",
           "status": "ok",
           "baseline": 0.3468,
-          "state": 0.3324
+          "state": 0.3468
         },
         {
           "seizure_id": "114602200102",
@@ -45,31 +45,31 @@
           "seizure_id": "114602300102",
           "status": "ok",
           "baseline": 0.6912,
-          "state": 0.6716
+          "state": 0.6912
         },
         {
           "seizure_id": "114602400102",
           "status": "ok",
           "baseline": 0.7613,
-          "state": 0.7517
+          "state": 0.7613
         },
         {
           "seizure_id": "114602500102",
           "status": "ok",
           "baseline": 0.6897,
-          "state": 0.6648
+          "state": 0.6897
         }
       ],
       "train_drop_reasons": [
         "in_postictal"
       ],
-      "temperature": 4.0,
-      "train_loo_score": 0.5503,
+      "temperature": Infinity,
+      "train_loo_score": 0.5559,
       "n_scored": 5,
       "status": "ok",
       "median_baseline": 0.6897,
-      "median_state": 0.6648,
-      "median_increment": -0.0144,
+      "median_state": 0.6897,
+      "median_increment": 0.0,
       "n_positive": 0
     },
     "30min": {
@@ -95,32 +95,32 @@
           "seizure_id": "114602300102",
           "status": "ok",
           "baseline": 0.6912,
-          "state": 0.6756
+          "state": 0.6912
         },
         {
           "seizure_id": "114602400102",
           "status": "ok",
           "baseline": 0.7613,
-          "state": 0.7556
+          "state": 0.7613
         },
         {
           "seizure_id": "114602500102",
           "status": "ok",
           "baseline": 0.6897,
-          "state": 0.6917
+          "state": 0.6897
         }
       ],
       "train_drop_reasons": [
         "in_postictal"
       ],
-      "temperature": 4.0,
-      "train_loo_score": 0.5474,
+      "temperature": Infinity,
+      "train_loo_score": 0.5559,
       "n_scored": 3,
       "status": "ok",
       "median_baseline": 0.6912,
-      "median_state": 0.6917,
-      "median_increment": -0.0057,
-      "n_positive": 1
+      "median_state": 0.6912,
+      "median_increment": 0.0,
+      "n_positive": 0
     },
     "2h": {
       "n_train_usable": 5,

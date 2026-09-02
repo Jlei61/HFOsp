@@ -90,3 +90,16 @@ def test_no_train_field_yields_an_all_nan_prediction_not_zeros():
     pred = predict_field(np.empty((0, 3)), weights=None)
     assert pred.shape == (3,)
     assert np.all(np.isnan(pred))
+
+
+def test_infinite_temperature_is_exactly_the_uniform_baseline():
+    """Makes "the baseline is a strict nested special case" true of the grid.
+
+    Without inf in the grid the selection topped out at tau=4.0, which is close
+    to uniform but never equal, so leave-one-out could not actually choose the
+    baseline.
+    """
+    q = np.array([1.0, 0.0])
+    ref = np.array([[0.9, 0.1], [-1.0, 0.0], [0.3, 0.4]])
+    w = state_similarity_weights(q, ref, temperature=float("inf"))
+    assert np.allclose(w, 1.0 / 3.0)
