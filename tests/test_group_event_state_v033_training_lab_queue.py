@@ -165,10 +165,22 @@ def test_k2_k6_k7_controller_respects_slots_release_and_writes_the_status_page(t
         spawned.append({"unit": str(unit_path), "gpu": gpu})
         return {"pid": os.getpid(), "pgid": os.getpgid(0)}
 
+    fixed_healthy_snapshot = {
+        "snapshot_epoch": 0.0,
+        "gpus": [],
+        "mem_total_gib": 256.0,
+        "mem_available_gib": 240.0,
+        "load1": 0.0,
+        "cores": 80,
+        "iowait_pct": 0.0,
+        "disk_free_gib": 100.0,
+        "disk_path": str(tmp_path),
+    }
+
     ctl = Controller(shared, agent, registered=REGISTERED, head_commit=HEAD, release_present=lambda: False,
                      spawner=fake_spawner, lease={"max_workers": 1, "gpu_ids": [], "max_gpu_workers": 0,
                                                   "threads_per_worker": 1, "lease_source": "test"},
-                     results_index=tmp_path / "index")
+                     results_index=tmp_path / "index", snapshotter=lambda: fixed_healthy_snapshot)
     report = ctl.step()
     assert report["ingested"]["req_toy"] == "PENDING" and report["ingested"]["req_human"] == "HELD_NO_RELEASE"
     assert len(spawned) == 1 and report["spawned"] == 1 and report["slots"] == 1

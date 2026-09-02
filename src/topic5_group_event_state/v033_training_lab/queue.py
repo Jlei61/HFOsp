@@ -710,7 +710,8 @@ class Controller:
                  head_commit: str | None = None, release_present: Callable[[], bool] | None = None,
                  spawner: Callable[..., dict[str, Any]] = spawn_worker, lease: Mapping[str, Any] | None = None,
                  results_index: Path | None = None, gpu_ids: Sequence[int] | None = None, poll_seconds: float = 30.0,
-                 device_hint: str | None = None) -> None:
+                 device_hint: str | None = None,
+                 snapshotter: Callable[[], Mapping[str, Any]] | None = None) -> None:
         self.shared_root, self.agent_root = Path(shared_root), Path(agent_root)
         self.registered = tuple(registered or TRAINABLE_REGISTRY)
         self.head_commit = head_commit or current_commit()
@@ -725,6 +726,10 @@ class Controller:
         self.stable_cycles = 0
         self.current_cap = 1
         self.device_hint = device_hint
+        # Keep the live resource guard in production, but make the resource
+        # observation an explicit dependency so queue tests do not depend on
+        # unrelated host load from concurrently running scientific jobs.
+        self.snapshotter = snapshotter or snapshot
         (self.agent_root / "controller").mkdir(parents=True, exist_ok=True)
         (self.agent_root / "units").mkdir(parents=True, exist_ok=True)
         (self.agent_root / "logs").mkdir(parents=True, exist_ok=True)
@@ -837,7 +842,7 @@ class Controller:
             if driver.state["phase"] not in ("done", "failed") and status == JobStatus.PENDING.value:
                 update_job_status(self.shared_root, rid, status=JobStatus.RUNNING.value, driver=driver.status())
         lease = self.lease()
-        snap = snapshot()
+        snap = dict(self.snapshotter())
         workload = pending[0].workload_class if pending else "cpu_train_fixed_leaky"
         sentinel = self.sentinel_for(workload)
         threads = int(lease.get("threads_per_worker", 1))
