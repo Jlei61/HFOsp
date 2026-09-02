@@ -42,3 +42,12 @@ def test_coarse_grid_uses_four_seed_cells_for_all_17_candidates(tmp_path):
         ))
     assert set(map(len, by_candidate.values())) == {4}
     assert "rev21_zm_off" in by_candidate
+
+
+def test_timescale_grid_uses_the_same_four_seed_cells(tmp_path):
+    config, manifest = _inputs()
+    timescale = {"candidates": manifest["candidates"][:9]}
+    jobs = build_jobs(config, timescale, tmp_path, "timescale", "c" * 40)
+    assert len(jobs) == 9 * 4
+    assert len({(job["topology_seed"], job["dynamics_seed"])
+                for job in jobs}) == 4

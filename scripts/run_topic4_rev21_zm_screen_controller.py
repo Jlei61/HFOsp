@@ -103,7 +103,7 @@ def build_jobs(config: dict, manifest: dict, output_root: Path, phase: str,
             int(config["search"]["canary_network_seeds"][0]),
             int(config["search"]["seed_audit_dynamics_seeds"][0]),
         )]
-    elif phase == "coarse":
+    elif phase in {"coarse", "timescale"}:
         candidates = [row["candidate_id"] for row in manifest["candidates"]]
         pairs = [
             (int(topology), int(dynamics))
@@ -111,7 +111,7 @@ def build_jobs(config: dict, manifest: dict, output_root: Path, phase: str,
             for dynamics in config["search"]["fit_dynamics_seeds"]
         ]
     else:
-        raise ValueError("phase must be canary or coarse")
+        raise ValueError("phase must be canary, coarse or timescale")
     missing = sorted(set(candidates) - candidate_ids)
     if missing:
         raise RuntimeError(f"screen candidates absent from manifest: {missing}")
@@ -160,7 +160,9 @@ def _launch(job: dict, *, config_path: Path, artifact_root: Path,
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=Path, required=True)
-    parser.add_argument("--phase", choices=("canary", "coarse"), required=True)
+    parser.add_argument("--phase", choices=("canary", "coarse", "timescale"),
+                        required=True)
+    parser.add_argument("--candidate-manifest", type=Path)
     parser.add_argument("--expected-commit", required=True)
     parser.add_argument("--artifact-root", type=Path,
                         default=Path("/home/honglab/leijiaxin/HFOsp"))
@@ -174,7 +176,10 @@ def main() -> None:
     if subprocess.check_output(
             ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip() != commit:
         raise RuntimeError("controller HEAD differs from expected commit")
-    manifest_path = artifact_root / config["candidate_manifest"]
+    manifest_path = (
+        args.candidate_manifest.resolve() if args.candidate_manifest
+        else artifact_root / config["candidate_manifest"]
+    )
     manifest = json.loads(manifest_path.read_text())
     if manifest.get("config_sha256") != _sha256(config_path):
         raise RuntimeError("rev21 candidate manifest is stale")
