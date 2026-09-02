@@ -1,0 +1,69 @@
+{
+  "tag": "registry_producer",
+  "warning": "",
+  "provenance": {
+    "producer": "P_local",
+    "seed": "1",
+    "source_commit": "54845f4dc73e73b58ba1bc45860f21f74451c130",
+    "config_hash": "ed69ff73ec817f4e21501adfcae67b6381973afb40b25f1383273f2764f85567",
+    "checkpoint_hash": "8f74ac555baa2ff37a4b99c91932c5097a5c7c1b9b4ad09423a6e60f443641a6",
+    "anchor_path": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_pengzihang/P_local/seed1/anchor_state.npz",
+    "registry_version": "group_event_state_v0_2_registry_1"
+  },
+  "subject": "yuquan_pengzihang",
+  "arm": "a1_static_recent_history",
+  "seed": 1,
+  "field_key": "hfa_field_5s",
+  "n_episodes": 4,
+  "n_train_leads": 2,
+  "n_heldout_leads": 2,
+  "leads": {
+    "5min": {
+      "n_train_usable": 2,
+      "per_seizure": [
+        {
+          "seizure_id": "pengzihang_sz_006",
+          "status": "no_temperature_train_too_small",
+          "baseline": -0.297
+        },
+        {
+          "seizure_id": "pengzihang_sz_008",
+          "status": "no_temperature_train_too_small",
+          "baseline": -0.2817
+        }
+      ],
+      "train_drop_reasons": [],
+      "temperature": null,
+      "train_loo_score": null,
+      "n_scored": 0,
+      "status": "not_estimable_no_scored_heldout"
+    },
+    "30min": {
+      "n_train_usable": 0,
+      "per_seizure": [],
+      "train_drop_reasons": [
+        "no_state_coverage",
+        "no_state_trajectory_at_anchor"
+      ],
+      "status": "not_estimable_insufficient_train_anchors"
+    },
+    "2h": {
+      "n_train_usable": 0,
+      "per_seizure": [],
+      "train_drop_reasons": [
+        "no_state_coverage",
+        "no_state_trajectory_at_anchor"
+      ],
+      "status": "not_estimable_insufficient_train_anchors"
+    },
+    "6h": {
+      "n_train_usable": 0,
+      "per_seizure": [],
+      "train_drop_reasons": [
+        "no_state_coverage",
+        "no_state_coverage"
+      ],
+      "status": "not_estimable_insufficient_train_anchors"
+    }
+  }
+}

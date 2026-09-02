@@ -1,0 +1,75 @@
+{
+  "tag": "registry_producer",
+  "warning": "",
+  "provenance": {
+    "producer": "P_memoryless",
+    "seed": "1",
+    "source_commit": "54845f4dc73e73b58ba1bc45860f21f74451c130",
+    "config_hash": "239342ad6299f78494f59f48c3a20656a30e569b80f1a6381ca09053afdf790f",
+    "checkpoint_hash": "d8a89a72a0389e8dc70c86996553f286e7478f65b74068929da334cc727aba8c",
+    "registry_version": "group_event_state_v0_2_registry_1"
+  },
+  "subject": "yuquan_pengzihang",
+  "arm": "a1_static_recent_history",
+  "seed": 1,
+  "n_rows_total": 226,
+  "n_rows_state_available": 216,
+  "n_train_rows": 113,
+  "n_eval_rows": 103,
+  "n_episodes": 4,
+  "n_heldout_episodes": 2,
+  "split_epoch": 1574931946.967,
+  "state_dim": 96,
+  "max_state_age_sec": 330.0,
+  "split_mode": "seizure_rolling_origin",
+  "chosen_C": {
+    "intercept_only": 0.03,
+    "baseline": 0.1,
+    "baseline_plus_state": 0.1
+  },
+  "chosen_state_components": 1,
+  "mean_log_score_intercept_only": -0.9181846205114158,
+  "arm_worse_than_intercept": {
+    "baseline": true,
+    "baseline_plus_state": true
+  },
+  "eval_events": 19,
+  "status": "unusable_fit_worse_than_intercept",
+  "mean_log_score": {
+    "intercept_only": -0.9181846205114158,
+    "baseline": -2.122460959686993,
+    "baseline_plus_state": -2.111068601244525
+  },
+  "brier_by_bin": {
+    "intercept_only": [
+      0.01837,
+      0.02748,
+      0.03685,
+      0.06737,
+      0.09416,
+      0.06365
+    ],
+    "baseline": [
+      0.08713,
+      0.1132,
+      0.13153,
+      0.17137,
+      0.23742,
+      0.47395
+    ],
+    "baseline_plus_state": [
+      0.0862,
+      0.11186,
+      0.13008,
+      0.16961,
+      0.23826,
+      0.47569
+    ]
+  },
+  "nested_increment_log_score": {
+    "mean_gain": 0.011392358442468041,
+    "median_gain": -0.0046408582952075506,
+    "n": 103,
+    "n_positive": 43
+  }
+}

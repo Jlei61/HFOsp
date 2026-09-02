@@ -1,0 +1,26 @@
+{
+  "tag": "registry_producer",
+  "warning": "",
+  "provenance": {
+    "producer": "P_memoryless",
+    "seed": "1",
+    "source_commit": "54845f4dc73e73b58ba1bc45860f21f74451c130",
+    "config_hash": "239342ad6299f78494f59f48c3a20656a30e569b80f1a6381ca09053afdf790f",
+    "checkpoint_hash": "d8a89a72a0389e8dc70c86996553f286e7478f65b74068929da334cc727aba8c",
+    "registry_version": "group_event_state_v0_2_registry_1"
+  },
+  "subject": "yuquan_xuxinyi",
+  "arm": "a1_static_recent_history",
+  "seed": 1,
+  "n_rows_total": 275,
+  "n_rows_state_available": 267,
+  "n_train_rows": 267,
+  "n_eval_rows": 0,
+  "n_episodes": 3,
+  "n_heldout_episodes": 1,
+  "split_epoch": 1567321786.9625,
+  "state_dim": 96,
+  "max_state_age_sec": 330.0,
+  "split_mode": "seizure_rolling_origin",
+  "status": "insufficient_rows_for_plumbing"
+}

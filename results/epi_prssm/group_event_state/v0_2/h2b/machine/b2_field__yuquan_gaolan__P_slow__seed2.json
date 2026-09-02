@@ -1,0 +1,89 @@
+{
+  "tag": "registry_producer",
+  "warning": "",
+  "provenance": {
+    "producer": "P_slow",
+    "seed": "2",
+    "source_commit": "54845f4dc73e73b58ba1bc45860f21f74451c130",
+    "config_hash": "617a6705e6c35ffb855e2838c11a52d1f7c24a4e0df796c11872e7e292ee9001",
+    "checkpoint_hash": "7789739184db119918efc896de48d818411df0d75cc3ae9cf83daea8f27470d6",
+    "anchor_path": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_gaolan/P_slow/seed2/anchor_state.npz",
+    "registry_version": "group_event_state_v0_2_registry_1"
+  },
+  "subject": "yuquan_gaolan",
+  "arm": "a1_static_recent_history",
+  "seed": 2,
+  "field_key": "hfa_field_5s",
+  "n_episodes": 4,
+  "n_train_leads": 2,
+  "n_heldout_leads": 2,
+  "leads": {
+    "5min": {
+      "n_train_usable": 2,
+      "per_seizure": [
+        {
+          "seizure_id": "gaolan_sz_003",
+          "status": "no_temperature_train_too_small",
+          "baseline": -0.3611
+        },
+        {
+          "seizure_id": "gaolan_sz_004",
+          "status": "no_temperature_train_too_small",
+          "baseline": -0.1358
+        }
+      ],
+      "train_drop_reasons": [],
+      "temperature": null,
+      "train_loo_score": null,
+      "n_scored": 0,
+      "status": "not_estimable_no_scored_heldout"
+    },
+    "30min": {
+      "n_train_usable": 2,
+      "per_seizure": [
+        {
+          "seizure_id": "gaolan_sz_003",
+          "status": "no_temperature_train_too_small",
+          "baseline": -0.3611
+        },
+        {
+          "seizure_id": "gaolan_sz_004",
+          "status": "no_temperature_train_too_small",
+          "baseline": -0.1358
+        }
+      ],
+      "train_drop_reasons": [],
+      "temperature": null,
+      "train_loo_score": null,
+      "n_scored": 0,
+      "status": "not_estimable_no_scored_heldout"
+    },
+    "2h": {
+      "n_train_usable": 2,
+      "per_seizure": [
+        {
+          "seizure_id": "gaolan_sz_003",
+          "status": "in_postictal"
+        },
+        {
+          "seizure_id": "gaolan_sz_004",
+          "status": "no_temperature_train_too_small",
+          "baseline": -0.1358
+        }
+      ],
+      "train_drop_reasons": [],
+      "temperature": null,
+      "train_loo_score": null,
+      "n_scored": 0,
+      "status": "not_estimable_no_scored_heldout"
+    },
+    "6h": {
+      "n_train_usable": 1,
+      "per_seizure": [],
+      "train_drop_reasons": [
+        "no_state_coverage"
+      ],
+      "status": "not_estimable_insufficient_train_anchors"
+    }
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "tag": "registry_producer",
+  "warning": "",
+  "provenance": {
+    "producer": "P_local",
+    "seed": "1",
+    "source_commit": "54845f4dc73e73b58ba1bc45860f21f74451c130",
+    "config_hash": "ed69ff73ec817f4e21501adfcae67b6381973afb40b25f1383273f2764f85567",
+    "checkpoint_hash": "8f74ac555baa2ff37a4b99c91932c5097a5c7c1b9b4ad09423a6e60f443641a6",
+    "registry_version": "group_event_state_v0_2_registry_1"
+  },
+  "subject": "yuquan_gaolan",
+  "arm": "a1_static_recent_history",
+  "seed": 1,
+  "n_rows_total": 237,
+  "n_rows_state_available": 227,
+  "n_train_rows": 88,
+  "n_eval_rows": 139,
+  "n_episodes": 4,
+  "n_heldout_episodes": 2,
+  "split_epoch": 1605858586.912,
+  "state_dim": 96,
+  "max_state_age_sec": 330.0,
+  "split_mode": "seizure_rolling_origin",
+  "chosen_C": {
+    "intercept_only": 0.3,
+    "baseline": 1.0,
+    "baseline_plus_state": 1.0
+  },
+  "chosen_state_components": 4,
+  "mean_log_score_intercept_only": -1.5609840623330085,
+  "arm_worse_than_intercept": {
+    "baseline": true,
+    "baseline_plus_state": true
+  },
+  "eval_events": 44,
+  "status": "unusable_fit_worse_than_intercept",
+  "mean_log_score": {
+    "intercept_only": -1.5609840623330085,
+    "baseline": -9.340862663040348,
+    "baseline_plus_state": -11.775416630845632
+  },
+  "brier_by_bin": {
+    "intercept_only": [
+      0.01317,
+      0.02384,
+      0.03729,
+      0.09021,
+      0.2936,
+      0.29576
+    ],
+    "baseline": [
+      0.27137,
+      0.36406,
+      0.46732,
+      0.68173,
+      0.84858,
+      0.53452
+    ],
+    "baseline_plus_state": [
+      0.37817,
+      0.41468,
+      0.45914,
+      0.61507,
+      0.8338,
+      0.52842
+    ]
+  },
+  "nested_increment_log_score": {
+    "mean_gain": -2.434553967805284,
+    "median_gain": 0.25364567049220765,
+    "n": 139,
+    "n_positive": 77
+  }
+}

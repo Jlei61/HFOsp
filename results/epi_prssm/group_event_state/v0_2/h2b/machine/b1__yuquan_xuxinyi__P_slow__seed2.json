@@ -1,0 +1,26 @@
+{
+  "tag": "registry_producer",
+  "warning": "",
+  "provenance": {
+    "producer": "P_slow",
+    "seed": "2",
+    "source_commit": "54845f4dc73e73b58ba1bc45860f21f74451c130",
+    "config_hash": "617a6705e6c35ffb855e2838c11a52d1f7c24a4e0df796c11872e7e292ee9001",
+    "checkpoint_hash": "7789739184db119918efc896de48d818411df0d75cc3ae9cf83daea8f27470d6",
+    "registry_version": "group_event_state_v0_2_registry_1"
+  },
+  "subject": "yuquan_xuxinyi",
+  "arm": "a1_static_recent_history",
+  "seed": 2,
+  "n_rows_total": 275,
+  "n_rows_state_available": 267,
+  "n_train_rows": 267,
+  "n_eval_rows": 0,
+  "n_episodes": 3,
+  "n_heldout_episodes": 1,
+  "split_epoch": 1567321786.9625,
+  "state_dim": 96,
+  "max_state_age_sec": 330.0,
+  "split_mode": "seizure_rolling_origin",
+  "status": "insufficient_rows_for_plumbing"
+}

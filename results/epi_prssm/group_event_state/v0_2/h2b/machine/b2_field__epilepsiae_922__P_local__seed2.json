@@ -1,0 +1,341 @@
+{
+  "tag": "registry_producer",
+  "warning": "",
+  "provenance": {
+    "producer": "P_local",
+    "seed": "2",
+    "source_commit": "54845f4dc73e73b58ba1bc45860f21f74451c130",
+    "config_hash": "ed69ff73ec817f4e21501adfcae67b6381973afb40b25f1383273f2764f85567",
+    "checkpoint_hash": "8f74ac555baa2ff37a4b99c91932c5097a5c7c1b9b4ad09423a6e60f443641a6",
+    "anchor_path": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_922/P_local/seed2/anchor_state.npz",
+    "registry_version": "group_event_state_v0_2_registry_1"
+  },
+  "subject": "epilepsiae_922",
+  "arm": "a1_static_recent_history",
+  "seed": 2,
+  "field_key": "hfa_field_5s",
+  "n_episodes": 22,
+  "n_train_leads": 11,
+  "n_heldout_leads": 11,
+  "leads": {
+    "5min": {
+      "n_train_usable": 8,
+      "per_seizure": [
+        {
+          "seizure_id": "92201500102",
+          "status": "ok",
+          "baseline": 0.5916,
+          "state": 0.5933
+        },
+        {
+          "seizure_id": "92201700102",
+          "status": "ok",
+          "baseline": 0.2052,
+          "state": 0.2074
+        },
+        {
+          "seizure_id": "92201800102",
+          "status": "ok",
+          "baseline": 0.579,
+          "state": 0.576
+        },
+        {
+          "seizure_id": "92202000102",
+          "status": "ok",
+          "baseline": 0.586,
+          "state": 0.5811
+        },
+        {
+          "seizure_id": "92202100102",
+          "status": "ok",
+          "baseline": 0.7533,
+          "state": 0.7531
+        },
+        {
+          "seizure_id": "92202200102",
+          "status": "ok",
+          "baseline": 0.5778,
+          "state": 0.5766
+        },
+        {
+          "seizure_id": "92202300102",
+          "status": "ok",
+          "baseline": 0.5816,
+          "state": 0.5835
+        },
+        {
+          "seizure_id": "92200001102",
+          "status": "ok",
+          "baseline": 0.6251,
+          "state": 0.6257
+        },
+        {
+          "seizure_id": "92200101102",
+          "status": "ok",
+          "baseline": 0.6068,
+          "state": 0.6059
+        },
+        {
+          "seizure_id": "92200201102",
+          "status": "no_state_trajectory_at_anchor"
+        },
+        {
+          "seizure_id": "92200501102",
+          "status": "ok",
+          "baseline": 0.7516,
+          "state": 0.7526
+        }
+      ],
+      "train_drop_reasons": [
+        "no_field",
+        "no_state_trajectory_at_anchor",
+        "no_state_trajectory_at_anchor"
+      ],
+      "temperature": 4.0,
+      "train_loo_score": 0.7249,
+      "n_scored": 10,
+      "status": "ok",
+      "median_baseline": 0.5888,
+      "median_state": 0.5884,
+      "median_increment": 0.0002,
+      "n_positive": 5
+    },
+    "30min": {
+      "n_train_usable": 7,
+      "per_seizure": [
+        {
+          "seizure_id": "92201500102",
+          "status": "no_state_trajectory_at_anchor"
+        },
+        {
+          "seizure_id": "92201700102",
+          "status": "ok",
+          "baseline": 0.2296,
+          "state": 0.2406
+        },
+        {
+          "seizure_id": "92201800102",
+          "status": "ok",
+          "baseline": 0.5874,
+          "state": 0.5087
+        },
+        {
+          "seizure_id": "92202000102",
+          "status": "in_postictal"
+        },
+        {
+          "seizure_id": "92202100102",
+          "status": "ok",
+          "baseline": 0.7554,
+          "state": 0.7029
+        },
+        {
+          "seizure_id": "92202200102",
+          "status": "ok",
+          "baseline": 0.579,
+          "state": 0.5402
+        },
+        {
+          "seizure_id": "92202300102",
+          "status": "ok",
+          "baseline": 0.5797,
+          "state": 0.6406
+        },
+        {
+          "seizure_id": "92200001102",
+          "status": "ok",
+          "baseline": 0.645,
+          "state": 0.5966
+        },
+        {
+          "seizure_id": "92200101102",
+          "status": "ok",
+          "baseline": 0.6204,
+          "state": 0.607
+        },
+        {
+          "seizure_id": "92200201102",
+          "status": "in_postictal"
+        },
+        {
+          "seizure_id": "92200501102",
+          "status": "ok",
+          "baseline": 0.7581,
+          "state": 0.74
+        }
+      ],
+      "train_drop_reasons": [
+        "no_field",
+        "in_postictal",
+        "in_postictal",
+        "in_postictal"
+      ],
+      "temperature": 0.25,
+      "train_loo_score": 0.7383,
+      "n_scored": 8,
+      "status": "ok",
+      "median_baseline": 0.6039,
+      "median_state": 0.6018,
+      "median_increment": -0.0285,
+      "n_positive": 2
+    },
+    "2h": {
+      "n_train_usable": 7,
+      "per_seizure": [
+        {
+          "seizure_id": "92201500102",
+          "status": "ok",
+          "baseline": 0.5824,
+          "state": 0.5812
+        },
+        {
+          "seizure_id": "92201700102",
+          "status": "ok",
+          "baseline": 0.2256,
+          "state": 0.2242
+        },
+        {
+          "seizure_id": "92201800102",
+          "status": "in_postictal"
+        },
+        {
+          "seizure_id": "92202000102",
+          "status": "ok",
+          "baseline": 0.6092,
+          "state": 0.6058
+        },
+        {
+          "seizure_id": "92202100102",
+          "status": "ok",
+          "baseline": 0.7369,
+          "state": 0.7337
+        },
+        {
+          "seizure_id": "92202200102",
+          "status": "ok",
+          "baseline": 0.5975,
+          "state": 0.5949
+        },
+        {
+          "seizure_id": "92202300102",
+          "status": "in_postictal"
+        },
+        {
+          "seizure_id": "92200001102",
+          "status": "no_state_coverage"
+        },
+        {
+          "seizure_id": "92200101102",
+          "status": "ok",
+          "baseline": 0.645,
+          "state": 0.6438
+        },
+        {
+          "seizure_id": "92200201102",
+          "status": "ok",
+          "baseline": 0.2386,
+          "state": 0.2382
+        },
+        {
+          "seizure_id": "92200501102",
+          "status": "ok",
+          "baseline": 0.7211,
+          "state": 0.7174
+        }
+      ],
+      "train_drop_reasons": [
+        "no_field",
+        "in_postictal",
+        "in_postictal",
+        "in_postictal"
+      ],
+      "temperature": 4.0,
+      "train_loo_score": 0.7599,
+      "n_scored": 8,
+      "status": "ok",
+      "median_baseline": 0.6034,
+      "median_state": 0.6003,
+      "median_increment": -0.002,
+      "n_positive": 0
+    },
+    "6h": {
+      "n_train_usable": 5,
+      "per_seizure": [
+        {
+          "seizure_id": "92201500102",
+          "status": "in_postictal"
+        },
+        {
+          "seizure_id": "92201700102",
+          "status": "ok",
+          "baseline": 0.1578,
+          "state": 0.1603
+        },
+        {
+          "seizure_id": "92201800102",
+          "status": "ok",
+          "baseline": 0.552,
+          "state": 0.5553
+        },
+        {
+          "seizure_id": "92202000102",
+          "status": "ok",
+          "baseline": 0.5397,
+          "state": 0.5416
+        },
+        {
+          "seizure_id": "92202100102",
+          "status": "ok",
+          "baseline": 0.7474,
+          "state": 0.7492
+        },
+        {
+          "seizure_id": "92202200102",
+          "status": "in_postictal"
+        },
+        {
+          "seizure_id": "92202300102",
+          "status": "in_postictal"
+        },
+        {
+          "seizure_id": "92200001102",
+          "status": "ok",
+          "baseline": 0.596,
+          "state": 0.5982
+        },
+        {
+          "seizure_id": "92200101102",
+          "status": "ok",
+          "baseline": 0.543,
+          "state": 0.544
+        },
+        {
+          "seizure_id": "92200201102",
+          "status": "ok",
+          "baseline": 0.1539,
+          "state": 0.1573
+        },
+        {
+          "seizure_id": "92200501102",
+          "status": "in_postictal"
+        }
+      ],
+      "train_drop_reasons": [
+        "no_state_coverage",
+        "no_state_coverage",
+        "in_postictal",
+        "no_field",
+        "in_postictal",
+        "in_postictal"
+      ],
+      "temperature": 4.0,
+      "train_loo_score": 0.6258,
+      "n_scored": 7,
+      "status": "ok",
+      "median_baseline": 0.543,
+      "median_state": 0.544,
+      "median_increment": 0.0023,
+      "n_positive": 7
+    }
+  }
+}
