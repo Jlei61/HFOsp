@@ -406,6 +406,82 @@ def evaluate_legacy_grammar(
     return {"event_nll": total / max(n, 1), "n_events": n}
 
 
+def summarize_training_adequacy(
+    history: list[Mapping[str, Any]],
+    *,
+    selected_epoch: int,
+    max_epochs: int,
+    patience: int,
+) -> dict[str, Any]:
+    """Describe convergence without reading any phase beyond inner calibration."""
+
+    n_run = len(history)
+    if n_run == 0:
+        raise ValueError("training history is empty")
+    values = np.asarray(
+        [float(row["inner_validation_event_nll"]) for row in history], dtype=float
+    )
+    tail = values[-min(10, values.size):]
+    improvement_last10 = float(tail[0] - tail[-1]) if tail.size >= 2 else 0.0
+    stopped_by_patience = n_run < int(max_epochs)
+    epochs_after_selected = int(n_run - 1 - int(selected_epoch))
+    plateau = bool(
+        stopped_by_patience
+        and epochs_after_selected >= int(patience)
+        and int(selected_epoch) < int(max_epochs) - 1
+    )
+    return {
+        "n_epochs_run": int(n_run),
+        "max_epochs": int(max_epochs),
+        "patience": int(patience),
+        "selected_epoch": int(selected_epoch),
+        "selected_at_budget_edge": bool(int(selected_epoch) == int(max_epochs) - 1),
+        "stopped_by_patience": stopped_by_patience,
+        "epochs_after_selected": epochs_after_selected,
+        "inner_nll_improvement_over_last10_epochs": improvement_last10,
+        "plateau_qualified": plateau,
+        "evidence_source": "calibration_inner_16_to_20_percent_only",
+    }
+
+
+def select_offset_optimizer_trial(
+    trials: list[Mapping[str, Any]], *, tolerance: float
+) -> dict[str, Any]:
+    """Select among plateau-qualified trials; smallest LR breaks near-ties."""
+
+    eligible = [
+        row for row in trials
+        if bool(row["training_adequacy"]["plateau_qualified"])
+    ]
+    rule = (
+        "plateau_qualified first; then inner NLL within fixed absolute "
+        f"tolerance {float(tolerance):g}; then smallest offset LR"
+    )
+    if not eligible:
+        return {
+            "status": "NO_ADEQUATE_PLATEAU",
+            "selected_trial": None,
+            "selection_rule": rule,
+        }
+    best = min(float(row["best_inner_validation_event_nll"]) for row in eligible)
+    near = [
+        row for row in eligible
+        if float(row["best_inner_validation_event_nll"]) <= best + float(tolerance)
+    ]
+    chosen = min(near, key=lambda row: float(row["offset_learning_rate"]))
+    return {
+        "status": "SELECTED_CALIBRATION_ONLY",
+        "selected_trial": str(chosen["trial"]),
+        "selected_checkpoint": str(chosen["checkpoint"]),
+        "selected_checkpoint_sha256": str(chosen["checkpoint_sha256"]),
+        "selected_offset_learning_rate": float(chosen["offset_learning_rate"]),
+        "best_plateau_inner_nll": best,
+        "tolerance": float(tolerance),
+        "n_plateau_qualified": len(eligible),
+        "selection_rule": rule,
+    }
+
+
 def calibrate_legacy_contact_grammar(
     subject: str,
     *,
@@ -497,6 +573,12 @@ def calibrate_legacy_contact_grammar(
             break
     if best_state is None:
         raise RuntimeError("no finite calibration checkpoint was selected")
+    adequacy = summarize_training_adequacy(
+        history,
+        selected_epoch=best_epoch,
+        max_epochs=cfg.max_epochs,
+        patience=cfg.patience,
+    )
     model.load_state_dict(best_state, strict=True)
     model.cpu().eval()
     elapsed = time.monotonic() - started
@@ -525,6 +607,7 @@ def calibrate_legacy_contact_grammar(
             "inner_validation_events": int(data.inner_rows.size),
             "selected_epoch": best_epoch,
             "best_inner_validation_event_nll": best,
+            "training_adequacy": adequacy,
             "config": asdict(cfg),
             "later_development_rows_read_for_scoring_or_selection": False,
         },
@@ -560,6 +643,7 @@ def calibrate_legacy_contact_grammar(
         "best_inner_validation_event_nll": best,
         "selected_epoch": best_epoch,
         "history": history,
+        "training_adequacy": adequacy,
         "architecture_provenance": provenance,
         "feature_provenance": data.feature_provenance,
         "partition": data.partition,

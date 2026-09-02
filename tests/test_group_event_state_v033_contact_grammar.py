@@ -12,6 +12,8 @@ from src.topic5_group_event_state.v033_training_lab.contact_grammar import (
     build_subject_grammar,
     direct_legacy_score,
     load_calibrated_legacy_grammar,
+    select_offset_optimizer_trial,
+    summarize_training_adequacy,
     tensor_state_hash,
 )
 from src.topic5_rank_distribution import FullHistorySequenceGRU, next_set_stop_loss
@@ -184,3 +186,51 @@ def test_calibrated_artifact_reload_is_logit_and_loss_identical(tmp_path):
         assert torch.equal(before_outputs[key], after_outputs[key])
     assert torch.equal(before_loss, after_loss)
     assert not any(parameter.requires_grad for parameter in loaded.parameters())
+
+
+def test_training_adequacy_distinguishes_plateau_from_budget_edge():
+    plateau_history = [
+        {"inner_validation_event_nll": value}
+        for value in (1.2, 1.1, 1.0, 1.01, 1.02, 1.03)
+    ]
+    plateau = summarize_training_adequacy(
+        plateau_history, selected_epoch=2, max_epochs=10, patience=3
+    )
+    assert plateau["plateau_qualified"] is True
+    assert plateau["stopped_by_patience"] is True
+    edge_history = [
+        {"inner_validation_event_nll": 1.0 - epoch * 1e-4}
+        for epoch in range(10)
+    ]
+    edge = summarize_training_adequacy(
+        edge_history, selected_epoch=9, max_epochs=10, patience=3
+    )
+    assert edge["selected_at_budget_edge"] is True
+    assert edge["plateau_qualified"] is False
+    assert edge["inner_nll_improvement_over_last10_epochs"] > 0
+
+
+def test_offset_grid_selects_only_plateaus_and_smallest_lr_within_tolerance():
+    def row(name, lr, nll, plateau):
+        return {
+            "trial": name, "offset_learning_rate": lr,
+            "best_inner_validation_event_nll": nll,
+            "training_adequacy": {"plateau_qualified": plateau},
+            "checkpoint": f"/{name}.pt", "checkpoint_sha256": name,
+        }
+
+    selected = select_offset_optimizer_trial(
+        [
+            row("edge_but_best", 0.01, 0.8, False),
+            row("lr003", 0.03, 1.00005, True),
+            row("lr01", 0.1, 1.0, True),
+        ],
+        tolerance=1e-4,
+    )
+    assert selected["status"] == "SELECTED_CALIBRATION_ONLY"
+    assert selected["selected_trial"] == "lr003"
+    failed = select_offset_optimizer_trial(
+        [row("edge", 0.01, 0.5, False)], tolerance=1e-4
+    )
+    assert failed["status"] == "NO_ADEQUATE_PLATEAU"
+    assert failed["selected_trial"] is None

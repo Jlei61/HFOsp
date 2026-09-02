@@ -37,6 +37,8 @@ def main() -> None:
     parser.add_argument("--max-epochs", type=int, default=24)
     parser.add_argument("--patience", type=int, default=4)
     parser.add_argument("--batch-size", type=int, default=1024)
+    parser.add_argument("--offset-learning-rate", type=float, default=3e-3)
+    parser.add_argument("--base-learning-rate", type=float, default=1e-3)
     parser.add_argument("--seed", type=int, default=20260903)
     parser.add_argument("--smoke-fit-events", type=int)
     parser.add_argument("--smoke-inner-events", type=int)
@@ -46,6 +48,8 @@ def main() -> None:
         batch_size=args.batch_size,
         max_epochs=args.max_epochs,
         patience=args.patience,
+        offset_learning_rate=args.offset_learning_rate,
+        base_learning_rate=args.base_learning_rate,
         seed=args.seed,
         max_fit_events=args.smoke_fit_events,
         max_inner_events=args.smoke_inner_events,
