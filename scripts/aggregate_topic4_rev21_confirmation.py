@@ -14,8 +14,8 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from scripts.aggregate_topic4_rev21_zm_screen import (  # noqa: E402
-    _atomic_json, _load_npz, _resolve, _sha256, reference_support,
-    summarize_candidate,
+    _atomic_json, _load_npz, _resolve, _sha256, model_ictal_or_control,
+    reference_support, summarize_candidate,
 )
 from src.topic4_rev20_dual_core_endpoint import (  # noqa: E402
     score_complete_distribution, score_validation_endpoints,
@@ -134,7 +134,7 @@ def main() -> None:
             "topology_seed": int(worker["topology_seed"]),
             "dynamics_seed": int(worker["dynamics_seed"]),
             "operational_onset_ms": worker["simulation"]["runaway_early_stop_ms"],
-            "model_ictal": worker["model_ictal_rev21"],
+            "model_ictal": model_ictal_or_control(worker),
             "selection": selection,
             "validation": validation,
             "worker_json": str(path),

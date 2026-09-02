@@ -46,14 +46,19 @@ patient held-out artifact in this stage.
 2. Run a small fixed paired seed set under systemd/nohup.
 3. Aggregate model-ictal morphology and the three separate interictal endpoints.
 4. Do not use patient ictal data and do not add grid points after seeing output.
-5. Carry forward only predeclared model-internally eligible Pareto candidates.
+5. Prefer a formally eligible, interictal-retained candidate. If none exists,
+   carry exactly one interictal-retained, operational and numerically safe
+   near-state point into the already frozen timescale grid by its weakest-clause
+   shortfall. Do not call that point eligible and do not relax the final gate.
 
 ## Stage 4: timescale refinement
 
 1. Around the frozen coarse candidate, run the 3 x 3
    `(tau_z,tau_adp)` grid while preserving integrated M strength.
-2. Apply the frozen lexicographic selection rule.
-3. Freeze one finalist before confirmation.
+2. Apply the frozen lexicographic selection rule and the original full state
+   criteria. Near-state status from Stage 3 has no confirmatory standing.
+3. Freeze one finalist before confirmation only if it is formally eligible and
+   retains all three interictal endpoints.
 
 ## Stage 5: independent confirmation and controls
 

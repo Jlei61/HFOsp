@@ -93,8 +93,18 @@ def main() -> None:
     coarse_path = output_root / "coarse/aggregate.json"
     coarse = json.loads(coarse_path.read_text())
     candidate_id = coarse.get("coarse_candidate_for_timescale_refinement")
-    if coarse.get("status") != "REV21_COARSE_HAS_CROSS_STATE_CANDIDATE" or not candidate_id:
-        raise RuntimeError("coarse screen did not freeze a cross-state candidate")
+    allowed_statuses = {
+        "REV21_COARSE_HAS_CROSS_STATE_CANDIDATE",
+        "REV21_COARSE_HAS_NEAR_STATE_TIMESCALE_SEED",
+    }
+    if coarse.get("status") not in allowed_statuses or not candidate_id:
+        raise RuntimeError("coarse screen did not freeze a timescale seed")
+    seed_role = coarse.get("timescale_seed_role")
+    if seed_role not in {
+        "FORMALLY_ELIGIBLE_AND_INTERICTAL_RETAINED",
+        "INTERICTAL_RETAINED_NEAREST_FORMAL_STATE_SHORTFALL",
+    }:
+        raise RuntimeError("coarse timescale seed role is missing or invalid")
     if coarse.get("patient_heldout_opened") or coarse.get("patient_ictal_inputs_read"):
         raise RuntimeError("coarse selection opened forbidden patient inputs")
     source_path = args.artifact_root / config["candidate_manifest"]
@@ -114,6 +124,14 @@ def main() -> None:
         "coarse_aggregate_sha256": _sha256(coarse_path),
         "source_manifest_sha256": _sha256(source_path),
         "source_coarse_candidate_id": candidate_id,
+        "source_coarse_status": coarse["status"],
+        "timescale_seed_role": seed_role,
+        "formal_state_gate_relaxed": False,
+        "selection_boundary": (
+            "near-state seeds may map the preregistered timescale axis but "
+            "cannot freeze a work point unless the original full model-ictal "
+            "and interictal-retention criteria pass"
+        ),
         "candidates": build_timescale_candidates(config, matches[0]),
         "patient_heldout_opened": False,
         "patient_ictal_inputs_read": False,

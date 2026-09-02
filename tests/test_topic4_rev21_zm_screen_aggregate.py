@@ -1,7 +1,8 @@
 import pytest
 
 from scripts.aggregate_topic4_rev21_zm_screen import (
-    _neighbor_scores, reference_support, summarize_candidate,
+    _neighbor_scores, model_ictal_or_control, qualification_shortfall,
+    reference_support, summarize_candidate,
 )
 
 
@@ -78,3 +79,45 @@ def test_neighbor_stability_uses_only_adjacent_grid_levels():
         "I_th_EI_scale": 0.8, "integrated_M_scale": 1.0,
     })
     assert center["neighbor_eligible_fraction"] == pytest.approx(2.0)
+
+
+def test_qualification_shortfall_is_zero_only_for_formal_pass():
+    assert qualification_shortfall({
+        "status": "MODEL_ICTAL_ELIGIBLE_REV21",
+    }) == 0.0
+    state = {
+        "status": "MODEL_ICTAL_NOT_ELIGIBLE_REV21",
+        "clauses": {
+            "operational_detector_reached": True,
+            "transition_after_minimum_dwell": True,
+            "numerically_safe": True,
+        },
+        "thresholds": {
+            "duty": 0.8,
+            "population_rate_ratio_min": 2.0,
+            "contact_centroid_shift_min_hz": 5.0,
+            "contact_centroid_ratio_min": 1.25,
+        },
+        "recruitment": {"joint_duty": 0.4},
+        "population_rate": {"ratio_early_over_base": 4.0},
+        "contact_frequency": {
+            "primary_shift_hz": 10.0,
+            "primary_ratio": 1.5,
+        },
+    }
+    assert qualification_shortfall(state) == pytest.approx(0.5)
+
+
+def test_qualification_shortfall_rejects_unreached_or_unsafe_states():
+    assert qualification_shortfall({
+        "status": "MODEL_ICTAL_NOT_ELIGIBLE_REV21",
+        "clauses": {"operational_detector_reached": False},
+    }) == float("inf")
+
+
+def test_zm_off_is_explicitly_not_scored_but_active_missing_state_fails():
+    state = model_ictal_or_control({"candidate_id": "rev21_zm_off"})
+    assert state["status"] == "MODEL_ICTAL_CONTROL_NOT_SCORED"
+    assert state["eligible"] is False
+    with pytest.raises(RuntimeError):
+        model_ictal_or_control({"candidate_id": "active"})

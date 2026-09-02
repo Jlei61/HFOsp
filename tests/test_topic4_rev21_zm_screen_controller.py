@@ -121,3 +121,26 @@ def test_complete_rejects_artifact_from_an_old_phase_manifest(tmp_path):
     payload["provenance"]["candidate_manifest_sha256"] = "b" * 64
     job["json"].write_text(json.dumps(payload))
     assert _complete(job)
+
+
+def test_complete_accepts_zm_off_without_active_state_readout(tmp_path):
+    import hashlib
+    npz = tmp_path / "off.npz"
+    npz.write_bytes(b"off-control")
+    digest = hashlib.sha256(npz.read_bytes()).hexdigest()
+    job = {
+        "candidate_id": "rev21_zm_off", "topology_seed": 1,
+        "dynamics_seed": 2, "json": tmp_path / "off.json", "npz": npz,
+        "expected_commit": "a" * 40,
+        "candidate_manifest_sha256": "b" * 64,
+    }
+    job["json"].write_text(json.dumps({
+        "status": "REV12ND_NODE_WORKER_COMPLETE",
+        "candidate_id": "rev21_zm_off", "topology_seed": 1,
+        "dynamics_seed": 2, "arrays": {"sha256": digest},
+        "provenance": {
+            "expected_git_commit": "a" * 40,
+            "candidate_manifest_sha256": "b" * 64,
+        },
+    }))
+    assert _complete(job)

@@ -57,6 +57,62 @@ def _finite(values):
     ], float)
 
 
+def qualification_shortfall(state: dict) -> float:
+    """Normalized weakest-clause deficit for timescale seeding only.
+
+    A zero is a formal pass. A finite positive value does not relax the state
+    definition; it only prevents the predeclared timescale experiment from
+    being blocked when amplitude and timescale jointly determine one clause.
+    """
+    if state.get("status") == "MODEL_ICTAL_ELIGIBLE_REV21":
+        return 0.0
+    if not state.get("clauses", {}).get("operational_detector_reached"):
+        return float("inf")
+    thresholds = state.get("thresholds", {})
+    recruitment = state.get("recruitment", {})
+    rate = state.get("population_rate", {})
+    frequency = state.get("contact_frequency", {})
+    values = (
+        (recruitment.get("joint_duty"), thresholds.get("duty")),
+        (rate.get("ratio_early_over_base"),
+         thresholds.get("population_rate_ratio_min")),
+        (frequency.get("primary_shift_hz"),
+         thresholds.get("contact_centroid_shift_min_hz")),
+        (frequency.get("primary_ratio"),
+         thresholds.get("contact_centroid_ratio_min")),
+    )
+    deficits = []
+    for observed, target in values:
+        if observed is None or target is None or not np.isfinite(float(observed)):
+            return float("inf")
+        scale = max(abs(float(target)), 1e-12)
+        deficits.append(max(0.0, (float(target) - float(observed)) / scale))
+    if not state.get("clauses", {}).get("transition_after_minimum_dwell"):
+        deficits.append(1.0)
+    if not state.get("clauses", {}).get("numerically_safe"):
+        return float("inf")
+    return float(max(deficits))
+
+
+def model_ictal_or_control(worker: dict) -> dict:
+    if "model_ictal_rev21" in worker:
+        return worker["model_ictal_rev21"]
+    if worker.get("candidate_id") in {"rev21_zm_off", "rev21_confirm_zm_off"}:
+        return {
+            "schema_id": "model_ictal_control_not_scored_v1",
+            "status": "MODEL_ICTAL_CONTROL_NOT_SCORED",
+            "eligible": False,
+            "clauses": {},
+            "boundary": (
+                "Z/M-off is a paired interictal reference and exact historical "
+                "parity path; it is not ranked as an active transition candidate"
+            ),
+        }
+    raise RuntimeError(
+        f"active candidate {worker.get('candidate_id')} lacks model-ictal evidence"
+    )
+
+
 def reference_support(endpoint_matrices: dict) -> dict:
     mapping = {
         "complete_distribution": "training_complete_distribution",
@@ -172,12 +228,27 @@ def summarize_candidate(candidate_id: str, cells: list[dict], off_lookup: dict,
     else:
         distance = None
     counts = [int(row["selection"]["n_returned_families"]) for row in cells]
+    shortfalls = _finite([
+        qualification_shortfall(row["model_ictal"]) for row in cells
+    ])
+    operational = np.asarray([
+        bool(row["model_ictal"].get("clauses", {}).get(
+            "operational_detector_reached")) for row in cells
+    ], bool)
     return {
         "candidate_id": candidate_id,
         "level": level,
         "cell_count": len(cells),
         "model_ictal_eligible_cells": int(np.sum(eligible)),
         "model_ictal_eligible_fraction": float(np.mean(eligible)),
+        "model_ictal_qualification_shortfall": {
+            "n_finite": int(len(shortfalls)),
+            "median": (float(np.median(shortfalls)) if len(shortfalls) else None),
+            "q75": (float(np.quantile(shortfalls, 0.75))
+                    if len(shortfalls) else None),
+            "operational_transition_fraction": float(np.mean(operational)),
+            "role": "timescale-seed ranking only; not an eligibility relaxation",
+        },
         "operational_onset_ms": {
             "n": int(len(onsets)),
             "median": float(np.median(onsets)) if len(onsets) else None,
@@ -282,7 +353,7 @@ def main() -> None:
             "topology_seed": worker["topology_seed"],
             "dynamics_seed": worker["dynamics_seed"],
             "operational_onset_ms": worker["simulation"]["runaway_early_stop_ms"],
-            "model_ictal": worker["model_ictal_rev21"],
+            "model_ictal": model_ictal_or_control(worker),
             "selection": selection, "validation": validation,
             "worker_json": str(path),
         }
@@ -333,17 +404,42 @@ def main() -> None:
     eligible_retained = [row for row in ranked
                          if row["model_ictal_eligible_cells"] > 0
                          and row["interictal_substrate_retained"]]
+    near_retained = sorted([
+        row for row in ranked
+        if row["interictal_substrate_retained"]
+        and row["model_ictal_qualification_shortfall"]["median"] is not None
+    ], key=lambda row: (
+        row["model_ictal_qualification_shortfall"]["median"],
+        -row["model_ictal_qualification_shortfall"][
+            "operational_transition_fraction"],
+        (float("inf") if row["worst_standardized_deterioration"] is None
+         else row["worst_standardized_deterioration"]),
+        row["log_distance_from_reference"], row["candidate_id"],
+    ))
+    timescale_seed = (
+        eligible_retained[0] if eligible_retained
+        else (near_retained[0] if near_retained else None)
+    )
+    if eligible_retained:
+        status = "REV21_COARSE_HAS_CROSS_STATE_CANDIDATE"
+        seed_role = "FORMALLY_ELIGIBLE_AND_INTERICTAL_RETAINED"
+    elif timescale_seed is not None:
+        status = "REV21_COARSE_HAS_NEAR_STATE_TIMESCALE_SEED"
+        seed_role = "INTERICTAL_RETAINED_NEAREST_FORMAL_STATE_SHORTFALL"
+    else:
+        status = "NO_TIMESCALE_SEED_IN_FROZEN_ZM_AMPLITUDE_GRID"
+        seed_role = None
     payload = {
         "schema_id": "topic4_rev21_zm_coarse_aggregate_v1",
-        "status": ("REV21_COARSE_HAS_CROSS_STATE_CANDIDATE"
-                   if eligible_retained else
-                   "NO_CROSS_STATE_WORKPOINT_IN_FROZEN_ZM_GRID"),
+        "status": status,
         "reference_support": support,
         "per_cell": cells,
         "candidate_summaries": summaries,
         "ranked_active_candidate_ids": [row["candidate_id"] for row in ranked],
         "coarse_candidate_for_timescale_refinement": (
-            eligible_retained[0]["candidate_id"] if eligible_retained else None),
+            None if timescale_seed is None else timescale_seed["candidate_id"]),
+        "timescale_seed_role": seed_role,
+        "formal_cross_state_candidate_present": bool(eligible_retained),
         "patient_heldout_opened": False,
         "patient_ictal_inputs_read": False,
         "selection_unit": "topology_by_dynamics_seed_cell",

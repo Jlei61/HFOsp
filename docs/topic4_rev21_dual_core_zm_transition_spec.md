@@ -102,12 +102,22 @@ The search is staged and finite:
 1. coarse access map at fixed `tau_z=5000 ms`, `tau_adp=500 ms`:
    `s_I in {0.70,0.80,0.90,1.00}` and
    `s_M in {0.50,1.00,1.50,2.00}`;
-2. only around model-internally eligible coarse points, a timescale map:
+2. around the best interictal-retained coarse point, a timescale map:
    `tau_z in {3000,5000,8000} ms` and
    `tau_adp in {250,500,1000} ms`, preserving the selected `s_M`;
 3. Z-only, M-only and Z/M-off controls at the frozen finalist.
 
 No parameter level is added after viewing clinical ictal data.
+
+The preferred timescale seed is a formally model-ictal eligible,
+interictal-retained coarse point. If none exists, the predeclared timescale map
+may still be run around one interictal-retained point that reached an
+operational, numerically safe transition. That diagnostic seed minimizes the
+largest normalized deficit across joint recruitment duty, population-rate
+ratio, contact-frequency shift and contact-frequency ratio. This fallback only
+tests whether amplitude and timescale jointly control a failed clause. It does
+not relax any final state criterion, and a positive deficit can never freeze a
+work point.
 
 ## 5. One uninterrupted trajectory and formal interictal events
 
@@ -208,16 +218,22 @@ This order is frozen before the scan. No weighted patient-ictal objective is
 used. At most one work point enters confirmation on a fresh
 `3 topology x 4 dynamics` matrix.
 
+If no formally eligible and retained coarse point exists, the same ordering may
+select one retained near-state point for the predeclared timescale experiment
+using the weakest-clause shortfall in Section 4. This is a mechanism diagnostic,
+not a work-point selection. The original full state and interictal criteria
+remain mandatory at timescale aggregation and confirmation.
+
 Confirmation is called multi-seed robust only when at least 8 of the 12 fresh
 topology-by-dynamics cells satisfy `MODEL_ICTAL_ELIGIBLE_REV21`, with at least
 2 eligible dynamics realizations in at least 2 of the 3 topology seeds, and the
 three aggregate interictal endpoints remain inside the independent Z/M-off
 support. This is the only confirmation gate; there is no event-count gate.
 
-If no point passes both state and retention criteria, the result is
-`NO_CROSS_STATE_WORKPOINT_IN_FROZEN_ZM_GRID`. A model-ictal-only candidate may
-be displayed as a mechanism boundary but cannot become the primary Fig.5
-work point.
+If no timescale point passes both state and retention criteria, the result is
+`NO_CROSS_STATE_WORKPOINT_IN_FROZEN_ZM_GRID`. A near-state or model-ictal-only
+candidate may be displayed as a mechanism boundary but cannot become the
+primary Fig.5 work point.
 
 ## 9. Post-freeze clinical bridge
 

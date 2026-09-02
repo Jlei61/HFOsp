@@ -27,6 +27,10 @@ CANARY_CANDIDATES = (
 )
 
 
+def _is_zm_off_candidate(candidate_id: str) -> bool:
+    return str(candidate_id) in {"rev21_zm_off", "rev21_confirm_zm_off"}
+
+
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -65,12 +69,16 @@ def _complete(job: dict) -> bool:
     try:
         payload = json.loads(job["json"].read_text())
         provenance = payload.get("provenance", {})
+        state_evidence_complete = (
+            "model_ictal_rev21" in payload
+            or _is_zm_off_candidate(job["candidate_id"])
+        )
         return (
             payload.get("status") == COMPLETE_STATUS
             and payload.get("candidate_id") == job["candidate_id"]
             and payload.get("topology_seed") == job["topology_seed"]
             and payload.get("dynamics_seed") == job["dynamics_seed"]
-            and "model_ictal_rev21" in payload
+            and state_evidence_complete
             and payload.get("arrays", {}).get("sha256") == _sha256(job["npz"])
             and provenance.get("expected_git_commit") == job["expected_commit"]
             and provenance.get("candidate_manifest_sha256")
