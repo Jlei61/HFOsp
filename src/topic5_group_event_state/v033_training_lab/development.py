@@ -90,13 +90,17 @@ def load_development_view(request: Mapping[str, Any], *, scaling: str) -> tuple[
     development = np.flatnonzero((phase == DEVELOPMENT_PHASE) & eligible.all(axis=1))
     if development.size == 0:
         raise ValueError("released artifact has no fully eligible development-evaluation anchors")
-    counts = np.full_like(counts_all, -1)
-    log_mu = np.full_like(log_mu_all, np.nan)
+    # Keep the already-public TRAIN/STATE_SELECTION rows in the view because
+    # the common tensor constructor uses TRAIN anchor identities to recreate
+    # model-side bookkeeping.  Only DEVELOPMENT_EVALUATION is scored below;
+    # retaining these keys does not refit or refresh checkpoint statistics.
+    counts = training_view.counts.copy()
+    log_mu = training_view.log_mu_h.copy()
     counts[development] = counts_all[development]
     log_mu[development] = log_mu_all[development]
     view = replace(
         training_view,
-        phase_index={"development": development},
+        phase_index={**training_view.phase_index, "development": development},
         counts=counts,
         log_mu_h=log_mu,
         h_meta={**training_view.h_meta, "phase_contract": {
