@@ -8,28 +8,29 @@
 2. 该状态能否改变一次群体事件如何继续和招募；
 3. 该状态能否迁移到发作，并且 IED 是否在共同状态之外反馈性改变未来状态。
 
-当前未运行的 H2b/H3 只画坐标和比较关系，不填模拟数据。
+v0.3.1 没有测到正确的 residual estimand，因此 H1/H2a/H2b/H3 的主图接口都不填模拟数据。旧 pilot 数字只保存在 payload 的 archival diagnostics 中。
 
 ## 图 1：H1 future-block predictive state
 
 **科学问题**：停止读取未来事件后，时刻 `t` 的候选状态能否预测未来 5、30、120 分钟的一片群体事件，而不是只预测下一次事件。
 
-**承重比较**：
+**承重比较**：所有模型都先包含同一个显式多尺度历史 `H(t)`。
 
-- B：状态相对可解释 multiscale history baseline 的未来事件数 log-score 增量；
-- C：正确时刻状态相对保留自相关的 block-shifted wrong-time state 的增量。
+- B：`H+S_correct` 相对 `H` 的未来事件数 log-score 增量；
+- C：`H+S_correct` 相对 `H+S_shifted` 的增量；
+- D：`H+S_dynamic` 相对 `H+mean(S_train)` 的增量。
 
-两个纵轴均统一为“正值支持状态”。每条细线是一位患者，粗菱形为患者中位；缺失保持缺失，绝不画成零。
+三个纵轴均统一为“正值支持状态”。每条细线是一位患者，粗菱形为患者中位；缺失保持缺失，绝不画成零。
 
-**最后理想结果**：B、C 在 30 和 120 分钟仍稳定高于零。只有 5 分钟阳性只能称短程历史记忆，不能称慢状态。
+**最后理想结果**：B、C、D 在 30 分钟稳定高于零，120 分钟只在预先具备 coverage 的患者中作 secondary。只有 5 分钟阳性只能称短程历史记忆，不能称慢状态。
 
-**当前 pilot 读数**：可估患者中，状态在 B 全部未胜过 multiscale history；C 只有一位患者在 5、30 分钟为正，另一位接近零，且 120 分钟不稳定。因此当前不支持可复现的慢预测状态。
+**当前 pilot 读数**：`not yet run`。v0.3.1 比较的是 `S` 单独与 `H`，不是 `H+S` 与 `H`；其一位患者的 correct-vs-shifted 短中期信号只能作为诊断，不能填进这三个主 panel。当前结论是 state learning 未决，不是 H1 阴性。
 
 ## 图 2：H2a state-dependent repertoire
 
 **科学问题**：在事件开头相同或相近时，状态是否改变事件后面会不会继续、继续时招募多少触点、具体招募哪些触点。
 
-**承重比较**：正确时刻状态与 wrong-time state 在三个条件 likelihood 上的差值：
+**承重比较**：`H+S_correct` 必须同时胜过 `H`、`H+S_shifted` 和 `H+S_mean`；图上画 correct state 相对三个对照中表现最好的一个的增量：
 
 - B：continue vs STOP；
 - C：positive size，条件于继续；
@@ -39,7 +40,7 @@
 
 **最后理想结果**：正确时刻状态在多个物理 horizon 上稳定改善 subset 与 same-prefix continuation，而不是只改善事件大小。
 
-**当前 pilot 读数**：continue 与 size 的患者中位接近零；subset 在一位患者 30 分钟明显反向，其他点接近零。same-prefix 的最终接口已在 payload 中固定，但尚未运行。因此 H2a 当前未建立。
+**当前 pilot 读数**：`not yet run`。v0.3.1 的两位患者基本停在首轮 checkpoint，关键患者又缺少 residual H+S 配对；旧 near-zero mark contrast 不能作为 H2a 阴性。
 
 ## 图 3：H2b transfer 与 H3 feedback
 
@@ -56,13 +57,14 @@
 
 ## 固定数据接口
 
-payload 格式为 `group_event_state_core_evidence_v1`，由
+payload 格式为 `group_event_state_core_evidence_v2`，由
 `src/topic5_group_event_state/v03/core_evidence.py` 生成。稳定字段包括：
 
 - `h1_future_block.rows`；
 - `h2a_repertoire.rows` 与 `same_prefix.required_fields`；
 - `h2b_transfer.{risk_rows,field_rows}`；
 - `h3_feedback.{model_rows,impulse_rows}`。
+- `v0_3_1_diagnostics` 只作旧数值溯源，plotter 不消费它生成主结果点。
 
 producer 为 `scripts/paper_figures/plot_group_event_state_core_evidence.py`。输出写到
 `results/group_event_state/core_evidence/`，包含 PNG、矢量 PDF、metadata、payload 与中文 README。

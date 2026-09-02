@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Render the three stable core-evidence figures for Group-Event State.
+"""Render the corrected core-evidence interfaces for Group-Event State.
 
-Current H1/H2a observations are read from the v0.3 pilot summary.  H2b/H3
-panels use explicit empty interfaces until those analyses are run; the producer
-never invents demonstration data.
+The v0.3.1 measurements are preserved in the payload as archival diagnostics,
+but they cannot populate H1/H2a because the residual H+S estimand was not run.
+Empty panels are explicit and are never filled with demonstration data.
 """
 from __future__ import annotations
 
@@ -174,10 +174,22 @@ def _gain_panel(
         color="#4D766B",
         fontsize=7.0,
     )
+    if not values:
+        ax.text(
+            0.5,
+            0.49,
+            "not yet run",
+            transform=ax.transAxes,
+            ha="center",
+            va="center",
+            color="#777777",
+            fontsize=8.0,
+            fontweight="bold",
+        )
     ax.set_xticks(x, _tick_labels(rows, field))
     ax.set_ylabel(ylabel)
     ax.set_title(title, loc="left", fontweight="bold")
-    if show_legend:
+    if show_legend and values:
         handles = [
             Line2D([0], [0], color=colors[a], marker="o", lw=0.8, ms=3.2, label=a)
             for a in colors
@@ -193,15 +205,15 @@ def _draw_h1_schematic(ax: plt.Axes) -> None:
     event_x = [0.9, 2.2, 3.5, 4.8]
     event_colors = ["#5D7C93", "#8A5A2F", "#5D7C93", "#7E6E84"]
     for x0, color in zip(event_x, event_colors):
-        ys = [3.7, 4.15, 4.6]
+        ys = [3.25, 3.7, 4.15]
         ax.scatter([x0] * 3, ys, s=[18, 28, 13], color=color, edgecolor="white", lw=0.45)
-        ax.plot([x0, x0], [3.65, 4.65], color=color, lw=0.55, alpha=0.65)
-    ax.text(0.75, 5.05, "Past group events", fontsize=8.0, fontweight="bold")
+        ax.plot([x0, x0], [3.2, 4.2], color=color, lw=0.55, alpha=0.65)
+    ax.text(0.7, 4.48, "Past group events", fontsize=6.8, fontweight="bold")
     state_x = np.linspace(0.7, 5.4, 100)
     state_y = 1.9 + 0.45 * np.sin(state_x * 0.95) + 0.13 * state_x
     ax.plot(state_x, state_y, color=STATE, lw=2.0)
     ax.scatter(event_x, np.interp(event_x, state_x, state_y), color=STATE, s=18, zorder=4)
-    ax.text(0.75, 0.75, "Candidate state  S(t)", color=STATE, fontsize=8.2, fontweight="bold")
+    ax.text(0.7, 0.68, "Candidate state  S(t)", color=STATE, fontsize=6.6, fontweight="bold")
     ax.axvline(5.65, color="#4D4D4D", lw=0.85, ls=(0, (3, 2)))
     ax.add_patch(plt.Rectangle((5.8, 1.0), 3.6, 3.8, facecolor="#EEF1F2", edgecolor="none"))
     future_x = [6.4, 7.05, 8.1, 8.7]
@@ -209,36 +221,43 @@ def _draw_h1_schematic(ax: plt.Axes) -> None:
         ax.scatter([x0] * n, np.linspace(3.7, 4.5, n), s=18, color="#A8B1B6")
     ax.annotate(
         "open-loop",
-        xy=(8.9, 2.15),
-        xytext=(6.05, 2.15),
+        xy=(8.9, 2.35),
+        xytext=(6.0, 2.35),
         arrowprops=dict(arrowstyle="-|>", color=STATE, lw=1.2),
         color=STATE,
-        fontsize=7.4,
+        fontsize=6.5,
         va="center",
     )
-    ax.text(6.08, 1.25, "Future event block\n5 / 30 / 120 min", fontsize=8.0, fontweight="bold")
-    ax.text(0.0, 5.82, "State must predict a future block", fontsize=8.2, fontweight="bold")
+    ax.text(6.0, 1.12, "Future block\n5 / 30 / 120 min", fontsize=6.7, fontweight="bold")
+    ax.text(
+        0.0, 5.82, "State must predict\na future block",
+        fontsize=6.8, fontweight="bold", va="top", linespacing=0.90,
+    )
 
 
 def render_h1(payload: dict[str, Any], out_dir: Path) -> dict[str, Any]:
     _style()
-    fig = plt.figure(figsize=(DOUBLE_COLUMN_MM * MM, 68 * MM))
-    gs = fig.add_gridspec(1, 3, width_ratios=[1.2, 1.0, 1.0], wspace=0.42)
-    axes = [fig.add_subplot(gs[0, i]) for i in range(3)]
+    fig = plt.figure(figsize=(DOUBLE_COLUMN_MM * MM, 70 * MM))
+    gs = fig.add_gridspec(1, 4, width_ratios=[1.3, 1.0, 1.0, 1.0], wspace=0.60)
+    axes = [fig.add_subplot(gs[0, i]) for i in range(4)]
     _draw_h1_schematic(axes[0])
     rows = payload["h1_future_block"]["rows"]
     colors = _subject_palette(payload)
     _gain_panel(
-        axes[1], rows, "count_gain_over_multiscale", "Beyond multiscale history",
-        "Relative count\nlog-score gain", colors, show_legend=True,
+        axes[1], rows, "residual_gain_over_history", "Residual beyond history",
+        "H+S gain\nover H", colors,
     )
     _gain_panel(
         axes[2], rows, "correct_time_gain_over_shifted", "Time-specific state",
-        "Correct-time\ncount gain", colors,
+        "Correct-state gain\nover shifted state", colors,
     )
-    for letter, ax in zip("ABC", axes):
+    _gain_panel(
+        axes[3], rows, "dynamic_gain_over_mean", "Dynamic, not static",
+        "Dynamic-state gain\nover mean state", colors,
+    )
+    for letter, ax in zip("ABCD", axes):
         _panel(ax, letter)
-    fig.subplots_adjust(left=0.045, right=0.99, bottom=0.18, top=0.91)
+    fig.subplots_adjust(left=0.04, right=0.995, bottom=0.18, top=0.91)
     return _save(fig, out_dir, FIGURE_STEMS["h1"])
 
 
@@ -282,21 +301,21 @@ def render_h2a(payload: dict[str, Any], out_dir: Path) -> dict[str, Any]:
     rows = payload["h2a_repertoire"]["rows"]
     colors = _subject_palette(payload)
     all_values = [
-        abs(float(row["gain_over_shifted"]))
+        abs(float(row["gain_over_best_control"]))
         for row in rows
-        if row.get("gain_over_shifted") is not None
+        if row.get("gain_over_best_control") is not None
     ]
     limit = max(max(all_values, default=0.01) * 1.12, 0.01)
     shared_ylim = (-limit, limit)
     specs = (
-        ("continue", "Continue vs STOP", "Wrong-time − correct-time\nmark NLL"),
+        ("continue", "Continue vs STOP", "Correct-state gain\nover best control"),
         ("positive_size", "Size | continue", ""),
         ("subset", "Contact subset | size", ""),
     )
     for ax, (endpoint, title, ylabel) in zip(axes[1:], specs):
         subset = [row for row in rows if row["endpoint"] == endpoint]
         _gain_panel(
-            ax, subset, "gain_over_shifted", title, ylabel, colors,
+            ax, subset, "gain_over_best_control", title, ylabel, colors,
             shared_ylim=shared_ylim, show_legend=endpoint == "continue",
         )
     for letter, ax in zip("ABCD", axes):
@@ -431,11 +450,11 @@ def _write_readme(out_dir: Path) -> Path:
     path.write_text(
         "# Group-Event State core evidence\n\n"
         "### group_event_state_h1_future_blocks.png\n\n"
-        "这张图回答 H1：群体间期事件历史形成的状态，能否在停止读取未来事件后预测未来 5、30、120 分钟的事件数。B 比较状态与可解释 multiscale history，C 比较正确时刻与保留自相关的错时状态；纵轴均为正值支持状态。\n\n"
-        "**关注点**：最终承重结果应同时在 B、C 的较长 horizon 位于零线上方，并以患者为分母；当前 pilot 未达到。\n\n"
+        "这张图回答 H1：在显式多尺度历史 H 已经进入每个模型之后，动态状态 S 是否还对未来 5、30、120 分钟的事件块提供增量。B 比较 H+S 与 H，C 比较正确时刻与 block-shifted S，D 比较动态 S 与 TRAIN 均值 S；纵轴均为正值支持 residual state。\n\n"
+        "**关注点**：v0.3.1 没有运行这三个 residual 对比，所以当前 panel 留空；旧 S-vs-H 数字只保存在 payload 的 archival diagnostics 中，不能填入主图。\n\n"
         "### group_event_state_h2a_repertoire.png\n\n"
-        "这张图回答 H2a：给定相同或相近的事件开头，状态是否改变事件继续/停止、继续时的招募规模以及具体触点集合。三个统计 panel 共用 y 轴，避免把接近零的小数方向误读成强效应。\n\n"
-        "**关注点**：最终需要 contact subset 与 same-prefix continuation 的患者级增量稳定高于零；只改善 STOP 只能称 extent state。\n\n"
+        "这张图回答 H2a：给定相同或相近的事件开头，H+S_correct 是否同时胜过 H、H+S_shifted 和 H+S_mean，进而改变事件继续/停止、继续时的招募规模以及具体触点集合。三个统计 panel 共用 y 轴。\n\n"
+        "**关注点**：v0.3.1 的 state path 未可靠训练且缺少 H+S 配对，因此当前留空；最终需要 contact subset 与 same-prefix continuation 的患者级增量稳定高于零。\n\n"
         "### group_event_state_h2b_h3_transfer_feedback.png\n\n"
         "这张图预先固定跨任务与反馈机制的最终接口。A/B 分别放冻结间期状态对发作风险和发作早期空间场的增量；C 比较 no-feedback、count/rate feedback 与 mark-specific feedback；D 显示不同 IED 类型的有符号状态冲击。当前这些实验尚未运行，因此只显示坐标、对照方向和 not yet run，不填模拟数据。\n\n"
         "**关注点**：H2b 必须以 held-out seizure 为分母；H3 必须先控制共同 pre-event state，且冲击允许正负方向。\n"
@@ -448,7 +467,10 @@ def main() -> None:
     parser.add_argument(
         "--summary",
         type=Path,
-        default=Path("/data/hfosp_group_event_state_v0_3/pilot/summary_main.json"),
+        default=Path(
+            "/data/hfosp_group_event_state_v0_3/pilot/"
+            "summary_v0_3_1_closeout.json"
+        ),
     )
     parser.add_argument("--payload", type=Path, default=None)
     parser.add_argument(
@@ -477,7 +499,7 @@ def main() -> None:
     metadata = {
         "asset_id": "group_event_state_core_evidence",
         "paper_slot": "TBD",
-        "status": "CANDIDATE_FRAMEWORK_CURRENT_PILOT_NOT_ESTABLISHED",
+        "status": "CANDIDATE_FRAMEWORK_V0_3_1_PRIMARY_ESTIMAND_NOT_RUN",
         "payload_format": payload["format"],
         "payload": str(payload_path),
         "source_summary": source_summary,

@@ -3,6 +3,8 @@ from __future__ import annotations
 import torch
 import numpy as np
 
+from scripts.finalize_group_event_state_v03_pilot import _paired_count_summary
+
 from src.topic5_continuous_marked_state_r1.mark_likelihood import tied_group_mark_log_prob
 from src.topic5_group_event_state.v02.timeline import CoverageSegment
 from src.topic5_group_event_state.v03.grammar import (
@@ -224,3 +226,26 @@ def test_empty_long_horizon_is_reported_without_invalidating_shorter_horizons():
         {"state_train": np.arange(2), "dev_val": np.arange(1), "dev_test": np.arange(3)}
     )
     assert complete["status"] == "ok"
+
+
+def test_posthoc_intercept_flag_never_changes_scored_pair_denominator():
+    def row(a, b, a_ok, b_ok):
+        return {
+            "count_poisson_nll": {"correct_state": a, "multiscale_history": b},
+            "posthoc_intercept_audit": {
+                "admissible_within_0p5_nats": {
+                    "correct_state": a_ok,
+                    "multiscale_history": b_ok,
+                }
+            },
+        }
+
+    summary = _paired_count_summary(
+        [row(2.0, 1.0, True, True), row(5.0, 2.0, False, True)],
+        "correct_state",
+        "multiscale_history",
+    )
+    assert summary["raw_contrast"] == 2.0
+    assert summary["n_scored_seeds"] == 2
+    assert summary["n_posthoc_flagged_seeds"] == 1
+    assert summary["legacy_filtered_contrast_deprecated"] == 1.0

@@ -1,8 +1,15 @@
 # Topic 5 Archive Index
 
+- **2026-09-02 Group-Event State v0.3.1 审阅后正式收口**：
+  [`closeout`](group_event_state_v0_3_1_post_review_closeout_2026-09-02.md) ·
+  [`白话版`](group_event_state_v0_3_pilot_plain_2026-09-02.md) ·
+  [`技术版`](group_event_state_v0_3_pilot_technical_2026-09-02.md) ·
+  [`冻结 spec`](group_event_state_v0_3_pretrained_decoder_backbone_spec_plan_2026-09-02.md)。
+  最终状态为 `V0_3_1_PILOT_CLOSED_MAJOR_REVISION`：端到端仪器完成，但旧实验没有运行 `H+S` 相对 `H`、correct 相对 shifted、dynamic 相对 TRAIN-mean 的完整 residual estimand，state learning/H1/H2a 均为未决而非阴性。旧 `S` 单独比较只保留为诊断；development test 不再充当未来独立检验；H2b/H3 与 sealed partition 均未运行。
+
 - **2026-09-02 群体间期事件状态三张核心证据图合同**：
   [`figure contract`](group_event_state_core_evidence_figure_contract_2026-09-02.md)。
-  先固定 H1 future-block、H2a state-dependent repertoire、H2b seizure transfer 与 H3 feedback 的最终画布和机器接口；当前 v0.3 三患者 pilot 只填真实 H1/H2a 读数，H2b/H3 保持 `not yet run`，不使用模拟占位。producer 为 `scripts/paper_figures/plot_group_event_state_core_evidence.py`，输出位于 `results/group_event_state/core_evidence/`，当前身份为 candidate framework，不进入 Fig1–Fig4 canonical。
+  先固定 H1 future-block、H2a state-dependent repertoire、H2b seizure transfer 与 H3 feedback 的最终画布和机器接口；v0.3.1 的旧读数只进入 archival diagnostics，四个主假设接口均保持 `not yet run`，不使用模拟占位。producer 为 `scripts/paper_figures/plot_group_event_state_core_evidence.py`，输出位于 `results/group_event_state/core_evidence/`，当前身份为 candidate framework，不进入 Fig1–Fig4 canonical。
 
 - **2026-08-31 H2b frozen interictal-state cross-task transfer v0.3 探索收口**：
   [`白话版`](continuous_marked_state_h2b_cross_task_v0_3_plain_2026-08-31.md) ·
@@ -406,9 +413,9 @@
 
 - **2026-09-02 Group-Event State v0.3 marked-point-process 架构修订**：
   - Scientific Spec + 执行计划：`group_event_state_v0_3_pretrained_decoder_backbone_spec_plan_2026-09-02.md`
-  - 三患者 pilot 白话报告：`group_event_state_v0_3_pilot_plain_2026-09-02.md`；技术报告：`group_event_state_v0_3_pilot_technical_2026-09-02.md`；机器汇总：`/data/hfosp_group_event_state_v0_3/pilot/summary_main.json`。
+  - 三患者 pilot 审阅后白话报告：`group_event_state_v0_3_pilot_plain_2026-09-02.md`；技术报告：`group_event_state_v0_3_pilot_technical_2026-09-02.md`；权威机器汇总：`/data/hfosp_group_event_state_v0_3/pilot/summary_v0_3_1_closeout.json`。旧 `summary_main.json` 仅作历史溯源。
   - v0.2 的 96 维端到端多任务模型保留为 `P_local_multitask` 基线；v0.3 将一次事件内部 fast grammar 与跨事件状态分开，并用 marked temporal point-process timing/survival likelihood 显式利用有效记录中的无事件证据。
   - 旧 34 人 × 3 seeds `FullHistorySequenceGRU` 的 learned weights 不进入 primary；只读取结构宽度。primary 在 calibration prefix 上拟合 single-K categorical `grammar-v0.3`（K=0 唯一表示 STOP），给定 K 后使用 product-form conditional K-subset likelihood，再冻结 grammar 并训练 gated low-rank state adapter。
-  - 状态使用 5/30/120/360 min fixed decay bank，每档 4 通道，共 16 维；输入完整群体事件 token。event-only 为 primary，background-only 与 fused 为独立实验轴。主损失为 IED timing/survival、未来 5/30/120 min count、continue/positive size 和 contact subset。
-  - pilot 结果：9/9 训练运行完成、21/21 队列任务成功。可比较患者中 future count 相对 multiscale baseline 在 5/30 min 均为 0/2 有利，120 min 为 0/1；correct-time 相对 wrong-time 未跨患者复现，mark 差值多数接近数值零。安全结论是当前合同未识别出可复现慢状态，不是生物学阴性；formal/sealed 分区未打开。
+  - 状态使用 nominal 5/30/120/360 min decay bank，每档 4 通道，共 16 维；自由 state-to-state mixing 使这些标签不能解释为固定生理时间尺度。输入为完整群体事件 token；本轮损失含 timing/survival、未来 count 和 contact grammar。
+  - pilot 结果：9/9 训练运行完成、21/21 队列任务成功，但未运行承重的 `H+S` residual estimand；两位患者三个 seed 均选择首轮 checkpoint，另一位在预算边缘。旧 `S` vs `H` 和 `S` vs shifted 数字只作诊断，不能给出患者阳性/阴性分母。安全结论是 `instrument complete, state learning unresolved`；formal/sealed 分区未打开。
   - 独立 seizure-risk decoder 只读取冻结的 interictal-only state，使用单调离散 survival hazard；30 min 为 primary horizon。联合 seizure fine-tune 只能作 supervised extension。

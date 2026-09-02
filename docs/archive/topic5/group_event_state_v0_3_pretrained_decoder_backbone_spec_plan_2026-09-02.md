@@ -1,10 +1,20 @@
 # Group-Event State v0.3：Marked point process 状态骨干与双任务迁移
 
 **日期：** 2026-09-02  
-**状态：** `V0_3_1_NESTED_PILOT_COMPLETE_DEVELOPMENT_ONLY`
+**状态：** `V0_3_1_PILOT_CLOSED_MAJOR_REVISION`
 **版本关系：** v0.2 的 96 维端到端多任务网络降为 `P_local_multitask` 基线；v0.3 是新的主架构。旧结果不混入新模型选择，正式/封存分区继续关闭。
 
-**阶段性执行结果：** 3 位预定义患者 × 3 seeds 已完成。模型层 nested contract 通过，但旧全记录触点筛选仍使测量层属于 transductive development。当前模型在可比较患者中没有胜过 multiscale history，correct-time 也没有跨患者稳定胜过 block-shifted state；两位患者三 seeds 均选择第一个训练 epoch，另一位在预算边缘。因此本版验收为“仪器端到端可运行、H1/H2a 未建立且受优化/测量边界限制”，不是生物学阴性。详见同日白话版与技术版报告。
+**阶段性执行结果：** 3 位预定义患者 × 3 seeds 已完成。模型层 nested contract 通过，但旧全记录触点筛选仍使测量层属于 transductive development。审阅后确认，本轮比较的是 `S` 单独与显式历史 `H`，并没有运行真正承重的 `H+S` 相对 `H`；两位患者三 seeds 均选择第一个训练 epoch，另一位在预算边缘。因此本版只验收“仪器端到端可运行”，state learning、H1 与 H2a 均为**未决而非阴性**。详见同日审阅后白话版、技术版和 closeout 记录。
+
+## 审阅后冻结说明
+
+本文前半部分保留 v0.3.1 当时实际执行的模型合同，便于追溯；下方原 Phase 3–5 扩队列计划已经作废，不得继续执行。v0.3.1 的机器汇总、文字报告和图接口统一遵守以下边界：
+
+1. 承重 estimand 必须是 `H+S_correct` vs `H`、`H+S_correct` vs `H+S_shifted`、`H+S_dynamic` vs `H+mean(S_train)`；v0.3.1 三项均未运行。
+2. 旧 `S` vs `H`、`S` vs shifted `S` 只作诊断。`epilepsiae_1146` 的 5/30 分钟信号最多说明轨迹含时刻相关信息。
+3. 所有有限 development-test 分数都保留。用同一 development-test 表现算出的 fitted-intercept audit 只能加 flag，不能删 seed 或改变分母。
+4. 80–100% 时间块已经参与本轮架构审阅，今后不能再作为最终独立检验。
+5. H2b/H3 未运行；正式/封存分区未打开；本轮不启动任何追加训练。
 
 ## 0. 核心问题
 
@@ -298,12 +308,12 @@ baseline 至少包括：
 
 ### H1：跨真实时间 predictive state
 
-需要：
+下一版需要在同一显式历史基础上同时检验：
 
-- marked timing + grammar 在 held-out data 有增量；
-- learned \(S(t)\) 超过 capacity-matched multiscale \(H(t)\)；
-- open-loop 30/120 min 仍有信息；
-- correct-time 优于 block-shift。
+- `H+S_correct` 优于 `H`；
+- `H+S_correct` 优于 `H+S_shifted`；
+- `H+S_dynamic` 优于 `H+mean(S_train)`；
+- open-loop 30 min 仍有信息；120 min 只在事前 coverage 合格者中作 secondary。
 
 只改善下一事件，称短程 filter。
 
@@ -361,23 +371,15 @@ baseline 至少包括：
 
 ### Phase 3：H1/H2a development
 
-- 扩到固定 6 人；
-- fixed-time 5/30/120 min rolling/open-loop；
-- 拆 timing、size/observed STOP、identity|K、continuation；
-- 加 background-only 与 fused 两臂；
-- patient/block-first 汇总，不以普通阴性停止其他 endpoint。
+**已作废，不执行。** 原计划曾准备直接扩到固定 6 人；审阅确认 primary residual estimand、state-path 可训练性、count 分布和长 horizon credit assignment 均未解决，因此不能原样扩队列。后续工作必须另立 v0.3.2 合同。
 
 ### Phase 4：H2b frozen transfer
 
-- 冻结 interictal state；
-- baseline vs baseline+state discrete seizure hazard；
-- 30 min primary，完整风险曲线 secondary；
-- seizure/cluster/patient 层级评估；
-- 数据支持时增加 early ictal field/path。
+**暂缓。** 在 residual interictal state 尚未形成前，不使用 v0.3.1 checkpoint 解释跨发作迁移。
 
 ### Phase 5：H3 独立模型比较
 
-在 H1/H2b 之外单独实现 common-drive、count feedback、mark feedback；不把 observer update 当作 H3。
+**暂缓。** v0.3.1 不承担 H3。未来仍需在 H1/H2b 之外独立比较 common-drive、count feedback、mark feedback；不把 observer update 当作 H3。
 
 ## 10. 资源与交付
 

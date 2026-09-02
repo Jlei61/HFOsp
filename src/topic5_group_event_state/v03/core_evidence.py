@@ -13,7 +13,7 @@ import json
 import math
 
 
-FORMAT = "group_event_state_core_evidence_v1"
+FORMAT = "group_event_state_core_evidence_v2"
 HORIZON_KEYS = ("300s", "1800s", "7200s")
 HORIZON_MINUTES = (5, 30, 120)
 MARK_ENDPOINTS = ("continue", "positive_size", "subset")
@@ -33,22 +33,13 @@ def _finite(value: Any) -> float | None:
     return value if math.isfinite(value) else None
 
 
-def _skill(delta_state_minus_control: Any, scale: Any = 1.0) -> float | None:
-    """Convert loss contrast to a paper-facing gain (positive is favourable)."""
-    delta = _finite(delta_state_minus_control)
-    denominator = _finite(scale)
-    if delta is None or denominator is None or denominator <= 0:
-        return None
-    return -delta / denominator
-
-
 def build_payload(summary: Mapping[str, Any]) -> dict[str, Any]:
-    if summary.get("format") != "group_event_state_v0_3_pilot_summary":
-        raise ValueError("not a group-event-state v0.3 pilot summary")
+    if summary.get("format") != "group_event_state_v0_3_1_closeout_summary":
+        raise ValueError("not a group-event-state v0.3.1 closeout summary")
     subjects = list(summary["subjects"])
     aliases = {subject: f"P{i + 1}" for i, subject in enumerate(subjects)}
-    h1_rows: list[dict[str, Any]] = []
-    h2a_rows: list[dict[str, Any]] = []
+    diagnostic_count_rows: list[dict[str, Any]] = []
+    diagnostic_mark_rows: list[dict[str, Any]] = []
     training: list[dict[str, Any]] = []
     for subject in subjects:
         subject_row = summary["per_subject"][subject]
@@ -63,24 +54,33 @@ def build_payload(summary: Mapping[str, Any]) -> dict[str, Any]:
         )
         for key, minutes in zip(HORIZON_KEYS, HORIZON_MINUTES):
             row = subject_row["horizons"][key]
-            intercept = row.get("intercept_poisson_nll")
-            h1_rows.append(
+            diagnostic_count_rows.append(
                 {
                     "subject": subject,
                     "alias": aliases[subject],
                     "horizon_minutes": minutes,
-                    "count_gain_over_multiscale": _skill(
-                        row.get("count_correct_minus_multiscale"), intercept
+                    "state_alone_minus_history_nll": _finite(
+                        row.get("count_correct_minus_multiscale")
                     ),
-                    "correct_time_gain_over_shifted": _skill(
-                        row.get("count_correct_minus_shifted"), intercept
+                    "correct_minus_shifted_nll": _finite(
+                        row.get("count_correct_minus_shifted")
                     ),
-                    "count_pair_seeds_multiscale": row["count_pair_estimable_seeds"][
+                    "count_pair_scored_seeds_multiscale": row[
+                        "count_pair_scored_seeds"
+                    ][
                         "correct_vs_multiscale"
                     ],
-                    "count_pair_seeds_shifted": row["count_pair_estimable_seeds"][
+                    "count_pair_scored_seeds_shifted": row[
+                        "count_pair_scored_seeds"
+                    ][
                         "correct_vs_shifted"
                     ],
+                    "posthoc_flagged_seeds_multiscale": row[
+                        "count_pair_posthoc_flagged_seeds"
+                    ]["correct_vs_multiscale"],
+                    "posthoc_flagged_seeds_shifted": row[
+                        "count_pair_posthoc_flagged_seeds"
+                    ]["correct_vs_shifted"],
                     "n_anchors": row["n_development_test_anchors"],
                     "coverage_status": (
                         "insufficient_coverage"
@@ -90,13 +90,13 @@ def build_payload(summary: Mapping[str, Any]) -> dict[str, Any]:
                 }
             )
             for endpoint in MARK_ENDPOINTS:
-                h2a_rows.append(
+                diagnostic_mark_rows.append(
                     {
                         "subject": subject,
                         "alias": aliases[subject],
                         "horizon_minutes": minutes,
                         "endpoint": endpoint,
-                        "gain_over_shifted": _skill(
+                        "correct_minus_shifted_nll": _finite(
                             row.get(f"{endpoint}_correct_minus_shifted")
                         ),
                         "n_seeds": row["n_seeds"],
@@ -109,7 +109,7 @@ def build_payload(summary: Mapping[str, Any]) -> dict[str, Any]:
                 )
     payload = {
         "format": FORMAT,
-        "status": "development_pilot",
+        "status": "v0_3_1_closed_major_revision",
         "source": {
             "summary_format": summary["format"],
             "source_commit": summary["source_commit"],
@@ -123,21 +123,48 @@ def build_payload(summary: Mapping[str, Any]) -> dict[str, Any]:
         },
         "horizons_minutes": list(HORIZON_MINUTES),
         "training": training,
-        "h1_future_block": {
-            "status": "measured",
-            "rows": h1_rows,
-            "gain_definition": (
-                "(control Poisson NLL - correct-state Poisson NLL) / "
-                "fitted-intercept Poisson NLL; positive favours state"
+        "v0_3_1_diagnostics": {
+            "status": "archival_not_primary_estimand",
+            "count_rows": diagnostic_count_rows,
+            "mark_rows": diagnostic_mark_rows,
+            "reason": (
+                "v0.3.1 measured S alone versus H and S versus shifted S; "
+                "it did not measure residual H+S contrasts"
             ),
         },
-        "h2a_repertoire": {
-            "status": "measured",
-            "rows": h2a_rows,
+        "h1_future_block": {
+            "status": "not_yet_run",
+            "rows": [],
             "gain_definition": (
-                "wrong-time mark NLL - correct-time mark NLL; "
-                "positive favours correct-time state"
+                "control negative-binomial NLL minus H+S_correct NLL; "
+                "positive favours residual state"
             ),
+            "required_fields": [
+                "subject",
+                "horizon_minutes",
+                "residual_gain_over_history",
+                "correct_time_gain_over_shifted",
+                "dynamic_gain_over_mean",
+                "n_score_blocks",
+            ],
+        },
+        "h2a_repertoire": {
+            "status": "not_yet_run",
+            "rows": [],
+            "gain_definition": (
+                "best of H, H+S_shifted and H+S_mean NLL minus "
+                "H+S_correct NLL; positive favours dynamic correct-time state"
+            ),
+            "required_fields": [
+                "subject",
+                "horizon_minutes",
+                "endpoint",
+                "gain_over_best_control",
+                "gain_over_history",
+                "gain_over_shifted",
+                "gain_over_mean",
+                "n_score_blocks",
+            ],
             "same_prefix": {
                 "status": "not_yet_run",
                 "rows": [],
@@ -188,8 +215,8 @@ def build_payload(summary: Mapping[str, Any]) -> dict[str, Any]:
         },
         "claim_boundary": {
             "h1_h2a": (
-                "current three-patient development data do not establish a "
-                "replicable slow predictive state"
+                "v0.3.1 did not measure the residual H+S estimand; state "
+                "learning is unresolved, not negative"
             ),
             "h2b_h3": "not yet run; figure slots contain no synthetic observations",
             "upstream_measurement": (
@@ -217,6 +244,9 @@ def validate_payload(payload: Mapping[str, Any]) -> None:
     for row in payload["h2a_repertoire"]["rows"]:
         if row["endpoint"] not in MARK_ENDPOINTS:
             raise ValueError("unexpected H2a endpoint")
+    if payload["status"] == "v0_3_1_closed_major_revision":
+        if payload["h1_future_block"]["rows"] or payload["h2a_repertoire"]["rows"]:
+            raise ValueError("v0.3.1 diagnostics must not populate residual-state panels")
 
 
 def load_payload(path: Path) -> dict[str, Any]:

@@ -10,10 +10,15 @@ def _summary():
             "count_correct_minus_multiscale": -2.0,
             "count_correct_minus_shifted": 1.0,
             "intercept_poisson_nll": 10.0,
-            "count_pair_estimable_seeds": {
+            "count_pair_scored_seeds": {
                 "correct_vs_multiscale": 3,
                 "correct_vs_shifted": 2,
                 "correct_vs_state_free": 0,
+            },
+            "count_pair_posthoc_flagged_seeds": {
+                "correct_vs_multiscale": 1,
+                "correct_vs_shifted": 0,
+                "correct_vs_state_free": 3,
             },
             "n_development_test_anchors": 20,
             "n_insufficient_coverage_seeds": 0,
@@ -23,7 +28,7 @@ def _summary():
             "subset_correct_minus_shifted": None,
         }
     return {
-        "format": "group_event_state_v0_3_pilot_summary",
+        "format": "group_event_state_v0_3_1_closeout_summary",
         "source_commit": "abc",
         "subjects": ["patient"],
         "nested_source_audit": {
@@ -41,17 +46,22 @@ def _summary():
     }
 
 
-def test_payload_uses_positive_gain_direction_and_keeps_missing_as_missing():
+def test_v031_diagnostics_are_archived_but_do_not_populate_primary_panels():
     payload = build_payload(_summary())
     validate_payload(payload)
-    h1 = payload["h1_future_block"]["rows"][0]
-    assert h1["count_gain_over_multiscale"] == 0.2
-    assert h1["correct_time_gain_over_shifted"] == -0.1
+    h1 = payload["v0_3_1_diagnostics"]["count_rows"][0]
+    assert h1["state_alone_minus_history_nll"] == -2.0
+    assert h1["correct_minus_shifted_nll"] == 1.0
+    assert h1["posthoc_flagged_seeds_multiscale"] == 1
     marks = {
-        row["endpoint"]: row["gain_over_shifted"]
-        for row in payload["h2a_repertoire"]["rows"][:3]
+        row["endpoint"]: row["correct_minus_shifted_nll"]
+        for row in payload["v0_3_1_diagnostics"]["mark_rows"][:3]
     }
-    assert marks == {"continue": 0.01, "positive_size": -0.02, "subset": None}
+    assert marks == {"continue": -0.01, "positive_size": 0.02, "subset": None}
+    assert payload["h1_future_block"]["rows"] == []
+    assert payload["h2a_repertoire"]["rows"] == []
+    assert "residual_gain_over_history" in payload["h1_future_block"]["required_fields"]
+    assert "gain_over_best_control" in payload["h2a_repertoire"]["required_fields"]
 
 
 def test_unrun_cross_task_slots_are_explicit_and_never_filled_with_demo_data():
