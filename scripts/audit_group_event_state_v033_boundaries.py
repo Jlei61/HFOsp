@@ -100,6 +100,8 @@ def audit_subject(args: tuple[str, str]) -> dict:
             for u in units:
                 excluded_seconds += max(0.0, min(stop, u.stop_epoch) - max(onset, u.start_epoch))
         differs = last_main != last_hard
+        kept_positions = np.asarray(tl.stream_positions, dtype=np.int64)
+        kept_update_ok = bool(update[kept_positions].all()) if kept_positions.size else True
         return {
             "subject": subject, "status": "ok",
             "n_sessions": len(units), "n_target_segments": len(segments), "n_seizures": len(tl.seizures),
@@ -115,7 +117,7 @@ def audit_subject(args: tuple[str, str]) -> dict:
                 "n_excluded_seizure_or_postictal_inside_sessions": int((inside_session & ~update).sum()),
                 "n_kept_by_v032_timeline": int(tl.n_events),
                 "kept_equals_in_target_segments": bool(int((ev_seg >= 0).sum()) == tl.n_events),
-                "no_updating_event_inside_seizure_or_postictal": bool(not (update & ~update).any()),
+                "no_updating_event_inside_seizure_or_postictal": kept_update_ok,
             },
             "anchors": {"n_grid": int(t_anchor.size),
                         "all_inside_a_target_segment": bool((an_seg >= 0).all()),
@@ -166,6 +168,8 @@ def main() -> None:
         "all_matches_v032_eligibility": bool(all(v["matches_v032_eligibility"] for r in ok for v in r["anchors"]["per_horizon"].values())),
         "all_hard_reset_equals_v032_last_event_pos": bool(all(r["carry"]["hard_reset_variant_equals_v032_last_event_pos"] for r in ok)),
         "all_kept_equals_in_target_segments": bool(all(r["events"]["kept_equals_in_target_segments"] for r in ok)),
+        "all_state_events_exclude_seizure_and_postictal": bool(
+            all(r["events"]["no_updating_event_inside_seizure_or_postictal"] for r in ok)),
     }
     payload = {
         "format": "group_event_state_v0_3_3_data_boundary_audit",

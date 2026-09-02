@@ -9,6 +9,7 @@ sensitivity variant*, never the default.
 from __future__ import annotations
 
 import numpy as np
+import inspect
 import pytest
 import torch
 
@@ -16,6 +17,14 @@ from src.topic5_group_event_state.v02.timeline import RecordedSession, build_car
 from src.topic5_group_event_state.v032_eval.partition import eval_partition
 from src.topic5_group_event_state.v032_model.state import anchor_states, leaky_bank_trajectory
 from src.topic5_group_event_state.v033_evaluator import boundaries as B
+
+
+def test_real_boundary_audit_checks_the_kept_stream_not_a_tautology():
+    import scripts.audit_group_event_state_v033_boundaries as audit
+
+    source = inspect.getsource(audit.audit_subject)
+    assert "update[kept_positions].all()" in source
+    assert "update & ~update" not in source
 
 SESSIONS = [RecordedSession(0, 0.0, 10_000.0), RecordedSession(1, 20_000.0, 30_000.0)]
 SEIZURES = [{"onset_epoch": 5_000.0, "offset_epoch": 5_100.0}]

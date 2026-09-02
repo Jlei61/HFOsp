@@ -23,6 +23,7 @@ from typing import Any
 
 import numpy as np
 
+from . import canonical as C
 from .scaffold import Scaffold
 
 DGP_KINDS = ("D0", "D1", "D2", "D3", "D4", "D5")
@@ -32,6 +33,8 @@ HIDDEN_TAU_SECONDS = 1800.0
 MARK_WIDTH = 2
 BASE_RATE_CLIP = (0.01, 0.99)
 PRIMARY_HORIZON = 1800.0
+COUNT_PROFILE_EDGES_SECONDS = (0.0, 300.0, 900.0, 1800.0)
+COUNT_PROFILE_WIDTHS_SECONDS = np.diff(COUNT_PROFILE_EDGES_SECONDS)
 
 
 @dataclass
@@ -45,6 +48,10 @@ class SyntheticData:
     hidden_tau: float
     counts: dict[int, np.ndarray]
     log_mu_true: dict[int, np.ndarray]
+    count_profile: np.ndarray
+    log_mu_profile_h: np.ndarray
+    log_mu_profile_true: np.ndarray
+    log_r_profile_h: np.ndarray
     z_count: np.ndarray
     z_grammar_anchor: np.ndarray
     z_grammar_event: np.ndarray
@@ -59,7 +66,10 @@ class SyntheticData:
         return {"kind": self.kind, "subject": self.subject, "beta_count": self.beta_count,
                 "beta_grammar": self.beta_grammar, "generator_seed": self.generator_seed,
                 "noise_seed": self.noise_seed, "hidden_tau_seconds": self.hidden_tau,
-                "mark_width": MARK_WIDTH, "marks_visible": self.marks is not None, "has_state": dict(self.has_state)}
+                "mark_width": MARK_WIDTH, "marks_visible": self.marks is not None,
+                "count_profile_edges_seconds": list(COUNT_PROFILE_EDGES_SECONDS),
+                "count_profile_baseline": "1800s_H_mean_distributed_by_bin_duration_for_synthetic_assay_only",
+                "has_state": dict(self.has_state)}
 
 
 # --------------------------------------------------------------------------- hidden state
@@ -111,26 +121,9 @@ def _log_sigmoid_pair(logits: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
 
 
 def conditional_bernoulli_logpmf(logits: np.ndarray, subset: np.ndarray) -> np.ndarray:
-    """``log P(S | |S| = K)`` for independent Bernoulli contacts with the given logits (vectorised over rows)."""
+    """``log P(S | |S| = K)``: the negated canonical grammar score (single formula lives in ``canonical``)."""
 
-    x = np.asarray(subset, dtype=bool)
-    lg = np.asarray(logits, dtype=np.float64)
-    if lg.shape != x.shape or lg.ndim != 2:
-        raise ValueError("logits and subset must both be (E, C)")
-    e, c = lg.shape
-    logp, log1mp = _log_sigmoid_pair(lg)
-    joint = np.where(x, logp, log1mp).sum(axis=1)
-    k = x.sum(axis=1)
-    kmax = int(k.max()) if e else 0
-    dp = np.full((e, kmax + 1), -np.inf)
-    dp[:, 0] = 0.0
-    for j in range(c):
-        new = dp + log1mp[:, j:j + 1]
-        if kmax:
-            new[:, 1:] = np.logaddexp(new[:, 1:], dp[:, :-1] + logp[:, j:j + 1])
-        dp = new
-    log_z = dp[np.arange(e), k]
-    return joint - log_z
+    return -C.conditional_subset_nll(logits, subset)
 
 
 def sample_conditional_bernoulli_batch(rng: np.random.Generator, logits: np.ndarray, sizes: np.ndarray) -> np.ndarray:
@@ -235,6 +228,32 @@ def generate(scaffold: Scaffold, kind: str, *, beta_count: float, beta_grammar: 
             y[rows] = noise.negative_binomial(r, r / (r + mu))
         counts[key] = y
 
+    # Primary S_N target: three disjoint physical-time bins whose sum is N_0-30min.
+    # The synthetic assay has only a cumulative H registry, so its state-free
+    # bin means use the registry's 30-minute mean under a constant within-window
+    # baseline rate. This is an explicit synthetic construction; human training
+    # consumes the materialised per-bin H offsets supplied by Workstream C.
+    profile_horizon = int(COUNT_PROFILE_EDGES_SECONDS[-1])
+    if profile_horizon not in scaffold.log_mu_h:
+        raise ValueError("count-profile assay requires the 1800-second H registry horizon")
+    total_log_mu_h = np.asarray(scaffold.log_mu_h[profile_horizon], dtype=np.float64)
+    fractions = COUNT_PROFILE_WIDTHS_SECONDS / float(profile_horizon)
+    log_mu_profile_h = total_log_mu_h[:, None] + np.log(fractions)[None, :]
+    profile_loading = np.array([0.75, 1.0, 1.25], dtype=np.float64)
+    log_mu_profile_true = log_mu_profile_h + (
+        float(beta_count) * z_count[:, None] * profile_loading[None, :] if count_on else 0.0
+    )
+    base_log_r = scaffold.log_r_h.get(profile_horizon)
+    base_log_r = float(base_log_r) if base_log_r is not None else float(np.log(5.0))
+    log_r_profile_h = np.full(3, base_log_r, dtype=np.float64)
+    count_profile = np.zeros((a, 3), dtype=np.int64)
+    h_i = scaffold.horizon_index(float(profile_horizon))
+    rows = np.flatnonzero(scaffold.eligible[:, h_i] & np.isfinite(log_mu_profile_true).all(axis=1))
+    for j in range(3):
+        r = float(np.exp(log_r_profile_h[j]))
+        mu = np.exp(log_mu_profile_true[rows, j])
+        count_profile[rows, j] = noise.negative_binomial(r, r / (r + mu))
+
     logits = base_logits[None, :] + (float(beta_grammar) * loadings[None, :] * z_grammar_event[:, None] if grammar_on else 0.0)
     participation = sample_conditional_bernoulli_batch(noise, np.broadcast_to(logits, (n, c)).copy(), scaffold.event_size())
 
@@ -251,7 +270,10 @@ def generate(scaffold: Scaffold, kind: str, *, beta_count: float, beta_grammar: 
     return SyntheticData(
         kind=kind, subject=scaffold.subject, beta_count=float(beta_count), beta_grammar=float(beta_grammar),
         generator_seed=int(generator_seed), noise_seed=int(noise_seed), hidden_tau=float(hidden_tau),
-        counts=counts, log_mu_true=log_mu_true, z_count=z_count, z_grammar_anchor=z_grammar_anchor,
+        counts=counts, log_mu_true=log_mu_true,
+        count_profile=count_profile, log_mu_profile_h=log_mu_profile_h,
+        log_mu_profile_true=log_mu_profile_true, log_r_profile_h=log_r_profile_h,
+        z_count=z_count, z_grammar_anchor=z_grammar_anchor,
         z_grammar_event=z_grammar_event, marks=marks, innovations=innovations, participation=participation,
         base_logits=base_logits, loadings=loadings, has_state={"count": count_on, "grammar": grammar_on},
     )

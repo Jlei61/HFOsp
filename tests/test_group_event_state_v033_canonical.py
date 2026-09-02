@@ -144,6 +144,8 @@ def test_shared_rule_rejects_unequal_arm_dispersions_and_per_arm_requires_every_
         _table(dispersion=0.3, dispersion_rule="per_arm")
     with pytest.raises(ValueError):
         _table(dispersion=0.3, dispersion_rule="whatever")
+    with pytest.raises(ValueError, match="missing"):
+        _table(dispersion={"H": 0.3}, dispersion_rule="shared")
 
 
 def test_per_arm_dispersion_scores_each_arm_with_its_own_log_r_through_the_canonical_formula():
@@ -264,3 +266,68 @@ def test_assert_tables_agree_raises_on_first_discrepant_row_above_tolerance():
     c = _table(seed=52, n=20)
     with pytest.raises(C.EvaluatorDisagreement):
         C.assert_tables_agree(a, c)  # different targets are a different object, not a tolerance question
+
+
+def test_unmasked_nonfinite_rows_and_noninteger_counts_fail_closed():
+    n = 10
+    with pytest.raises(ValueError, match="non-finite prediction"):
+        _table(n=n, prediction_H=np.r_[np.nan, np.ones(n - 1)])
+    y, log_mu = _rows(n=n)
+    with pytest.raises(ValueError, match="integer-valued"):
+        _table(n=n, target=y.astype(float) + 0.5, prediction_H=log_mu)
+    t = _table(n=n)
+    t["per_anchor_NLL_H"][2] = np.nan
+    with pytest.raises(ValueError, match="non-finite paired score"):
+        C.paired_gain(t)
+
+
+def test_parity_checks_predictions_dispersions_weights_and_row_identity():
+    a = _table(seed=53, n=12)
+    for key in ("prediction_H", "dispersion", "weight"):
+        b = _table(seed=53, n=12)
+        b[key] = np.array(b[key], copy=True)
+        b[key].reshape(-1)[3] += 1e-3
+        with pytest.raises(C.EvaluatorDisagreement, match=key):
+            C.assert_tables_agree(a, b)
+    b = _table(seed=53, n=12)
+    b["checkpoint_hash"] = b["checkpoint_hash"].copy()
+    b["checkpoint_hash"][4] = "different"
+    with pytest.raises(C.EvaluatorDisagreement, match="checkpoint_hash"):
+        C.assert_tables_agree(a, b)
+
+
+# --------------------------------------------------------------------------- score families beyond NB
+def test_conditional_subset_nll_is_the_single_grammar_score_and_matches_brute_force():
+    import itertools
+    rng = np.random.default_rng(61)
+    logits = rng.normal(size=5)
+    p = 1.0 / (1.0 + np.exp(-logits))
+    subsets = [np.array([i in s for i in range(5)]) for s in itertools.combinations(range(5), 2)]
+    nll = C.conditional_subset_nll(np.tile(logits, (len(subsets), 1)), np.array(subsets))
+    joint = np.array([np.prod(np.where(s, p, 1 - p)) for s in subsets])
+    assert np.allclose(np.exp(-nll), joint / joint.sum())
+
+
+def test_table_from_precomputed_scores_keeps_schema_mask_weight_and_reductions():
+    n = 12
+    rng = np.random.default_rng(62)
+    nll_h = rng.uniform(1, 3, n)
+    nll_s = nll_h - 0.2
+    mask = np.ones(n, bool)
+    mask[3] = False
+    t = C.build_per_anchor_table_from_scores(
+        subject="toy", seed=1, checkpoint_hash="x", split="dev_test", anchor_time=np.arange(n) * 300.0,
+        target=rng.integers(1, 5, n), per_anchor_nll={"H": nll_h, "H_plus_state": nll_s},
+        score_family="conditional_subset_nll", mask=mask, weight=None,
+        eligibility="n_future_positive", evidence_label="DIAGNOSTIC")
+    for col in C.SCHEMA_COLUMNS:
+        assert col in t and len(t[col]) == n, col
+    assert t["meta"]["score_family"] == "conditional_subset_nll" and t["meta"]["schema_version"] == C.SCHEMA_VERSION
+    assert np.isnan(t["per_anchor_NLL_H"][3]) and np.isnan(t["prediction_H"]).all()
+    g = C.paired_gain(t)
+    assert np.isclose(g["gain"], 0.2) and g["n_rows_used"] == n - 1
+    with pytest.raises(ValueError):
+        C.build_per_anchor_table_from_scores(
+            subject="toy", seed=1, checkpoint_hash="x", split="dev_test", anchor_time=np.arange(n) * 300.0,
+            target=np.zeros(n), per_anchor_nll={"H": nll_h}, score_family="conditional_subset_nll",
+            mask=None, weight=None, eligibility="e", evidence_label="D")
