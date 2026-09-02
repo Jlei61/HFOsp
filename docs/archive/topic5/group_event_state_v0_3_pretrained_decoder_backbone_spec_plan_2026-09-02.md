@@ -1,8 +1,10 @@
 # Group-Event State v0.3：Marked point process 状态骨干与双任务迁移
 
 **日期：** 2026-09-02  
-**状态：** `V0_3_1_NESTED_PILOT_CONTRACT`
+**状态：** `V0_3_1_NESTED_PILOT_COMPLETE_DEVELOPMENT_ONLY`
 **版本关系：** v0.2 的 96 维端到端多任务网络降为 `P_local_multitask` 基线；v0.3 是新的主架构。旧结果不混入新模型选择，正式/封存分区继续关闭。
+
+**阶段性执行结果：** 3 位预定义患者 × 3 seeds 已完成。模型层 nested contract 通过，但旧全记录触点筛选仍使测量层属于 transductive development。当前模型在可比较患者中没有胜过 multiscale history，correct-time 也没有跨患者稳定胜过 block-shifted state；两位患者三 seeds 均选择第一个训练 epoch，另一位在预算边缘。因此本版验收为“仪器端到端可运行、H1/H2a 未建立且受优化/测量边界限制”，不是生物学阴性。详见同日白话版与技术版报告。
 
 ## 0. 核心问题
 

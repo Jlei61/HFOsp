@@ -179,6 +179,12 @@ def main() -> None:
                     if x["posthoc_intercept_audit"]["admissible_within_0p5_nats"].get(a, False)
                     and x["posthoc_intercept_audit"]["admissible_within_0p5_nats"].get(b, False)
                 ])
+            def admissible_count_pairs(a, b):
+                return sum(
+                    x["posthoc_intercept_audit"]["admissible_within_0p5_nats"].get(a, False)
+                    and x["posthoc_intercept_audit"]["admissible_within_0p5_nats"].get(b, False)
+                    for x in h_rows
+                )
             h_out[horizon] = {
                 "n_seeds": len(h_rows),
                 "n_insufficient_coverage_seeds": len(rows) - len(h_rows),
@@ -199,6 +205,17 @@ def main() -> None:
                     for name in (
                         "correct_state", "multiscale_history", "block_shifted_state", "state_free"
                     )
+                },
+                "count_pair_estimable_seeds": {
+                    "correct_vs_multiscale": admissible_count_pairs(
+                        "correct_state", "multiscale_history"
+                    ),
+                    "correct_vs_shifted": admissible_count_pairs(
+                        "correct_state", "block_shifted_state"
+                    ),
+                    "correct_vs_state_free": admissible_count_pairs(
+                        "correct_state", "state_free"
+                    ),
                 },
                 "intercept_poisson_nll": _med([
                     x["posthoc_intercept_audit"]["development_test_intercept_poisson_nll"] for x in h_rows
@@ -241,6 +258,17 @@ def main() -> None:
         per_subject[subject] = {
             "n_seeds": len(rows),
             "selected_epochs": [r["training"]["selected_epoch"] for r in rows],
+            "n_history_epochs": [len(r["training"]["history"]) for r in rows],
+            "optimization_status": (
+                "first_trained_epoch_selected_all_seeds"
+                if rows and all(r["training"]["selected_epoch"] == 0 for r in rows)
+                else "budget_edge_all_seeds"
+                if rows and all(
+                    r["training"]["selected_epoch"] >= len(r["training"]["history"]) - 2
+                    for r in rows
+                )
+                else "mixed_or_interior"
+            ),
             "state_norm_validation": _med([
                 r["training"]["history"][r["training"]["selected_epoch"]]["validation"]["state_norm_median"]
                 for r in rows
@@ -327,6 +355,7 @@ def main() -> None:
         row = per_subject[subject]
         plain_lines.append(
             f"- `{subject}`：{row['n_seeds']}/3 seeds；选中 epoch {row['selected_epochs']}；"
+            f"训练状态 `{row['optimization_status']}`；"
             f"验证状态范数中位 {_fmt(row['state_norm_validation'], 3)}；event encoder / state / adapter 相对更新 "
             f"{_fmt(row['encoder_relative_update'], 5)} / {_fmt(row['state_relative_update'], 5)} / {_fmt(row['adapter_relative_update'], 5)}。"
         )
@@ -352,9 +381,18 @@ def main() -> None:
         plain_lines.append(f"| {horizon} | " + " | ".join(cells) + " |")
     plain_lines += [
         "",
-        "## 当前允许结论",
+        "## 这轮真正得到的结果",
         "",
-        "这张表只能回答三件事：模型是否真正训练、正确时刻的状态是否胜过保留自相关的错时状态、以及它是否胜过一个可解释的多尺度历史基线。只有当多名患者、多个 seed 在较长 horizon 上方向一致，才能把它叫作候选慢预测状态。",
+        "1. **没有发现超过简单多尺度历史的慢状态。** 在可比较的患者里，正确时刻状态预测未来事件数在 5 分钟和 30 分钟都是 0/2 优于 multiscale baseline；120 分钟是 0/1。差值为正，说明状态模型更差。",
+        "2. **时刻专属性不稳定。** event-count 的 correct-vs-wrong-time 在 5/30 分钟都是一位患者有利、一位不利；120 分钟唯一可比较患者也不利。`epilepsiae_1146` 在 5/30 分钟有利，但没有跨患者复现。",
+        "3. **contact mark 没有形成稳定的慢调制。** 表中若干 3/3 同向项的患者中位效应只有 1e-7 左右，数值上接近零；这是两位患者都只选中第一个训练 epoch、state/adapter 几乎没动造成的方向计数假象。唯一训练较充分的 `epilepsiae_1146`，subset 在 5 分钟略好（-0.0037），30 分钟反而更差（+0.0273），120 分钟也更差（+0.0010）。",
+        "4. **训练可识别性不均一。** `epilepsiae_1146` 三 seeds 都在预算末端取最优，说明可能还未完全收敛；另外两位三 seeds 都选择第一个训练 epoch，说明当前优化没有找到稳定增量。",
+        "",
+        "因此，本 pilot 对 H1/H2a 的安全判定是：**当前 16 维 fixed-timescale + point-process/future-count 训练合同没有识别出可跨患者复现的慢预测状态；这不是生物学阴性。** 它既可能是表示/优化不足，也可能说明群体事件中的可预测部分主要被简单多尺度统计解释。",
+        "",
+        "## 当前允许结论与边界",
+        "",
+        "这轮证明了 nested timing/survival、冻结 grammar、真实时间 state 和多事件 open-loop 这套仪器可以端到端运行；结果层只支持上面的 development 诊断，不支持宣称发现慢状态。表中的 count 对比还经过拟合截距审计；部分患者/seed 不合格时直接不进入该对比，详细分母见技术报告。",
         "",
         "它还不能回答：这个状态能否预测发作、IED 是否反过来塑造状态、或者任何跨患者正式结论。H2b 与 H3 必须读取这轮冻结的轨迹，分别独立检验。",
         "",
@@ -389,13 +427,15 @@ def main() -> None:
                 f"positive-size−shift={_fmt(h['positive_size_correct_minus_shifted'])}; "
                 f"subset−shift={_fmt(h['subset_correct_minus_shifted'])}; "
                 f"anchors={h['n_development_test_anchors']}, matched={h['n_shift_matched_anchors']}, "
+                f"pair-admissible seeds={h['count_pair_estimable_seeds']}; "
+                f"coverage-insufficient seeds={h['n_insufficient_coverage_seeds']}; "
                 f"ridge-edge seeds={h['multiscale_ridge_edge_seeds']}/3."
             )
         technical_lines.append("")
     technical_lines += [
         "## Interpretation boundary",
         "",
-        "Negative contrasts are favourable. The pilot is not powered for cohort inference. A ridge-edge baseline is retained with a caveat rather than converted into a biological result. Mark comparisons against wrong-time and state-free grammar are valid; a full capacity-matched multiscale mark adapter remains a later comparison and is not silently claimed here.",
+        "Negative contrasts are favourable. The pilot is not powered for cohort inference. Two subjects selected the first trained epoch in all seeds, so their near-zero mark contrasts are not affirmative evidence. One subject selected checkpoints at the training-budget edge, so a negative result would remain optimization-limited. A ridge-edge baseline is retained with a caveat rather than converted into a biological result. Count contrasts enter aggregation only when both arms pass the fitted-intercept audit. Mark comparisons against wrong-time and state-free grammar are valid as development diagnostics; a full capacity-matched multiscale mark adapter remains a later comparison and is not silently claimed here.",
         "",
         f"Machine report: `{machine_path}`",
     ]

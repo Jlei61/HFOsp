@@ -402,7 +402,9 @@
 
 - **2026-09-02 Group-Event State v0.3 marked-point-process 架构修订**：
   - Scientific Spec + 执行计划：`group_event_state_v0_3_pretrained_decoder_backbone_spec_plan_2026-09-02.md`
+  - 三患者 pilot 白话报告：`group_event_state_v0_3_pilot_plain_2026-09-02.md`；技术报告：`group_event_state_v0_3_pilot_technical_2026-09-02.md`；机器汇总：`/data/hfosp_group_event_state_v0_3/pilot/summary_main.json`。
   - v0.2 的 96 维端到端多任务模型保留为 `P_local_multitask` 基线；v0.3 将一次事件内部 fast grammar 与跨事件状态分开，并用 marked temporal point-process timing/survival likelihood 显式利用有效记录中的无事件证据。
-  - 旧 34 人 × 3 seeds `FullHistorySequenceGRU` 只作 outer-TRAIN 初始化和 transductive supportive arm；primary 先在新 fixed-cardinality conditional-Bernoulli likelihood 下校准无状态 `grammar-v0.3`，再冻结 grammar 并训练 gated low-rank state adapter。
-  - 状态使用 2/10/30/120/720 min fixed decay bank，输入完整群体事件 token；event-only 为 primary，background-only 与 fused 为独立实验轴。主损失收缩为 IED timing/survival、group size/observed STOP、contact identity conditional on size。
+  - 旧 34 人 × 3 seeds `FullHistorySequenceGRU` 的 learned weights 不进入 primary；只读取结构宽度。primary 在 calibration prefix 上拟合 single-K categorical `grammar-v0.3`（K=0 唯一表示 STOP），给定 K 后使用 product-form conditional K-subset likelihood，再冻结 grammar 并训练 gated low-rank state adapter。
+  - 状态使用 5/30/120/360 min fixed decay bank，每档 4 通道，共 16 维；输入完整群体事件 token。event-only 为 primary，background-only 与 fused 为独立实验轴。主损失为 IED timing/survival、未来 5/30/120 min count、continue/positive size 和 contact subset。
+  - pilot 结果：9/9 训练运行完成、21/21 队列任务成功。可比较患者中 future count 相对 multiscale baseline 在 5/30 min 均为 0/2 有利，120 min 为 0/1；correct-time 相对 wrong-time 未跨患者复现，mark 差值多数接近数值零。安全结论是当前合同未识别出可复现慢状态，不是生物学阴性；formal/sealed 分区未打开。
   - 独立 seizure-risk decoder 只读取冻结的 interictal-only state，使用单调离散 survival hazard；30 min 为 primary horizon。联合 seizure fine-tune 只能作 supervised extension。
