@@ -105,4 +105,3 @@ def positions_for_phase(
     phase_index = PHASE_NAMES.index(phase)
     mask = partition.labels_of(event_times) == phase_index
     return np.asarray(stream_positions, dtype=np.int64)[np.flatnonzero(mask)]
-
