@@ -19,6 +19,7 @@ from __future__ import annotations
 from typing import Any
 
 import numpy as np
+from scipy import optimize
 import torch
 
 from .config import ModelConfig
@@ -26,6 +27,39 @@ from .data import SubjectBundle
 from .model import ResidualStateModel
 from .shift import block_circular_donor
 from .trainer import anchor_terms, bundle_tensors, h_only_nll
+from .readout import _nb_log_prob_np
+
+
+def fit_train_intercept(
+    bundle: SubjectBundle,
+    *,
+    horizon: float,
+    log_r_h: float,
+) -> float:
+    """Fit one static log-mean offset using *state-train anchors only*.
+
+    This is the minimal recalibration control for the residual state model.  It
+    asks whether a dynamic state does more than repair a constant level error in
+    ``H``.  Development-validation/test counts never enter this fit.
+    """
+
+    idx = np.flatnonzero(bundle.anchor_mask("state_train", horizon))
+    if idx.size == 0:
+        raise ValueError("cannot fit an H intercept without state-train anchors")
+    h_i = bundle.horizon_index(horizon)
+    y = np.asarray(bundle.counts[idx, h_i], dtype=np.float64)
+    log_mu_h = np.asarray(bundle.log_mu_h(horizon)[idx], dtype=np.float64)
+    result = optimize.minimize_scalar(
+        lambda offset: -float(
+            _nb_log_prob_np(y, np.exp(log_mu_h + float(offset)), float(log_r_h)).sum()
+        ),
+        bounds=(-6.0, 6.0),
+        method="bounded",
+        options={"xatol": 1e-8},
+    )
+    if not result.success or not np.isfinite(result.x):
+        raise RuntimeError(f"TRAIN-only intercept optimisation failed: {result.message}")
+    return float(result.x)
 
 
 def block_bootstrap_mean_ci(
@@ -106,6 +140,12 @@ def evaluate_arms(
         state = correct["state"]
         nll_correct = correct["nll"].cpu().numpy().astype(np.float64)
         nll_h = h_only_nll(bundle, phase=phase, horizon=horizon, log_r_h=log_r_h)
+        intercept = fit_train_intercept(bundle, horizon=horizon, log_r_h=log_r_h)
+        phase_idx = np.flatnonzero(bundle.anchor_mask(phase, horizon))
+        h_i = bundle.horizon_index(horizon)
+        y_intercept = np.asarray(bundle.counts[phase_idx, h_i], dtype=np.float64)
+        mu_intercept = np.exp(np.asarray(bundle.log_mu_h(horizon)[phase_idx], dtype=np.float64) + intercept)
+        nll_intercept = -_nb_log_prob_np(y_intercept, mu_intercept, float(log_r_h))
         mean_state = model.train_mean_state.to(state.dtype).unsqueeze(0).expand_as(state)
         mean_terms = anchor_terms(model, bundle, phase=phase, horizon=horizon, device=device,
                                   tensors=t, state_override=mean_state)
@@ -144,6 +184,8 @@ def evaluate_arms(
     modulation = correct["modulation"].cpu().numpy().astype(np.float64)
     contrasts = {
         "h_minus_correct": contrast(nll_h, nll_correct),
+        "intercept_minus_correct": contrast(nll_intercept, nll_correct),
+        "h_minus_intercept": contrast(nll_h, nll_intercept),
         "shifted_minus_correct": contrast(nll_shifted, nll_correct),
         "mean_minus_correct": contrast(nll_mean, nll_correct),
         "h_minus_mean": contrast(nll_h, nll_mean),
@@ -164,6 +206,13 @@ def evaluate_arms(
         "effective_independent_windows": bundle.effective_independent_windows(phase, horizon),
         "arms": {
             "h": {"nll_mean": float(nll_h.mean()), "log_r": float(log_r_h), "n": n},
+            "h_plus_intercept": {
+                "nll_mean": float(nll_intercept.mean()),
+                "intercept": float(intercept),
+                "fit_phase": "state_train",
+                "log_r": float(log_r_h),
+                "n": n,
+            },
             "h_plus_s_correct": {
                 "nll_mean": float(nll_correct.mean()),
                 "modulation_rms": float(np.sqrt(np.mean(modulation ** 2))),
@@ -190,6 +239,7 @@ def evaluate_arms(
             "idx": idx.tolist(),
             "segment": segments.tolist(),
             "nll_h": nll_h.tolist(),
+            "nll_intercept": nll_intercept.tolist(),
             "nll_correct": nll_correct.tolist(),
             "nll_shifted": [None if not np.isfinite(v) else float(v) for v in nll_shifted],
             "nll_mean": nll_mean.tolist(),

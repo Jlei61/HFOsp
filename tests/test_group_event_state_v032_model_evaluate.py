@@ -64,3 +64,25 @@ def test_e1_e5_five_arms_share_anchors_mean_arm_is_constant_and_h_uses_given_dis
     seg = bundle.anchor_segment[np.asarray(per["idx"])]
     ok = donor >= 0
     assert np.all(seg[ok] == seg[donor[ok]])
+
+
+def test_e6_intercept_recalibrated_h_arm_is_fit_on_train_anchors_only():
+    from src.topic5_group_event_state.v032_model.evaluate import fit_train_intercept
+
+    bundle, _ = make_toy_bundle(seed=12)
+    cfg = ModelConfig()
+    model = _ready_model(bundle, cfg, seed=1)
+    log_r_h, _src = resolve_log_r_h(bundle, 1800.0)
+    c = fit_train_intercept(bundle, horizon=1800.0, log_r_h=log_r_h)
+    assert np.isfinite(c) and abs(c) < 3.0
+    # perturbing dev_test counts leaves the intercept unchanged
+    h_i = bundle.horizon_index(1800.0)
+    test = bundle.anchor_mask("dev_test", 1800.0)
+    bundle.counts[test, h_i] = bundle.counts[test, h_i] * 3 + 7
+    assert fit_train_intercept(bundle, horizon=1800.0, log_r_h=log_r_h) == pytest.approx(c)
+    out = evaluate_arms(model, bundle, cfg, device=CPU, phase="dev_test", horizon=1800.0, log_r_h=log_r_h)
+    arm = out["arms"]["h_plus_intercept"]
+    assert arm["intercept"] == pytest.approx(c) and arm["n"] == out["n_anchors"]
+    assert out["contrasts"]["intercept_minus_correct"]["n"] == out["n_anchors"]
+    assert out["contrasts"]["h_minus_intercept"]["n"] == out["n_anchors"]
+    assert len(out["per_anchor"]["nll_intercept"]) == out["n_anchors"]
