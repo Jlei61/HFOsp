@@ -1,0 +1,198 @@
+{
+  "arm": "M1_count_rate_feedback",
+  "block_file": "/data/hfosp_group_event_state_v0_2/agent_c/checkpoints/main/yuquan_pengzihang__M1_count_rate_feedback__seed3__blocks.npz",
+  "checkpoint_file": "/data/hfosp_group_event_state_v0_2/agent_c/checkpoints/main/yuquan_pengzihang__M1_count_rate_feedback__seed3__checkpoint.pt",
+  "config_hash": "cf463d16a49a3502ed355179fa1b0c7e43f30c416927635baba2a259c4a520a8",
+  "context": {
+    "dataset": "yuquan",
+    "n_contacts": 12,
+    "n_count_features": 4,
+    "n_disjoint_blocks": {
+      "120": 3,
+      "30": 28,
+      "5": 215
+    },
+    "n_drive_features": 22,
+    "n_events_interictal": 45048,
+    "n_mark_features": 42,
+    "n_segments": 5,
+    "n_timeline_steps": 36772,
+    "split_hours": {
+      "development_test": 3.7801060555378596,
+      "inner_validation": 3.7801060553391777,
+      "train": 11.340318166944714
+    },
+    "subject": "yuquan_pengzihang",
+    "support_hash": "6317f3d2f73c14b9a52a82922231f5ce2d26cd5baf79ae6896407993c8563cde"
+  },
+  "device": "cuda:1",
+  "evaluation": {
+    "development_test": {
+      "120": {
+        "n_disjoint_blocks": 0,
+        "n_sliding_anchors_not_independent": 21,
+        "status": "no_independent_blocks"
+      },
+      "30": {
+        "mean_count_logscore": -7.566871643066406,
+        "mean_mark_group_logscore": {
+          "extent": -1.2639639377593994,
+          "multiband": -1.6186175346374512,
+          "participation": -1.4525221586227417,
+          "waveform_crossband": -1.782569408416748
+        },
+        "mean_mark_logscore": -1.5926727056503296,
+        "median_count_true": 796.5,
+        "n_blocks_with_events": 6,
+        "n_disjoint_blocks": 6,
+        "n_sliding_anchors_not_independent": 39,
+        "status": "ok"
+      },
+      "5": {
+        "mean_count_logscore": -5.892057418823242,
+        "mean_mark_group_logscore": {
+          "extent": -1.4538525342941284,
+          "multiband": -1.5766030550003052,
+          "participation": -1.554153323173523,
+          "waveform_crossband": -1.937028408050537
+        },
+        "mean_mark_logscore": -1.6643993854522705,
+        "median_count_true": 126.0,
+        "n_blocks_with_events": 43,
+        "n_disjoint_blocks": 43,
+        "n_sliding_anchors_not_independent": 44,
+        "status": "ok"
+      }
+    },
+    "inner_validation": {
+      "120": {
+        "n_disjoint_blocks": 0,
+        "n_sliding_anchors_not_independent": 17,
+        "status": "no_independent_blocks"
+      },
+      "30": {
+        "mean_count_logscore": -7.9401702880859375,
+        "mean_mark_group_logscore": {
+          "extent": -1.2547223567962646,
+          "multiband": -1.2636913061141968,
+          "participation": -1.3776016235351562,
+          "waveform_crossband": -1.20363450050354
+        },
+        "mean_mark_logscore": -1.2784373760223389,
+        "median_count_true": 1121.0,
+        "n_blocks_with_events": 5,
+        "n_disjoint_blocks": 5,
+        "n_sliding_anchors_not_independent": 35,
+        "status": "ok"
+      },
+      "5": {
+        "mean_count_logscore": -6.250232696533203,
+        "mean_mark_group_logscore": {
+          "extent": -1.5741417407989502,
+          "multiband": -1.62289559841156,
+          "participation": -1.741437315940857,
+          "waveform_crossband": -1.5317524671554565
+        },
+        "mean_mark_logscore": -1.6272413730621338,
+        "median_count_true": 186.0,
+        "n_blocks_with_events": 42,
+        "n_disjoint_blocks": 42,
+        "n_sliding_anchors_not_independent": 44,
+        "status": "ok"
+      }
+    }
+  },
+  "event_update": true,
+  "feedback_model": "count_rate_edge",
+  "fit": {
+    "history": [
+      {
+        "epoch": 0,
+        "inner_validation_objective": 4.417497863372167,
+        "seconds": 2.4,
+        "train_loss": 4.299813421567281
+      },
+      {
+        "epoch": 1,
+        "inner_validation_objective": 4.444979389508565,
+        "seconds": 4.3,
+        "train_loss": 4.2557476679484045
+      },
+      {
+        "epoch": 2,
+        "inner_validation_objective": 5.088968952496846,
+        "seconds": 6.3,
+        "train_loss": 8.176360710461934
+      },
+      {
+        "epoch": 3,
+        "inner_validation_objective": 4.7352364758650465,
+        "seconds": 8.5,
+        "train_loss": 9.327251545588176
+      },
+      {
+        "epoch": 4,
+        "inner_validation_objective": 4.5612673163414,
+        "seconds": 10.6,
+        "train_loss": 7.8910064697265625
+      },
+      {
+        "epoch": 5,
+        "inner_validation_objective": 4.47849507133166,
+        "seconds": 12.8,
+        "train_loss": 5.525847299893697
+      },
+      {
+        "epoch": 6,
+        "inner_validation_objective": 4.6220815777778625,
+        "seconds": 14.8,
+        "train_loss": 5.103167502085368
+      },
+      {
+        "epoch": 7,
+        "inner_validation_objective": 4.466126521428426,
+        "seconds": 16.7,
+        "train_loss": 7.263097246487935
+      },
+      {
+        "epoch": 8,
+        "inner_validation_objective": 4.547212024529775,
+        "seconds": 18.7,
+        "train_loss": 9.778278795878093
+      }
+    ],
+    "inner_validation_objective": 4.417497863372167,
+    "n_epochs_run": 9,
+    "parameters": {
+      "count_adapter": 213,
+      "decoder": 39042,
+      "drive": 4656,
+      "mark_adapter": 0,
+      "state": 96,
+      "total": 44007
+    },
+    "selected_epoch": 0,
+    "stop_reason": "early_stopping",
+    "train_seconds": 18.7,
+    "window_steps": 766
+  },
+  "horizons_minutes": [
+    5,
+    30,
+    120
+  ],
+  "peak_gpu_gib": 0.037009239196777344,
+  "physical_dt": true,
+  "run_id": "yuquan_pengzihang__M1_count_rate_feedback__seed3",
+  "seed": 3,
+  "source_commit": "f0c9e0750cb59ee9691634d1c57a36487fdc421c",
+  "status": "ok",
+  "subject": "yuquan_pengzihang",
+  "support_hash": "6317f3d2f73c14b9a52a82922231f5ce2d26cd5baf79ae6896407993c8563cde",
+  "tag": "main",
+  "total_seconds": 21.8,
+  "train_event_rate_hz": 0.5214188410331558,
+  "uses_background": true,
+  "uses_multiband": true,
+  "uses_waveform": true
+}

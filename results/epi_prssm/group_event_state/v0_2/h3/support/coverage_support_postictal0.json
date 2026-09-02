@@ -1,0 +1,5855 @@
+{
+  "horizons_minutes": [
+    5,
+    30,
+    120,
+    360
+  ],
+  "min_development_test_blocks": 6,
+  "n_subjects": 27,
+  "n_subjects_eligible_per_horizon": {
+    "120": 8,
+    "30": 27,
+    "360": 0,
+    "5": 27
+  },
+  "postictal_exclusion_s": 0.0,
+  "split_names": [
+    "train",
+    "inner_validation",
+    "development_test"
+  ],
+  "subjects": [
+    {
+      "coverage_hours": 224.0361111111111,
+      "eligible_horizons": [
+        5,
+        30,
+        120
+      ],
+      "horizon_support": {
+        "120": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 8,
+            "inner_validation": 3,
+            "train": 29
+          },
+          "n_independent_target_blocks": {
+            "development_test": 16,
+            "inner_validation": 6,
+            "train": 48
+          }
+        },
+        "30": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 42,
+            "inner_validation": 21,
+            "train": 143
+          },
+          "n_independent_target_blocks": {
+            "development_test": 81,
+            "inner_validation": 39,
+            "train": 278
+          }
+        },
+        "360": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 2,
+            "inner_validation": 0,
+            "train": 5
+          },
+          "n_independent_target_blocks": {
+            "development_test": 3,
+            "inner_validation": 0,
+            "train": 6
+          }
+        },
+        "5": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 265,
+            "inner_validation": 132,
+            "train": 925
+          },
+          "n_independent_target_blocks": {
+            "development_test": 527,
+            "inner_validation": 263,
+            "train": 1842
+          }
+        }
+      },
+      "intervals": [
+        {
+          "duration_seconds": 38983.0,
+          "segment_id": 0,
+          "split": "train",
+          "start": 1228131939.0,
+          "stop": 1228170922.0
+        },
+        {
+          "duration_seconds": 3600.0,
+          "segment_id": 1,
+          "split": "train",
+          "start": 1228171165.0,
+          "stop": 1228174765.0
+        },
+        {
+          "duration_seconds": 11861.575195074081,
+          "segment_id": 2,
+          "split": "train",
+          "start": 1228180373.0,
+          "stop": 1228192234.575195
+        },
+        {
+          "duration_seconds": 17311.983399152756,
+          "segment_id": 3,
+          "split": "train",
+          "start": 1228192407.233398,
+          "stop": 1228209719.216797
+        },
+        {
+          "duration_seconds": 8187.049804925919,
+          "segment_id": 4,
+          "split": "train",
+          "start": 1228209851.358398,
+          "stop": 1228218038.408203
+        },
+        {
+          "duration_seconds": 4419.0,
+          "segment_id": 5,
+          "split": "train",
+          "start": 1228218096.841797,
+          "stop": 1228222515.841797
+        },
+        {
+          "duration_seconds": 35071.95019507408,
+          "segment_id": 6,
+          "split": "train",
+          "start": 1228222627.049805,
+          "stop": 1228257699.0
+        },
+        {
+          "duration_seconds": 17183.0,
+          "segment_id": 7,
+          "split": "train",
+          "start": 1228258038.0,
+          "stop": 1228275221.0
+        },
+        {
+          "duration_seconds": 12938.016602039337,
+          "segment_id": 8,
+          "split": "train",
+          "start": 1228281394.0,
+          "stop": 1228294332.016602
+        },
+        {
+          "duration_seconds": 49609.15820288658,
+          "segment_id": 9,
+          "split": "train",
+          "start": 1228294464.841797,
+          "stop": 1228344074.0
+        },
+        {
+          "duration_seconds": 1411.7753911018372,
+          "segment_id": 10,
+          "split": "train",
+          "start": 1228344279.0,
+          "stop": 1228345690.775391
+        },
+        {
+          "duration_seconds": 919.3330068588257,
+          "segment_id": 11,
+          "split": "train",
+          "start": 1228345767.516602,
+          "stop": 1228346686.849609
+        },
+        {
+          "duration_seconds": 46210.1494140625,
+          "segment_id": 12,
+          "split": "train",
+          "start": 1228346777.433594,
+          "stop": 1228392987.583008
+        },
+        {
+          "duration_seconds": 1950.7919921875,
+          "segment_id": 13,
+          "split": "train",
+          "start": 1228393101.033203,
+          "stop": 1228395051.825195
+        },
+        {
+          "duration_seconds": 35185.73339796066,
+          "segment_id": 14,
+          "split": "train",
+          "start": 1228395145.266602,
+          "stop": 1228430331.0
+        },
+        {
+          "duration_seconds": 13733.150391101837,
+          "segment_id": 15,
+          "split": "train",
+          "start": 1228430636.0,
+          "stop": 1228444369.150391
+        },
+        {
+          "duration_seconds": 22407.08398413658,
+          "segment_id": 16,
+          "split": "train",
+          "start": 1228444436.741211,
+          "stop": 1228466843.825195
+        },
+        {
+          "duration_seconds": 7671.191405773163,
+          "segment_id": 17,
+          "split": "train",
+          "start": 1228466914.341797,
+          "stop": 1228474585.533203
+        },
+        {
+          "duration_seconds": 1577.6914060115814,
+          "segment_id": 18,
+          "split": "train",
+          "start": 1228474671.933594,
+          "stop": 1228476249.625
+        },
+        {
+          "duration_seconds": 46510.5,
+          "segment_id": 19,
+          "split": "train",
+          "start": 1228476321.5,
+          "stop": 1228522832.0
+        },
+        {
+          "duration_seconds": 34524.97460889816,
+          "segment_id": 20,
+          "split": "train",
+          "start": 1228523857.0,
+          "stop": 1228558381.974609
+        },
+        {
+          "duration_seconds": 4757.141602039337,
+          "segment_id": 21,
+          "split": "train",
+          "start": 1228558480.191406,
+          "stop": 1228563237.333008
+        },
+        {
+          "duration_seconds": 46601.93359398842,
+          "segment_id": 22,
+          "split": "train",
+          "start": 1228563321.066406,
+          "stop": 1228609923.0
+        },
+        {
+          "duration_seconds": 41.27539110183716,
+          "segment_id": 23,
+          "split": "train",
+          "start": 1228610001.0,
+          "stop": 1228610042.275391
+        },
+        {
+          "duration_seconds": 79663.65039110184,
+          "segment_id": 24,
+          "split": "train",
+          "start": 1228610136.349609,
+          "stop": 1228689800.0
+        },
+        {
+          "duration_seconds": 21096.301171541214,
+          "segment_id": 25,
+          "split": "train",
+          "start": 1228690030.0,
+          "stop": 1228711126.3011715
+        },
+        {
+          "duration_seconds": 9.5367431640625e-07,
+          "segment_id": 25,
+          "split": "train",
+          "start": 1228711126.3011715,
+          "stop": 1228711126.3011725
+        },
+        {
+          "duration_seconds": 26136.69882750511,
+          "segment_id": 25,
+          "split": "inner_validation",
+          "start": 1228711126.3011725,
+          "stop": 1228737263.0
+        },
+        {
+          "duration_seconds": 38306.0,
+          "segment_id": 26,
+          "split": "inner_validation",
+          "start": 1228737860.0,
+          "stop": 1228776166.0
+        },
+        {
+          "duration_seconds": 7202.0,
+          "segment_id": 27,
+          "split": "inner_validation",
+          "start": 1228776708.0,
+          "stop": 1228783910.0
+        },
+        {
+          "duration_seconds": 8844.93124961853,
+          "segment_id": 28,
+          "split": "inner_validation",
+          "start": 1228783914.0,
+          "stop": 1228792758.9312496
+        },
+        {
+          "duration_seconds": 9.5367431640625e-07,
+          "segment_id": 28,
+          "split": "inner_validation",
+          "start": 1228792758.9312496,
+          "stop": 1228792758.9312506
+        },
+        {
+          "duration_seconds": 10117.068749427795,
+          "segment_id": 28,
+          "split": "development_test",
+          "start": 1228792758.9312506,
+          "stop": 1228802876.0
+        },
+        {
+          "duration_seconds": 500.0,
+          "segment_id": 29,
+          "split": "development_test",
+          "start": 1228803162.0,
+          "stop": 1228803662.0
+        },
+        {
+          "duration_seconds": 3600.0,
+          "segment_id": 30,
+          "split": "development_test",
+          "start": 1228804638.0,
+          "stop": 1228808238.0
+        },
+        {
+          "duration_seconds": 54387.0,
+          "segment_id": 31,
+          "split": "development_test",
+          "start": 1228808243.0,
+          "stop": 1228862630.0
+        },
+        {
+          "duration_seconds": 81325.95800805092,
+          "segment_id": 32,
+          "split": "development_test",
+          "start": 1228863024.0,
+          "stop": 1228944349.958008
+        },
+        {
+          "duration_seconds": 4372.233397960663,
+          "segment_id": 33,
+          "split": "development_test",
+          "start": 1228944429.766602,
+          "stop": 1228948802.0
+        },
+        {
+          "duration_seconds": 6677.0,
+          "segment_id": 34,
+          "split": "development_test",
+          "start": 1228949081.0,
+          "stop": 1228955758.0
+        }
+      ],
+      "n_coverage_segments": 18,
+      "n_recorded_blocks": 231,
+      "n_seizures": 17,
+      "n_usable_intervals": 39,
+      "postictal_exclusion_s": 0.0,
+      "recorded_hours": 223.9661111111111,
+      "split_hours": {
+        "development_test": 44.71646115428871,
+        "inner_validation": 22.358230577243695,
+        "train": 156.5076140411033
+      },
+      "subject": "epilepsiae_1073",
+      "usable_hours_after_seizure_cuts": 223.58230577263566
+    },
+    {
+      "coverage_hours": 183.10611111111112,
+      "eligible_horizons": [
+        5,
+        30,
+        120
+      ],
+      "horizon_support": {
+        "120": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 7,
+            "inner_validation": 3,
+            "train": 26
+          },
+          "n_independent_target_blocks": {
+            "development_test": 10,
+            "inner_validation": 5,
+            "train": 44
+          }
+        },
+        "30": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 33,
+            "inner_validation": 16,
+            "train": 120
+          },
+          "n_independent_target_blocks": {
+            "development_test": 63,
+            "inner_validation": 30,
+            "train": 236
+          }
+        },
+        "360": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 0,
+            "inner_validation": 1,
+            "train": 5
+          },
+          "n_independent_target_blocks": {
+            "development_test": 0,
+            "inner_validation": 1,
+            "train": 6
+          }
+        },
+        "5": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 216,
+            "inner_validation": 108,
+            "train": 761
+          },
+          "n_independent_target_blocks": {
+            "development_test": 428,
+            "inner_validation": 213,
+            "train": 1515
+          }
+        }
+      },
+      "intervals": [
+        {
+          "duration_seconds": 20086.67480492592,
+          "segment_id": 0,
+          "split": "train",
+          "start": 1228217310.0,
+          "stop": 1228237396.674805
+        },
+        {
+          "duration_seconds": 20205.96679711342,
+          "segment_id": 1,
+          "split": "train",
+          "start": 1228237476.033203,
+          "stop": 1228257682.0
+        },
+        {
+          "duration_seconds": 3502.0,
+          "segment_id": 2,
+          "split": "train",
+          "start": 1228257894.0,
+          "stop": 1228261396.0
+        },
+        {
+          "duration_seconds": 31369.0,
+          "segment_id": 3,
+          "split": "train",
+          "start": 1228267504.0,
+          "stop": 1228298873.0
+        },
+        {
+          "duration_seconds": 45123.0,
+          "segment_id": 4,
+          "split": "train",
+          "start": 1228298912.0,
+          "stop": 1228344035.0
+        },
+        {
+          "duration_seconds": 50873.47460889816,
+          "segment_id": 5,
+          "split": "train",
+          "start": 1228344356.0,
+          "stop": 1228395229.474609
+        },
+        {
+          "duration_seconds": 35110.93359398842,
+          "segment_id": 6,
+          "split": "train",
+          "start": 1228395242.066406,
+          "stop": 1228430353.0
+        },
+        {
+          "duration_seconds": 41672.0,
+          "segment_id": 7,
+          "split": "train",
+          "start": 1228430583.0,
+          "stop": 1228472255.0
+        },
+        {
+          "duration_seconds": 50003.0,
+          "segment_id": 8,
+          "split": "train",
+          "start": 1228472632.0,
+          "stop": 1228522635.0
+        },
+        {
+          "duration_seconds": 77163.58300805092,
+          "segment_id": 9,
+          "split": "train",
+          "start": 1228522672.0,
+          "stop": 1228599835.583008
+        },
+        {
+          "duration_seconds": 7923.345702886581,
+          "segment_id": 10,
+          "split": "train",
+          "start": 1228599928.654297,
+          "stop": 1228607852.0
+        },
+        {
+          "duration_seconds": 2856.0751950740814,
+          "segment_id": 11,
+          "split": "train",
+          "start": 1228607883.0,
+          "stop": 1228610739.075195
+        },
+        {
+          "duration_seconds": 27897.03320288658,
+          "segment_id": 12,
+          "split": "train",
+          "start": 1228610835.633789,
+          "stop": 1228638732.666992
+        },
+        {
+          "duration_seconds": 47125.75966858864,
+          "segment_id": 13,
+          "split": "train",
+          "start": 1228638902.588867,
+          "stop": 1228686028.3485355
+        },
+        {
+          "duration_seconds": 3781.6514644622803,
+          "segment_id": 13,
+          "split": "inner_validation",
+          "start": 1228686028.3485355,
+          "stop": 1228689810.0
+        },
+        {
+          "duration_seconds": 3572.0419919490814,
+          "segment_id": 14,
+          "split": "inner_validation",
+          "start": 1228690088.0,
+          "stop": 1228693660.041992
+        },
+        {
+          "duration_seconds": 49971.03320288658,
+          "segment_id": 15,
+          "split": "inner_validation",
+          "start": 1228693748.150391,
+          "stop": 1228743719.183594
+        },
+        {
+          "duration_seconds": 8519.822852373123,
+          "segment_id": 16,
+          "split": "inner_validation",
+          "start": 1228743780.644531,
+          "stop": 1228752300.4673834
+        },
+        {
+          "duration_seconds": 9.5367431640625e-07,
+          "segment_id": 16,
+          "split": "inner_validation",
+          "start": 1228752300.4673834,
+          "stop": 1228752300.4673843
+        },
+        {
+          "duration_seconds": 23885.53261566162,
+          "segment_id": 16,
+          "split": "development_test",
+          "start": 1228752300.4673843,
+          "stop": 1228776186.0
+        },
+        {
+          "duration_seconds": 14509.0,
+          "segment_id": 17,
+          "split": "development_test",
+          "start": 1228776492.0,
+          "stop": 1228791001.0
+        },
+        {
+          "duration_seconds": 6426.650391101837,
+          "segment_id": 18,
+          "split": "development_test",
+          "start": 1228791589.0,
+          "stop": 1228798015.650391
+        },
+        {
+          "duration_seconds": 31232.8505859375,
+          "segment_id": 19,
+          "split": "development_test",
+          "start": 1228798082.458008,
+          "stop": 1228829315.308594
+        },
+        {
+          "duration_seconds": 33297.06542992592,
+          "segment_id": 20,
+          "split": "development_test",
+          "start": 1228829383.93457,
+          "stop": 1228862681.0
+        },
+        {
+          "duration_seconds": 17957.0,
+          "segment_id": 21,
+          "split": "development_test",
+          "start": 1228863055.0,
+          "stop": 1228881012.0
+        },
+        {
+          "duration_seconds": 105.0,
+          "segment_id": 22,
+          "split": "development_test",
+          "start": 1228881122.0,
+          "stop": 1228881227.0
+        },
+        {
+          "duration_seconds": 4276.0,
+          "segment_id": 23,
+          "split": "development_test",
+          "start": 1228881777.0,
+          "stop": 1228886053.0
+        }
+      ],
+      "n_coverage_segments": 15,
+      "n_recorded_blocks": 189,
+      "n_seizures": 9,
+      "n_usable_intervals": 27,
+      "postictal_exclusion_s": 0.0,
+      "recorded_hours": 183.05777777777777,
+      "split_hours": {
+        "development_test": 36.58030528406302,
+        "inner_validation": 18.29015264239576,
+        "train": 128.03106849511465
+      },
+      "subject": "epilepsiae_1077",
+      "usable_hours_after_seizure_cuts": 182.90152642157344
+    },
+    {
+      "coverage_hours": 157.46277777777777,
+      "eligible_horizons": [
+        5,
+        30,
+        120
+      ],
+      "horizon_support": {
+        "120": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 6,
+            "inner_validation": 1,
+            "train": 21
+          },
+          "n_independent_target_blocks": {
+            "development_test": 11,
+            "inner_validation": 1,
+            "train": 37
+          }
+        },
+        "30": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 30,
+            "inner_validation": 12,
+            "train": 105
+          },
+          "n_independent_target_blocks": {
+            "development_test": 58,
+            "inner_validation": 22,
+            "train": 201
+          }
+        },
+        "360": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 1,
+            "inner_validation": 0,
+            "train": 5
+          },
+          "n_independent_target_blocks": {
+            "development_test": 1,
+            "inner_validation": 0,
+            "train": 7
+          }
+        },
+        "5": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 187,
+            "inner_validation": 90,
+            "train": 656
+          },
+          "n_independent_target_blocks": {
+            "development_test": 372,
+            "inner_validation": 179,
+            "train": 1299
+          }
+        }
+      },
+      "intervals": [
+        {
+          "duration_seconds": 67774.0,
+          "segment_id": 0,
+          "split": "train",
+          "start": 1245297241.0,
+          "stop": 1245365015.0
+        },
+        {
+          "duration_seconds": 43213.0,
+          "segment_id": 1,
+          "split": "train",
+          "start": 1245365236.0,
+          "stop": 1245408449.0
+        },
+        {
+          "duration_seconds": 64821.0,
+          "segment_id": 2,
+          "split": "train",
+          "start": 1245408452.0,
+          "stop": 1245473273.0
+        },
+        {
+          "duration_seconds": 7201.0,
+          "segment_id": 3,
+          "split": "train",
+          "start": 1245480477.0,
+          "stop": 1245487678.0
+        },
+        {
+          "duration_seconds": 3600.0,
+          "segment_id": 4,
+          "split": "train",
+          "start": 1245491281.0,
+          "stop": 1245494881.0
+        },
+        {
+          "duration_seconds": 7202.0,
+          "segment_id": 5,
+          "split": "train",
+          "start": 1245498483.0,
+          "stop": 1245505685.0
+        },
+        {
+          "duration_seconds": 32411.0,
+          "segment_id": 6,
+          "split": "train",
+          "start": 1245509287.0,
+          "stop": 1245541698.0
+        },
+        {
+          "duration_seconds": 13908.783202886581,
+          "segment_id": 7,
+          "split": "train",
+          "start": 1245542436.0,
+          "stop": 1245556344.783203
+        },
+        {
+          "duration_seconds": 7343.5,
+          "segment_id": 8,
+          "split": "train",
+          "start": 1245556466.308594,
+          "stop": 1245563809.808594
+        },
+        {
+          "duration_seconds": 14524.291991949081,
+          "segment_id": 9,
+          "split": "train",
+          "start": 1245563923.708008,
+          "stop": 1245578448.0
+        },
+        {
+          "duration_seconds": 45744.0,
+          "segment_id": 10,
+          "split": "train",
+          "start": 1245578453.0,
+          "stop": 1245624197.0
+        },
+        {
+          "duration_seconds": 13522.216797113419,
+          "segment_id": 11,
+          "split": "train",
+          "start": 1245624493.0,
+          "stop": 1245638015.216797
+        },
+        {
+          "duration_seconds": 764.0996088981628,
+          "segment_id": 12,
+          "split": "train",
+          "start": 1245638132.900391,
+          "stop": 1245638897.0
+        },
+        {
+          "duration_seconds": 15027.8662109375,
+          "segment_id": 13,
+          "split": "train",
+          "start": 1245638902.0,
+          "stop": 1245653929.866211
+        },
+        {
+          "duration_seconds": 56091.625,
+          "segment_id": 14,
+          "split": "train",
+          "start": 1245654051.375,
+          "stop": 1245710143.0
+        },
+        {
+          "duration_seconds": 2893.3173835277557,
+          "segment_id": 15,
+          "split": "train",
+          "start": 1245710371.0,
+          "stop": 1245713264.3173835
+        },
+        {
+          "duration_seconds": 9951.715819358826,
+          "segment_id": 15,
+          "split": "inner_validation",
+          "start": 1245713264.3173835,
+          "stop": 1245723216.033203
+        },
+        {
+          "duration_seconds": 5327.625,
+          "segment_id": 16,
+          "split": "inner_validation",
+          "start": 1245723373.383789,
+          "stop": 1245728701.008789
+        },
+        {
+          "duration_seconds": 9528.458008050919,
+          "segment_id": 17,
+          "split": "inner_validation",
+          "start": 1245728823.908203,
+          "stop": 1245738352.366211
+        },
+        {
+          "duration_seconds": 6101.125,
+          "segment_id": 18,
+          "split": "inner_validation",
+          "start": 1245738472.616211,
+          "stop": 1245744573.741211
+        },
+        {
+          "duration_seconds": 19671.275391101837,
+          "segment_id": 19,
+          "split": "inner_validation",
+          "start": 1245744717.724609,
+          "stop": 1245764389.0
+        },
+        {
+          "duration_seconds": 5997.186523675919,
+          "segment_id": 20,
+          "split": "inner_validation",
+          "start": 1245764392.0,
+          "stop": 1245770389.1865237
+        },
+        {
+          "duration_seconds": 26412.81347632408,
+          "segment_id": 20,
+          "split": "development_test",
+          "start": 1245770389.1865237,
+          "stop": 1245796802.0
+        },
+        {
+          "duration_seconds": 26162.94140601158,
+          "segment_id": 21,
+          "split": "development_test",
+          "start": 1245797068.0,
+          "stop": 1245823230.941406
+        },
+        {
+          "duration_seconds": 60194.01660203934,
+          "segment_id": 22,
+          "split": "development_test",
+          "start": 1245823303.983398,
+          "stop": 1245883498.0
+        },
+        {
+          "duration_seconds": 385.0,
+          "segment_id": 23,
+          "split": "development_test",
+          "start": 1245883503.0,
+          "stop": 1245883888.0
+        }
+      ],
+      "n_coverage_segments": 15,
+      "n_recorded_blocks": 159,
+      "n_seizures": 9,
+      "n_usable_intervals": 26,
+      "postictal_exclusion_s": 0.0,
+      "recorded_hours": 157.4113888888889,
+      "split_hours": {
+        "development_test": 31.431880967881945,
+        "inner_validation": 15.71594048394097,
+        "train": 110.0115833875868
+      },
+      "subject": "epilepsiae_1096",
+      "usable_hours_after_seizure_cuts": 157.15940483940972
+    },
+    {
+      "coverage_hours": 155.005,
+      "eligible_horizons": [
+        5,
+        30,
+        120
+      ],
+      "horizon_support": {
+        "120": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 6,
+            "inner_validation": 3,
+            "train": 18
+          },
+          "n_independent_target_blocks": {
+            "development_test": 12,
+            "inner_validation": 6,
+            "train": 28
+          }
+        },
+        "30": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 29,
+            "inner_validation": 15,
+            "train": 96
+          },
+          "n_independent_target_blocks": {
+            "development_test": 58,
+            "inner_validation": 29,
+            "train": 184
+          }
+        },
+        "360": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 1,
+            "inner_validation": 1,
+            "train": 3
+          },
+          "n_independent_target_blocks": {
+            "development_test": 2,
+            "inner_validation": 1,
+            "train": 4
+          }
+        },
+        "5": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 184,
+            "inner_validation": 92,
+            "train": 636
+          },
+          "n_independent_target_blocks": {
+            "development_test": 366,
+            "inner_validation": 184,
+            "train": 1262
+          }
+        }
+      },
+      "intervals": [
+        {
+          "duration_seconds": 4410.650391101837,
+          "segment_id": 0,
+          "split": "train",
+          "start": 1253002932.0,
+          "stop": 1253007342.650391
+        },
+        {
+          "duration_seconds": 13971.0,
+          "segment_id": 1,
+          "split": "train",
+          "start": 1253007512.825195,
+          "stop": 1253021483.825195
+        },
+        {
+          "duration_seconds": 20278.224608898163,
+          "segment_id": 2,
+          "split": "train",
+          "start": 1253021621.900391,
+          "stop": 1253041900.125
+        },
+        {
+          "duration_seconds": 12580.766602039337,
+          "segment_id": 3,
+          "split": "train",
+          "start": 1253042018.233398,
+          "stop": 1253054599.0
+        },
+        {
+          "duration_seconds": 3550.5917971134186,
+          "segment_id": 4,
+          "split": "train",
+          "start": 1253054803.0,
+          "stop": 1253058353.591797
+        },
+        {
+          "duration_seconds": 2406.3330080509186,
+          "segment_id": 5,
+          "split": "train",
+          "start": 1253058440.666992,
+          "stop": 1253060847.0
+        },
+        {
+          "duration_seconds": 6435.333008050919,
+          "segment_id": 6,
+          "split": "train",
+          "start": 1253066299.0,
+          "stop": 1253072734.333008
+        },
+        {
+          "duration_seconds": 21252.15820288658,
+          "segment_id": 7,
+          "split": "train",
+          "start": 1253072871.625,
+          "stop": 1253094123.783203
+        },
+        {
+          "duration_seconds": 3581.391602039337,
+          "segment_id": 8,
+          "split": "train",
+          "start": 1253094224.608398,
+          "stop": 1253097806.0
+        },
+        {
+          "duration_seconds": 14901.233397960663,
+          "segment_id": 9,
+          "split": "train",
+          "start": 1253097880.0,
+          "stop": 1253112781.233398
+        },
+        {
+          "duration_seconds": 19898.775391101837,
+          "segment_id": 10,
+          "split": "train",
+          "start": 1253112920.608398,
+          "stop": 1253132819.383789
+        },
+        {
+          "duration_seconds": 7653.599608898163,
+          "segment_id": 11,
+          "split": "train",
+          "start": 1253132967.400391,
+          "stop": 1253140621.0
+        },
+        {
+          "duration_seconds": 2490.5917971134186,
+          "segment_id": 12,
+          "split": "train",
+          "start": 1253140924.0,
+          "stop": 1253143414.591797
+        },
+        {
+          "duration_seconds": 11927.507811784744,
+          "segment_id": 13,
+          "split": "train",
+          "start": 1253143530.466797,
+          "stop": 1253155457.974609
+        },
+        {
+          "duration_seconds": 734.5830080509186,
+          "segment_id": 14,
+          "split": "train",
+          "start": 1253155592.416992,
+          "stop": 1253156327.0
+        },
+        {
+          "duration_seconds": 5680.7587890625,
+          "segment_id": 15,
+          "split": "train",
+          "start": 1253161744.0,
+          "stop": 1253167424.758789
+        },
+        {
+          "duration_seconds": 15282.007812023163,
+          "segment_id": 16,
+          "split": "train",
+          "start": 1253167586.058594,
+          "stop": 1253182868.066406
+        },
+        {
+          "duration_seconds": 43688.2587890625,
+          "segment_id": 17,
+          "split": "train",
+          "start": 1253183013.741211,
+          "stop": 1253226702.0
+        },
+        {
+          "duration_seconds": 27597.0,
+          "segment_id": 18,
+          "split": "train",
+          "start": 1253227094.0,
+          "stop": 1253254691.0
+        },
+        {
+          "duration_seconds": 19598.233397960663,
+          "segment_id": 19,
+          "split": "train",
+          "start": 1253254785.0,
+          "stop": 1253274383.233398
+        },
+        {
+          "duration_seconds": 46120.35839796066,
+          "segment_id": 20,
+          "split": "train",
+          "start": 1253274438.933594,
+          "stop": 1253320559.291992
+        },
+        {
+          "duration_seconds": 85375.75791025162,
+          "segment_id": 21,
+          "split": "train",
+          "start": 1253320618.049805,
+          "stop": 1253405993.8077152
+        },
+        {
+          "duration_seconds": 55630.730761528015,
+          "segment_id": 21,
+          "split": "inner_validation",
+          "start": 1253405993.8077152,
+          "stop": 1253461624.5384767
+        },
+        {
+          "duration_seconds": 9.5367431640625e-07,
+          "segment_id": 21,
+          "split": "inner_validation",
+          "start": 1253461624.5384767,
+          "stop": 1253461624.5384777
+        },
+        {
+          "duration_seconds": 24228.461522340775,
+          "segment_id": 21,
+          "split": "development_test",
+          "start": 1253461624.5384777,
+          "stop": 1253485853.0
+        },
+        {
+          "duration_seconds": 86263.0,
+          "segment_id": 22,
+          "split": "development_test",
+          "start": 1253486121.0,
+          "stop": 1253572384.0
+        },
+        {
+          "duration_seconds": 770.0,
+          "segment_id": 23,
+          "split": "development_test",
+          "start": 1253572718.0,
+          "stop": 1253573488.0
+        }
+      ],
+      "n_coverage_segments": 10,
+      "n_recorded_blocks": 160,
+      "n_seizures": 14,
+      "n_usable_intervals": 27,
+      "postictal_exclusion_s": 0.0,
+      "recorded_hours": 154.95944444444444,
+      "split_hours": {
+        "development_test": 30.90596153398355,
+        "inner_validation": 15.452980767356026,
+        "train": 108.17086536983649
+      },
+      "subject": "epilepsiae_1125",
+      "usable_hours_after_seizure_cuts": 154.52980767117606
+    },
+    {
+      "coverage_hours": 78.80305555555556,
+      "eligible_horizons": [
+        5,
+        30
+      ],
+      "horizon_support": {
+        "120": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 1,
+            "inner_validation": 0,
+            "train": 5
+          },
+          "n_independent_target_blocks": {
+            "development_test": 2,
+            "inner_validation": 0,
+            "train": 8
+          }
+        },
+        "30": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 14,
+            "inner_validation": 6,
+            "train": 39
+          },
+          "n_independent_target_blocks": {
+            "development_test": 25,
+            "inner_validation": 9,
+            "train": 69
+          }
+        },
+        "360": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 0,
+            "inner_validation": 0,
+            "train": 0
+          },
+          "n_independent_target_blocks": {
+            "development_test": 0,
+            "inner_validation": 0,
+            "train": 0
+          }
+        },
+        "5": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 93,
+            "inner_validation": 45,
+            "train": 311
+          },
+          "n_independent_target_blocks": {
+            "development_test": 181,
+            "inner_validation": 87,
+            "train": 608
+          }
+        }
+      },
+      "intervals": [
+        {
+          "duration_seconds": 3600.0,
+          "segment_id": 0,
+          "split": "train",
+          "start": 1240466978.0,
+          "stop": 1240470578.0
+        },
+        {
+          "duration_seconds": 3600.0,
+          "segment_id": 1,
+          "split": "train",
+          "start": 1240481382.0,
+          "stop": 1240484982.0
+        },
+        {
+          "duration_seconds": 30372.0,
+          "segment_id": 2,
+          "split": "train",
+          "start": 1240495786.0,
+          "stop": 1240526158.0
+        },
+        {
+          "duration_seconds": 3863.3164060115814,
+          "segment_id": 3,
+          "split": "train",
+          "start": 1240526546.0,
+          "stop": 1240530409.316406
+        },
+        {
+          "duration_seconds": 7067.838866949081,
+          "segment_id": 4,
+          "split": "train",
+          "start": 1240530465.947266,
+          "stop": 1240537533.786133
+        },
+        {
+          "duration_seconds": 2801.0195322036743,
+          "segment_id": 5,
+          "split": "train",
+          "start": 1240537630.552734,
+          "stop": 1240540431.572266
+        },
+        {
+          "duration_seconds": 1646.111328125,
+          "segment_id": 6,
+          "split": "train",
+          "start": 1240540462.256836,
+          "stop": 1240542108.368164
+        },
+        {
+          "duration_seconds": 16812.335937976837,
+          "segment_id": 7,
+          "split": "train",
+          "start": 1240542287.875,
+          "stop": 1240559100.210938
+        },
+        {
+          "duration_seconds": 2286.3417971134186,
+          "segment_id": 8,
+          "split": "train",
+          "start": 1240559142.033203,
+          "stop": 1240561428.375
+        },
+        {
+          "duration_seconds": 1319.3388669490814,
+          "segment_id": 9,
+          "split": "train",
+          "start": 1240561472.229492,
+          "stop": 1240562791.568359
+        },
+        {
+          "duration_seconds": 5990.192383050919,
+          "segment_id": 10,
+          "split": "train",
+          "start": 1240562825.045898,
+          "stop": 1240568815.238281
+        },
+        {
+          "duration_seconds": 692.4902341365814,
+          "segment_id": 11,
+          "split": "train",
+          "start": 1240568860.799805,
+          "stop": 1240569553.290039
+        },
+        {
+          "duration_seconds": 931.7509760856628,
+          "segment_id": 12,
+          "split": "train",
+          "start": 1240569578.257813,
+          "stop": 1240570510.008789
+        },
+        {
+          "duration_seconds": 261.25781297683716,
+          "segment_id": 13,
+          "split": "train",
+          "start": 1240570595.483398,
+          "stop": 1240570856.741211
+        },
+        {
+          "duration_seconds": 3742.554687976837,
+          "segment_id": 14,
+          "split": "train",
+          "start": 1240570975.753906,
+          "stop": 1240574718.308594
+        },
+        {
+          "duration_seconds": 813.5703129768372,
+          "segment_id": 15,
+          "split": "train",
+          "start": 1240574817.758789,
+          "stop": 1240575631.329102
+        },
+        {
+          "duration_seconds": 7077.0068359375,
+          "segment_id": 16,
+          "split": "train",
+          "start": 1240575871.75,
+          "stop": 1240582948.756836
+        },
+        {
+          "duration_seconds": 5862.182616949081,
+          "segment_id": 17,
+          "split": "train",
+          "start": 1240583656.933594,
+          "stop": 1240589519.116211
+        },
+        {
+          "duration_seconds": 1627.9384770393372,
+          "segment_id": 18,
+          "split": "train",
+          "start": 1240589539.927734,
+          "stop": 1240591167.866211
+        },
+        {
+          "duration_seconds": 4995.189452886581,
+          "segment_id": 19,
+          "split": "train",
+          "start": 1240591260.310547,
+          "stop": 1240596255.5
+        },
+        {
+          "duration_seconds": 5836.313477039337,
+          "segment_id": 20,
+          "split": "train",
+          "start": 1240596346.052734,
+          "stop": 1240602182.366211
+        },
+        {
+          "duration_seconds": 5034.270508050919,
+          "segment_id": 21,
+          "split": "train",
+          "start": 1240602274.604492,
+          "stop": 1240607308.875
+        },
+        {
+          "duration_seconds": 3506.6914060115814,
+          "segment_id": 22,
+          "split": "train",
+          "start": 1240607422.875,
+          "stop": 1240610929.566406
+        },
+        {
+          "duration_seconds": 3509.3242189884186,
+          "segment_id": 23,
+          "split": "train",
+          "start": 1240611035.883789,
+          "stop": 1240614545.208008
+        },
+        {
+          "duration_seconds": 1970.5917971134186,
+          "segment_id": 24,
+          "split": "train",
+          "start": 1240614596.408203,
+          "stop": 1240616567.0
+        },
+        {
+          "duration_seconds": 131.68359398841858,
+          "segment_id": 25,
+          "split": "train",
+          "start": 1240616636.0,
+          "stop": 1240616767.683594
+        },
+        {
+          "duration_seconds": 4265.925781011581,
+          "segment_id": 26,
+          "split": "train",
+          "start": 1240616849.366211,
+          "stop": 1240621115.291992
+        },
+        {
+          "duration_seconds": 24247.54199194908,
+          "segment_id": 27,
+          "split": "train",
+          "start": 1240621193.458008,
+          "stop": 1240645441.0
+        },
+        {
+          "duration_seconds": 2916.0,
+          "segment_id": 28,
+          "split": "train",
+          "start": 1240656244.0,
+          "stop": 1240659160.0
+        },
+        {
+          "duration_seconds": 3404.0,
+          "segment_id": 29,
+          "split": "train",
+          "start": 1240659337.0,
+          "stop": 1240662741.0
+        },
+        {
+          "duration_seconds": 28767.98828101158,
+          "segment_id": 30,
+          "split": "train",
+          "start": 1240666491.0,
+          "stop": 1240695258.988281
+        },
+        {
+          "duration_seconds": 7221.958008050919,
+          "segment_id": 31,
+          "split": "train",
+          "start": 1240695277.041992,
+          "stop": 1240702499.0
+        },
+        {
+          "duration_seconds": 545.693359375,
+          "segment_id": 32,
+          "split": "train",
+          "start": 1240725542.0,
+          "stop": 1240726087.6933594
+        },
+        {
+          "duration_seconds": 3054.306640625,
+          "segment_id": 32,
+          "split": "inner_validation",
+          "start": 1240726087.6933594,
+          "stop": 1240729142.0
+        },
+        {
+          "duration_seconds": 3600.0,
+          "segment_id": 33,
+          "split": "inner_validation",
+          "start": 1240732744.0,
+          "stop": 1240736344.0
+        },
+        {
+          "duration_seconds": 3861.992187976837,
+          "segment_id": 34,
+          "split": "inner_validation",
+          "start": 1240754350.0,
+          "stop": 1240758211.992188
+        },
+        {
+          "duration_seconds": 12943.027343988419,
+          "segment_id": 35,
+          "split": "inner_validation",
+          "start": 1240758259.133789,
+          "stop": 1240771202.161133
+        },
+        {
+          "duration_seconds": 4643.590819835663,
+          "segment_id": 36,
+          "split": "inner_validation",
+          "start": 1240771265.575195,
+          "stop": 1240775909.166015
+        },
+        {
+          "duration_seconds": 9715.833985090256,
+          "segment_id": 36,
+          "split": "development_test",
+          "start": 1240775909.166015,
+          "stop": 1240785625.0
+        },
+        {
+          "duration_seconds": 10802.0,
+          "segment_id": 37,
+          "split": "development_test",
+          "start": 1240785942.0,
+          "stop": 1240796744.0
+        },
+        {
+          "duration_seconds": 3600.0,
+          "segment_id": 38,
+          "split": "development_test",
+          "start": 1240829153.0,
+          "stop": 1240832753.0
+        },
+        {
+          "duration_seconds": 28488.0,
+          "segment_id": 39,
+          "split": "development_test",
+          "start": 1240843557.0,
+          "stop": 1240872045.0
+        },
+        {
+          "duration_seconds": 3600.0,
+          "segment_id": 40,
+          "split": "development_test",
+          "start": 1240872255.0,
+          "stop": 1240875855.0
+        }
+      ],
+      "n_coverage_segments": 15,
+      "n_recorded_blocks": 80,
+      "n_seizures": 26,
+      "n_usable_intervals": 43,
+      "postictal_exclusion_s": 0.0,
+      "recorded_hours": 78.78694444444444,
+      "split_hours": {
+        "development_test": 15.612731662525071,
+        "inner_validation": 7.806365831229422,
+        "train": 54.64456081887087
+      },
+      "subject": "epilepsiae_1146",
+      "usable_hours_after_seizure_cuts": 78.06365831262535
+    },
+    {
+      "coverage_hours": 260.10305555555556,
+      "eligible_horizons": [
+        5,
+        30,
+        120
+      ],
+      "horizon_support": {
+        "120": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 9,
+            "inner_validation": 5,
+            "train": 41
+          },
+          "n_independent_target_blocks": {
+            "development_test": 15,
+            "inner_validation": 10,
+            "train": 76
+          }
+        },
+        "30": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 47,
+            "inner_validation": 25,
+            "train": 178
+          },
+          "n_independent_target_blocks": {
+            "development_test": 91,
+            "inner_validation": 49,
+            "train": 346
+          }
+        },
+        "360": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 1,
+            "inner_validation": 1,
+            "train": 11
+          },
+          "n_independent_target_blocks": {
+            "development_test": 2,
+            "inner_validation": 2,
+            "train": 18
+          }
+        },
+        "5": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 306,
+            "inner_validation": 155,
+            "train": 1086
+          },
+          "n_independent_target_blocks": {
+            "development_test": 610,
+            "inner_validation": 309,
+            "train": 2164
+          }
+        }
+      },
+      "intervals": [
+        {
+          "duration_seconds": 3600.0,
+          "segment_id": 0,
+          "split": "train",
+          "start": 1079342259.0,
+          "stop": 1079345859.0
+        },
+        {
+          "duration_seconds": 49138.0,
+          "segment_id": 1,
+          "split": "train",
+          "start": 1079345875.0,
+          "stop": 1079395013.0
+        },
+        {
+          "duration_seconds": 18080.0,
+          "segment_id": 2,
+          "split": "train",
+          "start": 1079395071.0,
+          "stop": 1079413151.0
+        },
+        {
+          "duration_seconds": 62046.0,
+          "segment_id": 3,
+          "split": "train",
+          "start": 1079419541.0,
+          "stop": 1079481587.0
+        },
+        {
+          "duration_seconds": 86590.0,
+          "segment_id": 4,
+          "split": "train",
+          "start": 1079481620.0,
+          "stop": 1079568210.0
+        },
+        {
+          "duration_seconds": 12350.0,
+          "segment_id": 5,
+          "split": "train",
+          "start": 1079568230.0,
+          "stop": 1079580580.0
+        },
+        {
+          "duration_seconds": 73174.0,
+          "segment_id": 6,
+          "split": "train",
+          "start": 1079581167.0,
+          "stop": 1079654341.0
+        },
+        {
+          "duration_seconds": 89097.0,
+          "segment_id": 7,
+          "split": "train",
+          "start": 1079654383.0,
+          "stop": 1079743480.0
+        },
+        {
+          "duration_seconds": 3618.5585939884186,
+          "segment_id": 8,
+          "split": "train",
+          "start": 1079743501.0,
+          "stop": 1079747119.558594
+        },
+        {
+          "duration_seconds": 79923.49609398842,
+          "segment_id": 9,
+          "split": "train",
+          "start": 1079747175.503906,
+          "stop": 1079827099.0
+        },
+        {
+          "duration_seconds": 165749.26757788658,
+          "segment_id": 10,
+          "split": "train",
+          "start": 1079827140.0,
+          "stop": 1079992889.267578
+        },
+        {
+          "duration_seconds": 6953.373047113419,
+          "segment_id": 11,
+          "split": "train",
+          "start": 1079992967.626953,
+          "stop": 1079999921.0
+        },
+        {
+          "duration_seconds": 4654.363280296326,
+          "segment_id": 12,
+          "split": "train",
+          "start": 1079999962.0,
+          "stop": 1080004616.3632803
+        },
+        {
+          "duration_seconds": 83004.63671970367,
+          "segment_id": 12,
+          "split": "inner_validation",
+          "start": 1080004616.3632803,
+          "stop": 1080087621.0
+        },
+        {
+          "duration_seconds": 10563.085936546326,
+          "segment_id": 13,
+          "split": "inner_validation",
+          "start": 1080087644.0,
+          "stop": 1080098207.0859365
+        },
+        {
+          "duration_seconds": 20351.93945455551,
+          "segment_id": 13,
+          "split": "development_test",
+          "start": 1080098207.0859365,
+          "stop": 1080118559.025391
+        },
+        {
+          "duration_seconds": 11200.9375,
+          "segment_id": 14,
+          "split": "development_test",
+          "start": 1080118700.482422,
+          "stop": 1080129901.419922
+        },
+        {
+          "duration_seconds": 35812.681639909744,
+          "segment_id": 15,
+          "split": "development_test",
+          "start": 1080130020.570313,
+          "stop": 1080165833.251953
+        },
+        {
+          "duration_seconds": 6934.255858898163,
+          "segment_id": 16,
+          "split": "development_test",
+          "start": 1080165952.744141,
+          "stop": 1080172887.0
+        },
+        {
+          "duration_seconds": 5068.599608898163,
+          "segment_id": 17,
+          "split": "development_test",
+          "start": 1080172921.0,
+          "stop": 1080177989.599609
+        },
+        {
+          "duration_seconds": 2036.3300778865814,
+          "segment_id": 18,
+          "split": "development_test",
+          "start": 1080178085.669922,
+          "stop": 1080180122.0
+        },
+        {
+          "duration_seconds": 79671.0,
+          "segment_id": 19,
+          "split": "development_test",
+          "start": 1080180138.0,
+          "stop": 1080259809.0
+        },
+        {
+          "duration_seconds": 9408.744141101837,
+          "segment_id": 20,
+          "split": "development_test",
+          "start": 1080259836.0,
+          "stop": 1080269244.744141
+        },
+        {
+          "duration_seconds": 16650.95703101158,
+          "segment_id": 21,
+          "split": "development_test",
+          "start": 1080269328.042969,
+          "stop": 1080285979.0
+        }
+      ],
+      "n_coverage_segments": 15,
+      "n_recorded_blocks": 268,
+      "n_seizures": 7,
+      "n_usable_intervals": 24,
+      "postictal_exclusion_s": 0.0,
+      "recorded_hours": 260.06083333333333,
+      "split_hours": {
+        "development_test": 51.98206814229488,
+        "inner_validation": 25.991034071180554,
+        "train": 181.93723849813142
+      },
+      "subject": "epilepsiae_253",
+      "usable_hours_after_seizure_cuts": 259.91034071160686
+    },
+    {
+      "coverage_hours": 61.234722222222224,
+      "eligible_horizons": [
+        5,
+        30
+      ],
+      "horizon_support": {
+        "120": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 0,
+            "inner_validation": 0,
+            "train": 6
+          },
+          "n_independent_target_blocks": {
+            "development_test": 0,
+            "inner_validation": 0,
+            "train": 9
+          }
+        },
+        "30": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 10,
+            "inner_validation": 4,
+            "train": 38
+          },
+          "n_independent_target_blocks": {
+            "development_test": 17,
+            "inner_validation": 8,
+            "train": 68
+          }
+        },
+        "360": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 0,
+            "inner_validation": 0,
+            "train": 0
+          },
+          "n_independent_target_blocks": {
+            "development_test": 0,
+            "inner_validation": 0,
+            "train": 0
+          }
+        },
+        "5": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 69,
+            "inner_validation": 35,
+            "train": 250
+          },
+          "n_independent_target_blocks": {
+            "development_test": 138,
+            "inner_validation": 69,
+            "train": 495
+          }
+        }
+      },
+      "intervals": [
+        {
+          "duration_seconds": 43173.44238305092,
+          "segment_id": 0,
+          "split": "train",
+          "start": 1107834618.0,
+          "stop": 1107877791.442383
+        },
+        {
+          "duration_seconds": 9490.641602039337,
+          "segment_id": 1,
+          "split": "train",
+          "start": 1107877838.5,
+          "stop": 1107887329.141602
+        },
+        {
+          "duration_seconds": 15424.325194835663,
+          "segment_id": 2,
+          "split": "train",
+          "start": 1107887387.583008,
+          "stop": 1107902811.908203
+        },
+        {
+          "duration_seconds": 4143.333008050919,
+          "segment_id": 3,
+          "split": "train",
+          "start": 1107902902.666992,
+          "stop": 1107907046.0
+        },
+        {
+          "duration_seconds": 3600.0,
+          "segment_id": 4,
+          "split": "train",
+          "start": 1107907075.0,
+          "stop": 1107910675.0
+        },
+        {
+          "duration_seconds": 8118.0,
+          "segment_id": 5,
+          "split": "train",
+          "start": 1107910680.0,
+          "stop": 1107918798.0
+        },
+        {
+          "duration_seconds": 3600.0,
+          "segment_id": 6,
+          "split": "train",
+          "start": 1107923953.0,
+          "stop": 1107927553.0
+        },
+        {
+          "duration_seconds": 3600.0,
+          "segment_id": 7,
+          "split": "train",
+          "start": 1107927566.0,
+          "stop": 1107931166.0
+        },
+        {
+          "duration_seconds": 33904.8662109375,
+          "segment_id": 8,
+          "split": "train",
+          "start": 1107931207.0,
+          "stop": 1107965111.866211
+        },
+        {
+          "duration_seconds": 5634.9912109375,
+          "segment_id": 9,
+          "split": "train",
+          "start": 1107965176.008789,
+          "stop": 1107970811.0
+        },
+        {
+          "duration_seconds": 7018.733397960663,
+          "segment_id": 10,
+          "split": "train",
+          "start": 1107986045.0,
+          "stop": 1107993063.733398
+        },
+        {
+          "duration_seconds": 296.34960889816284,
+          "segment_id": 11,
+          "split": "train",
+          "start": 1107993194.650391,
+          "stop": 1107993491.0
+        },
+        {
+          "duration_seconds": 15870.430272340775,
+          "segment_id": 12,
+          "split": "train",
+          "start": 1107993510.0,
+          "stop": 1108009380.4302723
+        },
+        {
+          "duration_seconds": 5798.261133670807,
+          "segment_id": 12,
+          "split": "inner_validation",
+          "start": 1108009380.4302723,
+          "stop": 1108015178.691406
+        },
+        {
+          "duration_seconds": 3474.599608898163,
+          "segment_id": 13,
+          "split": "inner_validation",
+          "start": 1108015238.400391,
+          "stop": 1108018713.0
+        },
+        {
+          "duration_seconds": 12709.298241376877,
+          "segment_id": 14,
+          "split": "inner_validation",
+          "start": 1108018722.0,
+          "stop": 1108031431.2982414
+        },
+        {
+          "duration_seconds": 9.5367431640625e-07,
+          "segment_id": 14,
+          "split": "inner_validation",
+          "start": 1108031431.2982414,
+          "stop": 1108031431.2982423
+        },
+        {
+          "duration_seconds": 8892.701757669449,
+          "segment_id": 14,
+          "split": "development_test",
+          "start": 1108031431.2982423,
+          "stop": 1108040324.0
+        },
+        {
+          "duration_seconds": 11319.375,
+          "segment_id": 15,
+          "split": "development_test",
+          "start": 1108040333.0,
+          "stop": 1108051652.375
+        },
+        {
+          "duration_seconds": 13792.783202886581,
+          "segment_id": 16,
+          "split": "development_test",
+          "start": 1108051743.216797,
+          "stop": 1108065536.0
+        },
+        {
+          "duration_seconds": 8165.733397960663,
+          "segment_id": 17,
+          "split": "development_test",
+          "start": 1108065569.0,
+          "stop": 1108073734.733398
+        },
+        {
+          "duration_seconds": 1793.7246088981628,
+          "segment_id": 18,
+          "split": "development_test",
+          "start": 1108073816.275391,
+          "stop": 1108075610.0
+        }
+      ],
+      "n_coverage_segments": 11,
+      "n_recorded_blocks": 64,
+      "n_seizures": 15,
+      "n_usable_intervals": 22,
+      "postictal_exclusion_s": 0.0,
+      "recorded_hours": 61.2275,
+      "split_hours": {
+        "development_test": 12.212310546504128,
+        "inner_validation": 6.106155273583201,
+        "train": 42.7430869136254
+      },
+      "subject": "epilepsiae_384",
+      "usable_hours_after_seizure_cuts": 61.06155273371272
+    },
+    {
+      "coverage_hours": 139.96694444444444,
+      "eligible_horizons": [
+        5,
+        30
+      ],
+      "horizon_support": {
+        "120": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 1,
+            "inner_validation": 1,
+            "train": 12
+          },
+          "n_independent_target_blocks": {
+            "development_test": 2,
+            "inner_validation": 1,
+            "train": 17
+          }
+        },
+        "30": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 20,
+            "inner_validation": 11,
+            "train": 78
+          },
+          "n_independent_target_blocks": {
+            "development_test": 32,
+            "inner_validation": 21,
+            "train": 138
+          }
+        },
+        "360": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 0,
+            "inner_validation": 0,
+            "train": 2
+          },
+          "n_independent_target_blocks": {
+            "development_test": 0,
+            "inner_validation": 0,
+            "train": 2
+          }
+        },
+        "5": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 150,
+            "inner_validation": 76,
+            "train": 536
+          },
+          "n_independent_target_blocks": {
+            "development_test": 294,
+            "inner_validation": 150,
+            "train": 1056
+          }
+        }
+      },
+      "intervals": [
+        {
+          "duration_seconds": 3600.0,
+          "segment_id": 0,
+          "split": "train",
+          "start": 1138406403.0,
+          "stop": 1138410003.0
+        },
+        {
+          "duration_seconds": 3543.728516101837,
+          "segment_id": 1,
+          "split": "train",
+          "start": 1138410015.0,
+          "stop": 1138413558.728516
+        },
+        {
+          "duration_seconds": 8344.815428972244,
+          "segment_id": 2,
+          "split": "train",
+          "start": 1138413639.025391,
+          "stop": 1138421983.84082
+        },
+        {
+          "duration_seconds": 2746.900391101837,
+          "segment_id": 3,
+          "split": "train",
+          "start": 1138422187.691406,
+          "stop": 1138424934.591797
+        },
+        {
+          "duration_seconds": 4909.488281965256,
+          "segment_id": 4,
+          "split": "train",
+          "start": 1138425040.02832,
+          "stop": 1138429949.516602
+        },
+        {
+          "duration_seconds": 8218.941406011581,
+          "segment_id": 5,
+          "split": "train",
+          "start": 1138430224.049805,
+          "stop": 1138438442.991211
+        },
+        {
+          "duration_seconds": 4492.833008050919,
+          "segment_id": 6,
+          "split": "train",
+          "start": 1138438596.908203,
+          "stop": 1138443089.741211
+        },
+        {
+          "duration_seconds": 49918.01660203934,
+          "segment_id": 7,
+          "split": "train",
+          "start": 1138443210.983398,
+          "stop": 1138493129.0
+        },
+        {
+          "duration_seconds": 3600.0,
+          "segment_id": 8,
+          "split": "train",
+          "start": 1138493203.0,
+          "stop": 1138496803.0
+        },
+        {
+          "duration_seconds": 21601.0,
+          "segment_id": 9,
+          "split": "train",
+          "start": 1138496822.0,
+          "stop": 1138518423.0
+        },
+        {
+          "duration_seconds": 3059.6669919490814,
+          "segment_id": 10,
+          "split": "train",
+          "start": 1138522024.0,
+          "stop": 1138525083.666992
+        },
+        {
+          "duration_seconds": 9906.595702886581,
+          "segment_id": 11,
+          "split": "train",
+          "start": 1138525313.525391,
+          "stop": 1138535220.121094
+        },
+        {
+          "duration_seconds": 44015.93457007408,
+          "segment_id": 12,
+          "split": "train",
+          "start": 1138535316.06543,
+          "stop": 1138579332.0
+        },
+        {
+          "duration_seconds": 10641.0,
+          "segment_id": 13,
+          "split": "train",
+          "start": 1138580115.0,
+          "stop": 1138590756.0
+        },
+        {
+          "duration_seconds": 4997.8974609375,
+          "segment_id": 14,
+          "split": "train",
+          "start": 1138590787.0,
+          "stop": 1138595784.897461
+        },
+        {
+          "duration_seconds": 16156.375977039337,
+          "segment_id": 15,
+          "split": "train",
+          "start": 1138595863.374023,
+          "stop": 1138612019.75
+        },
+        {
+          "duration_seconds": 7505.938477039337,
+          "segment_id": 16,
+          "split": "train",
+          "start": 1138612108.575195,
+          "stop": 1138619614.513672
+        },
+        {
+          "duration_seconds": 4000.0527341365814,
+          "segment_id": 17,
+          "split": "train",
+          "start": 1138619812.049805,
+          "stop": 1138623812.102539
+        },
+        {
+          "duration_seconds": 12077.981445074081,
+          "segment_id": 18,
+          "split": "train",
+          "start": 1138653553.018555,
+          "stop": 1138665631.0
+        },
+        {
+          "duration_seconds": 2804.0,
+          "segment_id": 19,
+          "split": "train",
+          "start": 1138665730.0,
+          "stop": 1138668534.0
+        },
+        {
+          "duration_seconds": 320.6748049259186,
+          "segment_id": 20,
+          "split": "train",
+          "start": 1138668862.0,
+          "stop": 1138669182.674805
+        },
+        {
+          "duration_seconds": 4364.90625,
+          "segment_id": 21,
+          "split": "train",
+          "start": 1138669257.09375,
+          "stop": 1138673622.0
+        },
+        {
+          "duration_seconds": 9833.675781011581,
+          "segment_id": 22,
+          "split": "train",
+          "start": 1138673794.333008,
+          "stop": 1138683628.008789
+        },
+        {
+          "duration_seconds": 6642.658202886581,
+          "segment_id": 23,
+          "split": "train",
+          "start": 1138683820.341797,
+          "stop": 1138690463.0
+        },
+        {
+          "duration_seconds": 3645.858397960663,
+          "segment_id": 24,
+          "split": "train",
+          "start": 1138694063.0,
+          "stop": 1138697708.858398
+        },
+        {
+          "duration_seconds": 17247.625977039337,
+          "segment_id": 25,
+          "split": "train",
+          "start": 1138697906.233398,
+          "stop": 1138715153.859375
+        },
+        {
+          "duration_seconds": 21299.809569835663,
+          "segment_id": 26,
+          "split": "train",
+          "start": 1138715227.607422,
+          "stop": 1138736527.416992
+        },
+        {
+          "duration_seconds": 15346.558593988419,
+          "segment_id": 27,
+          "split": "train",
+          "start": 1138736560.441406,
+          "stop": 1138751907.0
+        },
+        {
+          "duration_seconds": 16103.941406011581,
+          "segment_id": 28,
+          "split": "train",
+          "start": 1138755768.0,
+          "stop": 1138771871.941406
+        },
+        {
+          "duration_seconds": 8434.102442026138,
+          "segment_id": 29,
+          "split": "train",
+          "start": 1138771962.513672,
+          "stop": 1138780396.6161141
+        },
+        {
+          "duration_seconds": 9.5367431640625e-07,
+          "segment_id": 29,
+          "split": "train",
+          "start": 1138780396.6161141,
+          "stop": 1138780396.616115
+        },
+        {
+          "duration_seconds": 9568.038182020187,
+          "segment_id": 29,
+          "split": "inner_validation",
+          "start": 1138780396.616115,
+          "stop": 1138789964.654297
+        },
+        {
+          "duration_seconds": 7699.626954078674,
+          "segment_id": 30,
+          "split": "inner_validation",
+          "start": 1138790023.990234,
+          "stop": 1138797723.617188
+        },
+        {
+          "duration_seconds": 16400.1875,
+          "segment_id": 31,
+          "split": "inner_validation",
+          "start": 1138797792.756836,
+          "stop": 1138814192.944336
+        },
+        {
+          "duration_seconds": 13386.572851419449,
+          "segment_id": 32,
+          "split": "inner_validation",
+          "start": 1138814268.738281,
+          "stop": 1138827655.3111324
+        },
+        {
+          "duration_seconds": 9.5367431640625e-07,
+          "segment_id": 32,
+          "split": "inner_validation",
+          "start": 1138827655.3111324,
+          "stop": 1138827655.3111334
+        },
+        {
+          "duration_seconds": 10664.688866615295,
+          "segment_id": 32,
+          "split": "development_test",
+          "start": 1138827655.3111334,
+          "stop": 1138838320.0
+        },
+        {
+          "duration_seconds": 25563.31738305092,
+          "segment_id": 33,
+          "split": "development_test",
+          "start": 1138838648.0,
+          "stop": 1138864211.317383
+        },
+        {
+          "duration_seconds": 4844.733397960663,
+          "segment_id": 34,
+          "split": "development_test",
+          "start": 1138864267.266602,
+          "stop": 1138869112.0
+        },
+        {
+          "duration_seconds": 3182.0,
+          "segment_id": 35,
+          "split": "development_test",
+          "start": 1138869151.0,
+          "stop": 1138872333.0
+        },
+        {
+          "duration_seconds": 3600.0,
+          "segment_id": 36,
+          "split": "development_test",
+          "start": 1138872532.0,
+          "stop": 1138876132.0
+        },
+        {
+          "duration_seconds": 2276.3642580509186,
+          "segment_id": 37,
+          "split": "development_test",
+          "start": 1138876143.0,
+          "stop": 1138878419.364258
+        },
+        {
+          "duration_seconds": 3681.515625,
+          "segment_id": 38,
+          "split": "development_test",
+          "start": 1138878475.474609,
+          "stop": 1138882156.990234
+        },
+        {
+          "duration_seconds": 11800.871093034744,
+          "segment_id": 39,
+          "split": "development_test",
+          "start": 1138882300.016602,
+          "stop": 1138894100.887695
+        },
+        {
+          "duration_seconds": 7715.177734851837,
+          "segment_id": 40,
+          "split": "development_test",
+          "start": 1138894258.02832,
+          "stop": 1138901973.206055
+        },
+        {
+          "duration_seconds": 6499.007813215256,
+          "segment_id": 41,
+          "split": "development_test",
+          "start": 1138902109.599609,
+          "stop": 1138908608.607422
+        },
+        {
+          "duration_seconds": 4215.094726085663,
+          "segment_id": 42,
+          "split": "development_test",
+          "start": 1138908703.933594,
+          "stop": 1138912919.02832
+        },
+        {
+          "duration_seconds": 2692.6679689884186,
+          "segment_id": 43,
+          "split": "development_test",
+          "start": 1138913011.5,
+          "stop": 1138915704.167969
+        },
+        {
+          "duration_seconds": 3386.7783200740814,
+          "segment_id": 44,
+          "split": "development_test",
+          "start": 1138915785.25,
+          "stop": 1138919172.02832
+        },
+        {
+          "duration_seconds": 3986.6337890625,
+          "segment_id": 45,
+          "split": "development_test",
+          "start": 1138919282.366211,
+          "stop": 1138923269.0
+        }
+      ],
+      "n_coverage_segments": 15,
+      "n_recorded_blocks": 144,
+      "n_seizures": 31,
+      "n_usable_intervals": 50,
+      "postictal_exclusion_s": 0.0,
+      "recorded_hours": 139.955,
+      "split_hours": {
+        "development_test": 26.14134749333064,
+        "inner_validation": 13.070673746797773,
+        "train": 91.49471622778309
+      },
+      "subject": "epilepsiae_548",
+      "usable_hours_after_seizure_cuts": 130.7067374679115
+    },
+    {
+      "coverage_hours": 59.99722222222222,
+      "eligible_horizons": [
+        5,
+        30
+      ],
+      "horizon_support": {
+        "120": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 2,
+            "inner_validation": 0,
+            "train": 8
+          },
+          "n_independent_target_blocks": {
+            "development_test": 4,
+            "inner_validation": 0,
+            "train": 15
+          }
+        },
+        "30": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 11,
+            "inner_validation": 4,
+            "train": 39
+          },
+          "n_independent_target_blocks": {
+            "development_test": 22,
+            "inner_validation": 8,
+            "train": 77
+          }
+        },
+        "360": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 0,
+            "inner_validation": 0,
+            "train": 2
+          },
+          "n_independent_target_blocks": {
+            "development_test": 0,
+            "inner_validation": 0,
+            "train": 3
+          }
+        },
+        "5": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 71,
+            "inner_validation": 35,
+            "train": 249
+          },
+          "n_independent_target_blocks": {
+            "development_test": 142,
+            "inner_validation": 68,
+            "train": 494
+          }
+        }
+      },
+      "intervals": [
+        {
+          "duration_seconds": 45246.0,
+          "segment_id": 0,
+          "split": "train",
+          "start": 1159789323.0,
+          "stop": 1159834569.0
+        },
+        {
+          "duration_seconds": 85256.0,
+          "segment_id": 1,
+          "split": "train",
+          "start": 1159834607.0,
+          "stop": 1159919863.0
+        },
+        {
+          "duration_seconds": 3600.0,
+          "segment_id": 2,
+          "split": "train",
+          "start": 1159919967.0,
+          "stop": 1159923567.0
+        },
+        {
+          "duration_seconds": 1235.9111330509186,
+          "segment_id": 3,
+          "split": "train",
+          "start": 1159923592.0,
+          "stop": 1159924827.911133
+        },
+        {
+          "duration_seconds": 572.0166020393372,
+          "segment_id": 4,
+          "split": "train",
+          "start": 1159924851.758789,
+          "stop": 1159925423.775391
+        },
+        {
+          "duration_seconds": 9460.732422113419,
+          "segment_id": 5,
+          "split": "train",
+          "start": 1159925443.267578,
+          "stop": 1159934904.0
+        },
+        {
+          "duration_seconds": 5739.27499961853,
+          "segment_id": 6,
+          "split": "train",
+          "start": 1159937717.0,
+          "stop": 1159943456.2749996
+        },
+        {
+          "duration_seconds": 12751.85878944397,
+          "segment_id": 6,
+          "split": "inner_validation",
+          "start": 1159943456.2749996,
+          "stop": 1159956208.133789
+        },
+        {
+          "duration_seconds": 3127.5419919490814,
+          "segment_id": 7,
+          "split": "inner_validation",
+          "start": 1159956283.458008,
+          "stop": 1159959411.0
+        },
+        {
+          "duration_seconds": 5707.732812404633,
+          "segment_id": 8,
+          "split": "inner_validation",
+          "start": 1160473031.0,
+          "stop": 1160478738.7328124
+        },
+        {
+          "duration_seconds": 43174.26718759537,
+          "segment_id": 8,
+          "split": "development_test",
+          "start": 1160478738.7328124,
+          "stop": 1160521913.0
+        }
+      ],
+      "n_coverage_segments": 6,
+      "n_recorded_blocks": 63,
+      "n_seizures": 22,
+      "n_usable_intervals": 11,
+      "postictal_exclusion_s": 0.0,
+      "recorded_hours": 59.99305555555556,
+      "split_hours": {
+        "development_test": 11.992851996554268,
+        "inner_validation": 5.996425998277134,
+        "train": 41.97498198800617
+      },
+      "subject": "epilepsiae_583",
+      "usable_hours_after_seizure_cuts": 59.96425998283757
+    },
+    {
+      "coverage_hours": 218.4086111111111,
+      "eligible_horizons": [
+        5,
+        30,
+        120
+      ],
+      "horizon_support": {
+        "120": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 8,
+            "inner_validation": 2,
+            "train": 21
+          },
+          "n_independent_target_blocks": {
+            "development_test": 14,
+            "inner_validation": 4,
+            "train": 37
+          }
+        },
+        "30": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 35,
+            "inner_validation": 16,
+            "train": 118
+          },
+          "n_independent_target_blocks": {
+            "development_test": 68,
+            "inner_validation": 31,
+            "train": 220
+          }
+        },
+        "360": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 2,
+            "inner_validation": 0,
+            "train": 4
+          },
+          "n_independent_target_blocks": {
+            "development_test": 2,
+            "inner_validation": 0,
+            "train": 4
+          }
+        },
+        "5": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 215,
+            "inner_validation": 106,
+            "train": 746
+          },
+          "n_independent_target_blocks": {
+            "development_test": 426,
+            "inner_validation": 210,
+            "train": 1476
+          }
+        }
+      },
+      "intervals": [
+        {
+          "duration_seconds": 7200.0,
+          "segment_id": 0,
+          "split": "train",
+          "start": 1257761399.0,
+          "stop": 1257768599.0
+        },
+        {
+          "duration_seconds": 20618.78320288658,
+          "segment_id": 1,
+          "split": "train",
+          "start": 1257816698.0,
+          "stop": 1257837316.783203
+        },
+        {
+          "duration_seconds": 50358.391600847244,
+          "segment_id": 2,
+          "split": "train",
+          "start": 1257837557.516602,
+          "stop": 1257887915.908203
+        },
+        {
+          "duration_seconds": 4590.6337890625,
+          "segment_id": 3,
+          "split": "train",
+          "start": 1257888012.366211,
+          "stop": 1257892603.0
+        },
+        {
+          "duration_seconds": 8230.150391101837,
+          "segment_id": 4,
+          "split": "train",
+          "start": 1257892817.0,
+          "stop": 1257901047.150391
+        },
+        {
+          "duration_seconds": 7128.041991949081,
+          "segment_id": 5,
+          "split": "train",
+          "start": 1257912988.958008,
+          "stop": 1257920117.0
+        },
+        {
+          "duration_seconds": 25569.983397960663,
+          "segment_id": 6,
+          "split": "train",
+          "start": 1257925751.0,
+          "stop": 1257951320.983398
+        },
+        {
+          "duration_seconds": 903.53125,
+          "segment_id": 7,
+          "split": "train",
+          "start": 1258079350.46875,
+          "stop": 1258080254.0
+        },
+        {
+          "duration_seconds": 43210.0,
+          "segment_id": 8,
+          "split": "train",
+          "start": 1258080762.0,
+          "stop": 1258123972.0
+        },
+        {
+          "duration_seconds": 25206.0,
+          "segment_id": 9,
+          "split": "train",
+          "start": 1258131175.0,
+          "stop": 1258156381.0
+        },
+        {
+          "duration_seconds": 54012.0,
+          "segment_id": 10,
+          "split": "train",
+          "start": 1258159983.0,
+          "stop": 1258213995.0
+        },
+        {
+          "duration_seconds": 3600.0,
+          "segment_id": 11,
+          "split": "train",
+          "start": 1258217597.0,
+          "stop": 1258221197.0
+        },
+        {
+          "duration_seconds": 18004.0,
+          "segment_id": 12,
+          "split": "train",
+          "start": 1258224799.0,
+          "stop": 1258242803.0
+        },
+        {
+          "duration_seconds": 21603.0,
+          "segment_id": 13,
+          "split": "train",
+          "start": 1258242865.0,
+          "stop": 1258264468.0
+        },
+        {
+          "duration_seconds": 3600.0,
+          "segment_id": 14,
+          "split": "train",
+          "start": 1258268069.0,
+          "stop": 1258271669.0
+        },
+        {
+          "duration_seconds": 23649.2587890625,
+          "segment_id": 15,
+          "split": "train",
+          "start": 1258275271.0,
+          "stop": 1258298920.258789
+        },
+        {
+          "duration_seconds": 4996.541991949081,
+          "segment_id": 16,
+          "split": "train",
+          "start": 1258299077.458008,
+          "stop": 1258304074.0
+        },
+        {
+          "duration_seconds": 3600.0,
+          "segment_id": 17,
+          "split": "train",
+          "start": 1258307676.0,
+          "stop": 1258311276.0
+        },
+        {
+          "duration_seconds": 50412.0,
+          "segment_id": 18,
+          "split": "train",
+          "start": 1258328415.0,
+          "stop": 1258378827.0
+        },
+        {
+          "duration_seconds": 1906.5996088981628,
+          "segment_id": 19,
+          "split": "train",
+          "start": 1258382429.0,
+          "stop": 1258384335.599609
+        },
+        {
+          "duration_seconds": 26849.710937023163,
+          "segment_id": 20,
+          "split": "train",
+          "start": 1258384556.289063,
+          "stop": 1258411406.0
+        },
+        {
+          "duration_seconds": 3053.599608898163,
+          "segment_id": 21,
+          "split": "train",
+          "start": 1258411595.0,
+          "stop": 1258414648.599609
+        },
+        {
+          "duration_seconds": 26269.127928972244,
+          "segment_id": 22,
+          "split": "train",
+          "start": 1258414827.822266,
+          "stop": 1258441096.950195
+        },
+        {
+          "duration_seconds": 17696.01298880577,
+          "segment_id": 23,
+          "split": "train",
+          "start": 1258441237.079102,
+          "stop": 1258458933.0920908
+        },
+        {
+          "duration_seconds": 9.5367431640625e-07,
+          "segment_id": 23,
+          "split": "train",
+          "start": 1258458933.0920908,
+          "stop": 1258458933.0920918
+        },
+        {
+          "duration_seconds": 10159.332713127136,
+          "segment_id": 23,
+          "split": "inner_validation",
+          "start": 1258458933.0920918,
+          "stop": 1258469092.424805
+        },
+        {
+          "duration_seconds": 28398.539062023163,
+          "segment_id": 24,
+          "split": "inner_validation",
+          "start": 1258469124.460938,
+          "stop": 1258497523.0
+        },
+        {
+          "duration_seconds": 26051.75214934349,
+          "segment_id": 25,
+          "split": "inner_validation",
+          "start": 1258497750.0,
+          "stop": 1258523801.7521493
+        },
+        {
+          "duration_seconds": 60014.24785065651,
+          "segment_id": 25,
+          "split": "development_test",
+          "start": 1258523801.7521493,
+          "stop": 1258583816.0
+        },
+        {
+          "duration_seconds": 61213.0,
+          "segment_id": 26,
+          "split": "development_test",
+          "start": 1258583996.0,
+          "stop": 1258645209.0
+        },
+        {
+          "duration_seconds": 7201.0,
+          "segment_id": 27,
+          "split": "development_test",
+          "start": 1258656013.0,
+          "stop": 1258663214.0
+        },
+        {
+          "duration_seconds": 791.0,
+          "segment_id": 28,
+          "split": "development_test",
+          "start": 1258670416.0,
+          "stop": 1258671207.0
+        }
+      ],
+      "n_coverage_segments": 22,
+      "n_recorded_blocks": 222,
+      "n_seizures": 9,
+      "n_usable_intervals": 32,
+      "postictal_exclusion_s": 0.0,
+      "recorded_hours": 218.36138888888888,
+      "split_hours": {
+        "development_test": 35.894235514071255,
+        "inner_validation": 17.94711775680383,
+        "train": 125.62982429954741
+      },
+      "subject": "epilepsiae_818",
+      "usable_hours_after_seizure_cuts": 179.4711775704225
+    },
+    {
+      "coverage_hours": 424.27666666666664,
+      "eligible_horizons": [
+        5,
+        30,
+        120
+      ],
+      "horizon_support": {
+        "120": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 14,
+            "inner_validation": 8,
+            "train": 50
+          },
+          "n_independent_target_blocks": {
+            "development_test": 25,
+            "inner_validation": 13,
+            "train": 87
+          }
+        },
+        "30": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 74,
+            "inner_validation": 37,
+            "train": 258
+          },
+          "n_independent_target_blocks": {
+            "development_test": 143,
+            "inner_validation": 73,
+            "train": 496
+          }
+        },
+        "360": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 3,
+            "inner_validation": 1,
+            "train": 10
+          },
+          "n_independent_target_blocks": {
+            "development_test": 3,
+            "inner_validation": 2,
+            "train": 14
+          }
+        },
+        "5": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 481,
+            "inner_validation": 241,
+            "train": 1678
+          },
+          "n_independent_target_blocks": {
+            "development_test": 954,
+            "inner_validation": 478,
+            "train": 3330
+          }
+        }
+      },
+      "intervals": [
+        {
+          "duration_seconds": 45774.0,
+          "segment_id": 0,
+          "split": "train",
+          "start": 1215424908.0,
+          "stop": 1215470682.0
+        },
+        {
+          "duration_seconds": 32067.0,
+          "segment_id": 1,
+          "split": "train",
+          "start": 1215470961.0,
+          "stop": 1215503028.0
+        },
+        {
+          "duration_seconds": 19522.7587890625,
+          "segment_id": 2,
+          "split": "train",
+          "start": 1215519124.0,
+          "stop": 1215538646.758789
+        },
+        {
+          "duration_seconds": 18729.78320288658,
+          "segment_id": 3,
+          "split": "train",
+          "start": 1215538655.216797,
+          "stop": 1215557385.0
+        },
+        {
+          "duration_seconds": 71677.21679711342,
+          "segment_id": 4,
+          "split": "train",
+          "start": 1215557639.0,
+          "stop": 1215629316.216797
+        },
+        {
+          "duration_seconds": 4028.0830078125,
+          "segment_id": 5,
+          "split": "train",
+          "start": 1215629338.341797,
+          "stop": 1215633366.424805
+        },
+        {
+          "duration_seconds": 10055.3662109375,
+          "segment_id": 6,
+          "split": "train",
+          "start": 1215633372.633789,
+          "stop": 1215643428.0
+        },
+        {
+          "duration_seconds": 62328.125,
+          "segment_id": 7,
+          "split": "train",
+          "start": 1215643777.0,
+          "stop": 1215706105.125
+        },
+        {
+          "duration_seconds": 440.73339796066284,
+          "segment_id": 8,
+          "split": "train",
+          "start": 1215706125.716797,
+          "stop": 1215706566.450195
+        },
+        {
+          "duration_seconds": 1118.6669921875,
+          "segment_id": 9,
+          "split": "train",
+          "start": 1215706578.033203,
+          "stop": 1215707696.700195
+        },
+        {
+          "duration_seconds": 3314.1162109375,
+          "segment_id": 10,
+          "split": "train",
+          "start": 1215707709.275391,
+          "stop": 1215711023.391602
+        },
+        {
+          "duration_seconds": 4736.757812976837,
+          "segment_id": 11,
+          "split": "train",
+          "start": 1215711027.416992,
+          "stop": 1215715764.174805
+        },
+        {
+          "duration_seconds": 7803.982422113419,
+          "segment_id": 12,
+          "split": "train",
+          "start": 1215715768.475586,
+          "stop": 1215723572.458008
+        },
+        {
+          "duration_seconds": 6129.275391101837,
+          "segment_id": 13,
+          "split": "train",
+          "start": 1215723577.724609,
+          "stop": 1215729707.0
+        },
+        {
+          "duration_seconds": 735.8837890625,
+          "segment_id": 14,
+          "split": "train",
+          "start": 1215729918.0,
+          "stop": 1215730653.883789
+        },
+        {
+          "duration_seconds": 64421.51660203934,
+          "segment_id": 15,
+          "split": "train",
+          "start": 1215730662.008789,
+          "stop": 1215795083.525391
+        },
+        {
+          "duration_seconds": 811.2753899097443,
+          "segment_id": 16,
+          "split": "train",
+          "start": 1215795088.083008,
+          "stop": 1215795899.358398
+        },
+        {
+          "duration_seconds": 13931.034180164337,
+          "segment_id": 17,
+          "split": "train",
+          "start": 1215795906.491211,
+          "stop": 1215809837.525391
+        },
+        {
+          "duration_seconds": 6464.841796875,
+          "segment_id": 18,
+          "split": "train",
+          "start": 1215809845.716797,
+          "stop": 1215816310.558594
+        },
+        {
+          "duration_seconds": 4583.950195074081,
+          "segment_id": 19,
+          "split": "train",
+          "start": 1215816333.049805,
+          "stop": 1215820917.0
+        },
+        {
+          "duration_seconds": 5449.833008050919,
+          "segment_id": 20,
+          "split": "train",
+          "start": 1215820934.0,
+          "stop": 1215826383.833008
+        },
+        {
+          "duration_seconds": 114.24902391433716,
+          "segment_id": 21,
+          "split": "train",
+          "start": 1215826394.05957,
+          "stop": 1215826508.308594
+        },
+        {
+          "duration_seconds": 62594.85058617592,
+          "segment_id": 22,
+          "split": "train",
+          "start": 1215826515.408203,
+          "stop": 1215889110.258789
+        },
+        {
+          "duration_seconds": 781.3007810115814,
+          "segment_id": 23,
+          "split": "train",
+          "start": 1215889114.491211,
+          "stop": 1215889895.791992
+        },
+        {
+          "duration_seconds": 406.02539110183716,
+          "segment_id": 24,
+          "split": "train",
+          "start": 1215889900.474609,
+          "stop": 1215890306.5
+        },
+        {
+          "duration_seconds": 7522.942383050919,
+          "segment_id": 25,
+          "split": "train",
+          "start": 1215890330.099609,
+          "stop": 1215897853.041992
+        },
+        {
+          "duration_seconds": 7458.599610090256,
+          "segment_id": 26,
+          "split": "train",
+          "start": 1215897858.291992,
+          "stop": 1215905316.891602
+        },
+        {
+          "duration_seconds": 2616.6748049259186,
+          "segment_id": 27,
+          "split": "train",
+          "start": 1215905320.325195,
+          "stop": 1215907937.0
+        },
+        {
+          "duration_seconds": 28777.93359398842,
+          "segment_id": 28,
+          "split": "train",
+          "start": 1215907968.0,
+          "stop": 1215936745.933594
+        },
+        {
+          "duration_seconds": 23070.875,
+          "segment_id": 29,
+          "split": "train",
+          "start": 1215936761.224609,
+          "stop": 1215959832.099609
+        },
+        {
+          "duration_seconds": 9987.583985090256,
+          "segment_id": 30,
+          "split": "train",
+          "start": 1215959893.974609,
+          "stop": 1215969881.558594
+        },
+        {
+          "duration_seconds": 3964.9912109375,
+          "segment_id": 31,
+          "split": "train",
+          "start": 1215969887.483398,
+          "stop": 1215973852.474609
+        },
+        {
+          "duration_seconds": 1050.7421870231628,
+          "segment_id": 32,
+          "split": "train",
+          "start": 1215973858.991211,
+          "stop": 1215974909.733398
+        },
+        {
+          "duration_seconds": 13675.808593988419,
+          "segment_id": 33,
+          "split": "train",
+          "start": 1215974920.599609,
+          "stop": 1215988596.408203
+        },
+        {
+          "duration_seconds": 1342.5332028865814,
+          "segment_id": 34,
+          "split": "train",
+          "start": 1215988603.466797,
+          "stop": 1215989946.0
+        },
+        {
+          "duration_seconds": 72020.0,
+          "segment_id": 35,
+          "split": "train",
+          "start": 1215990140.0,
+          "stop": 1216062160.0
+        },
+        {
+          "duration_seconds": 3446.349608898163,
+          "segment_id": 36,
+          "split": "train",
+          "start": 1216065762.0,
+          "stop": 1216069208.349609
+        },
+        {
+          "duration_seconds": 6523.025391101837,
+          "segment_id": 37,
+          "split": "train",
+          "start": 1216069220.974609,
+          "stop": 1216075744.0
+        },
+        {
+          "duration_seconds": 69070.39160203934,
+          "segment_id": 38,
+          "split": "train",
+          "start": 1216075992.0,
+          "stop": 1216145062.391602
+        },
+        {
+          "duration_seconds": 97.94238305091858,
+          "segment_id": 39,
+          "split": "train",
+          "start": 1216145068.083008,
+          "stop": 1216145166.025391
+        },
+        {
+          "duration_seconds": 45076.058593034744,
+          "segment_id": 40,
+          "split": "train",
+          "start": 1216176473.299805,
+          "stop": 1216221549.358398
+        },
+        {
+          "duration_seconds": 378.39160203933716,
+          "segment_id": 41,
+          "split": "train",
+          "start": 1216221555.858398,
+          "stop": 1216221934.25
+        },
+        {
+          "duration_seconds": 8891.191406011581,
+          "segment_id": 42,
+          "split": "train",
+          "start": 1216221941.125,
+          "stop": 1216230832.316406
+        },
+        {
+          "duration_seconds": 17602.7587890625,
+          "segment_id": 43,
+          "split": "train",
+          "start": 1216230839.241211,
+          "stop": 1216248442.0
+        },
+        {
+          "duration_seconds": 29607.0,
+          "segment_id": 44,
+          "split": "train",
+          "start": 1216248624.0,
+          "stop": 1216278231.0
+        },
+        {
+          "duration_seconds": 11389.450195074081,
+          "segment_id": 45,
+          "split": "train",
+          "start": 1216278418.0,
+          "stop": 1216289807.450195
+        },
+        {
+          "duration_seconds": 30560.85058617592,
+          "segment_id": 46,
+          "split": "train",
+          "start": 1216289920.799805,
+          "stop": 1216320481.650391
+        },
+        {
+          "duration_seconds": 46753.625,
+          "segment_id": 47,
+          "split": "train",
+          "start": 1216353711.424805,
+          "stop": 1216400465.049805
+        },
+        {
+          "duration_seconds": 14014.433593034744,
+          "segment_id": 48,
+          "split": "train",
+          "start": 1216400472.516602,
+          "stop": 1216414486.950195
+        },
+        {
+          "duration_seconds": 9732.067383050919,
+          "segment_id": 49,
+          "split": "train",
+          "start": 1216414497.366211,
+          "stop": 1216424229.433594
+        },
+        {
+          "duration_seconds": 953.5498049259186,
+          "segment_id": 50,
+          "split": "train",
+          "start": 1216424242.450195,
+          "stop": 1216425196.0
+        },
+        {
+          "duration_seconds": 69534.6337890625,
+          "segment_id": 51,
+          "split": "train",
+          "start": 1216425216.0,
+          "stop": 1216494750.633789
+        },
+        {
+          "duration_seconds": 5221.824218988419,
+          "segment_id": 52,
+          "split": "train",
+          "start": 1216494773.041992,
+          "stop": 1216499994.866211
+        },
+        {
+          "duration_seconds": 1248.5507810115814,
+          "segment_id": 53,
+          "split": "train",
+          "start": 1216500003.866211,
+          "stop": 1216501252.416992
+        },
+        {
+          "duration_seconds": 10437.483397960663,
+          "segment_id": 54,
+          "split": "train",
+          "start": 1216501256.516602,
+          "stop": 1216511694.0
+        },
+        {
+          "duration_seconds": 23807.970702171326,
+          "segment_id": 55,
+          "split": "train",
+          "start": 1216511728.0,
+          "stop": 1216535535.9707022
+        },
+        {
+          "duration_seconds": 9.5367431640625e-07,
+          "segment_id": 55,
+          "split": "train",
+          "start": 1216535535.9707022,
+          "stop": 1216535535.9707031
+        },
+        {
+          "duration_seconds": 34883.24609398842,
+          "segment_id": 55,
+          "split": "inner_validation",
+          "start": 1216535535.9707031,
+          "stop": 1216570419.216797
+        },
+        {
+          "duration_seconds": 6560.141602039337,
+          "segment_id": 56,
+          "split": "inner_validation",
+          "start": 1216570429.408203,
+          "stop": 1216576989.549805
+        },
+        {
+          "duration_seconds": 16315.683593988419,
+          "segment_id": 57,
+          "split": "inner_validation",
+          "start": 1216577009.316406,
+          "stop": 1216593325.0
+        },
+        {
+          "duration_seconds": 70437.09960889816,
+          "segment_id": 58,
+          "split": "inner_validation",
+          "start": 1216593583.0,
+          "stop": 1216664020.099609
+        },
+        {
+          "duration_seconds": 16058.775391101837,
+          "segment_id": 59,
+          "split": "inner_validation",
+          "start": 1216664036.224609,
+          "stop": 1216680095.0
+        },
+        {
+          "duration_seconds": 2010.31933426857,
+          "segment_id": 60,
+          "split": "inner_validation",
+          "start": 1216680318.0,
+          "stop": 1216682328.3193343
+        },
+        {
+          "duration_seconds": 9.5367431640625e-07,
+          "segment_id": 60,
+          "split": "inner_validation",
+          "start": 1216682328.3193343,
+          "stop": 1216682328.3193352
+        },
+        {
+          "duration_seconds": 60429.62207078934,
+          "segment_id": 60,
+          "split": "development_test",
+          "start": 1216682328.3193352,
+          "stop": 1216742757.941406
+        },
+        {
+          "duration_seconds": 11678.492187023163,
+          "segment_id": 61,
+          "split": "development_test",
+          "start": 1216742762.083008,
+          "stop": 1216754440.575195
+        },
+        {
+          "duration_seconds": 12097.233397960663,
+          "segment_id": 62,
+          "split": "development_test",
+          "start": 1216754449.766602,
+          "stop": 1216766547.0
+        },
+        {
+          "duration_seconds": 1198.1914060115814,
+          "segment_id": 63,
+          "split": "development_test",
+          "start": 1216766784.0,
+          "stop": 1216767982.191406
+        },
+        {
+          "duration_seconds": 4984.075195074081,
+          "segment_id": 64,
+          "split": "development_test",
+          "start": 1216768003.924805,
+          "stop": 1216772988.0
+        },
+        {
+          "duration_seconds": 63231.21679711342,
+          "segment_id": 65,
+          "split": "development_test",
+          "start": 1216773025.0,
+          "stop": 1216836256.216797
+        },
+        {
+          "duration_seconds": 10378.942383050919,
+          "segment_id": 66,
+          "split": "development_test",
+          "start": 1216836261.974609,
+          "stop": 1216846640.916992
+        },
+        {
+          "duration_seconds": 6430.174804925919,
+          "segment_id": 67,
+          "split": "development_test",
+          "start": 1216846657.825195,
+          "stop": 1216853088.0
+        },
+        {
+          "duration_seconds": 49399.0,
+          "segment_id": 68,
+          "split": "development_test",
+          "start": 1216853323.0,
+          "stop": 1216902722.0
+        },
+        {
+          "duration_seconds": 22097.53320288658,
+          "segment_id": 69,
+          "split": "development_test",
+          "start": 1216902750.0,
+          "stop": 1216924847.533203
+        },
+        {
+          "duration_seconds": 1041.2910158634186,
+          "segment_id": 70,
+          "split": "development_test",
+          "start": 1216924855.075195,
+          "stop": 1216925896.366211
+        },
+        {
+          "duration_seconds": 6951.600586175919,
+          "segment_id": 71,
+          "split": "development_test",
+          "start": 1216925925.783203,
+          "stop": 1216932877.383789
+        },
+        {
+          "duration_seconds": 6603.158202886581,
+          "segment_id": 72,
+          "split": "development_test",
+          "start": 1216932883.841797,
+          "stop": 1216939487.0
+        },
+        {
+          "duration_seconds": 36010.0,
+          "segment_id": 73,
+          "split": "development_test",
+          "start": 1216939700.0,
+          "stop": 1216975710.0
+        }
+      ],
+      "n_coverage_segments": 24,
+      "n_recorded_blocks": 435,
+      "n_seizures": 52,
+      "n_usable_intervals": 78,
+      "postictal_exclusion_s": 0.0,
+      "recorded_hours": 424.1458333333333,
+      "split_hours": {
+        "development_test": 81.25848090271154,
+        "inner_validation": 40.62924045145512,
+        "train": 284.40468316058315
+      },
+      "subject": "epilepsiae_916",
+      "usable_hours_after_seizure_cuts": 406.2924045147498
+    },
+    {
+      "coverage_hours": 110.59277777777778,
+      "eligible_horizons": [
+        5,
+        30
+      ],
+      "horizon_support": {
+        "120": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 2,
+            "inner_validation": 0,
+            "train": 9
+          },
+          "n_independent_target_blocks": {
+            "development_test": 3,
+            "inner_validation": 0,
+            "train": 14
+          }
+        },
+        "30": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 18,
+            "inner_validation": 7,
+            "train": 65
+          },
+          "n_independent_target_blocks": {
+            "development_test": 32,
+            "inner_validation": 12,
+            "train": 114
+          }
+        },
+        "360": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 0,
+            "inner_validation": 0,
+            "train": 1
+          },
+          "n_independent_target_blocks": {
+            "development_test": 0,
+            "inner_validation": 0,
+            "train": 1
+          }
+        },
+        "5": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 123,
+            "inner_validation": 61,
+            "train": 431
+          },
+          "n_independent_target_blocks": {
+            "development_test": 243,
+            "inner_validation": 116,
+            "train": 850
+          }
+        }
+      },
+      "intervals": [
+        {
+          "duration_seconds": 21533.150391101837,
+          "segment_id": 0,
+          "split": "train",
+          "start": 1220869365.0,
+          "stop": 1220890898.150391
+        },
+        {
+          "duration_seconds": 26855.05859398842,
+          "segment_id": 1,
+          "split": "train",
+          "start": 1220890925.941406,
+          "stop": 1220917781.0
+        },
+        {
+          "duration_seconds": 7201.0,
+          "segment_id": 2,
+          "split": "train",
+          "start": 1220924711.0,
+          "stop": 1220931912.0
+        },
+        {
+          "duration_seconds": 11974.1162109375,
+          "segment_id": 3,
+          "split": "train",
+          "start": 1220932228.0,
+          "stop": 1220944202.116211
+        },
+        {
+          "duration_seconds": 21901.27441382408,
+          "segment_id": 4,
+          "split": "train",
+          "start": 1220944230.258789,
+          "stop": 1220966131.533203
+        },
+        {
+          "duration_seconds": 1213.216796875,
+          "segment_id": 5,
+          "split": "train",
+          "start": 1220966139.066406,
+          "stop": 1220967352.283203
+        },
+        {
+          "duration_seconds": 11556.5,
+          "segment_id": 6,
+          "split": "train",
+          "start": 1220967390.741211,
+          "stop": 1220978947.241211
+        },
+        {
+          "duration_seconds": 3706.507812976837,
+          "segment_id": 7,
+          "split": "train",
+          "start": 1220978956.383789,
+          "stop": 1220982662.891602
+        },
+        {
+          "duration_seconds": 1705.2001960277557,
+          "segment_id": 8,
+          "split": "train",
+          "start": 1220982668.950195,
+          "stop": 1220984374.150391
+        },
+        {
+          "duration_seconds": 15498.6337890625,
+          "segment_id": 9,
+          "split": "train",
+          "start": 1220984417.366211,
+          "stop": 1220999916.0
+        },
+        {
+          "duration_seconds": 2657.8085939884186,
+          "segment_id": 10,
+          "split": "train",
+          "start": 1221000131.0,
+          "stop": 1221002788.808594
+        },
+        {
+          "duration_seconds": 2114.117187023163,
+          "segment_id": 11,
+          "split": "train",
+          "start": 1221002799.641602,
+          "stop": 1221004913.758789
+        },
+        {
+          "duration_seconds": 4076.3251960277557,
+          "segment_id": 12,
+          "split": "train",
+          "start": 1221004931.316406,
+          "stop": 1221009007.641602
+        },
+        {
+          "duration_seconds": 4391.858397960663,
+          "segment_id": 13,
+          "split": "train",
+          "start": 1221009022.991211,
+          "stop": 1221013414.849609
+        },
+        {
+          "duration_seconds": 4950.125,
+          "segment_id": 14,
+          "split": "train",
+          "start": 1221013431.691406,
+          "stop": 1221018381.816406
+        },
+        {
+          "duration_seconds": 32492.28613305092,
+          "segment_id": 15,
+          "split": "train",
+          "start": 1221035115.030273,
+          "stop": 1221067607.316406
+        },
+        {
+          "duration_seconds": 8095.608399152756,
+          "segment_id": 16,
+          "split": "train",
+          "start": 1221067622.541992,
+          "stop": 1221075718.150391
+        },
+        {
+          "duration_seconds": 11075.033202886581,
+          "segment_id": 17,
+          "split": "train",
+          "start": 1221075734.966797,
+          "stop": 1221086810.0
+        },
+        {
+          "duration_seconds": 2281.6835939884186,
+          "segment_id": 18,
+          "split": "train",
+          "start": 1221087009.0,
+          "stop": 1221089290.683594
+        },
+        {
+          "duration_seconds": 2133.2167971134186,
+          "segment_id": 19,
+          "split": "train",
+          "start": 1221089304.108398,
+          "stop": 1221091437.325195
+        },
+        {
+          "duration_seconds": 44335.34960889816,
+          "segment_id": 20,
+          "split": "train",
+          "start": 1221091453.633789,
+          "stop": 1221135788.983398
+        },
+        {
+          "duration_seconds": 7700.941406965256,
+          "segment_id": 21,
+          "split": "train",
+          "start": 1221135803.950195,
+          "stop": 1221143504.891602
+        },
+        {
+          "duration_seconds": 2089.608397960663,
+          "segment_id": 22,
+          "split": "train",
+          "start": 1221143516.525391,
+          "stop": 1221145606.133789
+        },
+        {
+          "duration_seconds": 4977.349608898163,
+          "segment_id": 23,
+          "split": "train",
+          "start": 1221145620.766602,
+          "stop": 1221150598.116211
+        },
+        {
+          "duration_seconds": 10154.736910820007,
+          "segment_id": 24,
+          "split": "train",
+          "start": 1221150608.333008,
+          "stop": 1221160763.0699189
+        },
+        {
+          "duration_seconds": 9.5367431640625e-07,
+          "segment_id": 24,
+          "split": "train",
+          "start": 1221160763.0699189,
+          "stop": 1221160763.0699198
+        },
+        {
+          "duration_seconds": 1745.9046890735626,
+          "segment_id": 24,
+          "split": "inner_validation",
+          "start": 1221160763.0699198,
+          "stop": 1221162508.974609
+        },
+        {
+          "duration_seconds": 10434.474608898163,
+          "segment_id": 25,
+          "split": "inner_validation",
+          "start": 1221162518.525391,
+          "stop": 1221172953.0
+        },
+        {
+          "duration_seconds": 1260.6337890625,
+          "segment_id": 26,
+          "split": "inner_validation",
+          "start": 1221173147.0,
+          "stop": 1221174407.633789
+        },
+        {
+          "duration_seconds": 9789.583984136581,
+          "segment_id": 27,
+          "split": "inner_validation",
+          "start": 1221174420.991211,
+          "stop": 1221184210.575195
+        },
+        {
+          "duration_seconds": 7408.125,
+          "segment_id": 28,
+          "split": "inner_validation",
+          "start": 1221184222.875,
+          "stop": 1221191631.0
+        },
+        {
+          "duration_seconds": 4430.7412109375,
+          "segment_id": 29,
+          "split": "inner_validation",
+          "start": 1221198085.0,
+          "stop": 1221202515.741211
+        },
+        {
+          "duration_seconds": 3026.3519513607025,
+          "segment_id": 30,
+          "split": "inner_validation",
+          "start": 1221202524.141602,
+          "stop": 1221205550.4935534
+        },
+        {
+          "duration_seconds": 27278.50644659996,
+          "segment_id": 30,
+          "split": "development_test",
+          "start": 1221205550.4935534,
+          "stop": 1221232829.0
+        },
+        {
+          "duration_seconds": 4135.766600847244,
+          "segment_id": 31,
+          "split": "development_test",
+          "start": 1221232836.841797,
+          "stop": 1221236972.608398
+        },
+        {
+          "duration_seconds": 3524.2001950740814,
+          "segment_id": 32,
+          "split": "development_test",
+          "start": 1221236986.125,
+          "stop": 1221240510.325195
+        },
+        {
+          "duration_seconds": 3511.0664060115814,
+          "segment_id": 33,
+          "split": "development_test",
+          "start": 1221240527.683594,
+          "stop": 1221244038.75
+        },
+        {
+          "duration_seconds": 11634.2412109375,
+          "segment_id": 34,
+          "split": "development_test",
+          "start": 1221244053.416992,
+          "stop": 1221255687.658203
+        },
+        {
+          "duration_seconds": 8103.849608898163,
+          "segment_id": 35,
+          "split": "development_test",
+          "start": 1221255699.150391,
+          "stop": 1221263803.0
+        },
+        {
+          "duration_seconds": 18004.0,
+          "segment_id": 36,
+          "split": "development_test",
+          "start": 1221263885.0,
+          "stop": 1221281889.0
+        }
+      ],
+      "n_coverage_segments": 8,
+      "n_recorded_blocks": 114,
+      "n_seizures": 29,
+      "n_usable_intervals": 40,
+      "postictal_exclusion_s": 0.0,
+      "recorded_hours": 110.56027777777778,
+      "split_hours": {
+        "development_test": 21.164341796769033,
+        "inner_validation": 10.582170898185835,
+        "train": 74.07519628902276
+      },
+      "subject": "epilepsiae_922",
+      "usable_hours_after_seizure_cuts": 105.82170898397763
+    },
+    {
+      "coverage_hours": 219.115,
+      "eligible_horizons": [
+        5,
+        30,
+        120
+      ],
+      "horizon_support": {
+        "120": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 8,
+            "inner_validation": 3,
+            "train": 29
+          },
+          "n_independent_target_blocks": {
+            "development_test": 14,
+            "inner_validation": 5,
+            "train": 52
+          }
+        },
+        "30": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 41,
+            "inner_validation": 18,
+            "train": 142
+          },
+          "n_independent_target_blocks": {
+            "development_test": 79,
+            "inner_validation": 35,
+            "train": 278
+          }
+        },
+        "360": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 2,
+            "inner_validation": 0,
+            "train": 4
+          },
+          "n_independent_target_blocks": {
+            "development_test": 3,
+            "inner_validation": 0,
+            "train": 6
+          }
+        },
+        "5": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 261,
+            "inner_validation": 128,
+            "train": 909
+          },
+          "n_independent_target_blocks": {
+            "development_test": 517,
+            "inner_validation": 253,
+            "train": 1809
+          }
+        }
+      },
+      "intervals": [
+        {
+          "duration_seconds": 42638.0,
+          "segment_id": 0,
+          "split": "train",
+          "start": 1246877649.0,
+          "stop": 1246920287.0
+        },
+        {
+          "duration_seconds": 34443.27539110184,
+          "segment_id": 1,
+          "split": "train",
+          "start": 1246920701.0,
+          "stop": 1246955144.275391
+        },
+        {
+          "duration_seconds": 51018.29980492592,
+          "segment_id": 2,
+          "split": "train",
+          "start": 1246955225.700195,
+          "stop": 1247006244.0
+        },
+        {
+          "duration_seconds": 11339.0,
+          "segment_id": 3,
+          "split": "train",
+          "start": 1247006549.0,
+          "stop": 1247017888.0
+        },
+        {
+          "duration_seconds": 355.0,
+          "segment_id": 4,
+          "split": "train",
+          "start": 1247024251.0,
+          "stop": 1247024606.0
+        },
+        {
+          "duration_seconds": 67726.0,
+          "segment_id": 5,
+          "split": "train",
+          "start": 1247024856.0,
+          "stop": 1247092582.0
+        },
+        {
+          "duration_seconds": 35304.0,
+          "segment_id": 6,
+          "split": "train",
+          "start": 1247092777.0,
+          "stop": 1247128081.0
+        },
+        {
+          "duration_seconds": 45337.0,
+          "segment_id": 7,
+          "split": "train",
+          "start": 1247133968.0,
+          "stop": 1247179305.0
+        },
+        {
+          "duration_seconds": 12049.0,
+          "segment_id": 8,
+          "split": "train",
+          "start": 1247179483.0,
+          "stop": 1247191532.0
+        },
+        {
+          "duration_seconds": 30095.3837890625,
+          "segment_id": 9,
+          "split": "train",
+          "start": 1247191604.0,
+          "stop": 1247221699.383789
+        },
+        {
+          "duration_seconds": 2275.3212890625,
+          "segment_id": 10,
+          "split": "train",
+          "start": 1247221720.408203,
+          "stop": 1247223995.729492
+        },
+        {
+          "duration_seconds": 42755.83203101158,
+          "segment_id": 11,
+          "split": "train",
+          "start": 1247224003.167969,
+          "stop": 1247266759.0
+        },
+        {
+          "duration_seconds": 6360.3837890625,
+          "segment_id": 12,
+          "split": "train",
+          "start": 1247266814.0,
+          "stop": 1247273174.383789
+        },
+        {
+          "duration_seconds": 78937.5,
+          "segment_id": 13,
+          "split": "train",
+          "start": 1247273211.5,
+          "stop": 1247352149.0
+        },
+        {
+          "duration_seconds": 31561.41699194908,
+          "segment_id": 14,
+          "split": "train",
+          "start": 1247352168.0,
+          "stop": 1247383729.416992
+        },
+        {
+          "duration_seconds": 36512.85839796066,
+          "segment_id": 15,
+          "split": "train",
+          "start": 1247383736.900391,
+          "stop": 1247420249.758789
+        },
+        {
+          "duration_seconds": 2325.7919919490814,
+          "segment_id": 16,
+          "split": "train",
+          "start": 1247420296.441406,
+          "stop": 1247422622.233398
+        },
+        {
+          "duration_seconds": 1838.3623051643372,
+          "segment_id": 17,
+          "split": "train",
+          "start": 1247422745.041992,
+          "stop": 1247424583.404297
+        },
+        {
+          "duration_seconds": 142.87109398841858,
+          "segment_id": 18,
+          "split": "train",
+          "start": 1247424593.974609,
+          "stop": 1247424736.845703
+        },
+        {
+          "duration_seconds": 81.83300805091858,
+          "segment_id": 19,
+          "split": "train",
+          "start": 1247424747.75,
+          "stop": 1247424829.583008
+        },
+        {
+          "duration_seconds": 13405.424804925919,
+          "segment_id": 20,
+          "split": "train",
+          "start": 1247424915.575195,
+          "stop": 1247438321.0
+        },
+        {
+          "duration_seconds": 5086.595311164856,
+          "segment_id": 21,
+          "split": "train",
+          "start": 1247438526.0,
+          "stop": 1247443612.5953112
+        },
+        {
+          "duration_seconds": 2138.754297733307,
+          "segment_id": 21,
+          "split": "inner_validation",
+          "start": 1247443612.5953112,
+          "stop": 1247445751.349609
+        },
+        {
+          "duration_seconds": 26823.958006858826,
+          "segment_id": 22,
+          "split": "inner_validation",
+          "start": 1247445812.025391,
+          "stop": 1247472635.983398
+        },
+        {
+          "duration_seconds": 20495.737303972244,
+          "segment_id": 23,
+          "split": "inner_validation",
+          "start": 1247472652.121094,
+          "stop": 1247493147.858398
+        },
+        {
+          "duration_seconds": 1076.1582040786743,
+          "segment_id": 24,
+          "split": "inner_validation",
+          "start": 1247493224.858398,
+          "stop": 1247494301.016602
+        },
+        {
+          "duration_seconds": 2801.1337890625,
+          "segment_id": 25,
+          "split": "inner_validation",
+          "start": 1247494384.849609,
+          "stop": 1247497185.983398
+        },
+        {
+          "duration_seconds": 1844.5498039722443,
+          "segment_id": 26,
+          "split": "inner_validation",
+          "start": 1247497265.558594,
+          "stop": 1247499110.108398
+        },
+        {
+          "duration_seconds": 23618.15859413147,
+          "segment_id": 27,
+          "split": "inner_validation",
+          "start": 1247499190.941406,
+          "stop": 1247522809.1000001
+        },
+        {
+          "duration_seconds": 9.5367431640625e-07,
+          "segment_id": 27,
+          "split": "inner_validation",
+          "start": 1247522809.1000001,
+          "stop": 1247522809.100001
+        },
+        {
+          "duration_seconds": 1903.8999989032745,
+          "segment_id": 27,
+          "split": "development_test",
+          "start": 1247522809.100001,
+          "stop": 1247524713.0
+        },
+        {
+          "duration_seconds": 12699.0,
+          "segment_id": 28,
+          "split": "development_test",
+          "start": 1247524962.0,
+          "stop": 1247537661.0
+        },
+        {
+          "duration_seconds": 73507.0,
+          "segment_id": 29,
+          "split": "development_test",
+          "start": 1247537730.0,
+          "stop": 1247611237.0
+        },
+        {
+          "duration_seconds": 10802.0,
+          "segment_id": 30,
+          "split": "development_test",
+          "start": 1247611448.0,
+          "stop": 1247622250.0
+        },
+        {
+          "duration_seconds": 46577.0,
+          "segment_id": 31,
+          "split": "development_test",
+          "start": 1247651060.0,
+          "stop": 1247697637.0
+        },
+        {
+          "duration_seconds": 10802.0,
+          "segment_id": 32,
+          "split": "development_test",
+          "start": 1247697839.0,
+          "stop": 1247708641.0
+        },
+        {
+          "duration_seconds": 1306.0,
+          "segment_id": 33,
+          "split": "development_test",
+          "start": 1247712243.0,
+          "stop": 1247713549.0
+        }
+      ],
+      "n_coverage_segments": 18,
+      "n_recorded_blocks": 225,
+      "n_seizures": 16,
+      "n_usable_intervals": 37,
+      "postictal_exclusion_s": 0.0,
+      "recorded_hours": 219.0547222222222,
+      "split_hours": {
+        "development_test": 43.77691666636203,
+        "inner_validation": 21.88845833354526,
+        "train": 153.2192083331612
+      },
+      "subject": "epilepsiae_958",
+      "usable_hours_after_seizure_cuts": 218.88458333306843
+    },
+    {
+      "coverage_hours": 24.000016666650772,
+      "eligible_horizons": [
+        5,
+        30
+      ],
+      "horizon_support": {
+        "120": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 1,
+            "inner_validation": 0,
+            "train": 4
+          },
+          "n_independent_target_blocks": {
+            "development_test": 1,
+            "inner_validation": 0,
+            "train": 7
+          }
+        },
+        "30": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 4,
+            "inner_validation": 2,
+            "train": 16
+          },
+          "n_independent_target_blocks": {
+            "development_test": 8,
+            "inner_validation": 3,
+            "train": 32
+          }
+        },
+        "360": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 0,
+            "inner_validation": 0,
+            "train": 1
+          },
+          "n_independent_target_blocks": {
+            "development_test": 0,
+            "inner_validation": 0,
+            "train": 1
+          }
+        },
+        "5": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 28,
+            "inner_validation": 14,
+            "train": 100
+          },
+          "n_independent_target_blocks": {
+            "development_test": 56,
+            "inner_validation": 27,
+            "train": 200
+          }
+        }
+      },
+      "intervals": [
+        {
+          "duration_seconds": 60480.04200005531,
+          "segment_id": 0,
+          "split": "train",
+          "start": 1569017996.0,
+          "stop": 1569078476.042
+        },
+        {
+          "duration_seconds": 8640.005999803543,
+          "segment_id": 0,
+          "split": "inner_validation",
+          "start": 1569078476.042,
+          "stop": 1569087116.0479999
+        },
+        {
+          "duration_seconds": 9.5367431640625e-07,
+          "segment_id": 0,
+          "split": "inner_validation",
+          "start": 1569087116.0479999,
+          "stop": 1569087116.0480008
+        },
+        {
+          "duration_seconds": 17280.01199913025,
+          "segment_id": 0,
+          "split": "development_test",
+          "start": 1569087116.0480008,
+          "stop": 1569104396.06
+        }
+      ],
+      "n_coverage_segments": 1,
+      "n_recorded_blocks": 12,
+      "n_seizures": 0,
+      "n_usable_intervals": 4,
+      "postictal_exclusion_s": 0.0,
+      "recorded_hours": 24.000199999809265,
+      "split_hours": {
+        "development_test": 4.800003333091736,
+        "inner_validation": 2.400001666877005,
+        "train": 16.800011666682032
+      },
+      "subject": "yuquan_chengshuai",
+      "usable_hours_after_seizure_cuts": 24.000016666650772
+    },
+    {
+      "coverage_hours": 24.00002874996927,
+      "eligible_horizons": [
+        5,
+        30
+      ],
+      "horizon_support": {
+        "120": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 1,
+            "inner_validation": 0,
+            "train": 4
+          },
+          "n_independent_target_blocks": {
+            "development_test": 1,
+            "inner_validation": 0,
+            "train": 7
+          }
+        },
+        "30": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 4,
+            "inner_validation": 1,
+            "train": 16
+          },
+          "n_independent_target_blocks": {
+            "development_test": 8,
+            "inner_validation": 2,
+            "train": 32
+          }
+        },
+        "360": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 0,
+            "inner_validation": 0,
+            "train": 1
+          },
+          "n_independent_target_blocks": {
+            "development_test": 0,
+            "inner_validation": 0,
+            "train": 1
+          }
+        },
+        "5": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 28,
+            "inner_validation": 14,
+            "train": 100
+          },
+          "n_independent_target_blocks": {
+            "development_test": 56,
+            "inner_validation": 26,
+            "train": 200
+          }
+        }
+      },
+      "intervals": [
+        {
+          "duration_seconds": 60480.07244992256,
+          "segment_id": 0,
+          "split": "train",
+          "start": 1586878441.0,
+          "stop": 1586938921.07245
+        },
+        {
+          "duration_seconds": 6612.904550075531,
+          "segment_id": 0,
+          "split": "inner_validation",
+          "start": 1586938921.07245,
+          "stop": 1586945533.977
+        },
+        {
+          "duration_seconds": 2027.1057999134064,
+          "segment_id": 1,
+          "split": "inner_validation",
+          "start": 1586945533.977,
+          "stop": 1586947561.0828
+        },
+        {
+          "duration_seconds": 17280.020699977875,
+          "segment_id": 1,
+          "split": "development_test",
+          "start": 1586947561.0828,
+          "stop": 1586964841.1035
+        }
+      ],
+      "n_coverage_segments": 1,
+      "n_recorded_blocks": 12,
+      "n_seizures": 1,
+      "n_usable_intervals": 4,
+      "postictal_exclusion_s": 0.0,
+      "recorded_hours": 24.000344999631245,
+      "split_hours": {
+        "development_test": 4.800005749993854,
+        "inner_validation": 2.400002874996927,
+        "train": 16.800020124978488
+      },
+      "subject": "yuquan_chenziyang",
+      "usable_hours_after_seizure_cuts": 24.00002874996927
+    },
+    {
+      "coverage_hours": 24.0000225000249,
+      "eligible_horizons": [
+        5,
+        30
+      ],
+      "horizon_support": {
+        "120": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 1,
+            "inner_validation": 0,
+            "train": 1
+          },
+          "n_independent_target_blocks": {
+            "development_test": 1,
+            "inner_validation": 0,
+            "train": 1
+          }
+        },
+        "30": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 4,
+            "inner_validation": 2,
+            "train": 13
+          },
+          "n_independent_target_blocks": {
+            "development_test": 8,
+            "inner_validation": 3,
+            "train": 25
+          }
+        },
+        "360": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 0,
+            "inner_validation": 0,
+            "train": 0
+          },
+          "n_independent_target_blocks": {
+            "development_test": 0,
+            "inner_validation": 0,
+            "train": 0
+          }
+        },
+        "5": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 28,
+            "inner_validation": 14,
+            "train": 97
+          },
+          "n_independent_target_blocks": {
+            "development_test": 56,
+            "inner_validation": 27,
+            "train": 193
+          }
+        }
+      },
+      "intervals": [
+        {
+          "duration_seconds": 12708.994499921799,
+          "segment_id": 0,
+          "split": "train",
+          "start": 1605822418.0,
+          "stop": 1605835126.9945
+        },
+        {
+          "duration_seconds": 12420.044999837875,
+          "segment_id": 1,
+          "split": "train",
+          "start": 1605835345.897,
+          "stop": 1605847765.942
+        },
+        {
+          "duration_seconds": 10660.958999872208,
+          "segment_id": 2,
+          "split": "train",
+          "start": 1605847925.953,
+          "stop": 1605858586.912
+        },
+        {
+          "duration_seconds": 17275.023000001907,
+          "segment_id": 3,
+          "split": "train",
+          "start": 1605858772.9015,
+          "stop": 1605876047.9245
+        },
+        {
+          "duration_seconds": 6925.055850028992,
+          "segment_id": 4,
+          "split": "train",
+          "start": 1605876182.992,
+          "stop": 1605883108.0478501
+        },
+        {
+          "duration_seconds": 9.5367431640625e-07,
+          "segment_id": 4,
+          "split": "train",
+          "start": 1605883108.0478501,
+          "stop": 1605883108.047851
+        },
+        {
+          "duration_seconds": 8570.011049032211,
+          "segment_id": 4,
+          "split": "inner_validation",
+          "start": 1605883108.047851,
+          "stop": 1605891678.0589
+        },
+        {
+          "duration_seconds": 9.5367431640625e-07,
+          "segment_id": 4,
+          "split": "inner_validation",
+          "start": 1605891678.0589,
+          "stop": 1605891678.058901
+        },
+        {
+          "duration_seconds": 17140.022099018097,
+          "segment_id": 4,
+          "split": "development_test",
+          "start": 1605891678.058901,
+          "stop": 1605908818.081
+        }
+      ],
+      "n_coverage_segments": 1,
+      "n_recorded_blocks": 12,
+      "n_seizures": 4,
+      "n_usable_intervals": 9,
+      "postictal_exclusion_s": 0.0,
+      "recorded_hours": 24.00027000029882,
+      "split_hours": {
+        "development_test": 4.761117249727249,
+        "inner_validation": 2.380558624996079,
+        "train": 16.663910375171238
+      },
+      "subject": "yuquan_gaolan",
+      "usable_hours_after_seizure_cuts": 23.805586249894567
+    },
+    {
+      "coverage_hours": 26.000016666650772,
+      "eligible_horizons": [
+        5,
+        30
+      ],
+      "horizon_support": {
+        "120": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 1,
+            "inner_validation": 0,
+            "train": 4
+          },
+          "n_independent_target_blocks": {
+            "development_test": 1,
+            "inner_validation": 0,
+            "train": 8
+          }
+        },
+        "30": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 5,
+            "inner_validation": 2,
+            "train": 18
+          },
+          "n_independent_target_blocks": {
+            "development_test": 9,
+            "inner_validation": 4,
+            "train": 35
+          }
+        },
+        "360": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 0,
+            "inner_validation": 0,
+            "train": 1
+          },
+          "n_independent_target_blocks": {
+            "development_test": 0,
+            "inner_validation": 0,
+            "train": 2
+          }
+        },
+        "5": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 31,
+            "inner_validation": 15,
+            "train": 109
+          },
+          "n_independent_target_blocks": {
+            "development_test": 61,
+            "inner_validation": 30,
+            "train": 217
+          }
+        }
+      },
+      "intervals": [
+        {
+          "duration_seconds": 65520.04200005531,
+          "segment_id": 0,
+          "split": "train",
+          "start": 1578292510.0,
+          "stop": 1578358030.042
+        },
+        {
+          "duration_seconds": 9360.005999803543,
+          "segment_id": 0,
+          "split": "inner_validation",
+          "start": 1578358030.042,
+          "stop": 1578367390.0479999
+        },
+        {
+          "duration_seconds": 9.5367431640625e-07,
+          "segment_id": 0,
+          "split": "inner_validation",
+          "start": 1578367390.0479999,
+          "stop": 1578367390.0480008
+        },
+        {
+          "duration_seconds": 18720.01199913025,
+          "segment_id": 0,
+          "split": "development_test",
+          "start": 1578367390.0480008,
+          "stop": 1578386110.06
+        }
+      ],
+      "n_coverage_segments": 1,
+      "n_recorded_blocks": 13,
+      "n_seizures": 0,
+      "n_usable_intervals": 4,
+      "postictal_exclusion_s": 0.0,
+      "recorded_hours": 26.000216666460037,
+      "split_hours": {
+        "development_test": 5.200003333091736,
+        "inner_validation": 2.6000016668770045,
+        "train": 18.20001166668203
+      },
+      "subject": "yuquan_hanyuxuan",
+      "usable_hours_after_seizure_cuts": 26.000016666650772
+    },
+    {
+      "coverage_hours": 24.000016944474645,
+      "eligible_horizons": [
+        5,
+        30
+      ],
+      "horizon_support": {
+        "120": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 1,
+            "inner_validation": 0,
+            "train": 4
+          },
+          "n_independent_target_blocks": {
+            "development_test": 1,
+            "inner_validation": 0,
+            "train": 7
+          }
+        },
+        "30": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 4,
+            "inner_validation": 2,
+            "train": 16
+          },
+          "n_independent_target_blocks": {
+            "development_test": 8,
+            "inner_validation": 3,
+            "train": 32
+          }
+        },
+        "360": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 0,
+            "inner_validation": 0,
+            "train": 1
+          },
+          "n_independent_target_blocks": {
+            "development_test": 0,
+            "inner_validation": 0,
+            "train": 1
+          }
+        },
+        "5": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 28,
+            "inner_validation": 14,
+            "train": 100
+          },
+          "n_independent_target_blocks": {
+            "development_test": 56,
+            "inner_validation": 27,
+            "train": 200
+          }
+        }
+      },
+      "intervals": [
+        {
+          "duration_seconds": 60480.04270005226,
+          "segment_id": 0,
+          "split": "train",
+          "start": 1602982744.0,
+          "stop": 1603043224.0427
+        },
+        {
+          "duration_seconds": 9.5367431640625e-07,
+          "segment_id": 0,
+          "split": "train",
+          "start": 1603043224.0427,
+          "stop": 1603043224.042701
+        },
+        {
+          "duration_seconds": 8640.006098985672,
+          "segment_id": 0,
+          "split": "inner_validation",
+          "start": 1603043224.042701,
+          "stop": 1603051864.0488
+        },
+        {
+          "duration_seconds": 9.5367431640625e-07,
+          "segment_id": 0,
+          "split": "inner_validation",
+          "start": 1603051864.0488,
+          "stop": 1603051864.048801
+        },
+        {
+          "duration_seconds": 17280.012199163437,
+          "segment_id": 0,
+          "split": "development_test",
+          "start": 1603051864.048801,
+          "stop": 1603069144.061
+        }
+      ],
+      "n_coverage_segments": 1,
+      "n_recorded_blocks": 12,
+      "n_seizures": 0,
+      "n_usable_intervals": 5,
+      "postictal_exclusion_s": 0.0,
+      "recorded_hours": 24.00020333369573,
+      "split_hours": {
+        "development_test": 4.80000338865651,
+        "inner_validation": 2.400001694427596,
+        "train": 16.800011861390537
+      },
+      "subject": "yuquan_huangwanling",
+      "usable_hours_after_seizure_cuts": 24.000016944474645
+    },
+    {
+      "coverage_hours": 24.000005277792614,
+      "eligible_horizons": [
+        5,
+        30
+      ],
+      "horizon_support": {
+        "120": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 1,
+            "inner_validation": 0,
+            "train": 2
+          },
+          "n_independent_target_blocks": {
+            "development_test": 1,
+            "inner_validation": 0,
+            "train": 3
+          }
+        },
+        "30": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 4,
+            "inner_validation": 2,
+            "train": 13
+          },
+          "n_independent_target_blocks": {
+            "development_test": 8,
+            "inner_validation": 3,
+            "train": 25
+          }
+        },
+        "360": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 0,
+            "inner_validation": 0,
+            "train": 0
+          },
+          "n_independent_target_blocks": {
+            "development_test": 0,
+            "inner_validation": 0,
+            "train": 0
+          }
+        },
+        "5": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 28,
+            "inner_validation": 14,
+            "train": 96
+          },
+          "n_independent_target_blocks": {
+            "development_test": 55,
+            "inner_validation": 27,
+            "train": 188
+          }
+        }
+      },
+      "intervals": [
+        {
+          "duration_seconds": 1288.9230000972748,
+          "segment_id": 0,
+          "split": "train",
+          "start": 1574887228.0,
+          "stop": 1574888516.923
+        },
+        {
+          "duration_seconds": 5879.933500051498,
+          "segment_id": 1,
+          "split": "train",
+          "start": 1574888700.998,
+          "stop": 1574894580.9315
+        },
+        {
+          "duration_seconds": 1276.9830000400543,
+          "segment_id": 2,
+          "split": "train",
+          "start": 1574894700.9285,
+          "stop": 1574895977.9115
+        },
+        {
+          "duration_seconds": 35880.99799990654,
+          "segment_id": 3,
+          "split": "train",
+          "start": 1574896065.969,
+          "stop": 1574931946.967
+        },
+        {
+          "duration_seconds": 1375.9854998588562,
+          "segment_id": 4,
+          "split": "train",
+          "start": 1574932683.9635,
+          "stop": 1574934059.949
+        },
+        {
+          "duration_seconds": 10105.00200009346,
+          "segment_id": 5,
+          "split": "train",
+          "start": 1574934059.949,
+          "stop": 1574944164.951
+        },
+        {
+          "duration_seconds": 3758.589250087738,
+          "segment_id": 6,
+          "split": "train",
+          "start": 1574944340.9665,
+          "stop": 1574948099.5557501
+        },
+        {
+          "duration_seconds": 8509.487749814987,
+          "segment_id": 6,
+          "split": "inner_validation",
+          "start": 1574948099.5557501,
+          "stop": 1574956609.0435
+        },
+        {
+          "duration_seconds": 9.5367431640625e-07,
+          "segment_id": 6,
+          "split": "inner_validation",
+          "start": 1574956609.0435,
+          "stop": 1574956609.043501
+        },
+        {
+          "duration_seconds": 17018.975499153137,
+          "segment_id": 6,
+          "split": "development_test",
+          "start": 1574956609.043501,
+          "stop": 1574973628.019
+        }
+      ],
+      "n_coverage_segments": 1,
+      "n_recorded_blocks": 12,
+      "n_seizures": 8,
+      "n_usable_intervals": 10,
+      "postictal_exclusion_s": 0.0,
+      "recorded_hours": 24.000063333511353,
+      "split_hours": {
+        "development_test": 4.727493194209205,
+        "inner_validation": 2.363746597435739,
+        "train": 16.546226180593173
+      },
+      "subject": "yuquan_pengzihang",
+      "usable_hours_after_seizure_cuts": 23.637465972238118
+    },
+    {
+      "coverage_hours": 24.00002874996927,
+      "eligible_horizons": [
+        5,
+        30
+      ],
+      "horizon_support": {
+        "120": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 0,
+            "inner_validation": 0,
+            "train": 2
+          },
+          "n_independent_target_blocks": {
+            "development_test": 0,
+            "inner_validation": 0,
+            "train": 3
+          }
+        },
+        "30": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 3,
+            "inner_validation": 2,
+            "train": 15
+          },
+          "n_independent_target_blocks": {
+            "development_test": 6,
+            "inner_validation": 3,
+            "train": 27
+          }
+        },
+        "360": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 0,
+            "inner_validation": 0,
+            "train": 0
+          },
+          "n_independent_target_blocks": {
+            "development_test": 0,
+            "inner_validation": 0,
+            "train": 0
+          }
+        },
+        "5": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 27,
+            "inner_validation": 14,
+            "train": 97
+          },
+          "n_independent_target_blocks": {
+            "development_test": 52,
+            "inner_validation": 27,
+            "train": 193
+          }
+        }
+      },
+      "intervals": [
+        {
+          "duration_seconds": 8429.959000110626,
+          "segment_id": 0,
+          "split": "train",
+          "start": 1608770127.0,
+          "stop": 1608778556.959
+        },
+        {
+          "duration_seconds": 75.9135000705719,
+          "segment_id": 1,
+          "split": "train",
+          "start": 1608778617.9875,
+          "stop": 1608778693.901
+        },
+        {
+          "duration_seconds": 10168.069000005722,
+          "segment_id": 2,
+          "split": "train",
+          "start": 1608778765.9215,
+          "stop": 1608788933.9905
+        },
+        {
+          "duration_seconds": 18477.928499937057,
+          "segment_id": 3,
+          "split": "train",
+          "start": 1608788996.9655,
+          "stop": 1608807474.894
+        },
+        {
+          "duration_seconds": 139.91899991035461,
+          "segment_id": 4,
+          "split": "train",
+          "start": 1608807537.9835,
+          "stop": 1608807677.9025
+        },
+        {
+          "duration_seconds": 22575.616849899292,
+          "segment_id": 5,
+          "split": "train",
+          "start": 1608807746.946,
+          "stop": 1608830322.56285
+        },
+        {
+          "duration_seconds": 9.5367431640625e-07,
+          "segment_id": 5,
+          "split": "train",
+          "start": 1608830322.56285,
+          "stop": 1608830322.562851
+        },
+        {
+          "duration_seconds": 8552.486549139023,
+          "segment_id": 5,
+          "split": "inner_validation",
+          "start": 1608830322.562851,
+          "stop": 1608838875.0494
+        },
+        {
+          "duration_seconds": 636.8740999698639,
+          "segment_id": 5,
+          "split": "development_test",
+          "start": 1608838875.0494,
+          "stop": 1608839511.9235
+        },
+        {
+          "duration_seconds": 212.05400013923645,
+          "segment_id": 6,
+          "split": "development_test",
+          "start": 1608839878.896,
+          "stop": 1608840090.95
+        },
+        {
+          "duration_seconds": 13864.941499948502,
+          "segment_id": 7,
+          "split": "development_test",
+          "start": 1608840184.9545,
+          "stop": 1608854049.896
+        },
+        {
+          "duration_seconds": 2391.103499889374,
+          "segment_id": 8,
+          "split": "development_test",
+          "start": 1608854136.0,
+          "stop": 1608856527.1035
+        }
+      ],
+      "n_coverage_segments": 1,
+      "n_recorded_blocks": 12,
+      "n_seizures": 8,
+      "n_usable_intervals": 12,
+      "postictal_exclusion_s": 0.0,
+      "recorded_hours": 24.000344999631245,
+      "split_hours": {
+        "development_test": 4.751381416651938,
+        "inner_validation": 2.375690708094173,
+        "train": 16.629834958579803
+      },
+      "subject": "yuquan_sunyuanxin",
+      "usable_hours_after_seizure_cuts": 23.756907083325917
+    },
+    {
+      "coverage_hours": 26.0,
+      "eligible_horizons": [
+        5,
+        30
+      ],
+      "horizon_support": {
+        "120": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 1,
+            "inner_validation": 0,
+            "train": 3
+          },
+          "n_independent_target_blocks": {
+            "development_test": 1,
+            "inner_validation": 0,
+            "train": 5
+          }
+        },
+        "30": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 5,
+            "inner_validation": 2,
+            "train": 16
+          },
+          "n_independent_target_blocks": {
+            "development_test": 8,
+            "inner_validation": 4,
+            "train": 32
+          }
+        },
+        "360": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 0,
+            "inner_validation": 0,
+            "train": 0
+          },
+          "n_independent_target_blocks": {
+            "development_test": 0,
+            "inner_validation": 0,
+            "train": 0
+          }
+        },
+        "5": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 30,
+            "inner_validation": 15,
+            "train": 108
+          },
+          "n_independent_target_blocks": {
+            "development_test": 59,
+            "inner_validation": 30,
+            "train": 214
+          }
+        }
+      },
+      "intervals": [
+        {
+          "duration_seconds": 5447.924999952316,
+          "segment_id": 0,
+          "split": "train",
+          "start": 1567232420.0,
+          "stop": 1567237867.925
+        },
+        {
+          "duration_seconds": 28644.97500014305,
+          "segment_id": 1,
+          "split": "train",
+          "start": 1567237867.925,
+          "stop": 1567266512.9
+        },
+        {
+          "duration_seconds": 31394.18249988556,
+          "segment_id": 2,
+          "split": "train",
+          "start": 1567266512.9,
+          "stop": 1567297907.0825
+        },
+        {
+          "duration_seconds": 9.5367431640625e-07,
+          "segment_id": 2,
+          "split": "train",
+          "start": 1567297907.0825,
+          "stop": 1567297907.082501
+        },
+        {
+          "duration_seconds": 9355.29749917984,
+          "segment_id": 2,
+          "split": "inner_validation",
+          "start": 1567297907.082501,
+          "stop": 1567307262.38
+        },
+        {
+          "duration_seconds": 14524.582499980927,
+          "segment_id": 2,
+          "split": "development_test",
+          "start": 1567307262.38,
+          "stop": 1567321786.9625
+        },
+        {
+          "duration_seconds": 4186.012500047684,
+          "segment_id": 3,
+          "split": "development_test",
+          "start": 1567321833.9875,
+          "stop": 1567326020.0
+        }
+      ],
+      "n_coverage_segments": 1,
+      "n_recorded_blocks": 13,
+      "n_seizures": 3,
+      "n_usable_intervals": 7,
+      "postictal_exclusion_s": 0.0,
+      "recorded_hours": 26.0,
+      "split_hours": {
+        "development_test": 5.197387500007947,
+        "inner_validation": 2.5986937497721776,
+        "train": 18.19085625025961
+      },
+      "subject": "yuquan_xuxinyi",
+      "usable_hours_after_seizure_cuts": 25.986937500039737
+    },
+    {
+      "coverage_hours": 22.000001666678322,
+      "eligible_horizons": [
+        5,
+        30
+      ],
+      "horizon_support": {
+        "120": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 1,
+            "inner_validation": 0,
+            "train": 3
+          },
+          "n_independent_target_blocks": {
+            "development_test": 1,
+            "inner_validation": 0,
+            "train": 5
+          }
+        },
+        "30": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 4,
+            "inner_validation": 2,
+            "train": 14
+          },
+          "n_independent_target_blocks": {
+            "development_test": 7,
+            "inner_validation": 3,
+            "train": 28
+          }
+        },
+        "360": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 0,
+            "inner_validation": 0,
+            "train": 1
+          },
+          "n_independent_target_blocks": {
+            "development_test": 0,
+            "inner_validation": 0,
+            "train": 1
+          }
+        },
+        "5": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 26,
+            "inner_validation": 13,
+            "train": 92
+          },
+          "n_independent_target_blocks": {
+            "development_test": 51,
+            "inner_validation": 25,
+            "train": 182
+          }
+        }
+      },
+      "intervals": [
+        {
+          "duration_seconds": 45055.96600008011,
+          "segment_id": 0,
+          "split": "train",
+          "start": 1555198706.0,
+          "stop": 1555243761.966
+        },
+        {
+          "duration_seconds": 10384.03819990158,
+          "segment_id": 1,
+          "split": "train",
+          "start": 1555243761.966,
+          "stop": 1555254146.0042
+        },
+        {
+          "duration_seconds": 9.5367431640625e-07,
+          "segment_id": 1,
+          "split": "train",
+          "start": 1555254146.0042,
+          "stop": 1555254146.004201
+        },
+        {
+          "duration_seconds": 7920.000599145889,
+          "segment_id": 1,
+          "split": "inner_validation",
+          "start": 1555254146.004201,
+          "stop": 1555262066.0048
+        },
+        {
+          "duration_seconds": 15840.001199960709,
+          "segment_id": 1,
+          "split": "development_test",
+          "start": 1555262066.0048,
+          "stop": 1555277906.006
+        }
+      ],
+      "n_coverage_segments": 1,
+      "n_recorded_blocks": 11,
+      "n_seizures": 1,
+      "n_usable_intervals": 5,
+      "postictal_exclusion_s": 0.0,
+      "recorded_hours": 22.00001833346155,
+      "split_hours": {
+        "development_test": 4.400000333322419,
+        "inner_validation": 2.2000001664294135,
+        "train": 15.400001166926492
+      },
+      "subject": "yuquan_zhangbichen",
+      "usable_hours_after_seizure_cuts": 22.000001666678322
+    },
+    {
+      "coverage_hours": 24.677257500025963,
+      "eligible_horizons": [
+        5,
+        30
+      ],
+      "horizon_support": {
+        "120": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 1,
+            "inner_validation": 0,
+            "train": 3
+          },
+          "n_independent_target_blocks": {
+            "development_test": 1,
+            "inner_validation": 0,
+            "train": 6
+          }
+        },
+        "30": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 4,
+            "inner_validation": 2,
+            "train": 16
+          },
+          "n_independent_target_blocks": {
+            "development_test": 8,
+            "inner_validation": 3,
+            "train": 32
+          }
+        },
+        "360": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 0,
+            "inner_validation": 0,
+            "train": 0
+          },
+          "n_independent_target_blocks": {
+            "development_test": 0,
+            "inner_validation": 0,
+            "train": 0
+          }
+        },
+        "5": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 29,
+            "inner_validation": 14,
+            "train": 103
+          },
+          "n_independent_target_blocks": {
+            "development_test": 58,
+            "inner_validation": 28,
+            "train": 205
+          }
+        }
+      },
+      "intervals": [
+        {
+          "duration_seconds": 38438.046000003815,
+          "segment_id": 0,
+          "split": "train",
+          "start": 1578002768.0,
+          "stop": 1578041206.046
+        },
+        {
+          "duration_seconds": 23748.64289999008,
+          "segment_id": 1,
+          "split": "train",
+          "start": 1578049729.0,
+          "stop": 1578073477.6429
+        },
+        {
+          "duration_seconds": 9.5367431640625e-07,
+          "segment_id": 1,
+          "split": "train",
+          "start": 1578073477.6429,
+          "stop": 1578073477.642901
+        },
+        {
+          "duration_seconds": 8883.812699079514,
+          "segment_id": 1,
+          "split": "inner_validation",
+          "start": 1578073477.642901,
+          "stop": 1578082361.4556
+        },
+        {
+          "duration_seconds": 9.5367431640625e-07,
+          "segment_id": 1,
+          "split": "inner_validation",
+          "start": 1578082361.4556,
+          "stop": 1578082361.455601
+        },
+        {
+          "duration_seconds": 17767.6253991127,
+          "segment_id": 1,
+          "split": "development_test",
+          "start": 1578082361.455601,
+          "stop": 1578100129.081
+        }
+      ],
+      "n_coverage_segments": 2,
+      "n_recorded_blocks": 13,
+      "n_seizures": 0,
+      "n_usable_intervals": 6,
+      "postictal_exclusion_s": 0.0,
+      "recorded_hours": 24.677505000299877,
+      "split_hours": {
+        "development_test": 4.935451499753528,
+        "inner_validation": 2.467725750009219,
+        "train": 17.274080250263214
+      },
+      "subject": "yuquan_zhangjiaqi",
+      "usable_hours_after_seizure_cuts": 24.677257500025963
+    },
+    {
+      "coverage_hours": 26.000003749993112,
+      "eligible_horizons": [
+        5,
+        30
+      ],
+      "horizon_support": {
+        "120": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 1,
+            "inner_validation": 0,
+            "train": 4
+          },
+          "n_independent_target_blocks": {
+            "development_test": 1,
+            "inner_validation": 0,
+            "train": 8
+          }
+        },
+        "30": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 5,
+            "inner_validation": 2,
+            "train": 18
+          },
+          "n_independent_target_blocks": {
+            "development_test": 9,
+            "inner_validation": 4,
+            "train": 35
+          }
+        },
+        "360": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 0,
+            "inner_validation": 0,
+            "train": 1
+          },
+          "n_independent_target_blocks": {
+            "development_test": 0,
+            "inner_validation": 0,
+            "train": 2
+          }
+        },
+        "5": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 31,
+            "inner_validation": 15,
+            "train": 108
+          },
+          "n_independent_target_blocks": {
+            "development_test": 61,
+            "inner_validation": 30,
+            "train": 215
+          }
+        }
+      },
+      "intervals": [
+        {
+          "duration_seconds": 255.98250007629395,
+          "segment_id": 0,
+          "split": "train",
+          "start": 1596157072.0,
+          "stop": 1596157327.9825
+        },
+        {
+          "duration_seconds": 30.9689998626709,
+          "segment_id": 1,
+          "split": "train",
+          "start": 1596157327.9825,
+          "stop": 1596157358.9515
+        },
+        {
+          "duration_seconds": 19.948500156402588,
+          "segment_id": 2,
+          "split": "train",
+          "start": 1596157358.9515,
+          "stop": 1596157378.9
+        },
+        {
+          "duration_seconds": 47.98799991607666,
+          "segment_id": 3,
+          "split": "train",
+          "start": 1596157378.9,
+          "stop": 1596157426.888
+        },
+        {
+          "duration_seconds": 19.111500024795532,
+          "segment_id": 4,
+          "split": "train",
+          "start": 1596157426.888,
+          "stop": 1596157445.9995
+        },
+        {
+          "duration_seconds": 27.899999856948853,
+          "segment_id": 5,
+          "split": "train",
+          "start": 1596157445.9995,
+          "stop": 1596157473.8995
+        },
+        {
+          "duration_seconds": 21.064500093460083,
+          "segment_id": 6,
+          "split": "train",
+          "start": 1596157473.8995,
+          "stop": 1596157494.964
+        },
+        {
+          "duration_seconds": 47.98799991607666,
+          "segment_id": 7,
+          "split": "train",
+          "start": 1596157494.964,
+          "stop": 1596157542.952
+        },
+        {
+          "duration_seconds": 65049.057450056076,
+          "segment_id": 8,
+          "split": "train",
+          "start": 1596157542.952,
+          "stop": 1596222592.00945
+        },
+        {
+          "duration_seconds": 9.5367431640625e-07,
+          "segment_id": 8,
+          "split": "train",
+          "start": 1596222592.00945,
+          "stop": 1596222592.009451
+        },
+        {
+          "duration_seconds": 9360.00134897232,
+          "segment_id": 8,
+          "split": "inner_validation",
+          "start": 1596222592.009451,
+          "stop": 1596231952.0108
+        },
+        {
+          "duration_seconds": 9.5367431640625e-07,
+          "segment_id": 8,
+          "split": "inner_validation",
+          "start": 1596231952.0108,
+          "stop": 1596231952.0108008
+        },
+        {
+          "duration_seconds": 18720.002699136734,
+          "segment_id": 8,
+          "split": "development_test",
+          "start": 1596231952.0108008,
+          "stop": 1596250672.0135
+        }
+      ],
+      "n_coverage_segments": 1,
+      "n_recorded_blocks": 13,
+      "n_seizures": 8,
+      "n_usable_intervals": 13,
+      "postictal_exclusion_s": 0.0,
+      "recorded_hours": 26.000048749910462,
+      "split_hours": {
+        "development_test": 5.200000749760204,
+        "inner_validation": 2.6000003749794427,
+        "train": 18.20000262525346
+      },
+      "subject": "yuquan_zhangjinhan",
+      "usable_hours_after_seizure_cuts": 26.000003749993112
+    },
+    {
+      "coverage_hours": 24.000030555526415,
+      "eligible_horizons": [
+        5,
+        30
+      ],
+      "horizon_support": {
+        "120": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 1,
+            "inner_validation": 0,
+            "train": 3
+          },
+          "n_independent_target_blocks": {
+            "development_test": 1,
+            "inner_validation": 0,
+            "train": 3
+          }
+        },
+        "30": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 4,
+            "inner_validation": 2,
+            "train": 15
+          },
+          "n_independent_target_blocks": {
+            "development_test": 8,
+            "inner_validation": 3,
+            "train": 28
+          }
+        },
+        "360": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 0,
+            "inner_validation": 0,
+            "train": 0
+          },
+          "n_independent_target_blocks": {
+            "development_test": 0,
+            "inner_validation": 0,
+            "train": 0
+          }
+        },
+        "5": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 28,
+            "inner_validation": 14,
+            "train": 99
+          },
+          "n_independent_target_blocks": {
+            "development_test": 56,
+            "inner_validation": 27,
+            "train": 195
+          }
+        }
+      },
+      "intervals": [
+        {
+          "duration_seconds": 4129.927999973297,
+          "segment_id": 0,
+          "split": "train",
+          "start": 1597273445.0,
+          "stop": 1597277574.928
+        },
+        {
+          "duration_seconds": 19.028000116348267,
+          "segment_id": 1,
+          "split": "train",
+          "start": 1597277574.928,
+          "stop": 1597277593.956
+        },
+        {
+          "duration_seconds": 19952.941999912262,
+          "segment_id": 2,
+          "split": "train",
+          "start": 1597277593.956,
+          "stop": 1597297546.898
+        },
+        {
+          "duration_seconds": 21276.097999811172,
+          "segment_id": 3,
+          "split": "train",
+          "start": 1597297571.89,
+          "stop": 1597318847.988
+        },
+        {
+          "duration_seconds": 15065.700599908829,
+          "segment_id": 4,
+          "split": "train",
+          "start": 1597318874.968,
+          "stop": 1597333940.6685998
+        },
+        {
+          "duration_seconds": 9.5367431640625e-07,
+          "segment_id": 4,
+          "split": "train",
+          "start": 1597333940.6685998,
+          "stop": 1597333940.6686008
+        },
+        {
+          "duration_seconds": 8634.813799142838,
+          "segment_id": 4,
+          "split": "inner_validation",
+          "start": 1597333940.6686008,
+          "stop": 1597342575.4824
+        },
+        {
+          "duration_seconds": 17269.627599954605,
+          "segment_id": 4,
+          "split": "development_test",
+          "start": 1597342575.4824,
+          "stop": 1597359845.11
+        }
+      ],
+      "n_coverage_segments": 1,
+      "n_recorded_blocks": 12,
+      "n_seizures": 6,
+      "n_usable_intervals": 8,
+      "postictal_exclusion_s": 0.0,
+      "recorded_hours": 24.000366666316985,
+      "split_hours": {
+        "development_test": 4.797118777765168,
+        "inner_validation": 2.398559388650788,
+        "train": 16.789915722409884
+      },
+      "subject": "yuquan_zhangkexuan",
+      "usable_hours_after_seizure_cuts": 23.98559388882584
+    },
+    {
+      "coverage_hours": 26.00002166668574,
+      "eligible_horizons": [
+        5,
+        30
+      ],
+      "horizon_support": {
+        "120": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 1,
+            "inner_validation": 0,
+            "train": 3
+          },
+          "n_independent_target_blocks": {
+            "development_test": 1,
+            "inner_validation": 0,
+            "train": 5
+          }
+        },
+        "30": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 5,
+            "inner_validation": 2,
+            "train": 16
+          },
+          "n_independent_target_blocks": {
+            "development_test": 9,
+            "inner_validation": 4,
+            "train": 31
+          }
+        },
+        "360": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 0,
+            "inner_validation": 0,
+            "train": 1
+          },
+          "n_independent_target_blocks": {
+            "development_test": 0,
+            "inner_validation": 0,
+            "train": 1
+          }
+        },
+        "5": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 31,
+            "inner_validation": 15,
+            "train": 107
+          },
+          "n_independent_target_blocks": {
+            "development_test": 61,
+            "inner_validation": 30,
+            "train": 212
+          }
+        }
+      },
+      "intervals": [
+        {
+          "duration_seconds": 4804.914000034332,
+          "segment_id": 0,
+          "split": "train",
+          "start": 1565794204.0,
+          "stop": 1565799008.914
+        },
+        {
+          "duration_seconds": 49143.05400013924,
+          "segment_id": 1,
+          "split": "train",
+          "start": 1565799079.906,
+          "stop": 1565848222.96
+        },
+        {
+          "duration_seconds": 9334.961999893188,
+          "segment_id": 2,
+          "split": "train",
+          "start": 1565848325.98,
+          "stop": 1565857660.942
+        },
+        {
+          "duration_seconds": 2081.6868000030518,
+          "segment_id": 3,
+          "split": "train",
+          "start": 1565857708.984,
+          "stop": 1565859790.6708
+        },
+        {
+          "duration_seconds": 9.5367431640625e-07,
+          "segment_id": 3,
+          "split": "train",
+          "start": 1565859790.6708,
+          "stop": 1565859790.670801
+        },
+        {
+          "duration_seconds": 9337.802399158478,
+          "segment_id": 3,
+          "split": "inner_validation",
+          "start": 1565859790.670801,
+          "stop": 1565869128.4732
+        },
+        {
+          "duration_seconds": 18675.604799985886,
+          "segment_id": 3,
+          "split": "development_test",
+          "start": 1565869128.4732,
+          "stop": 1565887804.078
+        }
+      ],
+      "n_coverage_segments": 1,
+      "n_recorded_blocks": 13,
+      "n_seizures": 5,
+      "n_usable_intervals": 7,
+      "postictal_exclusion_s": 0.0,
+      "recorded_hours": 26.00028166691462,
+      "split_hours": {
+        "development_test": 5.187667999996079,
+        "inner_validation": 2.5938339997662436,
+        "train": 18.156838000284303
+      },
+      "subject": "yuquan_zhaojinrui",
+      "usable_hours_after_seizure_cuts": 25.938340000046622
+    },
+    {
+      "coverage_hours": 24.000013888875642,
+      "eligible_horizons": [
+        5,
+        30
+      ],
+      "horizon_support": {
+        "120": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 1,
+            "inner_validation": 0,
+            "train": 4
+          },
+          "n_independent_target_blocks": {
+            "development_test": 1,
+            "inner_validation": 0,
+            "train": 7
+          }
+        },
+        "30": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 4,
+            "inner_validation": 2,
+            "train": 16
+          },
+          "n_independent_target_blocks": {
+            "development_test": 8,
+            "inner_validation": 3,
+            "train": 32
+          }
+        },
+        "360": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 0,
+            "inner_validation": 0,
+            "train": 1
+          },
+          "n_independent_target_blocks": {
+            "development_test": 0,
+            "inner_validation": 0,
+            "train": 1
+          }
+        },
+        "5": {
+          "n_disjoint_exposure_target_pairs": {
+            "development_test": 28,
+            "inner_validation": 14,
+            "train": 100
+          },
+          "n_independent_target_blocks": {
+            "development_test": 56,
+            "inner_validation": 27,
+            "train": 200
+          }
+        }
+      },
+      "intervals": [
+        {
+          "duration_seconds": 60480.03499984741,
+          "segment_id": 0,
+          "split": "train",
+          "start": 1603414475.0,
+          "stop": 1603474955.0349998
+        },
+        {
+          "duration_seconds": 9.5367431640625e-07,
+          "segment_id": 0,
+          "split": "train",
+          "start": 1603474955.0349998,
+          "stop": 1603474955.0350008
+        },
+        {
+          "duration_seconds": 8640.004999160767,
+          "segment_id": 0,
+          "split": "inner_validation",
+          "start": 1603474955.0350008,
+          "stop": 1603483595.04
+        },
+        {
+          "duration_seconds": 17280.009999990463,
+          "segment_id": 0,
+          "split": "development_test",
+          "start": 1603483595.04,
+          "stop": 1603500875.05
+        }
+      ],
+      "n_coverage_segments": 1,
+      "n_recorded_blocks": 12,
+      "n_seizures": 0,
+      "n_usable_intervals": 4,
+      "postictal_exclusion_s": 0.0,
+      "recorded_hours": 24.00016666650772,
+      "split_hours": {
+        "development_test": 4.800002777775129,
+        "inner_validation": 2.4000013886557685,
+        "train": 16.800009722444745
+      },
+      "subject": "yuquan_zhourongxuan",
+      "usable_hours_after_seizure_cuts": 24.000013888875642
+    }
+  ],
+  "tag": "postictal0"
+}

@@ -1,0 +1,272 @@
+{
+  "arm": "M2_mark_specific_feedback",
+  "block_file": "/data/hfosp_group_event_state_v0_2/agent_c/checkpoints/main/yuquan_zhangjiaqi__M2_mark_specific_feedback__seed3__blocks.npz",
+  "checkpoint_file": "/data/hfosp_group_event_state_v0_2/agent_c/checkpoints/main/yuquan_zhangjiaqi__M2_mark_specific_feedback__seed3__checkpoint.pt",
+  "config_hash": "e065601d52c263d5f446010caa6bc08f2431f2e173db46f79b98b3fe329e6011",
+  "context": {
+    "dataset": "yuquan",
+    "n_contacts": 7,
+    "n_count_features": 4,
+    "n_disjoint_blocks": {
+      "120": 7,
+      "30": 43,
+      "5": 290
+    },
+    "n_drive_features": 22,
+    "n_events_interictal": 48494,
+    "n_mark_features": 37,
+    "n_segments": 2,
+    "n_timeline_steps": 49090,
+    "split_hours": {
+      "development_test": 4.935451499753528,
+      "inner_validation": 4.935451500018438,
+      "train": 14.806354500253997
+    },
+    "subject": "yuquan_zhangjiaqi",
+    "support_hash": "edae0b8a28d47adb110017ea334f3c8ef9f4d1d7cf94274ec0e7a5acfeb23617"
+  },
+  "device": "cuda:0",
+  "evaluation": {
+    "development_test": {
+      "120": {
+        "mean_count_logscore": -8.337814331054688,
+        "mean_mark_group_logscore": {
+          "extent": -0.6351426839828491,
+          "multiband": -1.02070951461792,
+          "participation": -1.358477234840393,
+          "waveform_crossband": -0.677710235118866
+        },
+        "mean_mark_logscore": -0.942106306552887,
+        "median_count_true": 4166.0,
+        "n_blocks_with_events": 1,
+        "n_disjoint_blocks": 1,
+        "n_sliding_anchors_not_independent": 36,
+        "status": "ok"
+      },
+      "30": {
+        "mean_count_logscore": -7.374685287475586,
+        "mean_mark_group_logscore": {
+          "extent": -1.017890453338623,
+          "multiband": -1.47409987449646,
+          "participation": -1.7007319927215576,
+          "waveform_crossband": -1.2602720260620117
+        },
+        "mean_mark_logscore": -1.4106367826461792,
+        "median_count_true": 1084.5,
+        "n_blocks_with_events": 8,
+        "n_disjoint_blocks": 8,
+        "n_sliding_anchors_not_independent": 54,
+        "status": "ok"
+      },
+      "5": {
+        "mean_count_logscore": -5.694295406341553,
+        "mean_mark_group_logscore": {
+          "extent": -1.6339213848114014,
+          "multiband": -1.7403185367584229,
+          "participation": -1.793796181678772,
+          "waveform_crossband": -1.7300381660461426
+        },
+        "mean_mark_logscore": -1.7384748458862305,
+        "median_count_true": 145.0,
+        "n_blocks_with_events": 58,
+        "n_disjoint_blocks": 58,
+        "n_sliding_anchors_not_independent": 59,
+        "status": "ok"
+      }
+    },
+    "inner_validation": {
+      "120": {
+        "mean_count_logscore": -9.184385299682617,
+        "mean_mark_group_logscore": {
+          "extent": -2.2581260204315186,
+          "multiband": -2.3949732780456543,
+          "participation": -2.9601590633392334,
+          "waveform_crossband": -1.132104754447937
+        },
+        "mean_mark_logscore": -2.081225633621216,
+        "median_count_true": 5239.0,
+        "n_blocks_with_events": 1,
+        "n_disjoint_blocks": 1,
+        "n_sliding_anchors_not_independent": 35,
+        "status": "ok"
+      },
+      "30": {
+        "mean_count_logscore": -7.546407222747803,
+        "mean_mark_group_logscore": {
+          "extent": -1.9195736646652222,
+          "multiband": -1.4590877294540405,
+          "participation": -1.7014169692993164,
+          "waveform_crossband": -1.0970966815948486
+        },
+        "mean_mark_logscore": -1.424867868423462,
+        "median_count_true": 1119.0,
+        "n_blocks_with_events": 8,
+        "n_disjoint_blocks": 8,
+        "n_sliding_anchors_not_independent": 53,
+        "status": "ok"
+      },
+      "5": {
+        "mean_count_logscore": -5.803966999053955,
+        "mean_mark_group_logscore": {
+          "extent": -1.9067227840423584,
+          "multiband": -1.6401381492614746,
+          "participation": -1.6587415933609009,
+          "waveform_crossband": -1.4148083925247192
+        },
+        "mean_mark_logscore": -1.5921927690505981,
+        "median_count_true": 150.0,
+        "n_blocks_with_events": 57,
+        "n_disjoint_blocks": 57,
+        "n_sliding_anchors_not_independent": 58,
+        "status": "ok"
+      }
+    }
+  },
+  "event_update": true,
+  "feedback_model": "count_rate_plus_mark_edge",
+  "fit": {
+    "history": [
+      {
+        "epoch": 0,
+        "inner_validation_objective": 4.543096490102272,
+        "seconds": 2.9,
+        "train_loss": 4.48730024798163
+      },
+      {
+        "epoch": 1,
+        "inner_validation_objective": 4.524617338833743,
+        "seconds": 5.2,
+        "train_loss": 4.4538144407601195
+      },
+      {
+        "epoch": 2,
+        "inner_validation_objective": 4.488494846918812,
+        "seconds": 7.6,
+        "train_loss": 4.541709061326651
+      },
+      {
+        "epoch": 3,
+        "inner_validation_objective": 4.463957734303932,
+        "seconds": 9.7,
+        "train_loss": 9.115900976904507
+      },
+      {
+        "epoch": 4,
+        "inner_validation_objective": 4.433160442195526,
+        "seconds": 11.7,
+        "train_loss": 8.477117415132193
+      },
+      {
+        "epoch": 5,
+        "inner_validation_objective": 4.408088475057523,
+        "seconds": 13.8,
+        "train_loss": 7.493958802058779
+      },
+      {
+        "epoch": 6,
+        "inner_validation_objective": 4.385634618262722,
+        "seconds": 15.8,
+        "train_loss": 7.083004104680028
+      },
+      {
+        "epoch": 7,
+        "inner_validation_objective": 4.37266603234696,
+        "seconds": 18.0,
+        "train_loss": 6.836240702661975
+      },
+      {
+        "epoch": 8,
+        "inner_validation_objective": 4.364417951400966,
+        "seconds": 20.1,
+        "train_loss": 8.568621766978296
+      },
+      {
+        "epoch": 9,
+        "inner_validation_objective": 4.359568530566071,
+        "seconds": 22.1,
+        "train_loss": 9.508025613324396
+      },
+      {
+        "epoch": 10,
+        "inner_validation_objective": 4.363613520583061,
+        "seconds": 24.0,
+        "train_loss": 9.422929648695321
+      },
+      {
+        "epoch": 11,
+        "inner_validation_objective": 4.3684637252598595,
+        "seconds": 25.9,
+        "train_loss": 8.85871122623312
+      },
+      {
+        "epoch": 12,
+        "inner_validation_objective": 4.37220852995572,
+        "seconds": 28.0,
+        "train_loss": 8.51005191638552
+      },
+      {
+        "epoch": 13,
+        "inner_validation_objective": 4.419680399437473,
+        "seconds": 30.2,
+        "train_loss": 6.151919307379887
+      },
+      {
+        "epoch": 14,
+        "inner_validation_objective": 4.417071956477753,
+        "seconds": 32.3,
+        "train_loss": 22.95767017068534
+      },
+      {
+        "epoch": 15,
+        "inner_validation_objective": 4.412547777776849,
+        "seconds": 34.4,
+        "train_loss": 7.762683186037787
+      },
+      {
+        "epoch": 16,
+        "inner_validation_objective": 4.475316139116679,
+        "seconds": 36.6,
+        "train_loss": 8.786554410539825
+      },
+      {
+        "epoch": 17,
+        "inner_validation_objective": 4.445607459708436,
+        "seconds": 38.7,
+        "train_loss": 12.78441671667428
+      }
+    ],
+    "inner_validation_objective": 4.359568530566071,
+    "n_epochs_run": 18,
+    "parameters": {
+      "count_adapter": 213,
+      "decoder": 36132,
+      "drive": 4656,
+      "mark_adapter": 345,
+      "state": 96,
+      "total": 41442
+    },
+    "selected_epoch": 9,
+    "stop_reason": "early_stopping",
+    "train_seconds": 38.7,
+    "window_steps": 1022
+  },
+  "horizons_minutes": [
+    5,
+    30,
+    120
+  ],
+  "peak_gpu_gib": 0.043848514556884766,
+  "physical_dt": true,
+  "run_id": "yuquan_zhangjiaqi__M2_mark_specific_feedback__seed3",
+  "seed": 3,
+  "source_commit": "f0c9e0750cb59ee9691634d1c57a36487fdc421c",
+  "status": "ok",
+  "subject": "yuquan_zhangjiaqi",
+  "support_hash": "edae0b8a28d47adb110017ea334f3c8ef9f4d1d7cf94274ec0e7a5acfeb23617",
+  "tag": "main",
+  "total_seconds": 41.0,
+  "train_event_rate_hz": 0.5400459046805844,
+  "uses_background": true,
+  "uses_multiband": true,
+  "uses_waveform": true
+}

@@ -1,0 +1,159 @@
+{
+  "arm": "M2_mark_specific_feedback",
+  "block_file": "/data/hfosp_group_event_state_v0_2/agent_c/checkpoints/perturbation_main/epilepsiae_384__M2_mark_specific_feedback__seed0__blocks.npz",
+  "checkpoint_config_hash": "f7ec3348f997fe94f1150248c53072b1d38ac1640c9ffe4adc2c2ebd00bd551e",
+  "checkpoint_file": "/data/hfosp_group_event_state_v0_2/agent_c/checkpoints/main/epilepsiae_384__M2_mark_specific_feedback__seed0__checkpoint.pt",
+  "config_hash": "5d21c272b0b2451b46a08eff1207cd06e2341c39960b4740a70d94785aa334ac",
+  "donor_pool_split": "train",
+  "horizons": {
+    "120": {
+      "status": "no_disjoint_exposure_target_pairs"
+    },
+    "30": {
+      "burden_effect": {
+        "mean_count_logscore": -6.413651466369629,
+        "mean_mark_logscore": -1.430642671055264,
+        "median_count_delta_vs_real": -0.00020456314086914062,
+        "median_mark_delta_vs_real": -4.458427429199219e-05,
+        "n_blocks_real_better_count": 2,
+        "n_blocks_real_better_mark": 2
+      },
+      "burst_thinning": {
+        "mean_count_logscore": -6.413912349277073,
+        "mean_mark_logscore": -1.430644816822476,
+        "median_count_delta_vs_real": 0.0,
+        "median_mark_delta_vs_real": 0.0,
+        "n_blocks_real_better_count": 3,
+        "n_blocks_real_better_mark": 2
+      },
+      "content_effect": {
+        "mean_count_logscore": -6.414039346906874,
+        "mean_mark_logscore": -1.4306732945972018,
+        "median_count_delta_vs_real": 8.249282836914062e-05,
+        "median_mark_delta_vs_real": 1.52587890625e-05,
+        "n_blocks_real_better_count": 9,
+        "n_blocks_real_better_mark": 6
+      },
+      "median_exposure_events": 53.0,
+      "n_disjoint_pairs": 9,
+      "no_event_feedback": {
+        "mean_count_logscore": -6.413651466369629,
+        "mean_mark_logscore": -1.430642671055264,
+        "median_count_delta_vs_real": -0.00020456314086914062,
+        "median_mark_delta_vs_real": -4.458427429199219e-05,
+        "n_blocks_real_better_count": 2,
+        "n_blocks_real_better_mark": 2
+      },
+      "rate_preserving_mark_shuffle": {
+        "mean_count_logscore": -6.413908534579807,
+        "mean_mark_logscore": -1.4306472539901733,
+        "median_count_delta_vs_real": -1.1444091796875e-05,
+        "median_mark_delta_vs_real": 3.5762786865234375e-07,
+        "n_blocks_real_better_count": 3,
+        "n_blocks_real_better_mark": 5
+      },
+      "real_sequence": {
+        "mean_count_logscore": -6.4139102300008135,
+        "mean_mark_logscore": -1.4306449625227187,
+        "median_count_delta_vs_real": 0.0,
+        "median_mark_delta_vs_real": 0.0,
+        "n_blocks_real_better_count": 0,
+        "n_blocks_real_better_mark": 0
+      },
+      "state_matched_mark_replacement": {
+        "mean_count_logscore": -6.414039346906874,
+        "mean_mark_logscore": -1.4306732945972018,
+        "median_count_delta_vs_real": 8.249282836914062e-05,
+        "median_mark_delta_vs_real": 1.52587890625e-05,
+        "n_blocks_real_better_count": 9,
+        "n_blocks_real_better_mark": 6
+      },
+      "status": "ok"
+    },
+    "5": {
+      "burden_effect": {
+        "mean_count_logscore": -4.373089696540207,
+        "mean_mark_logscore": -2.766344138833343,
+        "median_count_delta_vs_real": -8.106231689453125e-05,
+        "median_mark_delta_vs_real": 4.2319297790527344e-05,
+        "n_blocks_real_better_count": 5,
+        "n_blocks_real_better_mark": 40
+      },
+      "burst_thinning": {
+        "mean_count_logscore": -4.373175839908788,
+        "mean_mark_logscore": -2.766241599301823,
+        "median_count_delta_vs_real": 0.0,
+        "median_mark_delta_vs_real": 0.0,
+        "n_blocks_real_better_count": 4,
+        "n_blocks_real_better_mark": 24
+      },
+      "content_effect": {
+        "mean_count_logscore": -4.3732132520832,
+        "mean_mark_logscore": -2.766206694430992,
+        "median_count_delta_vs_real": 9.5367431640625e-06,
+        "median_mark_delta_vs_real": -5.0067901611328125e-06,
+        "n_blocks_real_better_count": 38,
+        "n_blocks_real_better_mark": 12
+      },
+      "median_exposure_events": 11.0,
+      "n_disjoint_pairs": 61,
+      "no_event_feedback": {
+        "mean_count_logscore": -4.373089696540207,
+        "mean_mark_logscore": -2.766344138833343,
+        "median_count_delta_vs_real": -8.106231689453125e-05,
+        "median_mark_delta_vs_real": 4.2319297790527344e-05,
+        "n_blocks_real_better_count": 5,
+        "n_blocks_real_better_mark": 40
+      },
+      "rate_preserving_mark_shuffle": {
+        "mean_count_logscore": -4.3731858144040965,
+        "mean_mark_logscore": -2.7662273860368574,
+        "median_count_delta_vs_real": 0.0,
+        "median_mark_delta_vs_real": 0.0,
+        "n_blocks_real_better_count": 20,
+        "n_blocks_real_better_mark": 20
+      },
+      "real_sequence": {
+        "mean_count_logscore": -4.373185697149058,
+        "mean_mark_logscore": -2.7662276068671803,
+        "median_count_delta_vs_real": 0.0,
+        "median_mark_delta_vs_real": 0.0,
+        "n_blocks_real_better_count": 0,
+        "n_blocks_real_better_mark": 0
+      },
+      "state_matched_mark_replacement": {
+        "mean_count_logscore": -4.3732132520832,
+        "mean_mark_logscore": -2.766206694430992,
+        "median_count_delta_vs_real": 9.5367431640625e-06,
+        "median_mark_delta_vs_real": -5.0067901611328125e-06,
+        "n_blocks_real_better_count": 38,
+        "n_blocks_real_better_mark": 12
+      },
+      "status": "ok"
+    }
+  },
+  "n_donors": 4096,
+  "perturbation_arms": [
+    "real_sequence",
+    "no_event_feedback",
+    "state_matched_mark_replacement",
+    "rate_preserving_mark_shuffle",
+    "burst_thinning"
+  ],
+  "primary_arms": [
+    "real_sequence",
+    "no_event_feedback",
+    "state_matched_mark_replacement"
+  ],
+  "run_id": "epilepsiae_384__M2_mark_specific_feedback__seed0",
+  "secondary_arms": [
+    "rate_preserving_mark_shuffle",
+    "burst_thinning"
+  ],
+  "seed": 0,
+  "status": "ok",
+  "subject": "epilepsiae_384",
+  "support_hash": "21d976485a328d4a5dd1c451a9442b9219e34952807063093f34c8b844814b93",
+  "tag": "main",
+  "total_seconds": 6.7
+}

@@ -1,0 +1,159 @@
+{
+  "arm": "M2_mark_specific_feedback",
+  "block_file": "/data/hfosp_group_event_state_v0_2/agent_c/checkpoints/perturbation_main/yuquan_sunyuanxin__M2_mark_specific_feedback__seed1__blocks.npz",
+  "checkpoint_config_hash": "badffdeeac8dc9f80dd11cc1670cb4af559642deb1960dbadfeb3890a44819fd",
+  "checkpoint_file": "/data/hfosp_group_event_state_v0_2/agent_c/checkpoints/main/yuquan_sunyuanxin__M2_mark_specific_feedback__seed1__checkpoint.pt",
+  "config_hash": "04d677aa3f6542d6f2ea96df5ffa1e698afde94c97cfc70616f9c4dcbe308b7a",
+  "donor_pool_split": "train",
+  "horizons": {
+    "120": {
+      "status": "no_disjoint_exposure_target_pairs"
+    },
+    "30": {
+      "burden_effect": {
+        "mean_count_logscore": -7.258816242218018,
+        "mean_mark_logscore": -4.338633060455322,
+        "median_count_delta_vs_real": -0.08139944076538086,
+        "median_mark_delta_vs_real": -0.08781206607818604,
+        "n_blocks_real_better_count": 0,
+        "n_blocks_real_better_mark": 0
+      },
+      "burst_thinning": {
+        "mean_count_logscore": -7.335021018981934,
+        "mean_mark_logscore": -4.4211790561676025,
+        "median_count_delta_vs_real": -0.005194664001464844,
+        "median_mark_delta_vs_real": -0.005266070365905762,
+        "n_blocks_real_better_count": 0,
+        "n_blocks_real_better_mark": 0
+      },
+      "content_effect": {
+        "mean_count_logscore": -7.413329124450684,
+        "mean_mark_logscore": -4.524113178253174,
+        "median_count_delta_vs_real": 0.07311344146728516,
+        "median_mark_delta_vs_real": 0.09766805171966553,
+        "n_blocks_real_better_count": 2,
+        "n_blocks_real_better_mark": 2
+      },
+      "median_exposure_events": 141.0,
+      "n_disjoint_pairs": 2,
+      "no_event_feedback": {
+        "mean_count_logscore": -7.258816242218018,
+        "mean_mark_logscore": -4.338633060455322,
+        "median_count_delta_vs_real": -0.08139944076538086,
+        "median_mark_delta_vs_real": -0.08781206607818604,
+        "n_blocks_real_better_count": 0,
+        "n_blocks_real_better_mark": 0
+      },
+      "rate_preserving_mark_shuffle": {
+        "mean_count_logscore": -7.337615013122559,
+        "mean_mark_logscore": -4.4265042543411255,
+        "median_count_delta_vs_real": -0.0026006698608398438,
+        "median_mark_delta_vs_real": 5.91278076171875e-05,
+        "n_blocks_real_better_count": 1,
+        "n_blocks_real_better_mark": 1
+      },
+      "real_sequence": {
+        "mean_count_logscore": -7.340215682983398,
+        "mean_mark_logscore": -4.426445126533508,
+        "median_count_delta_vs_real": 0.0,
+        "median_mark_delta_vs_real": 0.0,
+        "n_blocks_real_better_count": 0,
+        "n_blocks_real_better_mark": 0
+      },
+      "state_matched_mark_replacement": {
+        "mean_count_logscore": -7.413329124450684,
+        "mean_mark_logscore": -4.524113178253174,
+        "median_count_delta_vs_real": 0.07311344146728516,
+        "median_mark_delta_vs_real": 0.09766805171966553,
+        "n_blocks_real_better_count": 2,
+        "n_blocks_real_better_mark": 2
+      },
+      "status": "ok"
+    },
+    "5": {
+      "burden_effect": {
+        "mean_count_logscore": -3.9544105529785156,
+        "mean_mark_logscore": -2.6146129694851963,
+        "median_count_delta_vs_real": -0.00013065338134765625,
+        "median_mark_delta_vs_real": -0.0025534629821777344,
+        "n_blocks_real_better_count": 10,
+        "n_blocks_real_better_mark": 3
+      },
+      "burst_thinning": {
+        "mean_count_logscore": -3.958718169819225,
+        "mean_mark_logscore": -2.6172026937658135,
+        "median_count_delta_vs_real": 0.0,
+        "median_mark_delta_vs_real": -4.708766937255859e-06,
+        "n_blocks_real_better_count": 8,
+        "n_blocks_real_better_mark": 6
+      },
+      "content_effect": {
+        "mean_count_logscore": -3.9628131714734165,
+        "mean_mark_logscore": -2.618951212276112,
+        "median_count_delta_vs_real": -0.0002837181091308594,
+        "median_mark_delta_vs_real": 0.0011729001998901367,
+        "n_blocks_real_better_count": 11,
+        "n_blocks_real_better_mark": 14
+      },
+      "median_exposure_events": 22.0,
+      "n_disjoint_pairs": 22,
+      "no_event_feedback": {
+        "mean_count_logscore": -3.9544105529785156,
+        "mean_mark_logscore": -2.6146129694851963,
+        "median_count_delta_vs_real": -0.00013065338134765625,
+        "median_mark_delta_vs_real": -0.0025534629821777344,
+        "n_blocks_real_better_count": 10,
+        "n_blocks_real_better_mark": 3
+      },
+      "rate_preserving_mark_shuffle": {
+        "mean_count_logscore": -3.95958936214447,
+        "mean_mark_logscore": -2.617416734045202,
+        "median_count_delta_vs_real": -7.510185241699219e-06,
+        "median_mark_delta_vs_real": -2.86102294921875e-06,
+        "n_blocks_real_better_count": 10,
+        "n_blocks_real_better_mark": 10
+      },
+      "real_sequence": {
+        "mean_count_logscore": -3.9595151272687046,
+        "mean_mark_logscore": -2.6174104755575005,
+        "median_count_delta_vs_real": 0.0,
+        "median_mark_delta_vs_real": 0.0,
+        "n_blocks_real_better_count": 0,
+        "n_blocks_real_better_mark": 0
+      },
+      "state_matched_mark_replacement": {
+        "mean_count_logscore": -3.9628131714734165,
+        "mean_mark_logscore": -2.618951212276112,
+        "median_count_delta_vs_real": -0.0002837181091308594,
+        "median_mark_delta_vs_real": 0.0011729001998901367,
+        "n_blocks_real_better_count": 11,
+        "n_blocks_real_better_mark": 14
+      },
+      "status": "ok"
+    }
+  },
+  "n_donors": 2093,
+  "perturbation_arms": [
+    "real_sequence",
+    "no_event_feedback",
+    "state_matched_mark_replacement",
+    "rate_preserving_mark_shuffle",
+    "burst_thinning"
+  ],
+  "primary_arms": [
+    "real_sequence",
+    "no_event_feedback",
+    "state_matched_mark_replacement"
+  ],
+  "run_id": "yuquan_sunyuanxin__M2_mark_specific_feedback__seed1",
+  "secondary_arms": [
+    "rate_preserving_mark_shuffle",
+    "burst_thinning"
+  ],
+  "seed": 1,
+  "status": "ok",
+  "subject": "yuquan_sunyuanxin",
+  "support_hash": "241b4b03fcd0dc513082c8e5acd09f5fc69e51484f0a75e1adb916421758f637",
+  "tag": "main",
+  "total_seconds": 1.2
+}

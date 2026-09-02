@@ -1,0 +1,204 @@
+{
+  "agent_c_internal_diagnostic": {
+    "checkpoint_config_hash": "5698470dcd6379743eca0ea67de2f7ae48096bdd490d6e8579c389c9b3c05625",
+    "horizons": {
+      "120": {
+        "fraction_positive": 0.762667961793751,
+        "median_innovation_count_fraction": 0.00011969328625127673,
+        "median_mark_shift": {
+          "extent": 2.0811955891986145e-06,
+          "multiband": -1.2389135918056127e-05,
+          "participation": -2.201646566390991e-06,
+          "waveform_crossband": 1.5787392840138637e-05
+        },
+        "n_events": 6177
+      },
+      "30": {
+        "fraction_positive": 0.7675246883600453,
+        "median_innovation_count_fraction": 0.00024273956660181284,
+        "median_mark_shift": {
+          "extent": -4.594524796175392e-07,
+          "multiband": -3.2668434869265184e-05,
+          "participation": -1.1209243666598923e-06,
+          "waveform_crossband": 2.1062014639028348e-05
+        },
+        "n_events": 6177
+      },
+      "5": {
+        "fraction_positive": 0.7665533430467865,
+        "median_innovation_count_fraction": 0.0009393332875333726,
+        "median_mark_shift": {
+          "extent": -7.651746273040771e-06,
+          "multiband": -2.6984016585629433e-05,
+          "participation": -5.4823854043206666e-06,
+          "waveform_crossband": 3.34056094288826e-05
+        },
+        "n_events": 6177
+      }
+    },
+    "innovation_vs_realised_future_change": {
+      "120": {
+        "median_realised_change_events": -147.0,
+        "n_events": 6177,
+        "spearman": -0.05904474411636913
+      },
+      "30": {
+        "median_realised_change_events": -2.0,
+        "n_events": 6177,
+        "spearman": -0.04542049815052636
+      },
+      "5": {
+        "median_realised_change_events": 1.0,
+        "n_events": 6177,
+        "spearman": -0.03657932480591817
+      }
+    },
+    "producer_source": "agent_c_internal_frozen_arm",
+    "tier": "diagnostic_only_not_registry_bound"
+  },
+  "arm": "M2_mark_specific_feedback",
+  "array_file": "/data/hfosp_group_event_state_v0_2/agent_c/checkpoints/innovation_main/yuquan_gaolan__M2_mark_specific_feedback__seed2__innovation.npz",
+  "config_hash": "2fc3044c8ffb4e005ba6473367e4db77bbfefc07d7db113cfa9de46db429847e",
+  "n_events_traced": 6177,
+  "registry_bound_trajectory": {
+    "note": "agent A has published no verified producer for this patient; the registry-bound trajectory was not computed and was NOT substituted",
+    "per_producer": {
+      "B_multiscale": {
+        "detail": "entry is missing contract fields: ['producer_id', 'model_family', 'uses_waveform', 'uses_multiband', 'uses_background', 'event_update', 'feedback_model', 'physical_dt', 'training_objective', 'anchor_grid_minutes', 'source_commit', 'config_hash', 'checkpoint_hash']",
+        "entry": {
+          "result": "/data/hfosp_group_event_state_v0_2/agent_a/future_block/baseline_only/per_subject/yuquan_gaolan.json"
+        },
+        "producer_id": "B_multiscale",
+        "status": "invalid"
+      },
+      "P_local": {
+        "detail": "entry is missing contract fields: ['producer_id', 'model_family', 'uses_waveform', 'uses_multiband', 'uses_background', 'event_update', 'feedback_model', 'physical_dt', 'training_objective', 'anchor_grid_minutes', 'source_commit', 'config_hash', 'checkpoint_hash']",
+        "entry": {
+          "1": {
+            "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_gaolan/P_local/seed1/anchor_state.npz",
+            "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_gaolan/P_local/seed1/checkpoint.pt",
+            "checkpoint_sha256": "589c3d9664e17172903f6502d354c8d5ee48e36a16b87203c97863dd3967c080",
+            "config_hash": "89386005c96031919c1bdf728f150f894fc317f14c10b237873e76840d559575",
+            "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_gaolan/P_local/seed1/event_state.npz",
+            "n_epochs_run": 24,
+            "param_update_magnitude": {
+              "encoder": 0.021708538682432013,
+              "heads": 0.18703064351430973,
+              "state": 0.07758420754859634
+            },
+            "peak_memory_reserved_gb": 2.921332736,
+            "selected_epoch": 21,
+            "stop_reason": "max_epochs",
+            "train_seconds": 229.9
+          },
+          "2": {
+            "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_gaolan/P_local/seed2/anchor_state.npz",
+            "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_gaolan/P_local/seed2/checkpoint.pt",
+            "checkpoint_sha256": "3d03a38930229a492e5c9c8d7c592f0a428049b4ac2d2a7b30aabbc7cb511564",
+            "config_hash": "6d8b4aefb0127a7e5ea3abd589770eafa13fc502b8f909e81fa4f6bc336fccba",
+            "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_gaolan/P_local/seed2/event_state.npz",
+            "n_epochs_run": 23,
+            "param_update_magnitude": {
+              "encoder": 0.0175966926705655,
+              "heads": 0.1940565133615992,
+              "state": 0.07184890961931542
+            },
+            "peak_memory_reserved_gb": 2.921332736,
+            "selected_epoch": 18,
+            "stop_reason": "early_stopping",
+            "train_seconds": 221.5
+          },
+          "3": {
+            "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_gaolan/P_local/seed3/anchor_state.npz",
+            "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_gaolan/P_local/seed3/checkpoint.pt",
+            "checkpoint_sha256": "33bdde664a1a6571d715af877837bb912b07460184a5d00f1a8c8d298460fc52",
+            "config_hash": "96b2710e8497a0d37f2ee059a269e1a8703bcd82c023efb04ff3bd30eeff254c",
+            "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_gaolan/P_local/seed3/event_state.npz",
+            "n_epochs_run": 19,
+            "param_update_magnitude": {
+              "encoder": 0.019874258606713182,
+              "heads": 0.16641548694490688,
+              "state": 0.07473745061799375
+            },
+            "peak_memory_reserved_gb": 2.921332736,
+            "selected_epoch": 14,
+            "stop_reason": "early_stopping",
+            "train_seconds": 187.8
+          }
+        },
+        "producer_id": "P_local",
+        "status": "invalid"
+      },
+      "P_slow": {
+        "detail": "entry is missing contract fields: ['producer_id', 'model_family', 'uses_waveform', 'uses_multiband', 'uses_background', 'event_update', 'feedback_model', 'physical_dt', 'training_objective', 'anchor_grid_minutes', 'source_commit', 'config_hash', 'checkpoint_hash']",
+        "entry": {
+          "1": {
+            "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_gaolan/P_slow/seed1/anchor_state.npz",
+            "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_gaolan/P_slow/seed1/checkpoint.pt",
+            "checkpoint_sha256": "5602505d4667748faf5e429f7fa3a6c1cf4e5e6659988293c8883077fc31ed81",
+            "config_hash": "4a92886dc40871cd101138b38ba969bf52be270341131928075cfe7f60c6eabe",
+            "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_gaolan/P_slow/seed1/event_state.npz",
+            "n_epochs_run": 24,
+            "param_update_magnitude": {
+              "encoder": 0.023547501274386484,
+              "future": 0.4307890304476584,
+              "heads": 0.21965324074156098,
+              "state": 0.09086910176317092
+            },
+            "peak_memory_reserved_gb": 8.89192448,
+            "selected_epoch": 22,
+            "stop_reason": "max_epochs",
+            "train_seconds": 250.1
+          },
+          "2": {
+            "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_gaolan/P_slow/seed2/anchor_state.npz",
+            "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_gaolan/P_slow/seed2/checkpoint.pt",
+            "checkpoint_sha256": "87c1557b0d39fe5acc4e3a2f068f3e100b8ebb77719124b266d4d024562f8dac",
+            "config_hash": "4c682edd48c957c7703a3d25b6ea5e700dd123aaca3e2bfe3c0040fab6f841f4",
+            "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_gaolan/P_slow/seed2/event_state.npz",
+            "n_epochs_run": 12,
+            "param_update_magnitude": {
+              "encoder": 0.013621022144955813,
+              "future": 0.18045830179366332,
+              "heads": 0.13094521469366144,
+              "state": 0.05019898221401912
+            },
+            "peak_memory_reserved_gb": 8.89192448,
+            "selected_epoch": 7,
+            "stop_reason": "early_stopping",
+            "train_seconds": 129.0
+          },
+          "3": {
+            "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_gaolan/P_slow/seed3/anchor_state.npz",
+            "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_gaolan/P_slow/seed3/checkpoint.pt",
+            "checkpoint_sha256": "fe6593eab2672e76f583eb4ebc786819483036ccfc19dd1ead140445f9565d6f",
+            "config_hash": "a7026a4d4820914c6da9f2d2885c48a87bed919320c75fc9fbbc79006e5da8bf",
+            "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/yuquan_gaolan/P_slow/seed3/event_state.npz",
+            "n_epochs_run": 11,
+            "param_update_magnitude": {
+              "encoder": 0.012897074320135055,
+              "future": 0.16455797373234693,
+              "heads": 0.11164236953767641,
+              "state": 0.046822166831285233
+            },
+            "peak_memory_reserved_gb": 8.89192448,
+            "selected_epoch": 6,
+            "stop_reason": "early_stopping",
+            "train_seconds": 127.1
+          }
+        },
+        "producer_id": "P_slow",
+        "status": "invalid"
+      }
+    },
+    "producers_verified": [],
+    "status": "not_available"
+  },
+  "run_id": "yuquan_gaolan__M2_mark_specific_feedback__seed2",
+  "seed": 2,
+  "status": "ok",
+  "subject": "yuquan_gaolan",
+  "support_hash": "7d8f12873fef25ee9d503d97a78acabf13cbcedbfbe3e5c0e1064c5f090c0699",
+  "tag": "main",
+  "total_seconds": 0.8
+}

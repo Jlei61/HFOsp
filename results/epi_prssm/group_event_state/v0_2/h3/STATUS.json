@@ -1,0 +1,57 @@
+{
+  "agent": "agent_c",
+  "process_management": "exact PID/PGID from this lease only; never pkill -f",
+  "queue_owner": {
+    "alive": false,
+    "heartbeat_epoch": 1788314699.5474682,
+    "n_failed": 0,
+    "n_pending": 0,
+    "n_resource_failed": 0,
+    "n_running": 0,
+    "pgid": 1049011,
+    "phase": "innovation",
+    "pid": 1053057
+  },
+  "role": "H3 event feedback",
+  "stages": {
+    "impulse": {
+      "directory": "/tmp/hfosp_group_event_state_v02_c/results/epi_prssm/group_event_state/v0_2/h3/machine/impulse_main",
+      "n_files": 81,
+      "n_ok": 81,
+      "status": "ok",
+      "unreadable_or_failed": []
+    },
+    "innovation": {
+      "directory": "/tmp/hfosp_group_event_state_v02_c/results/epi_prssm/group_event_state/v0_2/h3/machine/innovation_main",
+      "n_files": 81,
+      "n_ok": 81,
+      "status": "ok",
+      "unreadable_or_failed": []
+    },
+    "models": {
+      "directory": "/tmp/hfosp_group_event_state_v02_c/results/epi_prssm/group_event_state/v0_2/h3/machine/main",
+      "n_files": 486,
+      "n_ok": 486,
+      "status": "ok",
+      "unreadable_or_failed": []
+    },
+    "perturbation": {
+      "directory": "/tmp/hfosp_group_event_state_v02_c/results/epi_prssm/group_event_state/v0_2/h3/machine/perturbation_main",
+      "n_files": 81,
+      "n_ok": 81,
+      "status": "ok",
+      "unreadable_or_failed": []
+    }
+  },
+  "support_artifacts": {
+    "background_coverage.json": true,
+    "background_table.json": true,
+    "coverage_support_postictal0.json": true,
+    "coverage_support_primary.json": true,
+    "event_features.json": true,
+    "seed_null_preregistration.md": true,
+    "training_protocol_freeze.md": true
+  },
+  "tag": "main",
+  "written_epoch": 1788316339.9436257
+}

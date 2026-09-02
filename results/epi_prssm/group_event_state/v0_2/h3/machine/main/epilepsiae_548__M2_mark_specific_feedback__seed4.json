@@ -1,0 +1,248 @@
+{
+  "arm": "M2_mark_specific_feedback",
+  "block_file": "/data/hfosp_group_event_state_v0_2/agent_c/checkpoints/main/epilepsiae_548__M2_mark_specific_feedback__seed4__blocks.npz",
+  "checkpoint_file": "/data/hfosp_group_event_state_v0_2/agent_c/checkpoints/main/epilepsiae_548__M2_mark_specific_feedback__seed4__checkpoint.pt",
+  "config_hash": "433dfcf6457ce37f7b6a7b9dda9021a86bc8f5888982711d4da3d0a71d77dae9",
+  "context": {
+    "dataset": "epilepsiae",
+    "n_contacts": 12,
+    "n_count_features": 4,
+    "n_disjoint_blocks": {
+      "120": 16,
+      "30": 145,
+      "5": 1140
+    },
+    "n_drive_features": 22,
+    "n_events_interictal": 24254,
+    "n_mark_features": 43,
+    "n_segments": 43,
+    "n_timeline_steps": 20791,
+    "split_hours": {
+      "development_test": 20.05099490000142,
+      "inner_validation": 20.050994900465014,
+      "train": 60.15298470073275
+    },
+    "subject": "epilepsiae_548",
+    "support_hash": "d6bb4b07efa29292de6fc36b7438f2b3888e6b955949327a9bf802123b5b9c1b"
+  },
+  "device": "cuda:0",
+  "evaluation": {
+    "development_test": {
+      "120": {
+        "mean_count_logscore": -7.832907199859619,
+        "mean_mark_group_logscore": {
+          "extent": -6.759854793548584,
+          "multiband": -29.459997177124023,
+          "participation": -58.863224029541016,
+          "waveform_crossband": -48.272151947021484
+        },
+        "mean_mark_logscore": -41.76921081542969,
+        "median_count_true": 194.0,
+        "n_blocks_with_events": 3,
+        "n_disjoint_blocks": 3,
+        "n_sliding_anchors_not_independent": 109,
+        "status": "ok"
+      },
+      "30": {
+        "mean_count_logscore": -8.124850273132324,
+        "mean_mark_group_logscore": {
+          "extent": -2.8180689811706543,
+          "multiband": -1.5406454801559448,
+          "participation": -3.145190477371216,
+          "waveform_crossband": -1.6127954721450806
+        },
+        "mean_mark_logscore": -2.099360942840576,
+        "median_count_true": 70.5,
+        "n_blocks_with_events": 28,
+        "n_disjoint_blocks": 28,
+        "n_sliding_anchors_not_independent": 189,
+        "status": "ok"
+      },
+      "5": {
+        "mean_count_logscore": -6.100158214569092,
+        "mean_mark_group_logscore": {
+          "extent": -1.6344859600067139,
+          "multiband": -1.8412141799926758,
+          "participation": -1.6847143173217773,
+          "waveform_crossband": -2.0157792568206787
+        },
+        "mean_mark_logscore": -1.8358924388885498,
+        "median_count_true": 6.0,
+        "n_blocks_with_events": 184,
+        "n_disjoint_blocks": 225,
+        "n_sliding_anchors_not_independent": 236,
+        "status": "ok"
+      }
+    },
+    "inner_validation": {
+      "120": {
+        "mean_count_logscore": -5.760912895202637,
+        "mean_mark_group_logscore": {
+          "extent": -1.6743791103363037,
+          "multiband": -2.6121983528137207,
+          "participation": -0.8799111247062683,
+          "waveform_crossband": -2.1983203887939453
+        },
+        "mean_mark_logscore": -1.9382141828536987,
+        "median_count_true": 70.0,
+        "n_blocks_with_events": 2,
+        "n_disjoint_blocks": 2,
+        "n_sliding_anchors_not_independent": 107,
+        "status": "ok"
+      },
+      "30": {
+        "mean_count_logscore": -6.411342620849609,
+        "mean_mark_group_logscore": {
+          "extent": -1.2827239036560059,
+          "multiband": -1.3965173959732056,
+          "participation": -1.1102007627487183,
+          "waveform_crossband": -1.47361421585083
+        },
+        "mean_mark_logscore": -1.331984281539917,
+        "median_count_true": 43.0,
+        "n_blocks_with_events": 30,
+        "n_disjoint_blocks": 31,
+        "n_sliding_anchors_not_independent": 205,
+        "status": "ok"
+      },
+      "5": {
+        "mean_count_logscore": -4.014091968536377,
+        "mean_mark_group_logscore": {
+          "extent": -1.649458646774292,
+          "multiband": -1.8659312725067139,
+          "participation": -1.3899617195129395,
+          "waveform_crossband": -2.000119686126709
+        },
+        "mean_mark_logscore": -1.758568525314331,
+        "median_count_true": 3.0,
+        "n_blocks_with_events": 160,
+        "n_disjoint_blocks": 229,
+        "n_sliding_anchors_not_independent": 236,
+        "status": "ok"
+      }
+    }
+  },
+  "event_update": true,
+  "feedback_model": "count_rate_plus_mark_edge",
+  "fit": {
+    "history": [
+      {
+        "epoch": 0,
+        "inner_validation_objective": 5.240765747786267,
+        "seconds": 3.1,
+        "train_loss": 3.169878772326878
+      },
+      {
+        "epoch": 1,
+        "inner_validation_objective": 4.778470424379887,
+        "seconds": 5.7,
+        "train_loss": 3.0684294070516316
+      },
+      {
+        "epoch": 2,
+        "inner_validation_objective": 3.9104368744940587,
+        "seconds": 7.9,
+        "train_loss": 2.823618885449001
+      },
+      {
+        "epoch": 3,
+        "inner_validation_objective": 3.769082823573436,
+        "seconds": 10.2,
+        "train_loss": 2.9260225091661725
+      },
+      {
+        "epoch": 4,
+        "inner_validation_objective": 3.694134918242722,
+        "seconds": 12.6,
+        "train_loss": 2.597624628884452
+      },
+      {
+        "epoch": 5,
+        "inner_validation_objective": 3.658543695802213,
+        "seconds": 15.0,
+        "train_loss": 2.5750081573213848
+      },
+      {
+        "epoch": 6,
+        "inner_validation_objective": 3.6685426176934413,
+        "seconds": 17.4,
+        "train_loss": 2.427820352145604
+      },
+      {
+        "epoch": 7,
+        "inner_validation_objective": 3.7386545309922563,
+        "seconds": 19.8,
+        "train_loss": 2.3643513458115715
+      },
+      {
+        "epoch": 8,
+        "inner_validation_objective": 3.832791280886295,
+        "seconds": 22.2,
+        "train_loss": 2.340141292129244
+      },
+      {
+        "epoch": 9,
+        "inner_validation_objective": 3.892576946657541,
+        "seconds": 24.7,
+        "train_loss": 2.3326588800975254
+      },
+      {
+        "epoch": 10,
+        "inner_validation_objective": 3.958409582531464,
+        "seconds": 27.2,
+        "train_loss": 2.314532120738711
+      },
+      {
+        "epoch": 11,
+        "inner_validation_objective": 3.966750278267809,
+        "seconds": 29.6,
+        "train_loss": 2.3226937523909976
+      },
+      {
+        "epoch": 12,
+        "inner_validation_objective": 4.010263347905402,
+        "seconds": 32.1,
+        "train_loss": 2.3019968271255493
+      },
+      {
+        "epoch": 13,
+        "inner_validation_objective": 4.005336877071496,
+        "seconds": 34.6,
+        "train_loss": 2.307903000286647
+      }
+    ],
+    "inner_validation_objective": 3.658543695802213,
+    "n_epochs_run": 14,
+    "parameters": {
+      "count_adapter": 213,
+      "decoder": 39624,
+      "drive": 4656,
+      "mark_adapter": 369,
+      "state": 96,
+      "total": 44958
+    },
+    "selected_epoch": 5,
+    "stop_reason": "early_stopping",
+    "train_seconds": 34.6,
+    "window_steps": 512
+  },
+  "horizons_minutes": [
+    5,
+    30,
+    120
+  ],
+  "peak_gpu_gib": 0.04874134063720703,
+  "physical_dt": true,
+  "run_id": "epilepsiae_548__M2_mark_specific_feedback__seed4",
+  "seed": 4,
+  "source_commit": "f0c9e0750cb59ee9691634d1c57a36487fdc421c",
+  "status": "ok",
+  "subject": "epilepsiae_548",
+  "support_hash": "d6bb4b07efa29292de6fc36b7438f2b3888e6b955949327a9bf802123b5b9c1b",
+  "tag": "main",
+  "total_seconds": 40.1,
+  "train_event_rate_hz": 0.024714761438073024,
+  "uses_background": true,
+  "uses_multiband": true,
+  "uses_waveform": true
+}

@@ -1,0 +1,661 @@
+{
+  "config": {
+    "horizons": [
+      5,
+      30,
+      120
+    ],
+    "hours": 120.0,
+    "lr": 0.0003,
+    "max_epochs": 60,
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "strengths": [
+      3.0,
+      10.0
+    ]
+  },
+  "runs": [
+    {
+      "arms": {
+        "M0_no_feedback": {
+          "held_out_count": 6.062144594329396,
+          "held_out_mark": 0.8009363745500941,
+          "held_out_objective": 3.433114753805328,
+          "n_epochs_run": 11,
+          "seconds": 20.9,
+          "selected_epoch": 2
+        },
+        "M1_count_rate_feedback": {
+          "held_out_count": 6.041223407362066,
+          "held_out_mark": 0.8006440842223025,
+          "held_out_objective": 3.422501842537588,
+          "n_epochs_run": 12,
+          "seconds": 21.4,
+          "selected_epoch": 3
+        },
+        "M2_mark_specific_feedback": {
+          "held_out_count": 6.070137571489982,
+          "held_out_mark": 0.8100752642054758,
+          "held_out_objective": 3.4416803443310577,
+          "n_epochs_run": 11,
+          "seconds": 19.7,
+          "selected_epoch": 2
+        }
+      },
+      "feedback_variance_fraction": 0.0,
+      "gain_M1_over_M0": 0.01061291126774,
+      "gain_M1_over_M0_count": 0.02092118696733003,
+      "gain_M1_over_M0_mark": 0.00029229032779165554,
+      "gain_M2_over_M1": -0.019178501793469582,
+      "gain_M2_over_M1_count": -0.02891416412791603,
+      "gain_M2_over_M1_mark": -0.009431179983173332,
+      "n_events": 51843,
+      "seed": 0,
+      "strength": 0.0,
+      "truth": "zero_feedback"
+    },
+    {
+      "arms": {
+        "M0_no_feedback": {
+          "held_out_count": 5.968981583152662,
+          "held_out_mark": 0.7777805967194041,
+          "held_out_objective": 3.373381089936033,
+          "n_epochs_run": 33,
+          "seconds": 57.4,
+          "selected_epoch": 24
+        },
+        "M1_count_rate_feedback": {
+          "held_out_count": 5.9931122264223236,
+          "held_out_mark": 0.7841952725460655,
+          "held_out_objective": 3.3886537494841944,
+          "n_epochs_run": 34,
+          "seconds": 62.9,
+          "selected_epoch": 25
+        },
+        "M2_mark_specific_feedback": {
+          "held_out_count": 5.994616786829022,
+          "held_out_mark": 0.7762184576554731,
+          "held_out_objective": 3.385417622242248,
+          "n_epochs_run": 33,
+          "seconds": 55.8,
+          "selected_epoch": 24
+        }
+      },
+      "feedback_variance_fraction": 0.0,
+      "gain_M1_over_M0": -0.015272659548161371,
+      "gain_M1_over_M0_count": -0.024130643269661967,
+      "gain_M1_over_M0_mark": -0.006414675826661331,
+      "gain_M2_over_M1": 0.0032361272419465514,
+      "gain_M2_over_M1_count": -0.0015045604066985518,
+      "gain_M2_over_M1_mark": 0.00797681489059232,
+      "n_events": 41198,
+      "seed": 1,
+      "strength": 0.0,
+      "truth": "zero_feedback"
+    },
+    {
+      "arms": {
+        "M0_no_feedback": {
+          "held_out_count": 5.849097000925164,
+          "held_out_mark": 0.6901122325915469,
+          "held_out_objective": 3.2696046167583557,
+          "n_epochs_run": 33,
+          "seconds": 64.0,
+          "selected_epoch": 24
+        },
+        "M1_count_rate_feedback": {
+          "held_out_count": 5.836229680257551,
+          "held_out_mark": 0.6904978364278255,
+          "held_out_objective": 3.263363758342688,
+          "n_epochs_run": 34,
+          "seconds": 74.7,
+          "selected_epoch": 25
+        },
+        "M2_mark_specific_feedback": {
+          "held_out_count": 5.867868231814444,
+          "held_out_mark": 0.6976157101717863,
+          "held_out_objective": 3.282741970993115,
+          "n_epochs_run": 33,
+          "seconds": 66.9,
+          "selected_epoch": 24
+        }
+      },
+      "feedback_variance_fraction": 0.0,
+      "gain_M1_over_M0": 0.006240858415667461,
+      "gain_M1_over_M0_count": 0.012867320667613313,
+      "gain_M1_over_M0_mark": -0.00038560383627861405,
+      "gain_M2_over_M1": -0.019378212650426718,
+      "gain_M2_over_M1_count": -0.03163855155689266,
+      "gain_M2_over_M1_mark": -0.007117873743960779,
+      "n_events": 54997,
+      "seed": 2,
+      "strength": 0.0,
+      "truth": "zero_feedback"
+    },
+    {
+      "arms": {
+        "M0_no_feedback": {
+          "held_out_count": 6.322327390241851,
+          "held_out_mark": 0.6542290933964926,
+          "held_out_objective": 3.488278241819172,
+          "n_epochs_run": 41,
+          "seconds": 72.4,
+          "selected_epoch": 32
+        },
+        "M1_count_rate_feedback": {
+          "held_out_count": 6.306522351132625,
+          "held_out_mark": 0.6522827376589251,
+          "held_out_objective": 3.4794025443957755,
+          "n_epochs_run": 43,
+          "seconds": 72.8,
+          "selected_epoch": 34
+        },
+        "M2_mark_specific_feedback": {
+          "held_out_count": 6.291812586442135,
+          "held_out_mark": 0.6483780185571698,
+          "held_out_objective": 3.4700953024996526,
+          "n_epochs_run": 43,
+          "seconds": 70.9,
+          "selected_epoch": 34
+        }
+      },
+      "feedback_variance_fraction": 0.41992017967026224,
+      "gain_M1_over_M0": 0.008875697423396556,
+      "gain_M1_over_M0_count": 0.015805039109225483,
+      "gain_M1_over_M0_mark": 0.0019463557375675178,
+      "gain_M2_over_M1": 0.009307241896122864,
+      "gain_M2_over_M1_count": 0.014709764690490346,
+      "gain_M2_over_M1_mark": 0.003904719101755272,
+      "n_events": 83977,
+      "seed": 0,
+      "strength": 3.0,
+      "truth": "count_feedback"
+    },
+    {
+      "arms": {
+        "M0_no_feedback": {
+          "held_out_count": 6.419867264597039,
+          "held_out_mark": 0.7494900945271031,
+          "held_out_objective": 3.5846786795620713,
+          "n_epochs_run": 16,
+          "seconds": 16.1,
+          "selected_epoch": 7
+        },
+        "M1_count_rate_feedback": {
+          "held_out_count": 6.417519163286857,
+          "held_out_mark": 0.7506885528564453,
+          "held_out_objective": 3.5841038580716513,
+          "n_epochs_run": 16,
+          "seconds": 22.1,
+          "selected_epoch": 7
+        },
+        "M2_mark_specific_feedback": {
+          "held_out_count": 6.436460504121187,
+          "held_out_mark": 0.7483594702761709,
+          "held_out_objective": 3.592409987198679,
+          "n_epochs_run": 16,
+          "seconds": 35.0,
+          "selected_epoch": 7
+        }
+      },
+      "feedback_variance_fraction": 0.5782067233006514,
+      "gain_M1_over_M0": 0.0005748214904199855,
+      "gain_M1_over_M0_count": 0.002348101310182038,
+      "gain_M1_over_M0_mark": -0.001198458329342178,
+      "gain_M2_over_M1": -0.008306129127027884,
+      "gain_M2_over_M1_count": -0.018941340834329523,
+      "gain_M2_over_M1_mark": 0.002329082580274422,
+      "n_events": 73973,
+      "seed": 1,
+      "strength": 3.0,
+      "truth": "count_feedback"
+    },
+    {
+      "arms": {
+        "M0_no_feedback": {
+          "held_out_count": 6.381270705227647,
+          "held_out_mark": 0.7903533871664384,
+          "held_out_objective": 3.5858120461970424,
+          "n_epochs_run": 35,
+          "seconds": 71.3,
+          "selected_epoch": 26
+        },
+        "M1_count_rate_feedback": {
+          "held_out_count": 6.379493238823265,
+          "held_out_mark": 0.8009390967884703,
+          "held_out_objective": 3.5902161678058677,
+          "n_epochs_run": 36,
+          "seconds": 73.7,
+          "selected_epoch": 27
+        },
+        "M2_mark_specific_feedback": {
+          "held_out_count": 6.369557649895335,
+          "held_out_mark": 0.8100041567423697,
+          "held_out_objective": 3.5897809033188524,
+          "n_epochs_run": 36,
+          "seconds": 80.1,
+          "selected_epoch": 27
+        }
+      },
+      "feedback_variance_fraction": 0.4732456787619099,
+      "gain_M1_over_M0": -0.004404121608825307,
+      "gain_M1_over_M0_count": 0.001777466404381478,
+      "gain_M1_over_M0_mark": -0.01058570962203187,
+      "gain_M2_over_M1": 0.00043526448701536324,
+      "gain_M2_over_M1_count": 0.009935588927930006,
+      "gain_M2_over_M1_mark": -0.00906505995389939,
+      "n_events": 88473,
+      "seed": 2,
+      "strength": 3.0,
+      "truth": "count_feedback"
+    },
+    {
+      "arms": {
+        "M0_no_feedback": {
+          "held_out_count": 6.938159705349133,
+          "held_out_mark": 0.817373303135046,
+          "held_out_objective": 3.8777665042420892,
+          "n_epochs_run": 15,
+          "seconds": 35.0,
+          "selected_epoch": 6
+        },
+        "M1_count_rate_feedback": {
+          "held_out_count": 6.935702237215909,
+          "held_out_mark": 0.817212602168179,
+          "held_out_objective": 3.876457419692044,
+          "n_epochs_run": 15,
+          "seconds": 37.9,
+          "selected_epoch": 6
+        },
+        "M2_mark_specific_feedback": {
+          "held_out_count": 6.935700631027586,
+          "held_out_mark": 0.813631851707349,
+          "held_out_objective": 3.8746662413674677,
+          "n_epochs_run": 15,
+          "seconds": 36.8,
+          "selected_epoch": 6
+        }
+      },
+      "feedback_variance_fraction": 0.833656299035109,
+      "gain_M1_over_M0": 0.001309084550045192,
+      "gain_M1_over_M0_count": 0.0024574681332234505,
+      "gain_M1_over_M0_mark": 0.00016070096686693347,
+      "gain_M2_over_M1": 0.0017911783245763147,
+      "gain_M2_over_M1_count": 1.6061883227891371e-06,
+      "gain_M2_over_M1_mark": 0.003580750460830062,
+      "n_events": 154087,
+      "seed": 0,
+      "strength": 10.0,
+      "truth": "count_feedback"
+    },
+    {
+      "arms": {
+        "M0_no_feedback": {
+          "held_out_count": 7.193473706405128,
+          "held_out_mark": 0.7015085220336914,
+          "held_out_objective": 3.94749111421941,
+          "n_epochs_run": 43,
+          "seconds": 90.0,
+          "selected_epoch": 34
+        },
+        "M1_count_rate_feedback": {
+          "held_out_count": 7.191104724646755,
+          "held_out_mark": 0.6978710804259378,
+          "held_out_objective": 3.9444879025363466,
+          "n_epochs_run": 43,
+          "seconds": 97.1,
+          "selected_epoch": 34
+        },
+        "M2_mark_specific_feedback": {
+          "held_out_count": 7.206168580853768,
+          "held_out_mark": 0.7030256536018336,
+          "held_out_objective": 3.954597117227801,
+          "n_epochs_run": 44,
+          "seconds": 91.5,
+          "selected_epoch": 35
+        }
+      },
+      "feedback_variance_fraction": 0.6915313692535076,
+      "gain_M1_over_M0": 0.003003211683063167,
+      "gain_M1_over_M0_count": 0.0023689817583729678,
+      "gain_M1_over_M0_mark": 0.0036374416077535887,
+      "gain_M2_over_M1": -0.010109214691454316,
+      "gain_M2_over_M1_count": -0.01506385620701245,
+      "gain_M2_over_M1_mark": -0.005154573175895738,
+      "n_events": 132451,
+      "seed": 1,
+      "strength": 10.0,
+      "truth": "count_feedback"
+    },
+    {
+      "arms": {
+        "M0_no_feedback": {
+          "held_out_count": 7.082060745458284,
+          "held_out_mark": 0.798642281710246,
+          "held_out_objective": 3.9403515135842646,
+          "n_epochs_run": 28,
+          "seconds": 60.9,
+          "selected_epoch": 19
+        },
+        "M1_count_rate_feedback": {
+          "held_out_count": 7.0838436144961126,
+          "held_out_mark": 0.8045062197452527,
+          "held_out_objective": 3.9441749171206824,
+          "n_epochs_run": 28,
+          "seconds": 65.8,
+          "selected_epoch": 19
+        },
+        "M2_mark_specific_feedback": {
+          "held_out_count": 7.076131574274821,
+          "held_out_mark": 0.8017621930136064,
+          "held_out_objective": 3.9389468836442134,
+          "n_epochs_run": 27,
+          "seconds": 67.6,
+          "selected_epoch": 18
+        }
+      },
+      "feedback_variance_fraction": 0.8949902193521835,
+      "gain_M1_over_M0": -0.0038234035364177466,
+      "gain_M1_over_M0_count": -0.0017828690378287604,
+      "gain_M1_over_M0_mark": -0.005863938035006733,
+      "gain_M2_over_M1": 0.005228033476468941,
+      "gain_M2_over_M1_count": 0.007712040221291794,
+      "gain_M2_over_M1_mark": 0.0027440267316463096,
+      "n_events": 153166,
+      "seed": 2,
+      "strength": 10.0,
+      "truth": "count_feedback"
+    },
+    {
+      "arms": {
+        "M0_no_feedback": {
+          "held_out_count": 6.768285869981684,
+          "held_out_mark": 1.215363308108396,
+          "held_out_objective": 3.9951496923755028,
+          "n_epochs_run": 47,
+          "seconds": 89.0,
+          "selected_epoch": 38
+        },
+        "M1_count_rate_feedback": {
+          "held_out_count": 6.252262097226375,
+          "held_out_mark": 1.0239949283554113,
+          "held_out_objective": 3.641259211694409,
+          "n_epochs_run": 60,
+          "seconds": 118.0,
+          "selected_epoch": 55
+        },
+        "M2_mark_specific_feedback": {
+          "held_out_count": 6.253039638391522,
+          "held_out_mark": 1.0224984738466552,
+          "held_out_objective": 3.6409011166966603,
+          "n_epochs_run": 60,
+          "seconds": 141.6,
+          "selected_epoch": 58
+        }
+      },
+      "feedback_variance_fraction": 0.3112492919740336,
+      "gain_M1_over_M0": 0.35389048068109386,
+      "gain_M1_over_M0_count": 0.5160237727553083,
+      "gain_M1_over_M0_mark": 0.19136837975298482,
+      "gain_M2_over_M1": 0.00035809499774863696,
+      "gain_M2_over_M1_count": -0.0007775411651467223,
+      "gain_M2_over_M1_mark": 0.0014964545087561287,
+      "n_events": 59797,
+      "seed": 0,
+      "strength": 3.0,
+      "truth": "mark_feedback"
+    },
+    {
+      "arms": {
+        "M0_no_feedback": {
+          "held_out_count": 5.858401357842404,
+          "held_out_mark": 0.8664600546125599,
+          "held_out_objective": 3.3654198926366017,
+          "n_epochs_run": 33,
+          "seconds": 71.3,
+          "selected_epoch": 24
+        },
+        "M1_count_rate_feedback": {
+          "held_out_count": 5.823704185668361,
+          "held_out_mark": 0.8641998144648344,
+          "held_out_objective": 3.346921763163127,
+          "n_epochs_run": 35,
+          "seconds": 81.6,
+          "selected_epoch": 26
+        },
+        "M2_mark_specific_feedback": {
+          "held_out_count": 5.819620378850179,
+          "held_out_mark": 0.8678609358606865,
+          "held_out_objective": 3.3467057827703965,
+          "n_epochs_run": 37,
+          "seconds": 84.0,
+          "selected_epoch": 28
+        }
+      },
+      "feedback_variance_fraction": 0.27650748724184443,
+      "gain_M1_over_M0": 0.018498129473474734,
+      "gain_M1_over_M0_count": 0.034697172174043445,
+      "gain_M1_over_M0_mark": 0.002260240147725523,
+      "gain_M2_over_M1": 0.00021598039273040825,
+      "gain_M2_over_M1_count": 0.004083806818181657,
+      "gain_M2_over_M1_mark": -0.0036611213958520628,
+      "n_events": 48628,
+      "seed": 1,
+      "strength": 3.0,
+      "truth": "mark_feedback"
+    },
+    {
+      "arms": {
+        "M0_no_feedback": {
+          "held_out_count": 6.275407270951704,
+          "held_out_mark": 0.8432890034178228,
+          "held_out_objective": 3.5593481371847635,
+          "n_epochs_run": 45,
+          "seconds": 100.2,
+          "selected_epoch": 36
+        },
+        "M1_count_rate_feedback": {
+          "held_out_count": 6.22224944630308,
+          "held_out_mark": 0.8269820007981296,
+          "held_out_objective": 3.524615723550605,
+          "n_epochs_run": 47,
+          "seconds": 132.2,
+          "selected_epoch": 38
+        },
+        "M2_mark_specific_feedback": {
+          "held_out_count": 6.19655364552183,
+          "held_out_mark": 0.8152144286050751,
+          "held_out_objective": 3.5058840370634528,
+          "n_epochs_run": 46,
+          "seconds": 136.3,
+          "selected_epoch": 37
+        }
+      },
+      "feedback_variance_fraction": 0.26942451994918337,
+      "gain_M1_over_M0": 0.034732413634158465,
+      "gain_M1_over_M0_count": 0.05315782464862373,
+      "gain_M1_over_M0_mark": 0.0163070026196932,
+      "gain_M2_over_M1": 0.018731686487152288,
+      "gain_M2_over_M1_count": 0.02569580078125,
+      "gain_M2_over_M1_mark": 0.011767572193054465,
+      "n_events": 62813,
+      "seed": 2,
+      "strength": 3.0,
+      "truth": "mark_feedback"
+    },
+    {
+      "arms": {
+        "M0_no_feedback": {
+          "held_out_count": 7.147178832423744,
+          "held_out_mark": 1.589293568499557,
+          "held_out_objective": 4.379919442758188,
+          "n_epochs_run": 12,
+          "seconds": 32.1,
+          "selected_epoch": 3
+        },
+        "M1_count_rate_feedback": {
+          "held_out_count": 7.138735246430174,
+          "held_out_mark": 1.5912656243373746,
+          "held_out_objective": 4.376661782937723,
+          "n_epochs_run": 12,
+          "seconds": 37.0,
+          "selected_epoch": 3
+        },
+        "M2_mark_specific_feedback": {
+          "held_out_count": 7.135759709554426,
+          "held_out_mark": 1.590706994363856,
+          "held_out_objective": 4.37488961892801,
+          "n_epochs_run": 12,
+          "seconds": 36.6,
+          "selected_epoch": 3
+        }
+      },
+      "feedback_variance_fraction": 0.6413599650230484,
+      "gain_M1_over_M0": 0.0032576598204645535,
+      "gain_M1_over_M0_count": 0.008443585993570757,
+      "gain_M1_over_M0_mark": -0.0019720558378175657,
+      "gain_M2_over_M1": 0.0017721640097132507,
+      "gain_M2_over_M1_count": 0.0029755368757475864,
+      "gain_M2_over_M1_mark": 0.0005586299735185207,
+      "n_events": 116083,
+      "seed": 0,
+      "strength": 10.0,
+      "truth": "mark_feedback"
+    },
+    {
+      "arms": {
+        "M0_no_feedback": {
+          "held_out_count": 6.937126342189369,
+          "held_out_mark": 1.2481856237367994,
+          "held_out_objective": 4.0977688715656475,
+          "n_epochs_run": 12,
+          "seconds": 28.4,
+          "selected_epoch": 3
+        },
+        "M1_count_rate_feedback": {
+          "held_out_count": 6.91656479538913,
+          "held_out_mark": 1.2344908376558632,
+          "held_out_objective": 4.080634533680436,
+          "n_epochs_run": 12,
+          "seconds": 32.5,
+          "selected_epoch": 3
+        },
+        "M2_mark_specific_feedback": {
+          "held_out_count": 6.917219682173296,
+          "held_out_mark": 1.2566877802451546,
+          "held_out_objective": 4.092041087621983,
+          "n_epochs_run": 12,
+          "seconds": 31.7,
+          "selected_epoch": 3
+        }
+      },
+      "feedback_variance_fraction": 0.7159154776821741,
+      "gain_M1_over_M0": 0.017134337885211792,
+      "gain_M1_over_M0_count": 0.020561546800239583,
+      "gain_M1_over_M0_mark": 0.013694786080936217,
+      "gain_M2_over_M1": -0.011406553941546882,
+      "gain_M2_over_M1_count": -0.0006548867841660311,
+      "gain_M2_over_M1_mark": -0.02219694258929139,
+      "n_events": 84594,
+      "seed": 1,
+      "strength": 10.0,
+      "truth": "mark_feedback"
+    },
+    {
+      "arms": {
+        "M0_no_feedback": {
+          "held_out_count": 6.750530480197742,
+          "held_out_mark": 1.623553767210009,
+          "held_out_objective": 4.191649951786249,
+          "n_epochs_run": 10,
+          "seconds": 28.1,
+          "selected_epoch": 1
+        },
+        "M1_count_rate_feedback": {
+          "held_out_count": 6.750133459647877,
+          "held_out_mark": 1.6407212237922513,
+          "held_out_objective": 4.20001938387332,
+          "n_epochs_run": 10,
+          "seconds": 34.4,
+          "selected_epoch": 1
+        },
+        "M2_mark_specific_feedback": {
+          "held_out_count": 6.750724682967628,
+          "held_out_mark": 1.6187521578455601,
+          "held_out_objective": 4.189350738433966,
+          "n_epochs_run": 10,
+          "seconds": 32.6,
+          "selected_epoch": 1
+        }
+      },
+      "feedback_variance_fraction": 0.6493088176162601,
+      "gain_M1_over_M0": -0.008369432087071083,
+      "gain_M1_over_M0_count": 0.00039702054986534563,
+      "gain_M1_over_M0_mark": -0.01716745658224217,
+      "gain_M2_over_M1": 0.010668645439354307,
+      "gain_M2_over_M1_count": -0.0005912233197511441,
+      "gain_M2_over_M1_mark": 0.021969065946691124,
+      "n_events": 108484,
+      "seed": 2,
+      "strength": 10.0,
+      "truth": "mark_feedback"
+    }
+  ],
+  "summary": {
+    "count_feedback|strength=10.0": {
+      "feedback_variance_fraction": 0.833656299035109,
+      "median_gain_M1_over_M0_count": 0.0023689817583729678,
+      "median_gain_M1_over_M0_mark": 0.00016070096686693347,
+      "median_gain_M2_over_M1_count": 1.6061883227891371e-06,
+      "median_gain_M2_over_M1_mark": 0.0027440267316463096,
+      "n_seeds": 3,
+      "n_seeds_M1_better_count": 2,
+      "n_seeds_M2_better_mark": 2
+    },
+    "count_feedback|strength=3.0": {
+      "feedback_variance_fraction": 0.4732456787619099,
+      "median_gain_M1_over_M0_count": 0.002348101310182038,
+      "median_gain_M1_over_M0_mark": -0.001198458329342178,
+      "median_gain_M2_over_M1_count": 0.009935588927930006,
+      "median_gain_M2_over_M1_mark": 0.002329082580274422,
+      "n_seeds": 3,
+      "n_seeds_M1_better_count": 3,
+      "n_seeds_M2_better_mark": 2
+    },
+    "mark_feedback|strength=10.0": {
+      "feedback_variance_fraction": 0.6493088176162601,
+      "median_gain_M1_over_M0_count": 0.008443585993570757,
+      "median_gain_M1_over_M0_mark": -0.0019720558378175657,
+      "median_gain_M2_over_M1_count": -0.0005912233197511441,
+      "median_gain_M2_over_M1_mark": 0.0005586299735185207,
+      "n_seeds": 3,
+      "n_seeds_M1_better_count": 3,
+      "n_seeds_M2_better_mark": 2
+    },
+    "mark_feedback|strength=3.0": {
+      "feedback_variance_fraction": 0.27650748724184443,
+      "median_gain_M1_over_M0_count": 0.05315782464862373,
+      "median_gain_M1_over_M0_mark": 0.0163070026196932,
+      "median_gain_M2_over_M1_count": 0.004083806818181657,
+      "median_gain_M2_over_M1_mark": 0.0014964545087561287,
+      "n_seeds": 3,
+      "n_seeds_M1_better_count": 3,
+      "n_seeds_M2_better_mark": 2
+    },
+    "zero_feedback|strength=0.0": {
+      "feedback_variance_fraction": 0.0,
+      "median_gain_M1_over_M0_count": 0.012867320667613313,
+      "median_gain_M1_over_M0_mark": -0.00038560383627861405,
+      "median_gain_M2_over_M1_count": -0.02891416412791603,
+      "median_gain_M2_over_M1_mark": -0.007117873743960779,
+      "n_seeds": 3,
+      "n_seeds_M1_better_count": 2,
+      "n_seeds_M2_better_mark": 1
+    }
+  },
+  "tier": "implementation_conformance_only_not_evidence_about_H3"
+}

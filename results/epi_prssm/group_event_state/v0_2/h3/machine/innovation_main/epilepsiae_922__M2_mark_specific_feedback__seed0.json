@@ -1,0 +1,204 @@
+{
+  "agent_c_internal_diagnostic": {
+    "checkpoint_config_hash": "f7ec3348f997fe94f1150248c53072b1d38ac1640c9ffe4adc2c2ebd00bd551e",
+    "horizons": {
+      "120": {
+        "fraction_positive": 0.037967497841040164,
+        "median_innovation_count_fraction": 0.0,
+        "median_mark_shift": {
+          "extent": -3.228585043757448e-08,
+          "multiband": 2.6325384538949947e-08,
+          "participation": -1.4406396076083183e-09,
+          "waveform_crossband": 6.495751048163356e-09
+        },
+        "n_events": 165589
+      },
+      "30": {
+        "fraction_positive": 0.1306487749790143,
+        "median_innovation_count_fraction": 0.0,
+        "median_mark_shift": {
+          "extent": -5.079588660805712e-08,
+          "multiband": 4.2119062015899544e-08,
+          "participation": 3.0850060284137726e-09,
+          "waveform_crossband": 1.0002763062288977e-08
+        },
+        "n_events": 165589
+      },
+      "5": {
+        "fraction_positive": 0.1337407678046247,
+        "median_innovation_count_fraction": 0.0,
+        "median_mark_shift": {
+          "extent": -3.0229177383489514e-08,
+          "multiband": 4.40515570687694e-08,
+          "participation": -2.3865140974521637e-09,
+          "waveform_crossband": 1.2044508501674045e-08
+        },
+        "n_events": 165589
+      }
+    },
+    "innovation_vs_realised_future_change": {
+      "120": {
+        "median_realised_change_events": -80.0,
+        "n_events": 165589,
+        "spearman": -0.015524398050935178
+      },
+      "30": {
+        "median_realised_change_events": 1.0,
+        "n_events": 165589,
+        "spearman": -0.020711733060317844
+      },
+      "5": {
+        "median_realised_change_events": -1.0,
+        "n_events": 165589,
+        "spearman": 0.019110121613411322
+      }
+    },
+    "producer_source": "agent_c_internal_frozen_arm",
+    "tier": "diagnostic_only_not_registry_bound"
+  },
+  "arm": "M2_mark_specific_feedback",
+  "array_file": "/data/hfosp_group_event_state_v0_2/agent_c/checkpoints/innovation_main/epilepsiae_922__M2_mark_specific_feedback__seed0__innovation.npz",
+  "config_hash": "ac0d6063d33cf9c389b217ed4ff519fd1d847ef21f85d0a463d7fe50928f30a4",
+  "n_events_traced": 165589,
+  "registry_bound_trajectory": {
+    "note": "agent A has published no verified producer for this patient; the registry-bound trajectory was not computed and was NOT substituted",
+    "per_producer": {
+      "B_multiscale": {
+        "detail": "entry is missing contract fields: ['producer_id', 'model_family', 'uses_waveform', 'uses_multiband', 'uses_background', 'event_update', 'feedback_model', 'physical_dt', 'training_objective', 'anchor_grid_minutes', 'source_commit', 'config_hash', 'checkpoint_hash']",
+        "entry": {
+          "result": "/data/hfosp_group_event_state_v0_2/agent_a/future_block/baseline_only/per_subject/epilepsiae_922.json"
+        },
+        "producer_id": "B_multiscale",
+        "status": "invalid"
+      },
+      "P_local": {
+        "detail": "entry is missing contract fields: ['producer_id', 'model_family', 'uses_waveform', 'uses_multiband', 'uses_background', 'event_update', 'feedback_model', 'physical_dt', 'training_objective', 'anchor_grid_minutes', 'source_commit', 'config_hash', 'checkpoint_hash']",
+        "entry": {
+          "1": {
+            "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_922/P_local/seed1/anchor_state.npz",
+            "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_922/P_local/seed1/checkpoint.pt",
+            "checkpoint_sha256": "116365983f44948c87688a4444ff94bf08c222f2c8b5a009b7a782062777c497",
+            "config_hash": "d3f48c230e75fc6ee191e498d1b5e35c9eb2be04cf2d5a3632dd5eeb0b944ef9",
+            "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_922/P_local/seed1/event_state.npz",
+            "n_epochs_run": 19,
+            "param_update_magnitude": {
+              "encoder": 0.029238204167115124,
+              "heads": 0.526367589551842,
+              "state": 0.20826832834746448
+            },
+            "peak_memory_reserved_gb": 1.084227584,
+            "selected_epoch": 14,
+            "stop_reason": "early_stopping",
+            "train_seconds": 1484.4
+          },
+          "2": {
+            "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_922/P_local/seed2/anchor_state.npz",
+            "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_922/P_local/seed2/checkpoint.pt",
+            "checkpoint_sha256": "e30ee75fa1684f0efabe153be099b19d1b53e8d50442e6ca19a85209488bce41",
+            "config_hash": "d2a3792aef80f61a64cd5c64fbd675a5710912cbf12d250900579e825792d7b3",
+            "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_922/P_local/seed2/event_state.npz",
+            "n_epochs_run": 13,
+            "param_update_magnitude": {
+              "encoder": 0.021919142173639664,
+              "heads": 0.43269632602716873,
+              "state": 0.18325009938798217
+            },
+            "peak_memory_reserved_gb": 1.084227584,
+            "selected_epoch": 8,
+            "stop_reason": "early_stopping",
+            "train_seconds": 1045.4
+          },
+          "3": {
+            "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_922/P_local/seed3/anchor_state.npz",
+            "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_922/P_local/seed3/checkpoint.pt",
+            "checkpoint_sha256": "402febb7da03c28697ab06e41f753d4b3eddeac6717970fb5013de6614317152",
+            "config_hash": "81fbf17f932c50aca6a8ed624c43e2af01bd71b65a1ebc205590da34c85341b4",
+            "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_922/P_local/seed3/event_state.npz",
+            "n_epochs_run": 10,
+            "param_update_magnitude": {
+              "encoder": 0.01836915311071989,
+              "heads": 0.36956712495325256,
+              "state": 0.1476100629937018
+            },
+            "peak_memory_reserved_gb": 1.084227584,
+            "selected_epoch": 5,
+            "stop_reason": "early_stopping",
+            "train_seconds": 787.2
+          }
+        },
+        "producer_id": "P_local",
+        "status": "invalid"
+      },
+      "P_slow": {
+        "detail": "entry is missing contract fields: ['producer_id', 'model_family', 'uses_waveform', 'uses_multiband', 'uses_background', 'event_update', 'feedback_model', 'physical_dt', 'training_objective', 'anchor_grid_minutes', 'source_commit', 'config_hash', 'checkpoint_hash']",
+        "entry": {
+          "1": {
+            "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_922/P_slow/seed1/anchor_state.npz",
+            "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_922/P_slow/seed1/checkpoint.pt",
+            "checkpoint_sha256": "e19e9893710bf49a4542c1b5e07ea2ab4969078246a432b24ac363b536ef7d89",
+            "config_hash": "8f78ba427ce5b8c6bc7b8b4e1a11aea2f8e7a077b4d848a92d793366f4291812",
+            "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_922/P_slow/seed1/event_state.npz",
+            "n_epochs_run": 17,
+            "param_update_magnitude": {
+              "encoder": 0.014112357357988582,
+              "future": 0.40074066650944573,
+              "heads": 0.21166316040999783,
+              "state": 0.139528784409128
+            },
+            "peak_memory_reserved_gb": 2.965372928,
+            "selected_epoch": 12,
+            "stop_reason": "early_stopping",
+            "train_seconds": 1415.7
+          },
+          "2": {
+            "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_922/P_slow/seed2/anchor_state.npz",
+            "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_922/P_slow/seed2/checkpoint.pt",
+            "checkpoint_sha256": "f439b99fc4c82258e83690f2f80b992bc48d896f4cec03483b2bd4bb4fafaabe",
+            "config_hash": "29f607660c7e6ad36da38f7175de907178daca8094d2923f44aaf802de899e27",
+            "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_922/P_slow/seed2/event_state.npz",
+            "n_epochs_run": 18,
+            "param_update_magnitude": {
+              "encoder": 0.016556891566123142,
+              "future": 0.42238126981256613,
+              "heads": 0.19138566844217125,
+              "state": 0.14125979435435015
+            },
+            "peak_memory_reserved_gb": 2.965372928,
+            "selected_epoch": 13,
+            "stop_reason": "early_stopping",
+            "train_seconds": 1430.4
+          },
+          "3": {
+            "anchor_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_922/P_slow/seed3/anchor_state.npz",
+            "checkpoint": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_922/P_slow/seed3/checkpoint.pt",
+            "checkpoint_sha256": "1072e76d27aa7030174031c67528ecfd850b3ab1de95fe2d02bc5e86d441bef6",
+            "config_hash": "d3c77b29f2a863b0d6d9c56add47d6c2ddb8d4d08bbb3796a9a5f8035fc683ce",
+            "event_state": "/data/hfosp_group_event_state_v0_2/agent_a/producers/main/runs/epilepsiae_922/P_slow/seed3/event_state.npz",
+            "n_epochs_run": 15,
+            "param_update_magnitude": {
+              "encoder": 0.01495756218683575,
+              "future": 0.41290084316421116,
+              "heads": 0.2050279710909066,
+              "state": 0.13611201895145297
+            },
+            "peak_memory_reserved_gb": 2.965372928,
+            "selected_epoch": 10,
+            "stop_reason": "early_stopping",
+            "train_seconds": 1333.2
+          }
+        },
+        "producer_id": "P_slow",
+        "status": "invalid"
+      }
+    },
+    "producers_verified": [],
+    "status": "not_available"
+  },
+  "run_id": "epilepsiae_922__M2_mark_specific_feedback__seed0",
+  "seed": 0,
+  "status": "ok",
+  "subject": "epilepsiae_922",
+  "support_hash": "9c6b4ecbacddc3fc2b880c814155818bdd2d0de06f5b8737954d49006051ccca",
+  "tag": "main",
+  "total_seconds": 61.1
+}

@@ -1,0 +1,459 @@
+{
+  "arm": "M2_mark_specific_feedback",
+  "array_file": "/data/hfosp_group_event_state_v0_2/agent_c/checkpoints/impulse_main/epilepsiae_916__M2_mark_specific_feedback__seed0__impulse.npz",
+  "checkpoint_config_hash": "f7ec3348f997fe94f1150248c53072b1d38ac1640c9ffe4adc2c2ebd00bd551e",
+  "config_hash": "26b087aa72c9813a308ed181a75779aaade9df81187fed8f9490a96ebd26e61a",
+  "continuous_axis_spearman": {
+    "120": {
+      "band0_log_energy_mean": 0.11410284921357,
+      "band0_peak_time_mean": 0.491605815983152,
+      "band1_log_energy_mean": 0.32314867747817616,
+      "band1_peak_time_mean": 0.3467607684194109,
+      "band2_log_energy_mean": -0.09885350218740746,
+      "band2_peak_time_mean": 0.3795600129295111,
+      "band3_log_energy_mean": -0.18651256193138982,
+      "band3_peak_time_mean": 0.45001222700045235,
+      "band4_log_energy_mean": -0.3987413523380494,
+      "band4_peak_time_mean": -0.0018386887127635285,
+      "log1p_dt_prev": 0.11302650834082889,
+      "log1p_size": -0.39140590773826467,
+      "log1p_span_ms": -0.28573451973563185,
+      "n_tied_groups": -0.2627226196332674,
+      "size_fraction": -0.39140590773826467
+    },
+    "30": {
+      "band0_log_energy_mean": 0.11408144829803009,
+      "band0_peak_time_mean": 0.4916216020866978,
+      "band1_log_energy_mean": 0.32315057930854363,
+      "band1_peak_time_mean": 0.34676353621584444,
+      "band2_log_energy_mean": -0.0988400509775455,
+      "band2_peak_time_mean": 0.3795689446536355,
+      "band3_log_energy_mean": -0.18649459420814118,
+      "band3_peak_time_mean": 0.4500030783731259,
+      "band4_log_energy_mean": -0.39872116123655454,
+      "band4_peak_time_mean": -0.0018342866498243585,
+      "log1p_dt_prev": 0.11300310818321439,
+      "log1p_size": -0.39135026648257465,
+      "log1p_span_ms": -0.28572389901789713,
+      "n_tied_groups": -0.26272981497420145,
+      "size_fraction": -0.39135026648257465
+    },
+    "5": {
+      "band0_log_energy_mean": 0.11399385695459799,
+      "band0_peak_time_mean": 0.4916309445030902,
+      "band1_log_energy_mean": 0.3231187322374066,
+      "band1_peak_time_mean": 0.3467556213830124,
+      "band2_log_energy_mean": -0.09887477590051691,
+      "band2_peak_time_mean": 0.3796010349982538,
+      "band3_log_energy_mean": -0.18651774469201113,
+      "band3_peak_time_mean": 0.45000650456769653,
+      "band4_log_energy_mean": -0.39869760318586595,
+      "band4_peak_time_mean": -0.0018218928351374692,
+      "log1p_dt_prev": 0.1129731122145712,
+      "log1p_size": -0.3912989255988274,
+      "log1p_span_ms": -0.2857643266052502,
+      "n_tied_groups": -0.2627718376049769,
+      "size_fraction": -0.3912989255988274
+    }
+  },
+  "descriptive_event_types": {
+    "n_types": 4,
+    "per_type": {
+      "0": {
+        "fraction_positive": {
+          "120": 0.8778973509933775,
+          "30": 0.8774834437086093,
+          "5": 0.8774834437086093
+        },
+        "median_count_fraction": {
+          "120": 0.012015911750495434,
+          "30": 0.013042852282524109,
+          "5": 0.011798419058322906
+        },
+        "n_events": 2416
+      },
+      "1": {
+        "fraction_positive": {
+          "120": 0.7300855826201448,
+          "30": 0.7300855826201448,
+          "5": 0.7300855826201448
+        },
+        "median_count_fraction": {
+          "120": 0.010850219987332821,
+          "30": 0.011778516694903374,
+          "5": 0.010659843683242798
+        },
+        "n_events": 3038
+      },
+      "2": {
+        "fraction_positive": {
+          "120": 0.9907825432656132,
+          "30": 0.9907825432656132,
+          "5": 0.990594431903687
+        },
+        "median_count_fraction": {
+          "120": 0.027840357273817062,
+          "30": 0.030264120548963547,
+          "5": 0.027384284883737564
+        },
+        "n_events": 5316
+      },
+      "3": {
+        "fraction_positive": {
+          "120": 0.8944068221720592,
+          "30": 0.8944068221720592,
+          "5": 0.8939051918735892
+        },
+        "median_count_fraction": {
+          "120": 0.013077632524073124,
+          "30": 0.01419874094426632,
+          "5": 0.012844576500356197
+        },
+        "n_events": 3987
+      }
+    },
+    "tier": "descriptive_only_depends_on_K"
+  },
+  "lag_profile_supplement": {
+    "0": {
+      "horizons": {
+        "120": {
+          "fraction_events_positive": 0.8925933455309345,
+          "iqr_count_fraction": [
+            0.007326128892600536,
+            0.027813155204057693
+          ],
+          "median_count_fraction": 0.018540892750024796,
+          "median_count_fraction_by_channel": {
+            "count": 0.0117490878328681,
+            "mark": 0.006875199731439352,
+            "total": 0.018540892750024796
+          },
+          "median_mark_shift": {
+            "extent": 0.0007474820013158023,
+            "multiband": -0.00024014749214984477,
+            "participation": -0.00038199126720428467,
+            "waveform_crossband": -0.0005085416487418115
+          },
+          "n_events": 14757
+        },
+        "30": {
+          "fraction_events_positive": 0.8925255810801653,
+          "iqr_count_fraction": [
+            0.007947388105094433,
+            0.030235381796956062
+          ],
+          "median_count_fraction": 0.020141243934631348,
+          "median_count_fraction_by_channel": {
+            "count": 0.012754025869071484,
+            "mark": 0.007467836607247591,
+            "total": 0.020141243934631348
+          },
+          "median_mark_shift": {
+            "extent": 0.00018208473920822144,
+            "multiband": 0.000593555741943419,
+            "participation": -0.0003485052438918501,
+            "waveform_crossband": -0.00029054799233563244
+          },
+          "n_events": 14757
+        },
+        "5": {
+          "fraction_events_positive": 0.8923222877278579,
+          "iqr_count_fraction": [
+            0.007186842616647482,
+            0.027358688414096832
+          ],
+          "median_count_fraction": 0.018228648230433464,
+          "median_count_fraction_by_channel": {
+            "count": 0.011539730243384838,
+            "mark": 0.006763818673789501,
+            "total": 0.018228648230433464
+          },
+          "median_mark_shift": {
+            "extent": 0.0004220902919769287,
+            "multiband": 0.0006280929083004594,
+            "participation": -0.0003619448689278215,
+            "waveform_crossband": -0.0004941306542605162
+          },
+          "n_events": 14757
+        }
+      },
+      "lag_seconds": 0.0
+    },
+    "1800": {
+      "horizons": {
+        "120": {
+          "fraction_events_positive": 0.879447042081724,
+          "iqr_count_fraction": [
+            0.0003476747078821063,
+            0.0013341258745640516
+          ],
+          "median_count_fraction": 0.0008906513685360551,
+          "median_count_fraction_by_channel": {
+            "count": 0.0005446963477879763,
+            "mark": 0.00034862873144447803,
+            "total": 0.0008906513685360551
+          },
+          "median_mark_shift": {
+            "extent": 1.665949821472168e-05,
+            "multiband": -1.0693818694562651e-05,
+            "participation": -1.593927481735591e-05,
+            "waveform_crossband": -1.8271473891218193e-05
+          },
+          "n_events": 14757
+        },
+        "30": {
+          "fraction_events_positive": 0.8788371620248018,
+          "iqr_count_fraction": [
+            0.00036723201628774405,
+            0.0014172096271067858
+          ],
+          "median_count_fraction": 0.0009441061411052942,
+          "median_count_fraction_by_channel": {
+            "count": 0.0005769009003415704,
+            "mark": 0.00037057112785987556,
+            "total": 0.0009441061411052942
+          },
+          "median_mark_shift": {
+            "extent": -6.037453658791492e-06,
+            "multiband": 3.5856042813975364e-05,
+            "participation": -1.3160209164198022e-05,
+            "waveform_crossband": -5.933133707003435e-06
+          },
+          "n_events": 14757
+        },
+        "5": {
+          "fraction_events_positive": 0.8779562241648031,
+          "iqr_count_fraction": [
+            0.00032000892679207027,
+            0.0012429326307028532
+          ],
+          "median_count_fraction": 0.0008281320333480835,
+          "median_count_fraction_by_channel": {
+            "count": 0.0005050980835221708,
+            "mark": 0.00032573280623182654,
+            "total": 0.0008281320333480835
+          },
+          "median_mark_shift": {
+            "extent": 3.938873760489514e-06,
+            "multiband": 3.9539943827548996e-05,
+            "participation": -1.1906648978765588e-05,
+            "waveform_crossband": -1.0210017535428051e-05
+          },
+          "n_events": 14757
+        }
+      },
+      "lag_seconds": 1800.0
+    },
+    "300": {
+      "horizons": {
+        "120": {
+          "fraction_events_positive": 0.8904926475570916,
+          "iqr_count_fraction": [
+            0.0035903379321098328,
+            0.013610119000077248
+          ],
+          "median_count_fraction": 0.009089522995054722,
+          "median_count_fraction_by_channel": {
+            "count": 0.005741805303841829,
+            "mark": 0.0034008503425866365,
+            "total": 0.009089522995054722
+          },
+          "median_mark_shift": {
+            "extent": 0.00033117333077825606,
+            "multiband": -0.00012046409392496571,
+            "participation": -0.00018904854368884116,
+            "waveform_crossband": -0.0002387898857705295
+          },
+          "n_events": 14757
+        },
+        "30": {
+          "fraction_events_positive": 0.8904926475570916,
+          "iqr_count_fraction": [
+            0.0038878002669662237,
+            0.014771735295653343
+          ],
+          "median_count_fraction": 0.009862098842859268,
+          "median_count_fraction_by_channel": {
+            "count": 0.006224852986633778,
+            "mark": 0.00368988118134439,
+            "total": 0.009862098842859268
+          },
+          "median_mark_shift": {
+            "extent": 7.773687684675679e-05,
+            "multiband": 0.0002919211983680725,
+            "participation": -0.00017786957323551178,
+            "waveform_crossband": -0.00014658774307463318
+          },
+          "n_events": 14757
+        },
+        "5": {
+          "fraction_events_positive": 0.8904926475570916,
+          "iqr_count_fraction": [
+            0.0035099450033158064,
+            0.013336109928786755
+          ],
+          "median_count_fraction": 0.008904770016670227,
+          "median_count_fraction_by_channel": {
+            "count": 0.005618082359433174,
+            "mark": 0.0033307585399597883,
+            "total": 0.008904770016670227
+          },
+          "median_mark_shift": {
+            "extent": 0.0001966307609109208,
+            "multiband": 0.00030926946783438325,
+            "participation": -0.00018258516502100974,
+            "waveform_crossband": -0.0002393826434854418
+          },
+          "n_events": 14757
+        }
+      },
+      "lag_seconds": 300.0
+    },
+    "7200": {
+      "horizons": {
+        "120": {
+          "fraction_events_positive": 0.862302636037135,
+          "iqr_count_fraction": [
+            1.7166285033454187e-05,
+            6.628256232943386e-05
+          ],
+          "median_count_fraction": 4.482369695324451e-05,
+          "median_count_fraction_by_channel": {
+            "count": 2.47958396357717e-05,
+            "mark": 1.9550514480215497e-05,
+            "total": 4.482369695324451e-05
+          },
+          "median_mark_shift": {
+            "extent": -3.8743019104003906e-07,
+            "multiband": 2.9516715471800126e-07,
+            "participation": 6.370246410369873e-07,
+            "waveform_crossband": -3.180108478773036e-07
+          },
+          "n_events": 14757
+        },
+        "30": {
+          "fraction_events_positive": 0.8577624178356035,
+          "iqr_count_fraction": [
+            1.5258905477821827e-05,
+            6.17523182881996e-05
+          ],
+          "median_count_fraction": 4.100883597857319e-05,
+          "median_count_fraction_by_channel": {
+            "count": 2.2650021492154337e-05,
+            "mark": 1.8835246009984985e-05,
+            "total": 4.100883597857319e-05
+          },
+          "median_mark_shift": {
+            "extent": -3.66816925634339e-06,
+            "multiband": 4.458551757124951e-06,
+            "participation": 1.8545737248132355e-06,
+            "waveform_crossband": 3.0836090445518494e-06
+          },
+          "n_events": 14757
+        },
+        "5": {
+          "fraction_events_positive": 0.8480721013756184,
+          "iqr_count_fraction": [
+            1.0490472959645558e-05,
+            4.5300555939320475e-05
+          ],
+          "median_count_fraction": 2.9802766221109778e-05,
+          "median_count_fraction_by_channel": {
+            "count": 1.5735749911982566e-05,
+            "mark": 1.430521751899505e-05,
+            "total": 2.9802766221109778e-05
+          },
+          "median_mark_shift": {
+            "extent": -4.0059289858618286e-06,
+            "multiband": 5.293792582961032e-06,
+            "participation": 2.271806124554132e-06,
+            "waveform_crossband": 3.6910105336573906e-06
+          },
+          "n_events": 14757
+        }
+      },
+      "lag_seconds": 7200.0
+    }
+  },
+  "mark_group_names": [
+    "extent",
+    "multiband",
+    "participation",
+    "waveform_crossband"
+  ],
+  "n_events_scored": 14757,
+  "primary": {
+    "horizons": {
+      "120": {
+        "fraction_events_positive": 0.8925933455309345,
+        "iqr_count_fraction": [
+          0.007326128892600536,
+          0.027813155204057693
+        ],
+        "median_count_fraction": 0.018540892750024796,
+        "median_count_fraction_by_channel": {
+          "count": 0.0117490878328681,
+          "mark": 0.006875199731439352,
+          "total": 0.018540892750024796
+        },
+        "median_mark_shift": {
+          "extent": 0.0007474820013158023,
+          "multiband": -0.00024014749214984477,
+          "participation": -0.00038199126720428467,
+          "waveform_crossband": -0.0005085416487418115
+        },
+        "n_events": 14757
+      },
+      "30": {
+        "fraction_events_positive": 0.8925255810801653,
+        "iqr_count_fraction": [
+          0.007947388105094433,
+          0.030235381796956062
+        ],
+        "median_count_fraction": 0.020141243934631348,
+        "median_count_fraction_by_channel": {
+          "count": 0.012754025869071484,
+          "mark": 0.007467836607247591,
+          "total": 0.020141243934631348
+        },
+        "median_mark_shift": {
+          "extent": 0.00018208473920822144,
+          "multiband": 0.000593555741943419,
+          "participation": -0.0003485052438918501,
+          "waveform_crossband": -0.00029054799233563244
+        },
+        "n_events": 14757
+      },
+      "5": {
+        "fraction_events_positive": 0.8923222877278579,
+        "iqr_count_fraction": [
+          0.007186842616647482,
+          0.027358688414096832
+        ],
+        "median_count_fraction": 0.018228648230433464,
+        "median_count_fraction_by_channel": {
+          "count": 0.011539730243384838,
+          "mark": 0.006763818673789501,
+          "total": 0.018228648230433464
+        },
+        "median_mark_shift": {
+          "extent": 0.0004220902919769287,
+          "multiband": 0.0006280929083004594,
+          "participation": -0.0003619448689278215,
+          "waveform_crossband": -0.0004941306542605162
+        },
+        "n_events": 14757
+      }
+    },
+    "lag_seconds": 0.0
+  },
+  "reference_state_source": "median development_test anchor state",
+  "run_id": "epilepsiae_916__M2_mark_specific_feedback__seed0",
+  "seed": 0,
+  "status": "ok",
+  "subject": "epilepsiae_916",
+  "support_hash": "0f97012c40d70d00e015d49316f5c3dccf51424b28a9f7da36842ae28a9cc02c",
+  "tag": "main",
+  "total_seconds": 20.1
+}
