@@ -27,9 +27,9 @@ import torch
 from torch import Tensor, nn
 
 from src.topic5_group_event_state.v032_model.evaluate import block_bootstrap_mean_ci  # re-use
-from src.topic5_group_event_state.v032_model.readout import nb_log_prob
 from src.topic5_group_event_state.v032_model.shift import block_circular_donor
 from src.topic5_group_event_state.v032_model.state import anchor_states
+from src.topic5_group_event_state.v033_evaluator import canonical as C
 
 from .data import DataView
 from .models import FlexibleResidualStateModel
@@ -66,7 +66,7 @@ def _saturated_nll(y: np.ndarray, log_r: np.ndarray) -> float:
     for b in range(y.shape[1]):
         yb = torch.from_numpy(y[:, b].astype(np.float32))
         mu = torch.clamp(yb, min=1e-8)
-        total += (-nb_log_prob(yb, mu, torch.tensor(float(log_r[b])))).numpy()
+        total += C.nb_nll_torch(yb, torch.log(mu), torch.tensor(float(log_r[b]))).numpy()
     return float(total.mean())
 
 
@@ -144,7 +144,9 @@ def oracle_head_fit(trainable: Trainable, view: DataView, cfg: RecipeConfig, tru
 
     def nll(idx: Tensor) -> Tensor:
         log_mu = log_mu_h[idx] + alpha * head(zs[idx])
-        per_bin = torch.stack([-nb_log_prob(y[idx, b], torch.exp(log_mu[:, b]), log_r[b]) for b in range(view.n_bins)], dim=1)
+        per_bin = torch.stack([
+            C.nb_nll_torch(y[idx, b], log_mu[:, b], log_r[b]) for b in range(view.n_bins)
+        ], dim=1)
         return per_bin.sum(dim=1)
 
     for _ in range(int(steps)):

@@ -7,6 +7,7 @@ import pytest
 import torch
 from torch import nn
 
+from src.topic5_group_event_state.v033_evaluator import canonical as C
 from src.topic5_group_event_state.v033_training_lab.data import build_view
 from src.topic5_group_event_state.v033_training_lab.models import (
     ArchConfig,
@@ -160,13 +161,22 @@ def test_m9_count_profile_trainable_produces_per_anchor_terms_on_train_and_inner
     assert terms.nll.shape == (n,) and terms.per_bin_nll.shape == (n, 3) and terms.weights.shape == (n,)
     assert terms.modulation.shape == (n, 3) and terms.state_std.shape == (n, model.state_dim)
     assert torch.allclose(terms.nll, terms.per_bin_nll.sum(dim=1))
-    assert terms.nll.requires_grad and terms.nll.dtype == torch.float32
+    assert terms.nll.requires_grad and terms.nll.dtype == torch.float64
+    manual = torch.stack([
+        C.nb_nll_torch(terms.y[:, b], terms.log_mu[:, b], model.adapter.log_r[b])
+        for b in range(view.n_bins)
+    ], dim=1)
+    assert torch.equal(terms.per_bin_nll, manual)
     assert abs(float(terms.weights.mean()) - 1.0) < 1e-6
     val = trainable.loss_terms(model, view, "inner_val", device=CPU, differentiable_statistics=False,
                                sampling="anchor_balanced", lookback_seconds=7200.0)
     assert val.nll.shape == (view.n("inner_val"),)
     h = trainable.h_only_nll(view, "inner_val")
     assert h.shape == (view.n("inner_val"),) and np.isfinite(h).all()
+    y = view.counts[view.phase_index["inner_val"]]
+    manual_h = sum(C.nb_nll(y[:, b], view.log_mu_h[view.phase_index["inner_val"], b], view.log_r_h[b])
+                   for b in range(view.n_bins))
+    assert np.allclose(h, manual_h, atol=1e-10)
     with pytest.raises(KeyError):
         trainable.loss_terms(model, view, "dev_test", device=CPU, differentiable_statistics=False,
                              sampling="anchor_balanced", lookback_seconds=7200.0)

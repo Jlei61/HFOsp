@@ -16,7 +16,7 @@ import numpy as np
 import torch
 from torch import Tensor, nn
 
-from src.topic5_group_event_state.v032_model.readout import nb_log_prob  # re-use, do not re-invent
+from src.topic5_group_event_state.v033_evaluator import canonical as C
 
 from .data import DataView
 from .models import ArchConfig, FlexibleResidualStateModel, build_flexible_model
@@ -117,7 +117,7 @@ class ResidualCountTrainable:
         y = t["counts"][idx_t]
         log_mu = model.adapter(log_mu_h, state_std)
         per_bin = torch.stack([
-            -nb_log_prob(y[:, b], torch.exp(log_mu[:, b]), model.adapter.log_r[b]) for b in range(model.n_bins)
+            C.nb_nll_torch(y[:, b], log_mu[:, b], model.adapter.log_r[b]) for b in range(model.n_bins)
         ], dim=1)
         weights = torch.from_numpy(view.sample_weights(phase, sampling, lookback_seconds=lookback_seconds)).to(device, torch.float32)
         return LossTerms(idx=idx, nll=per_bin.sum(dim=1), per_bin_nll=per_bin, weights=weights,
@@ -131,7 +131,8 @@ class ResidualCountTrainable:
         log_mu_h = torch.from_numpy(view.log_mu_h[idx].astype(np.float32))
         total = torch.zeros(idx.size, dtype=torch.float32)
         for b in range(view.n_bins):
-            total = total - nb_log_prob(y[:, b], torch.exp(log_mu_h[:, b]), torch.tensor(float(view.log_r_h[b])))
+            total = total + C.nb_nll_torch(
+                y[:, b], log_mu_h[:, b], torch.tensor(float(view.log_r_h[b])))
         return total.numpy().astype(np.float64)
 
 
