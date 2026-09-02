@@ -1,113 +1,101 @@
-# Group-Event State v0.3.2 阶段收口（白话版）
+# Group-Event State v0.3.2 阶段收口（白话版，复审更正）
 
-**日期：** 2026-09-02  
-**状态：** `V0_3_2_INSTRUMENT_UNSTABLE_DEVELOPMENT_CLOSEOUT`  
-**范围：** 三位 development 患者、三个 seed；正式封存分区未打开。
+**日期：** 2026-09-02
+
+**状态：** `V0_3_2_PIPELINE_ACCEPTED_ASSAY_POWER_UNCALIBRATED_CLOSEOUT`
+
+**范围：** development-only；正式封存分区未打开。
 
 ## 一句话结论
 
-两条线已经接到同一个终点：数据和对照体系能完整运行，12 维事件状态也确实被训练并导出；但是这把尺子对人工植入的“真状态”表现出明显的 seed 依赖和非单调恢复，因此人体结果目前既不能证明发现了慢状态，也不能证明慢状态不存在。
+v0.3.2 已经把数据、显式历史、候选状态、错时对照和冻结 grammar probe 接成一条可复现管线；但它还没有把“多大真效应能够被稳定找回”定标清楚，而且只用未来事件数训练状态。因此，这一轮既没有发现共享慢状态，也没有排除它。
 
-## 两条线各自完成了什么
+## 这轮正式验收什么
 
-### 评价线
+本轮验收的是工程和测量地基：27 位患者的记录支持与资格审计完成，三位开发患者各三个 seed 的 12 维候选状态、H1 count 评价和 H2a grammar 迁移均已跑齐，相关 65 项测试通过，H2b、H3 和 sealed partition 均未运行。
 
-- 27 位患者的有效记录区间、检测器盲区、触点支持、数据资格和多尺度历史基线均已生成。
-- 三位固定开发患者完成 H1：比较 `H`、`H+正确时刻状态`、`H+错时状态` 和 `H+平均状态`。
-- 同三位患者完成 H2a：冻结状态后，只训练低容量 grammar adapter，分别评价继续/停止、继续时大小、具体触点集合和后续继续传播。
-- 所有比较都在患者内、seed 内配对；测试时间块没有重新拟合。
+当前状态应拆成六句：
 
-### 模型线
+```text
+pipeline：通过
+assay power：未定标
+H1：未决，30 min 合格分母只有 1 人
+H2a：未决，训练目标与迁移目标不一致
+H2b：未运行
+H3：未运行
+```
 
-- 训练了固定 5/30/120 分钟记忆尺度的 12 维 marked leaky bank，而不是旧的 96 维自由 RNN。
-- 三位患者 × 三个 seed 的主模型、随机 reservoir 对照和 open-loop 状态轨迹均已完成。
-- 9 条冻结状态轨迹已写入统一 registry，供 H1/H2a 读取。
-- 空真值和阳性真值的合成实验均已运行；另补做了效应强度阶梯。
+## 为什么不再叫“仪器不稳定”
 
-没有继续 repaired-RNN 架构扫描。原因不是算力或 OOM，而是预先规定的第一道科学条件——阳性合成恢复——没有可靠通过；此时比较更复杂架构只会扩大一个尚未定标的实验。
+空真值 6 次中没有观察到假阳性，但 6 次只够作 sanity check，不能证明特异性已经可靠建立。
 
-## 最关键的新发现：尺子不会稳定找回已知真状态
+阳性合成中，连续的 held-out gain 随人工效应增强而增加：
 
-空真值结果是干净的：6 次中 0 次假阳性。这说明模型目前不容易凭空编造一个稳定的状态增益。
+| 人工效应 β | median gain（nats/anchor） | CI 规则通过数 |
+|---:|---:|---:|
+| 0.35，新 seed | +0.0227 | 2/3 |
+| 0.70 | +0.1931 | 3/3 |
+| 1.40 | +0.2738 | 1/3 |
 
-但预先登记的阳性实验 3 次中 0 次通过。我们随后用新 seed 重复同样强度，并提高真效应：
+真正不稳定的是“3 次重复里有几次 CI 下界过零”这个二值判据，而不是连续 gain。每档只有三个 replicate，2/3、3/3 和 1/3 的波动不能证明更强效应更难恢复。
 
-| 人工真效应强度 | 找回次数 | 判定 |
-|---:|---:|---|
-| 0.35，原预登记组 | 0/3 | 失败 |
-| 0.35，新 seed | 2/3 | 通过但 seed 依赖 |
-| 0.70 | 3/3 | 通过 |
-| 1.40 | 1/3 | 反而失败 |
+所以正确口径是：**positive-recovery power 未定标**。下一版必须用更多 replicate、oracle effect 和分层 recovery 定位问题。
 
-更强的真效应没有带来更稳定的恢复，说明问题不只是“效应太小”，而是训练或计数模型在部分数据生成条件下不稳定。因而当前人体阴性不能被解释为生物学阴性。
+## H1：过去群体 IED 是否形成了超出近期统计的预测状态
 
-## H1：事件历史之外，是否还有正确时刻的慢预测状态
+主任务预测未来 30 分钟事件数，并比较：
 
-主任务是预测未来 30 分钟事件数。正值才支持状态，且必须同时满足：
+1. `H+正确时刻状态` 对显式多尺度历史 `H`；
+2. 正确时刻状态对 block-shifted 状态；
+3. 动态状态对训练期平均状态。
 
-1. 正确状态胜过显式历史 `H`；
-2. 正确状态胜过错时状态；
-3. 动态状态胜过训练期平均状态。
+三位开发患者中，只有 `epilepsiae_1146` 对 30 分钟主任务具备足够独立时间块。其三项增量分别为 −0.329、−0.443、−0.329，均不支持当前模型。
 
-事前数据资格检查后，三位患者中只有 `epilepsiae_1146` 对 30 分钟主任务合格。其三项增量分别为：
+这只能写成：
 
-| 患者 | 胜过 H | 胜过错时状态 | 胜过平均状态 |
-|---|---:|---:|---:|
-| `epilepsiae_1146` | −0.329 | −0.443 | −0.329 |
+> 在唯一合格患者的 development block 上，当前 count-trained leaky representation 没有在显式历史之外提供正确时刻的 30 分钟 count 增量。
 
-三项均为负，所以在唯一合格患者上，当前状态没有提供 residual 增量。
+不能写成“三位患者阴性”，更不能写成“脑内不存在慢状态”。另外，模型内部 dev-test 曾给 E1146 一个方向相反的 `H−correct=+0.1277`；外部统一评价为 −0.3291。两条评分路径尚未数值对齐，这将是 v0.3.3 的第一项修复。
 
-`yuquan_pengzihang` 的开发读数为正，但只有 20/2/3/7 个独立 30 分钟窗口用于 base-fit/inner-val/dev-val/dev-test，未达到事前阈值，不能用来抵消合格患者的阴性读数。`yuquan_zhangkexuan` 不合格且方向为负。120 分钟没有任何主任务合格患者。
+## H2a：状态是否改变下一次群体事件的空间走法
 
-5 分钟短程任务中，只有 `yuquan_pengzihang` 同时满足三项方向；另外两人不满足。因此当前也没有形成跨患者一致的短程 residual state。
+三位患者都具备足够的事件 prefix 和触点支持。当前结果没有显示 count-trained 状态能够稳定改善继续/停止、招募大小、具体触点集合或后续继续传播。
 
-**H1 结论：未建立。** 更准确地说，是“当前仪器不稳定，而且唯一合格的 30 分钟患者不支持这版状态”，不是“脑中没有慢状态”。
+但这个实验存在明确的目标错位：状态只用未来 30 分钟事件数训练，再被冻结去预测空间 grammar。一个 scalar count readout 最容易训练出 count-relevant 方向，不能据此排除另一种专门承载 propagation grammar 的状态。
 
-## H2a：这个状态是否改变下一次群体事件的空间走法
+此外，“相对测试集中最强对照”的数值受极值选择影响，已降为敏感性。主解释只看 `vs H` 和完整 shift-null 分布。
 
-H2a 的三位患者都具备足够的 prefix 和触点支持。优化也基本收敛：72 个 arm 中仅 1 个选择在训练预算末端，因此本轮 H2a 的主要问题不再是“完全没训练起来”。
+**H2a 结论：未决，不是空间状态阴性。**
 
-最重要的端点是：已经知道早期 prefix 和继续招募大小后，具体会招募哪些触点。相对历史、错时状态和平均状态中最强的那个对照，患者内三 seed 平均增量为：
+## “是不是网络根本没学会”的当前证据
 
-| 患者 | 具体触点集合增量 |
-|---|---:|
-| `epilepsiae_1146` | −0.00846 |
-| `yuquan_pengzihang` | −0.01385 |
-| `yuquan_zhangkexuan` | +0.00475 |
+这个担心合理，而且 v0.3.2 还没有系统排除。
 
-只有 1/3 患者方向有利，而且各 seed 范围均不稳定。继续/停止和后续继续传播也没有患者间一致优势；事件大小是混合方向。
+当前 event encoder 只有一套超参数：两层 MLP，hidden=32，输出 4 维 event write；AdamW 的 encoder LR 为 1e−3、adapter LR 为 3e−3、weight decay 为 1e−4，最多 600 steps。gate `alpha` 初始化为 0.03，并冻结前 50 steps。
 
-这里有一个很重要的读法：某些患者相对单独的 `H` 看起来会改善，但在错时或平均状态对照中会消失。这说明改善不能归因于“这一时刻的动态状态改变了具体传播路线”。
+九个 learned run 的最佳 checkpoint 全在 step 20–50；也就是说，被选中的模型里 gate 仍然停在初始化值 0.03。encoder 有梯度，训练损失也下降，因此不是“完全没训练”；但只试过一套学习率、容量、gate schedule 和 early-stopping 规则，不能排除训练配方限制。
 
-**H2a 结论：未建立。** 当前冻结状态没有稳定迁移到 contact identity 或 same-prefix continuation。
+还要特别澄清：v0.3.2 **没有学习原始脑电波形**。它读取的是已经提取出的群体事件参与、tied group、精确延迟、空间离散度、多频带汇总和 cross-band lag。当前结果最多约束“这套提取后事件特征 + 两层 MLP + count objective”，不能说 raw SEEG 没有信息，也不能说 waveform encoder 没学会。
 
-## H2b 和 H3
+## H2b 与 H3
 
-本轮没有运行发作风险迁移和 IED 反馈机制。这是 v0.3.2 合同的明确边界，不是阴性结果，也不是遗失的作业。
+- H2b 未运行，不是发作迁移阴性。下一版在 interictal objective 锁定状态后，可以运行 development-only 的冻结发作迁移诊断；发作结果不得反向选择或训练 state。
+- H3 未运行，不是 IED feedback 阴性。只有先得到有 correct-time 预测价值的状态，才比较 common-drive、count feedback 和 mark-specific feedback。
 
-- H2b 仍然是项目的核心跨任务问题：仅由间期事件学习的状态能否预测发作距离和发作早期空间场。
-- H3 必须在一个已被验证的 pre-event state 上比较 common-drive 与 event-feedback；当前状态仪器未定标，不应提前运行。
+## 下一版的核心变化
 
-## 这轮真正完成的科学进展
+下一版不先换大网络，而按顺序回答三个问题：
 
-1. 首次把关键比较改成了 `H+S` 对 `H`，不再让状态从头重学近期事件率。
-2. 首次把正确时刻、错时、平均状态和随机状态放在同一配对评价中。
-3. 首次用冻结 count-state 去测试 contact grammar 的跨端点迁移。
-4. 明确发现当前主要瓶颈是阳性恢复不稳定，而不是简单的 OOM、代码没跑或所有优化都停在初始点。
+1. **量尺是否能测到：** 用 oracle evaluator、oracle memory、encoder recovery 和完整恢复四层合成实验定标。
+2. **网络是否学会：** 固定架构，系统检查学习率、gate schedule、容量、正则、训练步数和 checkpoint 选择；先做小样本过拟合与 blocked inner-validation，再谈架构。
+3. **学的目标是否正确：** 分别训练 count-view state 与 grammar-view state，再用 cross-transfer 判断它们是否共享；不再预设一个 count-state 自动代表病理网络状态。
 
-## 下一步
-
-下一步不应扩患者，也不应立刻运行发作或 H3。最短路线是：
-
-1. 重写阳性生成器，使植入成分先在 TRAIN 内对 `H` 残差化，再在未见时间块验证其确实不能被 `H` 重建。
-2. 修复强效应下的非单调训练，要求恢复率随效应增强而不下降，并在两组 seed 上复现。
-3. 只在 `epilepsiae_1146` 和一位高事件率患者上重跑 H1；通过后再进入 6 人 development。
-4. 只有得到可重复的 correct-time residual state，才运行冻结 H2b；H3 继续保持独立，不作为 H1/H2b 的 gate。
+只有上述三层分开后，真实人体阴性才知道是在说量尺、训练、目标、架构，还是数据本身。
 
 ## 产物
 
 - 机器收口：`results/group_event_state/v0_3_2/v0_3_2_closeout_summary.json`
-- 冻结状态：`/data/hfosp_group_event_state_v0_3_2/shared/frozen_state_registry.json`
-- H1 核心图：`results/group_event_state/core_evidence/figures/group_event_state_h1_future_blocks.{png,pdf}`
-- H2a 核心图：`results/group_event_state/core_evidence/figures/group_event_state_h2a_repertoire.{png,pdf}`
-- 图说明：`results/group_event_state/core_evidence/figures/README.md`
+- 技术报告：`docs/archive/topic5/group_event_state_v0_3_2_closeout_technical_2026-09-02.md`
+- 下一版 spec：`docs/archive/topic5/group_event_state_v0_3_3_dual_view_state_spec_2026-09-02.md`
+- 下一版 plan：`docs/archive/topic5/group_event_state_v0_3_3_dual_view_state_plan_2026-09-02.md`
+- H1/H2a 图：`results/group_event_state/core_evidence/figures/`

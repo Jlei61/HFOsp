@@ -278,21 +278,32 @@ def main() -> None:
         / "model/synthetic_sensitivity/leaky_bank/epilepsiae_1146/summary.json"
     )
     ladder = _load(ladder_path) if ladder_path.exists() else None
-    ladder_nonmonotonic = False
+    binary_recovery_nonmonotonic = False
+    continuous_gain_monotonic = None
     if ladder is not None:
         ordered = sorted(ladder["rows"], key=lambda row: row["beta"])
-        ladder_nonmonotonic = any(
+        binary_recovery_nonmonotonic = any(
             low["pass"] and not high["pass"]
             for i, low in enumerate(ordered)
             for high in ordered[i + 1 :]
         )
+        gains = [float(row["median_gain_nats"]) for row in ordered]
+        continuous_gain_monotonic = all(high >= low for low, high in zip(gains, gains[1:]))
     registry_path = args.data_root / "shared/frozen_state_registry.json"
     registry = _load(registry_path)
     source_commit = _git_head(repo_root)
     summary = {
         "format": "group_event_state_v0_3_2_closeout_summary",
         "generated": datetime.now().astimezone().isoformat(timespec="seconds"),
-        "status": "V0_3_2_INSTRUMENT_UNSTABLE_DEVELOPMENT_CLOSEOUT",
+        "status": "V0_3_2_PIPELINE_ACCEPTED_ASSAY_POWER_UNCALIBRATED_CLOSEOUT",
+        "scientific_status": {
+            "pipeline": "accepted",
+            "assay_power": "uncalibrated",
+            "h1": "inconclusive_n1",
+            "h2a": "inconclusive_objective_mismatch",
+            "h2b": "not_run",
+            "h3": "not_run",
+        },
         "source_commit": source_commit,
         "sealed_partition_opened": False,
         "subjects": list(SUBJECTS),
@@ -313,12 +324,14 @@ def main() -> None:
             "positive": positive,
             "null": null,
             "effect_size_ladder": ladder,
-            "effect_size_ladder_nonmonotonic": ladder_nonmonotonic,
+            "binary_recovery_pass_count_nonmonotonic": binary_recovery_nonmonotonic,
+            "continuous_median_gain_monotonic": continuous_gain_monotonic,
             "admissible_for_human_state_claim": bool(positive["pass"] and null["pass"]),
             "decision": (
-                "the preregistered positive recovery failed and the added beta ladder was "
-                "seed-dependent/non-monotonic; human results are architecture diagnostics, "
-                "not evidence for presence or absence of a residual state"
+                "the pipeline is complete, but positive-recovery power is uncalibrated: "
+                "continuous median gain rises with beta while a three-replicate CI-based pass "
+                "count fluctuates; human results are development diagnostics, not evidence for "
+                "presence or absence of a residual state"
             ),
         },
         "state_registry": {
@@ -334,15 +347,19 @@ def main() -> None:
             "primary_dispersion_mode": "shared_H_alpha",
             "patient_first_aggregation": "mean within patient across three seeds",
             "per_subject": h1,
-            "decision": "not established; the only pre-eligible 30-min patient favours H over H+S",
+            "decision": (
+                "inconclusive (N=1 eligible): the only pre-eligible 30-min patient favours H "
+                "over the current count-trained H+S representation"
+            ),
         },
         "h2a": {
             "primary_endpoint": "subset_identity_given_K_and_prefix",
             "patient_first_aggregation": "mean within patient across three seeds",
             "per_subject": h2a,
             "decision": (
-                "development diagnostic only because the state instrument failed positive recovery; "
-                "budget-edge selections are reported separately"
+                "inconclusive objective mismatch: a state trained only on future count did not "
+                "transfer stably to grammar; best-control is sensitivity only, while H and shifted "
+                "comparisons remain the interpretable contrasts"
             ),
         },
         "h2b_h3": {
@@ -352,8 +369,9 @@ def main() -> None:
         "claim_boundary": {
             "allowed": [
                 "the v0.3.2 paired residual-state pipeline runs end to end on three development patients",
-                "the null synthetic generator does not produce a stable false positive",
-                "the positive synthetic generator is not recovered reliably by the current assay",
+                "no false positive was observed in six null sanity-check replicates",
+                "positive-recovery power is not calibrated by the current small synthetic experiment",
+                "the current count-trained representation is unsupported in the only eligible 30-min patient",
             ],
             "forbidden": [
                 "a slow physiological state was found",
@@ -368,7 +386,7 @@ def main() -> None:
 
     figure_payload = {
         "format": "group_event_state_core_evidence_v2",
-        "status": "v0_3_2_instrument_unstable_development",
+        "status": "v0_3_2_pipeline_accepted_assay_power_uncalibrated",
         "source": {
             "summary_format": summary["format"],
             "source_commit": source_commit,
@@ -389,7 +407,7 @@ def main() -> None:
         ],
         "v0_3_1_diagnostics": {"status": "archival_not_primary_estimand", "count_rows": [], "mark_rows": []},
         "h1_future_block": {
-            "status": "run_but_not_scientifically_admissible_positive_control_failed",
+            "status": "inconclusive_assay_power_uncalibrated_n1",
             "rows": h1_rows,
             "gain_definition": "control NB NLL minus H+S_correct NLL; positive favours residual state",
             "required_fields": [
@@ -398,9 +416,12 @@ def main() -> None:
             ],
         },
         "h2a_repertoire": {
-            "status": "run_but_not_scientifically_admissible_positive_control_failed",
+            "status": "inconclusive_objective_mismatch_count_trained_state",
             "rows": h2a_rows,
-            "gain_definition": "best-control NLL minus H+S_correct NLL; positive favours correct dynamic state",
+            "gain_definition": (
+                "control NLL minus H+S_correct NLL; H and shifted-state contrasts are primary "
+                "interpretive comparisons, best-control is adversarial sensitivity only"
+            ),
             "required_fields": [
                 "subject", "horizon_minutes", "endpoint", "gain_over_best_control",
                 "gain_over_history", "gain_over_shifted", "gain_over_mean", "n_score_blocks",

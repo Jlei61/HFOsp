@@ -142,33 +142,17 @@ def _gain_panel(
         y = np.asarray([lookup.get(h) for h in horizons], dtype=object)
         finite = np.asarray([v is not None and np.isfinite(float(v)) for v in y])
         yf = np.asarray([float(v) if ok else np.nan for v, ok in zip(y, finite)])
-        values.extend(yf[np.isfinite(yf)].tolist())
-        yf_line = np.asarray(
-            [
-                yi if np.isfinite(yi) and row_lookup[h].get("eligible", True) else np.nan
-                for h, yi in zip(horizons, yf)
-            ]
-        )
-        ax.plot(
-            x,
-            yf_line,
-            color=colors[alias],
-            lw=0.85,
-            alpha=0.78,
-            label=alias,
-            zorder=3,
-        )
-        point_offset = (group_index - (len(grouped) - 1) / 2) * 0.08 if len(horizons) == 1 else 0.0
+        point_offset = (group_index - (len(grouped) - 1) / 2) * 0.075
         for xi, horizon, yi in zip(x, horizons, yf):
-            if not np.isfinite(yi):
+            if not np.isfinite(yi) or not row_lookup[horizon].get("eligible", True):
                 continue
-            eligible = row_lookup[horizon].get("eligible", True)
+            values.append(float(yi))
             ax.scatter(
-                [xi + point_offset], [yi], s=17,
-                facecolor=colors[alias] if eligible else "white",
+                [xi + point_offset], [yi], s=19,
+                facecolor=colors[alias],
                 edgecolor=colors[alias], linewidth=0.75, zorder=4,
             )
-    medians = []
+    medians: list[float] = []
     for horizon in horizons:
         vals = [
             float(row[field])
@@ -177,8 +161,11 @@ def _gain_panel(
             and row.get(field) is not None
             and row.get("eligible", True)
         ]
-        medians.append(float(np.median(vals)) if vals else np.nan)
-    ax.plot(x, medians, color=STATE, lw=2.1, marker="D", ms=3.7, zorder=5, label="median")
+        medians.append(float(np.median(vals)) if len(vals) >= 2 else np.nan)
+    # Do not connect medians across horizons: eligibility changes with horizon.
+    for xi, median in zip(x, medians):
+        if np.isfinite(median):
+            ax.plot([xi - 0.15, xi + 0.15], [median, median], color=STATE, lw=2.1, zorder=5)
     if shared_ylim is None:
         max_abs = max([abs(v) for v in values] + [0.02])
         ylim = (-1.16 * max_abs, 1.16 * max_abs)
@@ -218,14 +205,7 @@ def _gain_panel(
         handles = [
             Line2D([0], [0], color=colors[a], marker="o", lw=0.8, ms=3.2, label=a)
             for a in colors
-        ] + [Line2D([0], [0], color=STATE, marker="D", lw=2, ms=3.2, label="median")]
-        if any(not row.get("eligible", True) for row in rows):
-            handles.append(
-                Line2D(
-                    [0], [0], color="#777777", marker="o", markerfacecolor="white",
-                    lw=0, ms=3.5, label="ineligible",
-                )
-            )
+        ] + [Line2D([0], [0], color=STATE, lw=2, label="median (n≥2)")]
         ax.legend(handles=handles, loc="lower left", ncol=2, handlelength=1.4, columnspacing=0.8)
     _finish_axis(ax)
 
@@ -290,8 +270,8 @@ def render_h1(payload: dict[str, Any], out_dir: Path) -> dict[str, Any]:
     for letter, ax in zip("ABCD", axes):
         _panel(ax, letter)
     fig.subplots_adjust(left=0.04, right=0.995, bottom=0.18, top=0.91)
-    if payload.get("status", "").startswith("v0_3_2_instrument_unstable"):
-        fig.text(0.995, 0.025, "Development diagnostic; positive-control recovery 0/3", ha="right", fontsize=7.0, color="#707070")
+    if payload.get("status", "").startswith("v0_3_2_pipeline_accepted"):
+        fig.text(0.995, 0.025, "Development only; assay power uncalibrated", ha="right", fontsize=7.0, color="#707070")
     return _save(fig, out_dir, FIGURE_STEMS["h1"])
 
 
@@ -335,29 +315,65 @@ def render_h2a(payload: dict[str, Any], out_dir: Path) -> dict[str, Any]:
     rows = payload["h2a_repertoire"]["rows"]
     colors = _subject_palette(payload)
     all_values = [
-        abs(float(row["gain_over_best_control"]))
+        abs(float(row[field]))
         for row in rows
-        if row.get("gain_over_best_control") is not None
+        for field in ("gain_over_history", "gain_over_shifted")
+        if row.get(field) is not None
     ]
     limit = max(max(all_values, default=0.01) * 1.12, 0.01)
     shared_ylim = (-limit, limit)
     specs = (
-        ("continue", "Continue vs STOP", "Correct-state gain\nover best control"),
+        ("continue", "Continue vs STOP", "Correct-state\nNLL gain"),
         ("positive_size", "Size | continue", ""),
         ("subset", "Contact subset | size", ""),
     )
     for ax, (endpoint, title, ylabel) in zip(axes[1:], specs):
         subset = [row for row in rows if row["endpoint"] == endpoint]
-        _gain_panel(
-            ax, subset, "gain_over_best_control", title, ylabel, colors,
-            shared_ylim=shared_ylim, show_legend=endpoint == "continue",
-            horizons=(30,),
+        ax.axhspan(0, shared_ylim[1], color=SUPPORT, alpha=0.55, zorder=-3)
+        ax.axhline(0, color="#4D4D4D", lw=0.75, ls=(0, (3, 2)), zorder=1)
+        x_positions = np.asarray([0.0, 1.0])
+        fields = ("gain_over_history", "gain_over_shifted")
+        for patient_i, row in enumerate(subset):
+            jitter = (patient_i - (len(subset) - 1) / 2) * 0.07
+            for xi, field in zip(x_positions, fields):
+                value = row.get(field)
+                if value is None or not np.isfinite(float(value)):
+                    continue
+                ax.scatter(
+                    xi + jitter,
+                    float(value),
+                    s=19,
+                    color=colors[row["alias"]],
+                    edgecolor="white",
+                    linewidth=0.45,
+                    zorder=4,
+                )
+        for xi, field in zip(x_positions, fields):
+            vals = [float(row[field]) for row in subset if row.get(field) is not None]
+            if len(vals) >= 2:
+                median = float(np.median(vals))
+                ax.plot([xi - 0.15, xi + 0.15], [median, median], color=STATE, lw=2.1, zorder=5)
+        ax.set_xlim(-0.38, 1.38)
+        ax.set_ylim(*shared_ylim)
+        ax.set_xticks(x_positions, ["vs H", "vs shifted\n(mean of 5)"])
+        ax.set_ylabel(ylabel)
+        ax.set_title(title, loc="left", fontweight="bold")
+        ax.text(
+            0.98, 0.96, "favourable  ↑", transform=ax.transAxes,
+            ha="right", va="top", color="#4D766B", fontsize=7.0,
         )
+        if endpoint == "continue":
+            handles = [
+                Line2D([0], [0], color=colors[a], marker="o", lw=0, ms=3.5, label=a)
+                for a in colors
+            ]
+            ax.legend(handles=handles, loc="lower left", ncol=2, handlelength=0.8, columnspacing=0.7)
+        _finish_axis(ax)
     for letter, ax in zip("ABCD", axes):
         _panel(ax, letter)
     fig.subplots_adjust(left=0.042, right=0.99, bottom=0.18, top=0.91)
-    if payload.get("status", "").startswith("v0_3_2_instrument_unstable"):
-        fig.text(0.99, 0.025, "Development diagnostic; positive-control recovery 0/3", ha="right", fontsize=7.0, color="#707070")
+    if payload.get("status", "").startswith("v0_3_2_pipeline_accepted"):
+        fig.text(0.99, 0.025, "Count-trained state; grammar transfer is objective-mismatched", ha="right", fontsize=7.0, color="#707070")
     return _save(fig, out_dir, FIGURE_STEMS["h2a"])
 
 
@@ -487,12 +503,12 @@ def _write_readme(out_dir: Path, payload: dict[str, Any]) -> Path:
     v032 = payload.get("status", "").startswith("v0_3_2")
     if v032:
         h1_focus = (
-            "实心点为事前数据资格合格，空心点仅为 development 诊断；中位数只汇总实心点。"
-            "当前阳性合成定标未通过，因此图中人体数值只能说明这版模型的观测表现，不能作为慢状态成立或不存在的证据。"
+            "只绘制事前资格合格的患者；不同 horizon 不连线，n=1 不画 cohort median，n=0 留空。"
+            "当前 positive-recovery power 尚未定标，因此人体数值只能说明这版 count-trained representation 的观测表现。"
         )
         h2_focus = (
             "状态来自 30 分钟 count 任务并已冻结；grammar 只训练低容量 residual adapter。"
-            "当前阳性合成定标未通过，且任何选在训练预算末端的 arm 都必须标为优化未收口。"
+            "主图分别显示相对 H 与相对五个 shift 均值的增量；test-best-control 只保留在机器结果中作为敏感性，不再承担主结论。"
         )
     else:
         h1_focus = (
@@ -509,7 +525,7 @@ def _write_readme(out_dir: Path, payload: dict[str, Any]) -> Path:
         "这张图回答 H1：在显式多尺度历史 H 已经进入每个模型之后，动态状态 S 是否还对未来 5、30、120 分钟的事件块提供增量。B 比较 H+S 与 H，C 比较正确时刻与 block-shifted S，D 比较动态 S 与 TRAIN 均值 S；纵轴均为正值支持 residual state。\n\n"
         f"**关注点**：{h1_focus}\n\n"
         "### group_event_state_h2a_repertoire.png\n\n"
-        "这张图回答 H2a：给定相同或相近的事件开头，H+S_correct 是否同时胜过 H、H+S_shifted 和 H+S_mean，进而改变事件继续/停止、继续时的招募规模以及具体触点集合。三个统计 panel 共用 y 轴。\n\n"
+        "这张图回答 H2a：给定相同或相近的事件开头，H+S_correct 是否胜过 H，并处于 block-shifted state 的有利方向，进而改变事件继续/停止、继续时的招募规模以及具体触点集合。三个统计 panel 共用 y 轴。\n\n"
         f"**关注点**：{h2_focus}\n\n"
         "### group_event_state_h2b_h3_transfer_feedback.png\n\n"
         "这张图预先固定跨任务与反馈机制的最终接口。A/B 分别放冻结间期状态对发作风险和发作早期空间场的增量；C 比较 no-feedback、count/rate feedback 与 mark-specific feedback；D 显示不同 IED 类型的有符号状态冲击。当前这些实验尚未运行，因此只显示坐标、对照方向和 not yet run，不填模拟数据。\n\n"

@@ -2,8 +2,9 @@
   "claim_boundary": {
     "allowed": [
       "the v0.3.2 paired residual-state pipeline runs end to end on three development patients",
-      "the null synthetic generator does not produce a stable false positive",
-      "the positive synthetic generator is not recovered reliably by the current assay"
+      "no false positive was observed in six null sanity-check replicates",
+      "positive-recovery power is not calibrated by the current small synthetic experiment",
+      "the current count-trained representation is unsupported in the only eligible 30-min patient"
     ],
     "forbidden": [
       "a slow physiological state was found",
@@ -265,10 +266,10 @@
         "subject": "yuquan_zhangkexuan"
       }
     ],
-    "status": "run_but_not_scientifically_admissible_positive_control_failed"
+    "status": "inconclusive_assay_power_uncalibrated_n1"
   },
   "h2a_repertoire": {
-    "gain_definition": "best-control NLL minus H+S_correct NLL; positive favours correct dynamic state",
+    "gain_definition": "control NLL minus H+S_correct NLL; H and shifted-state contrasts are primary interpretive comparisons, best-control is adversarial sensitivity only",
     "required_fields": [
       "subject",
       "horizon_minutes",
@@ -564,7 +565,7 @@
       "rows": [],
       "status": "reported_as_later_continuation_in_closeout_json"
     },
-    "status": "run_but_not_scientifically_admissible_positive_control_failed"
+    "status": "inconclusive_objective_mismatch_count_trained_state"
   },
   "h2b_transfer": {
     "field_rows": [],
@@ -585,10 +586,10 @@
     "measurement_layer_nested": true,
     "model_layer_nested": true,
     "sealed_partition_opened": false,
-    "source_commit": "9b4f456e6214bd84240019526af9c52083544a55",
+    "source_commit": "233f3ad11187b3f5ae0698c1fcc32996ce8edf9d",
     "summary_format": "group_event_state_v0_3_2_closeout_summary"
   },
-  "status": "v0_3_2_instrument_unstable_development",
+  "status": "v0_3_2_pipeline_accepted_assay_power_uncalibrated",
   "training": [
     {
       "alias": "P1",

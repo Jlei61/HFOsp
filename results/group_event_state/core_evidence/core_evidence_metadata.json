@@ -3,8 +3,9 @@
   "claim_boundary": {
     "allowed": [
       "the v0.3.2 paired residual-state pipeline runs end to end on three development patients",
-      "the null synthetic generator does not produce a stable false positive",
-      "the positive synthetic generator is not recovered reliably by the current assay"
+      "no false positive was observed in six null sanity-check replicates",
+      "positive-recovery power is not calibrated by the current small synthetic experiment",
+      "the current count-trained representation is unsupported in the only eligible 30-min patient"
     ],
     "forbidden": [
       "a slow physiological state was found",
@@ -16,19 +17,19 @@
   "figures": {
     "h1": {
       "pdf": "results/group_event_state/core_evidence/figures/group_event_state_h1_future_blocks.pdf",
-      "pdf_sha256": "7edbce7f19ede21d17572ed4e5ab5cdc58fc39518960e85e5083b8926bf75eb1",
+      "pdf_sha256": "086826c1256bf9175506e66ec5e526ddbca88b8f7a67183f325e75415056e451",
       "png": "results/group_event_state/core_evidence/figures/group_event_state_h1_future_blocks.png",
-      "png_sha256": "6345aa488399db5221f9b289d69c58c0750ffbef8b8391e67bf5f59114a7648d"
+      "png_sha256": "5e4a6c85eb5053b99cc5ff5922dd9ceffb70d4fb71cf9231304086e2e4d32c3d"
     },
     "h2a": {
       "pdf": "results/group_event_state/core_evidence/figures/group_event_state_h2a_repertoire.pdf",
-      "pdf_sha256": "2fbfbb55db921f40c4c41d8e75bda50877752f5f96a90544a92057e34470dfd8",
+      "pdf_sha256": "5de911f2fb4b0504832203f6169d2379bf00e963f800ca8196299972dadd88c9",
       "png": "results/group_event_state/core_evidence/figures/group_event_state_h2a_repertoire.png",
-      "png_sha256": "2ed7f330aead6747766569417418012fe47b3fcc74e2d7a9dbfae26be8f9e4a3"
+      "png_sha256": "7fd070f7abe8692964d754e1eeb1d1087475d99ac401cd8a093e73bb182b5dec"
     },
     "h2b_h3": {
       "pdf": "results/group_event_state/core_evidence/figures/group_event_state_h2b_h3_transfer_feedback.pdf",
-      "pdf_sha256": "33aa6d2e8ffc4ad74e4326c798c702b471bf68ad0a237adbd3c676b3722b35cd",
+      "pdf_sha256": "c1433b8137abb80e053b098d2355acab831e3b13fc7e95611742905e8afbb2b7",
       "png": "results/group_event_state/core_evidence/figures/group_event_state_h2b_h3_transfer_feedback.png",
       "png_sha256": "e7a6accc53f29b9173d665100754656b517649600f4923b5a0bd43853808779f"
     }
@@ -39,8 +40,8 @@
   "payload": "results/group_event_state/core_evidence/core_evidence_payload.json",
   "payload_format": "group_event_state_core_evidence_v2",
   "readme": "results/group_event_state/core_evidence/figures/README.md",
-  "source_commit": "9b4f456e6214bd84240019526af9c52083544a55",
+  "source_commit": "233f3ad11187b3f5ae0698c1fcc32996ce8edf9d",
   "source_summary": null,
   "statistical_grammar": "patient-first; positive gain supports hypothesis; missing is not zero",
-  "status": "v0_3_2_instrument_unstable_development"
+  "status": "v0_3_2_pipeline_accepted_assay_power_uncalibrated"
 }

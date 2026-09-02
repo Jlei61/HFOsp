@@ -4,13 +4,13 @@
 
 这张图回答 H1：在显式多尺度历史 H 已经进入每个模型之后，动态状态 S 是否还对未来 5、30、120 分钟的事件块提供增量。B 比较 H+S 与 H，C 比较正确时刻与 block-shifted S，D 比较动态 S 与 TRAIN 均值 S；纵轴均为正值支持 residual state。
 
-**关注点**：实心点为事前数据资格合格，空心点仅为 development 诊断；中位数只汇总实心点。当前阳性合成定标未通过，因此图中人体数值只能说明这版模型的观测表现，不能作为慢状态成立或不存在的证据。
+**关注点**：只绘制事前资格合格的患者；不同 horizon 不连线，n=1 不画 cohort median，n=0 留空。当前 positive-recovery power 尚未定标，因此人体数值只能说明这版 count-trained representation 的观测表现。
 
 ### group_event_state_h2a_repertoire.png
 
-这张图回答 H2a：给定相同或相近的事件开头，H+S_correct 是否同时胜过 H、H+S_shifted 和 H+S_mean，进而改变事件继续/停止、继续时的招募规模以及具体触点集合。三个统计 panel 共用 y 轴。
+这张图回答 H2a：给定相同或相近的事件开头，H+S_correct 是否胜过 H，并处于 block-shifted state 的有利方向，进而改变事件继续/停止、继续时的招募规模以及具体触点集合。三个统计 panel 共用 y 轴。
 
-**关注点**：状态来自 30 分钟 count 任务并已冻结；grammar 只训练低容量 residual adapter。当前阳性合成定标未通过，且任何选在训练预算末端的 arm 都必须标为优化未收口。
+**关注点**：状态来自 30 分钟 count 任务并已冻结；grammar 只训练低容量 residual adapter。主图分别显示相对 H 与相对五个 shift 均值的增量；test-best-control 只保留在机器结果中作为敏感性，不再承担主结论。
 
 ### group_event_state_h2b_h3_transfer_feedback.png
 

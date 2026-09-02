@@ -3,9 +3,17 @@
 - **2026-09-02 Group-Event State v0.3.2 residual-state 阶段收口**：
   [`白话版`](group_event_state_v0_3_2_closeout_plain_2026-09-02.md) ·
   [`技术版`](group_event_state_v0_3_2_closeout_technical_2026-09-02.md) ·
+  [`复审更正`](group_event_state_v0_3_2_post_review_corrections_2026-09-02.md) ·
+  [`v0.3.3 spec`](group_event_state_v0_3_3_dual_view_state_spec_2026-09-02.md) ·
+  [`v0.3.3 plan`](group_event_state_v0_3_3_dual_view_state_plan_2026-09-02.md) ·
+  [`v0.3.3 并行 handoff 索引`](group_event_state_v0_3_3_parallel_agent_handoff_index_2026-09-02.md) ·
+  [`Agent A`](group_event_state_v0_3_3_agent_a_evaluator_assay_handoff_2026-09-02.md) ·
+  [`Agent B`](group_event_state_v0_3_3_agent_b_training_laboratory_handoff_2026-09-02.md) ·
+  [`Agent C`](group_event_state_v0_3_3_agent_c_scientific_experiments_handoff_2026-09-02.md) ·
+  [`Supervisor`](group_event_state_v0_3_3_training_supervisor_handoff_2026-09-02.md) ·
   [`模型设计`](group_event_state_v0_3_2_model_design_2026-09-02.md) ·
   [`测量合同`](group_event_state_v0_3_2_measurement_contract_2026-09-02.md)。
-  27 人测量地基完成，三位 development 患者 × 三 seed 的 12 维 marked leaky state、H1 residual count 与冻结 H2a grammar probe 已跑齐；但预登记阳性合成恢复为 0/3，追加效应阶梯又表现为 2/3→3/3→1/3 的 seed 依赖和非单调性。唯一 30-min 合格患者的 H1 三项增量均为负；H2a contact subset 相对最强对照仅 1/3 患者有利。最终状态 `V0_3_2_INSTRUMENT_UNSTABLE_DEVELOPMENT_CLOSEOUT`：H1/H2a 未建立，不能作生物学阴性；H2b/H3/sealed partition 未运行。
+  27 人测量地基完成，三位 development 患者 × 三 seed 的 12 维 marked leaky state、H1 residual count 与冻结 H2a grammar probe 已跑齐。复审确认 continuous synthetic gain 随效应增强而上升，波动的是每档仅 3 次重复的 CI pass count；故最终状态修订为 `V0_3_2_PIPELINE_ACCEPTED_ASSAY_POWER_UNCALIBRATED_CLOSEOUT`。30-min H1 合格分母只有 E1146 一人，H1 为 `INCONCLUSIVE_N1`；H2a 使用 count-trained state 迁移 grammar，属于 `INCONCLUSIVE_OBJECTIVE_MISMATCH`。H2b/H3/sealed partition 未运行。v0.3.3 已按 `V0_3_3_MAJOR_REVISION_BEFORE_EXECUTION` 意见修订，当前为 `V0_3_3_REVISED_DRAFT_FOR_REVIEW_DO_NOT_EXECUTE`：核心缩为 canonical evaluator、Level 0–2/D0–D4、持续 Training Laboratory、R0/R1 dual-view、2 位 tuning + 4 位 untouched development replication、shared/private 与 frozen H2b risk；R2、early-field、gated、长 horizon 和 H3 均为探索或后续。
 
 - **2026-09-02 Group-Event State v0.3.1 审阅后正式收口**：
   [`closeout`](group_event_state_v0_3_1_post_review_closeout_2026-09-02.md) ·
