@@ -42,17 +42,24 @@ subsystem**；持续 OU 打开的有限 SNN 仍只能报告经验状态边缘，
 | eta_m | q_fold | fold E rate | Jacobian 实零模 bracket |
 |---:|---:|---:|---:|
 | 0.00 | 0.890893859 | 127.542 Hz | +0.002580 → −0.002284 |
-| 0.02 | 0.890825886 | 127.399 Hz | +0.000344 → −0.004537 |
+| 0.02 | 0.890825926 | 127.399 Hz | +0.000167 → −0.000320 |
 | 0.04 | 0.890757823 | 127.255 Hz | +0.002926 → −0.001925 |
 | 0.08 | 0.890622353 | 126.966 Hz | +0.003159 → −0.001679 |
 
-`eta_m=0.02` 的细化支在同一点满足：
+`eta_m=0.02` 的 micro-continuation 与 generic-fold 审计满足：
 
-- arclength tangent `dq/ds` 由正变负；
-- fixed-point Jacobian 的最近零实特征值穿过 0；
-- 高支与 fold 后中支连续相接；低 root 在同一 q 仍存在。
+- arclength tangent `dq/ds` 由 `+1.76e-4` 变为 `−3.37e-4`；
+- fixed-point Jacobian 最近实特征值由 `+1.67e-4` 变为 `−3.20e-4`；
+- 两种零点插值得到 `q=0.8908259261275` 与 `0.8908259261280`，仅差 `4.9e-13`；
+- 最近的 corrected fixed point 残差为 `1.49e-14`，最近零模 `|lambda_1|=1.67e-4`，
+  第二近模 `|lambda_2|=0.250`，谱间隔比约 `1499`，所以是 simple isolated zero mode；
+- 规范化左右零模给出 `|w^T F_q|=26.80`、
+  `|0.5 w^T F_xx[v,v]|=0.343`，后者跨五个方向差分步长的相对极差仅 `4.9e-7`；
+- 在同一 `q=0.890700`，折点两侧 warm start 分别收敛到 `130.572 Hz` 与
+  `124.459 Hz` 两个 fixed points；它们在 fold 合并。另有 near-silent low root，不属于这对合并根。
 
-因此 **1 mm reduced model 的 saddle-node 可以正式命名**。M 从 0 增到 0.08 只移动
+因此 **1 mm reduced model 的 generic saddle-node 已得到数值验证**，不是只凭曲线外观命名。
+M 从 0 增到 0.08 只移动
 `Δq_fold≈2.7×10^-4`，说明当前线性 M 不是 fold 位置的主要杠杆。
 
 ## 5. 稳定性与经验 SNN 的关系
@@ -101,6 +108,10 @@ subsystem**；持续 OU 打开的有限 SNN 仍只能报告经验状态边缘，
   `/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_zm_phase_diagram/deterministic_meanfield/patient_zm_bifurcation_ngrid20.{json,npz}`；
 - 分析图 PNG/PDF/SVG + metadata：
   `/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_zm_phase_diagram/figures/spatial_zm_phase_bifurcation_analysis.*`；
+- 专项 saddle-node 验证 JSON/NPZ：
+  `/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_zm_phase_diagram/deterministic_meanfield/patient_zm_saddle_node_validation_ngrid20.{json,npz}`；
+- 专项验证图 PNG/PDF/SVG + metadata：
+  `/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_zm_phase_diagram/figures/patient_zm_saddle_node_validation.*`；
 - 图义：A=OU-on finite SNN endpoints；B=OU-mean deterministic fixed-point skeleton；
   C=`q × eta_m` fold locus；D=fold Jacobian real zero mode；
 - 相关测试：60 项通过；PNG 目视通过；PDF 1 页、592.675 × 384.03 pt。

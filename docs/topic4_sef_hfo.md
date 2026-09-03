@@ -49,8 +49,9 @@
 > 持续全局高平台；matched-noise 双初值 pilot 则显示 `q=0.860 L/L → 0.840/0.820 L/I →
 > 0.805 I/I → 0.790/0.770 I/H`，尚无三 seed `L/H` 同点共存。进一步用实际患者邻接、阈值场、
 > q target 和 self-consistent M 构造 1 mm deterministic reduction，pseudo-arclength 折返与同一
-> fixed-point Jacobian 实零模共同确认 saddle-node：`eta_m=0.02` 时
-> `q_fold=0.890825886`、fold E rate=127.399 Hz；`eta_m=0→0.08` 仅移动
+> fixed-point Jacobian 实零模共同确认 saddle-node；进一步的 generic-fold 审计同时通过
+> 同一 q 双根、simple isolated zero mode、transversality 与 quadratic nondegeneracy：
+> `eta_m=0.02` 时 `q_fold=0.890825926`、fold E rate=127.399 Hz；`eta_m=0→0.08` 仅移动
 > `Δq_fold≈2.7e-4`。**术语边界**：saddle-node 只属于 OU 取零均值的 reduced frozen-q fast
 > subsystem；OU-on finite SNN 的经验边缘约 `q=0.80–0.825`，仍只能称 threshold-like
 > transition。coarse-grid convergence、colored-OU closure、delay-aware Hopf 和 empirical
