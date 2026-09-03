@@ -56,6 +56,11 @@ class RecipeConfig:
     lr: dict[str, float] = field(default_factory=lambda: dict(DEFAULT_LR))
     weight_decay: float = 1e-4
     grad_clip: float = 1.0
+    beta1: float = 0.9
+    beta2: float = 0.999
+    optimizer_eps: float = 1e-8
+    rms_alpha: float = 0.99
+    momentum: float = 0.0
     dispersion: str = "frozen"
     sampling: str = "anchor_balanced"
     scaling: str = "zscore"
@@ -86,6 +91,12 @@ class RecipeConfig:
             raise ValueError(f"lr missing for groups {missing}")
         if self.min_steps > self.max_steps or self.validate_every < 1 or self.max_steps < 1:
             raise ValueError("invalid step schedule")
+        if self.weight_decay < 0 or self.grad_clip <= 0 or self.optimizer_eps <= 0:
+            raise ValueError("weight decay, gradient clip or optimizer epsilon is invalid")
+        if not (0.0 < self.beta1 < 1.0 and 0.0 < self.beta2 < 1.0 and 0.0 < self.rms_alpha < 1.0):
+            raise ValueError("optimizer decay coefficients must lie in (0, 1)")
+        if self.momentum < 0.0 or self.momentum >= 1.0:
+            raise ValueError("optimizer momentum must lie in [0, 1)")
         return self
 
     @property
@@ -163,14 +174,16 @@ class PlateauController:
         self.n_reductions = int(payload["n_reductions"])
 
 
-def build_optimizer(name: str, groups: list[dict[str, Any]]) -> torch.optim.Optimizer:
-    if name == "adamw":
-        return torch.optim.AdamW(groups)
-    if name == "adam":
-        return torch.optim.Adam(groups)
-    if name == "rmsprop":
-        return torch.optim.RMSprop(groups)
-    raise ValueError(f"unknown optimizer {name!r}")
+def build_optimizer(cfg: RecipeConfig, groups: list[dict[str, Any]]) -> torch.optim.Optimizer:
+    if cfg.optimizer == "adamw":
+        return torch.optim.AdamW(groups, betas=(cfg.beta1, cfg.beta2), eps=cfg.optimizer_eps)
+    if cfg.optimizer == "adam":
+        return torch.optim.Adam(groups, betas=(cfg.beta1, cfg.beta2), eps=cfg.optimizer_eps)
+    if cfg.optimizer == "rmsprop":
+        return torch.optim.RMSprop(
+            groups, alpha=cfg.rms_alpha, eps=cfg.optimizer_eps, momentum=cfg.momentum,
+        )
+    raise ValueError(f"unknown optimizer {cfg.optimizer!r}")
 
 
 # ------------------------------------------------------------------ helpers
@@ -278,7 +291,7 @@ def train_recipe(
     ]
     optimizer_groups = [g for g in optimizer_groups if g["params"]]
     base_lr = {g["name"]: float(g["lr"]) for g in optimizer_groups}
-    optimizer = build_optimizer(cfg.optimizer, optimizer_groups)
+    optimizer = build_optimizer(cfg, optimizer_groups)
     plateau = PlateauController(cfg.plateau_factor, cfg.plateau_patience, cfg.improvement_tol) \
         if cfg.schedule == "plateau" else None
     trainable_params = [p for p in model.parameters() if p.requires_grad]
@@ -291,6 +304,11 @@ def train_recipe(
         "config": cfg.as_dict(), "config_hash": config_hash, "split_hash": view.split_hash,
         "input_hash": view.input_hash, "h_source": view.h_source, "bins_seconds": [list(b) for b in view.bins],
         "optimizer": cfg.optimizer, "schedule": cfg.schedule, "warmup_steps": cfg.warmup_steps(),
+        "optimizer_internals": {
+            "beta1": cfg.beta1, "beta2": cfg.beta2, "eps": cfg.optimizer_eps,
+            "rms_alpha": cfg.rms_alpha, "momentum": cfg.momentum,
+            "weight_decay": cfg.weight_decay, "grad_clip": cfg.grad_clip,
+        },
         "lr_by_group": base_lr, "optimizer_groups": {g["name"]: len(g["params"]) for g in optimizer_groups},
         "steps_budget": budget, "budget_is_full": budget == cfg.max_steps,
         "n_train_anchors": view.n("train"), "n_inner_val_anchors": view.n("inner_val"),

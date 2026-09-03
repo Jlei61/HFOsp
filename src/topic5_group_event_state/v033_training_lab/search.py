@@ -34,6 +34,13 @@ CATEGORICAL: dict[str, tuple[Any, ...]] = {
     "optimizer": ("adamw", "adam", "rmsprop"),
     "schedule": ("constant", "cosine", "plateau"),
     "warmup_fraction": (0.0, 0.05, 0.10),
+    "weight_decay": (0.0, 1e-4, 1e-3),
+    "grad_clip": (5.0, 10.0, 20.0),
+    "beta1": (0.85, 0.9),
+    "beta2": (0.99, 0.999),
+    "optimizer_eps": (1e-8, 1e-6),
+    "rms_alpha": (0.95, 0.99),
+    "momentum": (0.0, 0.5),
     "init": ("xavier", "orthogonal"),
     "write_scale": (0.01, 0.1, 1.0),
     "alpha_init": (0.01, 0.03, 0.1),
@@ -108,7 +115,11 @@ class SearchSpace:
         )
         cfg = RecipeConfig(arch=arch, optimizer=pick["optimizer"], schedule=pick["schedule"],
                            warmup_fraction=float(pick["warmup_fraction"]), lr=lr, dispersion=pick["dispersion"],
-                           sampling=pick["sampling"], scaling=pick["scaling"])
+                           sampling=pick["sampling"], scaling=pick["scaling"],
+                           weight_decay=float(pick["weight_decay"]), grad_clip=float(pick["grad_clip"]),
+                           beta1=float(pick["beta1"]), beta2=float(pick["beta2"]),
+                           optimizer_eps=float(pick["optimizer_eps"]), rms_alpha=float(pick["rms_alpha"]),
+                           momentum=float(pick["momentum"]))
         if budget is not None:
             cfg = budget.apply(cfg)
         return cfg.validate()

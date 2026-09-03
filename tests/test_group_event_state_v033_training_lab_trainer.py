@@ -61,10 +61,19 @@ def test_t1_lr_controller_definitions_and_every_optimizer_and_schedule_runs(tmp_
     view = _view(0)
     trainable = ResidualCountTrainable()
     for i, (opt, sched) in enumerate((("adamw", "constant"), ("adam", "cosine"), ("rmsprop", "plateau"))):
-        cfg = RecipeConfig(optimizer=opt, schedule=sched, plateau_patience=1, **FAST)
+        cfg = RecipeConfig(
+            optimizer=opt, schedule=sched, plateau_patience=1,
+            beta1=0.85, beta2=0.99, optimizer_eps=1e-6,
+            rms_alpha=0.95, momentum=0.5, grad_clip=5.0, **FAST,
+        )
         result = train_recipe(trainable, view, cfg, seed=1, device=CPU, out_dir=tmp_path / f"run{i}")
         assert result["status"] == "complete", result.get("reason")
         assert result["optimizer"] == opt and result["schedule"] == sched
+        assert result["optimizer_internals"] == {
+            "beta1": 0.85, "beta2": 0.99, "eps": 1e-6,
+            "rms_alpha": 0.95, "momentum": 0.5,
+            "weight_decay": 1e-4, "grad_clip": 5.0,
+        }
         assert all("lr_by_group" in row for row in result["history"])
     cos = train_recipe(trainable, view, RecipeConfig(schedule="cosine", max_steps=40, min_steps=40, patience=100,
                                                      validate_every=10), seed=1, device=CPU, out_dir=tmp_path / "cos")

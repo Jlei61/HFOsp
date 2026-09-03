@@ -65,6 +65,8 @@ def test_s1_sampler_is_seeded_log_uniform_in_lr_and_covers_every_categorical_val
         seen["optimizer"].add(d["optimizer"]); seen["schedule"].add(d["schedule"])
         seen["warmup_fraction"].add(d["warmup_fraction"]); seen["dispersion"].add(d["dispersion"])
         seen["sampling"].add(d["sampling"]); seen["scaling"].add(d["scaling"])
+        for key in ("weight_decay", "grad_clip", "beta1", "beta2", "optimizer_eps", "rms_alpha", "momentum"):
+            seen[key].add(d[key])
         for key in ("init", "write_scale", "alpha_init", "hidden_norm", "depth", "width", "activation", "dropout",
                     "write_width"):
             seen[key].add(d["arch"][key])
