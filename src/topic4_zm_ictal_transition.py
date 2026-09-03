@@ -11,6 +11,7 @@ proves the mirror is exact.
 """
 from __future__ import annotations
 
+import copy
 import hashlib
 import os
 import sys
@@ -190,6 +191,7 @@ def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=No
                     node_candidate_override=None, node_depth_shrinkage=1.0,
                     node_gain=1.0, node_dispersion_candidate_override=None,
                     edge_coefficients_override=None,
+                    graph_aspect_ratio_override=None,
                     ee_ellipse_angle_deg=45.0,
                     ee_ellipse_aspect_ratio=2.0,
                     ee_ellipse_reference_angle_deg=None,
@@ -256,6 +258,13 @@ def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=No
 
     base = _load_json_input(inputs["rev9_base_config"], artifact_root=artifact_root)
     stage = _load_json_input(inputs["stage_config"], artifact_root=artifact_root)
+    frozen_graph_aspect_ratio = float(stage["engine"]["AR"])
+    if graph_aspect_ratio_override is not None:
+        graph_aspect_ratio = float(graph_aspect_ratio_override)
+        if graph_aspect_ratio != 1.0:
+            raise RuntimeError("the only authorized rebuilt-topology null has graph AR=1")
+        stage = copy.deepcopy(stage)
+        stage["engine"]["AR"] = graph_aspect_ratio
     contract = _load_json_input(inputs["contact_contract"], artifact_root=artifact_root)
     anchor_config = _load_json_input(
         inputs["node_anchor_config"], artifact_root=artifact_root,
@@ -495,6 +504,9 @@ def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=No
                 ),
                 "edge_coefficients_override": edge_coefficients_override is not None,
                 "edge_coefficients_input_sha256": array_sha256(coefficients),
+                "graph_aspect_ratio_frozen": frozen_graph_aspect_ratio,
+                "graph_aspect_ratio_effective": float(engine["AR"]),
+                "graph_topology_override": graph_aspect_ratio_override is not None,
                 "node_mapping_audit": node["mapping_audit"],
                 "manual_field_audit": manual_field_audit,
                 "ellipse_audit": ellipse_audit,

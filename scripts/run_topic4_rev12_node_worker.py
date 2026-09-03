@@ -107,7 +107,16 @@ def _candidate_null_overrides(candidate):
         coefficient_hash = array_sha256(coefficients)
         if coefficient_hash != record["sha256"]:
             raise RuntimeError("edge coefficient override hash changed")
-    return transform, coefficients, coefficient_hash
+    topology = candidate.get("topology_override")
+    graph_aspect_ratio = None
+    if topology is not None:
+        if topology != {
+            "graph_aspect_ratio": 1.0,
+            "pairing": "unpaired_rebuilt_topology_control",
+        }:
+            raise RuntimeError("unsupported frozen topology override")
+        graph_aspect_ratio = 1.0
+    return transform, coefficients, coefficient_hash, graph_aspect_ratio
 
 
 def _segmentation_variants(event_unit: dict) -> list[dict]:
@@ -578,7 +587,8 @@ def main() -> None:
     ellipse_aspect = float(mechanisms.get("ellipse_aspect_ratio", 2.0))
     ellipse_reference_angle = mechanisms.get("ellipse_reference_angle_deg")
     ellipse_reference_aspect = mechanisms.get("ellipse_reference_aspect_ratio")
-    field_transform, edge_coefficients_override, override_coefficients_sha256 = (
+    (field_transform, edge_coefficients_override,
+     override_coefficients_sha256, graph_aspect_ratio_override) = (
         _candidate_null_overrides(candidate)
     )
     base_candidate_id = str(config.get("reference", {}).get(
@@ -593,6 +603,7 @@ def main() -> None:
         node_gain=node_gain,
         node_dispersion_candidate_override=dispersion_field,
         edge_coefficients_override=edge_coefficients_override,
+        graph_aspect_ratio_override=graph_aspect_ratio_override,
         ee_ellipse_angle_deg=ellipse_angle,
         ee_ellipse_aspect_ratio=ellipse_aspect,
         ee_ellipse_reference_angle_deg=(
@@ -1426,6 +1437,11 @@ def main() -> None:
                 "edge_coefficients_input_sha256"
             ],
             "edge_coefficients_override_sha256": override_coefficients_sha256,
+            "graph_aspect_ratio": substrate.extras["graph_aspect_ratio_effective"],
+            "graph_topology_override": substrate.extras["graph_topology_override"],
+            "topology_pairing": (
+                "unpaired" if graph_aspect_ratio_override is not None else "paired"
+            ),
             "edge_coefficients_all_zero": bool(np.allclose(substrate.edge_coefficients, 0.0)),
             "ellipse_audit": substrate.extras["ellipse_audit"],
             "learned_edge_audit": substrate.edge_audit,

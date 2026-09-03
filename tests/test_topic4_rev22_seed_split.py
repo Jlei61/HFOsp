@@ -46,7 +46,7 @@ def _rng_state(sub):
 
 def test_candidate_null_overrides_are_frozen_and_hash_checked():
     values = np.arange(12, dtype=np.float64).reshape(2, 6) / 10.0
-    transform, coefficients, digest = _candidate_null_overrides({
+    transform, coefficients, digest, graph_aspect = _candidate_null_overrides({
         "field_transform": "r90",
         "edge_coefficients_override": {
             "values": values.tolist(),
@@ -56,6 +56,7 @@ def test_candidate_null_overrides_are_frozen_and_hash_checked():
     assert transform == "r90"
     assert np.array_equal(coefficients, values)
     assert digest == array_sha256(values)
+    assert graph_aspect is None
 
     with pytest.raises(RuntimeError, match="hash changed"):
         _candidate_null_overrides({
@@ -65,6 +66,19 @@ def test_candidate_null_overrides_are_frozen_and_hash_checked():
         })
     with pytest.raises(RuntimeError, match="unsupported frozen field transform"):
         _candidate_null_overrides({"field_transform": "rotate_to_best"})
+    assert _candidate_null_overrides({
+        "topology_override": {
+            "graph_aspect_ratio": 1.0,
+            "pairing": "unpaired_rebuilt_topology_control",
+        },
+    })[3] == 1.0
+    with pytest.raises(RuntimeError, match="unsupported frozen topology override"):
+        _candidate_null_overrides({
+            "topology_override": {
+                "graph_aspect_ratio": 1.5,
+                "pairing": "unpaired_rebuilt_topology_control",
+            },
+        })
 
 
 @pytest.fixture(scope="module")
@@ -169,3 +183,22 @@ def test_frozen_edge_coefficient_override_changes_weights_not_topology(legacy):
     assert changed.extras["edge_coefficients_input_sha256"] == array_sha256(override)
     assert _graph_hashes(changed)["topology"] == _graph_hashes(legacy)["topology"]
     assert _graph_hashes(changed)["ampa"] != _graph_hashes(legacy)["ampa"]
+
+
+@pytest.mark.slow
+@pytest.mark.integration
+def test_isotropic_graph_override_rebuilds_topology_with_same_in_degree(legacy):
+    isotropic = _build(SEED_A, graph_aspect_ratio_override=1.0)
+    assert isotropic.extras["graph_aspect_ratio_frozen"] == 2.0
+    assert isotropic.extras["graph_aspect_ratio_effective"] == 1.0
+    assert isotropic.extras["graph_topology_override"] is True
+    assert _graph_hashes(isotropic)["topology"] != _graph_hashes(legacy)["topology"]
+    assert np.array_equal(isotropic.h_e, legacy.h_e)
+
+    def incoming_degree(substrate):
+        return sum(
+            np.asarray(matrix.getnnz(axis=1)).ravel()
+            for matrix in substrate.net["ampa_by_delay"]
+        )
+
+    assert np.array_equal(incoming_degree(isotropic), incoming_degree(legacy))
