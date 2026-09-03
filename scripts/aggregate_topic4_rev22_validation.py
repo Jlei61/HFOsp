@@ -874,6 +874,71 @@ def _unit_endpoint_row(unit: Mapping, context: Mapping, *, seed: int,
     }
 
 
+def load_validation_context(*, training_contract_path: Path,
+                            patient_training_target_path: Path, heldout_path: Path,
+                            contact_contract_path: Path, classifier_manifest_path: Path,
+                            n_cov: int, r_cov: float, floor_draws: int = 64,
+                            lag_cap_ms: float = 180.0, n_pair_min: int = 5,
+                            cover_quantile: float = 0.9,
+                            kmeans_seed: int = 20260902) -> tuple[dict, dict]:
+    """Load the immutable held-out scoring context for validation-only producers."""
+    contract, contract_hash = _read_json(contact_contract_path, "contact contract")
+    classifier_payload, classifier_hash = _read_json(
+        classifier_manifest_path, "classifier manifest")
+    training_contract, training_contract_hash = _load_npz(
+        training_contract_path, "patient training objective contract",
+        ("feature_center", "feature_scale", "pca_components", "sw_directions",
+         "reference_z", "contact_names", "patient_train_onsets_ms"),
+    )
+    training, training_hash = _load_npz(
+        patient_training_target_path, "patient training KMeans/OOD target",
+        ("feature_center", "feature_scale", "pca_components", "sw_directions",
+         "global_reference_z", "contact_names", "patient_train_ranks",
+         "patient_train_old_labels"),
+    )
+    heldout, heldout_hash = _load_npz(
+        heldout_path, "patient interictal heldout contract",
+        ("contact_names", "heldout_onsets", "heldout_ranks", "heldout_old_labels",
+         "heldout_block_ids"),
+    )
+    names = [str(value) for value in training_contract["contact_names"]]
+    if names != [str(value) for value in training["contact_names"]] or names != [
+            str(value) for value in heldout["contact_names"]]:
+        raise RuntimeError("training, heldout and worker contact orders differ")
+    groups, pairs = contract_groups(contract), contract_pairs(contract)
+    new_embedding = {
+        "center": training_contract["feature_center"],
+        "scale": training_contract["feature_scale"],
+        "components": training_contract["pca_components"],
+        "directions": training_contract["sw_directions"],
+        "reference_z": training_contract["reference_z"],
+    }
+    old_embedding = _old_embedding(training)
+    held_ms = np.asarray(heldout["heldout_onsets"], float) * 1000.0
+    held_groups = np.asarray(heldout["heldout_block_ids"])
+    held_views = PatientBlockViews(
+        held_ms, held_groups, groups, pairs, new_embedding, lag_cap_ms=lag_cap_ms)
+    context = {
+        "groups": groups, "pairs": pairs, "new_embedding": new_embedding,
+        "old_embedding": old_embedding, "classifier": _classifier(classifier_payload),
+        "training_ranks": np.asarray(training["patient_train_ranks"], float),
+        "training_labels": np.asarray(training["patient_train_old_labels"], int),
+        "held_views": held_views, "held_reference": held_views.full_reference(),
+        "held_z": held_views.z, "held_groups": held_groups,
+        "n_cov": int(n_cov), "r_cov": float(r_cov), "floor_draws": int(floor_draws),
+        "n_pair_min": int(n_pair_min), "lag_cap_ms": float(lag_cap_ms),
+        "cover_quantile": float(cover_quantile), "kmeans_seed": int(kmeans_seed),
+    }
+    hashes = {
+        "training_contract": training_contract_hash,
+        "patient_training_target": training_hash,
+        "heldout": heldout_hash,
+        "contact_contract": contract_hash,
+        "classifier_manifest": classifier_hash,
+    }
+    return context, {"contact_names": names, "input_hashes": hashes}
+
+
 def aggregate_validation(*, frozen_candidates_path: Path, candidate_manifest_path: Path,
                          response_design_path: Path, seed_manifest_path: Path,
                          fit_worker_dir: Path, qualification_worker_dir: Path,
