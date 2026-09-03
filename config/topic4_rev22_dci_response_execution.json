@@ -1,0 +1,225 @@
+{
+  "candidate_manifest": "results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/response_design/execution_candidate_manifest.json",
+  "claim_boundary": "Development-only one-patient identifiability of learned-connectivity redistribution parameters on a frozen dual-core substrate; no anatomical-core, biological-synapse, tract-direction, patient-generalization, ictal or patient-causal claim",
+  "complete_distribution": {
+    "floor_draws": 256,
+    "floor_seed": 20260902,
+    "heldout_open_after_selection": true,
+    "minimum_estimable_events": 2,
+    "patient_reference_max_events": 4096,
+    "patient_training_only_for_selection": true,
+    "primary": "unconditional_fixed_projection_sliced_wasserstein"
+  },
+  "dual_core_anchor": {
+    "candidate_id": "dualcore_s39",
+    "centers_mm": [
+      [
+        1.5377342579886317,
+        1.2264179880730808
+      ],
+      [
+        18.606612137053162,
+        2.417713414411992
+      ]
+    ],
+    "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+    "source_blob_sha256": "9c50b67764aa705f2119f052df34476426017a7d4bc00eb7569a24927f59185b",
+    "source_commit": "26bc4338",
+    "source_path": "results/topic4_sef_hfo/data_driven_dual_core_ood/final_analysis.json",
+    "target_count": 1499
+  },
+  "event_unit": {
+    "causal_memory_method": "local_ee_psp_tail",
+    "contact_geometry_used_for_boundary": false,
+    "edge_delay_rounding": "nearest",
+    "forward_parent_neighborhood_bins": 1,
+    "local_ee_delay_quantile": 1.0,
+    "minimum_active_neurons": 2,
+    "minimum_dominance": 0.7,
+    "minimum_parent_dominance": 0.7,
+    "minimum_parent_support": 0.001,
+    "movie_bin_mm": 1.0,
+    "movie_frame_ms": 2.0,
+    "name": "edge_supported_causal_family_observation",
+    "psp_tail_fraction": 0.5,
+    "sensitivity_edge_delay_roundings": [
+      "floor",
+      "nearest",
+      "ceil"
+    ],
+    "sensitivity_minimum_dominances": [
+      0.6,
+      0.7,
+      0.8
+    ],
+    "sensitivity_minimum_parent_supports": [
+      0.0003,
+      0.001,
+      0.003
+    ],
+    "sensitivity_psp_tail_fractions": [
+      0.8,
+      0.5,
+      0.2
+    ]
+  },
+  "frozen_contracts": {
+    "analysis_config": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-dual-core-mechanism-scan/config/topic4_rev22_dci_dual_core_interictal_identifiability.json",
+      "sha256": "7b6e6e643c7e0cc5f73da9c1435d7384d0008ca4e7775605351d0f3b59ddcd6f"
+    },
+    "connectivity_design_audit": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/connectivity_design_audit/connectivity_design_audit.json",
+      "sha256": "1b357b811183c871ddb6370f99bb6f246988f41a30f4fb627457c6fbfe9d3c10"
+    },
+    "fit_aggregate_script": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-dual-core-mechanism-scan/scripts/aggregate_topic4_rev22_fit.py",
+      "sha256": "1c739e35312797052d1cad019ee1d7c1bc2fcaf505e7bae71be72346b5630687"
+    },
+    "geometry_domain": {
+      "kind": "task3_geometry_domain",
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/geometry_domain/geometry_domain.json",
+      "sha256": "7a105cb38607bb4e138dcfa3860184ba84fe39886688703486abf7edd66118f0"
+    },
+    "minimal_transition_config": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-dual-core-mechanism-scan/config/topic4_rev22_dci_transition_execution.json",
+      "sha256": "ac7d9ab0c71dec1a8b733d9d386a8effe8a6ff886a2ef9f44b79a8ba15b1f026"
+    },
+    "plan": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-dual-core-mechanism-scan/docs/topic4_rev22_dci_interictal_parameter_identifiability_plan.md",
+      "sha256": "5fa2bd367d696e6797b4f66333728fc0f78e41119e73c2c90a3fd1687a6ac5f1"
+    },
+    "response_design": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/response_design/response_design_manifest.json",
+      "sha256": "d9ce44f0228e9db71795180e4d72e876c7e454a9c0fa355fffac7d08ffb81bef"
+    },
+    "response_design_module": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-dual-core-mechanism-scan/src/topic4_rev22_response_design.py",
+      "sha256": "02127b2c7c6e7d58023f6db704b22e9132f4805c90f13f4f842614d50b6190f0"
+    },
+    "response_surface_module": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-dual-core-mechanism-scan/src/topic4_rev22_response_surface.py",
+      "sha256": "6ecb38ffac9723b20285c154fb5267f10c2e3dc4482675fccfd058bc6521d412"
+    },
+    "seed_manifest": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/response_design/seed_manifest.json",
+      "sha256": "3418a35c857ef21e76203008260368d748a3d6ee457a5e7f430434a0a9a52468"
+    },
+    "spec": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-dual-core-mechanism-scan/docs/topic4_rev22_dci_interictal_parameter_identifiability_spec.md",
+      "sha256": "a491801a11a9e537a8e7861f9f785ee323a3fe81949ca7479afc90adc4b1fc90"
+    },
+    "training_objective_module": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-dual-core-mechanism-scan/src/topic4_rev22_interictal_objective.py",
+      "sha256": "4f914106880b89c4c8cdf6bc1d3d65a3c7b838941c9098f49c830e39c71c000b"
+    }
+  },
+  "inputs": {
+    "transition_config": {
+      "path": "config/topic4_rev22_dci_transition_execution.json",
+      "sha256": "ac7d9ab0c71dec1a8b733d9d386a8effe8a6ff886a2ef9f44b79a8ba15b1f026"
+    }
+  },
+  "network_cache": "results/topic4_sef_hfo/data_driven_core_field_rev9/network_cache",
+  "output_root": "results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability",
+  "plan": "docs/topic4_rev22_dci_interictal_parameter_identifiability_plan.md",
+  "reference": {
+    "Z_M": "off",
+    "base_substrate_candidate_id": "joint_04_control",
+    "ellipse_angle_deg": -22.80538396505847,
+    "ellipse_aspect_ratio": 2.0,
+    "ellipse_reference_source": "amendment v5.1 (2026-09-03): absolute reference = registered patient axis (src/sef_hfo_subject_placement.register_to_sheet theta_deg), which is the long axis of the E-to-E kernel used to sample the frozen graph (build_connectivity_rot, AR=2). rev20 used the nominal (45 deg, 2) no-op instead; that reference is 68 deg off the graph axis, so rev20's angle/aspect families acted on a misaligned kernel.",
+    "g_EE": 0.5,
+    "g_EtoI": 1.0,
+    "node_gain": 1.0,
+    "signed_depth_shrinkage": 1.0
+  },
+  "resources": {
+    "estimated_worker_gib": 18.0,
+    "long_run_launcher": "systemd-run --user plus nohup",
+    "maximum_workers": 16,
+    "minimum_free_disk_gib": 30,
+    "monitor_interval_seconds": 600,
+    "numerical_threads_per_worker": 1,
+    "reserved_available_memory_gib": 32
+  },
+  "schema_id": "topic4_rev22_dci_response_execution_v1",
+  "scientific_role": "development_only_frozen_dual_core_interictal_connectivity_identifiability",
+  "search": {
+    "canary_network_seeds": [
+      2511
+    ],
+    "confirmation_network_seeds": [
+      2621,
+      2622,
+      2623,
+      2624,
+      2625,
+      2626,
+      2627,
+      2628,
+      2629,
+      2630,
+      2631,
+      2632
+    ],
+    "contact_readout": {
+      "kernel_width_mm": 0.25,
+      "participation_margin_fraction": 0.1,
+      "smooth_ms": 5.0,
+      "source": "lineage_restricted_neuron_activity",
+      "timing_fraction": 0.5
+    },
+    "dynamics_seeds": [
+      3101,
+      3102
+    ],
+    "fit_network_seeds": [
+      2511,
+      2512,
+      2513,
+      2514
+    ],
+    "selection_network_seeds": [
+      2601,
+      2602,
+      2603,
+      2604,
+      2605,
+      2606
+    ],
+    "simulation": {
+      "duration_ms": 20000.0,
+      "early_stop_runaway": true,
+      "late_runaway_is_invalid": true
+    }
+  },
+  "source_topology": {
+    "baseline_window_ms": [
+      -120.0,
+      -20.0
+    ],
+    "bin_mm": 1.0,
+    "event_window_ms": [
+      -20.0,
+      180.0
+    ],
+    "frame_step_ms": 2.0,
+    "frame_width_ms": 3.0,
+    "full_sheet_movie": {
+      "enabled": true,
+      "frame_ms": 2.0
+    },
+    "minimum_active_neurons": 2,
+    "persistence_frames": 2
+  },
+  "spec": "docs/topic4_rev22_dci_interictal_parameter_identifiability_spec.md",
+  "validation": {
+    "minimum_fig4_readable_contacts": 3,
+    "natural_kmeans_seed": 20260902,
+    "ood_denominator": "all returned isolated causal families",
+    "paired_bootstrap_draws": 4096,
+    "paired_bootstrap_seed": 20260902,
+    "unreadable_counts_as_ood": true
+  }
+}
