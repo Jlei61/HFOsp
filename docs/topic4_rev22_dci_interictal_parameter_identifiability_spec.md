@@ -773,6 +773,15 @@ Node blocking factor adds 24, for 108 new Task 10b trajectories. Intact `M0000` 
 values are reused from the same confirmation seeds rather than rerun. No unnamed fourth
 paired-null family may be inferred from an arithmetic total.
 
+If surrogate disagreement freezes more than one full-model candidate, Task 10b uses the GP
+proposal as its single full condition; if no GP proposal exists, it uses the observed fallback,
+then frozen-manifest order. This choice is made without validation endpoints. All full-model
+candidates still receive qualification and confirmation, but the 108-run structural budget is
+not multiplied post hoc. In the rebuilt AR=1 arm, `M0000` leaves the isotropically sampled graph
+unreweighted, whereas the full condition applies the same frozen fixed-topology operator as the
+selected model. Thus this arm tests whether sampled graph anisotropy is necessary after the
+downstream operator is allowed; it does not assert that the final weighted graph is isotropic.
+
 The Node blocking factor is separate from the nulls. Two previously frozen Node candidates
 from earlier rounds, loadable through the existing override path and named in the Task 0
 config, are run at `M0000` and at the frozen full-model proposal on the same six topology

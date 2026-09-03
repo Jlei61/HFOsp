@@ -319,6 +319,12 @@ trajectories, 12 isotropic trajectories and 24 Node-factor trajectories, for 108
 trajectories. The intact arms are reused from confirmation. Nulls are opened with validation
 and never select a parameter.
 
+If GP/tree disagreement freezes two full-model candidates, use the GP proposal for this
+fixed 108-run block (observed fallback, then manifest order if GP is absent); do not use
+validation results to choose which candidate receives structural nulls. The AR=1 reference is
+left geometrically unreweighted, while the AR=1 full condition receives the same frozen
+fixed-topology operator as the selected model and is reported as an unpaired topology control.
+
 ## Task 11: open validation once
 
 - Score every immutable response-design trajectory as a descriptive second pass, in addition
