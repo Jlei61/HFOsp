@@ -44,6 +44,19 @@
 > `docs/archive/topic4/sef_hfo/data_driven_snn_cohort_formal_result_2026-08-16.md`，
 > 冻结与预检见同目录 `..._canary_and_formal_freeze_2026-08-15.md`。
 
+> **空间 Z/M + 持续 OU 相图更新（2026-09-03）**：作者本轮把 near-saturated tonic plateau
+> 与深调制振荡都计作 runaway。冻结 `tonic_b0_v2` 已由新 seeds 1841/1842/1843 以 3/3 确认
+> 持续全局高平台；matched-noise 双初值 pilot 则显示 `q=0.860 L/L → 0.840/0.820 L/I →
+> 0.805 I/I → 0.790/0.770 I/H`，尚无三 seed `L/H` 同点共存。进一步用实际患者邻接、阈值场、
+> q target 和 self-consistent M 构造 1 mm deterministic reduction，pseudo-arclength 折返与同一
+> fixed-point Jacobian 实零模共同确认 saddle-node：`eta_m=0.02` 时
+> `q_fold=0.890825886`、fold E rate=127.399 Hz；`eta_m=0→0.08` 仅移动
+> `Δq_fold≈2.7e-4`。**术语边界**：saddle-node 只属于 OU 取零均值的 reduced frozen-q fast
+> subsystem；OU-on finite SNN 的经验边缘约 `q=0.80–0.825`，仍只能称 threshold-like
+> transition。coarse-grid convergence、colored-OU closure、delay-aware Hopf 和 empirical
+> 3-seed 长驻留尚未完成，禁止写 finite-SNN phase transition。完整审阅：
+> `docs/archive/topic4/data_driven_zm_ictal_transition/spatial_zm_phase_bifurcation_analysis_2026-09-03.md`。
+
 ---
 
 ## 0. 一句话承诺（朴素表述，CLAUDE.md §8 大白话风格）
