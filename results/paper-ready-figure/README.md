@@ -13,6 +13,19 @@
 
 ---
 
+## 当前补充视频入口
+
+| paper slot | asset_id | status | canonical path |
+|---|---|---|---|
+| Supplementary Video 2 | `fig3c_peri_onset_field_evolution_video` | author-locked | `supplementary-video-2.gif` |
+
+Supplementary Video 2 将主图 Figure 3C 的 E10 | SZ3 发作场扩展到临床起始前 120 s 至起始后
+20 s。动画固定 shared TA plane、15 个触点、support、6 mm 显示核和跨帧一致的 power-z 色标，
+仅更新 10 s 滑窗内的 1–150 Hz robust-z 场；下方以幅度感知模板表达量
+`Q=max(|q_A|,|q_B|)` 显示场强变化，并用红蓝点标出 TA/TB 主导。该视频是单病例动态配套，
+不是 onset-emergent alignment、template-free replay 或 cohort 证据。完整合同和 SHA-256 见
+`supplementary-video-2_metadata.json`。
+
 ## Fig1 — 间期 HFO 群体事件素材
 
 - `fig1_hfo_group_event_demo/` — **Fig1-a1/a2 源素材**：legacy 人工标注 HFO n=178 形态图 + Yuquan Y3 群体事件示例。

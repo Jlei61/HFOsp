@@ -41,6 +41,7 @@
 
 | asset_id | paper_slot | status | canonical_path | 说明 |
 |---|---|---|---|---|
+| `fig3c_peri_onset_field_evolution_video` | Supplementary Video 2 | `SUPPLEMENT` | `results/paper-ready-figure/supplementary-video-2.gif` | 2026-09-03 作者锁定。E10/SZ3 的 Figure 3C 动态配套：固定 TA 间期场，右侧显示同一 shared plane 上从 −120 s 至 +20 s 的 1–150 Hz baseline-robust-z 发作场；下方为幅度感知模板表达量 `Q=max(|q_A|,|q_B|)` 与当前窗游标，红蓝点表示 TA/TB 主导。66 帧、10 s 滑窗、2 s 步长、固定 power-z 色标；0–10 s 帧通过静态 Figure 3C 数值一致性检查。只作代表病例动态可视化，不承担独立 cohort 或机制结论 |
 | `interictal_event_phenotypes` | FigS1 | `SUPPLEMENT` | `results/paper-ready-figure/archive/2026-08-13_non_main_figure_packages/supp_fig1_interictal_event_phenotypes/figures/` | legacy 人工标注事件验证集 |
 | `soz_auc` | FigS2 | `SUPPLEMENT` | `results/paper-ready-figure/archive/2026-08-13_non_main_figure_packages/supp_fig2_soz_auc/figures/` | raw vs synchronized SOZ AUC |
 | `k_scan_templates` | FigS3 | `SUPPLEMENT` | `results/paper-ready-figure/archive/2026-08-13_non_main_figure_packages/supp_fig3_k_scan_templates/figures/` | masked K=2–10 扫描与高阶示例 |

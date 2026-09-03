@@ -222,6 +222,16 @@ Fig3-B 是 intentionally selected morphology-aware TA representative。它说明
 
 **科学边界**：冻结 archive 的 early-ictal shared-field cohort null（二维共线 n=7，within-shaft p=0.346；shared-vs-own p=0.938）仍是 cohort 级主参照。这里的 sliding-window null 回答逐人哪些时间段偏离杆内置换，不能把 3/7 cluster 写成 cohort superiority，也不能因为 pre-onset cluster 而写 onset-emergent alignment。within-shaft power 仍依赖 shaft sizes；E583 的 3/22 coverage 尤其需要降级解释。
 
+### Supplementary Video 2: Figure 3C peri-onset field evolution
+
+E10 | SZ3 的静态 Figure 3C 被扩展为 `[-120,+20] s` 动态场。上排固定冻结 TA 间期场，仅更新右侧
+1–150 Hz baseline-robust-z 发作场；下排显示幅度感知模板表达量
+`Q=max(|q_A|,|q_B|)`，并以红蓝点标记 TA/TB 主导。每帧为 10 s 滑窗，步长 2 s，右侧
+power-z 色标跨帧固定；`[0,10] s` 帧通过正式 Figure 3C 的逐触点数值一致性闸门。正式投稿入口为
+`results/paper-ready-figure/supplementary-video-2.gif`，完整 metadata 为
+`results/paper-ready-figure/supplementary-video-2_metadata.json`。该视频只补足代表病例的动态可视化，
+不新增 cohort、onset-emergent alignment、template-free replay 或机制结论。
+
 ### Fig4: 被试特异性 SNN + KMeans readout 核验（E1146）
 
 **目的**：把同一 cm-SNN 标准底物按**病人真实电极平面**摆放，两个低阈值核放在**两类间期模板各自最早的电极区**（=两类模板的 source，轴两端），看同一虚拟 SEEG（=病人真实触点）能否读出正/反间期传播，并用无监督 KMeans 验证 readout 事件是否自然分成两类。
