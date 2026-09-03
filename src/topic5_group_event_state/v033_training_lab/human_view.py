@@ -97,9 +97,19 @@ def load_materialized_human_r0_view(
     if manifest_hash != str(iv.get("artifact_manifest_sha256", "")):
         raise ValueError("human artifact manifest SHA256 mismatch")
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    role = str(manifest.get("role", ""))
+    expansion = dict(request.get("human_trainability_experiment") or {})
+    expansion_authorized = expansion.get("cohort_expansion_authorized") is True \
+        and expansion.get("scientific_interpretation") == "optimization_diagnostic_only"
+    role_allowed = role == "tuning" or (
+        role == "explicit_non_tuning_override" and expansion_authorized
+    )
     if manifest.get("format") != "group_event_state_v0_3_3_human_r0_input_manifest" \
-            or manifest.get("subject") != subject or manifest.get("role") != "tuning":
-        raise PermissionError("human manifest is not the locked tuning-patient R0 artifact")
+            or manifest.get("subject") != subject or not role_allowed:
+        raise HumanArtifactHeld(
+            "human manifest is neither a locked tuning artifact nor an explicitly "
+            "authorized trainability-expansion artifact"
+        )
     if manifest.get("sealed") is not False \
             or manifest.get("development_evaluation_used_for_fitting") is not False:
         raise PermissionError("human manifest is sealed or used development evaluation for fitting")

@@ -123,3 +123,30 @@ def test_materialized_human_r0_refuses_an_unreleased_or_changed_evaluator(tmp_pa
     )
     with pytest.raises(ViewHeld, match="not released"):
         view_for_request(request, release_present=True, scaling="robust")
+
+
+def test_non_tuning_human_r0_requires_explicit_trainability_expansion_authorization(tmp_path):
+    request, _phase = _fixture(tmp_path)
+    manifest_path = Path(request["input_view"]["artifact_manifest"])
+    manifest = json.loads(manifest_path.read_text())
+    manifest["role"] = "explicit_non_tuning_override"
+    manifest_path.write_text(json.dumps(manifest))
+    request["input_view"]["artifact_manifest_sha256"] = _sha(manifest_path)
+    with pytest.raises(ViewHeld, match="trainability-expansion"):
+        view_for_request(request, release_present=True, scaling="robust")
+
+
+def test_non_tuning_human_r0_is_allowed_only_as_optimization_diagnostic(tmp_path):
+    request, _phase = _fixture(tmp_path)
+    manifest_path = Path(request["input_view"]["artifact_manifest"])
+    manifest = json.loads(manifest_path.read_text())
+    manifest["role"] = "explicit_non_tuning_override"
+    manifest_path.write_text(json.dumps(manifest))
+    request["input_view"]["artifact_manifest_sha256"] = _sha(manifest_path)
+    request["human_trainability_experiment"] = {
+        "cohort_expansion_authorized": True,
+        "scientific_interpretation": "optimization_diagnostic_only",
+    }
+    view, meta = view_for_request(request, release_present=True, scaling="robust")
+    assert view.n("train") == 3 and view.n("inner_val") == 2
+    assert meta["development_evaluation_exposed"] is False
