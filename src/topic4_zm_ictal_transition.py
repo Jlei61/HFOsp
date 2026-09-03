@@ -298,8 +298,6 @@ def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=No
         node = _candidate_node(node_candidate, positions, n_total=n_e + n_i,
                                stage=stage, config=anchor_config)
     elif field_type == "manual_dual_core_budget_matched":
-        if field_transform is not None:
-            raise RuntimeError("manual dual-core field does not support field transforms")
         h_manual, manual_field_audit = budget_matched_dual_core_h(
             positions, np.asarray(node_candidate["centers_mm"], float),
             target_count=int(node_candidate["target_count"]),
@@ -369,14 +367,27 @@ def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=No
             n_basis=node_candidate["n_basis"], degree=node_candidate["degree"],
             target_count=stage["N_core_manual"], L=engine["L"])
     else:
-        h_e = np.asarray(node["h"], float)
+        if field_transform is None:
+            h_e = np.asarray(node["h"], float)
+            query_field_audit = manual_field_audit
+        else:
+            # Re-query the rigidly transformed field and re-project its binary
+            # support to the frozen neuron budget. A fixed radial cutoff would
+            # change the selected count on a finite sampled sheet and confound
+            # placement with total Node mass.
+            h_e, query_field_audit = budget_matched_dual_core_h(
+                query_e, np.asarray(node_candidate["centers_mm"], float),
+                target_count=int(node_candidate["target_count"]),
+            )
         h_i = dual_core_query_h(
             query_i, np.asarray(node_candidate["centers_mm"], float),
-            distance_cutoff_mm=manual_field_audit["distance_cutoff_mm"],
+            distance_cutoff_mm=query_field_audit["distance_cutoff_mm"],
         )
         field_query_audit = {
-            **manual_field_audit,
+            **query_field_audit,
             "query_I_selected_count": int(np.sum(h_i)),
+            "field_transform": field_transform,
+            "budget_reprojected_after_transform": field_transform is not None,
         }
     if field_transform is None:
         if not np.array_equal(h_e, node["h"]):

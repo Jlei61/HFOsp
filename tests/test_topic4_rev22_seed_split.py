@@ -1,6 +1,7 @@
 """rev22-DCI Task 2: topology and dynamics seeds split without changing legacy output."""
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -103,3 +104,30 @@ def test_topology_seed_changes_the_graph_but_not_the_parameter_contract(legacy):
     assert split.extras["ellipse_audit"]["exact_noop"] == legacy.extras["ellipse_audit"]["exact_noop"]
     assert np.isclose(split.h_e.sum(), legacy.h_e.sum(), atol=1e-8)
     assert _rng_state(split) == _rng_state(legacy)
+
+
+@pytest.mark.slow
+@pytest.mark.integration
+def test_manual_dual_core_reregistration_preserves_frozen_node_budget(legacy):
+    manifest_path = (
+        ARTIFACT_ROOT / "results/topic4_sef_hfo/"
+        "data_driven_dual_core_interictal_identifiability/response_design/"
+        "execution_candidate_manifest.json"
+    )
+    manifest = json.loads(manifest_path.read_text())
+    candidate = next(row for row in manifest["candidates"]
+                     if row["candidate_id"] == "dci_p000")
+    expected = int(candidate["node_field"]["target_count"])
+
+    transformed = _build(
+        SEED_A,
+        node_candidate_override=candidate["node_field"],
+        field_transform="r180",
+    )
+
+    assert int(transformed.h_e.sum()) == expected
+    assert transformed.extras["field_query_audit"][
+        "budget_reprojected_after_transform"
+    ] is True
+    assert transformed.extras["field_query_audit"]["field_transform"] == "r180"
+    assert not np.array_equal(transformed.h_e, legacy.h_e)
