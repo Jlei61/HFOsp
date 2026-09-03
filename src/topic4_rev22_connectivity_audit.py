@@ -32,13 +32,15 @@ def _elliptical_radius(dx: np.ndarray, dy: np.ndarray, *, length_scale: float,
 
 
 def ellipse_reweight(graph: Mapping, *, length_scale: float, angle_deg: float,
-                     aspect_ratio: float) -> np.ndarray:
+                     aspect_ratio: float, reference_angle_deg: float = 45.0,
+                     reference_aspect_ratio: float = 2.0) -> np.ndarray:
     rows, data = np.asarray(graph["row"], int), np.asarray(graph["data"], float)
     log_ratio = (
         -_elliptical_radius(graph["dx"], graph["dy"], length_scale=length_scale,
                             angle_deg=angle_deg, aspect_ratio=aspect_ratio)
         + _elliptical_radius(graph["dx"], graph["dy"], length_scale=length_scale,
-                             angle_deg=45.0, aspect_ratio=2.0)
+                             angle_deg=float(reference_angle_deg),
+                             aspect_ratio=float(reference_aspect_ratio))
     )
     raw_ratio = np.exp(np.clip(log_ratio, -20.0, 20.0))
     incoming = np.bincount(rows, weights=data, minlength=int(graph["n_e"]))
@@ -201,6 +203,8 @@ def candidate_pathway_weights_from_logits(
     angle_deg: float,
     aspect_ratio: float,
     raw_logit_clip: float | None,
+    reference_angle_deg: float = 45.0,
+    reference_aspect_ratio: float = 2.0,
 ) -> dict:
     """Fast candidate weights after topology-specific unscaled logits are cached."""
     positions = np.asarray(positions, float)
@@ -217,7 +221,8 @@ def candidate_pathway_weights_from_logits(
     }
     ellipse = ellipse_reweight(
         ee_graph, length_scale=float(length_scale_ee), angle_deg=float(angle_deg),
-        aspect_ratio=float(aspect_ratio),
+        aspect_ratio=float(aspect_ratio), reference_angle_deg=float(reference_angle_deg),
+        reference_aspect_ratio=float(reference_aspect_ratio),
     )
     ee_logits = np.asarray(base_logits["E_to_E"], float) * float(g_ee)
     etoi_logits = np.asarray(base_logits["E_to_I"], float) * float(g_etoi)

@@ -145,11 +145,14 @@ def main() -> None:
     rev20_manifest = json.loads(args.rev20_manifest.read_text())
     reference = [c for c in rev20_manifest["candidates"] if c.get("is_reference")][0]
     node_field = reference["node_field"]
+    analysis = json.loads((ROOT / "config/topic4_rev22_dci_dual_core_interictal_identifiability.json").read_text())
+    expected_reference = (float(analysis["reference"]["ellipse_angle_deg"]),
+                          float(analysis["reference"]["ellipse_aspect_ratio"]))
     if not synthetic:
         rev20_config = ROOT / "config/topic4_rev20_dc_dual_core_mechanism_atlas.json"
         validate_formal_geometry_contract(
             domain_json, node_field_sha256=node_field.get("field_sha256"),
-            rev20_config_sha256=_sha256(rev20_config),
+            rev20_config_sha256=_sha256(rev20_config), expected_reference=expected_reference,
         )
         grid_table = args.domain_json.with_name("geometry_audit_grid.csv")
         if not grid_table.is_file() or _sha256(grid_table) != domain_json.get("grid_table_sha256"):
@@ -175,6 +178,12 @@ def main() -> None:
         "geometry_status": domain["geometry_status"],
         "bounds": {name: design["bounds"][d] for d, name in enumerate(PARAMS)},
         "reference": {name: REFERENCE[d] for d, name in enumerate(PARAMS)},
+        "geometry_reference": {
+            "absolute_angle_deg": design["absolute_reference"]["angle_deg"],
+            "absolute_aspect_ratio": design["absolute_reference"]["aspect_ratio"],
+            "theta_FT_deg_is_offset_from_absolute_angle": True,
+            "source": "rev22 amendment v5.1: registered patient axis (graph kernel long axis) and engine AR",
+        },
         "design_seed": design["seed"],
         "regenerations": design["regenerations"],
         "design_quality": design["design_quality"],

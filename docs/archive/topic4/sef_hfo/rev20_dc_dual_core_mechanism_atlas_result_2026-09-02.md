@@ -123,3 +123,21 @@ E→I 独立效应或统计 synergy。
   均保留。
 - 图中空心圆为 4-network screen、菱形为 12-network confirmation、灰叉为 runaway/不可估计点；
   invalid 点不进入连续曲线。
+
+## 7. 2026-09-03 更正：椭圆参考点与图轴错位（rev22 v5.1 结构审计发现）
+
+本轮的椭圆重加权以名义上的 `(45°, AR=2)` 作为精确无操作参考点，但冻结图的 E→E 核长轴是配准后的
+患者传播轴 `theta_EE = −22.8°`（`register_to_sheet`，`build_connectivity_rot`，AR=2），实现的加权几何
+长轴约在 158°（轴向），与 45° 相差 68°。因此 §4.4 对"长轴方向"与"长短轴比"两族的解读需要更正：
+
+- 请求 `aspect=3.0` 并不是"更强的各向异性"：它把权重推向与图轴近乎垂直的 45° 方向，实现的加权几何
+  反而变**圆**（实现长短轴比约 1.40，主轴翻到约 7°）。它带来的高招募与单模板收窄应读作"把图的有效
+  几何旋转并压圆"，不是"各向异性越强越收窄"。
+- 请求 `angle=67.5°` 等角度族的实现轴向移动方向与请求相反；`aspect=4.0` 的 runaway 与 `angle=90°`
+  的零事件同样发生在错位参考下，不能解释为图轴方向上的极端值。
+- 两族的 12 网络确认数值本身仍然有效（它们是真实跑出的结果），但其参数标签的物理含义已改变；
+  rev22 不再把这两族当作角度/长短轴响应的锚点。剂量族（EE、E→I、Joint）不受影响。
+
+来源：`docs/topic4_rev22_dci_interictal_parameter_identifiability_spec.md` §3.1；结构审计产物
+`results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/preliminary_archive/`。
+

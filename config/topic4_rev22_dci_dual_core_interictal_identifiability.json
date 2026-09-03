@@ -70,9 +70,10 @@
     "signed_depth_shrinkage": 1.0,
     "g_EE": 0.5,
     "g_EtoI": 1.0,
-    "ellipse_angle_deg": 45.0,
+    "ellipse_angle_deg": -22.80538396505847,
     "ellipse_aspect_ratio": 2.0,
-    "Z_M": "off"
+    "Z_M": "off",
+    "ellipse_reference_source": "amendment v5.1 (2026-09-03): absolute reference = registered patient axis (src/sef_hfo_subject_placement.register_to_sheet theta_deg), which is the long axis of the E-to-E kernel used to sample the frozen graph (build_connectivity_rot, AR=2). rev20 used the nominal (45 deg, 2) no-op instead; that reference is 68 deg off the graph axis, so rev20's angle/aspect families acted on a misaligned kernel."
   },
   "parameter_semantics": {
     "learned_ee_pattern_dose": {
@@ -89,14 +90,15 @@
     },
     "theta_FT": {
       "legacy_key": "ellipse_angle_deg",
-      "reference": 45.0,
-      "meaning": "fixed-topology E-to-E reweighting long-axis angle; graph sampled with rho_EE=0.6 (45 deg, AR=2)",
-      "not": "learned anatomical tract direction"
+      "reference": 0.0,
+      "absolute_reference_angle_deg": -22.80538396505847,
+      "meaning": "fixed-topology E-to-E reweighting long-axis angle offset relative to the graph's own kernel axis (registered patient axis); mechanisms.ellipse_angle_deg = absolute reference + theta_FT",
+      "not": "learned anatomical tract direction; nor an angle relative to the sheet's 45 deg diagonal"
     },
     "AR_FT": {
       "legacy_key": "ellipse_aspect_ratio",
       "reference": 2.0,
-      "meaning": "fixed-topology E-to-E reweighting aspect ratio, area preserved (ell*sqrt(AR), ell/sqrt(AR))",
+      "meaning": "fixed-topology E-to-E reweighting aspect ratio relative to the graph kernel AR=2, area preserved (ell*sqrt(AR), ell/sqrt(AR)); reference kernel = graph kernel",
       "not": "rebuilt isotropic/anisotropic topology"
     },
     "both_scale": {
@@ -128,14 +130,15 @@
       1.5
     ],
     "theta_FT_deg": [
-      22.5,
-      67.5
+      -22.5,
+      22.5
     ],
     "AR_FT": [
       1.0,
       3.0
     ],
-    "final_geometry_domain": "frozen by Task 3 structure audit"
+    "final_geometry_domain": "frozen by Task 3 structure audit",
+    "theta_FT_deg_semantics": "offset (deg) relative to the absolute reference angle reference.ellipse_angle_deg"
   },
   "objective": {
     "components": [
@@ -186,5 +189,22 @@
     "balanced": "dc_both_scale_1p25",
     "note": "reported after objective freeze; cannot accept, reject or tune the objective"
   },
-  "claim_boundary": "Development-only one-patient identifiability of learned-connectivity redistribution parameters on a frozen dual-core substrate; no anatomical-core, biological-synapse, tract-direction, patient-generalization, ictal or patient-causal claim"
+  "claim_boundary": "Development-only one-patient identifiability of learned-connectivity redistribution parameters on a frozen dual-core substrate; no anatomical-core, biological-synapse, tract-direction, patient-generalization, ictal or patient-causal claim",
+  "graph_kernel": {
+    "theta_EE_deg": -22.80538396505847,
+    "AR": 2.0,
+    "achieved_base_geometry_seed_2511": {
+      "angle_deg": 157.79,
+      "aspect_ratio": 1.93
+    },
+    "source": "register_to_sheet theta_deg (source->sink centroid direction) and stage engine AR"
+  },
+  "amendments": [
+    {
+      "version": "v5.1",
+      "date": "2026-09-03",
+      "kind": "structural (before any rev22 SNN run)",
+      "summary": "ellipse reference bound to the graph kernel axis; theta_FT redefined as an offset; Task 3 re-run required"
+    }
+  ]
 }

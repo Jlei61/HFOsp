@@ -105,9 +105,16 @@ def validate_inputs(response: dict, seed_manifest: dict, transition: dict,
 
 
 def _baseline(seed: int, *, artifact_root: Path, transition_path: Path,
-              rev20: dict, node_field: dict):
+              rev20: dict, node_field: dict, geometry_reference: dict | None = None):
     transition = load_round_config(transition_path)
     reference = rev20["reference"]
+    ellipse_reference = {}
+    ellipse_angle, ellipse_aspect = 45.0, 2.0
+    if geometry_reference is not None:
+        ellipse_angle = float(geometry_reference["angle_deg"])
+        ellipse_aspect = float(geometry_reference["aspect_ratio"])
+        ellipse_reference = {"ee_ellipse_reference_angle_deg": ellipse_angle,
+                             "ee_ellipse_reference_aspect_ratio": ellipse_aspect}
     substrate = build_substrate(
         transition, str(reference["base_substrate_candidate_id"]), int(seed),
         cache_dir=str(artifact_root / rev20["network_cache"]),
@@ -115,8 +122,9 @@ def _baseline(seed: int, *, artifact_root: Path, transition_path: Path,
         node_candidate_override=dict(node_field),
         node_depth_shrinkage=float(reference["signed_depth_shrinkage"]),
         node_gain=float(reference["node_gain"]),
-        ee_ellipse_angle_deg=45.0, ee_ellipse_aspect_ratio=2.0,
+        ee_ellipse_angle_deg=ellipse_angle, ee_ellipse_aspect_ratio=ellipse_aspect,
         artifact_root=artifact_root, topology_seed=int(seed), dynamics_seed=int(seed),
+        **ellipse_reference,
     )
     if not np.allclose(substrate.edge_coefficients, 0.0):
         raise RuntimeError("zero-dose baseline retained learned coefficients")
@@ -137,6 +145,8 @@ def _producer_parity(net: dict, positions: np.ndarray, h_all: np.ndarray,
         net, positions, length_scale=float(local["E_to_E_length_scale_mm"]),
         angle_deg=float(mechanisms["ellipse_angle_deg"]),
         aspect_ratio=float(mechanisms["ellipse_aspect_ratio"]),
+        reference_angle_deg=float(mechanisms.get("ellipse_reference_angle_deg", 45.0)),
+        reference_aspect_ratio=float(mechanisms.get("ellipse_reference_aspect_ratio", 2.0)),
     )
     dose = np.asarray([[float(mechanisms["g_EE"])], [float(mechanisms["g_EtoI"])]])
     produced, learned_audit = continuous_local_e_source_flow(
@@ -214,6 +224,8 @@ def audit_topology(seed: int, *, artifact_root: Path, transition_path: Path,
             angle_deg=float(mechanism["ellipse_angle_deg"]),
             aspect_ratio=float(mechanism["ellipse_aspect_ratio"]),
             raw_logit_clip=raw_logit_clip,
+            reference_angle_deg=float(mechanism.get("ellipse_reference_angle_deg", 45.0)),
+            reference_aspect_ratio=float(mechanism.get("ellipse_reference_aspect_ratio", 2.0)),
         )
         structure = candidate_structure(ee, etoi, final, positions)
         passed = structure_passes(structure, THRESHOLDS)

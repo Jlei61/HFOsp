@@ -64,7 +64,14 @@ def test_points_inside_domain_and_locked_coordinates_exact():
             assert set(r["family_membership"]) >= {"M0011", "M1111", "M0111", "M1011"}
         assert r["mechanisms"]["Z_M"] == "off"
         assert r["mechanisms"]["g_EE"] == r["physical"]["g_LEE"]
-        assert r["mechanisms"]["ellipse_angle_deg"] == r["physical"]["theta_FT_deg"]
+        absolute = domain["absolute_reference"]
+        expected_angle = (absolute["angle_deg"] if r["physical"]["theta_FT_deg"] == 0.0
+                          else absolute["angle_deg"] + r["physical"]["theta_FT_deg"])
+        assert r["mechanisms"]["ellipse_angle_deg"] == expected_angle
+        assert r["mechanisms"]["ellipse_reference_angle_deg"] == absolute["angle_deg"]
+        assert r["mechanisms"]["ellipse_reference_aspect_ratio"] == absolute["aspect_ratio"]
+        if r["is_reference"]:
+            assert r["mechanisms"]["ellipse_angle_deg"] == absolute["angle_deg"]
 
 
 def test_determinism_and_seed_sensitivity():
@@ -133,11 +140,14 @@ def test_duplicate_rejection_after_rounding():
 
 def test_fallback_branch_from_non_estimable_or_degenerate_domain():
     for payload in (
-        {"status": "GEOMETRY_STRUCTURALLY_NON_ESTIMABLE", "admissible_rectangle": None},
-        {"status": "GEOMETRY_DOMAIN_FROZEN", "admissible_rectangle": {"theta_deg": [45.0, 45.0],
-                                                                       "aspect_ratio": [2.0, 2.0]}},
+        {"status": "GEOMETRY_STRUCTURALLY_NON_ESTIMABLE", "admissible_rectangle": None,
+         "reference": {"angle_deg": -22.8, "aspect_ratio": 2.0}},
+        {"status": "GEOMETRY_DOMAIN_FROZEN", "admissible_rectangle": {"theta_deg": [-22.8, -22.8],
+                                                                       "aspect_ratio": [2.0, 2.0]},
+         "reference": {"angle_deg": -22.8, "aspect_ratio": 2.0}},
         {"status": "GEOMETRY_DOMAIN_FROZEN_ONE_DIMENSION_DEGENERATE",
-         "admissible_rectangle": {"theta_deg": [45.0, 45.0], "aspect_ratio": [1.5, 2.5]}},
+         "admissible_rectangle": {"theta_deg": [-22.8, -22.8], "aspect_ratio": [1.5, 2.5]},
+         "reference": {"angle_deg": -22.8, "aspect_ratio": 2.0}},
     ):
         domain = domain_from_geometry(payload)
         assert domain["branch"] == STATUS_FALLBACK
@@ -153,14 +163,18 @@ def test_fallback_branch_from_non_estimable_or_degenerate_domain():
 def test_domain_must_contain_reference():
     with pytest.raises(ValueError):
         domain_from_geometry({"status": "GEOMETRY_DOMAIN_FROZEN",
+                              "reference": {"angle_deg": 45.0, "aspect_ratio": 2.0},
                               "admissible_rectangle": {"theta_deg": [50.0, 60.0], "aspect_ratio": [1.0, 3.0]}})
+    with pytest.raises(ValueError, match="absolute reference"):
+        domain_from_geometry({"status": "GEOMETRY_DOMAIN_FROZEN",
+                              "admissible_rectangle": {"theta_deg": [40.0, 50.0], "aspect_ratio": [1.0, 3.0]}})
 
 
 def test_family_membership_rules():
     assert family_membership(np.asarray(REFERENCE), STATUS_PRIMARY) == list(MASKS)
-    assert family_membership(np.asarray([0.7, 1.0, 45.0, 2.0]), STATUS_PRIMARY) == [
+    assert family_membership(np.asarray([0.7, 1.0, 0.0, 2.0]), STATUS_PRIMARY) == [
         "M1000", "M1100", "M1111", "M1011", "M1101", "M1110"]
-    assert family_membership(np.asarray([0.7, 1.2, 50.0, 2.5]), STATUS_PRIMARY) == ["M1111"]
+    assert family_membership(np.asarray([0.7, 1.2, 5.0, 2.5]), STATUS_PRIMARY) == ["M1111"]
 
 
 def test_seed_manifest_non_overlap_and_decomposition_block():
@@ -197,3 +211,16 @@ def test_cli_synthetic_run_refuses_results_and_writes_outputs(tmp_path):
                               "--out-dir", "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/x",
                               "--rev20-manifest", str(rev20_manifest)], cwd=ROOT, capture_output=True)
     assert refused.returncode != 0
+
+
+def test_relative_angle_offsets_map_to_absolute_kernel_angles():
+    domain = domain_from_geometry(synthetic_domain((-40.0, -5.0), (1.5, 2.5),
+                                                   reference_angle_deg=-22.80538396505847))
+    assert domain["bounds"][2] == [-40.0 + 22.80538396505847, -5.0 + 22.80538396505847]
+    assert domain["absolute_reference"]["angle_deg"] == -22.80538396505847
+    design, rows = _rows(domain)
+    ref = [r for r in rows if r["is_reference"]][0]
+    assert ref["physical"]["theta_FT_deg"] == 0.0
+    assert ref["mechanisms"]["ellipse_angle_deg"] == -22.80538396505847  # bit-exact no-op angle
+    for r in rows:
+        assert -40.0 - 1e-9 <= r["mechanisms"]["ellipse_angle_deg"] <= -5.0 + 1e-9

@@ -21,7 +21,7 @@ from sklearn.gaussian_process import GaussianProcessClassifier, GaussianProcessR
 from sklearn.gaussian_process.kernels import ConstantKernel, Matern
 
 PARAMETER_ORDER = ("g_LEE", "g_LEI", "theta_FT_deg", "AR_FT")
-REFERENCE = (0.5, 1.0, 45.0, 2.0)
+REFERENCE = (0.5, 1.0, 0.0, 2.0)  # theta_FT_deg is an offset from the graph-axis reference (v5.1)
 COMPONENTS = ("D_support", "D_order", "D_lag", "D_cover")
 SHRINKAGE_PRIOR_WEIGHT = 8.0
 LENGTH_SCALE_BOUNDS = (0.05, 5.0)

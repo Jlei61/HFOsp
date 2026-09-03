@@ -13,7 +13,7 @@ each goal has a verification check that must pass before the next starts.
 | G1 | Task 0 + Task 1 | `objective_qualification.json` frozen with four identifiability ratios, four passing controls with exact-invariance clauses, and unit tests green |
 | G2 | Task 1b | rev20 validation-atlas prototype figure inspected; display-identifiability decisions frozen |
 | G3 | Task 2 | substrate-hash parity for equal seeds and a full 20 s archived-seed byte parity run; cross tests green |
-| G4 | Task 3 + Task 4 | achieved-geometry domain hash and design manifest frozen; coverage figure inspected |
+| G4 | Task 3 + Task 4 | achieved-geometry domain hash (graph-axis reference, v5.1) and design manifest frozen; coverage figure inspected; rev20 angle/aspect anchors excluded |
 | G4b | Task 4b | minimal transition config frozen; complete composed-connectivity design audit passes |
 | G5 | Task 5 | component GP + feasibility + minimax proposal code green on synthetic surfaces |
 | G6 | Task 6 | canary provenance clean; RSS/wall time recorded; concurrency set |
@@ -124,8 +124,10 @@ only topology seed must change the graph while preserving the frozen parameter c
 
 ## Task 3: structure-only admissibility audit
 
-- Evaluate a dense no-simulation grid over the provisional
-  `theta_FT in [22.5,67.5]`, `AR_FT in [1,3]` range on each fit topology.
+- Evaluate a dense no-simulation grid over the provisional `theta_FT in [-22.5,+22.5]` offset
+  around the graph kernel axis (`reference.ellipse_angle_deg` in the analysis config, the
+  registered patient axis) and `AR_FT in [1,3]` on each fit topology (amendment v5.1). The
+  reference cell is bit-exact; the audit binds the reference to the config and records it.
 - Verify exact reference no-op, unchanged topology/delays/GABA, AMPA cache rebuilding and
   per-target incoming E-to-E conservation.
 - Report edge-ratio distribution, effective source count, weighted distance/orientation
@@ -160,6 +162,8 @@ This audit does not reinterpret fixed-topology angle as anatomical direction.
 - Freeze the variance-decomposition block: `M0000` and one predeclared interior design
   point on the four fit topologies x three dynamics seeds (16 additional trajectories).
 - Keep rev20 one-dimensional artifacts as a separate historical batch; do not rerun them.
+  Only the dose families (`g_EE`, `g_EtoI`) may serve as axis anchors; the rev20 angle and
+  aspect families were run against the misaligned nominal reference (amendment v5.1).
 
 **Deliverables:** candidate manifest, seed manifest, manifest SHA256 and a coverage figure
 showing every 1D/2D projection of the design.

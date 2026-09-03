@@ -552,6 +552,8 @@ def main() -> None:
     g_etoi = float(mechanisms.get("g_EtoI", 0.0))
     ellipse_angle = float(mechanisms.get("ellipse_angle_deg", 45.0))
     ellipse_aspect = float(mechanisms.get("ellipse_aspect_ratio", 2.0))
+    ellipse_reference_angle = mechanisms.get("ellipse_reference_angle_deg")
+    ellipse_reference_aspect = mechanisms.get("ellipse_reference_aspect_ratio")
     base_candidate_id = str(config.get("reference", {}).get(
         "base_substrate_candidate_id", "node_baseline",
     ))
@@ -564,6 +566,10 @@ def main() -> None:
         node_dispersion_candidate_override=dispersion_field,
         ee_ellipse_angle_deg=ellipse_angle,
         ee_ellipse_aspect_ratio=ellipse_aspect,
+        ee_ellipse_reference_angle_deg=(
+            None if ellipse_reference_angle is None else float(ellipse_reference_angle)),
+        ee_ellipse_reference_aspect_ratio=(
+            None if ellipse_reference_aspect is None else float(ellipse_reference_aspect)),
         artifact_root=artifact_root,
         topology_seed=topology_seed, dynamics_seed=dynamics_seed,
     )
@@ -1379,6 +1385,8 @@ def main() -> None:
             "g_EtoI": g_etoi,
             "ellipse_angle_deg": ellipse_angle,
             "ellipse_aspect_ratio": ellipse_aspect,
+            "ellipse_reference_angle_deg": ellipse_reference_angle,
+            "ellipse_reference_aspect_ratio": ellipse_reference_aspect,
             "edge_coefficients_all_zero": bool(np.allclose(substrate.edge_coefficients, 0.0)),
             "ellipse_audit": substrate.extras["ellipse_audit"],
             "learned_edge_audit": substrate.edge_audit,

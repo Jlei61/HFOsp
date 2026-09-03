@@ -1,7 +1,11 @@
 """rev22-DCI Task 4: branch-specific response design and seed manifest (pure functions).
 
-Parameter order is ``[g_LEE, g_LEI, theta_FT_deg, AR_FT]`` with reference
-``(0.5, 1.0, 45.0, 2.0)``. The primary branch is the augmented 96-point design of spec
+Parameter order is ``[g_LEE, g_LEI, theta_FT_deg, AR_FT]``. Amendment v5.1: ``theta_FT_deg`` is
+the angle offset relative to the graph's own kernel axis (the registered patient axis), so the
+design reference is ``(0.5, 1.0, 0.0, 2.0)``; the absolute reference angle is carried by the
+geometry-domain JSON and written into every candidate's ``mechanisms`` as
+``ellipse_angle_deg = absolute_reference + theta_FT_deg`` together with the explicit
+``ellipse_reference_angle_deg`` / ``ellipse_reference_aspect_ratio`` the worker must honour. The primary branch is the augmented 96-point design of spec
 section 7; the dose-only fallback is the 32-point design over ``g_LEE x g_LEI``.
 No simulation, no patient data.
 """
@@ -15,7 +19,7 @@ import numpy as np
 from scipy.stats import qmc
 
 PARAMS = ("g_LEE", "g_LEI", "theta_FT_deg", "AR_FT")
-REFERENCE = (0.5, 1.0, 45.0, 2.0)
+REFERENCE = (0.5, 1.0, 0.0, 2.0)
 DOSE_BOUNDS = ((0.0, 1.0), (0.0, 1.5))
 DECIMALS = (4, 4, 2, 4)
 LEGACY_KEYS = ("g_EE", "g_EtoI", "ellipse_angle_deg", "ellipse_aspect_ratio")
@@ -85,12 +89,18 @@ def domain_from_geometry(domain_json: Mapping) -> dict:
     """
     status = str(domain_json.get("status", ""))
     rectangle = domain_json.get("admissible_rectangle")
+    absolute = domain_json.get("reference") or {}
+    if "angle_deg" not in absolute or "aspect_ratio" not in absolute:
+        raise ValueError("geometry domain must declare its absolute reference angle and aspect ratio")
+    ref_angle, ref_aspect = float(absolute["angle_deg"]), float(absolute["aspect_ratio"])
+    if not np.isclose(ref_aspect, REFERENCE[3]):
+        raise ValueError("geometry reference aspect ratio must equal the design reference AR")
     reason = None
     branch = STATUS_PRIMARY
     if status == "GEOMETRY_STRUCTURALLY_NON_ESTIMABLE" or rectangle is None:
         branch, reason = STATUS_FALLBACK, status or "NO_RECTANGLE"
     else:
-        theta = [float(v) for v in rectangle["theta_deg"]]
+        theta = [float(v) - ref_angle for v in rectangle["theta_deg"]]  # relative offsets
         ar = [float(v) for v in rectangle["aspect_ratio"]]
         if theta[1] <= theta[0] or ar[1] <= ar[0]:
             branch, reason = STATUS_FALLBACK, "GEOMETRY_ONE_DIMENSION_DEGENERATE_FALLBACK"
@@ -101,20 +111,24 @@ def domain_from_geometry(domain_json: Mapping) -> dict:
     else:
         bounds = (DOSE_BOUNDS[0], DOSE_BOUNDS[1], (theta[0], theta[1]), (ar[0], ar[1]))
     return {"branch": branch, "fallback_reason": reason, "geometry_status": status,
-            "bounds": [list(map(float, b)) for b in bounds]}
+            "bounds": [list(map(float, b)) for b in bounds],
+            "absolute_reference": {"angle_deg": ref_angle, "aspect_ratio": ref_aspect}}
 
 
-def synthetic_domain(theta_range: Sequence[float], ar_range: Sequence[float]) -> dict:
+def synthetic_domain(theta_range: Sequence[float], ar_range: Sequence[float],
+                     reference_angle_deg: float = 45.0, reference_aspect_ratio: float = 2.0) -> dict:
     return {
         "schema_id": "synthetic_geometry_domain",
         "status": "GEOMETRY_DOMAIN_FROZEN",
+        "reference": {"angle_deg": float(reference_angle_deg), "aspect_ratio": float(reference_aspect_ratio)},
         "admissible_rectangle": {"theta_deg": [float(theta_range[0]), float(theta_range[1])],
                                  "aspect_ratio": [float(ar_range[0]), float(ar_range[1])]},
     }
 
 
 def validate_formal_geometry_contract(payload: Mapping, *, node_field_sha256: str,
-                                      rev20_config_sha256: str) -> None:
+                                      rev20_config_sha256: str,
+                                      expected_reference: Sequence[float] | None = None) -> None:
     """Fail closed before a structure-only audit can authorize the formal design."""
     if payload.get("schema_id") != "topic4_rev22_dci_geometry_domain_v1":
         raise ValueError("unexpected geometry-domain schema")
@@ -125,9 +139,10 @@ def validate_formal_geometry_contract(payload: Mapping, *, node_field_sha256: st
     if payload.get("rev20_config_sha256") != rev20_config_sha256:
         raise ValueError("geometry audit used a different rev20 substrate config")
     reference = payload.get("reference", {})
-    if not (np.isclose(reference.get("angle_deg", np.nan), REFERENCE[2])
-            and np.isclose(reference.get("aspect_ratio", np.nan), REFERENCE[3])):
-        raise ValueError("geometry reference point changed")
+    if expected_reference is not None and not (
+            np.isclose(reference.get("angle_deg", np.nan), float(expected_reference[0]), rtol=0.0, atol=1e-9)
+            and np.isclose(reference.get("aspect_ratio", np.nan), float(expected_reference[1]))):
+        raise ValueError("geometry reference point differs from the frozen analysis reference")
     thresholds = payload.get("thresholds", {})
     for key, expected in EXPECTED_GEOMETRY_THRESHOLDS.items():
         if key not in thresholds or not np.isclose(float(thresholds[key]), expected):
@@ -243,6 +258,8 @@ def generate_design(domain: Mapping, *, seed: int, max_regenerations: int = 20) 
             delta[np.eye(len(unit), dtype=bool)] = np.inf
             return {"branch": branch, "rows": rows, "seed": int(seed), "regenerations": attempt,
                     "bounds": [list(map(float, b)) for b in bounds],
+                    "absolute_reference": dict(domain.get("absolute_reference")
+                                               or {"angle_deg": 45.0, "aspect_ratio": 2.0}),
                     "design_quality": {"global_minimum_unit_distance": float(delta.min()),
                                        "algorithm": "sequential_augmented_block_maximin_latin_hypercube",
                                        "trials_per_block": 32}}
@@ -262,10 +279,16 @@ def family_membership(physical: np.ndarray, branch: str) -> list[str]:
 
 def design_rows_to_manifest(design: Mapping, *, node_field: Mapping, node_mapping: Mapping) -> list[dict]:
     manifest = []
+    absolute = design.get("absolute_reference") or {"angle_deg": 45.0, "aspect_ratio": 2.0}
+    ref_angle, ref_aspect = float(absolute["angle_deg"]), float(absolute["aspect_ratio"])
     for index, row in enumerate(design["rows"]):
         physical = canonical_round(np.asarray(row["physical"], float))
         mechanisms = {"Z_M": "off"}
         mechanisms.update({legacy: float(physical[d]) for d, legacy in enumerate(LEGACY_KEYS)})
+        # absolute kernel angle = graph-axis reference + relative offset (offset 0 -> bit-exact reference)
+        mechanisms["ellipse_angle_deg"] = ref_angle if float(physical[2]) == 0.0 else ref_angle + float(physical[2])
+        mechanisms["ellipse_reference_angle_deg"] = ref_angle
+        mechanisms["ellipse_reference_aspect_ratio"] = ref_aspect
         manifest.append({
             "candidate_id": f"dci_p{index:03d}",
             "block": row["block"],

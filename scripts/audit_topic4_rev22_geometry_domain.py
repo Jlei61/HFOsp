@@ -199,7 +199,8 @@ def elliptical_radius(dx: np.ndarray, dy: np.ndarray, *, length_scale: float,
     return np.sqrt((u / parallel) ** 2 + (v / perpendicular) ** 2)
 
 
-def reweight_edges(graph: dict, *, length_scale: float, angle_deg: float, aspect_ratio: float):
+def reweight_edges(graph: dict, *, length_scale: float, angle_deg: float, aspect_ratio: float,
+                   reference=(REFERENCE_ANGLE_DEG, REFERENCE_ASPECT_RATIO)):
     """Vectorized twin of the producer's fixed-topology reweighting.
 
     Identical operation order per edge (log-ratio, clip to +-20, exponentiate, rescale by
@@ -212,7 +213,7 @@ def reweight_edges(graph: dict, *, length_scale: float, angle_deg: float, aspect
         -elliptical_radius(graph["dx"], graph["dy"], length_scale=length_scale,
                            angle_deg=angle_deg, aspect_ratio=aspect_ratio)
         + elliptical_radius(graph["dx"], graph["dy"], length_scale=length_scale,
-                            angle_deg=REFERENCE_ANGLE_DEG, aspect_ratio=REFERENCE_ASPECT_RATIO)
+                            angle_deg=float(reference[0]), aspect_ratio=float(reference[1]))
     )
     raw_ratio = np.exp(np.clip(log_ratio, -20.0, 20.0))
     incoming = np.bincount(rows, weights=data, minlength=n_e)
@@ -225,13 +226,15 @@ def reweight_edges(graph: dict, *, length_scale: float, angle_deg: float, aspect
 
 
 def validate_fast_path(net, positions, graph: dict, base_edges: dict, points, *,
-                       length_scale: float, tolerance: float = 1e-10) -> list[dict]:
+                       length_scale: float, tolerance: float = 1e-10,
+                       reference=(REFERENCE_ANGLE_DEG, REFERENCE_ASPECT_RATIO)) -> list[dict]:
     """Assert the vectorized reweighting reproduces the producer at sample grid points."""
     checks = []
     for angle_deg, aspect_ratio in points:
         new_net, audit = mechanism.fixed_topology_ee_ellipse_redistribution(
             net, positions, length_scale=length_scale, angle_deg=float(angle_deg),
-            aspect_ratio=float(aspect_ratio),
+            aspect_ratio=float(aspect_ratio), reference_angle_deg=float(reference[0]),
+            reference_aspect_ratio=float(reference[1]),
         )
         produced = ee_edges(new_net)
         if not (np.array_equal(produced["bin"], base_edges["bin"])
@@ -239,7 +242,7 @@ def validate_fast_path(net, positions, graph: dict, base_edges: dict, points, *,
                 and np.array_equal(produced["col"], base_edges["col"])):
             raise RuntimeError("producer changed the E-to-E edge structure")
         fast = reweight_edges(graph, length_scale=length_scale, angle_deg=float(angle_deg),
-                              aspect_ratio=float(aspect_ratio))
+                              aspect_ratio=float(aspect_ratio), reference=reference)
         if fast is None:
             raise RuntimeError("fast path reported a zero denominator where the producer did not")
         difference = np.max(np.abs(fast - produced["data"]))
@@ -257,12 +260,14 @@ def validate_fast_path(net, positions, graph: dict, base_edges: dict, points, *,
 
 
 def audit_grid_point(graph: dict, base_edges: dict, base_effective: np.ndarray, *,
-                     length_scale: float, angle_deg: float, aspect_ratio: float) -> dict:
+                     length_scale: float, angle_deg: float, aspect_ratio: float,
+                     reference=(REFERENCE_ANGLE_DEG, REFERENCE_ASPECT_RATIO)) -> dict:
     """Summarize the structural consequences of one (theta, AR) reweighting."""
-    is_reference = (float(angle_deg) == REFERENCE_ANGLE_DEG
-                    and float(aspect_ratio) == REFERENCE_ASPECT_RATIO)
+    is_reference = (float(angle_deg) == float(reference[0])
+                    and float(aspect_ratio) == float(reference[1]))
     new_data = (base_edges["data"] if is_reference else reweight_edges(
-        graph, length_scale=length_scale, angle_deg=angle_deg, aspect_ratio=aspect_ratio))
+        graph, length_scale=length_scale, angle_deg=angle_deg, aspect_ratio=aspect_ratio,
+        reference=reference))
     if new_data is None:
         return {
             "angle_deg": float(angle_deg), "aspect_ratio": float(aspect_ratio),
@@ -422,17 +427,24 @@ def _git_commit() -> str:
                           capture_output=True, text=True).stdout.strip()
 
 
-def _grid(theta_range, theta_step, ar_range, ar_step):
-    theta = np.round(np.arange(theta_range[0], theta_range[1] + 1e-9, theta_step), 6)
+def _grid(theta_half_width, theta_step, ar_range, ar_step, reference):
+    """Angle grid as exact offsets around the reference so the reference cell is exact."""
+    n_half = int(round(float(theta_half_width) / float(theta_step)))
+    offsets = np.arange(-n_half, n_half + 1, dtype=float) * float(theta_step)
+    theta = float(reference[0]) + offsets
+    theta[n_half] = float(reference[0])  # offset 0 -> bit-exact reference angle
     ar = np.round(np.arange(ar_range[0], ar_range[1] + 1e-9, ar_step), 6)
-    i_ref = int(np.flatnonzero(np.isclose(theta, REFERENCE_ANGLE_DEG))[0])
-    j_ref = int(np.flatnonzero(np.isclose(ar, REFERENCE_ASPECT_RATIO))[0])
+    i_ref = n_half
+    j_ref = int(np.flatnonzero(np.isclose(ar, float(reference[1])))[0])
+    if float(ar[j_ref]) != float(reference[1]):
+        raise ValueError("aspect-ratio grid must contain the reference aspect ratio exactly")
     return theta, ar, i_ref, j_ref
 
 
 def audit_one_topology(seed: int, *, artifact_root: Path, rev20_config: dict,
                        node_field: dict, theta: np.ndarray, ar: np.ndarray,
-                       i_ref: int, j_ref: int, started: float) -> tuple[int, dict]:
+                       i_ref: int, j_ref: int, started: float,
+                       reference=(REFERENCE_ANGLE_DEG, REFERENCE_ASPECT_RATIO)) -> tuple[int, dict]:
     """Run the full dense-grid structural audit for one independent topology."""
     t0 = time.time()
     captured = capture_reference_ee_graph(
@@ -457,9 +469,9 @@ def audit_one_topology(seed: int, *, artifact_root: Path, rev20_config: dict,
     }
     validation = validate_fast_path(
         net, positions, graph, base_edges,
-        [(REFERENCE_ANGLE_DEG, REFERENCE_ASPECT_RATIO), (float(theta[0]), float(ar[0])),
+        [(float(reference[0]), float(reference[1])), (float(theta[0]), float(ar[0])),
          (float(theta[-1]), float(ar[-1])), (float(theta[i_ref]), float(ar[-1]))],
-        length_scale=length_scale,
+        length_scale=length_scale, reference=reference,
     )
     print(f"[{time.time()-started:6.0f}s] seed {seed}: fast path validated against the producer "
           f"(max relative {max(c['max_relative_difference'] for c in validation):.2e})", flush=True)
@@ -478,6 +490,7 @@ def audit_one_topology(seed: int, *, artifact_root: Path, rev20_config: dict,
             record = audit_grid_point(
                 graph, base_edges, base_effective,
                 length_scale=length_scale, angle_deg=float(angle), aspect_ratio=float(aspect),
+                reference=reference,
             )
             record.update(seed=int(seed), i=i, j=j, passes=grid_point_passes(record))
             records.append(record)
@@ -498,7 +511,8 @@ def audit_one_topology(seed: int, *, artifact_root: Path, rev20_config: dict,
     return int(seed), output
 
 
-def _plot(out_dir: Path, theta, ar, worst: dict, rectangle: dict | None, seeds) -> dict:
+def _plot(out_dir: Path, theta, ar, worst: dict, rectangle: dict | None, seeds,
+          reference=(REFERENCE_ANGLE_DEG, REFERENCE_ASPECT_RATIO)) -> dict:
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -545,7 +559,7 @@ def _plot(out_dir: Path, theta, ar, worst: dict, rectangle: dict | None, seeds) 
             height = ar[rectangle["j1"]] - ar[rectangle["j0"]] + dar
             ax.add_patch(Rectangle((x0, y0), width, height, fill=False, edgecolor="black",
                                    linewidth=1.6))
-        ax.plot([REFERENCE_ANGLE_DEG], [REFERENCE_ASPECT_RATIO], marker="o", markersize=5,
+        ax.plot([float(reference[0])], [float(reference[1])], marker="o", markersize=5,
                 markerfacecolor="white", markeredgecolor="black", linestyle="none")
         ax.set_title(title)
         ax.set_xlabel("E-to-E long-axis angle (deg)")
@@ -582,7 +596,14 @@ def main() -> None:
     parser.add_argument("--rev20-config", type=Path,
                         default=ROOT / "config/topic4_rev20_dc_dual_core_mechanism_atlas.json")
     parser.add_argument("--seeds", type=int, nargs="+", default=list(FIT_SEEDS))
-    parser.add_argument("--theta-range", type=float, nargs=2, default=(22.5, 67.5))
+    parser.add_argument("--theta-half-width", type=float, default=22.5,
+                        help="angle grid half width around the reference axis (deg)")
+    parser.add_argument("--reference-angle-deg", type=float, default=None,
+                        help="absolute reference angle; default = rev22 analysis config "
+                             "reference.ellipse_angle_deg (registered patient axis)")
+    parser.add_argument("--reference-aspect-ratio", type=float, default=None)
+    parser.add_argument("--analysis-config", type=Path,
+                        default=ROOT / "config/topic4_rev22_dci_dual_core_interictal_identifiability.json")
     parser.add_argument("--theta-step", type=float, default=2.5)
     parser.add_argument("--ar-range", type=float, nargs=2, default=(1.0, 3.0))
     parser.add_argument("--ar-step", type=float, default=0.125)
@@ -602,7 +623,15 @@ def main() -> None:
         artifact_root / "results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/geometry_domain"
     )
     out_root.mkdir(parents=True, exist_ok=True)
-    theta, ar, i_ref, j_ref = _grid(args.theta_range, args.theta_step, args.ar_range, args.ar_step)
+    analysis = json.loads(args.analysis_config.read_text())
+    reference = (
+        float(analysis["reference"]["ellipse_angle_deg"]) if args.reference_angle_deg is None
+        else float(args.reference_angle_deg),
+        float(analysis["reference"]["ellipse_aspect_ratio"]) if args.reference_aspect_ratio is None
+        else float(args.reference_aspect_ratio),
+    )
+    theta, ar, i_ref, j_ref = _grid(args.theta_half_width, args.theta_step, args.ar_range,
+                                    args.ar_step, reference)
 
     if args.workers < 1 or args.workers > len(args.seeds):
         raise ValueError("workers must lie between one and the number of topology seeds")
@@ -612,7 +641,7 @@ def main() -> None:
             key, value = audit_one_topology(
                 seed, artifact_root=artifact_root, rev20_config=rev20_config,
                 node_field=node_field, theta=theta, ar=ar, i_ref=i_ref, j_ref=j_ref,
-                started=started,
+                started=started, reference=reference,
             )
             per_topology[key] = value
     else:
@@ -620,7 +649,7 @@ def main() -> None:
             futures = [pool.submit(
                 audit_one_topology, seed, artifact_root=artifact_root,
                 rev20_config=rev20_config, node_field=node_field, theta=theta, ar=ar,
-                i_ref=i_ref, j_ref=j_ref, started=started,
+                i_ref=i_ref, j_ref=j_ref, started=started, reference=reference,
             ) for seed in args.seeds]
             for future in as_completed(futures):
                 key, value = future.result()
@@ -648,7 +677,8 @@ def main() -> None:
             worst["edge_ratio_p99"][i, j] = np.nanmax([worst["edge_ratio_p99"][i, j], r["edge_ratio_p99"]])
             for k in ("edge_ratio_p01", "effective_source_median_ratio", "effective_source_p05_ratio"):
                 worst[k][i, j] = np.nanmin([worst[k][i, j], r[k]])
-    rectangle = largest_admissible_rectangle(pass_all, i_ref, j_ref, theta_values=theta)
+    rectangle = largest_admissible_rectangle(pass_all, i_ref, j_ref, theta_values=theta,
+                                             reference_angle=float(reference[0]))
     achieved = assess_achieved_geometry(per_topology, rectangle, theta, ar, i_ref, j_ref)
     if rectangle is None or rectangle["cells"] <= 1:
         status = "GEOMETRY_STRUCTURALLY_NON_ESTIMABLE"
@@ -719,7 +749,8 @@ def main() -> None:
                      f"长短轴比 {rectangle_bounds['aspect_ratio'][0]:g}–{rectangle_bounds['aspect_ratio'][1]:g}。")
     else:
         rect_text = "没有任何非参考格通过。"
-    figure_paths = _plot(out_root / "figures", theta, ar, worst, rectangle, sorted(per_topology))
+    figure_paths = _plot(out_root / "figures", theta, ar, worst, rectangle, sorted(per_topology),
+                         reference=reference)
     _write_readme(out_root / "figures", rect_text, sorted(per_topology))
 
     summary = {
@@ -729,8 +760,14 @@ def main() -> None:
         "rev20_config_sha256": _sha256(args.rev20_config),
         "rev20_manifest_sha256": _sha256(manifest_path),
         "node_field_sha256": node_field.get("field_sha256"),
-        "reference": {"angle_deg": REFERENCE_ANGLE_DEG, "aspect_ratio": REFERENCE_ASPECT_RATIO},
-        "grid": {"theta_deg": theta.tolist(), "aspect_ratio": ar.tolist(),
+        "reference": {"angle_deg": float(reference[0]), "aspect_ratio": float(reference[1]),
+                      "source": ("rev22 amendment v5.1: absolute reference = registered patient axis "
+                                 "(register_to_sheet theta_deg, the graph kernel long axis) and the "
+                                 "engine kernel AR; requested angles are offsets around it"),
+                      "theta_half_width_deg": float(args.theta_half_width)},
+        "grid": {"theta_deg": theta.tolist(),
+                 "theta_offset_deg": (theta - float(reference[0])).tolist(),
+                 "aspect_ratio": ar.tolist(),
                  "theta_step": float(args.theta_step), "ar_step": float(args.ar_step)},
         "thresholds": THRESHOLDS,
         "identifiability_thresholds": IDENTIFIABILITY_THRESHOLDS,

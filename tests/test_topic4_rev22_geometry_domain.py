@@ -141,3 +141,62 @@ def test_largest_rectangle_contains_reference_and_prefers_symmetry():
     single = np.zeros((5, 5), bool)
     single[2, 2] = True
     assert largest_admissible_rectangle(single, 2, 2)["cells"] == 1
+
+
+def test_graph_axis_reference_makes_realized_geometry_track_the_request():
+    """Amendment v5.1 premise: with the reference bound to the graph's own kernel axis,
+    the realized weighted geometry moves monotonically with the requested offset/aspect."""
+    import numpy as np
+    from scipy import sparse
+    from scipy.stats import spearmanr
+    from src.topic4_rev20_dual_core_mechanism import fixed_topology_ee_ellipse_redistribution
+    from scripts.audit_topic4_rev22_geometry_domain import weighted_connection_geometry
+
+    rng = np.random.default_rng(0)
+    theta_ref, ar_ref, l, L, n, n_e, k = -22.80538396505847, 2.0, 0.38, 20.0, 1500, 1200, 30
+    pos = rng.uniform(0.0, L, size=(n, 2))
+    c, s = np.cos(np.radians(theta_ref)), np.sin(np.radians(theta_ref))
+    l_par, l_perp = l * np.sqrt(ar_ref), l / np.sqrt(ar_ref)
+    rows, cols = [], []
+    for t in range(n_e):
+        dz = pos[:n_e] - pos[t]
+        u, v = c * dz[:, 0] + s * dz[:, 1], -s * dz[:, 0] + c * dz[:, 1]
+        w = np.exp(-np.sqrt((u / l_par) ** 2 + (v / l_perp) ** 2))
+        w[t] = 0.0
+        keys = rng.standard_exponential(n_e) / np.where(w > 0, w, np.inf)
+        src = np.argpartition(keys, k)[:k]
+        rows += [t] * k
+        cols += list(src)
+    net = {"NE": n_e, "NI": n - n_e,
+           "ampa_by_delay": [sparse.csr_matrix((np.ones(len(rows)), (rows, cols)), shape=(n, n_e))],
+           "gaba_by_delay": [sparse.csr_matrix((n, n - n_e))]}
+
+    def achieved(bins):
+        m = bins[0].tocoo()
+        keep = m.row < n_e
+        d = pos[m.col[keep]] - pos[m.row[keep]]
+        g = weighted_connection_geometry(d[:, 0], d[:, 1], m.data[keep])
+        return g["achieved_angle_deg"], g["achieved_aspect_ratio"]
+
+    base_angle, base_aspect = achieved(net["ampa_by_delay"])
+    assert abs(((base_angle - theta_ref) + 90.0) % 180.0 - 90.0) < 6.0
+    same, audit = fixed_topology_ee_ellipse_redistribution(
+        net, pos, length_scale=l, angle_deg=theta_ref, aspect_ratio=ar_ref,
+        reference_angle_deg=theta_ref, reference_aspect_ratio=ar_ref)
+    assert audit["exact_noop"]
+    offsets = [-15.0, 0.0, 15.0]
+    angles = []
+    for off in offsets:
+        new, _ = fixed_topology_ee_ellipse_redistribution(
+            net, pos, length_scale=l, angle_deg=theta_ref + off, aspect_ratio=ar_ref,
+            reference_angle_deg=theta_ref, reference_aspect_ratio=ar_ref)
+        a, _ = achieved(new["ampa_by_delay"])
+        angles.append(((a - base_angle) + 90.0) % 180.0 - 90.0)
+    assert spearmanr(offsets, angles).statistic == 1.0
+    aspects = []
+    for ar in (1.5, 2.0, 3.0):
+        new, _ = fixed_topology_ee_ellipse_redistribution(
+            net, pos, length_scale=l, angle_deg=theta_ref, aspect_ratio=ar,
+            reference_angle_deg=theta_ref, reference_aspect_ratio=ar_ref)
+        aspects.append(achieved(new["ampa_by_delay"])[1])
+    assert spearmanr([1.5, 2.0, 3.0], aspects).statistic == 1.0

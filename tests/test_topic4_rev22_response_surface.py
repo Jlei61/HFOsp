@@ -8,7 +8,7 @@ from src.topic4_rev22_response_surface import (
     pooled_shrinkage_noise, proposals_disagree, tree_proposal, unit_cube,
 )
 
-DOMAIN = {"g_LEE": [0.0, 1.0], "g_LEI": [0.0, 1.5], "theta_FT_deg": [22.5, 67.5], "AR_FT": [1.0, 3.0]}
+DOMAIN = {"g_LEE": [0.0, 1.0], "g_LEI": [0.0, 1.5], "theta_FT_deg": [-22.5, 22.5], "AR_FT": [1.0, 3.0]}
 CENTER = np.array([0.5, 0.5, 0.5, 0.5])
 DELTA = 0.35
 CENTERS = {
@@ -76,16 +76,16 @@ def test_unit_cube_round_trip_and_reference_position():
 
 def test_dose_only_zero_width_geometry_domain_is_supported():
     rows, _, _ = _rows()
-    fallback = {**DOMAIN, "theta_FT_deg": [45.0, 45.0], "AR_FT": [2.0, 2.0]}
+    fallback = {**DOMAIN, "theta_FT_deg": [0.0, 0.0], "AR_FT": [2.0, 2.0]}
     for row in rows[:24]:
-        row["x"][2:] = [45.0, 2.0]
+        row["x"][2:] = [0.0, 2.0]
         row["feasible"] = True
     fit = fit_all(rows[:24], ["D_support"], fallback, seed=3, n_restarts=0, n_estimators=20)
     proposal = conditional_minimax_proposal(
         fit["gps"], ["D_support"], "1100", REFERENCE, fallback, fit["feasibility"], seed=3,
     )
     assert proposal["status"] == "OK"
-    assert proposal["x"][2:] == [45.0, 2.0]
+    assert proposal["x"][2:] == [0.0, 2.0]
 
 
 def test_gp_loo_is_accurate_and_calibrated(fitted):

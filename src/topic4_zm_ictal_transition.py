@@ -191,6 +191,8 @@ def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=No
                     node_gain=1.0, node_dispersion_candidate_override=None,
                     ee_ellipse_angle_deg=45.0,
                     ee_ellipse_aspect_ratio=2.0,
+                    ee_ellipse_reference_angle_deg=None,
+                    ee_ellipse_reference_aspect_ratio=None,
                     artifact_root=None,
                     topology_seed=None, dynamics_seed=None):
     """Reconstruct one frozen arm on one network seed.
@@ -390,11 +392,30 @@ def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=No
 
     # ---- 8: fixed-topology EE geometry, then learned local mapper ----
     local = config["local_connectivity_basis"]
+    # rev22 amendment v5.1: the ellipse reference may be bound to the graph's own kernel
+    # (registered patient axis, engine AR). The legacy default keeps the rev20 nominal
+    # (45 deg, AR 2) reference byte-for-byte.
+    if ee_ellipse_reference_angle_deg is None and ee_ellipse_reference_aspect_ratio is None:
+        ellipse_reference = {}
+    else:
+        if ee_ellipse_reference_angle_deg is None or ee_ellipse_reference_aspect_ratio is None:
+            raise ValueError("ellipse reference angle and aspect ratio must be given together")
+        if abs(float(ee_ellipse_reference_angle_deg) - float(reg["theta_deg"])) > 1e-9:
+            raise RuntimeError(
+                "ellipse reference angle must equal the registered graph kernel axis "
+                f"({reg['theta_deg']!r}), got {ee_ellipse_reference_angle_deg!r}")
+        if abs(float(ee_ellipse_reference_aspect_ratio) - float(engine["AR"])) > 1e-12:
+            raise RuntimeError("ellipse reference aspect ratio must equal the graph kernel AR")
+        ellipse_reference = {
+            "reference_angle_deg": float(ee_ellipse_reference_angle_deg),
+            "reference_aspect_ratio": float(ee_ellipse_reference_aspect_ratio),
+        }
     net, ellipse_audit = fixed_topology_ee_ellipse_redistribution(
         net, np.asarray(net["pos"], float),
         length_scale=float(local["E_to_E_length_scale_mm"]),
         angle_deg=float(ee_ellipse_angle_deg),
         aspect_ratio=float(ee_ellipse_aspect_ratio),
+        **ellipse_reference,
     )
     pre_bins = list(net["ampa_by_delay"])
     pre_ee = _outgoing_by_pathway(pre_bins, n_e, "E_to_E")
