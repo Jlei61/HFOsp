@@ -191,12 +191,12 @@
 - **科学边界**：这类图只能写成“模型底物 + 两种特异性组合 + 虚拟 SEEG readout”的机制/读出示意。不能因为图上有正反事件，就直接声称真实病人机制被证明；pipeline/KMeans 验证若需要，另作补图或下游结果图。
 - **建模图 KMeans 核验图（modeling-KMeans companion）**：用于回答“模型 readout 里的多事件是否自然分成两类，以及这两类是否对应 tempA/tempB 或真实模板”。它是 SNN 四列 readout 图的**配套核验图**，不是新的机制图，也不是 cohort 统计图。
   - **输入合同**：只消费同一模型 readout 的 clean directional events，不重跑仿真；必须在 metadata/README 写清楚 event filter、`k_dir`、seed/tag、n_events、每类 event 数。若 readout 没有两个方向或每方向事件数不足，模型×真实模板矩阵必须显示 N/A，不能用两个 KMeans 簇硬冒充 forward/reverse。
-  - **布局（单行四块，左→右）**：`clustered event heatmap | per-channel rank distribution | cluster rank profile | model-vs-real 2×2 similarity matrix`。最左 heatmap 占主导宽度；中间两块紧凑，不挤占最右矩阵空间。
-  - **heatmap**：列按 KMeans 簇分组，红色边界标簇切分；灰格表示该事件未招募该触点；rank colorbar 竖放在 heatmap 右侧，标签为 `First → Last`。
+  - **布局（当前 Fig4 / FigS7）**：主图 Fig4-D 保留 cluster/patient rank profile，Fig4-E 保留 model-vs-real 2×2 matrix。原 clustered-event heatmap/rank-distribution 移至 FigS7-E。
+  - **heatmap（补图合同）**：列按 KMeans 簇分组，灰格表示该事件未招募该触点；rank colorbar 竖放在最右侧，标签为 `First → Last`，不得放置重复色条。
   - **左三块 y 轴**：必须 channel-for-channel 对齐。后两块不得各自重算 y 轴；应复制 heatmap 的 `ylim / yticks / yticklabels`，同一通道在三块里必须同一高度。
   - **cluster 命名 / 配色**：显示层不用 `C0/C1`，改用模板语义。`t_a` 固定红色，`t_b` 固定蓝色；原始 KMeans id 只保留在 metadata。若某个模型不是 t_a/t_b 语境，则用对应模板名，但必须固定“模板名→颜色”映射。
-  - **cluster profile**：画每个模板簇的 mean±std rank profile；legend 放在本 panel 内右上角，不单独占一行。
-  - **model-vs-real matrix**：右侧矩阵为模型模板 × 数据模板的 Spearman 相似性矩阵；只用 star 显示方向性 channel-shuffle permutation p，不在格子里堆数值；矩阵 cell 必须 `aspect=equal`，右侧 colorbar 与矩阵本体等高。
+  - **cluster profile**：当前 Fig4-D 只画模型/患者 rank profile 线，不叠加拥挤的 uncertainty band；legend 放在绘图区下方的 panel 留白内。
+  - **model-vs-real matrix**：Fig4-E 为模型模板 × 数据模板的 Spearman 相似性矩阵；四格保留 rho 数值，并只在 MTA–TA、MTB–TB 两个命名匹配格内分别叠加 matched within-shaft contact-permutation star。矩阵 cell 必须 `aspect=equal`，右侧 colorbar 与矩阵本体等高。
   - **报告口径**：图上/README 至少报告 cluster size、direction purity、within-cluster tau、shared-overlap corr、矩阵是否 valid。结论只能写“readout 聚类/模板一致性核验通过/不通过”；不能单独写成机制因果证明。
 - **M3A-v2 诊断变体（closed-loop negative screen）**：若要目视审阅慢变量动力学，可沿用同一四列视觉语法，但必须在 README/metadata 中注明它是 visual diagnostic，不是主 claim 图。Step4 的单核 kick 结果若镜像成 tempA/tempB 两端 probe，legend 必须写 source identity（tempA-source / tempB-source），不得把 source identity 写成传播方向或发作方向。示范输出：`results/paper-ready-figure/fig_m3a_v2_step4_dynamics/figures/`，脚本：`scripts/paper_figures/plot_fig_m3a_v2_step4_dynamics.py`。q_I/g_K gap sweep 的代表状态同样使用这个规则，输出 `results/paper-ready-figure/fig_m3a_v2_1_qigk_gap_dynamics/figures/`，脚本 `scripts/paper_figures/plot_fig_m3a_v2_1_qigk_gap_dynamics.py`。
 - **Figure 5 candidate 例外：E1146 state-dependent readout**：这张图不是普通四列机制图，而是 `continuous trajectory | single-event order | early-runaway energy` 的状态桥接图。它不重复 mechanism panel，也不标 A/B/C；总标题只写 `E1146`。下面所有规则为硬锁，完整说明见 `docs/fig5_snn_state_readout_spec.md`。
@@ -208,14 +208,12 @@
   - **选择纪律与 claim boundary**：不得为了让更多电极看起来被覆盖而事后扩大低阈值区或挑图；参数选择必须同时保留 delayed runaway、传播方向和 rank–energy 对应。当前 baseline 是 4/4 SCL contact readout、0/4 SCL-local E-neuron gate，因此只能写 `upper contacts participate in the group readout`。必须声明 runaway onset 是 sustained-rate 操作定义、不是解析 separatrix `q_I*`；virtual-LFP energy 不是 clinical broadband SEEG power；没有终止/恢复，不得写成完整 seizure。
   - **输出纪律**：计算 producer 为 `scripts/run_topic4_m3_runaway_readout.py`，plotting-only producer 为 `scripts/paper_figures/plot_fig_topic4_early_recruitment_readout.py`；canonical candidate 输出到 `results/paper-ready-figure/fig5_snn_state_readout/figures/`，同时生成同 stem PNG/PDF、metadata JSON 与中文 README。当前先不产 GIF。
 - **M3A-v2.2（sustained 协议 + h_G 载体）两类图（2026-06-29）**：(1) **结果汇总图**（不是四列、不是 SNN 重跑）——读自主探索的 `per_run.jsonl`（3184 sim），三联面板各答一个独立问题：slow-off 失败模式 vs r_hold / `q_I+g_K` 表型组成+候选数 / 干净事件 vs partial-fill 目标框；脚本 `scripts/paper_figures/plot_fig_m3a_v2_2_explore_summary.py`，输出 `results/paper-ready-figure/fig_m3a_v2_2_explore_summary/figures/`。**统计主张只在此图 + 归档 doc，不在四列动力学图。** (2) **代表性动力学四列图**——沿用上面的 M3A-v2 诊断变体规则（visual diagnostic、非主 claim、mechanism 轴线**无箭头**、legend 标 source identity 非方向），代表 case = fail-closed tonic（slow-off / `q_I+g_K`）+ 唯一干净事件（backup r=0.85），脚本 `scripts/paper_figures/plot_fig_m3a_v2_2_dynamics.py`，输出 `results/paper-ready-figure/fig_m3a_v2_2_dynamics/figures/`。四列图是**单 seed 重跑示意**，metadata 注明判读以 sweep + 汇总图为准。
-- **被试特异性变体（subject-specific SNN，Fig4A/B 起）**：Fig4A 用同一四列标准，但底物按**病人真实电极布局**摆放（示范 `results/paper-ready-figure/fig_subject_snn_epilepsiae_1146/`，脚本 `scripts/paper_figures/plot_fig_subject_snn.py`）。Fig4B 是同一 readout 的 KMeans=2 核验图，脚本 `scripts/paper_figures/plot_fig_subject_snn_kmeans2.py`。锁定约定：
-  - 两个低阈值核 = **两类间期模板各自最早的 k 个电极**（`template_source` 摆放，`src/sef_hfo_subject_placement.py`），即两类模板的 source 区，落在传播轴两端；不要用 swap decision_k 的宽 strip 质心（会被拉向中间）。
-  - 用**真实几何 plane-fit**（核间距自然 ≈ blessed sep0.7），不得人为 core-anchor 到固定间距。
-  - mechanism panel 必须显示**核与电极间期最早区 overlap**（高亮核成员触点）+ E→E 长轴带。
-  - readout 用 `k_dir=2`（病人电极比模型密杆稀疏的放宽，**载重参数**，必须在 metadata/README 注明 k_dir=3 的退化情况）。
-  - 诚实口径：readout 若用 spontaneous twoend，需注明自发双向**与 seed 有关**；separate-then-pool 只能写"仪器对齐"不能写"自发机制"。
-  - **LOCKED 模式（2026-06-26）= 每个 subject-SNN 案例固定出两张主图：Fig4A（readout 四列）+ Fig4B（KMeans 核验四块）。** Fig4C（real-vs-model profile）、Fig4D（组合 S 置换 null）是可选 supplement。
-  - Fig4B 必须遵守上面的 **建模图 KMeans 核验图** 规范；E1146 当前示范脚本为 `scripts/paper_figures/plot_fig_subject_snn_kmeans2.py`。
+- **当前 Figure 4 合同**：paper-facing A–G 位于 `results/paper-ready-figure/fig4/figures/`，由 `scripts/paper_figures/build_main_figure_4.py` 从冻结数组组装，不重跑仿真。
+  - A 将 local E/I circuit 与 patient-specific E/I substrate 拼为一个尺度关联 panel；右图不显示各向异性 E→E corridor、`possible data driven core` 或离散核心。左右局部框尺度匹配，左侧 scale bar 为 `0.5 mm`，触点 sampling footprint 用低透明度深绿色表示。
+  - B 使用 A 右侧现有留白，仅保留完整拼板中的 B 角标；不画占位文字或临时数据。该位置后续用于 data-driven 参数变化对患者间期事件复现影响的分析。
+  - C 为 Node field + Model TA/MTB。D 为模型/患者 rank profiles。E 为 contact-split cross-fit matrix。F 为 same-network 30–80 Hz virtual-contact firing-density readout。G 为 34 人 cohort。
+  - 独立 `fig4-panela` 与 `fig4-panel{c..g}` 不写角标；B 暂无独立文件；`fig4-complete-layout` 才写 A–G。原 masked-rank heatmap/rank distribution 保留在 FigS7-E。
+  - A、C–F 来自冻结 E10 development case，G 是 34 人 cohort；B 当前没有数据。不能据此升级为 patient-blind、real-geometry generalization、解剖 core 或机制因果证明。
 
 ---
 

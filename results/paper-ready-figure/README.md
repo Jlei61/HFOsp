@@ -4,6 +4,11 @@
 `figures/README.md` 说明这张图展示什么、哪个文件是接受版本。**本目录被 `.gitignore` 忽略**
 （图是产物，由脚本再生），所以这里的结构是组织约定、不进版本控制。
 
+> **2026-09-03 Figure 4 当前入口**：`fig4/figures/fig4-complete-layout.{png,pdf}`。
+> A、C–G 有独立文件；B 使用右上留白预留，当前无独立文件，后续用于 data-driven
+> 参数对患者间期事件复现的影响。producer 为
+> `scripts/paper_figures/build_main_figure_4.py`；原 KMeans panel 位于 FigS7-E。
+
 > **2026-06-30 整理记录**：① 删除 scratch 子目录 `fig_subject_snn_epilepsiae_1146_style_preview`
 > （仅样式预览）、`fig_m3a_v2_1_qigk_trajectory`（单文件孤儿预览）。② 把 24 个 per-subject
 > subject-SNN 读出图按主题打包进 `fig4_subject_snn_cohort/`（E1146 headline + 其变体仍留顶层，

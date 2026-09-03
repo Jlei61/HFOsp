@@ -451,7 +451,22 @@ After runaway onset, no KMeans or event-clustering shading is drawn.
 The subject-geometry variant uses `figdata_epilepsiae_1146_twoend_equal_tsrc_s3.npz`
 for contacts and foci, scaled onto the current M3A L=10 sheet.
 
-## Subject-specific SNN (E1146) — Fig4-A/B
+## Current Figure 4 A–G builder
+
+Canonical entry point:
+
+```bash
+python scripts/paper_figures/build_main_figure_4.py
+```
+
+The builder consumes frozen arrays and writes the label-free standalone panels
+`fig4-panela` and `fig4-panel{c..g}` plus the A–G complete layout. Panel B is
+intentionally empty and has no standalone file; its top-right slot is reserved
+for a future data-driven parameter-sensitivity analysis. The former B–F panels
+continue unchanged as C–G. The former KMeans heatmap/rank-distribution panel is
+maintained by `build_supplementary_figure_7.py` as Supplementary Fig. 7E.
+
+## Historical subject-specific SNN (E1146) — old Fig4-A/B lineage
 
 Fig4A formal entry point:
 

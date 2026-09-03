@@ -221,33 +221,19 @@ Panel A 只展示 raw shared-plane similarity trajectory；Panel B 只在 seizur
 
 **科学边界**：冻结 archive 的 early-ictal shared-field cohort null（二维共线 n=7，within-shaft p=0.346；shared-vs-own p=0.938）仍是 cohort 级主参照。这里的 sliding-window null 回答逐人哪些时间段偏离杆内置换，不能把 3/7 cluster 写成 cohort superiority，也不能因为 pre-onset cluster 而写 onset-emergent alignment。within-shaft power 仍依赖 shaft sizes；E583 的 3/22 coverage 尤其需要降级解释。
 
-### Fig4: 被试特异性 SNN + KMeans readout 核验（E1146）
+### Fig4: Data-driven interictal SNN（A–G，B 预留）
 
-**目的**：把同一 cm-SNN 标准底物按**病人真实电极平面**摆放，两个低阈值核放在**两类间期模板各自最早的电极区**（=两类模板的 source，轴两端），看同一虚拟 SEEG（=病人真实触点）能否读出正/反间期传播，并用无监督 KMeans 验证 readout 事件是否自然分成两类。
+**当前状态**：唯一完整布局为 `results/paper-ready-figure/fig4/figures/fig4-complete-layout.{png,pdf}`。A、C–G 有无角标独立 PNG/PDF；B 使用右上现有留白并明确预留，当前没有独立文件。producer 为 `scripts/paper_figures/build_main_figure_4.py`，只消费冻结产物，不重跑仿真。
 
-**Fig4A：subject-specific SNN readout**
+- **A**：local E/I microcircuit 与 patient-specific E/I substrate 的组合 panel；右侧保留触点几何和 E/I substrate，不显示 anisotropic E→E corridor 或 possible-core 覆盖。
+- **B**：暂时空置，完整拼板只保留 B 角标；后续用于 data-driven 不同参数对患者间期事件复现的影响。
+- **C**：冻结 data-driven Node field 与 Model TA/Model TB 空间模式。
+- **D**：模型 MTA/MTB 与患者 TA/TB 的 mean-rank profiles。
+- **E**：模型与患者模板的 equal-network contact-split cross-fit matrix。
+- **F**：同一冻结网络的 30–80 Hz virtual-contact firing-density readout。
+- **G**：34 人 canonical-layout held-out recovery 与 matched within-shaft null。
 
-- 输出目录：`results/paper-ready-figure/fig_subject_snn_epilepsiae_1146/figures/`
-- 正式文件：`fig_subject_snn_epilepsiae_1146.png` / `.pdf`
-- 复现入口：`scripts/paper_figures/plot_fig_subject_snn.py`（消费 `scripts/run_sef_hfo_subject_snn.py --placement template_source` 的产物）
-- 图形合同：四列结构 `mechanism | tempA source | tempB source | electrode readout`；mechanism 显示两核与电极最早区 overlap + E->E 长轴带；readout 用 spontaneous twoend，暖/冷阴影分 tempA/tempB 事件。
-
-**Fig4B：KMeans k=2 readout verification**
-
-- 正式文件：`fig_subject_snn_epilepsiae_1146_kmeans2.png` / `.pdf`
-- 复现入口：`scripts/paper_figures/plot_fig_subject_snn_kmeans2.py`
-- 图形合同：**四块** `clustered event heatmap | per-channel rank distribution | cluster rank distributions | model-vs-real 2×2 相似性矩阵`。前三块**复用仓库成熟 canonical 画图函数**（`scripts/plot_interictal_propagation.py` 的 `_plot_rank_histogram` / `_plot_rank_heatmap` / `_plot_cluster_boundaries` / `_plot_cluster_rank_fig4`，与 Topic-1a per_subject 图同一套），不手搓；heatmap rank colorbar 竖放在 heatmap 右侧；KMeans 显示标签不用 C0/C1，而用模板名（`t_a` 红、`t_b` 蓝）；第三块 legend 放在 panel 内右上角。第四块 = 模型 fwd/rev × 真实 t_a/t_b Spearman 矩阵，只用 star 显示方向性置换 p（不写数值）、aspect=equal，matrix colorbar 与矩阵等高。
-- **LOCKED 模式**：每个 subject-SNN 案例固定出 Fig4A（readout 四列）+ Fig4B（KMeans 四块）两张主图；Fig4C（real-vs-model profile）/ Fig4D（组合 S 置换 null）为可选 supplement。
-- 当前结果：同一个 seed3 spontaneous twoend readout 的 14 个 clean directional events 被 `KMeans k=2` 分成 `t_a/t_b` = 6/8；方向 purity=1.00；`within_cluster_tau_mean=0.939`；更干净的 shared-overlap corr = -0.69。
-
-**Fig4C：模型模板 vs 真实间期模板一致性**
-
-- 正式文件：`fig_subject_snn_epilepsiae_1146_realvsmodel.png` / `.pdf`
-- 复现入口：`scripts/paper_figures/plot_fig_subject_snn_realvsmodel.py`
-- 图形合同：A=真实 t_a/t_b 逐通道 `typical_rank`，B=模型 forward/reverse 逐通道平均 rank；一致性以逐通道 Spearman 判。
-- 当前结果：**model-forward vs real-t_a ρ=+0.87（n=7）、model-reverse vs real-t_b ρ=+0.62（n=11）**，交叉项为负 → 模型在 ICL readout 通道上复现了真实间期模板的传播顺序与 swap 反向结构。**结论=一致**，故未触发"不一致则重做 1146 仿真"。
-
-**当前口径（诚实）**：E1146（ICL 密杆，能采到完整传播）成立，但不是机制证明。模型 readout 顺序与真实间期模板一致（Fig4C），但属单被试、读出级一致性，非因果/cohort。自发双向**与 seed 有关**（seed3 6 正/8 反；seed1/2 偏反向），分开驱动 source 5/0、sink 0/9。读出依赖 `k_dir=2`（病人电极稀疏放宽，载重参数）+ 真实几何 plane-fit。E958（稀疏栅格）阴性。不声称"真实病人机制被证明"；这是机制/读出可行性示意。
+**当前口径**：现有 A、C–G 支持 development-case model-to-readout correspondence 和有限的 canonical-layout cohort advantage；B 当前不贡献证据。原 masked-rank KMeans heatmap/rank distribution 保留在 Supplementary Fig. 7E。不能将当前结果解释为恢复解剖核心、证明患者因果连接，或实现 patient-blind real-geometry generalization。
 
 ### Fig5-Fig6: 间期 scaffold 的 state-dependent readout 与机制边界
 

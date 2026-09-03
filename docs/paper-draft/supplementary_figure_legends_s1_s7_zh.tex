@@ -1,0 +1,87 @@
+% 需要在导言区加载：
+% \usepackage{graphicx}
+% \usepackage{float}
+% 下列路径假定补图文件命名为 FigS1.png、FigS2.pdf 至 FigS7.pdf。
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/FigS1.png}
+\caption{
+\textbf{人工标注的间期 HFO、棘波与耦合事件具有可区分的形态和频谱特征。}
+\textbf{a}，历史人工标注验证集中高频振荡（high-frequency oscillation，HFO；$n=178$）、棘波（spike；$n=202$）和 HFO--棘波耦合事件（coupled；$n=296$）的波形与时频特征。每列上方显示单事件波形（黑色）及平均波形（黄色），中间和下方分别显示平均原始时频图及相对于事件前基线归一化的平均时频图。
+\textbf{b}，三类事件的平均归一化频谱能量曲线；阴影表示均值标准误。HFO 事件在约 $80~\mathrm{Hz}$ 处呈现主要高频峰，棘波以低频成分为主，而耦合事件在约 $120~\mathrm{Hz}$ 处呈现独立高频峰。箭头标示相应的局部频谱峰。图中 $n$ 表示该历史人工标注验证集中的事件数，不作为当前 Yuquan 和 Epilepsiae 双队列分析的患者分母。
+}
+\label{figS1}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/FigS2.pdf}
+\caption{
+\textbf{原始及群体事件筛选后的间期 HFO 负荷对 SOZ 的定位能力。}
+\textbf{a}，Yuquan（$n=20$ 名患者）和 Epilepsiae（$n=15$ 名患者）队列中，以触点水平的群体事件筛选后 HFO 负荷区分临床标注发作起始区（seizure onset zone，SOZ）与非 SOZ 触点的患者水平受试者工作特征曲线。灰线表示单名患者，彩色实线表示队列均值，阴影表示均值标准误；插图中的点表示患者水平曲线下面积（area under the curve，AUC），黑线表示均值。Yuquan 和 Epilepsiae 队列的平均 AUC 分别为 $0.873$ 和 $0.955$。
+\textbf{b}，保留所有精修 HFO 检测（Raw）与进一步限制在通过筛选的群体事件时间窗内（Synchronized）所得患者水平 AUC 的配对比较。柱和黑色横线表示队列均值，连线点表示同一患者。Yuquan 队列的平均 AUC 由 $0.837$ 增至 $0.873$，Epilepsiae 队列由 $0.939$ 增至 $0.955$。统计检验采用双侧配对 Wilcoxon 符号秩检验；$\ast P<0.05$；n.s.，$P\geq0.05$。
+}
+\label{figS2}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/FigS3.pdf}
+\caption{
+\textbf{聚类数扫描表明多数患者由两个主要时序模板描述，同时保留少数高阶解。}
+\textbf{a}，在屏蔽未参与触点后的事件--触点招募秩次特征上，对 $40$ 名患者扫描 $K=2$--$10$ 的无监督聚类解。对每名患者，在跨随机种子的中位调整互信息（adjusted mutual information，AMI）不低于 $0.70$ 且最小事件簇占比不低于 $0.10$ 的解中，选择中位轮廓系数最高的 $K$。左图显示最优 $K$ 的患者分布，其中 $34/40$ 名患者选择 $K=2$；中图显示各患者相对于 $K=2$ 的轮廓系数差值，并叠加队列中位数和四分位距；右图显示每个 $K$ 同时通过上述两个稳定性条件的患者比例。
+\textbf{b}，两个 $K=4$ 解（E11 和 E19）及一个 $K=6$ 解（Y10）的招募顺序图，每名患者展示 $2{,}500$ 次群体事件。颜色表示单次事件内由早至晚的相对招募顺序，浅灰色表示该触点未参与事件，阴影间隔分隔不同模板。右侧曲线表示各模板的触点平均秩次，阴影表示 $\pm1$ 个标准差。
+}
+\label{figS3}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/FigS4.pdf}
+\caption{
+\textbf{三维方向信息改变成对模板轴的空间关系并提高留出方向组织。}
+\textbf{a}，同一 $28$ 名患者中，Timing-only（蓝色）与 Timing + 3D direction（橙色）聚类所得 TA 与 TB 全数据拟合轴有向夹角的配对半玫瑰分布。$0^{\circ}$ 表示方向相同，$180^{\circ}$ 表示方向相反；重叠柱形表示每个 $30^{\circ}$ 区间内的患者比例，混合色区域表示两种分布在该区间的共同部分。彩色菱形表示均值，外侧弧线表示均值 $\pm 1$ 个标准差。TA 与 TB 的平均夹角在 Timing-only 中为 $101.3^{\circ}\pm45.0^{\circ}$，在 Timing + 3D direction 中为 $134.6^{\circ}\pm34.4^{\circ}$。
+\textbf{b}，采用交替记录块交叉验证，比较 Timing-only 与 Timing + 3D direction 聚类所得的患者水平方向得分。所有间期事件均贡献时序特征，具有有限方向估计的事件额外贡献掩膜空间视图。方向得分定义为两个交叉验证折和两个模板中，留出事件方向与其所分配训练模板轴之间有符号余弦的等权均值。点表示患者，连线保留患者内配对关系，小提琴图表示分布，箱体和黑色横线分别表示四分位距和中位数。加入三维方向信息后，中位方向得分由 $0.435$ 增至 $0.479$；$26$ 名患者中 $22$ 名提高，中位配对增益为 $0.042$（bootstrap 95\% 置信区间，$0.011$--$0.064$；单侧配对 Wilcoxon 检验，$P=9.54\times10^{-6}$）。
+\textbf{c}，相同留出方向得分与各方法自身患者特异性 direction-shuffle 零分布中位数的比较。空心和实心分布分别表示零分布和观测值，灰线连接同一患者。Timing-only 与 Timing + 3D direction 的观测得分在全部 $26/26$ 名患者中均高于各自零分布中位数（单侧配对 Wilcoxon 检验，两者均为 $P=1.49\times10^{-8}$）；上方括号比较两种方法的观测得分（单侧配对 Wilcoxon 检验，$P=9.54\times10^{-6}$）。图中星号表示统计显著性，精确 $P$ 值见本图注。
+\textbf{d}，临床 SOZ 触点相对于患者自身可映射颅内植入触点几何的空间紧凑性。对每名患者计算 SOZ 触点到其自身质心的均方根（root-mean-square，RMS）半径，并除以从该患者全部可映射颅内触点中随机抽取等数量触点所得 $20{,}000$ 次零分布的中位半径；灰色虚线表示零比值 $1$。点表示患者（蓝色，Yuquan，$n=15$；紫色，Epilepsiae，$n=14$），实心点表示患者内经验检验 $P<0.05$，黑色横线和竖线分别表示中位数和四分位距。括号表示各数据集内患者级 $\log_2$ 比值相对于 $0$ 的单侧 Wilcoxon 符号秩检验（Yuquan，$P=3.1\times10^{-5}$；Epilepsiae，$P=1.2\times10^{-4}$；$\ast\ast\ast P<0.001$）。合并两个队列后，中位比值为 $0.375$（患者 bootstrap 95\% 置信区间，$0.261$--$0.478$；$n=29$ 名患者；单侧 Wilcoxon 检验，$P=3.7\times10^{-9}$）。
+}
+\label{figS4}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/FigS5.pdf}
+\caption{
+\textbf{发作早期频谱表型及一个 gamma 优势型发作示例。}
+\textbf{a}，$23$ 名患者共 $324$ 次发作的互斥性发作早期频谱分型。饼图显示宽频 $1$--$150~\mathrm{Hz}$ 型（$124/324$，$38.3\%$）、gamma 优势 $30$--$80~\mathrm{Hz}$ 型（$76/324$，$23.5\%$）、低频 $1$--$13~\mathrm{Hz}$ 型（$7/324$，$2.2\%$）及其他模式（$117/324$，$36.1\%$）的构成；$n$ 表示发作次数。
+\textbf{b}，代表性 gamma 优势型发作（E20，发作 7）。从上至下依次显示共同平均参考后的立体脑电信号、触点 HRB1 相对于基线归一化的时频图，以及 $1$--$30$、$30$--$80$、$80$--$150$ 和 $1$--$150~\mathrm{Hz}$ 频带的功率时间过程。时间以临床发作起始时刻 $0~\mathrm{s}$ 对齐；蓝色阴影表示 $-120$ 至 $-90~\mathrm{s}$ 的基线窗，红色阴影表示 $0$--$10~\mathrm{s}$ 的发作早期临床窗。该单次发作仅用于展示 gamma 优势型的信号形态，不参与队列水平统计推断。
+}
+\label{figS5}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/FigS6.pdf}
+\caption{
+\textbf{发作早期活动与 Timing + 3D direction 间期模板一致性的多频带分析。}
+\textbf{a}，$17$ 名患者在七个频带上的患者水平传播场一致性差值 $\Delta$。对每名患者和每个频带，$D$ 定义为发作早期稠密空间网格与由 Timing + 3D direction 聚类定义的 TA 或 TB 场中较匹配者之间的中位空间一致性，并在比较前消解符号和横向镜像对称性；$\Delta$ 为 $D$ 减去该患者全触点置换零分布的中位数（$1{,}000$ 次置换）。点表示患者，小提琴图表示分布，黑色横线表示队列中位数。红色小提琴图和星号表示该频带相对于其自身队列空间零分布的单侧置换检验 $P<0.05$；该逐频带检验未作七频带多重比较校正。
+\textbf{b}，相同患者--频带 $\Delta$ 值的热图，颜色表示相对于患者自身置换零分布的场一致性增益。患者按超过自身零分布的频带数排序，底行显示各频带的队列中位数；空心星号表示单侧患者自身经验检验 $P<0.05$，不代表队列水平显著性，亦未作跨频带多重比较校正。频带分别为 $\delta$（$1$--$4~\mathrm{Hz}$）、$\theta$（$4$--$8~\mathrm{Hz}$）、$\alpha$（$8$--$13~\mathrm{Hz}$）、$\beta$（$13$--$30~\mathrm{Hz}$）、$\gamma$（$30$--$80~\mathrm{Hz}$）、R（$80$--$150~\mathrm{Hz}$）和 FR（$150$--$250~\mathrm{Hz}$）。逐频带检验中，$\delta$、$\theta$、$\alpha$、$\beta$ 和 $\gamma$ 达到 $P<0.05$；七个频带均未通过七频带 maxT 校正（最小 $P_{\mathrm{FWER}}=0.058$），频带间直接 omnibus 检验亦不显著（校准后 $P=0.522$）。
+}
+\label{figS6}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/FigS7.pdf}
+\caption{
+\textbf{冻结局部连接消融与模型事件 KMeans 结构。}
+\textbf{a}，在被分类为两个冻结模式之一的正式事件中，Mode 1 事件所占比例，定义为 Mode 1$/$（Mode 1$+$Mode 2）。
+\textbf{b}，与 a 互补的 Mode 2 事件比例。
+\textbf{c}，不使用患者标签重新拟合的自然 KMeans $K=2$ 聚类与冻结 Mode 1$/$2 标签之间的平衡匹配率；自然聚类未被重新命名为患者模式。
+\textbf{d}，返回事件中位于冻结患者分布支持范围之外的比例，即分布外（out-of-distribution，OOD）比例。
+\textbf{e}，按冻结 MTA$/$MTB KMeans 标签分组的 $627$ 个 formal clean model events 的 masked recruitment-rank heatmap，右侧为对齐的逐触点 rank distribution 与唯一共享的 first-to-last 色标。
+a--d 比较 Node、+EE、+E-to-I 和 +EE+EI 四个冻结连接臂。每个连接臂在相同的 $12$ 个配对网络随机种子（1581--1592）上运行 $20~\mathrm{s}$，网络拓扑和传导延迟保持不变，并分别守恒每个兴奋性与抑制性目标的输入权重预算。空心圆表示单个网络，灰线连接同一网络随机种子在不同连接臂下的结果，实心圆表示各网络等权均值，误差线表示 90\% network-bootstrap 置信区间。a--d 的星号表示相应连接臂减去 Node 的配对 90\% network-bootstrap 置信区间不跨 $0$（$4{,}096$ 次重采样，未作多重比较校正）：a 和 b 中为 +E-to-I，c 中为 +EE+EI，d 中为 +E-to-I 和 +EE+EI。Mode 1$/$2 与 MTA$/$MTB 是冻结模型标签，不具有独立的病理学含义。该分析只估计冻结 E10 开发病例中模型内部的连接通路效应与事件结构，不能据此推断患者因果连接、解剖核心恢复，或患者盲和真实几何条件下的泛化。
+}
+\label{figS7}
+\end{figure}

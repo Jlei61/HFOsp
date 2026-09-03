@@ -13,13 +13,14 @@
 3. `status`：科学和出版状态。
 4. `canonical_path`：当前唯一可消费路径。
 
-状态只允许以下五类：
+状态只允许以下六类：
 
 - `LOCKED`：科学合同和可视版本均已锁定，可进入当前稿件。
 - `CANDIDATE`：可作为候选，但总拼版或 panel 位置尚未最终锁定。
 - `SUPPLEMENT`：只进入补图或补充计算材料。
 - `SOURCE`：正式 panel 的源素材或公共 renderer 输出，不能单独当论文结论引用。
 - `HISTORICAL`：已撤回、被替代或仅保留模型谱系；只能从 `archive/` 引用。
+- `LAYOUT_INCOMPLETE_RESERVED_PANEL_B`：作者已锁定现有 panel 与排版，但 B 明确预留，尚不能作为完整投稿图。
 
 引用时优先写 `asset_id (paper_slot)`，例如
 `ictal_field_scaffold (Fig3-A–F)`，不要只写“fig3 图”或直接沿用脚本内部的 `fig3c_*` 名称。
@@ -31,8 +32,8 @@
 | `interictal_hfo_temporal_scaffold` | Fig1-B–F | `LOCKED` | `results/paper-ready-figure/fig1/figures/` | 无角标的 B1/B2、C、D、E、F 独立输出 + 带 B–F 角标的 `fig1-complete-layout`；Fig1-A 为作者手绘。Fig1-F 自 2026-09-02 锁定为 v5：主散点右下必须是 single-template vs multi-cluster MI 配对 inset（患者连线、均值柱、paired Wilcoxon 括号），不得退回灰色 median ΔMI 小字 |
 | `interictal_spatial_scaffold` | Fig2-A–F | `CANDIDATE` | `results/paper-ready-figure/fig2/figures/` | B/E/F 默认读取 `all_event_timing_plus_space_no_hard_qc_v1`：B 为 26 人 held-out 方向比较，E 为 4 例显示，F 为完整 18 人 shared-plane 队列；A/C/D 保持原 canonical 版本 |
 | `ictal_field_scaffold` | Fig3-A–F | `LOCKED` | `results/paper-ready-figure/fig3/figures/` | A/B 保持原 raw/TFR 与四频带 signal context；C–F 默认读取 `all_event_timing_plus_space_no_hard_qc_v1` 重算源，D 为 n=17/16/11，F 为 17-subject A/B heatmap |
-| `working_subject_snn_fig4` | Fig4-A–G | `CANDIDATE` | `results/paper-ready-figure/fig4/figures/` | 当前工作版：A/B 为 E1146 setup，C 已替换为 12 张新网络上的 Node / +EE / +E-to-I / +EE+EI 冻结终点确认，D/E 为双向读出，F/G 为 validation；整图仍是跨阶段组合，当前不是最终锁图 |
-| `data_driven_snn_nlc_pathway_confirmation` | Fig4-C source | `SOURCE` | `results/topic4_sef_hfo/data_driven_local_connectivity_rev11_nlc/pathway_mechanism_confirmation/figures/` | 1581--1592 共 12 张全新配对网络，20 s/arm；显示无病理命名的 Mode 1/2 事件占比、自然 KMeans 两簇与冻结 Mode 1/2 标签的匹配率及 OOD，逐网络配对值和 90% network-bootstrap 区间。属于 patient-development static-pathway mechanism confirmation，不支持 patient-blind、临床波形、解剖 core 或发作生命周期结论 |
+| `data_driven_interictal_snn_fig4` | Fig4-A–G | `LAYOUT_INCOMPLETE_RESERVED_PANEL_B` | `results/paper-ready-figure/fig4/figures/` | A、C–G 有无角标独立 PNG/PDF，完整拼板带 A–G 角标。A 为 local E/I circuit + patient-specific substrate；B 使用右上现有留白并明确预留，当前无独立文件，后续用于 data-driven 参数对患者间期事件复现的影响；C 为 Node field + Model TA/MTB；D 为 rank profiles；E 为 cross-fit；F 为 recruitment-onset-span readout；G 为 34 人 cohort。原 KMeans heatmap/rank distribution 保留在 FigS7-E。 |
+| `data_driven_snn_nlc_pathway_confirmation` | FigS7-A–E | `SUPPLEMENT` | `results/paper-ready-figure/supp_fig7_nlc_pathway_confirmation/figures/` | A–D 为 1581--1592 共 12 张全新配对网络的冻结 local-connectivity ablation；E 为从主 Fig4 移入的 627-event masked-rank KMeans heatmap、逐触点 rank distribution 与共享色条。该补图只支持 development-case 模型内部 pathway effect 与事件结构。 |
 | `data_driven_snn_dual_mode_validation` | Fig4-C historical candidate | `DIAGNOSTIC_ONLY` | `results/topic4_sef_hfo/data_driven_core_field_rev10_d/spatial_ou_accessibility_d5_2_confirmation/figures/` | 连续场 + MTA/MTB same-network readout 和 KMeans 核验图；natural KMeans 未复现患者 TA/TB（direction purity `0.674` < patient-matched q05 `0.884`，pooled MTB↔TB `−0.60`），已被独立冻结终点的 NLC pathway panel 替代，不得再作为当前 Fig.4C source |
 | `data_driven_snn_d6_3_replication_diagnostic` | Fig4-C source（诊断，不可替换主文） | `DIAGNOSTIC_ONLY` | `results/topic4_sef_hfo/data_driven_core_field_rev10_d/continuous_field_kmeans_d6_3_fresh_replication/figures/` | 同规格第二套图，冻结连续场候选 `d62_a0p5_b0p5` 在 12 张全新网络上的复制臂；verdict `REV10D6_3_JOINT_CONTINUOUS_FIELD_NOT_REPLICATED`（patient cross-fit paired delta `−0.107`、K=2 支持仅 `4/12`）。图为 pooled 展示，不覆盖网络级复制失败，**不得替换主文 Fig.4** |
 | `core_model_s3_brakeoff` | Fig5-A working slot | `CANDIDATE` | `results/paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig5_core_model_s3_brakeoff/figures/` | 尚未形成 canonical `fig5/`，作为工作材料归档；Fig5/6 机制线尚未整体收口 |
@@ -69,9 +70,9 @@
   `fig3_ictal_field_concordance_grid_method_sensitivity/` 是计算与审计包；正式图应引用登记表中的
   panel 资产，而不是把整个 staging 目录叫作“Figure 3”。
 - `fig4_subject_snn_e1146/`、`fig_subject_snn_epilepsiae_1146*/` 和其余
-  `fig4_data_driven_core_field_*` 是 Figure 4 的 source/迭代包；当前排版只消费
-  `fig4/figures/`。只有登记表中的 `data_driven_snn_dual_mode_validation` 是当前 data-driven
-  双图规范源；它仍是 `SOURCE`，不能因视觉验收通过而自行升级为主图 `LOCKED`。
+  `fig4_data_driven_core_field_*` 是 Figure 4 的 source/迭代包；论文组装只消费
+  `fig4/figures/`。当前 A–G 中 B 预留为空，A、C–F 来自冻结 E10 development case，G 来自
+  34 人 cohort formal result；该视觉合同不扩大 scientific claim。
 
 ## 5. 2026-08-09 第一批归档
 
