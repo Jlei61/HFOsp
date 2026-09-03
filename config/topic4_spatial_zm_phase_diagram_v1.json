@@ -1,0 +1,141 @@
+{
+  "schema_version": "topic4_spatial_zm_phase_diagram_v1",
+  "scientific_role": "empirical_dual_initial_state_snn_branch_and_bistability_screen",
+  "source": {
+    "repository_artifact_root": "/home/honglab/leijiaxin/HFOsp",
+    "round_config": "config/topic4_data_driven_zm_ictal_transition_v1.json",
+    "round_config_sha256": "2ce70caf70ca1225ba9a95721692cf7fc9ce0f8fa9b977c85d0370c78941b20f",
+    "trajectory_json": "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_node_local_connectivity_plus_zm/spatial_zm_ou/tonic_confirmation_v2/tonic_b0_v2_s1842.json",
+    "trajectory_json_sha256": "80ef269f4f7d5ad2ac4910dc2b64727fe0c2c1004fd46407176deb029ac699f0",
+    "low_checkpoint": "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_node_local_connectivity_plus_zm/spatial_zm_ou/paper_ready_fig5_static/seed1842_checkpoint_t0200ms.npz",
+    "low_checkpoint_sha256": "c1d1eb54dd4035a4db47c1c23b67c4399e6a216c6ccc382bcd99b7ea2adc2cdb",
+    "high_checkpoint": "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_node_local_connectivity_plus_zm/spatial_zm_ou/paper_ready_fig5_static/seed1842_checkpoint_t0600ms.npz",
+    "high_checkpoint_sha256": "fdd492aefeb64c02cc704a1213e1b008cc72cab62c57595002db02604fb446c6",
+    "network_cache_dir": "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_node_local_connectivity_plus_zm/network_cache"
+  },
+  "output_root": "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_zm_phase_diagram",
+  "model": {
+    "primary_eta_m": 0.02,
+    "q_only_eta_m": 0.0,
+    "tau_m_ms": 12.5,
+    "stationary_ou": {
+      "sigma_rate_per_ms": 0.1,
+      "tau_ms": 20.0,
+      "ell_mm": 0.38
+    }
+  },
+  "classification": {
+    "contract_version": "event_tolerant_low_v2",
+    "amendment_date": "2026-09-03",
+    "low": {
+      "median_rate_hz_max": 80.0,
+      "median_active_e_fraction_max_exclusive": 0.5,
+      "high_rate_threshold_hz": 120.0,
+      "maximum_contiguous_high_rate_ms_exclusive": 100.0
+    },
+    "tonic_high": {
+      "median_rate_hz_min": 300.0,
+      "median_active_e_fraction_min": 0.85,
+      "median_recruited_sheet_fraction_min": 0.85,
+      "joint_global_recruitment_duty_min": 0.8
+    },
+    "note": "q95 is retained as a diagnostic but is not a LOW gate because sparse interictal-like events are part of the intended low state."
+  },
+  "stage0_canary": {
+    "q_clamp": [0.79, 0.805, 0.82],
+    "eta_m": [0.02],
+    "noise_seeds": [9101],
+    "initial_states": ["low", "high"],
+    "duration_ms": 1200.0,
+    "burn_in_ms": 400.0
+  },
+  "stage0b_post_canary_bracket": {
+    "amendment_date": "2026-09-03",
+    "rationale": "Stage 0 found I/I at q=0.820 and I/H at q=0.790 but no same-eta monostable anchors; add symmetric outer anchors without changing any classifier threshold.",
+    "q_clamp": [0.77, 0.84],
+    "eta_m": [0.02],
+    "noise_seeds": [9101],
+    "initial_states": ["low", "high"],
+    "duration_ms": 1200.0,
+    "burn_in_ms": 400.0
+  },
+  "stage0c_low_anchor_extension": {
+    "amendment_date": "2026-09-03",
+    "rationale": "The q=0.840 high-start arm scored 82.2 Hz and narrowly missed the frozen LOW median-rate limit of 80 Hz; extend once to q=0.860 without changing thresholds.",
+    "q_clamp": [0.86],
+    "eta_m": [0.02],
+    "noise_seeds": [9101],
+    "initial_states": ["low", "high"],
+    "duration_ms": 1200.0,
+    "burn_in_ms": 400.0
+  },
+  "stage0d_q_only_coexistence_probe": {
+    "amendment_date": "2026-09-03",
+    "rationale": "The frozen q-only locator left q=0.825 on the low side when initialized low, but never tested a matched high initial state. Probe this single point before broad refinement because persistent LOW/HIGH separation would be the first strict empirical coexistence candidate.",
+    "q_clamp": [0.825],
+    "eta_m": [0.0],
+    "noise_seeds": [9101],
+    "initial_states": ["low", "high"],
+    "duration_ms": 1200.0,
+    "burn_in_ms": 400.0
+  },
+  "stage0e_q_only_high_branch_bisection": {
+    "amendment_date": "2026-09-03",
+    "rationale": "At q=0.825 the low arm was LOW and the high arm decayed to INTERMEDIATE. Bisect toward the known q-only runaway side at q=0.800; run the high arm first and add the paired low arm only if a tonic-high branch survives.",
+    "q_clamp": [0.8125],
+    "eta_m": [0.0],
+    "noise_seeds": [9101],
+    "initial_states": ["high", "low_if_high_is_tonic"],
+    "duration_ms": 1200.0,
+    "burn_in_ms": 400.0
+  },
+  "stage0f_q_only_high_branch_bisection": {
+    "amendment_date": "2026-09-03",
+    "rationale": "The q=0.8125 high arm decayed to INTERMEDIATE, while the legacy q-only locator places the low-start escape interval between q=0.800 and q=0.825. Bisect q=0.80625 to test whether the high-branch survival and low-start escape boundaries separate into a narrow coexistence window.",
+    "q_clamp": [0.80625],
+    "eta_m": [0.0],
+    "noise_seeds": [9101],
+    "initial_states": ["high", "low_if_high_is_tonic"],
+    "duration_ms": 1200.0,
+    "burn_in_ms": 400.0
+  },
+  "stage1_q_branch": {
+    "execution_status": "superseded_before_any_formal_stage1_run_by_stage1_adaptive_branch_edges",
+    "q_start": 0.77,
+    "q_stop": 0.84,
+    "q_step": 0.0025,
+    "eta_m": [0.02, 0.0],
+    "noise_seeds": [9101, 9102, 9103],
+    "initial_states": ["low", "high"],
+    "duration_ms": 2500.0,
+    "burn_in_ms": 1000.0,
+    "maximum_refined_interval_width": 0.00125
+  },
+  "stage1_adaptive_branch_edges": {
+    "amendment_date": "2026-09-03",
+    "rationale": "Stage 0 measured 6-35 minute wall times per 1.2-s arm and revealed a broad INTERMEDIATE band. The original 348-run rectangular grid is neither resource-proportionate nor the best discriminator. Locate high-branch survival and low-start escape edges separately, then spend the three-seed denominator only on any interval where LOW and TONIC_HIGH overlap.",
+    "primary_order": [
+      "eta_m_0_high_start_survival_edge",
+      "eta_m_0_low_start_escape_edge",
+      "paired_overlap_candidates",
+      "eta_m_0p02_sensitivity"
+    ],
+    "initial_q_bracket": [0.775, 0.825],
+    "bisection_stop_width": 0.003125,
+    "pilot_noise_seed": 9101,
+    "confirmation_noise_seeds": [9101, 9102, 9103],
+    "pilot_duration_ms": 1200.0,
+    "pilot_burn_in_ms": 400.0,
+    "confirmation_duration_ms": 2500.0,
+    "confirmation_burn_in_ms": 1000.0,
+    "confirmation_trigger": "Run full paired three-seed confirmation only at q values where the pilot low arm is LOW and the pilot high arm is TONIC_HIGH; extend INTERMEDIATE arms before treating them as an edge.",
+    "claim_boundary": "Adaptive allocation changes computational order only. It does not change the model, noise, classifiers, initial states, or three-seed robust-label rule."
+  },
+  "stage2_q_by_m": {
+    "eta_m": [0.0, 0.01, 0.02, 0.04, 0.08],
+    "q_margin_around_stage1_boundary": 0.015,
+    "noise_seeds": [9101, 9102, 9103],
+    "initial_states": ["low", "high"]
+  },
+  "claim_boundary": "Finite stochastic SNN branch evidence only. A mathematical bifurcation label requires deterministic fixed-point continuation and Jacobian evidence; phase transition additionally requires a preregistered order parameter and finite-size scaling."
+}

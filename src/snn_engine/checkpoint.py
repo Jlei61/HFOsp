@@ -23,7 +23,14 @@ REQUIRED_KEYS = (
     "track_rec", "s_E_rec", "I_E_rec", "slow", "external_drive",
 )
 
-_SLOW_ARRAYS = ("z", "m", "I_I_last", "acc_D", "acc_A")
+_SLOW_BASE_ARRAYS = ("z", "m", "I_I_last", "acc_D", "acc_A")
+_SLOW_SPATIAL_ARRAYS = (
+    # SpatialZMQIGKSlowVars state. These keys are absent for the historical
+    # lumped Z/M object and therefore do not alter its checkpoint bytes.
+    "q_I", "qdriver_rE", "qdriver_rI", "field_count_E", "field_count_I",
+    "last_m_drive_E", "last_q_drive",
+)
+_SLOW_ARRAYS = _SLOW_BASE_ARRAYS + _SLOW_SPATIAL_ARRAYS
 _DRIVE_ARRAYS = ("field_state", "cached")
 
 
@@ -67,6 +74,21 @@ def capture(*, step, absolute_time_ms, V, ref, s_E, I_E, s_I, I_I, ring_sE,
             "acc_D": None if acc_d is None else np.array(acc_d, copy=True),
             "acc_A": None if acc_a is None else np.array(acc_a, copy=True),
         }
+        if hasattr(slow, "q_I"):
+            state["slow"].update({
+                "q_I": np.array(slow.q_I, copy=True),
+                "qdriver_rE": np.array(slow._qdriver.rE, copy=True),
+                "qdriver_rI": np.array(slow._qdriver.rI, copy=True),
+                "field_count_E": np.array(slow._field_count_E, copy=True),
+                "field_count_I": np.array(slow._field_count_I, copy=True),
+                "last_m_drive_E": np.array(slow._last_m_drive_E, copy=True),
+                "last_q_drive": np.array(slow._last_q_drive, copy=True),
+                "field_steps_seen": int(slow._field_steps_seen),
+                "field_steps_per_update": (
+                    None if slow._field_steps_per_update is None
+                    else int(slow._field_steps_per_update)
+                ),
+            })
     if external_drive is not None:
         state["external_drive"] = {
             "field_state": np.array(external_drive._state, copy=True),
@@ -95,6 +117,26 @@ def restore_slow(state, slow):
     acc_d, acc_a = payload.get("acc_D"), payload.get("acc_A")
     slow._acc_D = None if acc_d is None else np.array(acc_d, copy=True)
     slow._acc_A = None if acc_a is None else np.array(acc_a, copy=True)
+    if hasattr(slow, "q_I"):
+        required = (
+            "q_I", "qdriver_rE", "qdriver_rI", "field_count_E",
+            "field_count_I", "last_m_drive_E", "last_q_drive",
+            "field_steps_seen", "field_steps_per_update",
+        )
+        missing = [key for key in required if key not in payload]
+        if missing:
+            raise ValueError(
+                "spatial Z/M checkpoint is incomplete: " + ", ".join(missing))
+        slow.q_I[:] = payload["q_I"]
+        slow._qdriver.rE[:] = payload["qdriver_rE"]
+        slow._qdriver.rI[:] = payload["qdriver_rI"]
+        slow._field_count_E[:] = payload["field_count_E"]
+        slow._field_count_I[:] = payload["field_count_I"]
+        slow._last_m_drive_E[:] = payload["last_m_drive_E"]
+        slow._last_q_drive[:] = payload["last_q_drive"]
+        slow._field_steps_seen = int(payload["field_steps_seen"])
+        steps = payload["field_steps_per_update"]
+        slow._field_steps_per_update = None if steps is None else int(steps)
 
 
 def restore_external_drive(state, drive):
@@ -165,7 +207,7 @@ def load(path):
             drive[key[len("external_drive__"):]] = value
         else:
             state[key] = value
-    for name, payload, array_names in (("slow", slow, _SLOW_ARRAYS),
+    for name, payload, array_names in (("slow", slow, _SLOW_BASE_ARRAYS),
                                        ("external_drive", drive, _DRIVE_ARRAYS)):
         present = payload.pop("present", False)
         if not present:

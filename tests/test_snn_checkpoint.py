@@ -16,6 +16,9 @@ from src.snn_engine.checkpoint import (  # noqa: E402
 from src.snn_engine.mz_slow_vars import MZSlowVarsConfig  # noqa: E402
 from src.topic4_zm_slow_vars import ZMTracedSlowVars as MZSlowVars  # noqa: E402
 from src.topic4_spatial_ou_drive import SpatialOUConfig, SpatialOUDrive  # noqa: E402
+from src.topic4_spatial_zm_qigk import (  # noqa: E402
+    SpatialZMQIGKConfig, SpatialZMQIGKSlowVars,
+)
 
 
 def _state(n=12, ne=8, m=5):
@@ -104,3 +107,67 @@ def test_digest_changes_when_any_field_changes():
         else:
             mutated[key] = mutated[key] + 1
         assert digest(mutated) != base, key
+
+
+def test_spatial_zm_round_trip_restores_every_mutable_field(tmp_path):
+    rng = np.random.default_rng(19)
+    pos_e = rng.random((8, 2)) * 4.0
+    pos_i = rng.random((4, 2)) * 4.0
+    slow = SpatialZMQIGKSlowVars(
+        12, 18.0, pos_e, pos_i, 4.0, rng.random(8),
+        cfg=SpatialZMQIGKConfig(
+            n_grid=4, sigma_r_mm=0.4, sigma_q_mm=0.7,
+            h_smooth_sigma_mm=0.5, field_update_ms=0.1,
+            q_init=0.81, q_min=0.77, eta_m=0.02,
+            trace_stride_steps=1,
+        ),
+    )
+    labels = np.r_[np.zeros(8, int), np.ones(4, int)]
+    for _ in range(3):
+        slow.step(rng.random(12) < 0.3, labels, 0.1)
+    drive = SpatialOUDrive(
+        pos_e, 4.0, 0.1,
+        SpatialOUConfig(mode="local", sigma_rate_per_ms=0.1,
+                        tau_ms=20.0, ell_mm=0.4, seed=5),
+    )
+    state = capture(
+        step=3, absolute_time_ms=0.3,
+        V=rng.random(12), ref=np.zeros(12, np.int32),
+        s_E=rng.random(12), I_E=rng.random(12),
+        s_I=rng.random(12), I_I=rng.random(12),
+        ring_sE=rng.random((5, 12)), ring_sI=rng.random((5, 12)),
+        xi=0.0, rng=rng, ras_keep=np.array([0, 1]),
+        es_ema=0.0, es_run=0, track_rec=False,
+        s_E_rec=None, I_E_rec=None, slow=slow, external_drive=drive,
+    )
+    expected = {
+        "q_I": slow.q_I.copy(),
+        "qdriver_rE": slow._qdriver.rE.copy(),
+        "qdriver_rI": slow._qdriver.rI.copy(),
+        "field_count_E": slow._field_count_E.copy(),
+        "field_count_I": slow._field_count_I.copy(),
+        "last_m_drive_E": slow._last_m_drive_E.copy(),
+        "last_q_drive": slow._last_q_drive.copy(),
+    }
+    path = tmp_path / "spatial.npz"
+    save(state, path)
+    loaded = load(path)
+    slow.q_I[:] = 0.0
+    slow._qdriver.rE[:] = 0.0
+    slow._qdriver.rI[:] = 0.0
+    slow._field_count_E[:] = 0.0
+    slow._field_count_I[:] = 0.0
+    slow._last_m_drive_E[:] = 0.0
+    slow._last_q_drive[:] = 0.0
+    restore_slow(loaded, slow)
+    for name, values in expected.items():
+        actual = {
+            "q_I": slow.q_I,
+            "qdriver_rE": slow._qdriver.rE,
+            "qdriver_rI": slow._qdriver.rI,
+            "field_count_E": slow._field_count_E,
+            "field_count_I": slow._field_count_I,
+            "last_m_drive_E": slow._last_m_drive_E,
+            "last_q_drive": slow._last_q_drive,
+        }[name]
+        np.testing.assert_array_equal(actual, values)
