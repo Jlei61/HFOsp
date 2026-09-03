@@ -126,12 +126,20 @@ def main() -> None:
         record = candidate["structural_null"]
         family, condition = record["family"], record["condition"]
         if family == "isotropic_graph":
-            contrasts.append({
+            record_out = {
                 "candidate_id": candidate_id, "family": family, "condition": condition,
                 "status": "UNPAIRED_TOPOLOGY_CONTROL",
                 "null_endpoints": scored[candidate_id]["primary_endpoints"],
                 "intact_endpoints": intact_scored[condition]["primary_endpoints"],
-            })
+            }
+            if condition == "full":
+                reference_id = candidate_id.rsplit("_", 1)[0] + "_M0000"
+                record_out["within_isotropic_full_minus_M0000"] = (
+                    module.paired_nonlinear_bootstrap(
+                        raw[candidate_id], raw[reference_id], context,
+                        draws=args.bootstrap_draws, seed=20271920 + index,
+                        recall_subsamples=200))
+            contrasts.append(record_out)
             continue
         if family == "node_blocking_factor":
             if condition != "full":
