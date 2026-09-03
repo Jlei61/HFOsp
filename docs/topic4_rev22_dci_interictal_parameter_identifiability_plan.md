@@ -310,7 +310,9 @@ dynamics seed each, for `M0000` and the frozen full-model proposal:
 - one isotropic-graph arm (`rho_EE = 0`, unchanged in-degree) built through a separate
   network cache; it is reported unpaired.
 - two previously frozen Node candidates named in the Task 0 config, loaded through the
-  existing override path, as the Node blocking factor.
+  existing override path, as the Node blocking factor: rev17 `exact_dual_anchor` and
+  rev10-SA `v62_density_t050`. Their source-manifest hashes and historical statuses are
+  frozen in the config; neither is a rev22-selected Node winner.
 
 Budget: six named fixed-topology variants x 2 conditions x 6 seeds = 72 paired-null
 trajectories, 12 isotropic trajectories and 24 Node-factor trajectories, for 108 new

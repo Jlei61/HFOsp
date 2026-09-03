@@ -782,6 +782,12 @@ connectivity conclusion depends on which Node was frozen; it does not optimize t
 because the learned redistribution pattern is a function of the Node field and moving the
 cores redefines the pattern.
 
+The two blocking factors are frozen before rev22 candidate selection as rev17
+`exact_dual_anchor` (dual continuous mean/dispersion Node channels) and rev10-SA
+`v62_density_t050` (single continuous Node field). They are structural sensitivity controls,
+not alternative winners. In particular, the archived v6.2 fresh-network mode-coexistence
+status was not confirmed and must remain visible in the report.
+
 Null and blocking-factor results use the same paired network bootstrap as confirmation. A
 null arm that matches or exceeds the intact substrate on every endpoint is reported as
 `NULL_NOT_SEPARATED` for that null; the conditional identifiability claim stands, the

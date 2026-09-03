@@ -120,6 +120,37 @@
     "patient_ictal": "forbidden",
     "fig5_metrics": "forbidden"
   },
+  "structural_nulls": {
+    "status": "frozen_before_rev22_candidate_selection",
+    "confirmation_seed_prefix_count": 6,
+    "random_learned_row_seed": 20260913,
+    "random_two_core_seed": 20260914,
+    "fixed_topology_variants": [
+      "r180",
+      "r90",
+      "matched_norm_row_1",
+      "matched_norm_row_2",
+      "merged_midpoint_core",
+      "random_two_core_centers"
+    ],
+    "expected_new_trajectories": 108,
+    "node_blocking_factors": [
+      {
+        "candidate_id": "exact_dual_anchor",
+        "source_manifest": "results/topic4_sef_hfo/data_driven_node_dualmode_rev17/dual_field_selection/candidate_manifest.json",
+        "source_manifest_sha256": "46a01e6d39891c332f882c29ef53edac1133d54d54d48f6072f297fdec7bfa98",
+        "historical_status": "frozen_reference_not_a_selected_rev17_winner",
+        "purpose": "dual_continuous_mean_dispersion_node_block"
+      },
+      {
+        "candidate_id": "v62_density_t050",
+        "source_manifest": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/observation_invariant_field_v6_2_final/candidate_manifest.json",
+        "source_manifest_sha256": "1c30be6f2121ed54f1c42ab312a8fae334902bd0a4246fcb5bcf4e42bbbb7298",
+        "historical_status": "display_candidate_fresh_network_coexistence_not_confirmed",
+        "purpose": "single_continuous_node_field_block"
+      }
+    ]
+  },
   "provisional_domain": {
     "g_LEE": [
       0.0,
