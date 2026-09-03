@@ -492,7 +492,9 @@ def main() -> None:
             parser.error("dynamics seed is outside the frozen dynamics/network pools")
 
     artifact_root = args.artifact_root.resolve()
-    for record in config["inputs"].values():
+    for record in list(config["inputs"].values()) + list(config.get("frozen_contracts", {}).values()):
+        if record.get("path") is None or record.get("sha256") is None:
+            raise RuntimeError("frozen input record lacks path or sha256")
         path = _resolve(artifact_root, record["path"])
         if _sha256(path) != record["sha256"]:
             raise RuntimeError(f"input hash changed: {record['path']}")
@@ -1322,6 +1324,12 @@ def main() -> None:
     payload = {
         "status": "REV12ND_NODE_WORKER_COMPLETE",
         "scientific_role": config["scientific_role"],
+        "response_design_manifest_sha256": config.get("frozen_contracts", {}).get(
+            "response_design", {}
+        ).get("sha256"),
+        "seed_manifest_sha256": config.get("frozen_contracts", {}).get(
+            "seed_manifest", {}
+        ).get("sha256"),
         "candidate_id": args.candidate_id,
         "field_sha256": candidate["node_field"]["field_sha256"],
         "seed": int(args.seed),

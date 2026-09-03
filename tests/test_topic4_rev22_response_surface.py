@@ -56,7 +56,7 @@ def fitted():
 
 def test_shrinkage_formula_hand_example():
     out = pooled_shrinkage_noise({"a": 0.05, "b": 0.10, "c": None}, 4)
-    # unit-level variances: a = 4*0.0025 = 0.01, b = 4*0.01 = 0.04 -> pooled median 0.025
+    # unit-level variances: a = 4*0.0025 = 0.01, b = 4*0.01 = 0.04 -> pooled 0.025
     assert out["n_finite"] == 2
     assert out["s_pool_sq"] == pytest.approx(0.025)
     expected_a = (8 * 0.025 + 3 * 0.01) / 11 / 4
@@ -74,6 +74,20 @@ def test_unit_cube_round_trip_and_reference_position():
     assert tuple(PARAMETER_ORDER) == ("g_LEE", "g_LEI", "theta_FT_deg", "AR_FT")
 
 
+def test_dose_only_zero_width_geometry_domain_is_supported():
+    rows, _, _ = _rows()
+    fallback = {**DOMAIN, "theta_FT_deg": [45.0, 45.0], "AR_FT": [2.0, 2.0]}
+    for row in rows[:24]:
+        row["x"][2:] = [45.0, 2.0]
+        row["feasible"] = True
+    fit = fit_all(rows[:24], ["D_support"], fallback, seed=3, n_restarts=0, n_estimators=20)
+    proposal = conditional_minimax_proposal(
+        fit["gps"], ["D_support"], "1100", REFERENCE, fallback, fit["feasibility"], seed=3,
+    )
+    assert proposal["status"] == "OK"
+    assert proposal["x"][2:] == [45.0, 2.0]
+
+
 def test_gp_loo_is_accurate_and_calibrated(fitted):
     fit, rows, u, X = fitted
     for k in COMPONENTS:
@@ -82,6 +96,8 @@ def test_gp_loo_is_accurate_and_calibrated(fitted):
         assert loo["rmse"] < 0.15 * loo["observed_range"]
         assert 0.75 <= loo["coverage_90"] <= 1.0
         assert loo["spearman"] > 0.9
+        assert "optimizer_failed_fold_count" in loo
+    assert fit["surrogate_adequacy"]["status"] == "SURROGATE_ADEQUATE"
 
 
 def test_surface_predictions_track_truth(fitted):

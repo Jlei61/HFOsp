@@ -24,6 +24,12 @@ DEFAULT_RESPONSE = Path("/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/"
 DEFAULT_SEEDS = DEFAULT_RESPONSE.with_name("seed_manifest.json")
 DEFAULT_EXECUTION_CONFIG = ROOT / "config/topic4_rev22_dci_response_execution.json"
 DEFAULT_CANDIDATES = DEFAULT_RESPONSE.with_name("execution_candidate_manifest.json")
+DEFAULT_TRANSITION = ROOT / "config/topic4_rev22_dci_transition_execution.json"
+DEFAULT_CONNECTIVITY_AUDIT = Path(
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/"
+    "data_driven_dual_core_interictal_identifiability/connectivity_design_audit/"
+    "connectivity_design_audit.json"
+)
 
 
 def _sha256(path: Path) -> str:
@@ -48,7 +54,8 @@ def _seeds(block: dict) -> list[int]:
 
 
 def build_execution_config(analysis: dict, rev20: dict, seed_manifest: dict,
-                           candidate_manifest_path: str, frozen_contracts: dict) -> dict:
+                           candidate_manifest_path: str, frozen_contracts: dict,
+                           transition_input: dict | None = None) -> dict:
     fit = _seeds(seed_manifest["fit"])
     qualification = _seeds(seed_manifest["qualification"])
     confirmation = _seeds(seed_manifest["confirmation"])
@@ -67,7 +74,12 @@ def build_execution_config(analysis: dict, rev20: dict, seed_manifest: dict,
         "output_root": analysis["output_root"],
         "candidate_manifest": candidate_manifest_path,
         "network_cache": analysis["network_cache"],
-        "inputs": dict(rev20["inputs"]),
+        # The simulation worker only needs the transition contract.  Patient training and
+        # held-out artifacts belonged to the rev20 aggregate and must not even be hash-read
+        # by a rev22 fit worker before candidate selection is frozen.
+        "inputs": {"transition_config": dict(
+            rev20["inputs"]["transition_config"] if transition_input is None else transition_input
+        )},
         "frozen_contracts": dict(frozen_contracts),
         "dual_core_anchor": dict(analysis["dual_core_anchor"]),
         "reference": dict(analysis["reference"]),
@@ -98,6 +110,8 @@ def main() -> None:
     parser.add_argument("--seed-manifest", type=Path, default=DEFAULT_SEEDS)
     parser.add_argument("--execution-config-out", type=Path, default=DEFAULT_EXECUTION_CONFIG)
     parser.add_argument("--candidate-manifest-out", type=Path, default=DEFAULT_CANDIDATES)
+    parser.add_argument("--transition-config", type=Path, default=DEFAULT_TRANSITION)
+    parser.add_argument("--connectivity-design-audit", type=Path, default=DEFAULT_CONNECTIVITY_AUDIT)
     args = parser.parse_args()
 
     analysis = json.loads(args.analysis_config.read_text())
@@ -106,24 +120,53 @@ def main() -> None:
     rev20_path = ROOT / analysis["inputs"]["rev20_config"]["path"]
     if _sha256(rev20_path) != analysis["inputs"]["rev20_config"]["sha256"]:
         raise RuntimeError("rev20 execution config hash changed")
+    rev20 = json.loads(rev20_path.read_text())
     if seeds.get("response_design_manifest_sha256") != _sha256(args.response_manifest):
         raise RuntimeError("seed manifest is not bound to the response design")
     if response.get("candidate_count") != len(response.get("candidates", [])):
         raise RuntimeError("response design candidate count is inconsistent")
+    transition = json.loads(args.transition_config.read_text())
+    if transition.get("schema_id") != "topic4_rev22_dci_transition_execution_v1":
+        raise RuntimeError("rev22 minimal transition contract is missing")
+    if transition.get("source_transition_config_sha256") != rev20["inputs"]["transition_config"]["sha256"]:
+        raise RuntimeError("minimal transition contract is not derived from the frozen source")
+    transition_record_from_analysis = analysis.get("inputs", {}).get("rev22_transition_execution", {})
+    if (transition_record_from_analysis.get("path") != str(args.transition_config.resolve().relative_to(ROOT.resolve()))
+            or transition_record_from_analysis.get("sha256") != _sha256(args.transition_config)):
+        raise RuntimeError("analysis config does not freeze the minimal transition contract")
+    audit = json.loads(args.connectivity_design_audit.read_text())
+    if audit.get("status") != "CONNECTIVITY_DESIGN_ADMISSIBLE":
+        raise RuntimeError("final ellipse-plus-learned connectivity design did not pass")
+    if audit.get("response_design_manifest_sha256") != _sha256(args.response_manifest):
+        raise RuntimeError("connectivity audit is not bound to the response design")
 
     artifact_root = Path("/home/honglab/leijiaxin/HFOsp")
     try:
         candidate_relative = str(args.candidate_manifest_out.resolve().relative_to(artifact_root))
     except ValueError as exc:
         raise RuntimeError("formal candidate manifest must live under the artifact root") from exc
+    def record(path: Path) -> dict:
+        return {"path": str(path.resolve()), "sha256": _sha256(path)}
+
     contracts = {
         "analysis_config": {"path": str(args.analysis_config.resolve()), "sha256": _sha256(args.analysis_config)},
         "response_design": {"path": str(args.response_manifest.resolve()), "sha256": _sha256(args.response_manifest)},
         "seed_manifest": {"path": str(args.seed_manifest.resolve()), "sha256": _sha256(args.seed_manifest)},
         "geometry_domain": dict(response["domain_source"]),
+        "spec": record(ROOT / analysis["spec"]),
+        "plan": record(ROOT / analysis["plan"]),
+        "training_objective_module": record(ROOT / "src/topic4_rev22_interictal_objective.py"),
+        "response_design_module": record(ROOT / "src/topic4_rev22_response_design.py"),
+        "response_surface_module": record(ROOT / "src/topic4_rev22_response_surface.py"),
+        "fit_aggregate_script": record(ROOT / "scripts/aggregate_topic4_rev22_fit.py"),
+        "minimal_transition_config": record(args.transition_config),
+        "connectivity_design_audit": record(args.connectivity_design_audit),
     }
+    transition_record = {"path": str(args.transition_config.resolve().relative_to(ROOT.resolve())),
+                         "sha256": _sha256(args.transition_config)}
     execution = build_execution_config(
-        analysis, json.loads(rev20_path.read_text()), seeds, candidate_relative, contracts,
+        analysis, rev20, seeds, candidate_relative, contracts,
+        transition_input=transition_record,
     )
     config_sha = _atomic_json(args.execution_config_out, execution)
     commit = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, check=True,

@@ -1,9 +1,9 @@
 # Topic 4 rev22-DCI: frozen dual-core interictal connectivity identifiability
 
-**Status:** v4, accepted for execution on 2026-09-03 after three review rounds. Offline
-Tasks 0-5 may start immediately; any rev22 SNN trajectory beyond the Task 2 parity run and
-the Task 6 canary is authorized only after the Task 1 objective-qualification JSON and the
-Task 3 domain hash are frozen.
+**Status:** v5, execution contract repaired on 2026-09-03 after implementation audit.
+Offline Tasks 0-5 may start immediately. No rev22 SNN trajectory, including the Task 6
+canary, is authorized until the Task 1 objective qualification, Task 3 achieved-geometry
+domain, Task 4 response design and Task 4b final combined-connectivity audit are all frozen.
 
 **Parent result:** rev20-DC frozen dual-core mechanism atlas
 
@@ -42,6 +42,12 @@ The following are frozen for every rev22 run:
 - realized baseline topology, delays, background spatial OU and all non-varied parameters;
 - Z/M off, no ictal target, no Fig.5 criterion and no patient ictal file access;
 - total incoming E-to-E and E-to-I weight for each postsynaptic target.
+
+Fit workers receive a minimal rev22 transition config. Its declared inputs are limited to
+the frozen substrate, Node, contact, detector and placement contracts needed to reconstruct
+the model. Patient held-out arrays, KMeans/OOD classifiers, patient ictal inputs and Fig.5
+inputs must be physically absent from this config, not merely unused by the scoring code.
+The source historical transition-config hash and the minimal-config hash are both frozen.
 
 The Node field is frozen for the identifiability search. Section 14 varies it only as a
 discrete blocking factor and inside matched structural nulls; it is never optimized.
@@ -91,10 +97,20 @@ frozen before any response design is generated. If no nontrivial geometry neighb
 survives, geometry families are reported as structurally non-estimable and the dose-only
 families continue.
 
-Every point in the final rectangle must satisfy, on every fit topology: incoming-budget
+Every point in the final rectangle must satisfy, on every fit topology before the learned
+mapper is added: incoming-budget
 error at most `1e-9`; no zero normalization denominator; edge-ratio p01/p99 within
 `[0.25,4]`; median effective-source-count ratio to reference at least 0.75; and p05
 effective-source-count ratio at least 0.50.
+
+After the response design is generated, every complete four-parameter design point is
+audited again in the actual producer order: fixed-topology ellipse redistribution followed
+by the learned E-to-E and E-to-I mapper. The same structural limits apply separately to
+both final pathways relative to the unmodified graph, and a real-graph spot check must
+match the accepted producer edge for edge. This second audit is necessary because two
+individually admissible normalizations need not remain admissible after composition. Any
+failed candidate-topology cell stops execution; failed points cannot be silently removed
+from the frozen space-filling design.
 
 `AR_FT=1` means an attempted isotropizing reweighting on an anisotropically sampled graph;
 it is not a genuinely isotropic topology. `AR_FT=4` is excluded from the fit domain because
@@ -337,7 +353,7 @@ The experiment does not run a separate CMA-ES for every model family. The struct
 audit selects exactly one of two predeclared branches before any outcome simulation.
 
 If a nontrivial geometry rectangle survives, the primary branch uses one immutable 96-point
-space-filling design in the four-dimensional domain and fits one response surface **per
+sequential augmented block-maximin Latin-hypercube design in the four-dimensional domain and fits one response surface **per
 component** plus one feasibility surface. The design contains:
 
 - one exact reference point;
@@ -346,6 +362,8 @@ component** plus one feasibility surface. The design contains:
 - eight points on the `g_LEE x g_LEI` plane;
 - eight points on the `theta_FT x AR_FT` plane.
 
+This is maximin within each sequentially augmented design block, not a global optimum over
+all 96 points; the frozen manifest reports the achieved global minimum unit-cube distance.
 If geometry is structurally non-estimable, the fallback branch freezes
 `theta_FT=45 deg, AR_FT=2` and uses one immutable 32-point maximin design over
 `g_LEE x g_LEI`, including the exact reference. Only the four unique dose families
@@ -358,13 +376,20 @@ model retains an `observation_design=rev20_diagonal_seed` flag and their own see
 noise estimates. They constrain the same mean response surface but are not counted as new
 crossed-seed rev22 evidence.
 
+The design is not simulation-authorized until the final combined-connectivity audit covers
+the complete candidate-by-four-topology Cartesian product and reports
+`CONNECTIVITY_DESIGN_ADMISSIBLE`. The execution config hashes that audit. If it fails, the
+run stops at `FINAL_CONNECTIVITY_DESIGN_INADMISSIBLE`; changing any bound requires a
+versioned structural amendment and regeneration of the whole design before any SNN run.
+
 One heteroskedastic Matérn-5/2 Gaussian-process response surface is fit per training
 component to candidate-level means; a separate probabilistic classifier is fit to joint
 feasibility (`event_yield_estimable`, `safe`, joint-support estimable). No surface is ever
 fit to `J_fit` or to any `max`, because the maximum has non-differentiable ridges and the
 SNN itself moves through discrete regimes (zero-event, single-mode, dual-mode, runaway) that
 a smooth surface would misrepresent as a slope. Four seeds provide only three variance degrees of freedom, so raw pointwise variance
-is not used directly. Let `s_pool^2` be the pooled within-candidate variance and `s_c^2` the
+is not used directly. Let `s_pool^2` be the degrees-of-freedom-weighted pooled
+within-candidate variance over surface-eligible candidates and `s_c^2` the
 candidate variance over `n_c` eligible units. The observation variance uses the frozen
 shrinkage estimate:
 
@@ -382,7 +407,12 @@ for the report; it does not create extra simulated candidates. Surrogate predict
 constitute evidence: every proposed optimum is rerun on new seeds.
 
 Leave-one-candidate-out prediction error, rank correlation and uncertainty calibration are
-reported. If the GP and tree ensemble nominate disjoint regions, both proposals are carried
+reported. Every LOO fold refits the GP hyperparameters. An interpolated proposal is allowed
+only when every identifiable component has LOO Spearman at least 0.5, RMSE at most 0.5 of
+its observed range, 90% interval coverage at least 0.6, and optimizer-failed folds no more
+than `max(2, ceil(0.1*n))`. Otherwise the branch reports `OBSERVED_PARETO_FALLBACK` and carries
+predeclared observed nondominated design points instead of a predicted optimum. If the GP
+and tree ensemble nominate disjoint regions, both proposals are carried
 to the new-seed stage rather than choosing after viewing validation metrics.
 
 ## 8. Seed contract

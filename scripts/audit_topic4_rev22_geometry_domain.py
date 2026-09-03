@@ -18,6 +18,7 @@ import json
 import subprocess
 import sys
 import time
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
 import numpy as np
@@ -38,6 +39,14 @@ THRESHOLDS = {
     "edge_ratio_p99_max": 4.0,
     "effective_source_median_ratio_min": 0.75,
     "effective_source_p05_ratio_min": 0.50,
+}
+IDENTIFIABILITY_THRESHOLDS = {
+    "theta_rank_correlation_min": 0.80,
+    "theta_achieved_span_deg_min": 10.0,
+    "theta_signal_to_topology_range_min": 2.0,
+    "aspect_rank_correlation_min": 0.80,
+    "log_aspect_achieved_span_min": 0.10,
+    "aspect_signal_to_topology_range_min": 2.0,
 }
 FIT_SEEDS = (2511, 2512, 2513, 2514)
 
@@ -75,6 +84,104 @@ def effective_source_count(rows: np.ndarray, data: np.ndarray, n_e: int) -> np.n
     s2 = np.bincount(rows, weights=data * data, minlength=n_e)
     with np.errstate(invalid="ignore", divide="ignore"):
         return np.where(s2 > 0.0, s1 * s1 / np.where(s2 > 0.0, s2, 1.0), np.nan)
+
+
+def weighted_connection_geometry(dx: np.ndarray, dy: np.ndarray, data: np.ndarray) -> dict:
+    """Second-moment geometry actually expressed by a weighted directed edge set.
+
+    Orientation is axial (modulo 180 degrees).  The aspect statistic is the square root of
+    the covariance eigenvalue ratio, so it is on the same scale as a Gaussian kernel's
+    longitudinal/transverse length ratio; it is descriptive, not assumed equal to the
+    requested fixed-topology parameter.
+    """
+    dx, dy, weight = np.asarray(dx, float), np.asarray(dy, float), np.asarray(data, float)
+    if dx.shape != dy.shape or dx.shape != weight.shape or dx.ndim != 1:
+        raise ValueError("edge displacement and weight arrays must be aligned vectors")
+    if not len(weight) or np.any(~np.isfinite(weight)) or np.any(weight <= 0.0):
+        raise ValueError("edge weights must be non-empty, finite and positive")
+    total = float(np.sum(weight))
+    moment = np.asarray([
+        [np.sum(weight * dx * dx), np.sum(weight * dx * dy)],
+        [np.sum(weight * dx * dy), np.sum(weight * dy * dy)],
+    ], float) / total
+    eigenvalues, eigenvectors = np.linalg.eigh(moment)
+    if eigenvalues[0] <= 0.0 or not np.isfinite(eigenvalues).all():
+        raise RuntimeError("weighted edge covariance is singular or non-finite")
+    axis = eigenvectors[:, -1]
+    angle = float(np.degrees(np.arctan2(axis[1], axis[0])) % 180.0)
+    return {
+        "achieved_angle_deg": angle,
+        "achieved_aspect_ratio": float(np.sqrt(eigenvalues[-1] / eigenvalues[0])),
+        "weighted_rms_distance_mm": float(np.sqrt(np.trace(moment))),
+        "axial_anisotropy": float((eigenvalues[-1] - eigenvalues[0]) / np.sum(eigenvalues)),
+    }
+
+
+def _axial_delta_deg(angle: float, reference: float) -> float:
+    return float((float(angle) - float(reference) + 90.0) % 180.0 - 90.0)
+
+
+def assess_achieved_geometry(per_topology: dict, rectangle: dict | None, theta: np.ndarray,
+                             ar: np.ndarray, i_ref: int, j_ref: int,
+                             thresholds: dict = IDENTIFIABILITY_THRESHOLDS) -> dict:
+    """Determine whether requested geometry produces a topology-stable realized response."""
+    if rectangle is None:
+        return {"status": "GEOMETRY_ACHIEVED_RESPONSE_NOT_ESTIMABLE", "axes": {},
+                "thresholds": dict(thresholds), "pass": False}
+    i0, i1, j0, j1 = rectangle["i0"], rectangle["i1"], rectangle["j0"], rectangle["j1"]
+
+    def record(seed, i, j):
+        return next(row for row in per_topology[seed]["records"] if row["i"] == i and row["j"] == j)
+
+    seeds = sorted(per_topology)
+    reference_angles = {seed: record(seed, i_ref, j_ref)["achieved_angle_deg"] for seed in seeds}
+    theta_requested = np.asarray(theta[i0:i1 + 1], float)
+    theta_by_topology = np.asarray([
+        [_axial_delta_deg(record(seed, i, j_ref)["achieved_angle_deg"], reference_angles[seed])
+         for i in range(i0, i1 + 1)]
+        for seed in seeds
+    ], float)
+    aspect_requested = np.log(np.asarray(ar[j0:j1 + 1], float))
+    aspect_by_topology = np.log(np.asarray([
+        [record(seed, i_ref, j)["achieved_aspect_ratio"] for j in range(j0, j1 + 1)]
+        for seed in seeds
+    ], float))
+
+    def summarize(requested, achieved, *, span_key, rank_key, signal_key):
+        from scipy.stats import spearmanr
+
+        median = np.median(achieved, axis=0)
+        span = float(np.ptp(median))
+        topology_range = float(np.max(np.ptp(achieved, axis=0)))
+        ratio = float(span / max(topology_range, 1e-12))
+        rho = (float(spearmanr(requested, median).statistic)
+               if len(requested) >= 2 and np.ptp(median) > 0.0 else None)
+        checks = {
+            "rank": rho is not None and rho >= thresholds[rank_key],
+            "span": span >= thresholds[span_key],
+            "signal_to_topology_range": ratio >= thresholds[signal_key],
+        }
+        return {"requested": requested.tolist(), "achieved_by_topology": achieved.tolist(),
+                "achieved_median": median.tolist(), "rank_correlation": rho,
+                "achieved_span": span, "maximum_topology_range": topology_range,
+                "signal_to_topology_range": ratio, "checks": checks,
+                "pass": bool(all(checks.values()))}
+
+    theta_summary = summarize(
+        theta_requested, theta_by_topology,
+        span_key="theta_achieved_span_deg_min", rank_key="theta_rank_correlation_min",
+        signal_key="theta_signal_to_topology_range_min",
+    )
+    aspect_summary = summarize(
+        aspect_requested, aspect_by_topology,
+        span_key="log_aspect_achieved_span_min", rank_key="aspect_rank_correlation_min",
+        signal_key="aspect_signal_to_topology_range_min",
+    )
+    passed = theta_summary["pass"] and aspect_summary["pass"]
+    return {"status": "GEOMETRY_ACHIEVED_RESPONSE_IDENTIFIABLE" if passed else
+            "GEOMETRY_ACHIEVED_RESPONSE_NOT_IDENTIFIABLE",
+            "axes": {"theta": theta_summary, "aspect": aspect_summary},
+            "thresholds": dict(thresholds), "pass": bool(passed)}
 
 
 def elliptical_radius(dx: np.ndarray, dy: np.ndarray, *, length_scale: float,
@@ -165,6 +272,8 @@ def audit_grid_point(graph: dict, base_edges: dict, base_effective: np.ndarray, 
             "effective_source_median_ratio": None, "effective_source_p05_ratio": None,
             "targets_effective_ratio_below_0p5": None,
             "topology_unchanged": None, "gaba_unchanged": None,
+            "achieved_angle_deg": None, "achieved_aspect_ratio": None,
+            "weighted_rms_distance_mm": None, "axial_anisotropy": None,
         }
     n_e = base_edges["n_e"]
     ratio = new_data / base_edges["data"]
@@ -174,6 +283,7 @@ def audit_grid_point(graph: dict, base_edges: dict, base_effective: np.ndarray, 
     effective = effective_source_count(base_edges["row"], new_data, n_e)
     valid = np.isfinite(effective) & np.isfinite(base_effective) & (base_effective > 0)
     eff_ratio = effective[valid] / base_effective[valid]
+    geometry = weighted_connection_geometry(graph["dx"], graph["dy"], new_data)
     return {
         "angle_deg": float(angle_deg), "aspect_ratio": float(aspect_ratio),
         "status": "OK", "error": None,
@@ -187,6 +297,7 @@ def audit_grid_point(graph: dict, base_edges: dict, base_effective: np.ndarray, 
         "effective_source_p05_ratio": float(np.quantile(eff_ratio, 0.05)),
         "targets_effective_ratio_below_0p5": int(np.sum(eff_ratio < 0.5)),
         "topology_unchanged": True, "gaba_unchanged": True,
+        **geometry,
     }
 
 
@@ -319,6 +430,74 @@ def _grid(theta_range, theta_step, ar_range, ar_step):
     return theta, ar, i_ref, j_ref
 
 
+def audit_one_topology(seed: int, *, artifact_root: Path, rev20_config: dict,
+                       node_field: dict, theta: np.ndarray, ar: np.ndarray,
+                       i_ref: int, j_ref: int, started: float) -> tuple[int, dict]:
+    """Run the full dense-grid structural audit for one independent topology."""
+    t0 = time.time()
+    captured = capture_reference_ee_graph(
+        seed, artifact_root=artifact_root, rev20_config=rev20_config, node_field=node_field,
+    )
+    net, positions = captured["net"], captured["positions"]
+    length_scale = float(captured["kwargs"]["length_scale"])
+    base_edges = ee_edges(net)
+    base_effective = effective_source_count(base_edges["row"], base_edges["data"], base_edges["n_e"])
+    base_hashes = {
+        "ampa_topology": _hash_sparse_bins(net["ampa_by_delay"], include_data=False),
+        "ampa_data": _hash_sparse_bins(net["ampa_by_delay"]),
+        "gaba": _hash_sparse_bins(net["gaba_by_delay"]),
+    }
+    n_delay_bins = len(net["ampa_by_delay"])
+    print(f"[{time.time()-started:6.0f}s] seed {seed}: graph captured in {time.time()-t0:.0f}s; "
+          f"E={base_edges['n_e']} EE edges={len(base_edges['data'])} bins={n_delay_bins}", flush=True)
+    graph = {
+        "n_e": base_edges["n_e"], "row": base_edges["row"], "data": base_edges["data"],
+        "dx": positions[base_edges["col"], 0] - positions[base_edges["row"], 0],
+        "dy": positions[base_edges["col"], 1] - positions[base_edges["row"], 1],
+    }
+    validation = validate_fast_path(
+        net, positions, graph, base_edges,
+        [(REFERENCE_ANGLE_DEG, REFERENCE_ASPECT_RATIO), (float(theta[0]), float(ar[0])),
+         (float(theta[-1]), float(ar[-1])), (float(theta[i_ref]), float(ar[-1]))],
+        length_scale=length_scale,
+    )
+    print(f"[{time.time()-started:6.0f}s] seed {seed}: fast path validated against the producer "
+          f"(max relative {max(c['max_relative_difference'] for c in validation):.2e})", flush=True)
+    after_hashes = {
+        "ampa_topology": _hash_sparse_bins(net["ampa_by_delay"], include_data=False),
+        "ampa_data": _hash_sparse_bins(net["ampa_by_delay"]),
+        "gaba": _hash_sparse_bins(net["gaba_by_delay"]),
+    }
+    if after_hashes != base_hashes:
+        raise RuntimeError("validation mutated the frozen base network")
+    cache_record = captured.get("net", {}).get("cache_sha256")
+    del net, positions, captured
+    records = []
+    for i, angle in enumerate(theta):
+        for j, aspect in enumerate(ar):
+            record = audit_grid_point(
+                graph, base_edges, base_effective,
+                length_scale=length_scale, angle_deg=float(angle), aspect_ratio=float(aspect),
+            )
+            record.update(seed=int(seed), i=i, j=j, passes=grid_point_passes(record))
+            records.append(record)
+        print(f"[{time.time()-started:6.0f}s] seed {seed}: theta {angle:.1f} done", flush=True)
+    ref_record = next(r for r in records if r["i"] == i_ref and r["j"] == j_ref)
+    if not ref_record["exact_noop"] or ref_record["budget_error_max"] != 0.0:
+        raise RuntimeError("reference grid point was not an exact no-op")
+    output = {
+        "length_scale_mm": length_scale,
+        "n_e": int(base_edges["n_e"]),
+        "n_ee_edges": int(len(base_edges["data"])),
+        "n_delay_bins": int(n_delay_bins),
+        "base_hashes": base_hashes,
+        "network_cache": cache_record,
+        "fast_path_validation": validation,
+        "records": records,
+    }
+    return int(seed), output
+
+
 def _plot(out_dir: Path, theta, ar, worst: dict, rectangle: dict | None, seeds) -> dict:
     import matplotlib
     matplotlib.use("Agg")
@@ -407,6 +586,7 @@ def main() -> None:
     parser.add_argument("--theta-step", type=float, default=2.5)
     parser.add_argument("--ar-range", type=float, nargs=2, default=(1.0, 3.0))
     parser.add_argument("--ar-step", type=float, default=0.125)
+    parser.add_argument("--workers", type=int, default=4)
     parser.add_argument("--out-root", type=Path, default=None)
     args = parser.parse_args()
     started = time.time()
@@ -424,69 +604,27 @@ def main() -> None:
     out_root.mkdir(parents=True, exist_ok=True)
     theta, ar, i_ref, j_ref = _grid(args.theta_range, args.theta_step, args.ar_range, args.ar_step)
 
+    if args.workers < 1 or args.workers > len(args.seeds):
+        raise ValueError("workers must lie between one and the number of topology seeds")
     per_topology = {}
-    for seed in args.seeds:
-        t0 = time.time()
-        captured = capture_reference_ee_graph(
-            seed, artifact_root=artifact_root, rev20_config=rev20_config, node_field=node_field,
-        )
-        net, positions = captured["net"], captured["positions"]
-        length_scale = float(captured["kwargs"]["length_scale"])
-        base_edges = ee_edges(net)
-        base_effective = effective_source_count(base_edges["row"], base_edges["data"], base_edges["n_e"])
-        base_hashes = {
-            "ampa_topology": _hash_sparse_bins(net["ampa_by_delay"], include_data=False),
-            "ampa_data": _hash_sparse_bins(net["ampa_by_delay"]),
-            "gaba": _hash_sparse_bins(net["gaba_by_delay"]),
-        }
-        n_delay_bins = len(net["ampa_by_delay"])
-        print(f"[{time.time()-started:6.0f}s] seed {seed}: graph captured in {time.time()-t0:.0f}s; "
-              f"E={base_edges['n_e']} EE edges={len(base_edges['data'])} bins={n_delay_bins}", flush=True)
-        graph = {
-            "n_e": base_edges["n_e"], "row": base_edges["row"], "data": base_edges["data"],
-            "dx": positions[base_edges["col"], 0] - positions[base_edges["row"], 0],
-            "dy": positions[base_edges["col"], 1] - positions[base_edges["row"], 1],
-        }
-        validation = validate_fast_path(
-            net, positions, graph, base_edges,
-            [(REFERENCE_ANGLE_DEG, REFERENCE_ASPECT_RATIO), (float(theta[0]), float(ar[0])),
-             (float(theta[-1]), float(ar[-1])), (float(theta[i_ref]), float(ar[-1]))],
-            length_scale=length_scale,
-        )
-        print(f"[{time.time()-started:6.0f}s] seed {seed}: fast path validated against the producer "
-              f"(max relative {max(c['max_relative_difference'] for c in validation):.2e})", flush=True)
-        after_hashes = {
-            "ampa_topology": _hash_sparse_bins(net["ampa_by_delay"], include_data=False),
-            "ampa_data": _hash_sparse_bins(net["ampa_by_delay"]),
-            "gaba": _hash_sparse_bins(net["gaba_by_delay"]),
-        }
-        if after_hashes != base_hashes:
-            raise RuntimeError("validation mutated the frozen base network")
-        cache_record = captured.get("net", {}).get("cache_sha256")
-        del net, positions, captured
-        records = []
-        for i, angle in enumerate(theta):
-            for j, aspect in enumerate(ar):
-                record = audit_grid_point(graph, base_edges, base_effective,
-                                          length_scale=length_scale, angle_deg=float(angle),
-                                          aspect_ratio=float(aspect))
-                record.update(seed=int(seed), i=i, j=j, passes=grid_point_passes(record))
-                records.append(record)
-            print(f"[{time.time()-started:6.0f}s] seed {seed}: theta {angle:.1f} done", flush=True)
-        ref_record = next(r for r in records if r["i"] == i_ref and r["j"] == j_ref)
-        if not ref_record["exact_noop"] or ref_record["budget_error_max"] != 0.0:
-            raise RuntimeError("reference grid point was not an exact no-op")
-        per_topology[int(seed)] = {
-            "length_scale_mm": length_scale,
-            "n_e": int(base_edges["n_e"]),
-            "n_ee_edges": int(len(base_edges["data"])),
-            "n_delay_bins": int(n_delay_bins),
-            "base_hashes": base_hashes,
-            "network_cache": cache_record,
-            "fast_path_validation": validation,
-            "records": records,
-        }
-        del graph, base_edges, base_effective
+    if args.workers == 1:
+        for seed in args.seeds:
+            key, value = audit_one_topology(
+                seed, artifact_root=artifact_root, rev20_config=rev20_config,
+                node_field=node_field, theta=theta, ar=ar, i_ref=i_ref, j_ref=j_ref,
+                started=started,
+            )
+            per_topology[key] = value
+    else:
+        with ProcessPoolExecutor(max_workers=int(args.workers)) as pool:
+            futures = [pool.submit(
+                audit_one_topology, seed, artifact_root=artifact_root,
+                rev20_config=rev20_config, node_field=node_field, theta=theta, ar=ar,
+                i_ref=i_ref, j_ref=j_ref, started=started,
+            ) for seed in args.seeds]
+            for future in as_completed(futures):
+                key, value = future.result()
+                per_topology[key] = value
 
     # ---- combine ----
     n_i, n_j = len(theta), len(ar)
@@ -511,10 +649,13 @@ def main() -> None:
             for k in ("edge_ratio_p01", "effective_source_median_ratio", "effective_source_p05_ratio"):
                 worst[k][i, j] = np.nanmin([worst[k][i, j], r[k]])
     rectangle = largest_admissible_rectangle(pass_all, i_ref, j_ref, theta_values=theta)
+    achieved = assess_achieved_geometry(per_topology, rectangle, theta, ar, i_ref, j_ref)
     if rectangle is None or rectangle["cells"] <= 1:
         status = "GEOMETRY_STRUCTURALLY_NON_ESTIMABLE"
     elif rectangle["i0"] == rectangle["i1"] or rectangle["j0"] == rectangle["j1"]:
         status = "GEOMETRY_DOMAIN_FROZEN_ONE_DIMENSION_DEGENERATE"
+    elif not achieved["pass"]:
+        status = "GEOMETRY_STRUCTURALLY_NON_ESTIMABLE"
     else:
         status = "GEOMETRY_DOMAIN_FROZEN"
 
@@ -555,7 +696,9 @@ def main() -> None:
     fields = ["seed", "i", "j", "angle_deg", "aspect_ratio", "status", "exact_noop", "passes",
               "budget_error_max", "zero_denominator", "edge_ratio_p01", "edge_ratio_p50",
               "edge_ratio_p99", "effective_source_median_ratio", "effective_source_p05_ratio",
-              "targets_effective_ratio_below_0p5", "topology_unchanged", "gaba_unchanged"]
+              "targets_effective_ratio_below_0p5", "topology_unchanged", "gaba_unchanged",
+              "achieved_angle_deg", "achieved_aspect_ratio", "weighted_rms_distance_mm",
+              "axial_anisotropy"]
     with csv_path.open("w", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=fields, extrasaction="ignore")
         writer.writeheader()
@@ -590,8 +733,10 @@ def main() -> None:
         "grid": {"theta_deg": theta.tolist(), "aspect_ratio": ar.tolist(),
                  "theta_step": float(args.theta_step), "ar_step": float(args.ar_step)},
         "thresholds": THRESHOLDS,
+        "identifiability_thresholds": IDENTIFIABILITY_THRESHOLDS,
         "seeds": sorted(per_topology),
         "admissible_rectangle": rectangle_bounds,
+        "achieved_geometry": achieved,
         "binding_criteria": binding,
         "pass_all_topologies": pass_all.astype(int).tolist(),
         "worst_case_maps": {k: np.where(np.isfinite(v), v, None).tolist() for k, v in worst.items()},
@@ -606,8 +751,10 @@ def main() -> None:
         "grid_table_sha256": _sha256(csv_path),
         "figure": figure_paths,
         "elapsed_seconds": float(time.time() - started),
-        "claim_boundary": ("Structure-only admissibility of the fixed-topology reweighting; it does not "
-                           "reinterpret theta_FT as an anatomical direction and contains no simulation."),
+        "claim_boundary": ("Structure-only admissibility and realized weighted-moment identifiability of "
+                           "the fixed-topology ellipse reweighting; the final ellipse-plus-learned-mapper "
+                           "design audit is separate, theta_FT is not an anatomical direction, and this "
+                           "artifact contains no simulation."),
     }
     (out_root / "geometry_domain.json").write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n")
     print(json.dumps({"status": status, "rectangle": rectangle_bounds, "binding": binding,

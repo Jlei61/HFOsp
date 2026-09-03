@@ -10,11 +10,13 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
+import warnings
 
 import numpy as np
 from scipy.optimize import minimize
 from scipy.stats import qmc, spearmanr
 from sklearn.ensemble import ExtraTreesRegressor
+from sklearn.exceptions import ConvergenceWarning
 from sklearn.gaussian_process import GaussianProcessClassifier, GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import ConstantKernel, Matern
 
@@ -46,7 +48,9 @@ def pooled_shrinkage_noise(z_sd_by_candidate: Mapping[str, float | None],
         unit_var[name] = units_of(name) * float(sd) ** 2
     if not unit_var:
         return {"s_pool_sq": None, "variance": {}, "unit_variance": {}, "n_finite": 0}
-    s_pool_sq = float(np.median(list(unit_var.values())))
+    numerator = sum((units_of(name) - 1) * value for name, value in unit_var.items())
+    denominator = sum(units_of(name) - 1 for name in unit_var)
+    s_pool_sq = float(numerator / denominator) if denominator > 0 else float(np.mean(list(unit_var.values())))
     variance = {}
     for name, s_c_sq in unit_var.items():
         n_c = units_of(name)
@@ -59,15 +63,16 @@ def pooled_shrinkage_noise(z_sd_by_candidate: Mapping[str, float | None],
 
 def _bounds(domain: Mapping) -> np.ndarray:
     bounds = np.asarray([[float(domain[k][0]), float(domain[k][1])] for k in PARAMETER_ORDER], float)
-    if np.any(bounds[:, 1] <= bounds[:, 0]):
-        raise ValueError("every domain interval must have hi > lo")
+    if np.any(bounds[:, 1] < bounds[:, 0]) or not np.any(bounds[:, 1] > bounds[:, 0]):
+        raise ValueError("domain intervals must have hi >= lo and at least one free dimension")
     return bounds
 
 
 def unit_cube(x, domain: Mapping) -> np.ndarray:
     bounds = _bounds(domain)
     values = np.asarray(x, float)
-    return (values - bounds[:, 0]) / (bounds[:, 1] - bounds[:, 0])
+    width = bounds[:, 1] - bounds[:, 0]
+    return (values - bounds[:, 0]) / np.where(width > 0.0, width, 1.0)
 
 
 def from_unit_cube(u, domain: Mapping) -> np.ndarray:
@@ -106,6 +111,7 @@ class ComponentSurface:
     y_scale: float
     kernel_str: str
     n_train: int
+    fit_warnings: tuple[str, ...] = ()
 
     def predict(self, X_physical) -> tuple[np.ndarray, np.ndarray]:
         u = unit_cube(_as_matrix(X_physical), self.domain)
@@ -133,9 +139,13 @@ def fit_component_gp(X, z, noise_var, domain: Mapping, seed: int, *, n_restarts:
         normalize_y=False, n_restarts_optimizer=int(n_restarts), random_state=int(seed),
         optimizer=optimizer,
     )
-    gp.fit(u, (y - y_mean) / y_scale)
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always", ConvergenceWarning)
+        gp.fit(u, (y - y_mean) / y_scale)
+    fit_warnings = tuple(str(item.message) for item in caught if issubclass(item.category, ConvergenceWarning))
     return ComponentSurface(gp=gp, domain=domain, y_mean=y_mean, y_scale=y_scale,
-                            kernel_str=str(gp.kernel_), n_train=int(keep.sum()))
+                            kernel_str=str(gp.kernel_), n_train=int(keep.sum()),
+                            fit_warnings=fit_warnings)
 
 
 @dataclass
@@ -212,6 +222,8 @@ def loo_diagnostics(X, z, noise_var, domain: Mapping, seed: int, *, n_restarts: 
                 "status": "TOO_FEW_POINTS"}
     full = fit_component_gp(X, z, noise_var, domain, seed, n_restarts=n_restarts)
     predictions, sds = np.empty(n), np.empty(n)
+    warning_messages = list(full.fit_warnings)
+    failed_optimizer_folds = 0
     for i in range(n):
         mask = np.arange(n) != i
         if refit_hyperparameters:
@@ -220,6 +232,10 @@ def loo_diagnostics(X, z, noise_var, domain: Mapping, seed: int, *, n_restarts: 
             fold = fit_component_gp(X[mask], z[mask], noise_var[mask], domain, seed, n_restarts=0,
                                     kernel=full.gp.kernel_, optimizer=None)
         mean, sd = fold.predict(X[i:i + 1])
+        warning_messages.extend(fold.fit_warnings)
+        if any("failed to converge" in message.lower() or "abnormal" in message.lower()
+               for message in fold.fit_warnings):
+            failed_optimizer_folds += 1
         predictions[i], sds[i] = mean[0], sd[0]
     residual = predictions - z
     rho = spearmanr(predictions, z).statistic if n >= 3 else float("nan")
@@ -232,7 +248,37 @@ def loo_diagnostics(X, z, noise_var, domain: Mapping, seed: int, *, n_restarts: 
         "observed_range": float(z.max() - z.min()),
         "kernel": full.kernel_str,
         "refit_hyperparameters": bool(refit_hyperparameters),
+        "convergence_warning_count": int(len(warning_messages)),
+        "optimizer_failed_fold_count": int(failed_optimizer_folds),
+        "convergence_warnings": sorted(set(warning_messages)),
         "status": "OK",
+    }
+
+
+def assess_surrogate_adequacy(loo_by_component: Mapping, identifiable: Sequence[str]) -> dict:
+    """Predeclared rule for interpolation versus observed-point fallback."""
+    details = {}
+    for component in identifiable:
+        row = loo_by_component.get(component, {})
+        observed_range = row.get("observed_range")
+        checks = {
+            "status_ok": row.get("status") == "OK",
+            "rank_ok": row.get("spearman") is not None and row["spearman"] >= 0.5,
+            "rmse_ok": (row.get("rmse") is not None and observed_range is not None
+                        and observed_range > 0.0 and row["rmse"] <= 0.5 * observed_range),
+            "coverage_ok": row.get("coverage_90") is not None and row["coverage_90"] >= 0.6,
+            "optimizer_ok": row.get("optimizer_failed_fold_count", 0)
+                            <= max(2, int(np.ceil(0.1 * max(1, row.get("n", 0))))),
+        }
+        details[component] = {**checks, "pass": bool(all(checks.values()))}
+    passed = bool(identifiable) and all(details[k]["pass"] for k in identifiable)
+    return {
+        "status": "SURROGATE_ADEQUATE" if passed else "OBSERVED_PARETO_FALLBACK",
+        "proposal_source": "interpolated_gp" if passed else "observed_nondominated_design_points",
+        "thresholds": {"spearman_min": 0.5, "rmse_fraction_of_range_max": 0.5,
+                       "coverage_90_min": 0.6, "optimizer_failed_fold_fraction_max": 0.1,
+                       "optimizer_failed_fold_min_allowance": 2},
+        "components": details,
     }
 
 
@@ -418,9 +464,12 @@ def fit_all(design_rows: Sequence[Mapping], identifiable: Sequence[str], domain:
               "n_rows": len(rows), "n_feasible": int(feasible.sum())}
     for k in components:
         z = np.asarray([np.nan if r["Z"].get(k) is None else float(r["Z"][k]) for r in rows], float)
-        sd_map = {n: (None if r["jackknife_sd"].get(k) is None else float(r["jackknife_sd"][k]))
-                  for n, r in zip(names, rows)}
-        n_units = {n: int(r["n_units"]) for n, r in zip(names, rows)}
+        eligible_for_noise = feasible & np.isfinite(z)
+        sd_map = {
+            n: (None if r["jackknife_sd"].get(k) is None else float(r["jackknife_sd"][k]))
+            for n, r, eligible in zip(names, rows, eligible_for_noise) if eligible
+        }
+        n_units = {n: int(r["n_units"]) for n, r, eligible in zip(names, rows, eligible_for_noise) if eligible}
         noise = pooled_shrinkage_noise(sd_map, n_units)
         noise_var = np.asarray([noise["variance"].get(n, np.nan) for n in names], float)
         # only feasible, finite rows enter a continuous surface
@@ -440,4 +489,5 @@ def fit_all(design_rows: Sequence[Mapping], identifiable: Sequence[str], domain:
     missing = [k for k in identifiable if output["gps"].get(k) is None]
     if missing:
         raise ValueError(f"identifiable components without a fitted surface: {missing}")
+    output["surrogate_adequacy"] = assess_surrogate_adequacy(output["loo"], identifiable)
     return output

@@ -137,12 +137,15 @@ def main() -> None:
     parser.add_argument("--radius-draws", type=int, default=1000)
     parser.add_argument("--recall-subsamples", type=int, default=200)
     parser.add_argument("--c2st-resamples", type=int, default=20)
+    parser.add_argument("--out-root", type=Path, default=None)
+    parser.add_argument("--smoke", action="store_true")
     args = parser.parse_args()
     started = time.time()
     root = args.artifact_root.resolve()
     config = json.loads(args.config.read_text())
     cfg_obj = config["objective"]
-    out_root = root / config["output_root"] / "validation_atlas_prototype"
+    out_root = (args.out_root.resolve() if args.out_root is not None else
+                root / config["output_root"] / "validation_atlas_prototype")
     fig_root = out_root / "figures"
     fig_root.mkdir(parents=True, exist_ok=True)
 
@@ -182,19 +185,46 @@ def main() -> None:
     held_z = held_views.z
     print(f"[{time.time()-started:5.0f}s] held-out {len(held_ms)} events / {len(held_views.blocks)} blocks", flush=True)
 
-    # ---- rev20 units: onsets + historical validation fields ----
+    # ---- rev20 units: construct the complete expected candidate x seed grid first ----
     rev20_root = _resolve(root, inputs["rev20_output_root"]["path"])
+    rev20_config = json.loads(_verify(root, inputs["rev20_config"], "rev20_config").read_text())
+    selected = json.loads(_verify(root, inputs["rev20_selected_candidates"],
+                                  "rev20_selected_candidates").read_text())
     meta = {c["candidate_id"]: c for c in manifest["candidates"]}
     candidates = {}
+    expected_ids = {
+        "screen": set(meta),
+        "confirmation": set(selected["candidate_ids"]),
+    }
+    expected_seeds = {
+        "screen": tuple(int(seed) for seed in rev20_config["search"]["fit_network_seeds"]),
+        "confirmation": tuple(int(seed) for seed in rev20_config["search"]["confirmation_network_seeds"]),
+    }
+    for phase in PHASES:
+        if len(expected_seeds[phase]) != EXPECTED_UNITS[phase]:
+            raise RuntimeError(f"rev20 {phase} seed contract changed")
+        for cid in sorted(expected_ids[phase]):
+            if cid not in meta:
+                raise RuntimeError(f"rev20 selected candidate is outside manifest: {cid}")
+            candidates[(phase, cid)] = {
+                "phase": phase, "candidate_id": cid, "family": meta[cid]["family"],
+                "level": meta[cid]["level"], "is_reference": bool(meta[cid].get("is_reference")),
+                "units": [],
+            }
+
     for phase in PHASES:
         agg = json.loads((rev20_root / phase / "aggregate.json").read_text())
         hist = {(r["candidate_id"], int(r["seed"])): r for r in agg["per_network"]}
+        seen_units = set()
         for json_path in sorted((rev20_root / phase / "workers").glob("*.json")):
             payload = json.loads(json_path.read_text())
             cid, seed = payload["candidate_id"], int(payload["seed"])
-            entry = candidates.setdefault((phase, cid), {
-                "phase": phase, "candidate_id": cid, "family": meta[cid]["family"],
-                "level": meta[cid]["level"], "is_reference": bool(meta[cid].get("is_reference")), "units": []})
+            if cid not in expected_ids[phase] or seed not in expected_seeds[phase]:
+                raise RuntimeError(f"unexpected rev20 worker in {phase}: {cid} seed {seed}")
+            if (cid, seed) in seen_units:
+                raise RuntimeError(f"duplicate rev20 worker in {phase}: {cid} seed {seed}")
+            seen_units.add((cid, seed))
+            entry = candidates[(phase, cid)]
             row = hist.get((cid, seed), {})
             validation = row.get("validation", {})
             runaway = payload["simulation"].get("runaway_early_stop_ms") is not None
@@ -210,18 +240,47 @@ def main() -> None:
                     "returned_families": 0,
                 })
                 continue
-            arrays = np.load(npz_path)
-            returned = np.asarray(arrays["event_returned"], bool)
+            if payload.get("arrays", {}).get("sha256") != _sha256(npz_path):
+                raise RuntimeError(f"rev20 worker array hash changed: {npz_path}")
+            with np.load(npz_path) as arrays:
+                onsets_all = np.asarray(arrays["onsets"], float)
+                returned = np.asarray(arrays["event_returned"], bool)
+                contact_names = list(arrays["contact_names"])
+            if (onsets_all.ndim != 2 or onsets_all.shape[0] != len(returned)
+                    or onsets_all.shape[1] != len(training["contact_names"])
+                    or contact_names != list(training["contact_names"])
+                    or np.isinf(onsets_all).any()
+                    or np.any(np.sum(np.isfinite(onsets_all[returned]), axis=1) < 1)):
+                entry["units"].append({
+                    "seed": seed, "valid": False, "invalid_reason": "MALFORMED_OR_NONFINITE_NPZ",
+                    "runaway_early_stop_ms": None, "onsets_ms": np.zeros((0, len(training["contact_names"])), float),
+                    "kmeans_balanced_alignment": None, "ood_all_returned": None,
+                    "heldout_composite": None, "unreadable_fraction": None, "returned_families": 0,
+                })
+                continue
             entry["units"].append({
                 "seed": seed, "valid": True, "invalid_reason": None,
                 "runaway_early_stop_ms": None,
-                "onsets_ms": np.asarray(arrays["onsets"], float)[returned],
+                "onsets_ms": onsets_all[returned],
                 "kmeans_balanced_alignment": validation.get("direction_balanced_alignment"),
                 "ood_all_returned": validation.get("ood_all_returned"),
                 "heldout_composite": validation.get("complete_distribution_distance_reference"),
                 "unreadable_fraction": validation.get("unreadable_fraction"),
                 "returned_families": int(validation.get("n_returned_families", returned.sum())),
             })
+        for cid in sorted(expected_ids[phase]):
+            entry = candidates[(phase, cid)]
+            present = {int(unit["seed"]) for unit in entry["units"]}
+            for seed in expected_seeds[phase]:
+                if seed in present:
+                    continue
+                entry["units"].append({
+                    "seed": seed, "valid": False, "invalid_reason": "MISSING_WORKER",
+                    "runaway_early_stop_ms": None, "onsets_ms": np.zeros((0, len(training["contact_names"])), float),
+                    "kmeans_balanced_alignment": None, "ood_all_returned": None,
+                    "heldout_composite": None, "unreadable_fraction": None, "returned_families": 0,
+                })
+            entry["units"].sort(key=lambda unit: int(unit["seed"]))
     print(f"[{time.time()-started:5.0f}s] {len(candidates)} candidate groups", flush=True)
 
     # ---- recall contract from the screen reference (per-unit n) ----
@@ -242,10 +301,15 @@ def main() -> None:
     for (phase, cid), entry in candidates.items():
         units = entry["units"]
         valid_units = [u for u in units if u["valid"]]
-        entry["formal_estimable"] = (len(units) == EXPECTED_UNITS[phase]
-                                      and len(valid_units) == EXPECTED_UNITS[phase])
+        entry["formal_estimable"] = (
+            tuple(int(unit["seed"]) for unit in units) == expected_seeds[phase]
+            and len(valid_units) == EXPECTED_UNITS[phase]
+        )
         entry["invalid_units"] = len(units) - len(valid_units)
-        entry["runaway_fraction"] = float(np.mean([not u["valid"] for u in units])) if units else 1.0
+        entry["invalid_unit_fraction"] = float(np.mean([not u["valid"] for u in units])) if units else 1.0
+        entry["runaway_fraction"] = (float(np.mean([
+            u.get("invalid_reason") == "RUNAWAY" for u in units
+        ])) if units else 0.0)
         if not valid_units:
             entry.update(pooled=None, jackknife_sd={k: None for k in COMPONENTS},
                          n_pooled_events=0, recruitment_profile=None,
@@ -312,6 +376,7 @@ def main() -> None:
             "phase": phase, "candidate_id": cid, "family": entry["family"], "level": entry["level"],
             "is_reference": entry["is_reference"], "n_units": len(units), "n_pooled_events": n,
             "formal_estimable": entry["formal_estimable"], "invalid_units": entry["invalid_units"],
+            "invalid_unit_fraction": entry["invalid_unit_fraction"],
             "runaway_fraction": entry["runaway_fraction"],
             "heldout_D_support": None if pooled_values is None else pooled_values["D_support"]["value"],
             "heldout_D_order": None if pooled_values is None else pooled_values["D_order"]["value"],
@@ -416,7 +481,8 @@ def main() -> None:
 
     payload = {
         "schema_id": "topic4_rev22_dci_validation_atlas_prototype_v1",
-        "status": "PROTOTYPE_DESCRIPTIVE_ONLY",
+        "status": ("PROTOTYPE_SMOKE" if args.smoke else
+                   "PROTOTYPE_DESCRIPTIVE_LINEARIZED_INTERVALS"),
         "git_commit": _git_commit(),
         "objective_qualification_sha256": _sha256(qual_path),
         "objective_status": qualification["status"],
@@ -427,7 +493,14 @@ def main() -> None:
         "rows": [{k: v for k, v in r.items() if k != "per_unit"} | {"per_unit": r["per_unit"]} for r in rows],
         "family_matrix_confirmation_vs_reference": matrix,
         "held_out_floors": floors,
-        "claim_boundary": "layout and assay-sensitivity prototype on historical rev20 artifacts; not candidate selection",
+        "smoke": bool(args.smoke),
+        "interval_contract": (
+            "Candidate point estimates pool events exactly. Family-matrix intervals bootstrap "
+            "per-topology scalar sidecars and are layout diagnostics only; formal confirmation "
+            "must resample topology indices and recompute every nonlinear pooled endpoint, "
+            "KMeans alignment and OOD denominator."
+        ),
+        "claim_boundary": "layout and assay-sensitivity prototype on historical rev20 artifacts; not candidate selection or formal inference",
         "elapsed_seconds": float(time.time() - started),
     }
     (out_root / "validation_atlas_prototype.json").write_text(json.dumps(_json_safe(payload), indent=2, sort_keys=True) + "\n")

@@ -11,6 +11,7 @@ from src.topic4_rev22_response_design import (
     assert_seed_disjointness, build_seed_manifest, canonical_round, design_rows_to_manifest,
     domain_from_geometry, family_membership, generate_design, nearest_to_centre,
     point_table_sha256, synthetic_domain,
+    validate_formal_geometry_contract,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -81,6 +82,42 @@ def test_augmented_design_has_nonzero_separation():
     delta = np.linalg.norm(unit[:, None, :] - unit[None, :, :], axis=2)
     delta[np.eye(len(unit), dtype=bool)] = np.inf
     assert float(delta.min()) > 0.01
+    assert design["design_quality"]["algorithm"] == "sequential_augmented_block_maximin_latin_hypercube"
+
+
+def test_formal_geometry_contract_requires_all_topologies_and_passed_rectangle():
+    payload = {
+        "schema_id": "topic4_rev22_dci_geometry_domain_v1",
+        "seeds": [2511, 2512, 2513, 2514],
+        "node_field_sha256": "node", "rev20_config_sha256": "config",
+        "reference": {"angle_deg": 45.0, "aspect_ratio": 2.0},
+        "thresholds": {"budget_error_max": 1e-9, "edge_ratio_p01_min": 0.25,
+                       "edge_ratio_p99_max": 4.0, "effective_source_median_ratio_min": 0.75,
+                       "effective_source_p05_ratio_min": 0.50},
+        "identifiability_thresholds": {
+            "theta_rank_correlation_min": 0.80,
+            "theta_achieved_span_deg_min": 10.0,
+            "theta_signal_to_topology_range_min": 2.0,
+            "aspect_rank_correlation_min": 0.80,
+            "log_aspect_achieved_span_min": 0.10,
+            "aspect_signal_to_topology_range_min": 2.0,
+        },
+        "achieved_geometry": {
+            "status": "GEOMETRY_ACHIEVED_RESPONSE_IDENTIFIABLE", "pass": True,
+        },
+        "grid": {"theta_deg": [40.0, 45.0, 50.0], "aspect_ratio": [1.5, 2.0, 2.5]},
+        "pass_all_topologies": [[1, 1, 1], [1, 1, 1], [1, 1, 1]],
+        "per_topology": {str(seed): {} for seed in (2511, 2512, 2513, 2514)},
+        "admissible_rectangle": {"theta_deg": [40.0, 50.0], "aspect_ratio": [1.5, 2.5]},
+    }
+    validate_formal_geometry_contract(payload, node_field_sha256="node", rev20_config_sha256="config")
+    payload["seeds"] = [2511]
+    with pytest.raises(ValueError, match="four frozen"):
+        validate_formal_geometry_contract(payload, node_field_sha256="node", rev20_config_sha256="config")
+    payload["seeds"] = [2511, 2512, 2513, 2514]
+    payload["pass_all_topologies"][0][0] = 0
+    with pytest.raises(ValueError, match="failed grid"):
+        validate_formal_geometry_contract(payload, node_field_sha256="node", rev20_config_sha256="config")
 
 
 def test_duplicate_rejection_after_rounding():

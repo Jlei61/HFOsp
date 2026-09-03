@@ -41,7 +41,8 @@ def _rev20():
 
 def test_execution_contract_carries_worker_semantics_and_rev22_seeds():
     result = build_execution_config(_analysis(), _rev20(), _seed_manifest(),
-                                    "results/x/candidates.json", {"design": {"sha256": "d"}})
+                                    "results/x/candidates.json", {"design": {"sha256": "d"}},
+                                    transition_input={"path": "config/minimal.json", "sha256": "min"})
     assert result["scientific_role"].endswith("connectivity_identifiability")
     assert result["candidate_manifest"] == "results/x/candidates.json"
     assert result["search"]["fit_network_seeds"] == [1, 2, 3, 4]
@@ -51,6 +52,10 @@ def test_execution_contract_carries_worker_semantics_and_rev22_seeds():
     assert result["search"]["simulation"]["duration_ms"] == 20000.0
     assert result["event_unit"] == _rev20()["event_unit"]
     assert result["resources"]["maximum_workers"] == 16
+    assert set(result["inputs"]) == {"transition_config"}
+    assert result["inputs"]["transition_config"] == {
+        "path": "config/minimal.json", "sha256": "min",
+    }
 
 
 def test_bad_seed_counts_fail_closed():

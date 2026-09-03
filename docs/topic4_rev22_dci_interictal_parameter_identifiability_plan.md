@@ -13,7 +13,8 @@ each goal has a verification check that must pass before the next starts.
 | G1 | Task 0 + Task 1 | `objective_qualification.json` frozen with four identifiability ratios, four passing controls with exact-invariance clauses, and unit tests green |
 | G2 | Task 1b | rev20 validation-atlas prototype figure inspected; display-identifiability decisions frozen |
 | G3 | Task 2 | substrate-hash parity for equal seeds and a full 20 s archived-seed byte parity run; cross tests green |
-| G4 | Task 3 + Task 4 | domain hash and design manifest frozen; coverage figure inspected |
+| G4 | Task 3 + Task 4 | achieved-geometry domain hash and design manifest frozen; coverage figure inspected |
+| G4b | Task 4b | minimal transition config frozen; complete composed-connectivity design audit passes |
 | G5 | Task 5 | component GP + feasibility + minimax proposal code green on synthetic surfaces |
 | G6 | Task 6 | canary provenance clean; RSS/wall time recorded; concurrency set |
 | G7 | Task 7 + Task 8 | all fit artifacts immutable; proposals frozen before any validation field is loaded |
@@ -141,14 +142,14 @@ This audit does not reinterpret fixed-topology angle as anatomical direction.
 ## Task 4: freeze the branch-specific response design
 
 - If Task 3 freezes a nontrivial geometry rectangle, generate one deterministic augmented
-  96-point maximin design using a frozen design seed:
+  96-point sequential augmented block-maximin Latin-hypercube design using a frozen design seed:
   - one reference;
   - 47 full four-dimensional points;
   - 32 leave-one-locked points, eight per plane;
   - eight learned-dose-pair points;
   - eight geometry-pair points.
 - If Task 3 marks geometry structurally non-estimable, freeze the geometry coordinates at
-  their reference values and generate one deterministic 32-point maximin design over
+  their reference values and generate one deterministic 32-point block-maximin design over
   `g_LEE x g_LEI`, including the exact reference. Only `M0000`, `M1000`, `M0100` and
   `M1100` remain branch-eligible.
 - Reject duplicates after canonical rounding and regenerate before freezing.
@@ -163,6 +164,25 @@ This audit does not reinterpret fixed-topology angle as anatomical direction.
 **Deliverables:** candidate manifest, seed manifest, manifest SHA256 and a coverage figure
 showing every 1D/2D projection of the design.
 
+## Task 4b: minimal worker contract and final composed-connectivity audit
+
+- Compile a minimal rev22 transition config containing only the frozen substrate, Node,
+  contact, detector and placement inputs required by `build_substrate`; remove held-out,
+  KMeans/OOD, patient-ictal and Fig.5 inputs from the declared file graph and freeze Z/M off.
+- On every fit topology, reconstruct the unmodified graph once and cache the unscaled
+  learned-pair logits. For every frozen response-design point, apply the ellipse mapper and
+  learned E-to-E/E-to-I mapper in producer order without stepping the SNN.
+- Recheck incoming-budget conservation, final/base edge-ratio p01/p99 and effective-source
+  count separately for E-to-E and E-to-I on the full candidate x four-topology Cartesian
+  product.
+- On at least one non-reference point per topology, compare the fast audit with the accepted
+  producer edge for edge, including topology and delay-bin identity.
+- Freeze the audit table, JSON and hash into the execution config.
+
+**Stop rule:** any missing or failed candidate-topology cell, producer-parity error or
+validation-only input visible in the minimal transition config yields
+`FINAL_CONNECTIVITY_DESIGN_INADMISSIBLE`. Do not drop points and do not start a canary.
+
 ## Task 5: implement the response and conditional-optimum analysis
 
 - Aggregate raw seed-level component scores with equal weight per topology unit. Add
@@ -174,8 +194,10 @@ showing every 1D/2D projection of the design.
 - Fit one heteroskedastic Matérn-5/2 GP per training component using the pooled-shrinkage
   noise formula in spec section 7; never fit a surface to `J_fit` or to any maximum.
 - Fit the per-component tree-ensemble sensitivity model without changing proposal rules.
-- Run leave-one-candidate-out prediction checks per component and report RMSE, Spearman
-  rank correlation and interval coverage.
+- Run strict leave-one-candidate-out prediction checks per component, refitting GP
+  hyperparameters in every fold, and report RMSE, Spearman rank correlation, interval
+  coverage and optimizer warnings. Apply the predeclared surrogate-adequacy rule in the
+  spec; if it fails, carry observed nondominated design points instead of a predicted optimum.
 - For every branch-eligible mask, propose the minimax point of predicted normalized
   excesses over the identifiable components with locked coordinates at reference, inside
   the domain and the region of predicted joint feasibility at least 0.80. Store the
@@ -195,6 +217,9 @@ in the feasibility atlas.
   a geometry point that already failed the structure-only audit.
 - Verify Z/M off, complete causal-family output, physical onset arrays, topology/dynamics
   provenance, late-runaway handling and endpoint reproducibility.
+- Verify the worker reads the minimal transition config whose hash and final composed-
+  connectivity audit are bound into the execution config; validation-only files must not
+  appear in its declared inputs.
 - Measure peak RSS and wall time, then set worker concurrency. Numerical threads remain 1.
 
 **Stop only for:** parity failure, provenance drift, nonfinite output, insufficient disk or an

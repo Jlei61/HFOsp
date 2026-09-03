@@ -2,8 +2,9 @@ import numpy as np
 from scipy import sparse
 
 from scripts.audit_topic4_rev22_geometry_domain import (
-    THRESHOLDS, audit_grid_point, ee_edges, effective_source_count, grid_point_passes,
-    largest_admissible_rectangle, validate_fast_path,
+    THRESHOLDS, assess_achieved_geometry, audit_grid_point, ee_edges,
+    effective_source_count, grid_point_passes, largest_admissible_rectangle,
+    validate_fast_path, weighted_connection_geometry,
 )
 
 
@@ -33,6 +34,42 @@ def test_effective_source_count_matches_definition():
     assert np.isclose(eff[1], (2.5 ** 2) / (4.0 + 0.25))
     assert eff[2] == 1.0                                      # one input
     assert np.isnan(eff[3])                                   # no input
+
+
+def test_weighted_connection_geometry_recovers_axial_orientation_and_aspect():
+    angle = np.deg2rad(30.0)
+    axis = np.array([np.cos(angle), np.sin(angle)])
+    cross = np.array([-np.sin(angle), np.cos(angle)])
+    displacement = np.vstack([axis * 3.0, -axis * 3.0, cross, -cross])
+    geometry = weighted_connection_geometry(
+        displacement[:, 0], displacement[:, 1], np.ones(4),
+    )
+    np.testing.assert_allclose(geometry["achieved_angle_deg"], 30.0, atol=1e-10)
+    np.testing.assert_allclose(geometry["achieved_aspect_ratio"], 3.0, atol=1e-10)
+
+
+def test_achieved_geometry_requires_response_above_topology_variability():
+    theta = np.array([35.0, 45.0, 55.0])
+    aspect = np.array([1.5, 2.0, 2.5])
+    per_topology = {}
+    for seed, jitter in zip((1, 2, 3, 4), (-0.2, -0.1, 0.1, 0.2)):
+        records = []
+        for i, requested_theta in enumerate(theta):
+            for j, requested_aspect in enumerate(aspect):
+                records.append({
+                    "i": i, "j": j,
+                    "achieved_angle_deg": requested_theta + jitter,
+                    "achieved_aspect_ratio": requested_aspect * np.exp(jitter / 20.0),
+                })
+        per_topology[seed] = {"records": records}
+    rectangle = {"i0": 0, "i1": 2, "j0": 0, "j1": 2}
+    result = assess_achieved_geometry(per_topology, rectangle, theta, aspect, 1, 1)
+    assert result["pass"] is True
+    for block in per_topology.values():
+        for record in block["records"]:
+            record["achieved_angle_deg"] = 45.0
+    failed = assess_achieved_geometry(per_topology, rectangle, theta, aspect, 1, 1)
+    assert failed["pass"] is False
 
 
 def _graph(net, base):

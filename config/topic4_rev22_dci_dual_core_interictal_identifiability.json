@@ -6,6 +6,11 @@
   "output_root": "results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability",
   "network_cache": "results/topic4_sef_hfo/data_driven_core_field_rev9/network_cache",
   "inputs": {
+    "rev22_transition_execution": {
+      "path": "config/topic4_rev22_dci_transition_execution.json",
+      "sha256": "ac7d9ab0c71dec1a8b733d9d386a8effe8a6ff886a2ef9f44b79a8ba15b1f026",
+      "role": "minimal substrate-only worker config; no held-out, KMeans/OOD, ictal, Fig.5 or Z/M input"
+    },
     "rev20_config": {
       "path": "config/topic4_rev20_dc_dual_core_mechanism_atlas.json",
       "sha256": "fed5fbceca3a3bf90a73aa6b6189f74f3e162f998e841b715f476020ab9d0bf0"

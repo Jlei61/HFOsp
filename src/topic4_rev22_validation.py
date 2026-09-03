@@ -9,7 +9,6 @@ import numpy as np
 from scipy.spatial import cKDTree
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score
-from sklearn.model_selection import GroupKFold
 
 RECALL_OK = "OK"
 RECALL_LOW_YIELD = "NOT_ESTIMABLE_LOW_YIELD"
@@ -134,6 +133,57 @@ def fixed_budget_recall(model_z: np.ndarray, query_z: np.ndarray, *, n_cov: int,
             "subsamples": int(subsamples)}
 
 
+def _sample_preserving_groups(indices: np.ndarray, groups: np.ndarray, n: int,
+                              rng: np.random.Generator) -> np.ndarray:
+    """Sample without replacement while retaining at least one event per group."""
+    indices = np.asarray(indices, int)
+    unique = np.unique(groups[indices])
+    if n < len(unique):
+        raise ValueError("sample budget is smaller than the group count")
+    mandatory = np.asarray([rng.choice(indices[groups[indices] == group]) for group in unique], int)
+    if n == len(mandatory):
+        return mandatory
+    remaining = np.setdiff1d(indices, mandatory, assume_unique=False)
+    extra = rng.choice(remaining, size=n - len(mandatory), replace=False)
+    return np.concatenate([mandatory, extra])
+
+
+def _paired_group_folds(patient_groups: np.ndarray, model_groups: np.ndarray, *,
+                        n_splits: int, rng: np.random.Generator) -> tuple[list[tuple[np.ndarray, np.ndarray]], np.ndarray]:
+    """Create folds containing paired patient/model groups and return pair ids.
+
+    Equal numbers of groups from each class are paired before assignment to folds. Every
+    train and test partition therefore contains both classes. The pair ids also define a
+    group-level permutation null: swapping the two labels inside a pair preserves the
+    grouped dependence and the number of groups per class.
+    """
+    p_unique = np.unique(patient_groups)
+    m_unique = np.unique(model_groups)
+    if len(p_unique) != len(m_unique):
+        raise ValueError("paired-group folds require equal class-specific group counts")
+    n_pairs = min(len(p_unique), len(m_unique))
+    if n_pairs < 2:
+        return [], np.zeros(len(patient_groups) + len(model_groups), int)
+    p_selected = p_unique.copy()
+    m_selected = m_unique.copy()
+    rng.shuffle(p_selected)
+    rng.shuffle(m_selected)
+    p_pair = {group: pair for pair, group in enumerate(p_selected)}
+    m_pair = {group: pair for pair, group in enumerate(m_selected)}
+    pair_ids = np.asarray(
+        [p_pair[group] for group in patient_groups]
+        + [m_pair[group] for group in model_groups], int,
+    )
+    fold_ids = np.arange(n_pairs) % min(int(n_splits), n_pairs)
+    rng.shuffle(fold_ids)
+    splits = []
+    for fold in range(int(fold_ids.max()) + 1):
+        test = np.flatnonzero(np.isin(pair_ids, np.flatnonzero(fold_ids == fold)))
+        train = np.setdiff1d(np.arange(len(pair_ids)), test, assume_unique=True)
+        splits.append((train, test))
+    return splits, pair_ids
+
+
 # --------------------------------------------------------------------------- #
 # classifier two-sample test
 # --------------------------------------------------------------------------- #
@@ -153,32 +203,44 @@ def classifier_two_sample_auc(patient_z: np.ndarray, patient_groups: np.ndarray,
     if len(np.unique(patient_groups)) < 2 or len(np.unique(model_groups)) < 2 or len(model_z) < 4:
         return {"status": C2ST_NOT_ESTIMABLE, "auc": None}
     rng = np.random.default_rng(int(seed))
-    n = min(len(patient_z), len(model_z))
-    p_codes = {g: i for i, g in enumerate(np.unique(patient_groups))}
-    m_codes = {g: 10_000_000 + i for i, g in enumerate(np.unique(model_groups))}
+    n_group = min(len(np.unique(patient_groups)), len(np.unique(model_groups)))
+    if n_group < 2:
+        return {"status": C2ST_NOT_ESTIMABLE, "auc": None}
+
+    sample_sizes = []
 
     def one(labels_permuted: bool) -> float | None:
-        p_idx = rng.choice(len(patient_z), size=n, replace=False) if len(patient_z) > n else np.arange(len(patient_z))
-        m_idx = rng.choice(len(model_z), size=n, replace=False) if len(model_z) > n else np.arange(len(model_z))
+        p_selected = rng.choice(np.unique(patient_groups), size=n_group, replace=False)
+        m_selected = rng.choice(np.unique(model_groups), size=n_group, replace=False)
+        p_pool = np.flatnonzero(np.isin(patient_groups, p_selected))
+        m_pool = np.flatnonzero(np.isin(model_groups, m_selected))
+        n = min(len(p_pool), len(m_pool))
+        if n < max(4, n_group):
+            return None
+        p_idx = _sample_preserving_groups(p_pool, patient_groups, n, rng)
+        m_idx = _sample_preserving_groups(m_pool, model_groups, n, rng)
         x = np.vstack([patient_z[p_idx], model_z[m_idx]])
         y = np.concatenate([np.zeros(len(p_idx), int), np.ones(len(m_idx), int)])
-        groups = np.concatenate([[p_codes[g] for g in patient_groups[p_idx]],
-                                 [m_codes[g] for g in model_groups[m_idx]]])
-        if labels_permuted:
-            y = rng.permutation(y)
-        splits = min(int(n_splits), len(np.unique(groups)))
-        if splits < 2:
+        p_group = patient_groups[p_idx]
+        m_group = model_groups[m_idx]
+        splits, pair_ids = _paired_group_folds(p_group, m_group, n_splits=n_splits, rng=rng)
+        if len(splits) < 2:
             return None
+        if labels_permuted:
+            swap = rng.integers(0, 2, size=int(pair_ids.max()) + 1).astype(bool)
+            y = np.where(swap[pair_ids], 1 - y, y)
         scores = np.full(len(y), np.nan)
-        for train, test in GroupKFold(n_splits=splits).split(x, y, groups):
-            if len(np.unique(y[train])) < 2:
-                continue
+        for train, test in splits:
+            if len(np.unique(y[train])) < 2 or len(np.unique(y[test])) < 2:
+                return None
             clf = LogisticRegression(C=float(regularization_c), max_iter=2000)
             clf.fit(x[train], y[train])
             scores[test] = clf.decision_function(x[test])
         ok = np.isfinite(scores)
         if len(np.unique(y[ok])) < 2:
             return None
+        if not labels_permuted:
+            sample_sizes.append(int(n))
         return float(roc_auc_score(y[ok], scores[ok]))
 
     aucs = [v for v in (one(False) for _ in range(int(resamples))) if v is not None]
@@ -189,9 +251,10 @@ def classifier_two_sample_auc(patient_z: np.ndarray, patient_groups: np.ndarray,
     return {
         "status": "OK",
         "auc": float(aucs.mean()),
+        "auc_oriented": float(0.5 + abs(aucs.mean() - 0.5)),
         "auc_q05": float(np.quantile(aucs, 0.05)), "auc_q95": float(np.quantile(aucs, 0.95)),
         "separability": float(2.0 * abs(aucs.mean() - 0.5)),
         "permutation_auc_median": float(np.median(perms)) if perms else None,
         "permutation_auc_q95": float(np.quantile(perms, 0.95)) if perms else None,
-        "n_per_class": int(n), "resamples": int(len(aucs)),
+        "n_per_class": int(np.median(sample_sizes)), "resamples": int(len(aucs)),
     }

@@ -4,7 +4,7 @@ from src.topic4_rev22_validation import (
     C2ST_NOT_ESTIMABLE, RECALL_LOW_YIELD, RECALL_OK,
     REFERENCE_SUPPORT_BUDGET_NOT_ESTIMABLE, calibrate_coverage_radius,
     classifier_two_sample_auc, fixed_budget_recall, freeze_reference_support_budget,
-    paired_unit_bootstrap,
+    paired_unit_bootstrap, _paired_group_folds,
 )
 
 
@@ -64,3 +64,20 @@ def test_c2st_separates_shifted_model_and_is_chance_for_matched():
     assert abs(same["permutation_auc_median"] - 0.5) < 0.15
     single = classifier_two_sample_auc(patient, blocks, matched, np.zeros(200, int), seed=0)
     assert single["status"] == C2ST_NOT_ESTIMABLE
+
+
+def test_c2st_folds_contain_both_classes_and_permutation_is_group_level():
+    patient_groups = np.repeat(np.arange(4), [3] * 4)
+    model_groups = np.repeat(np.arange(4), [5] * 4)
+    splits, pair_ids = _paired_group_folds(
+        patient_groups, model_groups, n_splits=5, rng=np.random.default_rng(7),
+    )
+    labels = np.r_[np.zeros(len(patient_groups), int), np.ones(len(model_groups), int)]
+    assert len(splits) == 4
+    for train, test in splits:
+        assert set(labels[train]) == {0, 1}
+        assert set(labels[test]) == {0, 1}
+    swap = np.asarray([True, False, True, False])
+    permuted = np.where(swap[pair_ids], 1 - labels, labels)
+    for pair in np.unique(pair_ids):
+        assert len(np.unique(permuted[pair_ids == pair])) == 2

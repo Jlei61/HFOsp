@@ -48,6 +48,21 @@ FIT_TOPOLOGY_SEEDS = (2511, 2512, 2513, 2514)
 DECOMPOSITION_DYNAMICS_SEEDS = (3101, 3102)
 QUALIFICATION_TOPOLOGY_SEEDS = tuple(range(2601, 2607))
 CONFIRMATION_TOPOLOGY_SEEDS = tuple(range(2621, 2633))
+EXPECTED_GEOMETRY_THRESHOLDS = {
+    "budget_error_max": 1e-9,
+    "edge_ratio_p01_min": 0.25,
+    "edge_ratio_p99_max": 4.0,
+    "effective_source_median_ratio_min": 0.75,
+    "effective_source_p05_ratio_min": 0.50,
+}
+EXPECTED_GEOMETRY_IDENTIFIABILITY_THRESHOLDS = {
+    "theta_rank_correlation_min": 0.80,
+    "theta_achieved_span_deg_min": 10.0,
+    "theta_signal_to_topology_range_min": 2.0,
+    "aspect_rank_correlation_min": 0.80,
+    "log_aspect_achieved_span_min": 0.10,
+    "aspect_signal_to_topology_range_min": 2.0,
+}
 
 
 def sha256_text(text: str) -> str:
@@ -96,6 +111,56 @@ def synthetic_domain(theta_range: Sequence[float], ar_range: Sequence[float]) ->
         "admissible_rectangle": {"theta_deg": [float(theta_range[0]), float(theta_range[1])],
                                  "aspect_ratio": [float(ar_range[0]), float(ar_range[1])]},
     }
+
+
+def validate_formal_geometry_contract(payload: Mapping, *, node_field_sha256: str,
+                                      rev20_config_sha256: str) -> None:
+    """Fail closed before a structure-only audit can authorize the formal design."""
+    if payload.get("schema_id") != "topic4_rev22_dci_geometry_domain_v1":
+        raise ValueError("unexpected geometry-domain schema")
+    if tuple(payload.get("seeds", ())) != FIT_TOPOLOGY_SEEDS:
+        raise ValueError("geometry audit did not use all four frozen fit topologies")
+    if payload.get("node_field_sha256") != node_field_sha256:
+        raise ValueError("geometry audit used a different Node field")
+    if payload.get("rev20_config_sha256") != rev20_config_sha256:
+        raise ValueError("geometry audit used a different rev20 substrate config")
+    reference = payload.get("reference", {})
+    if not (np.isclose(reference.get("angle_deg", np.nan), REFERENCE[2])
+            and np.isclose(reference.get("aspect_ratio", np.nan), REFERENCE[3])):
+        raise ValueError("geometry reference point changed")
+    thresholds = payload.get("thresholds", {})
+    for key, expected in EXPECTED_GEOMETRY_THRESHOLDS.items():
+        if key not in thresholds or not np.isclose(float(thresholds[key]), expected):
+            raise ValueError(f"geometry threshold changed: {key}")
+    identifiability_thresholds = payload.get("identifiability_thresholds", {})
+    for key, expected in EXPECTED_GEOMETRY_IDENTIFIABILITY_THRESHOLDS.items():
+        if key not in identifiability_thresholds or not np.isclose(
+            float(identifiability_thresholds[key]), expected
+        ):
+            raise ValueError(f"geometry identifiability threshold changed: {key}")
+    achieved = payload.get("achieved_geometry", {})
+    if achieved.get("status") not in {
+        "GEOMETRY_ACHIEVED_RESPONSE_IDENTIFIABLE",
+        "GEOMETRY_ACHIEVED_RESPONSE_NOT_IDENTIFIABLE",
+        "GEOMETRY_ACHIEVED_RESPONSE_NOT_ESTIMABLE",
+    }:
+        raise ValueError("geometry achieved-response audit is missing")
+    if payload.get("status") == "GEOMETRY_DOMAIN_FROZEN" and achieved.get("pass") is not True:
+        raise ValueError("geometry domain was frozen without achieved-response identifiability")
+    theta = list(payload.get("grid", {}).get("theta_deg", ()))
+    aspect = list(payload.get("grid", {}).get("aspect_ratio", ()))
+    passed = np.asarray(payload.get("pass_all_topologies", ()), int)
+    if passed.shape != (len(theta), len(aspect)) or not theta or not aspect:
+        raise ValueError("geometry all-topology pass matrix is missing or malformed")
+    per_topology = payload.get("per_topology", {})
+    if set(per_topology) != {str(seed) for seed in FIT_TOPOLOGY_SEEDS}:
+        raise ValueError("geometry per-topology audit is incomplete")
+    rectangle = payload.get("admissible_rectangle")
+    if rectangle is not None:
+        i0, i1 = theta.index(float(rectangle["theta_deg"][0])), theta.index(float(rectangle["theta_deg"][1]))
+        j0, j1 = aspect.index(float(rectangle["aspect_ratio"][0])), aspect.index(float(rectangle["aspect_ratio"][1]))
+        if not np.all(passed[i0:i1 + 1, j0:j1 + 1] == 1):
+            raise ValueError("frozen geometry rectangle contains a failed grid point")
 
 
 # --------------------------------------------------------------------------- #
@@ -156,7 +221,7 @@ def _block_points(free_dims: Sequence[int], k: int, seed: int, unit_reference: n
 
 
 def generate_design(domain: Mapping, *, seed: int, max_regenerations: int = 20) -> dict:
-    """Deterministic augmented design for the chosen branch; duplicates trigger regeneration."""
+    """Deterministic sequential block-maximin design; duplicates trigger regeneration."""
     bounds = domain["bounds"]
     branch = domain["branch"]
     blocks = PRIMARY_BLOCKS if branch == STATUS_PRIMARY else FALLBACK_BLOCKS
@@ -173,8 +238,14 @@ def generate_design(domain: Mapping, *, seed: int, max_regenerations: int = 20) 
                 rows.append({"block": name, "unit": u, "physical": p})
         keys = [tuple(r["physical"].tolist()) for r in rows]
         if len(set(keys)) == len(keys):
+            unit = np.asarray([row["unit"] for row in rows], float)
+            delta = np.linalg.norm(unit[:, None, :] - unit[None, :, :], axis=2)
+            delta[np.eye(len(unit), dtype=bool)] = np.inf
             return {"branch": branch, "rows": rows, "seed": int(seed), "regenerations": attempt,
-                    "bounds": [list(map(float, b)) for b in bounds]}
+                    "bounds": [list(map(float, b)) for b in bounds],
+                    "design_quality": {"global_minimum_unit_distance": float(delta.min()),
+                                       "algorithm": "sequential_augmented_block_maximin_latin_hypercube",
+                                       "trials_per_block": 32}}
     raise RuntimeError("could not generate a duplicate-free design")
 
 

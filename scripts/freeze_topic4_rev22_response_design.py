@@ -23,7 +23,7 @@ if str(ROOT) not in sys.path:
 from src.topic4_rev22_response_design import (  # noqa: E402
     PARAMS, REFERENCE, STATUS_PRIMARY, build_seed_manifest, design_rows_to_manifest,
     domain_from_geometry, generate_design, nearest_to_centre, point_table_sha256,
-    synthetic_domain,
+    synthetic_domain, validate_formal_geometry_contract,
 )
 
 DEFAULT_DOMAIN = Path("/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/"
@@ -142,12 +142,21 @@ def main() -> None:
         domain_source = {"kind": "task3_geometry_domain", "sha256": _sha256(args.domain_json),
                          "path": str(args.domain_json)}
 
-    domain = domain_from_geometry(domain_json)
-    design = generate_design(domain, seed=args.design_seed)
-
     rev20_manifest = json.loads(args.rev20_manifest.read_text())
     reference = [c for c in rev20_manifest["candidates"] if c.get("is_reference")][0]
     node_field = reference["node_field"]
+    if not synthetic:
+        rev20_config = ROOT / "config/topic4_rev20_dc_dual_core_mechanism_atlas.json"
+        validate_formal_geometry_contract(
+            domain_json, node_field_sha256=node_field.get("field_sha256"),
+            rev20_config_sha256=_sha256(rev20_config),
+        )
+        grid_table = args.domain_json.with_name("geometry_audit_grid.csv")
+        if not grid_table.is_file() or _sha256(grid_table) != domain_json.get("grid_table_sha256"):
+            raise RuntimeError("geometry grid table is missing or changed")
+
+    domain = domain_from_geometry(domain_json)
+    design = generate_design(domain, seed=args.design_seed)
     node_mapping = {"node_gain": 1.0, "signed_depth_shrinkage": 1.0}
     rows = design_rows_to_manifest(design, node_field=node_field, node_mapping=node_mapping)
     table_sha = point_table_sha256(rows)
@@ -168,6 +177,7 @@ def main() -> None:
         "reference": {name: REFERENCE[d] for d, name in enumerate(PARAMS)},
         "design_seed": design["seed"],
         "regenerations": design["regenerations"],
+        "design_quality": design["design_quality"],
         "candidate_count": len(rows),
         "block_counts": {b: sum(1 for r in rows if r["block"] == b) for b in dict.fromkeys(r["block"] for r in rows)},
         "point_table_sha256": table_sha,
