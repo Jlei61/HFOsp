@@ -337,22 +337,70 @@ validation field is loaded, freeze:
 - one conditional optimum per family, plus any predeclared model-disagreement duplicate;
 - all qualification and confirmation seed pairs.
 
-After all corresponding SNN artifacts are immutable, open the following
-**selection-blind validation endpoints**:
+The sole pre-run exception is the explicitly separated Task 1b prototype on historical
+rev20 artifacts. It freezes display grammar and assay sensitivity only; it cannot modify
+the rev22 objective, structure domain, design, family set or candidate-selection code.
+
+The freeze manifest also fixes a support-budget contract before held-out data are opened:
+
+```text
+n_cov = floor(median returned-family count over the four M0000 fit units)
+```
+
+`n_cov` must be at least the 12-event fit-estimability threshold. For frozen draw `b`, let
+`S_b` contain `n_cov` patient-training support events and let `Q_b` be every remaining
+patient-training event. The fixed coverage radius is:
+
+```text
+r_cov = median_b q95_{q in Q_b} min_{s in S_b} distance(q, s),  b=1,...,1000
+```
+
+Neither `n_cov` nor `r_cov` may be re-estimated per candidate. If the reference gives
+`n_cov < 12`, report `REFERENCE_SUPPORT_BUDGET_NOT_ESTIMABLE`; fixed-budget recall remains
+descriptive and no five-endpoint Pareto support claim is allowed.
+
+After all corresponding SNN artifacts are immutable, the validation producer scores both
+the confirmed family candidates and every completed response-design trajectory. The latter
+is a descriptive second pass used only to draw parameter-response curves; it cannot change
+the branch, objective, feasible region, parameter values, family membership or seed plan.
+
+The following are the five primary **selection-blind validation endpoints**:
 
 1. recording-block held-out complete-distribution distance;
 2. natural model KMeans K=2 and balanced alignment to the frozen patient templates;
-3. OOD fraction over all returned causal families, with unreadable events counted as OOD;
-4. mode-specific recruitment, physical pairwise lag, rank profile and event-cloud spread;
-5. pooled and equal-network-weighted mode proportions;
-6. proportion of individual networks expressing both modes;
-7. returned-event yield, unreadable fraction and runaway/nonfinite status;
-8. 180 ms clipping fractions for event-contact onsets and whole events.
+3. patient-support OOD fraction over all returned causal families, with unreadable events
+   counted as OOD; `1-OOD` is reported as the corresponding precision-like quantity;
+4. fixed-budget held-out patient-event recall: the fraction of all patient held-out events
+   lying within `r_cov` of a model support set of exactly `n_cov` events;
+5. held-out physical timing error `D_time_ms`, using the same shaft-balanced pairwise-lag
+   estimator as `D_lag` and reporting both raw milliseconds and patient-floor-normalized
+   error.
 
-Only the held-out distribution uses patient events not used to build the training target.
-The KMeans alignment reference and OOD support were estimated from patient training data;
-they are selection-blind in rev22, not statistically independent. Because these artifacts
-have been viewed in earlier development rounds, the whole revision remains development-only.
+For recall, candidates with more than `n_cov` events use 200 frozen without-replacement
+subsamples and report their mean and interval. Candidates with fewer than `n_cov` events are
+`NOT_ESTIMABLE_LOW_YIELD` for fixed-budget recall; they are not assigned zero. Their
+all-event raw recall remains a sidecar. This separates distribution support from the number
+of generated events. Recall is computed within each crossed simulation unit and only then
+aggregated topology-first; events are never pooled across networks to manufacture support.
+
+Mandatory sidecars are mode-specific recruitment and rank profiles, pooled and
+equal-network-weighted mode proportions, the proportion of individual networks expressing
+both modes, returned-event yield, unreadable fraction, runaway/nonfinite status and both
+180 ms clipping fractions.
+
+A classifier two-sample test is secondary. In the frozen event embedding, a fixed linear
+classifier distinguishes patient held-out from model events under class-balanced,
+group-separated cross-validation: patient recording blocks and model topology seeds cannot
+cross folds. Report AUC, `2*abs(AUC-0.5)`, balanced-resampling uncertainty and a
+label-permutation reference. It cannot select parameters or replace the five diagnostic
+endpoints. If either class has fewer than two independent groups, report
+`C2ST_NOT_ESTIMABLE_GROUPS`; event-wise random folds are forbidden.
+
+Held-out distribution distance, recall, physical timing error and C2ST use patient events
+not used to build the training target. The KMeans alignment reference, OOD support and
+coverage radius were estimated from patient training data; they are selection-blind in
+rev22, not statistically independent. Because these artifacts have been viewed in earlier
+development rounds, the whole revision remains development-only.
 
 ## 10. Statistical analysis and parameter influence
 
@@ -373,25 +421,31 @@ A coordinate is called **useful within this SNN family** only when:
    leave-one-locked model under the rule below;
 7. the conclusion is not carried by one topology seed.
 
-For a full-versus-locked contrast, orient the three validation differences so positive is
-better:
+For a full-versus-locked contrast, orient the five primary validation differences so
+positive is better:
 
 ```text
 Delta = [D_heldout_locked - D_heldout_full,
          KMeans_alignment_full - KMeans_alignment_locked,
-         OOD_locked - OOD_full]
+         OOD_locked - OOD_full,
+         Recall_full - Recall_locked,
+         D_time_ms_locked - D_time_ms_full]
 ```
 
 Here `full` means `M1111` in the primary branch and `M1100` in the dose-only fallback.
 The fallback compares `M1100` with `M1000` and `M0100`; `M0000` remains the paired reference
 but is not misrepresented as a leave-one-coordinate model.
 
-The full model is `PARETO_SUPPORTED` only when all three point estimates are nonnegative,
+The full model is `PARETO_SUPPORTED` only when all five point estimates are nonnegative,
 none of their paired 90% intervals lies wholly below zero, and at least one paired 90%
 interval lies wholly above zero. Mixed-sign point estimates are reported as `TRADEOFF`.
 When every interval includes zero, the coordinate is `NON_IDENTIFIABLE_AT_CURRENT_SEEDS`.
-Yield, unreadable fraction and clipping remain mandatory sidecars and cannot be traded
-against the three endpoints by an undocumented scalar. `OUTPUT_DEGENERATION` is reported
+If any of the five endpoints is not estimable in either member of a contrast, report
+`PRIMARY_ENDPOINT_NOT_ESTIMABLE`; it cannot be upgraded to `PARETO_SUPPORTED` from the
+remaining endpoints.
+Classifier AUC, yield, unreadable fraction and clipping remain mandatory secondary or
+sidecar outputs and cannot be traded against the five endpoints by an undocumented scalar.
+`OUTPUT_DEGENERATION` is reported
 when any of the following holds relative to the paired reference: median returned-event
 yield ratio below 0.50; the paired 90% interval lower bound for increased unreadable
 fraction exceeds 0.10; or the paired 90% interval lower bound for increased any-clipped-event
@@ -403,8 +457,9 @@ coordinate is reported as non-identifiable, not ineffective.
 
 ## 11. Floor and effect-size reporting
 
-Primary tables report raw distances, KMeans alignment, OOD and event yield. The descriptive
-fraction of reducible discrepancy closed is
+Primary tables report raw complete-distribution distance, KMeans alignment, OOD,
+fixed-budget recall, physical timing error and event yield. Classifier AUC is secondary. The
+descriptive fraction of reducible discrepancy closed is
 
 ```text
 F_closed = (D_reference - D_candidate) /
@@ -424,7 +479,9 @@ Required outputs are:
 - branch-specific response-design manifest and seed manifest;
 - response-surface diagnostics and conditional-optimum table for all branch-eligible model
   families;
-- paired validation atlas for distance, KMeans alignment, OOD and yield;
+- paired validation atlas for complete-distribution distance, KMeans alignment, OOD,
+  fixed-budget recall, physical timing error and yield;
+- a post-freeze descriptive validation response atlas over all response-design trajectories;
 - Pareto plot of held-out distance versus KMeans alignment, colored by OOD;
 - one Fig.4-style direct event/GIF panel and one KMeans panel for the final nondominated
   candidate, generated from the same confirmed artifacts;
@@ -439,3 +496,34 @@ If supported, the strongest allowed conclusion is:
 Forbidden conclusions include biological E-to-E/E-to-I strength estimation, independent
 tract-direction recovery, anatomical core identification, cohort generalization, ictal
 recovery or patient-level causality.
+
+## 13. Figure grammar for parameter influence
+
+The primary response figure has two complementary layers.
+
+**Layer 1: conditional continuous response.** Columns are the four parameters in the
+primary branch, or the two learned-pattern doses in the fallback branch. Rows are held-out
+complete-distribution distance, KMeans balanced alignment, OOD, fixed-budget recall and
+physical timing error. Each curve is a one-dimensional slice through the post-freeze
+descriptive validation surface with all other coordinates locked at reference; it is not
+called a marginal causal effect. Pale points show all response-design observations and
+open circles show rescored rev20 one-dimensional anchors. Patient self-comparison bands are
+drawn only where the same statistic and sample-size contract define them. Event yield is
+encoded by point size and remains numerically reported.
+
+A validation row enters Layer 1 only if its rev20 between-candidate range divided by
+within-candidate seed MAD is at least 1 under the same predeclared identifiability rule used
+for training components. A non-identifiable row is moved intact to the sidecar figure and
+marked non-identifiable; it is not silently deleted. This display decision is frozen before
+rev22 simulation and cannot alter `J_fit`.
+
+**Layer 2: nested-family matrix.** Rows are the 12 primary-branch families or four fallback
+families. Four leading cells show free versus locked coordinates. Metric cells show paired
+differences and topology-first 90% intervals for the five primary validation endpoints.
+Yield and classifier two-sample AUC are secondary columns. The matrix provides inference at
+confirmed family optima; Layer 1 provides descriptive response shape and cannot substitute
+for confirmation.
+
+The existing Pareto plot remains: x is held-out complete-distribution distance, y is KMeans
+balanced alignment, color is OOD and point size is yield. Recall and physical timing stay
+visible in Layer 1 and the family matrix rather than being compressed into this plot.

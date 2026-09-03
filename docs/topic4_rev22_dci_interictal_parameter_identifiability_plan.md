@@ -51,6 +51,28 @@ to compensate.
 pair-state normalization, count-matched floor determinism, low-model-event behavior and
 descriptive known-case reporting that cannot alter objective qualification.
 
+## Task 1b: freeze the validation-atlas grammar on rev20 artifacts
+
+Only after the Task 1 objective JSON is immutable, run a separate descriptive producer over
+all 232 rev20 trajectories. It may read historical validation inputs but must not write to
+the objective-qualification or parameter-domain artifacts.
+
+- Compute held-out complete-distribution distance, natural KMeans balanced alignment, OOD,
+  fixed-budget patient-event recall and shaft-balanced physical timing error.
+- Compute event yield and classifier two-sample AUC as secondary outputs.
+- Freeze prototype-only `n_cov_rev20` from the rev20 reference and calibrate
+  `r_cov_rev20` using patient-training data only; use all held-out patient events as recall
+  queries. These prototype values do not replace the formal rev22 freeze in Task 8.
+- Apply the same between-candidate/within-seed identifiability ratio to each proposed
+  continuous-response row. Freeze which rows remain in the main atlas before any rev22
+  simulation; retain non-identifiable metrics in the sidecar.
+- Produce the first two-layer prototype: continuous parameter slices and the historical
+  family matrix. This is a layout and assay-sensitivity check, not candidate selection.
+
+**Tests:** fixed support-budget determinism, no patient-query count matching, low-yield
+recall status, grouped C2ST folds, label-permutation behavior and a guard proving the
+descriptive producer cannot modify Task 1 or Task 3 freeze files.
+
 ## Task 2: split topology and dynamics seeds without changing legacy output
 
 - Add `topology_seed` and `dynamics_seed` at the highest common runner boundary.
@@ -165,6 +187,10 @@ OOM-risk estimate that cannot retain at least 32 GiB free RAM.
 - Retain any family whose optimum equals the reference as a `REFERENCE_RETURN` row. Verify an
   exact same-seed duplicate is byte-identical, and freeze a topology-matched independent
   dynamics replicate for the stochastic reference floor.
+- Freeze `n_cov` from the four `M0000` fit units and calibrate `r_cov` from 1,000 frozen
+  patient-training support draws using the exact formula in spec section 9. Hash both before
+  any held-out metric is opened. If `n_cov < 12`, emit
+  `REFERENCE_SUPPORT_BUDGET_NOT_ESTIMABLE` and prohibit a five-endpoint Pareto support claim.
 - Write a freeze file containing coordinates, source surface hash and optimization trace.
 - Freeze qualification and confirmation seed pairs before launching either stage.
 - Do not read KMeans, OOD or held-out arrays while changing a parameter value.
@@ -193,37 +219,55 @@ fallback-branch proposals, plus predeclared GP/tree disagreement duplicates if a
 
 ## Task 11: open validation once
 
+- Score every immutable response-design trajectory as a descriptive second pass, in addition
+  to scoring qualification and confirmation trajectories. Never refit `J_fit`, revise an
+  optimum or change family membership after this pass opens.
+- Fit metric-specific descriptive response surfaces solely to draw the frozen conditional
+  slices. Do not optimize, rank candidates or update the training surrogate with these
+  surfaces.
 - Compute recording-block held-out complete-distribution distance.
 - Run natural KMeans K=2 on readable events and align clusters to frozen patient templates;
   report the full 2x2 matrix, balanced alignment and minority proportion.
-- Compute OOD using all returned families as denominator, with unreadable shown separately.
-- Compute mode-specific recruitment, physical lag and rank-profile diagnostics.
+- Compute OOD using all returned families as denominator, with unreadable counted as OOD and
+  shown separately; also report `1-OOD` as precision-like support agreement.
+- Compute fixed-budget held-out recall with frozen `n_cov` and `r_cov`; keep all-event recall
+  as a sidecar and mark candidates below `n_cov` as `NOT_ESTIMABLE_LOW_YIELD`.
+- Compute shaft-balanced physical timing error in raw milliseconds and floor-normalized
+  units, plus mode-specific recruitment and rank-profile diagnostics.
+- Run the secondary class-balanced, group-separated classifier two-sample test and its label
+  permutation reference.
 - Report both 180 ms clipping sidecars: event-contact fraction and any-clipped-event fraction.
 - Report pooled proportions, equal-network-weighted proportions and how many individual
   networks express both modes.
 - Use topology-first hierarchical bootstrap for paired contrasts.
-- Apply the predeclared paired Pareto rule to `M1111` versus each leave-one-locked family in
-  the primary branch. In the fallback, compare `M1100` with `M1000` and `M0100`, while
+- Apply the five-endpoint paired Pareto rule to `M1111` versus each leave-one-locked family
+  in the primary branch. In the fallback, compare `M1100` with `M1000` and `M0100`, while
   retaining `M0000` as the paired reference. Write `PARETO_SUPPORTED`, `TRADEOFF` or
   `NON_IDENTIFIABLE_AT_CURRENT_SEEDS` directly from point estimates and paired 90% intervals.
 - Report raw distance, a single fixed-floor `F_closed`, candidate-specific count-matched
   floors and returned-event yield side by side.
 
-The validation report must call KMeans/OOD **selection-blind**, not independent. Only the
-recording-block held-out distance is data-held-out, and the revision remains development-only.
+The validation report must call KMeans/OOD **selection-blind**, not independent. Held-out
+distribution distance, fixed-budget recall, physical timing error and C2ST use the held-out
+recording block; KMeans templates, OOD support and `r_cov` originate from patient training
+data. The revision remains development-only.
 
 ## Task 12: figures and scientific closeout
 
 Generate:
 
 1. objective-qualification controls showing minority removal, SCL censoring and time stretch;
-2. model-family matrix with free/locked coordinates and paired values for training distance,
-   held-out distance, KMeans alignment, OOD and yield;
-3. branch-specific response atlas: `g_LEE x g_LEI` in both branches and
+2. conditional continuous-response atlas with parameters as columns and, subject to the
+   pre-frozen display-identifiability rule, five rows: held-out distribution distance,
+   KMeans alignment, OOD, fixed-budget recall and physical timing error. Overlay pale design
+   points, open rev20 anchors and valid patient self-comparison bands; encode yield by size;
+3. nested-family matrix with free/locked parameter cells, paired five-endpoint differences
+   and intervals, plus secondary yield and classifier-AUC columns;
+4. branch-specific training-response atlas: `g_LEE x g_LEI` in both branches and
    `theta_FT x AR_FT` only in the primary branch;
-4. Pareto plot: held-out distance versus KMeans alignment, color=OOD, size=event yield;
-5. Fig.4-style direct readout/GIF and KMeans panel for the final nondominated candidate;
-6. Chinese `figures/README.md`, PNG/PDF, metadata and visual QA record.
+5. Pareto plot: held-out distance versus KMeans alignment, color=OOD, size=event yield;
+6. Fig.4-style direct readout/GIF and KMeans panel for the final nondominated candidate;
+7. Chinese `figures/README.md`, PNG/PDF, metadata and visual QA record.
 
 The report leads with:
 
