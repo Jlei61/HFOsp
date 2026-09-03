@@ -189,6 +189,7 @@ def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=No
                     ee_dose=1.0, etoi_dose=1.0,
                     node_candidate_override=None, node_depth_shrinkage=1.0,
                     node_gain=1.0, node_dispersion_candidate_override=None,
+                    edge_coefficients_override=None,
                     ee_ellipse_angle_deg=45.0,
                     ee_ellipse_aspect_ratio=2.0,
                     ee_ellipse_reference_angle_deg=None,
@@ -343,9 +344,20 @@ def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=No
     )
     if not np.isclose(node["h"].sum(), expected_mass, atol=1e-8):
         raise RuntimeError("Node anchor field budget changed")
-    coefficients = np.asarray(candidate["coefficients"], float)
-    if array_sha256(coefficients) != candidate["coefficients_sha256"]:
-        raise RuntimeError("edge coefficient hash changed")
+    coefficients = np.asarray(
+        candidate["coefficients"]
+        if edge_coefficients_override is None
+        else edge_coefficients_override,
+        float,
+    )
+    if coefficients.shape != (2, 6) or not np.isfinite(coefficients).all():
+        raise RuntimeError("edge coefficient override must be finite with shape (2, 6)")
+    if edge_coefficients_override is not None:
+        coefficients = coefficients.copy()
+    else:
+        # The frozen source row retains its original hash contract.
+        if array_sha256(coefficients) != candidate["coefficients_sha256"]:
+            raise RuntimeError("edge coefficient hash changed")
 
     # ---- 6: the producer re-seeds here, before the edge mapper ----
     net["rng"] = np.random.default_rng(dynamics_seed)
@@ -481,6 +493,8 @@ def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=No
                 "node_dispersion_candidate_override": (
                     node_dispersion_candidate_override is not None
                 ),
+                "edge_coefficients_override": edge_coefficients_override is not None,
+                "edge_coefficients_input_sha256": array_sha256(coefficients),
                 "node_mapping_audit": node["mapping_audit"],
                 "manual_field_audit": manual_field_audit,
                 "ellipse_audit": ellipse_audit,

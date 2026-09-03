@@ -52,6 +52,8 @@ from src.topic4_node_dualmode import (  # noqa: E402
 from src.topic4_zm_ictal_transition import (  # noqa: E402
     build_substrate, load_round_config, make_external_drive,
 )
+from src.topic4_graph_edge_flow import array_sha256  # noqa: E402
+from src.topic4_zm_d4 import D4_ELEMENTS  # noqa: E402
 import src.topic4_manual_dual_core  # noqa: E402,F401
 import src.topic4_rev20_dual_core_mechanism  # noqa: E402,F401
 from kick_probe import simulate_kick  # noqa: E402
@@ -84,6 +86,28 @@ ALLOWED_SCIENTIFIC_ROLES = {
 def _validate_scientific_role(role: str) -> None:
     if str(role) not in ALLOWED_SCIENTIFIC_ROLES:
         raise RuntimeError("rev12-ND scientific role changed")
+
+
+def _candidate_null_overrides(candidate):
+    transform = candidate.get("field_transform")
+    if transform in (None, "none"):
+        transform = None
+    elif transform not in D4_ELEMENTS:
+        raise RuntimeError(f"unsupported frozen field transform: {transform!r}")
+
+    record = candidate.get("edge_coefficients_override")
+    coefficients = None
+    coefficient_hash = None
+    if record is not None:
+        if not {"values", "sha256"}.issubset(record):
+            raise RuntimeError("edge coefficient override lacks values or sha256")
+        coefficients = np.asarray(record["values"], dtype=np.float64)
+        if coefficients.shape != (2, 6) or not np.isfinite(coefficients).all():
+            raise RuntimeError("edge coefficient override must be finite with shape (2, 6)")
+        coefficient_hash = array_sha256(coefficients)
+        if coefficient_hash != record["sha256"]:
+            raise RuntimeError("edge coefficient override hash changed")
+    return transform, coefficients, coefficient_hash
 
 
 def _segmentation_variants(event_unit: dict) -> list[dict]:
@@ -554,16 +578,21 @@ def main() -> None:
     ellipse_aspect = float(mechanisms.get("ellipse_aspect_ratio", 2.0))
     ellipse_reference_angle = mechanisms.get("ellipse_reference_angle_deg")
     ellipse_reference_aspect = mechanisms.get("ellipse_reference_aspect_ratio")
+    field_transform, edge_coefficients_override, override_coefficients_sha256 = (
+        _candidate_null_overrides(candidate)
+    )
     base_candidate_id = str(config.get("reference", {}).get(
         "base_substrate_candidate_id", "node_baseline",
     ))
     substrate = build_substrate(
         transition, base_candidate_id, args.seed, cache_dir=str(cache_dir),
+        field_transform=field_transform,
         ee_dose=g_ee, etoi_dose=g_etoi,
         node_candidate_override=candidate["node_field"],
         node_depth_shrinkage=depth_shrinkage,
         node_gain=node_gain,
         node_dispersion_candidate_override=dispersion_field,
+        edge_coefficients_override=edge_coefficients_override,
         ee_ellipse_angle_deg=ellipse_angle,
         ee_ellipse_aspect_ratio=ellipse_aspect,
         ee_ellipse_reference_angle_deg=(
@@ -1387,6 +1416,16 @@ def main() -> None:
             "ellipse_aspect_ratio": ellipse_aspect,
             "ellipse_reference_angle_deg": ellipse_reference_angle,
             "ellipse_reference_aspect_ratio": ellipse_reference_aspect,
+            "field_transform": field_transform,
+            "edge_coefficients_source": (
+                "frozen_candidate_override"
+                if edge_coefficients_override is not None
+                else "rev11_learned_row"
+            ),
+            "edge_coefficients_input_sha256": substrate.extras[
+                "edge_coefficients_input_sha256"
+            ],
+            "edge_coefficients_override_sha256": override_coefficients_sha256,
             "edge_coefficients_all_zero": bool(np.allclose(substrate.edge_coefficients, 0.0)),
             "ellipse_audit": substrate.extras["ellipse_audit"],
             "learned_edge_audit": substrate.edge_audit,

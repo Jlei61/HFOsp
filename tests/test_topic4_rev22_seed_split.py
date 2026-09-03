@@ -14,7 +14,9 @@ sys.path.insert(0, str(ROOT / "src" / "snn_engine"))
 sys.path.insert(0, str(ROOT))
 
 from src.topic4_rev20_dual_core_mechanism import _hash_sparse_bins  # noqa: E402
+from src.topic4_graph_edge_flow import array_sha256  # noqa: E402
 from src.topic4_zm_ictal_transition import build_substrate, load_round_config  # noqa: E402
+from scripts.run_topic4_rev12_node_worker import _candidate_null_overrides  # noqa: E402
 
 CONFIG = ROOT / "config/topic4_data_driven_zm_ictal_transition_v1.json"
 SHARED_CACHE = ARTIFACT_ROOT / "results/topic4_sef_hfo/data_driven_core_field_rev9/network_cache"
@@ -40,6 +42,29 @@ def _graph_hashes(sub):
 
 def _rng_state(sub):
     return sub.net["rng"].bit_generator.state["state"]["state"]
+
+
+def test_candidate_null_overrides_are_frozen_and_hash_checked():
+    values = np.arange(12, dtype=np.float64).reshape(2, 6) / 10.0
+    transform, coefficients, digest = _candidate_null_overrides({
+        "field_transform": "r90",
+        "edge_coefficients_override": {
+            "values": values.tolist(),
+            "sha256": array_sha256(values),
+        },
+    })
+    assert transform == "r90"
+    assert np.array_equal(coefficients, values)
+    assert digest == array_sha256(values)
+
+    with pytest.raises(RuntimeError, match="hash changed"):
+        _candidate_null_overrides({
+            "edge_coefficients_override": {
+                "values": values.tolist(), "sha256": "0" * 64,
+            },
+        })
+    with pytest.raises(RuntimeError, match="unsupported frozen field transform"):
+        _candidate_null_overrides({"field_transform": "rotate_to_best"})
 
 
 @pytest.fixture(scope="module")
@@ -131,3 +156,16 @@ def test_manual_dual_core_reregistration_preserves_frozen_node_budget(legacy):
     ] is True
     assert transformed.extras["field_query_audit"]["field_transform"] == "r180"
     assert not np.array_equal(transformed.h_e, legacy.h_e)
+
+
+@pytest.mark.slow
+@pytest.mark.integration
+def test_frozen_edge_coefficient_override_changes_weights_not_topology(legacy):
+    override = np.ascontiguousarray(legacy.edge_coefficients[:, ::-1])
+    changed = _build(SEED_A, edge_coefficients_override=override)
+
+    assert np.array_equal(changed.edge_coefficients, override)
+    assert changed.extras["edge_coefficients_override"] is True
+    assert changed.extras["edge_coefficients_input_sha256"] == array_sha256(override)
+    assert _graph_hashes(changed)["topology"] == _graph_hashes(legacy)["topology"]
+    assert _graph_hashes(changed)["ampa"] != _graph_hashes(legacy)["ampa"]
