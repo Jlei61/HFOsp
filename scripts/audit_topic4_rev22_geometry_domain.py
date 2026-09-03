@@ -527,17 +527,17 @@ def _plot(out_dir: Path, theta, ar, worst: dict, rectangle: dict | None, seeds,
     x_edges = np.concatenate([theta - dtheta / 2, [theta[-1] + dtheta / 2]])
     y_edges = np.concatenate([ar - dar / 2, [ar[-1] + dar / 2]])
     panels = [
-        ("budget_error_max", "Max incoming-budget error (worst topology)", "viridis",
+        ("budget_error_max", "Incoming-budget error (worst)", "viridis",
          LogNorm(vmin=1e-16, vmax=1e-9), r"$\leq 10^{-9}$"),
-        ("zero_denominator", "Zero normalization denominator (any topology)", "Greys",
+        ("zero_denominator", "Zero denominator (any)", "Greys",
          None, "none allowed"),
-        ("edge_ratio_p01", "Edge-weight ratio p01 (min over topologies)", "cividis",
+        ("edge_ratio_p01", "Edge-weight ratio p01 (min)", "cividis",
          TwoSlopeNorm(vmin=0.0, vcenter=0.25, vmax=1.0), r"$\geq 0.25$"),
-        ("edge_ratio_p99", "Edge-weight ratio p99 (max over topologies)", "cividis_r",
+        ("edge_ratio_p99", "Edge-weight ratio p99 (max)", "cividis_r",
          TwoSlopeNorm(vmin=1.0, vcenter=4.0, vmax=12.0), r"$\leq 4$"),
-        ("effective_source_median_ratio", "Effective source count, median ratio (min over topologies)",
+        ("effective_source_median_ratio", "Effective sources, median ratio (min)",
          "cividis", TwoSlopeNorm(vmin=0.0, vcenter=0.75, vmax=1.5), r"$\geq 0.75$"),
-        ("effective_source_p05_ratio", "Effective source count, p05 ratio (min over topologies)",
+        ("effective_source_p05_ratio", "Effective sources, p05 ratio (min)",
          "cividis", TwoSlopeNorm(vmin=0.0, vcenter=0.50, vmax=1.5), r"$\geq 0.50$"),
     ]
     fig, axes = plt.subplots(2, 3, figsize=(10.5, 6.2), constrained_layout=True)
@@ -575,17 +575,21 @@ def _plot(out_dir: Path, theta, ar, worst: dict, rectangle: dict | None, seeds,
     return {"png": str(png), "pdf": str(pdf)}
 
 
-def _write_readme(out_dir: Path, rectangle_text: str, seeds) -> None:
+def _write_readme(out_dir: Path, rectangle_text: str, seeds,
+                  reference=(REFERENCE_ANGLE_DEG, REFERENCE_ASPECT_RATIO)) -> None:
     text = (
         "### geometry_domain_admissibility.png\n\n"
-        "固定拓扑 E→E 椭圆重加权的纯结构审计，不含任何仿真。横轴是重加权用的长轴角度，纵轴是"
+        "固定拓扑 E→E 椭圆重加权的纯结构审计，不含任何仿真。横轴是重加权用的长轴绝对角度（参考点 "
+        f"{float(reference[0]):.2f}° 就是这张图自己抽边时用的核长轴，即配准后的患者传播轴），纵轴是"
         "长短轴比，六个面板分别对应六条预注册可采纳判据：每个靶细胞总输入是否守恒、有没有归一化"
         "分母为零、边权重比例的 1% 和 99% 分位是否落在 [0.25, 4] 之内、每个靶细胞的有效来源数相对"
         "参考点的中位数比例和 5% 分位比例是否够高。每格取四张拟合拓扑（seed "
-        f"{', '.join(str(s) for s in seeds)}）里最差的一张；白圈是参考点 (45°, 2)，黑框是四张拓扑上"
+        f"{', '.join(str(s) for s in seeds)}）里最差的一张；白圈是参考点 "
+        f"({float(reference[0]):.2f}°, {float(reference[1]):g})，黑框是四张拓扑上"
         f"全部判据同时通过的最大轴对齐矩形，{rectangle_text}\n\n"
         "**关注点**：黑框才是 rev22 允许优化的几何域，框外的角度或长短轴比不是"
-        "\"数据不喜欢\"，而是这张固定拓扑图上没有足够的边可以承接权重。\n"
+        "\"数据不喜欢\"，而是这张固定拓扑图上没有足够的边可以承接权重。参考点必须落在图自己的核轴上，"
+        "否则\"加大长短轴比\"实际会把实现几何压圆（2026-09-03 修正前就是这种情形）。\n"
     )
     (out_dir / "README.md").write_text(text)
 
@@ -751,7 +755,8 @@ def main() -> None:
         rect_text = "没有任何非参考格通过。"
     figure_paths = _plot(out_root / "figures", theta, ar, worst, rectangle, sorted(per_topology),
                          reference=reference)
-    _write_readme(out_root / "figures", rect_text, sorted(per_topology))
+    _write_readme(out_root / "figures", rect_text, sorted(per_topology),
+                  reference=reference)
 
     summary = {
         "schema_id": "topic4_rev22_dci_geometry_domain_v1",
