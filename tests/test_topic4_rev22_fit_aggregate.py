@@ -197,13 +197,27 @@ def _write_worker(ctx: dict, candidate_id: str, topology_seed: int, *,
         "provenance": {
             "git_commit": ctx["commit"],
             "expected_git_commit": ctx["commit"],
-            "runtime_modules_match_expected_commit": True,
-            "runtime_modules_dirty": False,
+            "runtime_modules_match_expected_commit": 1,
+            "runtime_modules_dirty": 0,
             "config_sha256": config_hash,
             "config_sha256_at_expected_commit": config_hash,
         },
     }
     _write_json(worker_dir / f"{stem}.json", payload)
+
+
+_ABSENT = object()
+
+
+def _set_provenance(ctx: dict, stem: str, **fields) -> None:
+    path = ctx["worker_dir"] / f"{stem}.json"
+    payload = json.loads(path.read_text())
+    for key, value in fields.items():
+        if value is _ABSENT:
+            payload["provenance"].pop(key, None)
+        else:
+            payload["provenance"][key] = value
+    _write_json(path, payload)
 
 
 def _run(ctx: dict, *, ancestry_checker=lambda _a, _b, _root: True) -> dict:
@@ -422,3 +436,39 @@ def test_candidate_specific_floor_is_deterministic_and_recruitment_thinned(tmp_p
         rows["full"]["floor"][component] != rows["censored"]["floor"][component]
         for component in aggregate.CONDITIONAL_COMPONENTS
     )
+
+
+@pytest.mark.parametrize(
+    "flags, expect_valid",
+    [
+        ({"runtime_modules_match_expected_commit": 1, "runtime_modules_dirty": 0}, True),
+        ({"runtime_modules_match_expected_commit": True, "runtime_modules_dirty": False}, True),
+        ({"runtime_modules_match_expected_commit": 0, "runtime_modules_dirty": 0}, False),
+        ({"runtime_modules_match_expected_commit": 1, "runtime_modules_dirty": 1}, False),
+        ({"runtime_modules_match_expected_commit": _ABSENT, "runtime_modules_dirty": 0}, False),
+        ({"runtime_modules_match_expected_commit": 1, "runtime_modules_dirty": _ABSENT}, False),
+        ({"runtime_modules_match_expected_commit": "yes", "runtime_modules_dirty": 0}, False),
+        ({"runtime_modules_match_expected_commit": 2, "runtime_modules_dirty": 0}, False),
+        ({"runtime_modules_match_expected_commit": 1, "runtime_modules_dirty": -1}, False),
+    ],
+)
+def test_provenance_flags_accept_worker_ints_and_fail_closed(tmp_path, flags, expect_valid):
+    ctx = _make_contracts(tmp_path)
+    for unit in ctx["units"]:
+        _write_worker(ctx, "c0", unit["topology_seed"], n_events=14)
+    stem = f"c0_seed_{ctx['units'][0]['topology_seed']}"
+    _set_provenance(ctx, stem, **flags)
+
+    payload = _run(ctx)
+    first = ctx["units"][0]
+    unit = next(
+        row for row in payload["candidates"][0]["units"]
+        if row["topology_seed"] == first["topology_seed"]
+        and row["dynamics_seed"] == first["dynamics_seed"]
+    )
+    assert unit["artifact_integrity"] is expect_valid
+    if expect_valid:
+        assert unit["inventory_status"] == "PRESENT_VALIDATED"
+    else:
+        assert unit["inventory_status"] == "INVALID_ARTIFACT"
+        assert any(reason.startswith("RUNTIME_MODULES_") for reason in unit["failure_reasons"])

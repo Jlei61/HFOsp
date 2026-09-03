@@ -380,9 +380,11 @@ def _validate_and_score_unit(
     provenance = payload.get("provenance") or {}
     expected_commit = str(provenance.get("expected_git_commit") or "")
     runtime_commit = str(provenance.get("git_commit") or "")
-    if provenance.get("runtime_modules_match_expected_commit") is not True:
+    frozen_flag = provenance.get("runtime_modules_match_expected_commit")
+    if type(frozen_flag) not in (bool, int) or frozen_flag != 1:
         failures.append("RUNTIME_MODULES_NOT_FROZEN")
-    if provenance.get("runtime_modules_dirty") is not False:
+    dirty_flag = provenance.get("runtime_modules_dirty")
+    if type(dirty_flag) not in (bool, int) or dirty_flag != 0:
         failures.append("RUNTIME_MODULES_DIRTY_OR_UNKNOWN")
     if provenance.get("config_sha256") != provenance.get("config_sha256_at_expected_commit"):
         failures.append("WORKER_CONFIG_NOT_AT_EXPECTED_COMMIT")
