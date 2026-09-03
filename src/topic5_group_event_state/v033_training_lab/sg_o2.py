@@ -42,7 +42,13 @@ from .contact_grammar import (
     tensor_state_hash,
 )
 from .data import robust_scale_apply, robust_scale_fit
-from .paths import atomic_write_json, atomic_write_torch, current_commit, file_hash
+from .paths import (
+    atomic_write_json,
+    atomic_write_torch,
+    current_commit,
+    file_hash,
+    payload_hash,
+)
 
 
 HUMAN_INPUT_ROOT = Path("/data/hfosp_group_event_state_v0_3_3/agent_c/human_inputs")
@@ -58,6 +64,9 @@ INITS = ("xavier", "orthogonal")
 ROUTINGS = ("joint", "mark_scaffold_split")
 TAUS_SECONDS = (300.0, 1800.0, 7200.0)
 TARGET_HORIZON_SECONDS = 1800.0
+RUN_KINDS = ("resource_smoke", "full_training")
+STAGES = ("S0", "S1", "S2", "S3")
+O1_RECIPE_FORMAT = "group_event_state_v0_3_3_o1_frozen_optimizer_recipe"
 
 
 @dataclass(frozen=True)
@@ -94,25 +103,66 @@ class SGO2ArchConfig:
 class SGO2TrainConfig:
     max_steps: int = 80
     patience: int = 12
-    learning_rate: float = 1e-3
-    weight_decay: float = 1e-4
-    gradient_clip: float = 1.0
     pair_batch_size: int = 1024
     seed: int = 20260903
     min_delta: float = 1e-5
+    run_kind: str = "resource_smoke"
     smoke_train_anchors: int | None = None
     smoke_inner_anchors: int | None = None
 
     def validate(self) -> "SGO2TrainConfig":
         if self.max_steps < 1 or self.patience < 1 or self.pair_batch_size < 1:
             raise ValueError("O2 steps, patience and pair batch size must be positive")
-        if self.learning_rate <= 0 or self.weight_decay < 0 \
-                or self.gradient_clip <= 0 or self.min_delta < 0:
-            raise ValueError("O2 optimiser settings are invalid")
+        if self.min_delta < 0 or self.run_kind not in RUN_KINDS:
+            raise ValueError("O2 min_delta or run kind is invalid")
         for value in (self.smoke_train_anchors, self.smoke_inner_anchors):
             if value is not None and int(value) < 1:
                 raise ValueError("O2 smoke anchor caps must be positive")
+        capped = self.smoke_train_anchors is not None or self.smoke_inner_anchors is not None
+        if self.run_kind == "resource_smoke" and (
+            self.smoke_train_anchors is None or self.smoke_inner_anchors is None
+        ):
+            raise ValueError("resource_smoke requires both explicit anchor caps")
+        if self.run_kind == "full_training" and capped:
+            raise ValueError("full_training forbids smoke caps; capped data is never a full run")
         return self
+
+
+@dataclass(frozen=True)
+class FrozenO1Recipe:
+    source_path: str
+    source_sha256: str
+    content_hash: str
+    optimizer: str
+    schedule: str
+    betas: tuple[float, float]
+    eps: float
+    weight_decay: float
+    gradient_clip: float
+    lr_encoder_weights: float
+    lr_encoder_bias: float
+    lr_adapter_w: float
+    selected_cell_id: str
+    o1_study_hash: str
+
+    def validate(self) -> "FrozenO1Recipe":
+        if self.optimizer not in {"adamw", "adam"}:
+            raise ValueError("O2 currently accepts AdamW/Adam selected by O1")
+        if self.schedule != "constant":
+            raise ValueError("O2 runner currently accepts only an O1 constant schedule")
+        if len(self.betas) != 2 or not all(0 < value < 1 for value in self.betas):
+            raise ValueError("O1 beta values are invalid")
+        if self.eps <= 0 or self.weight_decay < 0 or self.gradient_clip <= 0:
+            raise ValueError("O1 eps/weight decay/clip are invalid")
+        if min(self.lr_encoder_weights, self.lr_encoder_bias, self.lr_adapter_w) <= 0:
+            raise ValueError("O1 learning rates must be positive")
+        if len(self.source_sha256) != 64 or len(self.content_hash) != 64 \
+                or len(self.o1_study_hash) != 64:
+            raise ValueError("O1 recipe provenance hashes are incomplete")
+        return self
+
+    def as_dict(self) -> dict[str, Any]:
+        return asdict(self)
 
 
 @dataclass(frozen=True)
@@ -172,16 +222,25 @@ def assert_training_phases(phases: Sequence[str]) -> None:
         )
 
 
-def validate_o2_smoke_lease(path: Path, *, subject: str) -> dict[str, Any]:
-    """Require a current, explicit one-worker grant before touching a human GPU."""
+def validate_o2_lease(
+    path: Path,
+    *,
+    subject: str,
+    run_kind: str,
+    device: torch.device | None = None,
+) -> dict[str, Any]:
+    """Require a current grant whose scope exactly matches smoke/full work."""
 
+    if run_kind not in RUN_KINDS:
+        raise ValueError(f"unknown O2 run kind {run_kind!r}")
     payload = json.loads(Path(path).read_text(encoding="utf-8"))
     status = str(payload.get("status", "")).upper()
     scope = " ".join(str(v) for v in [
         *payload.get("allowed_now", []), *payload.get("allowed_work", []),
     ])
     subjects = {str(v) for v in payload.get("allowed_subjects", [])}
-    explicit = payload.get("o2_sg_human_smoke_authorized") is True
+    explicit_smoke = payload.get("o2_sg_human_smoke_authorized") is True
+    explicit_full = payload.get("o2_sg_human_full_training_authorized") is True
     if not status.startswith("ACTIVE") or int(payload.get("max_workers", 0)) < 1:
         raise PermissionError("O2 resource lease is not ACTIVE with at least one worker")
     expires = str(payload.get("expires_at", ""))
@@ -193,15 +252,132 @@ def validate_o2_smoke_lease(path: Path, *, subject: str) -> dict[str, Any]:
     if now >= expiry:
         raise PermissionError("O2 resource lease has expired")
     scope_lower = scope.lower()
-    scoped_o2_smoke = "o2" in scope_lower and "smoke" in scope_lower
-    if not explicit and "sg_o2" not in scope_lower \
-            and "s_g o2" not in scope_lower and not scoped_o2_smoke:
-        raise PermissionError("O2 resource lease does not explicitly authorize S_G O2 smoke")
+    scoped_o2 = "o2" in scope_lower or "sg_o2" in scope_lower or "s_g o2" in scope_lower
+    scoped_smoke = scoped_o2 and "smoke" in scope_lower
+    scoped_full = scoped_o2 and ("full" in scope_lower or "training" in scope_lower) \
+        and "smoke" not in scope_lower
+    if run_kind == "resource_smoke" and not (explicit_smoke or scoped_smoke):
+        raise PermissionError("O2 lease does not explicitly authorize a resource smoke")
+    if run_kind == "full_training" and not (explicit_full or scoped_full):
+        raise PermissionError("O2 lease does not explicitly authorize full training")
     if subjects and subject not in subjects:
         raise PermissionError(f"O2 resource lease does not authorize {subject}")
     if int(payload.get("max_jobs_per_gpu_before_sentinel_review", 1)) > 1:
         raise PermissionError("O2 sentinel lease must be one job per GPU or stricter")
+    if device is not None:
+        allowed_gpu = {int(value) for value in payload.get("allowed_gpu_indices", [])}
+        if device.type != "cuda" or (allowed_gpu and int(device.index or 0) not in allowed_gpu):
+            raise PermissionError(
+                f"O2 device {device} is outside lease GPU set {sorted(allowed_gpu)}"
+            )
     return payload
+
+
+def validate_o2_smoke_lease(path: Path, *, subject: str) -> dict[str, Any]:
+    """Backward-compatible named smoke validator used by the first sentinel."""
+
+    return validate_o2_lease(path, subject=subject, run_kind="resource_smoke")
+
+
+def freeze_o1_optimizer_recipe(
+    *,
+    study_manifest_path: Path,
+    cell_manifest_path: Path,
+    output_path: Path,
+) -> dict[str, Any]:
+    """Freeze a supervisor-selected O1 cell without reading its result metric.
+
+    O1 chooses the cell.  This function only proves that the cell belongs to a
+    leakage-safe O1 study and normalises the optimizer fields consumed by O2.
+    """
+
+    study_path = Path(study_manifest_path)
+    cell_path = Path(cell_manifest_path)
+    study = json.loads(study_path.read_text(encoding="utf-8"))
+    cell = json.loads(cell_path.read_text(encoding="utf-8"))
+    scope = dict(study.get("scientific_scope") or {})
+    if study.get("format") != "group_event_state_v0_3_3_o1_optimizer_study_v1" \
+            or scope.get("development_evaluation_read") is not False \
+            or scope.get("sealed_partition_opened") is not False \
+            or scope.get("selection_phase") != "STATE_SELECTION":
+        raise PermissionError("O1 study is not TRAIN plus STATE_SELECTION only")
+    if cell.get("format") != "group_event_state_v0_3_3_o1_optimizer_cell_v1":
+        raise ValueError("O1 selected cell manifest format is invalid")
+    cells = {str(row.get("cell_id")): row for row in study.get("cells", [])}
+    selected_id = str(cell.get("cell_id", ""))
+    registered = cells.get(selected_id)
+    if registered is None or registered.get("config_hash") != cell.get("config_hash"):
+        raise ValueError("O1 selected cell is not registered byte-for-byte in its study")
+    recipe = dict(cell.get("recipe") or {})
+    lr = dict(recipe.get("lr") or {})
+    required_lr = ("encoder_weights", "encoder_bias", "adapter_w")
+    if any(name not in lr for name in required_lr):
+        raise ValueError("O1 selected recipe lacks O2 optimizer groups")
+    normalized = {
+        "optimizer": str(recipe.get("optimizer", "")),
+        "schedule": str(recipe.get("schedule", "")),
+        "betas": [float(value) for value in recipe.get("betas", ())],
+        "eps": float(recipe.get("eps", float("nan"))),
+        "weight_decay": float(recipe.get("weight_decay", float("nan"))),
+        "gradient_clip": float(recipe.get("grad_clip", float("nan"))),
+        "lr_encoder_weights": float(lr["encoder_weights"]),
+        "lr_encoder_bias": float(lr["encoder_bias"]),
+        "lr_adapter_w": float(lr["adapter_w"]),
+        "selected_cell_id": selected_id,
+        "o1_study_hash": str(study.get("study_content_hash", "")),
+    }
+    content_hash = payload_hash(normalized)
+    payload = {
+        "format": O1_RECIPE_FORMAT,
+        "status": "SUPERVISOR_SELECTED_AND_FROZEN",
+        **normalized,
+        "content_hash": content_hash,
+        "o1_study_manifest": str(study_path),
+        "o1_study_manifest_sha256": file_hash(study_path),
+        "o1_cell_manifest": str(cell_path),
+        "o1_cell_manifest_sha256": file_hash(cell_path),
+        "development_evaluation_used": False,
+        "seizure_outcomes_used": False,
+        "sealed_partition_opened": False,
+        "selection_authority": "supervisor supplies the selected cell; this tool does not rank O1 results",
+        "source_commit": current_commit(),
+    }
+    atomic_write_json(output_path, payload)
+    return payload
+
+
+def load_frozen_o1_recipe(path: Path) -> FrozenO1Recipe:
+    source = Path(path)
+    payload = json.loads(source.read_text(encoding="utf-8"))
+    if payload.get("format") != O1_RECIPE_FORMAT \
+            or payload.get("status") != "SUPERVISOR_SELECTED_AND_FROZEN" \
+            or payload.get("development_evaluation_used") is not False \
+            or payload.get("seizure_outcomes_used") is not False \
+            or payload.get("sealed_partition_opened") is not False:
+        raise PermissionError("O2 requires a frozen leakage-safe O1 optimizer recipe")
+    normalized = {
+        name: payload[name]
+        for name in (
+            "optimizer", "schedule", "betas", "eps", "weight_decay",
+            "gradient_clip", "lr_encoder_weights", "lr_encoder_bias",
+            "lr_adapter_w", "selected_cell_id", "o1_study_hash",
+        )
+    }
+    if payload_hash(normalized) != payload.get("content_hash"):
+        raise ValueError("frozen O1 optimizer recipe content hash differs")
+    return FrozenO1Recipe(
+        source_path=str(source), source_sha256=file_hash(source),
+        content_hash=str(payload["content_hash"]),
+        optimizer=str(payload["optimizer"]), schedule=str(payload["schedule"]),
+        betas=tuple(float(value) for value in payload["betas"]),
+        eps=float(payload["eps"]), weight_decay=float(payload["weight_decay"]),
+        gradient_clip=float(payload["gradient_clip"]),
+        lr_encoder_weights=float(payload["lr_encoder_weights"]),
+        lr_encoder_bias=float(payload["lr_encoder_bias"]),
+        lr_adapter_w=float(payload["lr_adapter_w"]),
+        selected_cell_id=str(payload["selected_cell_id"]),
+        o1_study_hash=str(payload["o1_study_hash"]),
+    ).validate()
 
 
 def staged_o2_plan() -> dict[str, Any]:
@@ -233,11 +409,16 @@ def staged_o2_plan() -> dict[str, Any]:
                  {"init": init, "update_gate": gate}
                  for init in INITS for gate in (False, True)
              ]},
-            {"name": "O2_S4_optional_mark_scaffold_cell",
-             "requires": "only if joint encoder remains training-inadequate",
-             "cells_template": [{"input_routing": value} for value in ROUTINGS],
-             "interpretation": "architecture diagnostic only; no causal attribution"},
         ],
+        "optional_architecture_diagnostic": {
+            "name": "O2_S3_optional_mark_scaffold_diagnostic",
+            "requires": (
+                "only if the registered S3 init/gate cells remain "
+                "training-inadequate; execute under stage S3"
+            ),
+            "cells_template": [{"input_routing": value} for value in ROUTINGS],
+            "interpretation": "architecture diagnostic only; no causal attribution",
+        },
         "launch_policy": "one stage at a time; no Cartesian product; await O1 before S1",
     }
 
@@ -320,7 +501,7 @@ def load_sg_o2_human_data(
     input_root: Path = HUMAN_INPUT_ROOT,
     dataset_root: Path = DATASET_ROOT,
 ) -> SGO2HumanData:
-    """Expose only STATE_TRAIN/STATE_SELECTION targets and pre-70% inputs."""
+    """Expose only STATE_TRAIN/STATE_SELECTION targets and pre-80% inputs."""
 
     train_cfg.validate()
     if subject not in TUNING_SUBJECTS:
@@ -749,31 +930,195 @@ def _gradient_l2(parameters: Sequence[nn.Parameter]) -> float:
     ))
 
 
+def _o1_parameter_groups(model: SGO2Model, recipe: FrozenO1Recipe) -> list[dict[str, Any]]:
+    """Map O2 parameters onto the three semantically matching O1 LR groups."""
+
+    encoder_weight = [p for _name, p in model.encoder.named_parameters() if p.ndim > 1]
+    encoder_bias = [p for _name, p in model.encoder.named_parameters() if p.ndim <= 1]
+    adapter_weight = list(model.scorer.residual.parameters())
+    groups = [
+        {"name": "encoder_weights", "params": encoder_weight,
+         "lr": recipe.lr_encoder_weights, "weight_decay": recipe.weight_decay},
+        {"name": "encoder_bias", "params": encoder_bias,
+         "lr": recipe.lr_encoder_bias, "weight_decay": 0.0},
+        {"name": "adapter_w", "params": adapter_weight,
+         "lr": recipe.lr_adapter_w, "weight_decay": recipe.weight_decay},
+    ]
+    assigned = [id(parameter) for group in groups for parameter in group["params"]]
+    expected = [id(parameter) for parameter in model.parameters() if parameter.requires_grad]
+    if len(assigned) != len(set(assigned)) or set(assigned) != set(expected):
+        raise RuntimeError("O2 parameter groups are duplicated or incomplete")
+    return groups
+
+
+def _build_o1_optimizer(
+    model: SGO2Model, recipe: FrozenO1Recipe
+) -> tuple[torch.optim.Optimizer, dict[str, Any]]:
+    groups = _o1_parameter_groups(model, recipe)
+    kwargs = {"betas": recipe.betas, "eps": recipe.eps}
+    if recipe.optimizer == "adamw":
+        optimizer: torch.optim.Optimizer = torch.optim.AdamW(groups, **kwargs)
+    else:
+        optimizer = torch.optim.Adam(groups, **kwargs)
+    return optimizer, {
+        "family": recipe.optimizer,
+        "schedule": recipe.schedule,
+        "betas": list(recipe.betas), "eps": recipe.eps,
+        "weight_decay": recipe.weight_decay,
+        "gradient_clip": recipe.gradient_clip,
+        "lr_by_group": {group["name"]: float(group["lr"]) for group in groups},
+        "source_path": recipe.source_path,
+        "source_sha256": recipe.source_sha256,
+        "content_hash": recipe.content_hash,
+        "selected_cell_id": recipe.selected_cell_id,
+        "o1_study_hash": recipe.o1_study_hash,
+    }
+
+
+def o2_cell_contract(
+    *,
+    subject: str,
+    stage: str,
+    pairing_id: str,
+    arch: SGO2ArchConfig,
+    train_cfg: SGO2TrainConfig,
+    o1_recipe: FrozenO1Recipe,
+    data: SGO2HumanData,
+    grammar_hash: str,
+) -> dict[str, Any]:
+    if stage not in STAGES:
+        raise ValueError(f"O2 stage must be one of {STAGES}")
+    if not pairing_id.strip():
+        raise ValueError("O2 paired cells need a non-empty pairing_id")
+    core = {
+        "subject": subject, "stage": stage, "pairing_id": pairing_id,
+        "architecture": asdict(arch), "train_config": asdict(train_cfg),
+        "optimizer_recipe_content_hash": o1_recipe.content_hash,
+        "input_hash": str(data.provenance["human_input_sha256"]),
+        "split_hash": str(data.provenance["split_hash"]),
+        "frozen_grammar_hash": grammar_hash,
+        "target": "legacy_next_set_or_STOP_future_0_to_30min",
+    }
+    return {**core, "contract_hash": payload_hash(core)}
+
+
+def validate_resume_payload(
+    payload: Mapping[str, Any], *, contract_hash: str
+) -> None:
+    if payload.get("format") != "group_event_state_v0_3_3_sg_o2_resume" \
+            or payload.get("contract_hash") != contract_hash:
+        raise PermissionError("O2 resume state belongs to a different cell/contract")
+    step = int(payload.get("last_completed_step", -1))
+    if step < 0 or not isinstance(payload.get("history"), list):
+        raise ValueError("O2 resume state is incomplete")
+
+
+def _cell_status_payload(
+    *,
+    state: str,
+    contract: Mapping[str, Any],
+    run_kind: str,
+    last_completed_step: int,
+    extra: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    return {
+        "format": "group_event_state_v0_3_3_sg_o2_cell_status",
+        "state": state, "run_kind": run_kind,
+        "contract_hash": contract["contract_hash"],
+        "subject": contract["subject"], "stage": contract["stage"],
+        "pairing_id": contract["pairing_id"],
+        "last_completed_step": int(last_completed_step),
+        "updated_epoch": time.time(),
+        **dict(extra or {}),
+    }
+
+
+def ensure_pairing_manifest(
+    path: Path,
+    *,
+    contract: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Lock seed/data/optimizer identity shared by every cell in one stage."""
+
+    core = {
+        "subject": contract["subject"], "stage": contract["stage"],
+        "pairing_id": contract["pairing_id"],
+        "seed": contract["train_config"]["seed"],
+        "run_kind": contract["train_config"]["run_kind"],
+        "optimizer_recipe_content_hash": contract["optimizer_recipe_content_hash"],
+        "input_hash": contract["input_hash"], "split_hash": contract["split_hash"],
+        "frozen_grammar_hash": contract["frozen_grammar_hash"],
+        "target": contract["target"],
+    }
+    expected = {
+        "format": "group_event_state_v0_3_3_sg_o2_pairing_manifest",
+        **core, "pairing_hash": payload_hash(core),
+    }
+    path = Path(path)
+    if path.exists():
+        observed = json.loads(path.read_text(encoding="utf-8"))
+        if observed != expected:
+            raise PermissionError(
+                "O2 paired cells differ in seed/data/split/optimizer/target identity"
+            )
+        return observed
+    atomic_write_json(path, expected)
+    return expected
+
+
+def resolve_o2_output_dir(
+    *,
+    subject: str,
+    run_kind: str,
+    pairing_id: str,
+    stage: str,
+    requested: Path,
+) -> tuple[Path, Path]:
+    """Keep smoke/full artifacts in disjoint, contract-labelled namespaces."""
+
+    root = (O2_ROOT / subject / run_kind / pairing_id / stage).resolve()
+    output = Path(requested).resolve()
+    if output == root or root not in output.parents:
+        raise PermissionError(
+            f"O2 cell output must be a child of its canonical {run_kind} stage root {root}"
+        )
+    return output, root / "pairing_manifest.json"
+
+
 def run_sg_o2_cell(
     subject: str,
     *,
+    stage: str,
+    pairing_id: str,
     arch: SGO2ArchConfig,
     train_cfg: SGO2TrainConfig,
+    o1_recipe_path: Path,
     device: torch.device,
     output_dir: Path,
     lease_path: Path,
+    resume: bool = False,
     overwrite: bool = False,
 ) -> dict[str, Any]:
     """Fit exactly one O2 cell.  A separate driver decides the next stage."""
 
     arch.validate()
     train_cfg.validate()
-    lease = validate_o2_smoke_lease(lease_path, subject=subject)
-    allowed_gpu = {int(value) for value in lease.get("allowed_gpu_indices", [])}
-    if device.type != "cuda" or (allowed_gpu and int(device.index or 0) not in allowed_gpu):
-        raise PermissionError(
-            f"O2 smoke device {device} is outside the lease GPU set {sorted(allowed_gpu)}"
-        )
-    output_dir = Path(output_dir)
+    if stage not in STAGES:
+        raise ValueError(f"O2 stage must be one of {STAGES}")
+    if train_cfg.run_kind == "full_training" and overwrite:
+        raise PermissionError("full O2 cells are immutable; resume instead of overwrite")
+    lease = validate_o2_lease(
+        lease_path, subject=subject, run_kind=train_cfg.run_kind, device=device
+    )
+    o1_recipe = load_frozen_o1_recipe(o1_recipe_path)
+    output_dir, pairing_manifest_path = resolve_o2_output_dir(
+        subject=subject, run_kind=train_cfg.run_kind, pairing_id=pairing_id,
+        stage=stage, requested=output_dir,
+    )
     card_path = output_dir / "training_card.json"
     checkpoint_path = output_dir / "checkpoint.pt"
-    if card_path.exists() and checkpoint_path.exists() and not overwrite:
-        return json.loads(card_path.read_text(encoding="utf-8"))
+    resume_path = output_dir / "resume.pt"
+    status_path = output_dir / "cell_status.json"
     random.seed(train_cfg.seed)
     np.random.seed(train_cfg.seed)
     torch.manual_seed(train_cfg.seed)
@@ -794,6 +1139,19 @@ def run_sg_o2_cell(
     frozen_hash = tensor_state_hash(grammar.state_dict())
     if frozen_hash != grammar_artifact.get("base_tensor_hash"):
         raise ValueError("O2 grammar identity differs before training")
+    contract = o2_cell_contract(
+        subject=subject, stage=stage, pairing_id=pairing_id, arch=arch,
+        train_cfg=train_cfg, o1_recipe=o1_recipe, data=data,
+        grammar_hash=frozen_hash,
+    )
+    pairing_manifest = ensure_pairing_manifest(pairing_manifest_path, contract=contract)
+    if card_path.exists() and checkpoint_path.exists() and not overwrite:
+        card = json.loads(card_path.read_text(encoding="utf-8"))
+        if card.get("cell_contract", {}).get("contract_hash") != contract["contract_hash"]:
+            raise PermissionError("completed O2 cell exists under a different contract")
+        return card
+    if (resume_path.exists() or status_path.exists()) and not resume and not overwrite:
+        raise FileExistsError("partial O2 cell exists; pass --resume after checking its status")
 
     model = SGO2Model(
         grammar, in_dim=data.x_scaled.shape[1], arch=arch,
@@ -811,9 +1169,7 @@ def run_sg_o2_cell(
     trainable = [p for p in model.parameters() if p.requires_grad]
     if not trainable or any(p.requires_grad for p in model.scorer.decoder.parameters()):
         raise RuntimeError("O2 trainable/frozen parameter membership is invalid")
-    optimizer = torch.optim.AdamW(
-        trainable, lr=train_cfg.learning_rate, weight_decay=train_cfg.weight_decay
-    )
+    optimizer, optimizer_contract = _build_o1_optimizer(model, o1_recipe)
     base_inner = _base_pair_nll(
         grammar, data, data.inner_pairs, device=device,
         batch_size=train_cfg.pair_batch_size,
@@ -826,47 +1182,98 @@ def run_sg_o2_cell(
     best_state: dict[str, Tensor] | None = None
     stale = 0
     max_grad = 0.0
-    for step in range(1, train_cfg.max_steps + 1):
-        model.train()
-        optimizer.zero_grad(set_to_none=True)
-        states = model.anchor_state(
-            x, train_event, event_time, event_carry, anchor_time, last,
-            train_anchor_rows,
-        )
-        fit_nll = _pair_nll(
-            model, data, states, data.train_pairs, device=device,
-            batch_size=train_cfg.pair_batch_size, backward=True,
-        )
-        grad = _gradient_l2(trainable)
-        max_grad = max(max_grad, grad)
-        clipped = float(torch.nn.utils.clip_grad_norm_(trainable, train_cfg.gradient_clip))
-        optimizer.step()
-        model.eval()
-        with torch.no_grad():
+    start_step = 1
+    if resume:
+        if not resume_path.is_file():
+            raise FileNotFoundError("--resume requested but resume.pt is absent")
+        saved = torch.load(resume_path, map_location=device, weights_only=False)
+        validate_resume_payload(saved, contract_hash=contract["contract_hash"])
+        _load_trainable_state(model, saved["model_state"])
+        optimizer.load_state_dict(saved["optimizer_state"])
+        history = list(saved["history"])
+        best = float(saved["best_inner_nll"])
+        best_step = int(saved["best_step"])
+        best_state = dict(saved["best_state"]) if saved.get("best_state") is not None else None
+        stale = int(saved["stale"])
+        max_grad = float(saved["max_gradient_l2_before_clip"])
+        initial_l2 = float(saved["initial_parameter_l2"])
+        if not math.isclose(float(saved["base_inner_nll"]), base_inner, rel_tol=0, abs_tol=1e-10):
+            raise ValueError("O2 frozen baseline changed across resume")
+        start_step = int(saved["last_completed_step"]) + 1
+    atomic_write_json(status_path, _cell_status_payload(
+        state="RUNNING", contract=contract, run_kind=train_cfg.run_kind,
+        last_completed_step=start_step - 1,
+        extra={"resume": bool(resume), "pid": __import__("os").getpid()},
+    ))
+    try:
+        for step in range(start_step, train_cfg.max_steps + 1):
+            model.train()
+            optimizer.zero_grad(set_to_none=True)
             states = model.anchor_state(
                 x, train_event, event_time, event_carry, anchor_time, last,
                 train_anchor_rows,
             )
-            inner_nll = _pair_nll(
-                model, data, states, data.inner_pairs, device=device,
-                batch_size=train_cfg.pair_batch_size, backward=False,
+            fit_nll = _pair_nll(
+                model, data, states, data.train_pairs, device=device,
+                batch_size=train_cfg.pair_batch_size, backward=True,
             )
-        history.append({
-            "step": step, "fit_future_block_event_nll": fit_nll,
-            "inner_future_block_event_nll": inner_nll,
-            "inner_gain_over_frozen_grammar": base_inner - inner_nll,
-            "gradient_l2_before_clip": grad,
-            "clip_return_l2": clipped,
-        })
-        if np.isfinite(inner_nll) and inner_nll < best - train_cfg.min_delta:
-            best = float(inner_nll)
-            best_step = int(step)
-            best_state = _cpu_trainable_state(model)
-            stale = 0
-        else:
-            stale += 1
+            grad = _gradient_l2(trainable)
+            max_grad = max(max_grad, grad)
+            clipped = float(torch.nn.utils.clip_grad_norm_(
+                trainable, o1_recipe.gradient_clip
+            ))
+            optimizer.step()
+            model.eval()
+            with torch.no_grad():
+                states = model.anchor_state(
+                    x, train_event, event_time, event_carry, anchor_time, last,
+                    train_anchor_rows,
+                )
+                inner_nll = _pair_nll(
+                    model, data, states, data.inner_pairs, device=device,
+                    batch_size=train_cfg.pair_batch_size, backward=False,
+                )
+            history.append({
+                "step": step, "fit_future_block_event_nll": fit_nll,
+                "inner_future_block_event_nll": inner_nll,
+                "inner_gain_over_frozen_grammar": base_inner - inner_nll,
+                "gradient_l2_before_clip": grad,
+                "clip_return_l2": clipped,
+            })
+            if np.isfinite(inner_nll) and inner_nll < best - train_cfg.min_delta:
+                best = float(inner_nll)
+                best_step = int(step)
+                best_state = _cpu_trainable_state(model)
+                stale = 0
+            else:
+                stale += 1
+            resume_payload = {
+                "format": "group_event_state_v0_3_3_sg_o2_resume",
+                "contract_hash": contract["contract_hash"],
+                "last_completed_step": int(step),
+                "model_state": _cpu_trainable_state(model),
+                "optimizer_state": optimizer.state_dict(),
+                "history": history, "best_inner_nll": best,
+                "best_step": best_step, "best_state": best_state,
+                "stale": stale, "max_gradient_l2_before_clip": max_grad,
+                "initial_parameter_l2": initial_l2,
+                "base_inner_nll": base_inner,
+            }
+            atomic_write_torch(resume_path, resume_payload)
+            atomic_write_json(status_path, _cell_status_payload(
+                state="RUNNING", contract=contract, run_kind=train_cfg.run_kind,
+                last_completed_step=step,
+                extra={"best_step": best_step, "best_inner_nll": best},
+            ))
             if stale >= train_cfg.patience:
                 break
+    except BaseException as exc:
+        atomic_write_json(status_path, _cell_status_payload(
+            state="FAILED", contract=contract, run_kind=train_cfg.run_kind,
+            last_completed_step=(history[-1]["step"] if history else start_step - 1),
+            extra={"error_type": type(exc).__name__, "error": str(exc)},
+        ))
+        raise
     if best_state is None:
         raise RuntimeError("O2 did not produce a finite STATE_SELECTION checkpoint")
     _load_trainable_state(model, best_state)
@@ -877,21 +1284,33 @@ def run_sg_o2_cell(
     elapsed = time.monotonic() - started
     peak_gpu = int(torch.cuda.max_memory_allocated(device)) if device.type == "cuda" else 0
     peak_rss = int(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss) * 1024
-    smoke = train_cfg.smoke_train_anchors is not None \
-        or train_cfg.smoke_inner_anchors is not None
     checkpoint = {
         "format": "group_event_state_v0_3_3_sg_o2_training_diagnostic",
         "subject": subject, "architecture": asdict(arch),
         "train_config": asdict(train_cfg), "selected_step": best_step,
         "selected_inner_nll": best, "trainable_state": best_state,
         "frozen_grammar_hash": frozen_hash,
+        "cell_contract": contract,
+        "optimizer_recipe": optimizer_contract,
         "scientific_use": False,
         "source_commit": current_commit(),
     }
     atomic_write_torch(checkpoint_path, checkpoint)
+    checkpoint_sha256 = file_hash(checkpoint_path)
     card = {
         "format": "group_event_state_v0_3_3_sg_o2_training_card",
-        "status": "RESOURCE_SMOKE_COMPLETE" if smoke else "O2_CELL_COMPLETE",
+        "status": (
+            "RESOURCE_SMOKE_COMPLETE" if train_cfg.run_kind == "resource_smoke"
+            else "FULL_TRAINING_DIAGNOSTIC_COMPLETE"
+        ),
+        "run_kind": train_cfg.run_kind,
+        "stage": stage, "pairing_id": pairing_id,
+        "pairing_manifest": {
+            "path": str(pairing_manifest_path),
+            "sha256": file_hash(pairing_manifest_path),
+            "pairing_hash": pairing_manifest["pairing_hash"],
+        },
+        "cell_contract": contract,
         "scientific_use": False,
         "reason_not_scientific": (
             "O2 diagnoses trainability/architecture only; no later development score is read"
@@ -947,6 +1366,7 @@ def run_sg_o2_cell(
             "parameter_l2_selected": selected_l2,
             "history": history,
             "config": asdict(train_cfg),
+            "optimizer_recipe": optimizer_contract,
         },
         "resources": {
             "device": str(device), "elapsed_seconds": elapsed,
@@ -961,7 +1381,14 @@ def run_sg_o2_cell(
             "status": lease.get("status"),
         },
         "checkpoint": str(checkpoint_path),
+        "checkpoint_sha256": checkpoint_sha256,
+        "resume_checkpoint": str(resume_path),
         "source_commit": current_commit(),
     }
     atomic_write_json(card_path, card)
+    atomic_write_json(status_path, _cell_status_payload(
+        state="COMPLETE", contract=contract, run_kind=train_cfg.run_kind,
+        last_completed_step=int(history[-1]["step"]),
+        extra={"training_card": str(card_path), "checkpoint_sha256": checkpoint_sha256},
+    ))
     return card
