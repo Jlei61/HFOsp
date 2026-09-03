@@ -443,10 +443,13 @@ the rev22 objective, structure domain, design, family set or candidate-selection
 The freeze manifest also fixes a support-budget contract before held-out data are opened:
 
 ```text
-n_cov = floor(median returned-family count over the four M0000 fit units)
+n_cov = min returned-family count over the four expected M0000 fit units
 ```
 
-`n_cov` must be at least the 12-event fit-estimability threshold. For frozen draw `b`, let
+The minimum, rather than the median, keeps the paired reference estimable on every topology
+unit; the archived rev20 counts are `38/43/22/40`, for which the former median rule would
+discard two of four reference units. `n_cov` must be at least the 12-event fit-estimability
+threshold. For frozen draw `b`, let
 `S_b` contain `n_cov` patient-training support events and let `Q_b` be every remaining
 patient-training event. The fixed coverage radius is:
 
@@ -457,6 +460,8 @@ r_cov = median_b q95_{q in Q_b} min_{s in S_b} distance(q, s),  b=1,...,1000
 Neither `n_cov` nor `r_cov` may be re-estimated per candidate. If the reference gives
 `n_cov < 12`, report `REFERENCE_SUPPORT_BUDGET_NOT_ESTIMABLE`; fixed-budget recall remains
 descriptive and no six-endpoint Pareto support claim is allowed.
+If any expected `M0000` fit unit is runaway, nonfinite or missing, the support budget is
+not estimable; the minimum is never computed after dropping that unit.
 
 After all corresponding SNN artifacts are immutable, the validation producer scores both
 the confirmed family candidates and every completed response-design trajectory. The latter
@@ -484,6 +489,9 @@ subsamples and report their mean and interval. Candidates with fewer than `n_cov
 all-event raw recall remains a sidecar. This separates distribution support from the number
 of generated events. Recall is computed within each topology unit and only then aggregated by the paired
 network bootstrap; events are never pooled across networks to manufacture support.
+If any expected unit is runaway, nonfinite or missing, the candidate's validation vector is
+`PRIMARY_ENDPOINT_NOT_ESTIMABLE`; metrics conditional on surviving units may be shown only
+as sidecars and cannot enter response curves or paired contrasts.
 
 Mandatory sidecars are mode-specific recruitment and rank profiles, pooled and
 equal-network-weighted mode proportions, the proportion of individual networks expressing

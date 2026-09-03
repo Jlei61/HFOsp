@@ -77,6 +77,7 @@ ALLOWED_SCIENTIFIC_ROLES = {
     "development_only_dual_continuous_node_confirmation",
     "development_only_dual_continuous_node_global_screen",
     "development_only_frozen_dual_core_interictal_mechanism_atlas",
+    "development_only_frozen_dual_core_interictal_connectivity_identifiability",
 }
 
 

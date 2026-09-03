@@ -91,7 +91,8 @@ the objective-qualification or parameter-domain artifacts.
 - Compute the six primary endpoints on held-out data (support, order and timing views,
   fixed-budget recall, natural KMeans balanced alignment, OOD) plus the composite distance.
 - Compute event yield and classifier two-sample AUC as secondary outputs.
-- Freeze prototype-only `n_cov_rev20` from the rev20 reference and calibrate
+- Freeze prototype-only `n_cov_rev20` as the minimum returned-family count over the four
+  rev20 reference screen units and calibrate
   `r_cov_rev20` using patient-training data only; use all held-out patient events as recall
   queries. These prototype values do not replace the formal rev22 freeze in Task 8.
 - Apply the same between-candidate/within-seed identifiability ratio to each proposed
@@ -226,10 +227,13 @@ OOM-risk estimate that cannot retain at least 32 GiB free RAM.
 - Retain any family whose optimum equals the reference as a `REFERENCE_RETURN` row. Verify an
   exact same-seed duplicate is byte-identical, and freeze a topology-matched independent
   dynamics replicate for the stochastic reference floor.
-- Freeze `n_cov` from the four `M0000` fit units and calibrate `r_cov` from 1,000 frozen
+- Freeze `n_cov` as the minimum returned-family count over the four expected `M0000` fit units
+  and calibrate `r_cov` from 1,000 frozen
   patient-training support draws using the exact formula in spec section 9. Hash both before
   any held-out metric is opened. If `n_cov < 12`, emit
   `REFERENCE_SUPPORT_BUDGET_NOT_ESTIMABLE` and prohibit a six-endpoint Pareto support claim.
+  If any expected reference unit is invalid or missing, emit the same status without
+  recomputing the minimum over survivors.
 - Write a freeze file containing coordinates, source surface hash and optimization trace.
 - Freeze qualification and confirmation seed pairs before launching either stage.
 - Do not read KMeans, OOD or held-out arrays while changing a parameter value.
@@ -281,6 +285,9 @@ select a parameter.
 - Fit metric-specific descriptive response surfaces solely to draw the frozen conditional
   slices. Do not optimize, rank candidates or update the training surrogate with these
   surfaces.
+- Keep every expected unit in the audit. A candidate with any runaway, nonfinite or missing
+  unit is not estimable for the six primary endpoints; surviving-unit values are sidecars,
+  never a replacement for the failed paired candidate.
 - Compute the held-out support, order and timing views and the composite distance.
 - Run natural KMeans K=2 on readable events and align clusters to frozen patient templates;
   report the full 2x2 matrix, balanced alignment and minority proportion.
