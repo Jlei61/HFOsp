@@ -1,7 +1,8 @@
 # Topic 4 rev22-DCI: frozen dual-core interictal connectivity identifiability
 
-**Status:** v5.1, structural amendment on 2026-09-03 (ellipse reference bound to the graph
-kernel axis; see section 3.1) on top of v5, execution contract repaired on 2026-09-03 after
+**Status:** v5.2, structural amendments on 2026-09-03 (v5.1 ellipse reference bound to the
+graph kernel axis, section 3.1; v5.2 composed edge-ratio floor relaxed to 0.20, section 3.2)
+on top of v5, execution contract repaired on 2026-09-03 after
 implementation audit.
 Offline Tasks 0-5 may start immediately. No rev22 SNN trajectory, including the Task 6
 canary, is authorized until the Task 1 objective qualification, Task 3 achieved-geometry
@@ -119,6 +120,33 @@ an offset, re-runs the Task 3 audit, and regenerates the design before any SNN r
 rev20 angle and aspect families were run against the misaligned reference; the rev20 result
 archive carries a dated correction and those two one-dimensional families are **not** reused
 as rev22 axis anchors. The v5 audit output is retained under `preliminary_archive/`.
+
+### 3.2 Amendment v5.2: composed edge-ratio floor (2026-09-03, decided after the audit)
+
+The first composed audit under v5.1 returned `CONNECTIVITY_DESIGN_INADMISSIBLE`: 20 of 384
+candidate-by-topology cells had an E-to-E edge-weight ratio p01 of 0.212 to 0.238 against the
+0.25 floor. The failures are a pure interaction and identical on all four topologies. Neither
+transformation causes them alone: with the geometry at the graph kernel, an E-to-E dose of
+0.964 still gives 0.335, and with the doses at the reference, the worst geometry point gives
+0.307. The two pathways are separable, since the E-to-E ratio is uncorrelated with the E-to-I
+dose (-0.014) and the E-to-I ratio tracks its own dose (-0.915).
+
+The user decided on 2026-09-03 to relax the **composed** floor to 0.20 and keep the frozen
+design and the frozen geometry rectangle. The single-step geometry audit keeps 0.25. Three
+facts must travel with every downstream result:
+
+1. the relaxation was decided **after** the observed values were known, so 0.20 is not a
+   pre-registered value; the closest observed cell sits 0.012 above the new floor;
+2. every candidate whose composed p01 falls in the relaxed band `[0.20, 0.25)` is flagged
+   `relaxed_band` in the audit table and in the audit summary;
+3. the closeout must state explicitly whether any reported conclusion depends on a
+   `relaxed_band` candidate. If a family optimum or a Pareto verdict rests on one, the report
+   must say so next to the claim, not only in the audit artifact.
+
+Rejected alternatives, recorded so the choice is auditable: regenerating the design inside the
+composed-admissible region at the original floor (keeps every pre-registered threshold but
+makes the domain non-box), and shrinking the parameter box (loses large measured-admissible
+regions, and a geometry-side box conditional on the maximum dose collapses to the reference).
 
 These geometry limits are not yet the frozen fit domain. Task 3 replaces them with the
 largest connected, axis-aligned neighborhood containing `(45 deg, 2)` that passes the

@@ -14,7 +14,7 @@ each goal has a verification check that must pass before the next starts.
 | G2 | Task 1b | rev20 validation-atlas prototype figure inspected; display-identifiability decisions frozen |
 | G3 | Task 2 | substrate-hash parity for equal seeds and a full 20 s archived-seed byte parity run; cross tests green |
 | G4 | Task 3 + Task 4 | achieved-geometry domain hash (graph-axis reference, v5.1) and design manifest frozen; coverage figure inspected; rev20 angle/aspect anchors excluded |
-| G4b | Task 4b | minimal transition config frozen; complete composed-connectivity design audit passes |
+| G4b | Task 4b | minimal transition config frozen; complete composed-connectivity design audit passes under the v5.2 composed floor, with relaxed-band candidates flagged |
 | G5 | Task 5 | component GP + feasibility + minimax proposal code green on synthetic surfaces |
 | G6 | Task 6 | canary provenance clean; RSS/wall time recorded; concurrency set |
 | G7 | Task 7 + Task 8 | all fit artifacts immutable; proposals frozen before any validation field is loaded |
@@ -186,6 +186,10 @@ showing every 1D/2D projection of the design.
 **Stop rule:** any missing or failed candidate-topology cell, producer-parity error or
 validation-only input visible in the minimal transition config yields
 `FINAL_CONNECTIVITY_DESIGN_INADMISSIBLE`. Do not drop points and do not start a canary.
+This stop fired on 2026-09-03 (20 of 384 cells at 0.212-0.238). Amendment v5.2 relaxed the
+composed floor to 0.20 by user decision after the values were seen; the single-step floor
+stays 0.25, the design and geometry rectangle are unchanged, and every candidate in the
+relaxed band is flagged (spec section 3.2).
 
 ## Task 5: implement the response and conditional-optimum analysis
 
@@ -380,7 +384,8 @@ The report leads with:
 - which coordinates are useful, conditionally useful or non-identifiable;
 - whether improvement came from distribution coverage rather than event suppression;
 - the explicit boundary that no total synaptic strength, rebuilt tract geometry, Z/M or
-  ictal claim was tested.
+  ictal claim was tested;
+- whether any reported conclusion depends on a `relaxed_band` candidate (spec section 3.2).
 
 ## Budget and completion definition
 

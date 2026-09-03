@@ -53,12 +53,30 @@ DEFAULT_OUT = ARTIFACT_ROOT / (
     "results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/"
     "connectivity_design_audit"
 )
+# Amendment v5.2 (2026-09-03, decided by the user after the first composed audit):
+# the composed edge-ratio floor is 0.20, relaxed from the 0.25 used for each transformation
+# on its own. The relaxation was decided AFTER seeing that 20 of 384 cells fell in
+# [0.212, 0.238]; every candidate whose composed p01 lands in the relaxed band is flagged so
+# a downstream conclusion cannot rest on it silently. The single-step geometry audit keeps
+# 0.25 and its frozen rectangle is unchanged.
+COMPOSED_EDGE_RATIO_P01_MIN = 0.20
+SINGLE_STEP_EDGE_RATIO_P01_MIN = 0.25
 THRESHOLDS = {
     "budget_error_max": 1e-9,
-    "edge_ratio_p01_min": 0.25,
+    "edge_ratio_p01_min": COMPOSED_EDGE_RATIO_P01_MIN,
     "edge_ratio_p99_max": 4.0,
     "effective_source_median_ratio_min": 0.75,
     "effective_source_p05_ratio_min": 0.50,
+}
+THRESHOLD_PROVENANCE = {
+    "composed_edge_ratio_p01_min": COMPOSED_EDGE_RATIO_P01_MIN,
+    "single_step_edge_ratio_p01_min": SINGLE_STEP_EDGE_RATIO_P01_MIN,
+    "amendment": "v5.2",
+    "decided": "2026-09-03, after the first composed audit reported 20 of 384 cells at 0.212-0.238",
+    "decision_order": "threshold relaxed after the data were seen; not a pre-registered value",
+    "obligation": ("every candidate with composed edge-ratio p01 below the single-step floor is "
+                   "flagged relaxed_band; the closeout must state whether any conclusion depends "
+                   "on those candidates"),
 }
 
 
@@ -229,10 +247,13 @@ def audit_topology(seed: int, *, artifact_root: Path, transition_path: Path,
         )
         structure = candidate_structure(ee, etoi, final, positions)
         passed = structure_passes(structure, THRESHOLDS)
+        relaxed_band = bool(passed and any(
+            float(structure[pathway]["edge_ratio_p01"]) < SINGLE_STEP_EDGE_RATIO_P01_MIN
+            for pathway in structure))
         rows.append({
             "candidate_id": candidate["candidate_id"], "topology_seed": int(seed),
             "block": candidate["block"], "physical": dict(candidate["physical"]),
-            "passes": bool(passed), "pathways": structure,
+            "passes": bool(passed), "relaxed_band": relaxed_band, "pathways": structure,
         })
         if index == parity_index:
             parity = {
@@ -276,7 +297,7 @@ def summarize(per_topology: dict, candidates: list[dict]) -> tuple[list[dict], b
 def _write_csv(path: Path, rows: list[dict]) -> None:
     fields = [
         "candidate_id", "topology_seed", "block", "g_LEE", "g_LEI", "theta_FT_deg", "AR_FT",
-        "passes", "EE_budget_error", "EE_ratio_p01", "EE_ratio_p99",
+        "passes", "relaxed_band", "EE_budget_error", "EE_ratio_p01", "EE_ratio_p99",
         "EE_effective_source_median_ratio", "EE_effective_source_p05_ratio",
         "EtoI_budget_error", "EtoI_ratio_p01", "EtoI_ratio_p99",
         "EtoI_effective_source_median_ratio", "EtoI_effective_source_p05_ratio",
@@ -291,6 +312,7 @@ def _write_csv(path: Path, rows: list[dict]) -> None:
             writer.writerow({
                 "candidate_id": row["candidate_id"], "topology_seed": row["topology_seed"],
                 "block": row["block"], **row["physical"], "passes": row["passes"],
+                "relaxed_band": row.get("relaxed_band", False),
                 "EE_budget_error": ee["maximum_abs_incoming_error"],
                 "EE_ratio_p01": ee["edge_ratio_p01"], "EE_ratio_p99": ee["edge_ratio_p99"],
                 "EE_effective_source_median_ratio": ee["effective_source_median_ratio"],
@@ -358,11 +380,15 @@ def main() -> None:
         "minimal_transition_config_sha256": sha256(args.transition_config),
         "rev20_config_sha256": sha256(args.rev20_config),
         "thresholds": THRESHOLDS,
+        "threshold_provenance": THRESHOLD_PROVENANCE,
         "candidate_count": len(response["candidates"]),
         "topology_seeds": fit_seeds,
         "expected_cells": len(response["candidates"]) * len(fit_seeds),
         "observed_cells": len(rows),
         "passing_cells": int(sum(row["passes"] for row in rows)),
+        "relaxed_band_cells": int(sum(row.get("relaxed_band", False) for row in rows)),
+        "relaxed_band_candidates": sorted({row["candidate_id"] for row in rows
+                                           if row.get("relaxed_band")}),
         "failed_cells": failures,
         "producer_parity": {str(seed): per_topology[seed]["producer_parity"] for seed in fit_seeds},
         "per_topology": {
