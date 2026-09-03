@@ -27,7 +27,10 @@ PYTHON = Path("/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python")
 WORKER = ROOT / "scripts/run_topic4_rev12_node_worker.py"
 MANAGER = ROOT / "scripts/run_topic4_rev10_sa_managed_command.sh"
 WORKER_COMPLETE = "REV12ND_NODE_WORKER_COMPLETE"
-PHASES = ("canary", "fit", "decomposition", "qualification", "confirmation")
+PHASES = (
+    "canary", "fit", "decomposition", "qualification", "confirmation",
+    "structural_nulls",
+)
 FROZEN_SELECTION_PHASES = frozenset({"qualification", "confirmation"})
 RESERVE_GIB = 32.0
 MAXIMUM_WORKERS = 16
@@ -303,6 +306,15 @@ def expand_jobs(
         expected = int(block.get("new_trajectories", -1))
         if len(candidate_ids) * len(units) != expected or expected != 16:
             raise RuntimeError("decomposition manifest does not freeze exactly 16 new runs")
+    elif phase == "structural_nulls":
+        candidate_ids = list(index)
+        units = _seed_units(seed_manifest, "confirmation")[:6]
+        if len(candidate_ids) != 18 or len(units) != 6:
+            raise RuntimeError(
+                "structural-null manifest must freeze 18 candidates on six seeds"
+            )
+        if len(candidate_ids) * len(units) != 108:
+            raise RuntimeError("structural-null phase must contain exactly 108 jobs")
     else:
         candidate_ids = _frozen_candidate_ids(
             frozen_candidates_path, index, frozen_bindings,

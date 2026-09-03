@@ -96,6 +96,31 @@ def test_decomposition_launches_only_sixteen_new_split_seed_runs(tmp_path):
     assert {job["candidate_id"] for job in jobs} == {"dci_p000", "dci_p001"}
 
 
+def test_structural_null_phase_is_exactly_eighteen_by_six(tmp_path):
+    manifest = {
+        "candidate_count": 18,
+        "candidates": [
+            _candidate(f"sn_{index:02d}", "structural_null", (0, 0, 0, 0))
+            for index in range(18)
+        ],
+    }
+    seeds = _seeds()
+    seeds["confirmation"]["units"] = [
+        {"topology_seed": seed, "dynamics_seed": seed}
+        for seed in range(2621, 2633)
+    ]
+    jobs = expand_jobs("structural_nulls", manifest, seeds, tmp_path, COMMIT)
+    assert len(jobs) == 108
+    assert len({job["candidate_id"] for job in jobs}) == 18
+    assert {job["topology_seed"] for job in jobs} == set(range(2621, 2627))
+    assert all("/structural_nulls/" in str(job["json"]) for job in jobs)
+
+    manifest["candidates"].pop()
+    manifest["candidate_count"] = 17
+    with pytest.raises(RuntimeError, match="18 candidates"):
+        expand_jobs("structural_nulls", manifest, seeds, tmp_path, COMMIT)
+
+
 def test_equal_and_split_seed_jobs_have_unique_explicit_names(tmp_path):
     fit = expand_jobs("fit", _manifest(), _seeds(), tmp_path, COMMIT)[0]
     split = expand_jobs("decomposition", _manifest(), _seeds(), tmp_path, COMMIT)[0]
