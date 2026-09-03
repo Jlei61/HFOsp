@@ -1,5 +1,10 @@
 # 空间 Z/M 经验相图与患者匹配分叉分析（2026-09-03）
 
+> **2026-09-04 follow-up**：本报告中的“delay-aware stability / grid convergence / 3-seed
+> dynamic projection 未完成”已由后续审计闭合；旧的零延迟 high-branch stability/Hopf
+> sensitivity 不再作为当前口径。请以
+> `spatial_zm_saddle_organizer_delay_grid_audit_2026-09-04.md` 为准。
+
 ## 1. 审阅结论
 
 **一句话判断**：现在找到了一个真正满足“分支折返 + 固定点 Jacobian 实零模穿零”的

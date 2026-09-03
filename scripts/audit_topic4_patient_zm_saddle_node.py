@@ -274,6 +274,7 @@ def main():
         "micro_eigen_imag": eigen_imag,
         "closest_right_null": right_null,
         "closest_left_null": left_null,
+        "closest_rates": closest.rates,
         "probe_upper_rates": probe_upper.rates,
         "probe_lower_rates": probe_lower.rates,
     }

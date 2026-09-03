@@ -44,19 +44,24 @@
 > `docs/archive/topic4/sef_hfo/data_driven_snn_cohort_formal_result_2026-08-16.md`，
 > 冻结与预检见同目录 `..._canary_and_formal_freeze_2026-08-15.md`。
 
-> **空间 Z/M + 持续 OU 相图更新（2026-09-03）**：作者本轮把 near-saturated tonic plateau
-> 与深调制振荡都计作 runaway。冻结 `tonic_b0_v2` 已由新 seeds 1841/1842/1843 以 3/3 确认
-> 持续全局高平台；matched-noise 双初值 pilot 则显示 `q=0.860 L/L → 0.840/0.820 L/I →
-> 0.805 I/I → 0.790/0.770 I/H`，尚无三 seed `L/H` 同点共存。进一步用实际患者邻接、阈值场、
-> q target 和 self-consistent M 构造 1 mm deterministic reduction，pseudo-arclength 折返与同一
-> fixed-point Jacobian 实零模共同确认 saddle-node；进一步的 generic-fold 审计同时通过
-> 同一 q 双根、simple isolated zero mode、transversality 与 quadratic nondegeneracy：
-> `eta_m=0.02` 时 `q_fold=0.890825926`、fold E rate=127.399 Hz；`eta_m=0→0.08` 仅移动
-> `Δq_fold≈2.7e-4`。**术语边界**：saddle-node 只属于 OU 取零均值的 reduced frozen-q fast
-> subsystem；OU-on finite SNN 的经验边缘约 `q=0.80–0.825`，仍只能称 threshold-like
-> transition。coarse-grid convergence、colored-OU closure、delay-aware Hopf 和 empirical
-> 3-seed 长驻留尚未完成，禁止写 finite-SNN phase transition。完整审阅：
-> `docs/archive/topic4/data_driven_zm_ictal_transition/spatial_zm_phase_bifurcation_analysis_2026-09-03.md`。
+> **空间 Z/M + 持续 OU：saddle organizer 收口（2026-09-04）**：作者把 near-saturated
+> tonic plateau 与深调制振荡都计作 runaway；冻结 `tonic_b0_v2` 已由 prospective seeds
+> 1841/1842/1843 以 3/3 确认持续全局高平台。1 mm patient-matched deterministic
+> frozen-q reduction 的 generic saddle-node 仍成立（`q_fold=0.890825926`），但加入实际
+> recurrent conduction delays 后结论被收紧：near-silent 支在 `q=0.775–0.890` 稳定，
+> high-rate equilibrium 全段线性不稳定；远离 fold 的主复模约 27 Hz。因此高支只能称
+> **delay-unstable high-rate skeleton**，不能称稳定高 fixed point。
+>
+> 三颗 SNN 轨迹的 `q_core` 与 `q_mean` 都在操作性 onset 前穿过 reduced fold，提前
+> 167–284 ms 与 176–242 ms；后期平台率与 `q_min=0.775` 的 high skeleton 相差 6.8–7.8%，
+> 且 M 与 `M*=tau_M*r_E` 相差 0.28–1.07%。这支持 fold 作为**时间次序和状态尺度上的
+> organizer**，不等于它是有限 SNN 的精确阈值或因果证明。2、1.33、1 mm 三种保守粗化
+> 都有 generic fold，共享锚点的 high branch 均值率最大只差 0.15%；最细两网格的
+> `q_fold` 差 0.00282，但 fold rate 相差 32.9%，未过 15% 收敛门。因此可以报告
+> “fold existence and branch identity are robust within the tested reductions”，不能报告
+> 精确 fold state/rate 已网格收敛，更不能写 finite-SNN phase transition。paper-facing
+> Fig. 5 采用静态 A–D 版，B 专门承载这条 bounded mechanism claim。完整审阅：
+> `docs/archive/topic4/data_driven_zm_ictal_transition/spatial_zm_saddle_organizer_delay_grid_audit_2026-09-04.md`。
 
 ---
 

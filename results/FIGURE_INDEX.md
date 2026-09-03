@@ -7,7 +7,7 @@
 > per-subject / per-seizure 的诊断图（占全部图的 ~75%）不在本索引里逐一列出——它们藏在各目录的
 > `per_subject/` `per_seizure/` `subjects/` 子目录中，是单被试核对用，不是结论图。
 >
-> 最近更新：2026-07-30。新增结论图目录时，请在对应 topic 表里补一行。
+> 最近更新：2026-09-04。新增结论图目录时，请在对应 topic 表里补一行。
 >
 > **画新图前先看可视化标准** → [`docs/figure_style_guide.md`](../docs/figure_style_guide.md)：
 > 每类反复出现的图（时序模板 / swap 节点 / 几何传播 / 事件时序 / 机制模型）的固定布局 + 配色 + 轴约定。
@@ -26,6 +26,7 @@
 | 3 几何骨架 | [spatial_modulation/propagation_geometry/components/path_axis/figures/along_axis_stereotypy_profile.png](spatial_modulation/propagation_geometry/components/path_axis/figures/) | 传播是否沿一条稳定空间轴 |
 | 4 模型 | [topic4_sef_hfo/snn_heterogeneity/figures/mean_scan.png](topic4_sef_hfo/snn_heterogeneity/figures/) | SNN 阈值异质核：点火边界的参数扫描 |
 | 4 观测层 | [topic4_sef_hfo/observation_layer/snn_cm_spontaneous/figures/stage2_summary.png](topic4_sef_hfo/observation_layer/snn_cm_spontaneous/figures/) | 虚拟 SEEG 把模型读回成方向/模板 |
+| 4 Z/M transition | [paper-ready-figure/fig5_spatial_zm_ou_tonic/figures/fig5-spatial-zm-ou-tonic-main-v2.png](paper-ready-figure/fig5_spatial_zm_ou_tonic/figures/) | 持续 OU 下的 tonic global runaway 与 patient-matched reduced saddle organizer；不是有限 SNN 严格相变 |
 | 5 ictal 回响 | [topic5_ictal_template_echo/figures/echo_anchor_not_path.png](topic5_ictal_template_echo/figures/) | 发作期通道顺序是否回响间期模板（共享粗锚 vs 具体路径） |
 | 5 桥接 | [topic1_topic5_bridge/figures/q1prime_cohort_effect.png](topic1_topic5_bridge/figures/) | Topic 1 模板 × Topic 5 亚型 的队列效应 |
 | 5 bounded sequence | [topic5_interictal_scaffold_reliability_history_necessity/figures/topic5_scaffold_reliability_history_necessity_v0_1.png](topic5_interictal_scaffold_reliability_history_necessity/figures/) | 34人 target-blind：participation scaffold 可重复；真实顺序增量集中在最近2–3个 rank set，full history 不超过 H3 |
@@ -102,6 +103,7 @@
 | [topic4_sef_hfo/schematic/figures/](topic4_sef_hfo/schematic/figures/) | 机制示意图 |
 | [topic4_sef_hfo/data_driven_snn_cohort_v1/formal/figures/](topic4_sef_hfo/data_driven_snn_cohort_v1/formal/figures/) | **34 人 data-driven SNN cohort 收官（2026-08-16）＝两道闸门未过，主张不成立**。A 队列统计（谁在队列 / 是否赢过"同杆内换标签"对照 / 同网络是否长出两簇 / 换真实几何后是否同向）、B 代表患者场+两模式+同网络电极读数、C 代表患者聚类核验，外加带 A–C 字母的 `-complete-layout`。数字：只看电极名字的摆位上 23/34 赢过对照、中位优势 +0.0063（零假设水平的 3.3%）、p=0.043（符号检验 0.058 过不了）；**换真实植入几何效应归零**（−0.0007，p=0.98，两臂符号一致 14/28＝掷硬币）；同网络双模式仅 15/34。⚠️ canonical 摆位是**只看电极名字**排出的读出，**不是解剖**；两种读法（理想摆位假象 / 真实几何太弱）分不开，故状态是 unresolved 而非证伪。结果 `docs/archive/topic4/sef_hfo/data_driven_snn_cohort_formal_result_2026-08-16.md` |
 | [paper-ready-figure/fig4/figures/](paper-ready-figure/fig4/figures/) | **Figure 4 当前 canonical working package（CANDIDATE）**：A–G 无角标独立 PNG/PDF + 带字母 `fig4-complete-layout`。A E/I 概念示意，B E1146 subject-SNN placement，C 空白 reserved data-driven slot，D continuous virtual-SEEG，E forward/reverse firing-onset maps，F 21-seed/222-event rank heatmap，G rank profiles + model–data matrix。当前参数化版本不是最终机制图；后续由 data-driven core-field 版本原位替换。 |
+| [paper-ready-figure/fig5_spatial_zm_ou_tonic/figures/](paper-ready-figure/fig5_spatial_zm_ou_tonic/figures/) | **Figure 5 当前 paper-facing candidate（2026-09-04）**：作者指定静态 A–D 布局；A 连续 tonic global recruitment/readout，B `q_core/q_mean/M/rE` 对 patient-matched reduced fold 的投影，C 低态事件次序与 early-runaway energy，D matched weak-probe response。prospective seeds 1841–1843 为 3/3；B 的 high branch 是 delay-unstable skeleton，2/1.33/1 mm 均有 fold 但 fold rate 未收敛，禁止写成有限 SNN phase transition。 |
 | [paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig_m3a_v2_2_hG_runaway_transition/figures/](paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig_m3a_v2_2_hG_runaway_transition/figures/) | **M3A-v2.2 全局恢复 h_G 单轨迹 GIF**（visual diagnostic，非 sweep）：间期 axis-like→runaway 转变，把全局抑制恢复标量 `h_G` 打开。`h_G` 只在 runaway 时升起（局部事件期 χ_G≈0），但 runaway **未被逆转**；`eta_G` 阶梯 0→80（>10× 膜跨度）结构性无效——减法式全局刹车拉不回饱和 recurrent 雪崩，瓶颈在 E→E 衬底。配 v2.1 `fig_m3a_v2_1_qigk_runaway_transition`（同轨迹 h_G OFF） |
 | [topic4_criticality/figures/](topic4_criticality/figures/) | **M3A-v2.2 criticality M1**：frozen-Jacobian 轨迹判读；采样快照跨过失稳边界但没有直接命中 crossing，故 `csd_verdict=unresolved_operating_point`，作为历史诊断保留 |
 | [topic4_criticality_m2/figures/](topic4_criticality_m2/figures/) | **M3A-v2.2 criticality M2（2026-07-12 有界验收）**：线性起燃模式为 `core_localized`；非线性铺开对扰动强度/极性敏感，维持 `undetermined`。这是 M4 的上游诊断，不替代 M4 的恢复/终止设计 |

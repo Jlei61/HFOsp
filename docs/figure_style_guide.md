@@ -164,6 +164,7 @@
 ## Topic 4 · 机制模型（SEF-HFO / cm-SNN）
 
 - **示范图**：[`results/paper-ready-figure/fig5_core_model_s3_brakeoff/figures/core_model_s3_brakeoff.png`](../results/paper-ready-figure/fig5_core_model_s3_brakeoff/figures/core_model_s3_brakeoff.png)
+- **Fig. 5 transition 特例（2026-09-04 锁定）**：空间 Z/M + 持续 OU 的 transition 图不走下面的单行四列模板，而严格采用作者提供的 `A continuous readout | B critical manifold | C event order + early-runaway energy | D low/early-runaway matched probe response` 静态 A–D 布局；canonical producer 是 `scripts/paper_figures/plot_fig5_spatial_zm_ou_tonic_paper_ready.py`，输出是 `results/paper-ready-figure/fig5_spatial_zm_ou_tonic/figures/fig5-spatial-zm-ou-tonic-main-v2.*`。B 必须同时画 `q_core` 与 `q_mean`，标出 generic saddle-node，并明确 high branch 是 delay-unstable skeleton；不得画成稳定高 fixed point 或有限 SNN 精确阈值。该特例只覆盖这张 transition figure，不改写其他 SNN 机制图的默认标准。
 - **默认标准（SNN 仿真图都按这个画）**：`mechanism + tempA source + tempB source + electrode readout`。除非用户明确要求做诊断图、参数扫描图或 pipeline/KMeans 结果图，任何 SNN 相关主图 / paper-ready 图都不得回到旧的三行 Forward/Reverse/C 行堆叠布局。
 - **回答**：同一个 SNN 基底里，机制变量在哪里、两种特异性组合如何产生相反传播、同一虚拟 SEEG montage 是否能在电极 readout 中读出正/反事件。
 - **布局（单行 4 列）**：
