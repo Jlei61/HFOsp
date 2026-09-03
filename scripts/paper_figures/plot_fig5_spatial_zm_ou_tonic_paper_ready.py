@@ -395,14 +395,17 @@ def main() -> int:
     panel_label(ax_d1, "D", x=-0.18, y=1.16)
 
     order_cb = fig.colorbar(order_map, ax=ax_c1, fraction=0.045, pad=0.025)
+    order_cb.solids.set_rasterized(False)
     order_cb.set_label("event time\n(ms after window start)", fontsize=7.2)
     order_cb.ax.tick_params(labelsize=6.8)
     energy_cb = fig.colorbar(energy_map, ax=ax_c2, fraction=0.045, pad=0.025)
+    energy_cb.solids.set_rasterized(False)
     energy_cb.set_label("activity energy\n" + r"($\times 10^3$ Hz$^2$)",
                         fontsize=7.2)
     energy_cb.ax.tick_params(labelsize=6.8)
     response_cb = fig.colorbar(
         response_map, ax=[ax_d1, ax_d2], fraction=0.026, pad=0.018)
+    response_cb.solids.set_rasterized(False)
     response_cb.set_label(
         "mean signed probe effect\n(0–50 ms excess spikes per local E cell)",
         fontsize=7.2)

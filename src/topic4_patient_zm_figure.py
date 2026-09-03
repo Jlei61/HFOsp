@@ -117,6 +117,10 @@ def draw_critical_manifold_trajectory(
             bbox_to_anchor=(1.02, 0.0, 1.0, 1.0),
             bbox_transform=ax.transAxes, borderpad=0)
         colorbar = ax.figure.colorbar(scatter, cax=color_axis)
+        # Colorbar defaults rasterize dense solids.  With tight PDF bounding
+        # boxes that can detach the gradient image from its vector outline.
+        # Keep the small colorbar fully vector so PNG/PDF/SVG agree.
+        colorbar.solids.set_rasterized(False)
         colorbar.set_ticks([0, 200, 400])
         colorbar.ax.tick_params(labelsize=5.7, length=1.5)
         colorbar.set_label(r"SNN $r_E$ (Hz)", fontsize=6.0, labelpad=1.5)

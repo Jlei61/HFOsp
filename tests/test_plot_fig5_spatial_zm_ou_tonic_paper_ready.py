@@ -10,6 +10,7 @@ def test_paper_fig5_panel_b_uses_audited_critical_manifold():
     assert "patient_zm_delay_stability_audit.json" in source
     assert "patient_zm_grid_convergence.json" in source
     assert "delay-unstable" in source
+    assert source.count("solids.set_rasterized(False)") == 3
     assert ".gif" not in source.lower()
 
 

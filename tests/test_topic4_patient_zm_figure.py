@@ -49,3 +49,16 @@ def test_critical_manifold_panel_keeps_spatial_q_summaries_distinct():
         "delay-unstable in the audited closure")
     assert metadata["fold"]["q"] == 0.89
     plt.close(fig)
+
+
+def test_critical_manifold_colorbar_stays_vector_for_tight_pdf_export():
+    projection, arrays = _fixture()
+    fig, ax = plt.subplots()
+    draw_critical_manifold_trajectory(
+        ax, projection, arrays, seed=1842,
+        add_rate_colorbar=True, show_legend=False)
+    colorbar_axis = fig.axes[-1]
+    assert colorbar_axis is not ax
+    assert all(not collection.get_rasterized()
+               for collection in colorbar_axis.collections)
+    plt.close(fig)
