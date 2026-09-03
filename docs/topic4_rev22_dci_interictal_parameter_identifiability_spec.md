@@ -1,6 +1,9 @@
 # Topic 4 rev22-DCI: frozen dual-core interictal connectivity identifiability
 
-**Status:** specification for collaborator review; no rev22 SNN run is authorized by this document
+**Status:** v4, accepted for execution on 2026-09-03 after three review rounds. Offline
+Tasks 0-5 may start immediately; any rev22 SNN trajectory beyond the Task 2 parity run and
+the Task 6 canary is authorized only after the Task 1 objective-qualification JSON and the
+Task 3 domain hash are frozen.
 
 **Parent result:** rev20-DC frozen dual-core mechanism atlas
 
@@ -39,6 +42,9 @@ The following are frozen for every rev22 run:
 - realized baseline topology, delays, background spatial OU and all non-varied parameters;
 - Z/M off, no ictal target, no Fig.5 criterion and no patient ictal file access;
 - total incoming E-to-E and E-to-I weight for each postsynaptic target.
+
+The Node field is frozen for the identifiability search. Section 14 varies it only as a
+discrete blocking factor and inside matched structural nulls; it is never optimized.
 
 The formal observation remains one complete, returned, temporally isolated,
 edge-supported causal family. Detector fragments cannot define event boundaries. Missing
@@ -148,38 +154,79 @@ l_ei = t_ei - min_j(t_ej)                  physical relative onset in ms
 u_ei = l_ei / (max_j(t_ej)-min_j(t_ej))    normalized within-event order
 ```
 
-The label-free event vector contains:
+The label-free embedding vector used by the coverage component and by the composite
+distribution readout is:
 
 ```text
 x_e = [m_e,
-       m_e * u_e,
-       m_e * clip(l_e / 180 ms, 0, 1),
+       m_e * (1 + u_e),
+       m_e * (1 + clip(l_e / 180 ms, 0, 1)),
        ICL and SCL recruitment fractions,
        physical first-SCL minus first-ICL lag / 180 ms,
        cross-shaft-lag validity]
 ```
 
-All centering, scaling, PCA components and sliced-Wasserstein directions are learned from
+The `1 +` offset makes "recruited first" (`u_e = 0`) distinct from "not recruited" (`0`);
+the previous coding collapsed both to zero inside the order and physical blocks. All
+centering, scaling, PCA components and sliced-Wasserstein directions are learned from
 patient training events only and then frozen. No A/B label enters this representation.
 The 180 ms cap is a robustification limit, not a claim that longer model events are valid.
 For every patient/model set, report both the fraction of finite event-contact onsets clipped
 and the fraction of events with any clipped onset. These saturation sidecars cannot select a
 candidate but remain model-defect diagnostics.
 
-Three candidate training components are computed:
+### 5.1 Three conditional views
 
-1. `D_cloud`: sliced-Wasserstein distance between complete patient and model event clouds;
-2. `D_cover`: patient-to-model support coverage in the frozen standardized embedding. The
-   formal model-score query set is the complete patient training set. It is never subsampled
-   or reduced to the model event count. The statistic is the q90 distance from all patient
-   queries to the nearest model event;
-3. `D_lag`: shaft-balanced discrepancy of physical pairwise contact-lag distributions,
-   including the states `i before j`, `j before i`, and `not jointly recruited`.
+Recruitment information must not be counted repeatedly. For event `e` with recruited set
+`S_e`, define three views that are estimated on disjoint conditioning sets:
 
-For each `D_cover` patient-floor replicate only, draw a patient support set matched to the
-model event count, remove those support events, and query every remaining patient training
-event against that support. Thus count matching applies to the support set that substitutes
-for the model set, never to the patient-side query set.
+```text
+support view   S_e:        m_e, n_e = |S_e|, and J_e,ij = m_ei * m_ej for every contact pair
+order view     pi_e | S_e: for pairs with J_e,ij = 1, the state {i before j, j before i, tie}
+lag view       L_e | joint: for pairs with J_e,ij = 1, the physical |t_ei - t_ej| in ms
+```
+
+"Not jointly recruited" belongs to the support view only. It never enters the order or lag
+distances.
+
+### 5.2 Training components
+
+Four training components form the **vector training endpoint**
+`D(theta) = (D_support, D_order, D_lag, D_cover)`; each is a pure function of model onsets
+and the frozen patient-training contract, with no model label, KMeans, OOD or held-out input:
+
+1. `D_support`: mean of three shaft-balanced terms, each in `[0, 1]`: per-contact
+   recruitment-probability absolute difference averaged within ICL and within SCL, then
+   across shafts; 1-D Wasserstein distance between recruited-count distributions divided by
+   the contact count; and per-pair joint-recruitment-probability absolute difference
+   averaged within each pair class (ICL-ICL, ICL-SCL, SCL-SCL), then across classes.
+2. `D_order`: for every eligible pair, the Jensen-Shannon divergence (bits) between the
+   model and patient three-state conditional precedence distributions, averaged within pair
+   class and then across classes. A pair is eligible when the model side has at least
+   `n_pair_min = 5` jointly recruited events; the patient side is always eligible.
+3. `D_lag`: for every eligible pair, the 1-D Wasserstein distance in milliseconds between
+   the model and patient conditional `|lag|` distributions, with `|lag|` capped at 180 ms,
+   averaged within pair class and then across classes. Eligibility is the same as `D_order`.
+4. `D_cover`: patient-to-model support coverage in the frozen standardized embedding. The
+   query set is the complete patient training set; it is never subsampled or reduced to
+   the model event count. The statistic is the q90 distance from all patient queries to the
+   nearest model event.
+
+For `D_order` and `D_lag`, report the eligible-pair fraction per pair class. A trajectory
+whose eligible-pair fraction is below 0.5 in any class is `NOT_ESTIMABLE_LOW_JOINT_SUPPORT`
+for that component and enters the feasibility surface, not the continuous response.
+
+The composite sliced-Wasserstein distance `D_cloud` on `x_e` is still computed and reported
+for continuity with rev20 and for the composite embedding figures. It is **not** a training
+component: it re-weights recruitment through several blocks at once, which is exactly the
+"how far, not how" failure the decomposition removes.
+
+Every patient-floor replicate splits the patient training recording blocks into two random
+halves, draws a count-matched pseudo-model sample from one half, and scores it against all
+events of the other half. For `D_cover` the pseudo-model sample is the support set and the
+other half supplies every query. Thus count matching applies only to the sample that
+substitutes for the model set, never to the patient-side query or reference set, and the
+floor never compares events with other events of their own recording block.
 
 Each component has two uncertainty references:
 
@@ -196,33 +243,39 @@ E_k = max(0, (D_k - patient_floor_q50_k) /
 ## 6. Objective qualification before new simulation
 
 No rev22 simulation may start until all 232 rev20 trajectories have been rescored offline.
-For each component, define its empirical identifiability ratio as the between-candidate
-q90-q10 range divided by the median within-candidate seed MAD. A component with ratio below
-1 is not allowed to enter or dominate the scalar objective; it remains a diagnostic endpoint.
+For each of the four components, define its empirical identifiability ratio as the
+between-candidate q90-q10 range of candidate means divided by the median within-candidate
+seed MAD. A component with ratio below 1 is not allowed to enter the proposal scalar; it
+remains a reported endpoint.
 
-Let `A` contain the identifiable members of `{E_cloud, E_cover}`. The provisional scalar is:
+Let `A` contain the identifiable members of `{E_support, E_order, E_lag, E_cover}`. The
+**proposal scalar** used only to rank design points and to propose conditional optima is
+the minimax excess:
 
 ```text
-J_fit = max(A) + lambda_lag * E_lag
-lambda_lag = 0.25 if the D_lag identifiability ratio is at least 1, otherwise 0
+J_fit = max_{k in A} E_k
 ```
 
-If only one of `E_cloud` and `E_cover` is identifiable, `max(A)` is that component. If neither
-is identifiable, the formal result is `TRAINING_OBJECTIVE_UNIDENTIFIABLE` and no response
-search starts. This replaces an LSE over all components. A constantly high but
-parameter-insensitive coverage term, or an unresponsive physical-lag term, therefore cannot
-hide changes in another component. Report how often each active component determines the
-maximum across rev20 candidates.
+`J_fit` is an acquisition tool, not a scientific endpoint. No scientific statement is made
+from `J_fit` alone; the endpoint is the vector `D(theta)` with its per-component floors. If
+`A` is empty, the formal result is `TRAINING_OBJECTIVE_UNIDENTIFIABLE` and no response
+search starts. Report how often each active component determines the maximum across rev20
+candidates.
 
 The objective is accepted only if all four of the following zero-simulation controls behave
-in the expected direction:
+in the expected direction, each applied to a count-matched patient pseudo-model sample and
+compared with untouched pseudo-model draws:
 
-1. removing the patient minority cluster worsens `D_cover` and `J_fit`, even though the
-   objective receives no cluster label;
-2. censoring all SCL contacts worsens recruitment/coverage terms;
-3. stretching physical onsets while preserving normalized order selectively worsens
-   `D_lag` and the physical-onset part of `D_cloud`;
-4. permuting within-shaft onset times worsens the pair-lag component.
+1. removing the patient minority direction cluster worsens `D_cover` and `D_order`, even
+   though the objective receives no cluster label;
+2. censoring all SCL contacts worsens `D_support` and leaves ICL-ICL `D_order` unchanged;
+3. stretching physical onsets by a factor of two while preserving order worsens `D_lag`
+   and leaves `D_support` and `D_order` exactly unchanged;
+4. permuting onset times within each shaft worsens `D_order` and leaves `D_support`
+   exactly unchanged.
+
+The exact-invariance clauses are the reason for the decomposition: every control must move
+its target view and must not move the views it does not touch.
 
 Each component's rev20 candidate ranking is additionally reported with seed uncertainty
 rather than as a deterministic score. This uncertainty report is not a fifth objective
@@ -234,8 +287,9 @@ interpretation came from KMeans validation.
 
 The response surface requires at least 12 complete returned isolated causal families in
 each 20 s candidate-seed trajectory. Twelve is a measurement-estimability threshold, not a
-biological event-count gate. A candidate point enters the continuous response surface only
-when all four crossed fit units reach this minimum and none is runaway or nonfinite.
+biological event-count gate. A candidate point enters the continuous response surface of a component only when all
+four fit units reach this minimum, none is runaway or nonfinite, and, for `D_order` and
+`D_lag`, none is `NOT_ESTIMABLE_LOW_JOINT_SUPPORT`.
 
 All other completed trajectories remain results. They enter a separate feasibility surface
 with two explicit dimensions:
@@ -255,8 +309,8 @@ The experiment does not run a separate CMA-ES for every model family. The struct
 audit selects exactly one of two predeclared branches before any outcome simulation.
 
 If a nontrivial geometry rectangle survives, the primary branch uses one immutable 96-point
-space-filling design in the four-dimensional domain and fits one response surface. The
-design contains:
+space-filling design in the four-dimensional domain and fits one response surface **per
+component** plus one feasibility surface. The design contains:
 
 - one exact reference point;
 - 47 full four-dimensional maximin points;
@@ -276,8 +330,12 @@ model retains an `observation_design=rev20_diagonal_seed` flag and their own see
 noise estimates. They constrain the same mean response surface but are not counted as new
 crossed-seed rev22 evidence.
 
-A heteroskedastic Matérn-5/2 Gaussian-process response surface is fit to candidate-level
-means. Four seeds provide only three variance degrees of freedom, so raw pointwise variance
+One heteroskedastic Matérn-5/2 Gaussian-process response surface is fit per training
+component to candidate-level means; a separate probabilistic classifier is fit to joint
+feasibility (`event_yield_estimable`, `safe`, joint-support estimable). No surface is ever
+fit to `J_fit` or to any `max`, because the maximum has non-differentiable ridges and the
+SNN itself moves through discrete regimes (zero-event, single-mode, dual-mode, runaway) that
+a smooth surface would misrepresent as a slope. Four seeds provide only three variance degrees of freedom, so raw pointwise variance
 is not used directly. Let `s_pool^2` be the pooled within-candidate variance and `s_c^2` the
 candidate variance over `n_c` eligible units. The observation variance uses the frozen
 shrinkage estimate:
@@ -287,11 +345,13 @@ s_tilde_c^2 = (8 * s_pool^2 + (n_c - 1) * s_c^2) / (8 + n_c - 1)
 Var(candidate mean) = s_tilde_c^2 / n_c
 ```
 
-A second, nonparametric tree ensemble is a sensitivity analysis. Conditional optima for all
-12 families in the primary branch, or the four dose families in the fallback branch, are
-proposed from the same branch-specific surface and must remain inside the sampled domain and
-the feasible region. Surrogate predictions never constitute evidence: every proposed
-optimum is rerun on new seeds.
+A second, nonparametric tree ensemble per component is a sensitivity analysis. For every
+branch-eligible family, the conditional proposal is the minimax point of the predicted
+normalized excesses over the identifiable components, with locked coordinates fixed at
+reference, inside the sampled domain and inside the region whose predicted joint feasibility
+is at least 0.80. The predicted Pareto set of the family is stored alongside the proposal
+for the report; it does not create extra simulated candidates. Surrogate predictions never
+constitute evidence: every proposed optimum is rerun on new seeds.
 
 Leave-one-candidate-out prediction error, rank correlation and uncertainty calibration are
 reported. If the GP and tree ensemble nominate disjoint regions, both proposals are carried
@@ -317,11 +377,21 @@ separately.
 
 Seed stages are:
 
-| Stage | Crossed units per candidate | Role |
+| Stage | Units per candidate | Role |
 |---|---:|---|
-| fit | 2 topology x 2 dynamics = 4 | response surface |
-| new-seed qualification | 3 x 2 = 6 | verify predicted conditional optimum |
-| confirmation | 4 x 3 = 12 | final paired network-level comparison |
+| fit | 4 topology seeds, each with its own dynamics seed | component response surfaces |
+| variance decomposition block | `M0000` and one predeclared interior design point on the 4 fit topologies x 3 dynamics seeds | separate topology from dynamics variance |
+| new-seed qualification | 6 fresh topology seeds x 1 dynamics seed | verify predicted conditional optimum |
+| confirmation | 12 fresh topology seeds x 1 dynamics seed | final paired network-level comparison |
+
+Topology replication, not dynamics replication, is the binding constraint: rev20 showed
+that between-network spread and candidate-by-network interaction dominate, and a paired
+network bootstrap with only four topology clusters has 35 distinct resamples. The
+confirmation stage therefore reproduces the rev20 twelve-network structure and remains
+directly comparable to it. The crossed decomposition block is the only place where dynamics
+seeds are replicated within a topology; its variance components are reported, and if the
+dynamics fraction exceeds 0.5 the report must say so before any network-level interval is
+interpreted.
 
 All branch-eligible model-family optima proceed through qualification and confirmation
 unless the worker has an engineering failure or nonfinite/runaway trajectory. There is no
@@ -329,7 +399,8 @@ optional stopping based on early metric direction.
 
 ## 9. Selection and validation separation
 
-Only patient-training `J_fit` may choose parameter values. Before any candidate-level
+Only patient-training components, through the predeclared minimax proposal on the
+component surfaces, may choose parameter values. Before any candidate-level
 validation field is loaded, freeze:
 
 - the branch decision, response-design manifest and hashes;
@@ -357,31 +428,34 @@ r_cov = median_b q95_{q in Q_b} min_{s in S_b} distance(q, s),  b=1,...,1000
 
 Neither `n_cov` nor `r_cov` may be re-estimated per candidate. If the reference gives
 `n_cov < 12`, report `REFERENCE_SUPPORT_BUDGET_NOT_ESTIMABLE`; fixed-budget recall remains
-descriptive and no five-endpoint Pareto support claim is allowed.
+descriptive and no six-endpoint Pareto support claim is allowed.
 
 After all corresponding SNN artifacts are immutable, the validation producer scores both
 the confirmed family candidates and every completed response-design trajectory. The latter
 is a descriptive second pass used only to draw parameter-response curves; it cannot change
 the branch, objective, feasible region, parameter values, family membership or seed plan.
 
-The following are the five primary **selection-blind validation endpoints**:
+The following are the six primary **selection-blind validation endpoints**:
 
-1. recording-block held-out complete-distribution distance;
-2. natural model KMeans K=2 and balanced alignment to the frozen patient templates;
-3. patient-support OOD fraction over all returned causal families, with unreadable events
-   counted as OOD; `1-OOD` is reported as the corresponding precision-like quantity;
+1. held-out `D_support`: the support view against recording-block held-out events;
+2. held-out `D_order`: the conditional precedence view against held-out events;
+3. held-out `D_time_ms`: the conditional physical-lag view against held-out events, reported
+   in raw milliseconds and in patient-floor-normalized units;
 4. fixed-budget held-out patient-event recall: the fraction of all patient held-out events
    lying within `r_cov` of a model support set of exactly `n_cov` events;
-5. held-out physical timing error `D_time_ms`, using the same shaft-balanced pairwise-lag
-   estimator as `D_lag` and reporting both raw milliseconds and patient-floor-normalized
-   error.
+5. natural model KMeans K=2 and balanced alignment to the frozen patient templates;
+6. patient-support OOD fraction over all returned causal families, with unreadable events
+   counted as OOD; `1-OOD` is reported as the corresponding precision-like quantity.
+
+The composite held-out sliced-Wasserstein distance is retained as a secondary continuity
+column with rev20; it is not one of the six endpoints because it duplicates the three views.
 
 For recall, candidates with more than `n_cov` events use 200 frozen without-replacement
 subsamples and report their mean and interval. Candidates with fewer than `n_cov` events are
 `NOT_ESTIMABLE_LOW_YIELD` for fixed-budget recall; they are not assigned zero. Their
 all-event raw recall remains a sidecar. This separates distribution support from the number
-of generated events. Recall is computed within each crossed simulation unit and only then
-aggregated topology-first; events are never pooled across networks to manufacture support.
+of generated events. Recall is computed within each topology unit and only then aggregated by the paired
+network bootstrap; events are never pooled across networks to manufacture support.
 
 Mandatory sidecars are mode-specific recruitment and rank profiles, pooled and
 equal-network-weighted mode proportions, the proportion of individual networks expressing
@@ -392,59 +466,63 @@ A classifier two-sample test is secondary. In the frozen event embedding, a fixe
 classifier distinguishes patient held-out from model events under class-balanced,
 group-separated cross-validation: patient recording blocks and model topology seeds cannot
 cross folds. Report AUC, `2*abs(AUC-0.5)`, balanced-resampling uncertainty and a
-label-permutation reference. It cannot select parameters or replace the five diagnostic
+label-permutation reference. It cannot select parameters or replace the six diagnostic
 endpoints. If either class has fewer than two independent groups, report
 `C2ST_NOT_ESTIMABLE_GROUPS`; event-wise random folds are forbidden.
 
-Held-out distribution distance, recall, physical timing error and C2ST use patient events
-not used to build the training target. The KMeans alignment reference, OOD support and
+Held-out support, order and timing views, recall, composite distance and C2ST use patient
+events not used to build the training target. The KMeans alignment reference, OOD support and
 coverage radius were estimated from patient training data; they are selection-blind in
 rev22, not statistically independent. Because these artifacts have been viewed in earlier
 development rounds, the whole revision remains development-only.
 
 ## 10. Statistical analysis and parameter influence
 
-The independent unit is a crossed topology-dynamics simulation unit, not an event. Report
+The independent unit is the topology seed with its single dynamics seed, not an event;
+inside the decomposition block it is the crossed topology-dynamics unit. Report
 paired differences to `M0000` and nested contrasts between `M1111` and each
-leave-one-locked family. Use topology-first hierarchical bootstrap: resample topology seeds,
-then dynamics seeds within topology. Event bootstrap is only a lower-level uncertainty
-component and cannot replace seed-level inference.
+leave-one-locked family. Use a paired network bootstrap over topology seeds, exactly as rev20; in the
+decomposition block use topology-first hierarchical resampling. Event bootstrap is only a
+lower-level uncertainty component and cannot replace seed-level inference.
 
 A coordinate is called **useful within this SNN family** only when:
 
-1. freeing it improves training `J_fit` in the predicted region;
+1. freeing it yields a predicted Pareto improvement of the training component vector in
+   the proposed region, i.e. no identifiable component worsens beyond its seed noise and at
+   least one improves;
 2. the effect is reproduced on new-seed qualification and confirmation units;
-3. held-out complete-distribution distance improves;
+3. at least one held-out view (support, order or timing) improves;
 4. KMeans balanced alignment does not fall through minority-mode collapse;
 5. the candidate does not meet the predeclared `OUTPUT_DEGENERATION` rule below;
 6. the full model is paired-Pareto-supported relative to the corresponding
    leave-one-locked model under the rule below;
 7. the conclusion is not carried by one topology seed.
 
-For a full-versus-locked contrast, orient the five primary validation differences so
+For a full-versus-locked contrast, orient the six primary validation differences so
 positive is better:
 
 ```text
-Delta = [D_heldout_locked - D_heldout_full,
-         KMeans_alignment_full - KMeans_alignment_locked,
-         OOD_locked - OOD_full,
+Delta = [D_support_locked - D_support_full,
+         D_order_locked - D_order_full,
+         D_time_ms_locked - D_time_ms_full,
          Recall_full - Recall_locked,
-         D_time_ms_locked - D_time_ms_full]
+         KMeans_alignment_full - KMeans_alignment_locked,
+         OOD_locked - OOD_full]
 ```
 
 Here `full` means `M1111` in the primary branch and `M1100` in the dose-only fallback.
 The fallback compares `M1100` with `M1000` and `M0100`; `M0000` remains the paired reference
 but is not misrepresented as a leave-one-coordinate model.
 
-The full model is `PARETO_SUPPORTED` only when all five point estimates are nonnegative,
+The full model is `PARETO_SUPPORTED` only when all six point estimates are nonnegative,
 none of their paired 90% intervals lies wholly below zero, and at least one paired 90%
 interval lies wholly above zero. Mixed-sign point estimates are reported as `TRADEOFF`.
 When every interval includes zero, the coordinate is `NON_IDENTIFIABLE_AT_CURRENT_SEEDS`.
-If any of the five endpoints is not estimable in either member of a contrast, report
+If any of the six endpoints is not estimable in either member of a contrast, report
 `PRIMARY_ENDPOINT_NOT_ESTIMABLE`; it cannot be upgraded to `PARETO_SUPPORTED` from the
 remaining endpoints.
 Classifier AUC, yield, unreadable fraction and clipping remain mandatory secondary or
-sidecar outputs and cannot be traded against the five endpoints by an undocumented scalar.
+sidecar outputs and cannot be traded against the six endpoints by an undocumented scalar.
 `OUTPUT_DEGENERATION` is reported
 when any of the following holds relative to the paired reference: median returned-event
 yield ratio below 0.50; the paired 90% interval lower bound for increased unreadable
@@ -457,8 +535,8 @@ coordinate is reported as non-identifiable, not ineffective.
 
 ## 11. Floor and effect-size reporting
 
-Primary tables report raw complete-distribution distance, KMeans alignment, OOD,
-fixed-budget recall, physical timing error and event yield. Classifier AUC is secondary. The
+Primary tables report raw held-out support, order and timing views, fixed-budget recall,
+KMeans alignment, OOD and event yield; the composite distance is a secondary column. Classifier AUC is secondary. The
 descriptive fraction of reducible discrepancy closed is
 
 ```text
@@ -469,7 +547,8 @@ F_closed = (D_reference - D_candidate) /
 `patient_floor_fixed` is one floor computed at the reference candidate's pre-frozen median
 event count and reused for every candidate. It is not recomputed at each candidate's yield.
 Candidate-specific count-matched floors are reported separately as sampling diagnostics.
-`F_closed` is never called variance explained and is always shown beside event yield.
+`F_closed` is reported per view (support, order, timing) and for the composite distance. It
+is never called variance explained and is always shown beside event yield.
 
 ## 12. Outputs and allowed conclusions
 
@@ -479,8 +558,8 @@ Required outputs are:
 - branch-specific response-design manifest and seed manifest;
 - response-surface diagnostics and conditional-optimum table for all branch-eligible model
   families;
-- paired validation atlas for complete-distribution distance, KMeans alignment, OOD,
-  fixed-budget recall, physical timing error and yield;
+- paired validation atlas for the six primary endpoints, the composite distance and yield;
+- matched structural-null table and Node blocking-factor interaction table (section 14);
 - a post-freeze descriptive validation response atlas over all response-design trajectories;
 - Pareto plot of held-out distance versus KMeans alignment, colored by OOD;
 - one Fig.4-style direct event/GIF panel and one KMeans panel for the final nondominated
@@ -502,9 +581,10 @@ recovery or patient-level causality.
 The primary response figure has two complementary layers.
 
 **Layer 1: conditional continuous response.** Columns are the four parameters in the
-primary branch, or the two learned-pattern doses in the fallback branch. Rows are held-out
-complete-distribution distance, KMeans balanced alignment, OOD, fixed-budget recall and
-physical timing error. Each curve is a one-dimensional slice through the post-freeze
+primary branch, or the two learned-pattern doses in the fallback branch. Rows are the six
+primary endpoints: held-out support view, held-out order view, held-out physical timing,
+fixed-budget recall, KMeans balanced alignment and OOD. The composite distance is drawn in
+the sidecar figure only, because it duplicates the first three rows. Each curve is a one-dimensional slice through the post-freeze
 descriptive validation surface with all other coordinates locked at reference; it is not
 called a marginal causal effect. Pale points show all response-design observations and
 open circles show rescored rev20 one-dimensional anchors. Patient self-comparison bands are
@@ -519,11 +599,56 @@ rev22 simulation and cannot alter `J_fit`.
 
 **Layer 2: nested-family matrix.** Rows are the 12 primary-branch families or four fallback
 families. Four leading cells show free versus locked coordinates. Metric cells show paired
-differences and topology-first 90% intervals for the five primary validation endpoints.
+differences and paired-network 90% intervals for the six primary validation endpoints.
 Yield and classifier two-sample AUC are secondary columns. The matrix provides inference at
 confirmed family optima; Layer 1 provides descriptive response shape and cannot substitute
 for confirmation.
 
-The existing Pareto plot remains: x is held-out complete-distribution distance, y is KMeans
-balanced alignment, color is OOD and point size is yield. Recall and physical timing stay
+The existing Pareto plot remains: x is held-out order view, y is KMeans balanced alignment,
+color is OOD and point size is yield. It shows the coupling that the marginal rows cannot:
+an order improvement bought by losing the second mode. Support, timing and recall stay
 visible in Layer 1 and the family matrix rather than being compressed into this plot.
+
+A third figure shows the matched structural nulls of section 14: for the reference and the
+final full-model candidate, the six endpoints under the intact substrate and under each
+null, paired by topology seed.
+
+## 14. Matched structural nulls and the Node blocking factor
+
+The frozen substrate is post-selected on the same patient. A candidate that beats the
+reference therefore admits alternative readings: the two-core threshold field already fixes
+the propagation sources; the anisotropically sampled graph already fixes the axis; the
+learned weights only tune recruitment extent; a few parameters compensate one topology
+realization; or the two modes are a discretization of one continuum by the detector and
+KMeans. The identifiability claim of sections 1-13 is conditional on the substrate and is
+not threatened by these readings. Upgrading it to "the geometry of the learned pattern
+itself contributes, not only its budget" requires the following predeclared controls. They
+are run on the first six confirmation topology seeds, one dynamics seed each, for two
+conditions: `M0000` and the frozen full-model proposal (`M1111`, or `M1100` in the fallback
+branch). They are opened together with validation and never select a parameter.
+
+| Null | Construction | Alternative reading it tests |
+|---|---|---|
+| re-registration | existing square-symmetry transform of Node field and learned flow rule together (`r180`: axis kept, directed sense reversed; `r90`: axis rotated); graph and contacts fixed | specific Node placement relative to contacts and graph matters beyond its budget |
+| learned-pattern | learned coefficient rows replaced by two frozen random rows of matched norm at the same dose | any redistribution of the same magnitude would do |
+| placement | same 1,499-neuron budget: one merged core at the midpoint, and one two-core placement at frozen random centers with the learned rule following the field | any two cores give two modes |
+| isotropic graph | rebuilt topology with `rho_EE = 0` and unchanged in-degree, same contacts and Node; small arm, cannot be seed-paired with the fixed-topology arms | the sampled anisotropy fixes the axis |
+
+Two-mode discretization is checked on every confirmed candidate with the existing tools:
+K=2 versus K=1 held-out likelihood, the label-shuffle alignment null and the
+patient-matched KMeans benchmark. A candidate whose alignment does not exceed the shuffle
+null q95 is reported as `TWO_MODE_NOT_ABOVE_SHUFFLE`.
+
+The Node blocking factor is separate from the nulls. Two previously frozen Node candidates
+from earlier rounds, loadable through the existing override path and named in the Task 0
+config, are run at `M0000` and at the frozen full-model proposal on the same six topology
+seeds. The report states whether the direction of each full-versus-reference endpoint
+difference is preserved across the three Node choices. This answers whether the
+connectivity conclusion depends on which Node was frozen; it does not optimize the Node,
+because the learned redistribution pattern is a function of the Node field and moving the
+cores redefines the pattern.
+
+Null and blocking-factor results use the same paired network bootstrap as confirmation. A
+null arm that matches or exceeds the intact substrate on every endpoint is reported as
+`NULL_NOT_SEPARATED` for that null; the conditional identifiability claim stands, the
+upgraded claim does not.
