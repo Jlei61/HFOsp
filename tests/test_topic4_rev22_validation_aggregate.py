@@ -63,7 +63,20 @@ def _ranks(onsets: np.ndarray) -> np.ndarray:
     return np.argsort(np.argsort(onsets, axis=1), axis=1).astype(float)
 
 
-def _make_inputs(tmp_path: Path, *, candidate_ids=("full", "locked")) -> dict:
+def _candidate_row(candidate_id: str, family: str) -> dict:
+    return {
+        "candidate_id": candidate_id, "family_membership": [family],
+        "mechanisms": {"Z_M": "off", "g_EE": 0.5, "g_EtoI": 1.0,
+                       "ellipse_angle_deg": 45.0, "ellipse_aspect_ratio": 2.0},
+        "node_field": {"field_sha256": "field-hash"},
+        "physical": {"g_LEE": 0.5, "g_LEI": 1.0, "theta_FT_deg": 0.0, "AR_FT": 2.0},
+        "unit_cube": {"g_LEE": 0.5, "g_LEI": 0.5, "theta_FT_deg": 0.5, "AR_FT": 0.5},
+        "block": "fixture",
+    }
+
+
+def _make_inputs(tmp_path: Path, *, candidate_ids=("full", "locked"),
+                 fit_candidate_ids=("fit0",)) -> dict:
     git_commit = subprocess.check_output(
         ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True,
     ).strip()
@@ -117,20 +130,25 @@ def _make_inputs(tmp_path: Path, *, candidate_ids=("full", "locked")) -> dict:
     manifest = tmp_path / "execution_candidate_manifest.json"
     manifest_payload = {
         "schema_id": "topic4_rev22_dci_execution_candidate_manifest_v1",
-        "candidates": [{
-            "candidate_id": cid,
-            "family_membership": ["M1111" if cid == "full" else "M0111"],
-            "mechanisms": {"Z_M": "off", "g_EE": 0.5, "g_EtoI": 1.0,
-                           "ellipse_angle_deg": 45.0, "ellipse_aspect_ratio": 2.0},
-            "node_field": {"field_sha256": "field-hash"},
-        } for cid in candidate_ids]
+        "candidates": [_candidate_row(cid, "M1111" if cid == "full" else "M0111")
+                       for cid in candidate_ids]
     }
     manifest_hash = _json(manifest, manifest_payload)
-    response_hash = "response-design-hash"
+    response_design = tmp_path / "response_design_manifest.json"
+    response_payload = {
+        "schema_id": "topic4_rev22_dci_response_design_manifest_v1",
+        "candidate_count": len(fit_candidate_ids),
+        "candidates": [_candidate_row(cid, "M1111") for cid in fit_candidate_ids],
+    }
+    response_hash = _json(response_design, response_payload)
     frozen = tmp_path / "frozen_candidates.json"
     seeds = tmp_path / "seed_manifest.json"
     seed_payload = {
         "schema_id": "topic4_rev22_dci_seed_manifest_v1",
+        "response_design_manifest_sha256": response_hash,
+        "fit": {"units": [
+            {"topology_seed": 11 + i, "dynamics_seed": 11 + i} for i in range(4)
+        ]},
         "qualification": {"units": [
             {"topology_seed": 101 + i, "dynamics_seed": 201 + i} for i in range(6)
         ]},
@@ -150,9 +168,11 @@ def _make_inputs(tmp_path: Path, *, candidate_ids=("full", "locked")) -> dict:
     return {
         "training_contract": training_contract, "target": target, "heldout": heldout,
         "contact": contact, "classifier": classifier_path, "manifest": manifest,
-        "frozen": frozen, "seeds": seeds, "seed_payload": seed_payload,
+        "response_design": response_design, "frozen": frozen, "seeds": seeds,
+        "seed_payload": seed_payload, "fit_candidate_ids": list(fit_candidate_ids),
         "seed_hash": seed_hash, "response_hash": response_hash,
         "git_commit": git_commit,
+        "fit": tmp_path / "fit/workers",
         "qualification": tmp_path / "qualification/workers",
         "confirmation": tmp_path / "confirmation/workers", "out": tmp_path / "validation",
     }
@@ -196,6 +216,9 @@ def _worker(ctx: dict, phase: str, candidate: str, topology: int, dynamics: int,
 
 def _populate(ctx: dict, *, failure: tuple[str, str, int] | None = None,
               low_yield: bool = False) -> None:
+    for candidate in ctx["fit_candidate_ids"]:
+        for unit in ctx["seed_payload"]["fit"]["units"]:
+            _worker(ctx, "fit", candidate, unit["topology_seed"], unit["dynamics_seed"])
     for phase in ("qualification", "confirmation"):
         for candidate in ("full", "locked"):
             for unit in ctx["seed_payload"][phase]["units"]:
@@ -213,18 +236,21 @@ def _populate(ctx: dict, *, failure: tuple[str, str, int] | None = None,
 def _run(ctx: dict, **kwargs) -> dict:
     return validation.aggregate_validation(
         frozen_candidates_path=ctx["frozen"], candidate_manifest_path=ctx["manifest"],
-        seed_manifest_path=ctx["seeds"], qualification_worker_dir=ctx["qualification"],
+        response_design_path=ctx["response_design"], seed_manifest_path=ctx["seeds"],
+        fit_worker_dir=ctx["fit"], qualification_worker_dir=ctx["qualification"],
         confirmation_worker_dir=ctx["confirmation"], training_contract_path=ctx["training_contract"],
         patient_training_target_path=ctx["target"], heldout_path=ctx["heldout"],
         contact_contract_path=ctx["contact"], classifier_manifest_path=ctx["classifier"],
         output_dir=ctx["out"], n_cov=12, r_cov=5.0, floor_draws=4,
         bootstrap_draws=2, recall_subsamples=4, c2st_resamples=2,
+        fit_floor_draws=2, fit_recall_subsamples=2, fit_c2st_resamples=2,
+        expected_fit_candidates=len(ctx["fit_candidate_ids"]),
         n_pair_min=2, kmeans_seed=10, **kwargs,
     )
 
 
 def test_complete_grid_emits_all_task11_endpoints_and_selection_blind_language(tmp_path):
-    ctx = _make_inputs(tmp_path)
+    ctx = _make_inputs(tmp_path, fit_candidate_ids=("fit0", "fit1", "fit2"))
     _populate(ctx)
     payload = _run(ctx)
 
@@ -233,6 +259,15 @@ def test_complete_grid_emits_all_task11_endpoints_and_selection_blind_language(t
     assert payload["patient_ictal_input_read"] is False
     assert payload["terminology"]["kmeans_and_ood"] == "selection-blind"
     assert len(payload["unit_inventory"]) == 2 * (6 + 12)
+    fit = payload["fit_descriptive"]
+    assert fit["candidate_count"] == 3
+    assert fit["candidate_ids"] == ["fit0", "fit1", "fit2"]
+    assert fit["frozen_candidate_ids_unchanged"] == ["full", "locked"]
+    assert fit["descriptive_only"] is True and fit["cannot_select"] is True
+    assert fit["selection_effect"] == "NONE"
+    assert len(fit["unit_inventory"]) == 3 * 4
+    assert all(row["primary_status"] == "OK" for row in fit["candidates"])
+    assert all(row["selection_rank"] is None for row in fit["candidates"])
     full = next(row for row in payload["phases"]["confirmation"]
                 if row["candidate_id"] == "full")
     assert full["primary_status"] == "OK"
@@ -292,11 +327,40 @@ def test_low_yield_recall_is_not_replaced_by_zero(tmp_path):
     assert all(row["recall"] is None for row in full["recall_units"])
 
 
+def test_failed_fit_unit_retained_and_fit_candidate_fail_closed_without_refreeze(tmp_path):
+    ctx = _make_inputs(tmp_path, fit_candidate_ids=("fit0", "fit1"))
+    _populate(ctx)
+    unit = ctx["seed_payload"]["fit"]["units"][2]
+    stem = f"fit1_topo_{unit['topology_seed']}_dyn_{unit['dynamics_seed']}"
+    (ctx["fit"] / f"{stem}.json").unlink()
+    (ctx["fit"] / f"{stem}.npz").unlink()
+
+    payload = _run(ctx)
+    rows = {row["candidate_id"]: row for row in payload["fit_descriptive"]["candidates"]}
+    assert rows["fit0"]["primary_status"] == "OK"
+    assert rows["fit1"]["primary_status"] == validation.PRIMARY_NOT_ESTIMABLE
+    assert len(rows["fit1"]["units"]) == 4
+    assert all(value is None for value in rows["fit1"]["primary_endpoints"].values())
+    assert payload["fit_descriptive"]["frozen_candidate_ids_unchanged"] == ["full", "locked"]
+    assert payload["paired_pareto_contrasts"][0]["full_candidate_id"] == "full"
+
+
 def test_patient_ictal_path_is_rejected_before_read(tmp_path):
     path = tmp_path / "patient_ictal_target.json"
     path.write_text("{}")
     with pytest.raises(RuntimeError, match="patient-ictal boundary"):
         validation._read_json(path, "forbidden")
+
+
+def test_formal_response_design_inventory_requires_and_keeps_all_96_candidates():
+    candidates = [_candidate_row(f"dci_{index:03d}", "M1111") for index in range(96)]
+    ids, index = validation._fit_candidate_index({
+        "schema_id": "topic4_rev22_dci_response_design_manifest_v1",
+        "candidate_count": 96, "candidates": candidates,
+    }, expected_count=96)
+    assert len(ids) == 96
+    assert ids == [f"dci_{value:03d}" for value in range(96)]
+    assert set(index) == set(ids)
 
 
 def test_formal_bootstrap_repools_and_rescores_every_topology_draw(monkeypatch):

@@ -63,6 +63,7 @@ DEFAULT_STAGE = Path(
     "data_driven_dual_core_interictal_identifiability"
 )
 DEFAULT_CONFIG = ROOT / "config/topic4_rev22_dci_dual_core_interictal_identifiability.json"
+DEFAULT_RESPONSE_DESIGN = DEFAULT_STAGE / "response_design/response_design_manifest.json"
 PRIMARY = ("D_support", "D_order", "D_time_ms", "recall", "kmeans_alignment", "ood")
 PHASES = ("qualification", "confirmation")
 PRIMARY_NOT_ESTIMABLE = "PRIMARY_ENDPOINT_NOT_ESTIMABLE"
@@ -176,6 +177,39 @@ def _phase_units(seed_manifest: Mapping, phase: str) -> list[dict]:
     if len(output) != expected:
         raise RuntimeError(f"{phase} requires exactly {expected} topology units")
     return output
+
+
+def _fit_units(seed_manifest: Mapping) -> list[dict]:
+    block = seed_manifest.get("fit") or {}
+    units = block.get("units") if isinstance(block, Mapping) else None
+    if not isinstance(units, list) or len(units) != 4:
+        raise RuntimeError("seed manifest must freeze exactly four fit units")
+    output = []
+    seen = set()
+    for row in units:
+        topology = int(row["topology_seed"])
+        dynamics = int(row.get("dynamics_seed", topology))
+        key = (topology, dynamics)
+        if key in seen:
+            raise RuntimeError(f"duplicate fit unit: {key}")
+        seen.add(key)
+        output.append({"topology_seed": topology, "dynamics_seed": dynamics})
+    return output
+
+
+def _fit_candidate_index(design: Mapping, *, expected_count: int) -> tuple[list[str], dict]:
+    if design.get("schema_id") != "topic4_rev22_dci_response_design_manifest_v1":
+        raise RuntimeError("unexpected response-design manifest schema")
+    rows = design.get("candidates") or []
+    ids = [str(row["candidate_id"]) for row in rows]
+    declared = int(design.get("candidate_count", -1))
+    if declared != len(rows) or len(ids) != len(set(ids)):
+        raise RuntimeError("response-design candidate grid is incomplete or duplicated")
+    if len(rows) != int(expected_count):
+        raise RuntimeError(
+            f"response-design candidate count {len(rows)} != expected {int(expected_count)}"
+        )
+    return ids, {str(row["candidate_id"]): row for row in rows}
 
 
 def _candidate_index(manifest: Mapping, frozen: Mapping) -> tuple[list[str], dict]:
@@ -841,17 +875,23 @@ def _unit_endpoint_row(unit: Mapping, context: Mapping, *, seed: int,
 
 
 def aggregate_validation(*, frozen_candidates_path: Path, candidate_manifest_path: Path,
-                         seed_manifest_path: Path, qualification_worker_dir: Path,
+                         response_design_path: Path, seed_manifest_path: Path,
+                         fit_worker_dir: Path, qualification_worker_dir: Path,
                          confirmation_worker_dir: Path, training_contract_path: Path,
                          patient_training_target_path: Path, heldout_path: Path,
                          contact_contract_path: Path, classifier_manifest_path: Path,
                          output_dir: Path, n_cov: int, r_cov: float,
                          floor_draws: int = 64, bootstrap_draws: int = 512,
                          recall_subsamples: int = 200, c2st_resamples: int = 20,
+                         fit_floor_draws: int = 16, fit_recall_subsamples: int = 50,
+                         fit_c2st_resamples: int = 5, expected_fit_candidates: int = 96,
                          lag_cap_ms: float = 180.0, n_pair_min: int = 5,
                          cover_quantile: float = 0.9, kmeans_seed: int = 20260902) -> dict:
     frozen, frozen_hash = _read_json(frozen_candidates_path, "frozen candidates")
     manifest, manifest_hash = _read_json(candidate_manifest_path, "execution candidate manifest")
+    response_design, response_design_hash = _read_json(
+        response_design_path, "original response-design manifest"
+    )
     seeds, seed_hash = _read_json(seed_manifest_path, "seed manifest")
     contract, contract_hash = _read_json(contact_contract_path, "contact contract")
     classifier_payload, classifier_hash = _read_json(classifier_manifest_path, "classifier manifest")
@@ -869,7 +909,14 @@ def aggregate_validation(*, frozen_candidates_path: Path, candidate_manifest_pat
         raise RuntimeError("seed manifest changed after candidate freeze")
     if not frozen.get("response_design_manifest_sha256"):
         raise RuntimeError("frozen candidates lack response-design binding")
+    if frozen["response_design_manifest_sha256"] != response_design_hash:
+        raise RuntimeError("original response-design manifest changed after candidate freeze")
+    if seeds.get("response_design_manifest_sha256") != response_design_hash:
+        raise RuntimeError("seed manifest is not bound to the original response design")
     ids, candidates = _candidate_index(manifest, frozen)
+    fit_ids, fit_candidates = _fit_candidate_index(
+        response_design, expected_count=expected_fit_candidates,
+    )
     training_contract, training_contract_hash = _load_npz(
         training_contract_path, "patient training objective contract",
         ("feature_center", "feature_scale", "pca_components", "sw_directions",
@@ -931,6 +978,40 @@ def aggregate_validation(*, frozen_candidates_path: Path, candidate_manifest_pat
             seed=int(kmeans_seed) + 1000,
         ),
     }
+    fit_context = dict(context)
+    fit_context["floor_draws"] = int(fit_floor_draws)
+    fit_contract_units = _fit_units(seeds)
+    fit_rows = []
+    fit_inventory = []
+    for candidate_index, candidate_id in enumerate(fit_ids):
+        units = [
+            _validate_worker(
+                Path(fit_worker_dir), fit_candidates[candidate_id], unit["topology_seed"],
+                unit["dynamics_seed"], manifest_hash=response_design_hash,
+                seed_hash=seed_hash, contact_names=names,
+            ) for unit in fit_contract_units
+        ]
+        fit_inventory.extend(
+            {"phase": "fit_descriptive", **{k: v for k, v in unit.items() if k != "arrays"}}
+            for unit in units
+        )
+        scored = _score_candidate(
+            units, fit_context, phase="fit_descriptive", candidate_id=candidate_id,
+            seed=kmeans_seed + 100000 + candidate_index * 1000,
+            recall_subsamples=int(fit_recall_subsamples),
+            c2st_resamples=int(fit_c2st_resamples),
+        )
+        source = fit_candidates[candidate_id]
+        scored.update({
+            "descriptive_only": True,
+            "cannot_select": True,
+            "selection_rank": None,
+            "physical": source.get("physical"),
+            "unit_cube": source.get("unit_cube"),
+            "block": source.get("block"),
+            "family_membership": source.get("family_membership", []),
+        })
+        fit_rows.append(scored)
     phase_results = {}
     raw_units_by_phase: dict[str, dict[str, list[dict]]] = {}
     inventory = []
@@ -1014,12 +1095,32 @@ def aggregate_validation(*, frozen_candidates_path: Path, candidate_manifest_pat
         "patient_ictal_input_read": False,
         "frozen_support_budget": {"n_cov": int(n_cov), "r_cov": float(r_cov)},
         "phases": phase_results,
+        "fit_descriptive": {
+            "descriptive_only": True,
+            "cannot_select": True,
+            "candidate_source": "original_response_design_manifest",
+            "expected_candidate_count": int(expected_fit_candidates),
+            "expected_units_per_candidate": 4,
+            "candidate_count": len(fit_rows),
+            "candidate_ids": fit_ids,
+            "frozen_candidate_ids_unchanged": ids,
+            "selection_effect": "NONE",
+            "cost_contract": {
+                "floor_draws": int(fit_floor_draws),
+                "recall_subsamples": int(fit_recall_subsamples),
+                "c2st_resamples": int(fit_c2st_resamples),
+                "paired_bootstrap_draws": 0,
+            },
+            "candidates": fit_rows,
+            "unit_inventory": fit_inventory,
+        },
         "paired_pareto_contrasts": contrasts,
         "paired_reference_contrasts": reference_contrasts,
         "patient_recording_block_benchmark": patient_benchmark,
         "unit_inventory": inventory,
         "input_hashes": {
             "frozen_candidates": frozen_hash, "candidate_manifest": manifest_hash,
+            "response_design_manifest": response_design_hash,
             "seed_manifest": seed_hash, "training_contract": training_contract_hash,
             "patient_training_target": training_hash, "heldout_contract": heldout_hash,
             "contact_contract": contract_hash, "classifier_manifest": classifier_hash,
@@ -1040,8 +1141,10 @@ def main() -> None:
                         default=DEFAULT_STAGE / "response_fit/frozen_candidates.json")
     parser.add_argument("--candidate-manifest", type=Path,
                         default=DEFAULT_STAGE / "response_design/execution_candidate_manifest.json")
+    parser.add_argument("--response-design", type=Path, default=DEFAULT_RESPONSE_DESIGN)
     parser.add_argument("--seed-manifest", type=Path,
                         default=DEFAULT_STAGE / "response_design/seed_manifest.json")
+    parser.add_argument("--fit-workers", type=Path, default=DEFAULT_STAGE / "fit/workers")
     parser.add_argument("--qualification-workers", type=Path,
                         default=DEFAULT_STAGE / "qualification/workers")
     parser.add_argument("--confirmation-workers", type=Path,
@@ -1057,6 +1160,10 @@ def main() -> None:
     parser.add_argument("--bootstrap-draws", type=int, default=4096)
     parser.add_argument("--recall-subsamples", type=int, default=200)
     parser.add_argument("--c2st-resamples", type=int, default=20)
+    parser.add_argument("--fit-floor-draws", type=int, default=16)
+    parser.add_argument("--fit-recall-subsamples", type=int, default=50)
+    parser.add_argument("--fit-c2st-resamples", type=int, default=5)
+    parser.add_argument("--expected-fit-candidates", type=int, default=96)
     args = parser.parse_args()
     config = json.loads(args.config.read_text(encoding="utf-8"))
     root = Path("/home/honglab/leijiaxin/HFOsp")
@@ -1079,7 +1186,9 @@ def main() -> None:
     payload = aggregate_validation(
         frozen_candidates_path=args.frozen_candidates,
         candidate_manifest_path=args.candidate_manifest,
+        response_design_path=args.response_design,
         seed_manifest_path=args.seed_manifest,
+        fit_worker_dir=args.fit_workers,
         qualification_worker_dir=args.qualification_workers,
         confirmation_worker_dir=args.confirmation_workers,
         training_contract_path=args.training_contract,
@@ -1090,13 +1199,19 @@ def main() -> None:
         output_dir=args.output_dir, n_cov=int(budget["n_cov"]), r_cov=float(budget["r_cov"]),
         floor_draws=args.floor_draws, bootstrap_draws=args.bootstrap_draws,
         recall_subsamples=args.recall_subsamples, c2st_resamples=args.c2st_resamples,
+        fit_floor_draws=args.fit_floor_draws,
+        fit_recall_subsamples=args.fit_recall_subsamples,
+        fit_c2st_resamples=args.fit_c2st_resamples,
+        expected_fit_candidates=args.expected_fit_candidates,
         lag_cap_ms=float(config["objective"]["lag_cap_ms"]),
         n_pair_min=int(config["objective"]["n_pair_min"]),
         cover_quantile=float(config["objective"]["cover_quantile"]),
         kmeans_seed=20260902,
     )
     print(json.dumps({"status": payload["status"], "output": str(args.output_dir),
-                      "candidates": len(payload["phases"]["confirmation"])}, indent=2))
+                      "frozen_candidates": len(payload["phases"]["confirmation"]),
+                      "fit_descriptive_candidates": payload["fit_descriptive"]["candidate_count"]},
+                     indent=2))
 
 
 if __name__ == "__main__":
