@@ -19,6 +19,7 @@ human feature routing.
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
+import datetime as dt
 import json
 import math
 from pathlib import Path
@@ -183,6 +184,14 @@ def validate_o2_smoke_lease(path: Path, *, subject: str) -> dict[str, Any]:
     explicit = payload.get("o2_sg_human_smoke_authorized") is True
     if not status.startswith("ACTIVE") or int(payload.get("max_workers", 0)) < 1:
         raise PermissionError("O2 resource lease is not ACTIVE with at least one worker")
+    expires = str(payload.get("expires_at", ""))
+    try:
+        expiry = dt.datetime.fromisoformat(expires)
+    except ValueError as exc:
+        raise PermissionError("O2 resource lease has no valid expiry") from exc
+    now = dt.datetime.now(tz=expiry.tzinfo)
+    if now >= expiry:
+        raise PermissionError("O2 resource lease has expired")
     scope_lower = scope.lower()
     scoped_o2_smoke = "o2" in scope_lower and "smoke" in scope_lower
     if not explicit and "sg_o2" not in scope_lower \

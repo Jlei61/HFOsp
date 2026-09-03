@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import datetime as dt
 import json
 
 import numpy as np
@@ -94,6 +95,7 @@ def test_lease_must_explicitly_authorize_one_worker_o2_smoke(tmp_path) -> None:
         "allowed_subjects": ["epilepsiae_916"],
         "allowed_gpu_indices": [1],
         "max_jobs_per_gpu_before_sentinel_review": 1,
+        "expires_at": (dt.datetime.now().astimezone() + dt.timedelta(hours=1)).isoformat(),
     }
     path.write_text(json.dumps(good))
     assert validate_o2_smoke_lease(path, subject="epilepsiae_916")["max_workers"] == 1
@@ -135,4 +137,3 @@ def test_frozen_legacy_scorer_preserves_old_loss_and_gradients_only_residual() -
     assert state.grad is not None
     assert all(parameter.grad is None for parameter in decoder.parameters())
     assert all(not parameter.requires_grad for parameter in decoder.parameters())
-
