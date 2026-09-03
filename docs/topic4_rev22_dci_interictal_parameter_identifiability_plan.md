@@ -2,7 +2,8 @@
 
 **Depends on:** `docs/topic4_rev22_dci_interictal_parameter_identifiability_spec.md`
 
-**Execution state:** v4 in execution since 2026-09-03. Goals are executed in ladder order;
+**Execution state:** v4.1 in execution since 2026-09-03; Task 10b's arithmetic-only budget
+correction was frozen on 2026-09-04 before candidate freeze. Goals are executed in ladder order;
 each goal has a verification check that must pass before the next starts.
 
 ## Goal ladder
@@ -311,9 +312,10 @@ dynamics seed each, for `M0000` and the frozen full-model proposal:
 - two previously frozen Node candidates named in the Task 0 config, loaded through the
   existing override path, as the Node blocking factor.
 
-Budget: 4 nulls x 2 arms x 2 conditions x 6 = 96 paired trajectories, 12 isotropic
-trajectories, 24 Node-factor trajectories. Nulls are opened with validation and never
-select a parameter.
+Budget: six named fixed-topology variants x 2 conditions x 6 seeds = 72 paired-null
+trajectories, 12 isotropic trajectories and 24 Node-factor trajectories, for 108 new
+trajectories. The intact arms are reused from confirmation. Nulls are opened with validation
+and never select a parameter.
 
 ## Task 11: open validation once
 
@@ -398,14 +400,14 @@ explicit `REFERENCE_RETURN` stochastic-floor replicate:
 | variance-decomposition block | 16 | 16 |
 | candidates x 6 qualification topologies | 72 | 24 |
 | candidates x 12 confirmation topologies | 144 | 48 |
-| null block + isotropic arm + Node factor | 132 | 132 |
-| Total | 748 | 348 |
+| null block + isotropic arm + Node factor | 108 | 108 |
+| Total | 724 | 324 |
 
 Any excluded add-on is listed as a separate manifest row before launch; it cannot be hidden
 inside retries or the nominal branch budget.
 
 At the rev20 measured rate of approximately 42 min per trajectory and 16 effective workers,
-the ideal compute floor is about 33 wall-clock hours for the primary branch and 15 hours for
+the ideal compute floor is about 32 wall-clock hours for the primary branch and 14 hours for
 the dose-only fallback. Scheduling contention and invalid retries make roughly two and a half
 days or one day, respectively, more realistic. Both remain substantially smaller than separate
 multi-restart CMA-ES searches for every nested family.

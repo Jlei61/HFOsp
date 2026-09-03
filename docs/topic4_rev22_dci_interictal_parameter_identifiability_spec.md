@@ -1,7 +1,8 @@
 # Topic 4 rev22-DCI: frozen dual-core interictal connectivity identifiability
 
-**Status:** v5.2, structural amendments on 2026-09-03 (v5.1 ellipse reference bound to the
-graph kernel axis, section 3.1; v5.2 composed edge-ratio floor relaxed to 0.20, section 3.2)
+**Status:** v5.3, structural amendments on 2026-09-03 (v5.1 ellipse reference bound to the
+graph kernel axis, section 3.1; v5.2 composed edge-ratio floor relaxed to 0.20, section 3.2),
+with the Task 10b null-count arithmetic corrected on 2026-09-04 before candidate freeze,
 on top of v5, execution contract repaired on 2026-09-03 after
 implementation audit.
 Offline Tasks 0-5 may start immediately. No rev22 SNN trajectory, including the Task 6
@@ -764,6 +765,13 @@ Two-mode discretization is checked on every confirmed candidate with the existin
 K=2 versus K=1 held-out likelihood, the label-shuffle alignment null and the
 patient-matched KMeans benchmark. A candidate whose alignment does not exceed the shuffle
 null q95 is reported as `TWO_MODE_NOT_ABOVE_SHUFFLE`.
+
+The fixed-topology null block therefore contains six explicit variants (two
+re-registrations, two random learned-pattern rows and two placements), each crossed with two
+conditions and six topology seeds: 72 new trajectories. The isotropic arm adds 12 and the
+Node blocking factor adds 24, for 108 new Task 10b trajectories. Intact `M0000` and full-model
+values are reused from the same confirmation seeds rather than rerun. No unnamed fourth
+paired-null family may be inferred from an arithmetic total.
 
 The Node blocking factor is separate from the nulls. Two previously frozen Node candidates
 from earlier rounds, loadable through the existing override path and named in the Task 0
