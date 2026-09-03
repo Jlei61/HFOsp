@@ -1,6 +1,6 @@
 # Fig3-B：间期时序场与发作早期能量场规范
 
-> 状态：paper-ready locked，2026-07-18
+> 状态：paper-ready locked，视觉合同更新 2026-09-03
 > 当前实例：E1146 seizure 2（`seizure_id=114600200102`）
 > 唯一入口：`scripts/paper_figures/plot_fig3b_interictal_ictal_shared_field.py`
 
@@ -29,10 +29,10 @@
 - 左图：冻结 TA rank min–max 到 `0=early, 1=late`，`viridis`；标题只写红色语义色 `TA fields`（`#B2182B`）。
 - 右图：发作早期 broadband power 只为插值做连续 min–max，使用 `Blues`；高 power 为深色、低 power 为浅色，不用旧 `Reds` / `magma` painter。
 - 两图只共用**显示** kernel `6 mm`；不得把 6 mm 写成冻结评分 kernel。
-- 单行两列、等大方形 field；y 轴只在左图出现；两个 panel 各自写 `shared TA axis (mm)` xlabel；每图一条等高 colorbar。
-- 左色条标题为 `ranks`，直接显示真实 propagation rank（当前 `0–14`，端点附 `early/late`）；右色条直接显示 `[0,10] s` baseline-normalized log-band-power robust-z。不得只写无量纲的 `0/1` 或只有 `low/high`。
+- 单行两列、等大方形 field；空间 y label 统一写 `Y (mm)` 且只在左图出现；两个 panel 各自写 `shared TA axis (mm)` xlabel；每图一条等高 colorbar。
+- 左色条与 Fig2 统一为 normalized-rank `viridis` 显示语法：标题 `ranks`，ticks 为 `0 early / 0.5 / 1 late`；原始 propagation rank（当前 `0–14`）只保留在 metadata。右色条直接显示 `[0,10] s` baseline-normalized log-band-power robust-z。
 - 深浅语义必须一致：左图最早传播为深色，右图最高 broadband power 为深色。
-- 标题只写 `E1146`、红色 `TA fields` 与 `Early-ictal broadband power`；不写内部 a/b 编号或长统计说明。
+- 不写整体标题。左图只写红色 `TA fields`；右图按 `E10 | SZ3` / `Early ictal field` 两行写子图标题；不写内部 a/b 编号或长统计说明。右 colorbar 可见标题为 `power` / `z`。
 - 锁定的 seizure 2 在 `[0,10] s` 的 15/15 触点 robust-z 均为正，范围 `+1.03–+3.68`；`shared_a_signed=0.719127`，direct early-rank correlation=`0.570884`。`shared_a_signed` 仍只量化触点间空间模式一致性，不能单独当作全局能量检验。
 
 ## 5. 产物与验收

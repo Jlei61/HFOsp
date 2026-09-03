@@ -69,6 +69,10 @@ def plot_clinical_onset_gradient_field_cohort(
         figsize=(5.8, 3.45),
         pair_gap=0.62,
         group_gap=1.75,
+        ylabel_fontsize=14.0,
+        tick_fontsize=11.5,
+        group_tick_fontsize=11.5,
+        legend_fontsize=11.5,
     )
 
 

@@ -1,0 +1,76 @@
+{
+  "schema_version": "paper_figure3_panels_and_complete_layout_v11",
+  "producer": "scripts/paper_figures/build_main_figure_3.py",
+  "panel_letters_in_individual_files": false,
+  "panel_letters_in_complete_layout": true,
+  "individual_panel_png_dpi": 600,
+  "complete_layout_dpi": 600,
+  "panels": {
+    "a": [
+      "results/paper-ready-figure/fig3/figures/fig3-panela.png",
+      "results/paper-ready-figure/fig3/figures/fig3-panela.pdf"
+    ],
+    "b": [
+      "results/paper-ready-figure/fig3/figures/fig3-panelb.png",
+      "results/paper-ready-figure/fig3/figures/fig3-panelb.pdf"
+    ],
+    "c": [
+      "results/paper-ready-figure/fig3/figures/fig3-panelc.png",
+      "results/paper-ready-figure/fig3/figures/fig3-panelc.pdf"
+    ],
+    "d": [
+      "results/paper-ready-figure/fig3/figures/fig3-paneld.png",
+      "results/paper-ready-figure/fig3/figures/fig3-paneld.pdf"
+    ],
+    "e": [
+      "results/paper-ready-figure/fig3/figures/fig3-panele.png",
+      "results/paper-ready-figure/fig3/figures/fig3-panele.pdf"
+    ],
+    "f": [
+      "results/paper-ready-figure/fig3/figures/fig3-panelf.png",
+      "results/paper-ready-figure/fig3/figures/fig3-panelf.pdf"
+    ]
+  },
+  "panel_metadata": {
+    "c": "results/paper-ready-figure/fig3/fig3_panelc_metadata.json"
+  },
+  "complete_layout": [
+    "results/paper-ready-figure/fig3/figures/fig3-complete-layout.png",
+    "results/paper-ready-figure/fig3/figures/fig3-complete-layout.pdf"
+  ],
+  "sources": {
+    "a_b": "results/paper-ready-figure/fig3/figures/epilepsiae_1146_seizure_07_raw_spectral_context_summary.json",
+    "c": "results/paper-ready-figure/archive/2026-09-02_noncanonical_staging_qa_cleanup/fig3_all_events_timing_plus_space_sources/fig3c/figures/epilepsiae_1146_seizure_02_interictal_ictal_shared_field.pdf",
+    "d": "results/paper-ready-figure/archive/2026-09-02_noncanonical_staging_qa_cleanup/fig3_all_events_timing_plus_space_sources/fig3d/figures/clinical_onset_gradient_field_cohort_stat.pdf",
+    "e": "results/paper-ready-figure/archive/2026-09-02_noncanonical_staging_qa_cleanup/fig3_all_events_timing_plus_space_sources/fig3e/figures/epilepsiae_1146_peri_onset_template_expression_paper_ready_journal_clean.pdf",
+    "f": "results/paper-ready-figure/archive/2026-09-02_noncanonical_staging_qa_cleanup/fig3_all_events_timing_plus_space_sources/fig3f/figures/fig3f_ab_dominance_heatmap.pdf"
+  },
+  "panel_contract": {
+    "a": "two compact broken-axis raw SEEG plus TFR examples: E10 SZ8 SCL9 broadband-type and E20 SZ8 HRB1 gamma-type",
+    "b": "continuous representative E10 SZ8 SCL9 versus E20 SZ8 HRB1 band-power trajectories with 0-s onset markers, dB y labels, and unobstructed Broadband/Gamma legend",
+    "c": "title-free all-event Timing+Space interictal TA field with Fig2-matched normalized ranks versus E10 | SZ3 early ictal field; power colorbar shown as z",
+    "d": "all-event Timing+Space clinical-onset gradient-field cohort, n=17/16/11",
+    "e": "E10 all-event Timing+Space amplitude-aware template expression trajectories with per-axis upper-left stacked legends",
+    "f": "17-subject all-event Timing+Space signed A/B contrast heatmap"
+  },
+  "final_typography_contract": {
+    "principle": "normalize visible type after each panel is scaled into the locked complete layout",
+    "standard_axis_label_target_pt": [
+      9.0,
+      10.5
+    ],
+    "standard_tick_target_pt": [
+      7.5,
+      8.5
+    ],
+    "dense_tick_target_pt": [
+      6.5,
+      7.5
+    ],
+    "exceptions": {
+      "a_raw_channel_names": "dense tick tier",
+      "f_subject_labels": "dense tick tier"
+    },
+    "layout_changed": "top-row A/B width allocation only; C-F unchanged"
+  }
+}

@@ -44,6 +44,11 @@ COL_NONSIG = "#A9A9A9"
 COL_MEDIAN = "#202020"
 START_SEC, STOP_SEC, STEP_SEC = -120.0, 20.0, 2.0
 HEATMAP_SORT_WINDOW = (-30.0, 20.0)
+HEATMAP_AXIS_LABEL_FONTSIZE = 14.0
+HEATMAP_X_TICK_FONTSIZE = 11.5
+HEATMAP_DENSE_Y_TICK_FONTSIZE = 10.0
+HEATMAP_COLORBAR_LABEL_FONTSIZE = 12.5
+HEATMAP_COLORBAR_TICK_FONTSIZE = 11.0
 
 
 def _literal_list_assignment(path: Path, variable: str) -> list[str]:
@@ -230,8 +235,10 @@ def make_paired_figure(payload: dict) -> plt.Figure:
     return fig
 
 
-def _subject_timecourse(record: dict) -> tuple[np.ndarray, np.ndarray]:
-    path = DATA_DIR / "per_subject" / (
+def _subject_timecourse(
+    record: dict, *, data_dir: Path = DATA_DIR
+) -> tuple[np.ndarray, np.ndarray]:
+    path = data_dir / "per_subject" / (
         f"{record['subject']}_fig3f_ab_dominance_timecourse.npz"
     )
     with np.load(path) as data:
@@ -284,10 +291,10 @@ def _heatmap_pattern_metrics(trajectory: np.ndarray, centers: np.ndarray) -> dic
     }
 
 
-def _heatmap_items(payload: dict) -> list[dict]:
+def _heatmap_items(payload: dict, *, data_dir: Path = DATA_DIR) -> list[dict]:
     items = []
     for record in _primary_rows(payload):
-        centers, trajectory = _subject_timecourse(record)
+        centers, trajectory = _subject_timecourse(record, data_dir=data_dir)
         metrics = _heatmap_pattern_metrics(trajectory, centers)
         items.append({
             "record": record,
@@ -311,9 +318,9 @@ def _heatmap_items(payload: dict) -> list[dict]:
     return sorted(items, key=sort_key)
 
 
-def make_heatmap_figure(payload: dict) -> plt.Figure:
+def make_heatmap_figure(payload: dict, *, data_dir: Path = DATA_DIR) -> plt.Figure:
     """Selected display retaining the full signed peri-onset trajectory."""
-    items = _heatmap_items(payload)
+    items = _heatmap_items(payload, data_dir=data_dir)
     centers = items[0]["centers"]
     for item in items[1:]:
         if not np.allclose(centers, item["centers"]):
@@ -334,19 +341,26 @@ def make_heatmap_figure(payload: dict) -> plt.Figure:
     ax.axvline(0, color="black", lw=1.0, ls="--")
     ax.set_xlim(START_SEC, STOP_SEC)
     ax.set_xticks([-120, -60, 0, 20])
-    ax.set_xlabel("Time (s)", fontsize=10.2)
+    ax.set_xlabel("Time (s)", fontsize=HEATMAP_AXIS_LABEL_FONTSIZE, labelpad=5)
     ax.set_yticks(np.arange(len(items)))
     ax.set_yticklabels(
-        [_pretty(item["record"]["subject"]) for item in items], fontsize=7.8
+        [_pretty(item["record"]["subject"]) for item in items],
+        fontsize=HEATMAP_DENSE_Y_TICK_FONTSIZE,
     )
-    ax.tick_params(axis="x", labelsize=9.0, length=3.5, width=1.0)
-    ax.tick_params(axis="y", length=0, width=0)
+    ax.tick_params(
+        axis="x", labelsize=HEATMAP_X_TICK_FONTSIZE, length=3.5, width=1.0, pad=3
+    )
+    ax.tick_params(axis="y", length=0, width=0, pad=2)
     for spine in ax.spines.values():
         spine.set_linewidth(0.8)
         spine.set_color("0.35")
     colorbar = fig.colorbar(image, ax=ax, pad=0.025, fraction=0.046)
-    colorbar.set_label(r"Signed A/B contrast, $C_{AB}$", fontsize=9.0)
-    colorbar.ax.tick_params(labelsize=8.0, length=3)
+    colorbar.set_label(
+        r"Signed A/B contrast, $C_{AB}$",
+        fontsize=HEATMAP_COLORBAR_LABEL_FONTSIZE,
+        labelpad=6,
+    )
+    colorbar.ax.tick_params(labelsize=HEATMAP_COLORBAR_TICK_FONTSIZE, length=3)
     ticks = np.linspace(-vmax, vmax, 5)
     tick_labels = [f"{value:.2f}" for value in ticks]
     tick_labels[0] = f"B  {ticks[0]:.2f}"
@@ -361,8 +375,14 @@ def make_heatmap_figure(payload: dict) -> plt.Figure:
     return fig
 
 
-def _write_sidecars(payload: dict, paths: dict[str, Path]) -> None:
-    FIG_DIR.mkdir(parents=True, exist_ok=True)
+def _write_sidecars(
+    payload: dict,
+    paths: dict[str, Path],
+    *,
+    fig_dir: Path = FIG_DIR,
+    data_dir: Path = DATA_DIR,
+) -> None:
+    fig_dir.mkdir(parents=True, exist_ok=True)
     cohort = payload["primary_cohort_hierarchical_time_null"]
     summary = {
         "panel": "Figure 3F",
@@ -390,7 +410,7 @@ def _write_sidecars(payload: dict, paths: dict[str, Path]) -> None:
                     "subject": item["record"]["subject"],
                     **item["metrics"],
                 }
-                for item in _heatmap_items(payload)
+                for item in _heatmap_items(payload, data_dir=data_dir)
             ],
         },
         "manuscript_y_labels": {
@@ -402,7 +422,7 @@ def _write_sidecars(payload: dict, paths: dict[str, Path]) -> None:
                     "subject": item["record"]["subject"],
                     "manuscript_label": _pretty(item["record"]["subject"]),
                 }
-                for item in _heatmap_items(payload)
+                for item in _heatmap_items(payload, data_dir=data_dir)
             ],
         },
         "interpretation": (
@@ -410,7 +430,7 @@ def _write_sidecars(payload: dict, paths: dict[str, Path]) -> None:
             "panel is a compact inferential companion; neither requires the shared-plane subset."
         ),
     }
-    (FIG_DIR / "fig3f_ab_dominance_render_summary.json").write_text(
+    (fig_dir / "fig3f_ab_dominance_render_summary.json").write_text(
         json.dumps(summary, indent=2, ensure_ascii=False) + "\n"
     )
     p_text = _fmt_p(cohort["p_one_sided"]).replace("P", "p")
@@ -426,13 +446,21 @@ def _write_sidecars(payload: dict, paths: dict[str, Path]) -> None:
         "红、蓝分别表示 A、B 相对占优，白色表示没有稳定的 template dominance；虚线为 clinical onset。\n\n"
         "**关注点**：看临近 onset 是否出现跨患者一致的颜色加深，以及这种变化是同向选择、反向选择，还是患者间异质。\n"
     )
-    (FIG_DIR / "README.md").write_text(readme)
+    (fig_dir / "README.md").write_text(readme)
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", type=Path, default=COHORT_JSON)
+    parser.add_argument("--out-dir", type=Path, default=FIG_DIR)
+    parser.add_argument(
+        "--data-dir",
+        type=Path,
+        default=None,
+        help="directory containing per_subject timecourses; defaults to input JSON parent",
+    )
     args = parser.parse_args()
+    data_dir = args.input.resolve().parent if args.data_dir is None else args.data_dir
     payload = json.loads(args.input.read_text())
     plt.rcParams.update({
         "font.family": "DejaVu Sans",
@@ -441,17 +469,17 @@ def main() -> None:
         "pdf.fonttype": 42,
         "ps.fonttype": 42,
     })
-    FIG_DIR.mkdir(parents=True, exist_ok=True)
+    args.out_dir.mkdir(parents=True, exist_ok=True)
     paths: dict[str, Path] = {}
     for stem, maker in (
         (PAIRED_STEM, make_paired_figure),
-        (HEATMAP_STEM, make_heatmap_figure),
+        (HEATMAP_STEM, lambda item: make_heatmap_figure(item, data_dir=data_dir)),
     ):
         for suffix in ("png", "pdf"):
-            path = FIG_DIR / f"{stem}.{suffix}"
+            path = args.out_dir / f"{stem}.{suffix}"
             savefig_pub(maker(payload), path, dpi=300)
             paths[f"{stem}_{suffix}"] = path
-    _write_sidecars(payload, paths)
+    _write_sidecars(payload, paths, fig_dir=args.out_dir, data_dir=data_dir)
 
 
 if __name__ == "__main__":

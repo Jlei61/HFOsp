@@ -38,6 +38,7 @@ def _compose_complete_layout(
     placements: dict[str, tuple[Path, tuple[int, int, int, int]]],
     labels: dict[str, tuple[int, int]],
     anchors: dict[str, str] | None = None,
+    fit_to_cell: bool = False,
     label_font_size: int = 132,
 ) -> list[str]:
     """Assemble label-free panels on an aligned, whitespace-trimmed canvas.
@@ -96,7 +97,18 @@ def _compose_complete_layout(
             image = trim_outer_whitespace(source.convert("RGB"))
             x0, y0, x1, y1 = box
             resampling = getattr(Image, "Resampling", Image)
-            image.thumbnail((x1 - x0, y1 - y0), resampling.LANCZOS)
+            target = (x1 - x0, y1 - y0)
+            if fit_to_cell:
+                scale = min(target[0] / image.width, target[1] / image.height)
+                image = image.resize(
+                    (
+                        max(1, round(image.width * scale)),
+                        max(1, round(image.height * scale)),
+                    ),
+                    resampling.LANCZOS,
+                )
+            else:
+                image.thumbnail(target, resampling.LANCZOS)
             x, y = anchored_origin(box, image.size, anchors.get(panel_id, "center"))
             canvas.paste(image, (x, y))
     draw = ImageDraw.Draw(canvas)
