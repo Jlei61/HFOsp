@@ -49,6 +49,7 @@ SECONDARY = (
 )
 SCHEMAS = {
     "validation": "topic4_rev22_dci_validation_aggregate_v1",
+    "validation_surface": "topic4_rev22_dci_validation_response_surface_v1",
     "fit": "topic4_rev22_dci_training_only_fit_aggregate_v2",
     "response": "topic4_rev22_dci_response_fit_v1",
     "frozen": "topic4_rev22_dci_frozen_candidates_v1",
@@ -107,10 +108,12 @@ def _hash_entry(payload: Mapping, *keys: str) -> str | None:
     return str(value) if value else None
 
 
-def load_inputs(validation_path: Path, fit_path: Path, response_path: Path,
-                frozen_path: Path) -> dict:
+def load_inputs(validation_path: Path, validation_surface_path: Path, fit_path: Path,
+                response_path: Path, frozen_path: Path) -> dict:
     validation, validation_hash, vp = _read_json(
         validation_path, "validation aggregate", SCHEMAS["validation"])
+    validation_surface, validation_surface_hash, sp = _read_json(
+        validation_surface_path, "validation response surfaces", SCHEMAS["validation_surface"])
     fit, fit_hash, fp = _read_json(fit_path, "fit aggregate", SCHEMAS["fit"])
     response, response_hash, rp = _read_json(response_path, "response fit", SCHEMAS["response"])
     frozen, frozen_hash, zp = _read_json(frozen_path, "frozen candidates", SCHEMAS["frozen"])
@@ -122,9 +125,28 @@ def load_inputs(validation_path: Path, fit_path: Path, response_path: Path,
         raise RuntimeError("response fit is not a complete training-only freeze")
     if validation.get("snn_simulation_run") is not False or validation.get("patient_ictal_input_read") is not False:
         raise RuntimeError("validation aggregate violates the pure plotting boundary")
+    fit_descriptive = validation.get("fit_descriptive")
+    if not isinstance(fit_descriptive, Mapping):
+        raise RuntimeError("validation aggregate lacks fit_descriptive")
+    if fit_descriptive.get("descriptive_only") is not True or fit_descriptive.get("cannot_select") is not True:
+        raise RuntimeError("fit_descriptive is not locked descriptive-only/cannot-select")
+    fit_rows = fit_descriptive.get("candidates")
+    if int(fit_descriptive.get("candidate_count", -1)) != 96 or not isinstance(fit_rows, list) or len(fit_rows) != 96:
+        raise RuntimeError("fit_descriptive must contain exactly 96 candidates")
+    if (validation_surface.get("status") != "DESCRIPTIVE_VALIDATION_RESPONSE_COMPLETE"
+            or validation_surface.get("descriptive_only") is not True
+            or validation_surface.get("cannot_select") is not True
+            or validation_surface.get("selection_permitted") is not False):
+        raise RuntimeError("validation response surfaces are not descriptive-only/cannot-select")
+    if int(validation_surface.get("design_point_count", -1)) != 96:
+        raise RuntimeError("validation response surfaces must retain all 96 design points")
     bindings = (
         (_hash_entry(validation, "input_hashes", "frozen_candidates"), frozen_hash,
          "validation -> frozen candidates"),
+        (_hash_entry(validation_surface, "input_hashes", "validation_aggregate"), validation_hash,
+         "validation response surfaces -> validation aggregate"),
+        (_hash_entry(validation_surface, "input_hashes", "frozen_candidates"), frozen_hash,
+         "validation response surfaces -> frozen candidates"),
         (_hash_entry(response, "input_hashes", "fit_aggregate"), fit_hash,
          "response fit -> fit aggregate"),
         (_hash_entry(frozen, "input_hashes", "fit_aggregate"), fit_hash,
@@ -145,11 +167,19 @@ def load_inputs(validation_path: Path, fit_path: Path, response_path: Path,
         raise RuntimeError("frozen candidate ids are empty or duplicated")
     if set(frozen_ids) != set(observed_ids):
         raise RuntimeError("confirmation candidates differ from the frozen candidate set")
+    descriptive_ids = [str(row.get("candidate_id")) for row in fit_rows]
+    surface_ids = [str(row.get("candidate_id"))
+                   for row in validation_surface.get("original_design_points", [])]
+    if len(set(descriptive_ids)) != 96 or set(descriptive_ids) != set(surface_ids):
+        raise RuntimeError("validation surface points differ from fit_descriptive candidates")
     return {
-        "validation": validation, "fit": fit, "response": response, "frozen": frozen,
+        "validation": validation, "validation_surface": validation_surface,
+        "fit": fit, "response": response, "frozen": frozen,
         "hashes": {"validation": validation_hash, "fit": fit_hash,
+                   "validation_surface": validation_surface_hash,
                    "response": response_hash, "frozen": frozen_hash},
-        "paths": {"validation": str(vp), "fit": str(fp), "response": str(rp),
+        "paths": {"validation": str(vp), "validation_surface": str(sp),
+                  "fit": str(fp), "response": str(rp),
                   "frozen": str(zp)},
     }
 
@@ -219,30 +249,49 @@ def _yield(row: Mapping) -> float:
     return float((row.get("secondary") or {}).get("yield_total") or 0.0)
 
 
-def plot_validation_response(data: Mapping, physical: Mapping[str, Mapping], out: Path) -> list[Path]:
-    rows = _confirmation_rows(data)
+def plot_validation_response(data: Mapping, out: Path) -> list[Path]:
+    response = data["validation_surface"]
+    rows = data["validation"]["fit_descriptive"]["candidates"]
     yields = np.asarray([_yield(row) for row in rows], float)
     sizes = 10.0 + 35.0 * np.sqrt(yields / max(float(yields.max()), 1.0))
     fig, axes = plt.subplots(len(PRIMARY), len(PARAMS), figsize=(8.0, 9.2), squeeze=False)
     for i, (endpoint, label, direction) in enumerate(PRIMARY):
+        surface = (response.get("surfaces") or {}).get(endpoint)
+        if not isinstance(surface, Mapping):
+            raise RuntimeError(f"validation response surface missing endpoint: {endpoint}")
         for j, parameter in enumerate(PARAMS):
             ax = axes[i, j]
             good_x, good_y, good_s, bad_x = [], [], [], []
             for size, row in zip(sizes, rows):
-                x = physical[str(row["candidate_id"])][parameter]
+                x = _finite((row.get("physical") or {}).get(parameter))
                 value = _finite((row.get("primary_endpoints") or {}).get(endpoint))
+                if x is None:
+                    raise RuntimeError(f"descriptive point lacks parameter {parameter}")
                 if row.get("primary_status") == "OK" and value is not None:
                     good_x.append(x); good_y.append(value); good_s.append(size)
                 else:
                     bad_x.append(x)
             if good_x:
-                ax.scatter(good_x, good_y, s=good_s, color=COLORS["blue"], alpha=0.72,
-                           edgecolor="white", linewidth=0.35, zorder=3)
-                unique = sorted(set(good_x))
-                if len(unique) >= 2:
-                    medians = [np.median([y for x, y in zip(good_x, good_y) if x == value])
-                               for value in unique]
-                    ax.plot(unique, medians, color=COLORS["blue"], alpha=0.8, zorder=2)
+                ax.scatter(good_x, good_y, s=good_s, color=COLORS["gray"], alpha=0.18,
+                           edgecolor="none", zorder=1)
+            slices = surface.get("conditional_slices")
+            record = slices.get(parameter) if isinstance(slices, Mapping) else None
+            if surface.get("status") == "OK" and isinstance(record, Mapping):
+                axis = np.asarray(record.get("axis"), float)
+                mean = np.asarray(record.get("mean"), float)
+                lo = np.asarray(record.get("lo90"), float)
+                hi = np.asarray(record.get("hi90"), float)
+                if not (axis.ndim == mean.ndim == lo.ndim == hi.ndim == 1
+                        and len(axis) >= 2 and len(axis) == len(mean) == len(lo) == len(hi)
+                        and np.isfinite(np.concatenate([axis, mean, lo, hi])).all()):
+                    raise RuntimeError(f"malformed conditional slice: {endpoint}/{parameter}")
+                adequate = bool((surface.get("cv") or {}).get("adequate"))
+                color = COLORS["blue"] if adequate else COLORS["gray"]
+                ax.fill_between(axis, lo, hi, color=color, alpha=0.15, linewidth=0)
+                ax.plot(axis, mean, color=color, linestyle="-" if adequate else "--", zorder=3)
+            else:
+                ax.text(0.5, 0.5, "not estimable", ha="center", va="center",
+                        transform=ax.transAxes, color=COLORS["gray"])
             if bad_x:
                 top = ax.get_ylim()[1]
                 ax.scatter(bad_x, [top] * len(bad_x), marker="x", s=20,
@@ -257,7 +306,7 @@ def plot_validation_response(data: Mapping, physical: Mapping[str, Mapping], out
             ax.spines[["top", "right"]].set_visible(False)
             ax.grid(axis="y", color="#E6E6E6", linewidth=0.5)
     fig.suptitle("Selection-blind validation response", y=0.995, fontsize=9, fontweight="bold")
-    fig.text(0.995, 0.005, "Point area: returned-event yield; x: not estimable", ha="right",
+    fig.text(0.995, 0.005, "Line and band: conditional slice and 90% CI; pale point area: yield; x: not estimable", ha="right",
              va="bottom", fontsize=6.2, color="#555555")
     fig.tight_layout(rect=(0, 0.012, 1, 0.985))
     return _save(fig, out, "rev22_dci_validation_response_atlas")
@@ -341,7 +390,7 @@ def plot_pareto(data: Mapping, families: Mapping[str, str], out: Path) -> list[P
     usable = []
     for row in rows:
         endpoints = row.get("primary_endpoints") or {}
-        x, y, ood = (_finite(endpoints.get(key)) for key in ("D_support", "kmeans_alignment", "ood"))
+        x, y, ood = (_finite(endpoints.get(key)) for key in ("D_order", "kmeans_alignment", "ood"))
         if row.get("primary_status") == "OK" and None not in (x, y, ood):
             usable.append((row, x, y, ood))
     if usable:
@@ -357,7 +406,7 @@ def plot_pareto(data: Mapping, families: Mapping[str, str], out: Path) -> list[P
         fig.colorbar(scalar, ax=ax, pad=0.02, label="OOD fraction")
     else:
         ax.text(0.5, 0.5, "No estimable candidate", ha="center", va="center", transform=ax.transAxes)
-    ax.set_xlabel("Held-out support distance (lower)")
+    ax.set_xlabel("Held-out order distance (lower)")
     ax.set_ylabel("KMeans alignment (higher)")
     ax.set_title("Validation trade-off", fontweight="bold")
     ax.spines[["top", "right"]].set_visible(False)
@@ -368,43 +417,73 @@ def plot_pareto(data: Mapping, families: Mapping[str, str], out: Path) -> list[P
 
 def plot_training_response(data: Mapping, out: Path) -> list[Path]:
     candidates = data["fit"].get("candidates") or []
-    fig, axes = plt.subplots(len(TRAINING), len(PARAMS), figsize=(8.0, 6.4), squeeze=False)
+    plane_specs = [("dose_plane", "g_LEE", "g_LEI", "Learned-pattern dose plane")]
+    if data["response"].get("branch") == "PRIMARY_4D_BRANCH":
+        plane_specs.append(("geometry_plane", "theta_FT_deg", "AR_FT", "Geometry plane"))
+    fig, axes = plt.subplots(len(TRAINING), len(plane_specs),
+                             figsize=(4.2 * len(plane_specs), 7.4), squeeze=False)
+    row_mappables = []
     for i, (component, label) in enumerate(TRAINING):
-        for j, parameter in enumerate(PARAMS):
+        component_values = [
+            _finite((row.get("standardized_Z") or {}).get(component))
+            for row in candidates if row.get("block") in {spec[0] for spec in plane_specs}
+        ]
+        finite_component = [value for value in component_values if value is not None]
+        if not finite_component:
+            raise RuntimeError(f"training plane lacks estimable component: {component}")
+        norm = Normalize(vmin=min(finite_component), vmax=(max(finite_component)
+                         if max(finite_component) > min(finite_component)
+                         else min(finite_component) + 1.0))
+        row_mappable = None
+        for j, (block, x_name, y_name, title) in enumerate(plane_specs):
             ax = axes[i, j]
             good, bad = [], []
-            for row in candidates:
-                x = _finite((row.get("physical") or {}).get(parameter))
-                y = _finite((row.get("standardized_Z") or {}).get(component))
-                if x is None:
-                    raise RuntimeError(f"fit candidate lacks parameter {parameter}")
-                if row.get("continuous_surface_eligible") and y is not None:
-                    good.append((x, y))
+            plane_rows = [row for row in candidates if row.get("block") == block]
+            if len(plane_rows) < 3:
+                raise RuntimeError(f"training response plane {block} has fewer than three points")
+            for row in plane_rows:
+                x = _finite((row.get("physical") or {}).get(x_name))
+                y = _finite((row.get("physical") or {}).get(y_name))
+                value = _finite((row.get("standardized_Z") or {}).get(component))
+                if x is None or y is None:
+                    raise RuntimeError(f"fit candidate lacks coordinates for {block}")
+                if row.get("continuous_surface_eligible") and value is not None:
+                    good.append((x, y, value))
                 else:
-                    bad.append(x)
-            if good:
-                ax.scatter([x for x, _ in good], [y for _, y in good], s=9,
-                           color=COLORS["blue"], alpha=0.42, linewidth=0)
-                unique = sorted(set(x for x, _ in good))
-                if len(unique) >= 2:
-                    medians = [np.median([y for x, y in good if x == value]) for value in unique]
-                    ax.plot(unique, medians, color=COLORS["red"], linewidth=1.1)
+                    bad.append((x, y))
+            if len(good) >= 3:
+                x = np.asarray([row[0] for row in good])
+                y = np.asarray([row[1] for row in good])
+                z = np.asarray([row[2] for row in good])
+                centered = np.column_stack([x - x.mean(), y - y.mean()])
+                if np.linalg.matrix_rank(centered) >= 2:
+                    ax.tricontourf(x, y, z, levels=12, cmap="viridis", norm=norm, alpha=0.72)
+                row_mappable = ax.scatter(x, y, c=z, cmap="viridis", norm=norm, s=22,
+                                          edgecolor="white", linewidth=0.4, zorder=3)
             if bad:
-                top = ax.get_ylim()[1]
-                ax.scatter(bad, [top] * len(bad), marker="x", s=13, color=COLORS["gray"],
-                           clip_on=False)
-            ax.axhline(0, color="#BDBDBD", linewidth=0.6)
+                ax.scatter([row[0] for row in bad], [row[1] for row in bad], marker="x",
+                           s=18, color=COLORS["gray"], zorder=4)
             if i == 0:
-                ax.set_title(PARAM_LABELS[j])
+                ax.set_title(title)
             if j == 0:
-                ax.set_ylabel(label + "\nstandardized excess")
-            if i == len(TRAINING) - 1:
-                ax.set_xlabel(parameter)
+                ax.text(-0.28, 0.5, label, rotation=90, ha="center", va="center",
+                        transform=ax.transAxes)
+            ax.set_xlabel(x_name)
+            ax.set_ylabel(y_name)
             ax.spines[["top", "right"]].set_visible(False)
-            ax.grid(axis="y", color="#ECECEC", linewidth=0.45)
-    fig.suptitle("Training-only response surface observations", y=0.995,
+            ax.grid(color="#ECECEC", linewidth=0.4)
+        row_mappables.append(row_mappable)
+    fig.suptitle("Training-only two-dimensional response planes", y=0.995,
                  fontsize=9, fontweight="bold")
-    fig.tight_layout(rect=(0, 0, 1, 0.98))
+    fig.subplots_adjust(left=0.12, right=0.87, bottom=0.07, top=0.95, hspace=0.5, wspace=0.38)
+    for i, mappable in enumerate(row_mappables):
+        if mappable is None:
+            continue
+        box = axes[i, -1].get_position()
+        color_ax = fig.add_axes([0.895, box.y0, 0.012, box.height])
+        colorbar = fig.colorbar(mappable, cax=color_ax)
+        colorbar.set_label("standardized excess", fontsize=6.2)
+        colorbar.ax.tick_params(labelsize=5.8, width=0.5)
     return _save(fig, out, "rev22_dci_training_response_atlas")
 
 
@@ -480,7 +559,7 @@ def _atomic_json(path: Path, payload: Mapping) -> None:
 def _write_readme(path: Path) -> None:
     path.write_text(
         """### rev22_dci_validation_response_atlas
-六个 selection-blind 间期端点随四个连接参数的描述性变化。点面积表示返回事件产量，叉号表示该冻结候选不可估；连线仅连接相同参数值的中位数，不是因果或代理模型曲线。
+六个 selection-blind 间期端点随四个连接参数的条件响应。实线及阴影来自冻结后 descriptive validation surface 在其他三个参数固定于 full-model 坐标时的一维切片及 90% 区间；96 个设计点仅以浅色散点显示，点面积表示返回事件产量，叉号表示不可估。该图是 descriptive-only 且 cannot-select，不是边际因果效应，也不能反向改变候选。
 
 **关注点**：距离、recall、双模板一致性和 OOD 是否出现一致改善，而非由低产量换取。
 
@@ -490,12 +569,12 @@ def _write_readme(path: Path) -> None:
 **关注点**：锁回某个参数后，改善是否在配对网络层稳定消失。
 
 ### rev22_dci_validation_pareto
-横轴为 held-out support 距离，纵轴为 KMeans alignment，颜色为 OOD，点面积为事件产量。该图展示验证指标间的权衡，不参与候选选择。
+横轴为 held-out order 距离，纵轴为 KMeans alignment，颜色为 OOD，点面积为事件产量。该图展示验证指标间的权衡，不参与候选选择。
 
 **关注点**：是否存在同时向左上移动、OOD 不升且不靠少出事件的候选。
 
 ### rev22_dci_training_response_atlas
-96 点训练设计的四个预注册目标分量随四个参数变化；红线为同一参数值上的描述性中位数。灰叉保留不可行或不可估候选。
+96 点训练设计中预留的两组二维设计面：learned E→E×E→I dose，以及 primary branch 的轴向偏移×长短轴比。每行对应一个预注册训练目标分量，颜色为 standardized excess；灰叉保留不可行或不可估候选，不再把 Sobol unique-x 投影连接成折线。
 
 **关注点**：哪些参数在训练目标中可辨识，以及训练改善是否与验证端一致。
 
@@ -509,7 +588,7 @@ def _write_readme(path: Path) -> None:
 
 
 def render(data: Mapping, output_dir: Path) -> dict:
-    physical = _physical_map(data)
+    _physical_map(data)
     families = _family_map(data)
     output_dir = output_dir.expanduser().resolve()
     if output_dir.exists():
@@ -520,7 +599,7 @@ def render(data: Mapping, output_dir: Path) -> dict:
                                      prefix=f".{output_dir.name}.") as temporary:
         staging = Path(temporary)
         outputs: list[Path] = []
-        outputs += plot_validation_response(data, physical, staging)
+        outputs += plot_validation_response(data, staging)
         outputs += plot_family_matrix(data, families, staging)
         outputs += plot_pareto(data, families, staging)
         outputs += plot_training_response(data, staging)
@@ -555,12 +634,14 @@ def render(data: Mapping, output_dir: Path) -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--validation-aggregate", type=Path, required=True)
+    parser.add_argument("--validation-response-surfaces", type=Path, required=True)
     parser.add_argument("--fit-aggregate", type=Path, required=True)
     parser.add_argument("--response-fit", type=Path, required=True)
     parser.add_argument("--frozen-candidates", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     args = parser.parse_args()
-    data = load_inputs(args.validation_aggregate, args.fit_aggregate,
+    data = load_inputs(args.validation_aggregate, args.validation_response_surfaces,
+                       args.fit_aggregate,
                        args.response_fit, args.frozen_candidates)
     metadata = render(data, args.output_dir)
     print(json.dumps({"status": metadata["status"], "output": str(args.output_dir)}, indent=2))

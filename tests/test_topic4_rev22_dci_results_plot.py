@@ -52,19 +52,29 @@ def _fixture(tmp_path: Path) -> dict[str, Path]:
     fit_payload = {
         "schema_id": "topic4_rev22_dci_training_only_fit_aggregate_v2",
         "status": "FIT_AGGREGATE_COMPLETE",
-        "inventory": {"candidate_count": 4, "joint_feasibility_count": 3},
+        "inventory": {"candidate_count": 96, "joint_feasibility_count": 95},
         "candidates": [],
     }
-    physicals = (
-        ("full", [0.7, 0.8, 5.0, 2.3], True),
-        ("locked", [0.5, 0.8, 5.0, 2.3], True),
-        ("screen_a", [0.2, 0.4, -5.0, 1.5], True),
-        ("screen_bad", [0.9, 1.2, 8.0, 2.8], False),
-    )
-    for index, (candidate_id, values, feasible) in enumerate(physicals):
+    physicals = []
+    for index in range(96):
+        candidate_id = "full" if index == 0 else "locked" if index == 1 else f"screen_{index:03d}"
+        if index < 8:
+            values = [(index % 4) / 3, (index // 4) * 1.5, 0.0, 2.0]
+            block = "dose_plane"
+        elif index < 16:
+            local = index - 8
+            values = [0.5, 1.0, -10.0 + (local % 4) * (20.0 / 3), 1.0 + (local // 4) * 2.0]
+            block = "geometry_plane"
+        else:
+            values = [(index % 11) / 10, ((index * 3) % 13) / 8,
+                      -10.0 + ((index * 5) % 17) * 1.25, 1.0 + ((index * 7) % 19) / 9]
+            block = "full4d"
+        physicals.append((candidate_id, values, index != 95, block))
+    for index, (candidate_id, values, feasible, block) in enumerate(physicals):
         fit_payload["candidates"].append({
             "candidate_id": candidate_id,
             "physical": dict(zip(plotter.PARAMS, values)),
+            "block": block,
             "joint_feasibility": feasible,
             "continuous_surface_eligible": feasible,
             "standardized_Z": {
@@ -82,6 +92,7 @@ def _fixture(tmp_path: Path) -> dict[str, Path]:
         "schema_id": "topic4_rev22_dci_response_fit_v1",
         "status": "RESPONSE_FIT_COMPLETE",
         "training_only": True,
+        "branch": "PRIMARY_4D_BRANCH",
         "input_hashes": {"fit_aggregate": {"sha256": fit_hash}},
         "proposals": {
             "M1111": {"frozen_points": [{"execution_candidate_id": "full",
@@ -107,13 +118,35 @@ def _fixture(tmp_path: Path) -> dict[str, Path]:
     }
     validation_path = tmp_path / "validation_aggregate.json"
     rows = [_validation_row("full", 0.0), _validation_row("locked", 0.08)]
-    _write(validation_path, {
+    descriptive_rows = []
+    original_points = []
+    for index, (candidate_id, values, feasible, _) in enumerate(physicals):
+        shift = index / 1000
+        row = _validation_row(candidate_id, shift)
+        row["physical"] = dict(zip(plotter.PARAMS, values))
+        if not feasible:
+            row["primary_status"] = "PRIMARY_ENDPOINT_NOT_ESTIMABLE"
+            row["primary_endpoints"] = {name: None for name, _, _ in plotter.PRIMARY}
+        descriptive_rows.append(row)
+        original_points.append({
+            "candidate_id": candidate_id,
+            "physical": dict(zip(plotter.PARAMS, values)),
+            "primary_status": row["primary_status"],
+            "endpoints": row["primary_endpoints"],
+            "yield_total": row["secondary"]["yield_total"],
+            "not_estimable": {name: not feasible for name, _, _ in plotter.PRIMARY},
+        })
+    validation_hash = _write(validation_path, {
         "schema_id": "topic4_rev22_dci_validation_aggregate_v1",
         "status": "VALIDATION_AGGREGATE_COMPLETE",
         "snn_simulation_run": False,
         "patient_ictal_input_read": False,
         "input_hashes": {"frozen_candidates": frozen_hash},
         "phases": {"qualification": rows, "confirmation": rows},
+        "fit_descriptive": {
+            "descriptive_only": True, "cannot_select": True,
+            "candidate_count": 96, "candidates": descriptive_rows,
+        },
         "paired_pareto_contrasts": [{
             "full_candidate_id": "full", "locked_candidate_id": "locked",
             "status": "PARETO_SUPPORTED", "endpoints": interval,
@@ -125,13 +158,40 @@ def _fixture(tmp_path: Path) -> dict[str, Path]:
             for candidate_id in ("full", "locked")
         ],
     })
-    return {"validation": validation_path, "fit": fit_path, "response": response_path,
-            "frozen": frozen_path}
+    surface_path = tmp_path / "validation_response_surface.json"
+    surfaces = {}
+    for endpoint_index, (name, _, direction) in enumerate(plotter.PRIMARY):
+        slices = {}
+        for parameter_index, parameter in enumerate(plotter.PARAMS):
+            bounds = ((0.0, 1.0), (0.0, 1.5), (-10.0, 10.0), (1.0, 3.0))[parameter_index]
+            axis = [bounds[0] + (bounds[1] - bounds[0]) * step / 4 for step in range(5)]
+            mean = [0.2 + endpoint_index * 0.05 + parameter_index * 0.01 + value * 0.1
+                    for value in axis]
+            slices[parameter] = {
+                "axis": axis, "mean": mean,
+                "lo90": [value - 0.02 for value in mean],
+                "hi90": [value + 0.02 for value in mean],
+            }
+        surfaces[name] = {
+            "status": "OK", "direction": f"{direction}_is_better",
+            "cv": {"adequate": True}, "conditional_slices": slices,
+        }
+    _write(surface_path, {
+        "schema_id": "topic4_rev22_dci_validation_response_surface_v1",
+        "status": "DESCRIPTIVE_VALIDATION_RESPONSE_COMPLETE",
+        "descriptive_only": True, "cannot_select": True, "selection_permitted": False,
+        "design_point_count": 96, "original_design_points": original_points,
+        "surfaces": surfaces,
+        "input_hashes": {"validation_aggregate": {"sha256": validation_hash},
+                         "frozen_candidates": {"sha256": frozen_hash}},
+    })
+    return {"validation": validation_path, "validation_surface": surface_path,
+            "fit": fit_path, "response": response_path, "frozen": frozen_path}
 
 
 def _load(paths: dict[str, Path]) -> dict:
-    return plotter.load_inputs(paths["validation"], paths["fit"], paths["response"],
-                               paths["frozen"])
+    return plotter.load_inputs(paths["validation"], paths["validation_surface"],
+                               paths["fit"], paths["response"], paths["frozen"])
 
 
 def test_synthetic_fixture_renders_all_formats_readme_metadata_and_failure_sidecar(tmp_path):
@@ -150,6 +210,8 @@ def test_synthetic_fixture_renders_all_formats_readme_metadata_and_failure_sidec
         for suffix in plotter.FORMATS:
             assert (out / f"{stem}.{suffix}").stat().st_size > 100
     assert (out / "README.md").is_file()
+    assert "held-out order" in (out / "rev22_dci_validation_pareto.svg").read_text().lower()
+    assert "cannot-select" in (out / "README.md").read_text()
     sidecar = json.loads((out / "rev22_dci_failure_feasibility.json").read_text())
     assert sidecar["fit_candidates"]["LOW_YIELD"] == 1
     assert sidecar["validation_units"]["confirmation"]["eligible"] == 2
@@ -187,11 +249,34 @@ def test_rejects_nonaggregate_npz_and_ictal_named_paths(tmp_path):
     fake = tmp_path / "patient_ictal_summary.json"
     fake.write_text(paths["validation"].read_text())
     with pytest.raises(RuntimeError, match="forbidden non-aggregate input"):
-        plotter.load_inputs(fake, paths["fit"], paths["response"], paths["frozen"])
+        plotter.load_inputs(fake, paths["validation_surface"], paths["fit"],
+                            paths["response"], paths["frozen"])
     npz = tmp_path / "validation_aggregate.npz"
     npz.write_bytes(b"not an npz")
     with pytest.raises(RuntimeError, match="frozen JSON/CSV"):
-        plotter.load_inputs(npz, paths["fit"], paths["response"], paths["frozen"])
+        plotter.load_inputs(npz, paths["validation_surface"], paths["fit"],
+                            paths["response"], paths["frozen"])
+
+
+def test_fit_descriptive_cannot_select_is_required(tmp_path):
+    paths = _fixture(tmp_path)
+    validation = json.loads(paths["validation"].read_text())
+    validation["fit_descriptive"]["cannot_select"] = False
+    new_hash = _write(paths["validation"], validation)
+    surface = json.loads(paths["validation_surface"].read_text())
+    surface["input_hashes"]["validation_aggregate"]["sha256"] = new_hash
+    _write(paths["validation_surface"], surface)
+    with pytest.raises(RuntimeError, match="descriptive-only/cannot-select"):
+        _load(paths)
+
+
+def test_validation_surface_hash_binding_fails_closed(tmp_path):
+    paths = _fixture(tmp_path)
+    surface = json.loads(paths["validation_surface"].read_text())
+    surface["input_hashes"]["validation_aggregate"]["sha256"] = "f" * 64
+    _write(paths["validation_surface"], surface)
+    with pytest.raises(RuntimeError, match="surfaces -> validation aggregate"):
+        _load(paths)
 
 
 def test_output_directory_must_not_preexist(tmp_path):
