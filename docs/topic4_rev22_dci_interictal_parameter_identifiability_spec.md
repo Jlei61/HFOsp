@@ -212,9 +212,32 @@ and the frozen patient-training contract, with no model label, KMeans, OOD or he
    the model event count. The statistic is the q90 distance from all patient queries to the
    nearest model event.
 
-For `D_order` and `D_lag`, report the eligible-pair fraction per pair class. A trajectory
-whose eligible-pair fraction is below 0.5 in any class is `NOT_ESTIMABLE_LOW_JOINT_SUPPORT`
-for that component and enters the feasibility surface, not the continuous response.
+### 5.3 Candidate-level pooling, eligibility and bias matching
+
+The conditional views are estimated from jointly recruited events only, so their joint
+counts fall with recruitment. Two consequences are handled explicitly:
+
+- **Pooling.** The formal candidate-level value of every component is computed on the
+  events pooled over the candidate's topology units within a stage (four fit units, six
+  qualification units, twelve confirmation units). Per-unit values are sidecars. The
+  candidate-level uncertainty is the leave-one-topology-out jackknife of the pooled
+  statistic; confirmation contrasts recompute the pooled statistic on paired resampled unit
+  sets (paired network bootstrap). The offline rev20 rescoring pools the four screen seeds
+  and the twelve confirmation seeds of each candidate in the same way.
+- **Eligibility.** For `D_order` and `D_lag`, report the eligible-pair fraction per pair
+  class on the pooled events. A candidate whose pooled eligible-pair fraction is below 0.5
+  in any class is `NOT_ESTIMABLE_LOW_JOINT_SUPPORT` for that component and enters the
+  feasibility surface, not the continuous response. A learned-pattern ablation that never
+  co-recruits both shafts is therefore reported as non-estimable on the cross-shaft order
+  view, while `D_support` and `D_cover` carry its penalty.
+- **Bias matching.** The Jensen-Shannon and Wasserstein estimators have positive
+  finite-sample bias that scales with the number of joint observations per pair. The
+  floors for `D_order` and `D_lag` therefore use a pseudo-model sample that is count-matched
+  and additionally recruitment-thinned to the candidate's pooled per-contact recruitment
+  rates (each recruited entry is kept with probability `min(1, r_candidate / r_patient)`),
+  so that the floor carries the same joint-count bias as the candidate. `D_support` and
+  `D_cover` floors are count-matched only, because thinning would erase the support signal
+  they measure. Floors are thus candidate-specific for the two conditional views.
 
 The composite sliced-Wasserstein distance `D_cloud` on `x_e` is still computed and reported
 for continuity with rev20 and for the composite embedding figures. It is **not** a training
@@ -244,8 +267,9 @@ E_k = max(0, (D_k - patient_floor_q50_k) /
 
 No rev22 simulation may start until all 232 rev20 trajectories have been rescored offline.
 For each of the four components, define its empirical identifiability ratio as the
-between-candidate q90-q10 range of candidate means divided by the median within-candidate
-seed MAD. A component with ratio below 1 is not allowed to enter the proposal scalar; it
+between-candidate q90-q10 range of the pooled candidate-level standardized excess
+(`(D_k - floor_q50) / (floor_q95 - floor_q50)`, unclipped) divided by the median
+leave-one-topology-out jackknife standard deviation of that quantity. A component with ratio below 1 is not allowed to enter the proposal scalar; it
 remains a reported endpoint.
 
 Let `A` contain the identifiable members of `{E_support, E_order, E_lag, E_cover}`. The
@@ -266,8 +290,12 @@ The objective is accepted only if all four of the following zero-simulation cont
 in the expected direction, each applied to a count-matched patient pseudo-model sample and
 compared with untouched pseudo-model draws:
 
-1. removing the patient minority direction cluster worsens `D_cover` and `D_order`, even
-   though the objective receives no cluster label;
+1. removing the patient minority direction cluster worsens `D_order`, even though the
+   objective receives no cluster label; `D_cover` is reported for this control but is not
+   a pass criterion (amended 2026-09-03 before any simulation: a zero-simulation diagnostic
+   showed that nearest-neighbour coverage in the 16-dimensional frozen embedding is only
+   weakly direction-sensitive, because the two direction modes overlap heavily there; the
+   conditional precedence view is the minority-direction detector);
 2. censoring all SCL contacts worsens `D_support` and leaves ICL-ICL `D_order` unchanged;
 3. stretching physical onsets by a factor of two while preserving order worsens `D_lag`
    and leaves `D_support` and `D_order` exactly unchanged;
@@ -479,7 +507,9 @@ development rounds, the whole revision remains development-only.
 ## 10. Statistical analysis and parameter influence
 
 The independent unit is the topology seed with its single dynamics seed, not an event;
-inside the decomposition block it is the crossed topology-dynamics unit. Report
+inside the decomposition block it is the crossed topology-dynamics unit. Candidate-level
+statistics are pooled over units (section 5.3) and their uncertainty comes from resampling
+units, never events. Report
 paired differences to `M0000` and nested contrasts between `M1111` and each
 leave-one-locked family. Use a paired network bootstrap over topology seeds, exactly as rev20; in the
 decomposition block use topology-first hierarchical resampling. Event bootstrap is only a

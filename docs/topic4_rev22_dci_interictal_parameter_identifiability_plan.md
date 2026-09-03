@@ -53,10 +53,17 @@ semantics audit.
 - Use the full patient training set as the `D_cover` query set. Build block-split
   count-matched floors for all four components: pseudo-model sample from a random half of
   training recording blocks against all events of the other half.
-- Enforce pair eligibility `n_pair_min = 5` on the model side; emit
-  `NOT_ESTIMABLE_LOW_JOINT_SUPPORT` when any pair class has eligible fraction below 0.5.
-- Compute within-candidate seed noise and the between-candidate identifiability ratio for
-  each component on all 232 rev20 trajectories.
+- Pool events over each candidate's topology units for the formal candidate-level value;
+  keep per-unit values as sidecars; estimate uncertainty by leave-one-topology-out
+  jackknife (spec section 5.3).
+- Enforce pair eligibility `n_pair_min = 5` on the pooled model side; emit
+  `NOT_ESTIMABLE_LOW_JOINT_SUPPORT` when any pair class has pooled eligible fraction below
+  0.5.
+- Build recruitment-thinned, count-matched floors for `D_order` and `D_lag` per candidate
+  and count-matched floors for `D_support` and `D_cover` per pooled size.
+- Compute the jackknife noise and the between-candidate identifiability ratio for each
+  component on the standardized excess of all rev20 candidates (31 screen x 4 seeds,
+  9 confirmation x 12 seeds).
 - Report 180 ms clipping fractions by event-contact onset and by event.
 - Run the four synthetic manipulations from spec section 6 as the only objective controls,
   each with its exact-invariance clause checked to floating-point tolerance.

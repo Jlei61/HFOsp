@@ -450,6 +450,10 @@ def main() -> None:
     parser.add_argument("--config", required=True, type=Path)
     parser.add_argument("--candidate-id", required=True)
     parser.add_argument("--seed", required=True, type=int)
+    parser.add_argument("--topology-seed", type=int, default=None,
+                        help="network placement/connectivity seed; defaults to --seed")
+    parser.add_argument("--dynamics-seed", type=int, default=None,
+                        help="simulator net['rng'] and OU-drive seed; defaults to --seed")
     parser.add_argument("--expected-commit", required=True)
     parser.add_argument("--artifact-root", type=Path,
                         default=Path("/home/honglab/leijiaxin/HFOsp"))
@@ -466,8 +470,25 @@ def main() -> None:
             "selection_network_seeds", "confirmation_network_seeds",
         ) for seed in config["search"].get(key, [])
     }
-    if args.seed not in active_seeds:
-        parser.error("seed is outside every frozen rev12-ND pool")
+    topology_seed = args.seed if args.topology_seed is None else int(args.topology_seed)
+    dynamics_seed = args.seed if args.dynamics_seed is None else int(args.dynamics_seed)
+    seed_mode = (
+        "legacy" if topology_seed == args.seed and dynamics_seed == args.seed
+        else "split"
+    )
+    if seed_mode == "legacy":
+        if args.seed not in active_seeds:
+            parser.error("seed is outside every frozen rev12-ND pool")
+    else:
+        if topology_seed != args.seed:
+            parser.error("--seed must equal --topology-seed when seeds are split")
+        dynamics_pool = active_seeds | {
+            int(seed) for seed in config["search"].get("dynamics_seeds", [])
+        }
+        if topology_seed not in active_seeds:
+            parser.error("topology seed is outside every frozen network pool")
+        if dynamics_seed not in dynamics_pool:
+            parser.error("dynamics seed is outside the frozen dynamics/network pools")
 
     artifact_root = args.artifact_root.resolve()
     for record in config["inputs"].values():
@@ -504,7 +525,10 @@ def main() -> None:
         raise RuntimeError("rev12-ND runtime modules or config are not frozen")
 
     output_root = artifact_root / config["output_root"]
-    stem = f"{args.candidate_id}_seed_{args.seed}"
+    stem = (
+        f"{args.candidate_id}_seed_{args.seed}" if seed_mode == "legacy"
+        else f"{args.candidate_id}_topo_{topology_seed}_dyn_{dynamics_seed}"
+    )
     out_json = args.out_json or output_root / "workers" / f"{stem}.json"
     out_npz = args.out_npz or output_root / "workers" / f"{stem}.npz"
     cache_dir = artifact_root / config["network_cache"]
@@ -538,17 +562,18 @@ def main() -> None:
         ee_ellipse_angle_deg=ellipse_angle,
         ee_ellipse_aspect_ratio=ellipse_aspect,
         artifact_root=artifact_root,
+        topology_seed=topology_seed, dynamics_seed=dynamics_seed,
     )
     simulation = config["search"]["simulation"]
     substrate.params.T = float(simulation["duration_ms"])
-    substrate.net["rng"] = np.random.default_rng(args.seed)
+    substrate.net["rng"] = np.random.default_rng(dynamics_seed)
 
     result = simulate_kick(
         substrate.params, substrate.net, KICK_BOOST=0.0, t_kick=1e9,
         V_th_per_neuron=substrate.vtheta, slow=None,
         early_stop_runaway=bool(simulation["early_stop_runaway"]),
         external_e_rate_drive=make_external_drive(
-            substrate, transition["spatial_ou"], args.seed,
+            substrate, transition["spatial_ou"], dynamics_seed,
         ),
     )
     spikes = np.asarray(result["E_spk_bool"], bool)
@@ -1288,6 +1313,8 @@ def main() -> None:
             node_gain, depth_shrinkage, g_ee, g_etoi,
             ellipse_angle, ellipse_aspect,
         ], np.float64),
+        topology_seed=np.asarray(topology_seed, np.int64),
+        dynamics_seed=np.asarray(dynamics_seed, np.int64),
         **movie_arrays,
         **cascade_arrays,
     )
@@ -1297,6 +1324,10 @@ def main() -> None:
         "candidate_id": args.candidate_id,
         "field_sha256": candidate["node_field"]["field_sha256"],
         "seed": int(args.seed),
+        "topology_seed": int(topology_seed),
+        "dynamics_seed": int(dynamics_seed),
+        "seed_mode": seed_mode,
+        "seed_contract": substrate.extras["seed_contract"],
         "simulation": {
             "duration_ms": float(simulation["duration_ms"]),
             "runaway_early_stop_ms": result.get("runaway_early_stop_ms"),

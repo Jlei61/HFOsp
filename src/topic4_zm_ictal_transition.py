@@ -74,6 +74,9 @@ class Substrate:
     network_cache: dict
     field_transform: Any = None
     extras: dict = field(default_factory=dict)
+    topology_seed: int | None = None
+    dynamics_seed: int | None = None
+    seed_mode: str = "legacy"
 
 
 def load_round_config(path):
@@ -188,8 +191,17 @@ def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=No
                     node_gain=1.0, node_dispersion_candidate_override=None,
                     ee_ellipse_angle_deg=45.0,
                     ee_ellipse_aspect_ratio=2.0,
-                    artifact_root=None):
+                    artifact_root=None,
+                    topology_seed=None, dynamics_seed=None):
     """Reconstruct one frozen arm on one network seed.
+
+    ``topology_seed`` seeds neuron placement and connectivity sampling (it is
+    the ``Params.seed`` that keys the network cache); ``dynamics_seed`` seeds the
+    ``net["rng"]`` stream that the simulator consumes. Both default to ``seed``,
+    which is the legacy single-seed path with an unchanged RNG call order, so
+    ``topology_seed=dynamics_seed=seed`` reproduces archived runs bit for bit.
+    The spatial OU drive is seeded by the caller (``make_external_drive``) and
+    must receive the dynamics seed.
 
     ``field_transform`` is a square-symmetry element name; when given, the node
     field is queried at inverse-transformed positions and the two directed flow
@@ -217,6 +229,13 @@ def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=No
     )
     from src.topic4_rev20_dual_core_mechanism import (
         fixed_topology_ee_ellipse_redistribution,
+    )
+
+    topology_seed = int(seed) if topology_seed is None else int(topology_seed)
+    dynamics_seed = int(seed) if dynamics_seed is None else int(dynamics_seed)
+    seed_mode = (
+        "legacy" if topology_seed == int(seed) and dynamics_seed == int(seed)
+        else "split"
     )
 
     verify_frozen_inputs(config, artifact_root=artifact_root)
@@ -254,14 +273,14 @@ def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=No
     # ---- 1-3: params, network, E positions (order copied from the producer) ----
     params = Params(g=engine["g"], L=engine["L"], density=engine["density"],
                     T=float(config["simulation"]["duration_ms"]), dt=engine["dt"],
-                    nu_ext_ratio=cmrun.DRIVE, seed=int(seed))
+                    nu_ext_ratio=cmrun.DRIVE, seed=topology_seed)
     reg = (
         _placement(stage) if artifact_root is None
         else _placement_with_artifact_root(stage, artifact_root)
     )
     with _artifact_working_directory(artifact_root):
         net, n_e, n_i, cache_hit, cache_source = _load_network(
-            params, stage, reg, int(seed), base, str(cache_dir))
+            params, stage, reg, topology_seed, base, str(cache_dir))
     positions = np.asarray(net["pos"][:n_e], float)
     positions_i = np.asarray(net["pos"][n_e:], float)
 
@@ -329,7 +348,7 @@ def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=No
         raise RuntimeError("edge coefficient hash changed")
 
     # ---- 6: the producer re-seeds here, before the edge mapper ----
-    net["rng"] = np.random.default_rng(int(seed))
+    net["rng"] = np.random.default_rng(dynamics_seed)
 
     # ---- 7: E/I field query, optionally through the spatial transform ----
     query_e, query_i = positions, positions_i
@@ -419,7 +438,11 @@ def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=No
         detector_threshold=detector, engine=engine, stage=stage,
         network_cache=_cache_record(cache_hit, cache_source),
         field_transform=field_transform,
-        extras={"field_query_audit": field_query_audit, "cmrun": cmrun,
+        topology_seed=topology_seed, dynamics_seed=dynamics_seed,
+        seed_mode=seed_mode,
+        extras={"seed_contract": {"seed": int(seed), "topology_seed": topology_seed,
+                                  "dynamics_seed": dynamics_seed, "seed_mode": seed_mode},
+                "field_query_audit": field_query_audit, "cmrun": cmrun,
                 "placement": reg, "candidate": candidate,
                 "node_candidate": node_candidate,
                 "node_candidate_override": node_candidate_override is not None,
