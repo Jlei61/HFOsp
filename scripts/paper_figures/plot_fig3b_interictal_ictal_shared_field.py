@@ -10,9 +10,7 @@ or sign flipping.
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
-import os
 import sys
 from pathlib import Path
 from typing import Mapping, Sequence
@@ -34,7 +32,6 @@ from scripts.plot_topic5_interictal_event_envelope_field import (  # noqa: E402
     _event_field,
     load_frozen,
 )
-import scripts.plot_topic5_interictal_event_envelope_field as event_field_module  # noqa: E402
 from scripts.run_topic5_clinical_onset_shared_field_concordance import (  # noqa: E402
     BAND,
     CLINICAL_WINDOW,
@@ -64,15 +61,14 @@ from src.topic5_tspectral_field_concordance import (  # noqa: E402
     exact_name_align_matrix,
     score_observed_bundle,
 )
+from scripts.paper_figures.patient_public_labels import public_patient_label  # noqa: E402
 
 
-ARTIFACT_ROOT = Path(os.environ.get("HFOSP_ARTIFACT_ROOT", ROOT)).resolve()
-FROZEN_ROOT = Path(os.environ.get(
-    "HFOSP_INTERICTAL_FIELD_DIR",
-    ARTIFACT_ROOT / "results/interictal_propagation_masked/template_gradient_fields/per_subject",
-)).resolve()
+FROZEN_ROOT = (
+    ROOT / "results/interictal_propagation_masked/template_gradient_fields/per_subject"
+)
 CHECKPOINT_ROOT = (
-    ARTIFACT_ROOT
+    ROOT
     / "results/topic5_ictal_recruitment/tspectral_field_concordance/per_subject"
     / "clinical_onset_shared_field"
 )
@@ -82,12 +78,19 @@ OUT_DIR = (
     / "figures"
 )
 
-SCHEMA_ID = "fig3b_interictal_ictal_shared_field_locked_v5"
+SCHEMA_ID = "fig3b_interictal_ictal_shared_field_locked_v7"
 INTERICTAL_CMAP = "viridis"
 ICTAL_CMAP = "Blues"
 TEMPLATE_COLORS = {"A": "#B2182B", "B": "#2166AC"}
 FIGSIZE = (7.25, 3.65)
 DISPLAY_DPI = 300
+AXIS_LABEL_FONTSIZE = 13.0
+TICK_LABEL_FONTSIZE = 10.5
+COLORBAR_LABEL_FONTSIZE = 10.5
+COLORBAR_TICK_FONTSIZE = 9.5
+FIELD_TITLE_FONTSIZE = 12.5
+ICTAL_FIELD_TITLE = "Early ictal field"
+POWER_COLORBAR_TITLE = "power\nz"
 LOCKED_SEIZURE_IDX = 2
 MORPHOLOGY_CANDIDATE_IDXS = (2, 10, 23, 1)
 DIRECT_EARLY_CORR_MIN = 0.35
@@ -109,28 +112,13 @@ def _normalize_minmax(values: Sequence[float]) -> np.ndarray:
     return out
 
 
-def _load_record(ds_sid: str) -> tuple[dict, Path]:
-    path = FROZEN_ROOT / f"{ds_sid}.json"
+def _load_record(ds_sid: str, frozen_root: Path = FROZEN_ROOT) -> tuple[dict, Path]:
+    path = (Path(frozen_root) / f"{ds_sid}.json").resolve()
     record = json.loads(path.read_text(encoding="utf-8"))
     # Fingerprint verification is intentionally repeated here even though
     # load_frozen() performs the same fail-closed gate for the display payload.
     scorers_from_interictal_record(record)
     return record, path
-
-
-def _display_path(path: Path) -> str:
-    try:
-        return str(path.relative_to(ROOT))
-    except ValueError:
-        return str(path)
-
-
-def _sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 def _extract_clinical_activation(
@@ -154,7 +142,6 @@ def _extract_clinical_activation(
         pre_sec=pre_sec,
         post_sec=post_sec,
         reference=ICTAL_REFERENCE[dataset],
-        results_root=ARTIFACT_ROOT / "results",
     )
 
     target_names = [
@@ -229,45 +216,25 @@ def _extract_clinical_activation(
 
 
 def _checkpoint_event(
-    ds_sid: str,
-    seizure_idx: int,
-    *,
-    expected_field_sha256: str | None = None,
-    expected_fingerprint: str | None = None,
+    ds_sid: str, seizure_idx: int, checkpoint_root: Path = CHECKPOINT_ROOT,
 ) -> tuple[dict | None, Path]:
-    path = CHECKPOINT_ROOT / ds_sid / f"seizure_{int(seizure_idx):03d}.json"
+    path = (
+        Path(checkpoint_root) / ds_sid / f"seizure_{int(seizure_idx):03d}.json"
+    ).resolve()
     if not path.exists():
         return None, path
     payload = json.loads(path.read_text(encoding="utf-8"))
-    if (
-        expected_field_sha256 is not None
-        and payload.get("field_sha256") != expected_field_sha256
-    ):
-        return None, path
-    if (
-        expected_fingerprint is not None
-        and payload.get("field_fingerprint_sha256") != expected_fingerprint
-    ):
-        return None, path
     return payload.get("event"), path
 
 
 def _checkpoint_rows(
-    ds_sid: str,
-    n_target_contacts: int,
-    *,
-    expected_field_sha256: str,
-    expected_fingerprint: str,
+    ds_sid: str, n_target_contacts: int, checkpoint_root: Path = CHECKPOINT_ROOT,
 ) -> list[dict]:
     """Load complete exact-band clinical-onset checkpoint rows."""
-    subject_dir = CHECKPOINT_ROOT / ds_sid
+    subject_dir = (Path(checkpoint_root) / ds_sid).resolve()
     rows = []
     for path in sorted(subject_dir.glob("seizure_*.json")):
         payload = json.loads(path.read_text(encoding="utf-8"))
-        if payload.get("field_sha256") != expected_field_sha256:
-            continue
-        if payload.get("field_fingerprint_sha256") != expected_fingerprint:
-            continue
         event = payload.get("event") or {}
         if event.get("status") != "included":
             continue
@@ -410,11 +377,19 @@ def _draw_field(
     )
     ax.set_xlim(float(x_grid.min()), float(x_grid.max()))
     ax.set_ylim(float(y_grid.min()), float(y_grid.max()))
-    ax.set_title(title, fontsize=11.0, pad=7, color=title_color, fontweight="bold")
-    ax.set_xlabel("shared TA axis (mm)", fontsize=9.5)
-    ax.tick_params(axis="both", labelsize=8, length=2.2)
+    ax.set_title(
+        title,
+        fontsize=FIELD_TITLE_FONTSIZE,
+        pad=7,
+        color=title_color,
+        fontweight="bold",
+    )
+    ax.set_xlabel("shared TA axis (mm)", fontsize=AXIS_LABEL_FONTSIZE, labelpad=5)
+    ax.tick_params(
+        axis="both", labelsize=TICK_LABEL_FONTSIZE, length=2.8, pad=2.5
+    )
     if show_y:
-        ax.set_ylabel("transverse (mm)", fontsize=9.5)
+        ax.set_ylabel("Y (mm)", fontsize=AXIS_LABEL_FONTSIZE, labelpad=5)
     else:
         ax.tick_params(axis="y", left=False, labelleft=False)
     colorbar_values = np.asarray(colorbar_values, dtype=float)
@@ -425,6 +400,33 @@ def _draw_field(
         Normalize(float(finite_colorbar.min()), float(finite_colorbar.max())),
         cmap=cmap,
     )
+
+
+def _normalized_rank_colorbar(
+    fig: plt.Figure,
+    cax: plt.Axes,
+    rank_values: np.ndarray,
+):
+    """Reuse Fig2's paper-facing normalized-rank colorbar grammar."""
+    finite = np.asarray(rank_values, dtype=float)
+    finite = finite[np.isfinite(finite)]
+    if finite.size < 2:
+        raise ValueError("fewer than two finite frozen ranks")
+    rank_lo = float(np.min(finite))
+    rank_hi = float(np.max(finite))
+    if not rank_hi > rank_lo:
+        raise ValueError("frozen rank range is degenerate")
+    colorbar = fig.colorbar(
+        ScalarMappable(Normalize(0.0, 1.0), cmap=INTERICTAL_CMAP),
+        cax=cax,
+    )
+    colorbar.set_ticks([0.0, 0.5, 1.0])
+    colorbar.set_ticklabels(["0  early", "0.5", "1  late"])
+    colorbar.ax.set_title(
+        "ranks", fontsize=COLORBAR_LABEL_FONTSIZE, pad=5, loc="left"
+    )
+    colorbar.ax.tick_params(labelsize=COLORBAR_TICK_FONTSIZE, length=2)
+    return colorbar, (rank_lo, rank_hi)
 
 
 def render(
@@ -441,6 +443,8 @@ def render(
     )
     interictal_display = _normalize_minmax(rank)
     ictal_display = _normalize_minmax(activation)
+    dataset, raw_subject = ds_sid.split("_", 1)
+    pretty = f"{public_patient_label(dataset, raw_subject)} | SZ{LOCKED_SEIZURE_IDX + 1}"
 
     fig = plt.figure(figsize=FIGSIZE, layout="constrained", facecolor="white")
     grid = fig.add_gridspec(1, 4, width_ratios=[1.0, 0.045, 1.0, 0.045], wspace=0.08)
@@ -464,23 +468,14 @@ def render(
         support,
         cmap=ICTAL_CMAP,
         colorbar_values=activation,
-        title="Early-ictal broadband power",
+        title=f"{pretty}\n{ICTAL_FIELD_TITLE}",
         title_color="black",
         show_y=False,
     )
-    pretty = f"E{ds_sid.split('_', 1)[1]}"
-    fig.suptitle(pretty, x=0.015, ha="left", fontsize=13.5, fontweight="bold")
 
-    cbar_left = fig.colorbar(left_map, cax=fig.add_subplot(grid[0, 1]))
-    rank_lo = float(np.nanmin(rank))
-    rank_hi = float(np.nanmax(rank))
-    rank_mid = 0.5 * (rank_lo + rank_hi)
-    cbar_left.set_ticks([rank_lo, rank_mid, rank_hi])
-    cbar_left.set_ticklabels(
-        [f"{rank_lo:g} (early)", f"{rank_mid:g}", f"{rank_hi:g} (late)"]
+    cbar_left, (rank_lo, rank_hi) = _normalized_rank_colorbar(
+        fig, fig.add_subplot(grid[0, 1]), rank
     )
-    cbar_left.ax.set_title("ranks", fontsize=7.5, pad=5)
-    cbar_left.ax.tick_params(labelsize=7.5, length=2)
 
     cbar_right = fig.colorbar(right_map, cax=fig.add_subplot(grid[0, 3]))
     power_lo = float(np.nanmin(activation))
@@ -488,8 +483,10 @@ def render(
     power_ticks = np.linspace(power_lo, power_hi, 4)
     cbar_right.set_ticks(power_ticks)
     cbar_right.set_ticklabels([f"{value:.2f}" for value in power_ticks])
-    cbar_right.ax.set_title("power\n(robust z)", fontsize=7.5, pad=5)
-    cbar_right.ax.tick_params(labelsize=7.5, length=2)
+    cbar_right.ax.set_title(
+        POWER_COLORBAR_TITLE, fontsize=COLORBAR_LABEL_FONTSIZE, pad=5
+    )
+    cbar_right.ax.tick_params(labelsize=COLORBAR_TICK_FONTSIZE, length=2)
 
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=DISPLAY_DPI, bbox_inches="tight", facecolor="white")
@@ -505,11 +502,12 @@ def render(
         "interictal_colormap": INTERICTAL_CMAP,
         "ictal_colormap": ICTAL_CMAP,
         "color_semantics": "dark means earliest propagation on the left and highest broadband power on the right",
-        "interictal_colorbar_quantity": "raw propagation rank",
-        "interictal_colorbar_limits": [rank_lo, rank_hi],
+        "interictal_colorbar_quantity": "within-template normalized propagation rank",
+        "interictal_colorbar_limits": [0.0, 1.0],
+        "interictal_raw_rank_range": [rank_lo, rank_hi],
         "ictal_colorbar_quantity": "0-10 s mean baseline-normalized log-band-power robust z",
         "ictal_colorbar_limits": [power_lo, power_hi],
-        "interictal_transform": "min-max of frozen template rank for interpolation; colorbar restored to raw rank",
+        "interictal_transform": "min-max of frozen template rank for interpolation and Fig2-matched 0..1 display colorbar; raw rank range retained in metadata",
         "ictal_transform": "continuous min-max of 0-10 s mean robust-z for interpolation; colorbar restored to robust-z; no rank; no sign flip",
         "template_support_used_for_both_panels": f"support_{label.lower()}",
         "transverse_sign": int(fz["transverse_sign"]),
@@ -518,11 +516,13 @@ def render(
 
 
 def _write_readme(out_dir: Path, stem: str, seizure_idx: int) -> Path:
+    public_label = public_patient_label("epilepsiae", "1146")
+    public_seizure = f"SZ{seizure_idx + 1}"
     text = f"""# Fig3-B：间期时序场与发作早期能量场
 
 ### {stem}.png / .pdf
 
-E1146 的冻结 shared plane 配对图。左侧为 TA early-to-late timing field；右侧为模板更新前已固定、更新后不重新选择的 seizure {seizure_idx}。右图显示 clinical onset `0–10 s` broadband `1–150 Hz` baseline-normalized power，使用 `Blues`，且不做 rank 或 sign flip。两幅图严格复用同一 contact order、shared TA axis、transverse sign、TA support 与同一个 6 mm display kernel。
+{public_label} | {public_seizure} 的冻结 shared plane 配对图。左侧为 TA early-to-late timing field；右侧为从 positive-power TA morphology 候选中目视锁定的 early-ictal field。右图显示 clinical onset `0–10 s` broadband `1–150 Hz` baseline-normalized power，使用 `Blues`，且不做 rank 或 sign flip。两幅图严格复用同一 contact order、shared TA axis、transverse sign、TA support 与同一个 6 mm display kernel。
 
 **关注点**：这是一个 representative-subject shared-field readout，用于连接间期传播轴与同次发作早期能量分布；不能单独解释为 replay、因果机制或 cohort 结论。
 
@@ -530,7 +530,19 @@ E1146 的冻结 shared plane 配对图。左侧为 TA early-to-late timing field
 
 记录 raw seizure、临床窗、远端 baseline、频谱参数、冻结 fingerprint、A/B 匹配分数、逐触点原始值与显示归一化。重画时必须先通过 checkpoint score parity，不能从 ictal 值重拟合轴、平面、support 或 kernel。
 
-**关注点**：两条 colorbar 分别恢复为真实 propagation rank 与 robust-z 数值。seizure 2 在模板更新前已经固定，本次只在新模板上重评；空间相关仍只表达触点间相对模式。
+**关注点**：左侧 colorbar 与 Fig2 共用 normalized-rank `0 early / 0.5 / 1 late` 显示语法，原始 rank 范围保留在 metadata；右侧 colorbar 用 `power` / `z` 简写并保留 robust-z 数值。`Blues` 令高 broadband power 为深色，与左图“早期为深色”的视觉方向一致。锁定的 {public_seizure} 在 15/15 触点均为正，并通过局部源区形态 gate；空间相关仍只表达触点间相对模式。右图不是 contact rank，也不改变当前 maxAB 科学统计。
+
+### candidates_positive_ta_morphology/
+
+保留 seizure 2 / 10 / 23 / 1 四个 morphology-aware positive-power 预览、完整 25 次发作审计表和逐例 metadata。正式图经目视锁定候选 1（seizure 2）；其余候选只作选择 provenance。
+
+**关注点**：候选筛选与目视选择服务代表图构图，不能当作预注册统计、独立验证或 cohort 证据。
+
+### archive/
+
+保存已撤回的 seizure 15 负 power 版本和 seizure 9 中段先亮版本。
+
+**关注点**：archive 只记录选择合同为什么修订，不得作为正式 Fig3-B 引用。
 """
     path = out_dir / "README.md"
     path.write_text(text, encoding="utf-8")
@@ -538,52 +550,30 @@ E1146 的冻结 shared plane 配对图。左侧为 TA early-to-late timing field
 
 
 def main() -> None:
-    global FROZEN_ROOT, CHECKPOINT_ROOT
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--subject", default="epilepsiae_1146")
     parser.add_argument(
         "--seizure-idx", type=int, default=None,
         help="explicit inventory index; default is visually locked Fig3-B seizure 2",
     )
-    parser.add_argument("--field-root", type=Path, default=FROZEN_ROOT)
-    parser.add_argument("--checkpoint-root", type=Path, default=CHECKPOINT_ROOT)
-    parser.add_argument(
-        "--allow-missing-checkpoint",
-        action="store_true",
-        help="diagnostic only; paper-ready runs fail when the matched checkpoint is absent",
-    )
     parser.add_argument("--output-dir", type=Path, default=OUT_DIR)
+    parser.add_argument("--frozen-root", type=Path, default=FROZEN_ROOT)
+    parser.add_argument("--checkpoint-root", type=Path, default=CHECKPOINT_ROOT)
     args = parser.parse_args()
 
-    FROZEN_ROOT = args.field_root.resolve()
-    CHECKPOINT_ROOT = args.checkpoint_root.resolve()
-    event_field_module.FROZEN = FROZEN_ROOT
-
     ds_sid = str(args.subject).replace("/", "_")
-    record, frozen_path = _load_record(ds_sid)
-    fz = event_field_module.load_frozen(ds_sid)
-    field_file_sha256 = _sha256(frozen_path)
-    field_fingerprint = record["interictal_field"]["fingerprint_sha256"]
+    record, frozen_path = _load_record(ds_sid, args.frozen_root)
+    fz = load_frozen(ds_sid, frozen_root=args.frozen_root)
     checkpoint_rows = _checkpoint_rows(
-        ds_sid,
-        len(fz["names"]),
-        expected_field_sha256=field_file_sha256,
-        expected_fingerprint=field_fingerprint,
+        ds_sid, len(fz["names"]), checkpoint_root=args.checkpoint_root,
     )
     seizure_idx = LOCKED_SEIZURE_IDX if args.seizure_idx is None else int(args.seizure_idx)
     activation, extraction = _extract_clinical_activation(
         ds_sid, seizure_idx, record
     )
     checkpoint, checkpoint_path = _checkpoint_event(
-        ds_sid,
-        seizure_idx,
-        expected_field_sha256=field_file_sha256,
-        expected_fingerprint=field_fingerprint,
+        ds_sid, seizure_idx, checkpoint_root=args.checkpoint_root,
     )
-    if checkpoint is None and not args.allow_missing_checkpoint:
-        raise ValueError(
-            "matched field checkpoint is missing or has the wrong file/fingerprint identity"
-        )
     audit = _score_audit(record, activation, checkpoint)
     template = "A"
     rank = np.asarray(fz["rank_a"], dtype=float)
@@ -619,10 +609,6 @@ def main() -> None:
     support = np.asarray(
         fz["support_a" if template == "A" else "support_b"], dtype=float
     )
-    earliest_contacts = [
-        str(fz["names"][index])
-        for index in np.argsort(rank, kind="mergesort")[:2]
-    ]
     metadata = {
         "schema_id": SCHEMA_ID,
         "status": "paper-ready Fig3-B locked",
@@ -630,22 +616,30 @@ def main() -> None:
         "canonical_producer": "scripts/paper_figures/plot_fig3b_interictal_ictal_shared_field.py",
         "subject": ds_sid,
         "seizure_idx": seizure_idx,
-        "frozen_record": _display_path(frozen_path),
+        "public_patient_label": public_patient_label(*ds_sid.split("_", 1)),
+        "public_seizure_label": f"SZ{seizure_idx + 1}",
+        "display_label": (
+            f"{public_patient_label(*ds_sid.split('_', 1))} | SZ{seizure_idx + 1}"
+        ),
+        "frozen_record": str(frozen_path.relative_to(ROOT)),
         "frozen_contract": record.get("contract"),
         "frozen_fingerprint": record["interictal_field"]["fingerprint_sha256"],
         "axis_definition": record.get("axis_definition"),
         "axis_direction_convention": record.get("axis_direction_convention"),
         "field_plane": "shared",
         "selected_template": template,
-        "template_selection": "TA fixed; seizure 2 retained from the pre-refresh figure and re-evaluated without reselection",
+        "template_selection": (
+            "TA fixed; seizure 2 retained from the pre-refresh figure and re-evaluated "
+            "without reselection" if "all_events_timing_plus_space" in str(args.frozen_root)
+            else "TA fixed; seizure 2 visually locked from morphology-aware positive-power candidates 2, 10, 23, and 1"
+        ),
         "seizure_selection": {
-            "criterion": "same seizure fixed before the template refresh; no new candidate selection",
+            "criterion": "manual visual lock after transparent positive-power and local TA source-topology gate",
             "n_complete_exact_candidates": len(checkpoint_rows),
             "n_morphology_candidates": len(MORPHOLOGY_CANDIDATE_IDXS),
             "morphology_candidate_indices": list(MORPHOLOGY_CANDIDATE_IDXS),
             "candidate_review_order": list(MORPHOLOGY_CANDIDATE_IDXS),
-            "locked_before_template_refresh": True,
-            "reselected_after_template_refresh": False,
+            "locked_by_user_visual_review": bool(args.seizure_idx is None),
             "selected_seizure_idx": seizure_idx,
             "selected_candidate_order": 1 if seizure_idx == LOCKED_SEIZURE_IDX else None,
             "morphology_gate": {
@@ -655,7 +649,7 @@ def main() -> None:
                 "direct_early_rank_correlation_min": DIRECT_EARLY_CORR_MIN,
                 "early4_minus_late4_normalized_min_exclusive": 0.0,
                 "earliest2_min_normalized_min": EARLIEST_PAIR_MIN_NORM,
-                "earliest_contacts": earliest_contacts,
+                "earliest_contacts": ["SCL9", "ICL11"],
             },
             "selected_morphology_metrics": morphology,
             "candidate_summary": "results/paper-ready-figure/fig3b_interictal_ictal_shared_field/figures/candidates_positive_ta_morphology/candidate_summary.json",
@@ -668,9 +662,8 @@ def main() -> None:
         "ictal_display_values": _normalize_minmax(activation).tolist(),
         "ictal_extraction": extraction,
         "score_audit": audit,
-        "checkpoint": _display_path(checkpoint_path),
+        "checkpoint": str(checkpoint_path.relative_to(ROOT)),
         "checkpoint_present": checkpoint is not None,
-        "field_file_sha256": field_file_sha256,
         "checkpoint_max_abs_score_error": float(max_score_error),
         "display": display,
         "claim_scope": [

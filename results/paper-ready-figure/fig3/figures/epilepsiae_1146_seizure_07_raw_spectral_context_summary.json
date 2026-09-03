@@ -1,0 +1,184 @@
+{
+  "selected_channels": [
+    "SCL6",
+    "SCL7",
+    "SCL8",
+    "SCL9",
+    "ICL1",
+    "ICL2",
+    "ICL3",
+    "ICL4",
+    "ICL5",
+    "ICL6",
+    "ICL7",
+    "ICL8",
+    "ICL9",
+    "ICL10",
+    "ICL11"
+  ],
+  "channel_source": "lagpat:results/interictal_propagation_masked/rank_displacement/per_subject/epilepsiae_1146.json",
+  "spectral_channel": "SCL9",
+  "spectral_channel_selection": {
+    "method": "manual",
+    "score_window_sec": null,
+    "score_95pct_db": null
+  },
+  "spectral_summary": "single representative lagPat channel PSD, then dB vs baseline",
+  "x_window_sec": [
+    -120.0,
+    20.0
+  ],
+  "paper_role": "Fig3-A/B representative spectral-phenotype context",
+  "layout": "two compact broken-axis raw/TFR seizure examples in panel A; continuous phenotype-colored low/gamma/high-gamma/broadband trajectories in panel B",
+  "display_windows_sec": [
+    [
+      -110.0,
+      -90.0
+    ],
+    [
+      -10.0,
+      20.0
+    ]
+  ],
+  "omitted_display_interval_sec": [
+    -90.0,
+    -10.0
+  ],
+  "right_axis_contract": "continuous -120 to +20 s axis with black dashed 0-s markers; row-shared y limits; y ticks and compact dB label shown only on the left panel of each row; Broadband/Gamma legend occupies the curve-free upper-left of the low-band axis",
+  "displayed_bands": [
+    "low bands",
+    "gamma",
+    "high-gamma",
+    "broadband"
+  ],
+  "sidecar_only_bands": [
+    "alpha",
+    "beta"
+  ],
+  "band_enhancement_mean_db": {
+    "baseline": {
+      "alpha": 0.25823060359031186,
+      "beta": 0.2155889497259902,
+      "low bands": -0.06407979811597991,
+      "gamma": 0.10681809346688403,
+      "high-gamma": 0.049410193924278194,
+      "broadband": -0.0428477869552542
+    },
+    "eeg_onset_neighborhood": {
+      "alpha": 13.082959246317252,
+      "beta": 12.498654418000404,
+      "low bands": 10.158391113857732,
+      "gamma": 10.669230075759808,
+      "high-gamma": 6.650822691452961,
+      "broadband": 10.252463806936234
+    },
+    "clinical_0_10": {
+      "alpha": 15.590024083429348,
+      "beta": 22.02814050406303,
+      "low bands": 15.886720982416756,
+      "gamma": 23.341964316931453,
+      "high-gamma": 11.482070742499754,
+      "broadband": 16.22418169988804
+    }
+  },
+  "phenotype_comparison": {
+    "color_encodes": "seizure phenotype, not frequency band",
+    "primary": {
+      "display_subject": "E10 | SZ8",
+      "phenotype": "broadband_1_150",
+      "color": "#8D9FCD",
+      "spectral_channel": "SCL9"
+    },
+    "comparison": {
+      "display_subject": "E20 | SZ8",
+      "phenotype": "gamma_nonbroadband",
+      "color": "#62BE9F",
+      "spectral_channel": "HRB1",
+      "spectral_channel_selection": {
+        "method": "manual",
+        "score_window_sec": null,
+        "score_95pct_db": null
+      },
+      "clinical_0_10_mean_db": {
+        "alpha": 0.29989061517312665,
+        "beta": 14.55025104380322,
+        "low bands": -1.4974095501091869,
+        "gamma": 12.545184009177522,
+        "high-gamma": 9.150841413823454,
+        "broadband": -1.1379957529401814
+      }
+    },
+    "classification_source": "results/topic5_ictal_recruitment/peri_onset_energy_timing/early_spectral_phenotype/per_seizure_spectral_overlap_state.csv",
+    "same_patient": false,
+    "same_spectral_channel": false,
+    "primary_seizure_idx": 7,
+    "comparison_seizure_idx": 7,
+    "primary_classification_reason": "tspectral_anchored_band_support",
+    "comparison_classification_reason": "fast_specific_change_point",
+    "primary_detection_counts": {
+      "n_low_band_hits": 3,
+      "n_fast_band_hits": 3,
+      "n_total_band_hits": 6,
+      "strict_broadband_5of6": true
+    },
+    "comparison_detection_counts": {
+      "n_low_band_hits": 0,
+      "n_fast_band_hits": 2,
+      "n_total_band_hits": 2,
+      "strict_broadband_5of6": false
+    }
+  },
+  "subject": "epilepsiae_1146",
+  "public_patient_label": "E10",
+  "public_seizure_label": "SZ8",
+  "display_label": "E10 | SZ8",
+  "loader_subject": "epilepsiae/1146",
+  "seizure_idx": 7,
+  "seizure_id": "114600700102",
+  "fs": 1024.0,
+  "reference": "car",
+  "requested_channel_source": "lagpat",
+  "source_channels": [
+    "SCL6",
+    "SCL7",
+    "SCL8",
+    "SCL9",
+    "ICL1",
+    "ICL2",
+    "ICL3",
+    "ICL4",
+    "ICL5",
+    "ICL6",
+    "ICL7",
+    "ICL8",
+    "ICL9",
+    "ICL10",
+    "ICL11"
+  ],
+  "clinical_onset_sec": 0.0,
+  "eeg_onset_rel_sec": -3.770508050918579,
+  "baseline_window_sec": [
+    -120.0,
+    -90.0
+  ],
+  "eeg_onset_neighborhood_sec": [
+    -8.770508050918579,
+    1.229491949081421
+  ],
+  "clinical_field_input_window_sec": [
+    0.0,
+    10.0
+  ],
+  "outputs": {
+    "a": [
+      "results/paper-ready-figure/fig3/figures/fig3-panela.png",
+      "results/paper-ready-figure/fig3/figures/fig3-panela.pdf"
+    ],
+    "b": [
+      "results/paper-ready-figure/fig3/figures/fig3-panelb.png",
+      "results/paper-ready-figure/fig3/figures/fig3-panelb.pdf"
+    ]
+  },
+  "tier": "paper-ready Fig3-A/B descriptive phenotype context; not a within-patient or cohort statistic",
+  "panel_letters_in_individual_files": false
+}

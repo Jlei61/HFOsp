@@ -173,6 +173,11 @@ def _renderer_rows(
             "maxAB_abs_corr": 0.7,
             "A_signed_corr": -0.4,
             "B_signed_corr": 0.7,
+            "A_abs_projection_z": 0.2,
+            "B_abs_projection_z": 0.6,
+            "maxAB_abs_projection_z": 0.6,
+            "A_signed_projection_z": -0.2,
+            "B_signed_projection_z": 0.6,
         })
     return rows
 
@@ -278,13 +283,36 @@ def test_journal_clean_design_moves_titles_to_axes_and_omits_panel_text() -> Non
         assert not ax0.spines["right"].get_visible()
         assert not ax1.spines["top"].get_visible()
         assert not ax1.spines["right"].get_visible()
-        assert ax0.get_ylabel().startswith("Field similarity")
-        assert "max" in ax0.get_ylabel()
-        assert ax1.get_ylabel() == "Signed field similarity, r"
+        assert ax0.get_ylabel().startswith("Expression |q|")
+        assert "|q|" in ax0.get_ylabel()
+        assert ax1.get_ylabel() == "Signed q\n(baseline z)"
         assert ax0.get_xlabel() == "Time (s)"
         assert ax1.get_xlabel() == "Time (s)"
+        assert [text.get_text() for text in ax1.get_legend().get_texts()] == ["TA", "TB"]
+        assert ax0.get_legend()._loc == 2
+        assert ax1.get_legend()._loc == 2
+        assert ax0.get_legend()._ncols == 1
+        assert ax1.get_legend()._ncols == 1
         assert len(fig.texts) == 0
-        assert fig.get_size_inches()[1] == pytest.approx(2.55)
+        assert tuple(fig.get_size_inches()) == pytest.approx((14.0, 5.6))
+    finally:
+        render.plt.close(fig)
+
+
+def test_legacy_similarity_readout_remains_available() -> None:
+    df = pd.DataFrame(_renderer_rows())
+    agg = render._agg(df, readout=render.READOUT_SIMILARITY)
+    fig = render._make_figure(
+        df,
+        agg,
+        subject_label="E-demo",
+        design_variant=render.DESIGN_JOURNAL_CLEAN,
+        readout=render.READOUT_SIMILARITY,
+    )
+    try:
+        ax0, ax1 = fig.axes
+        assert ax0.get_ylabel().startswith("Field similarity")
+        assert ax1.get_ylabel() == "Signed field similarity, r"
     finally:
         render.plt.close(fig)
 

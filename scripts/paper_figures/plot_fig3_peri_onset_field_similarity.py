@@ -27,8 +27,17 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 import numpy as np
 import pandas as pd
+
+
+plt.rcParams.update({
+    "font.family": "sans-serif",
+    "font.sans-serif": ["Arial", "DejaVu Sans"],
+    "pdf.fonttype": 42,
+    "ps.fonttype": 42,
+})
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -36,6 +45,11 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from src.plot_style import FS_LABEL, FS_TICK, savefig_pub, style_panel  # noqa: E402
+from src.paper_figure_typography import (  # noqa: E402
+    DENSE_MULTIPANEL_TYPOGRAPHY,
+    LOCKED_PANEL_TYPOGRAPHY_POLICY,
+    apply_panel_aware_figure_typography,
+)
 from scripts.compute_topic5_signed_broadband_similarity import (  # noqa: E402
     _load_frozen_shared,
     _shared_geometry_metadata,
@@ -125,7 +139,8 @@ def _load_peri_onset(
     src: Path,
     ds_sid: str | None = None,
     *,
-    readout: str = READOUT_SIMILARITY,
+    readout: str = READOUT_PROJECTION,
+    frozen_field_dir: Path | None = None,
 ) -> pd.DataFrame:
     if readout not in READOUTS:
         raise ValueError(f"unknown readout={readout!r}")
@@ -158,7 +173,12 @@ def _load_peri_onset(
             raise RuntimeError(f"{src}: cannot infer one subject identity")
         ds_sid = subjects[0]
 
-    record, _shared = _load_frozen_shared(ds_sid)
+    if frozen_field_dir is None:
+        record, _shared = _load_frozen_shared(ds_sid)
+    else:
+        record, _shared = _load_frozen_shared(
+            ds_sid, frozen_field_dir=frozen_field_dir
+        )
     geometry = _shared_geometry_metadata(record)
     _require_unique_exact(df, "subject", ds_sid, src)
     _require_unique_exact(df, "field_plane", "shared", src)
@@ -270,7 +290,7 @@ def _readout_columns(readout: str) -> dict[str, str]:
     raise ValueError(f"unknown readout={readout!r}")
 
 
-def _agg(df: pd.DataFrame, *, readout: str = READOUT_SIMILARITY) -> pd.DataFrame:
+def _agg(df: pd.DataFrame, *, readout: str = READOUT_PROJECTION) -> pd.DataFrame:
     rows = []
     for (lo, hi, cen), g in df.groupby(["window_start_sec", "window_end_sec", "window_center_sec"], sort=True):
         row = {
@@ -337,13 +357,13 @@ def _make_figure(
     *,
     subject_label: str,
     design_variant: str = DESIGN_STANDARD,
-    readout: str = READOUT_SIMILARITY,
+    readout: str = READOUT_PROJECTION,
 ) -> plt.Figure:
     if design_variant not in DESIGN_VARIANTS:
         raise ValueError(f"unknown design_variant={design_variant!r}")
     journal_clean = design_variant == DESIGN_JOURNAL_CLEAN
 
-    figsize = (7.4, 2.55) if journal_clean else (7.4, 3.25)
+    figsize = (14.0, 5.6) if journal_clean else (7.4, 3.25)
     fig, axes = plt.subplots(1, 2, figsize=figsize, sharex=True)
     ax0, ax1 = axes
     columns = _readout_columns(readout)
@@ -375,7 +395,6 @@ def _make_figure(
         ax0.set_ylabel(ylabel, fontsize=FS_LABEL - 2)
         ax0.set_xlabel("Time (s)", fontsize=FS_LABEL - 2)
     else:
-        ax0.set_title("shared-gradient maxAB", fontsize=FS_LABEL, pad=8)
         ax0.set_ylabel(
             "template expression |q| (baseline z)"
             if readout == READOUT_PROJECTION else "field similarity |r|",
@@ -423,7 +442,6 @@ def _make_figure(
         )
         ax1.set_xlabel("Time (s)", fontsize=FS_LABEL - 2)
     else:
-        ax1.set_title("signed shared-gradient A/B", fontsize=FS_LABEL, pad=8)
         ax1.set_ylabel(
             "signed template expression q (baseline z)"
             if readout == READOUT_PROJECTION else "signed field similarity r",
@@ -449,7 +467,30 @@ def _make_figure(
             )
 
     if journal_clean:
-        fig.subplots_adjust(left=0.11, right=0.995, bottom=0.25, top=0.98, wspace=0.35)
+        for ax in axes:
+            handles, labels = ax.get_legend_handles_labels()
+            legend = ax.get_legend()
+            if legend is not None:
+                legend.remove()
+            ax.legend(
+                handles,
+                labels,
+                loc="upper left",
+                bbox_to_anchor=(0.015, 0.985),
+                ncol=1,
+                frameon=False,
+                handlelength=1.7,
+                labelspacing=0.35,
+                borderaxespad=0.0,
+            )
+            ax.xaxis.set_major_locator(MaxNLocator(nbins=5, integer=True))
+        fig.subplots_adjust(left=0.105, right=0.99, bottom=0.24, top=0.72, wspace=0.42)
+        apply_panel_aware_figure_typography(
+            fig,
+            spec=DENSE_MULTIPANEL_TYPOGRAPHY,
+            policy=LOCKED_PANEL_TYPOGRAPHY_POLICY,
+            enforce_atomic_axis_gate=False,
+        )
     else:
         fig.subplots_adjust(left=0.09, right=0.99, bottom=0.18, top=0.84, wspace=0.34)
     return fig
@@ -463,7 +504,7 @@ def _plot(
     *,
     subject_label: str,
     design_variant: str = DESIGN_STANDARD,
-    readout: str = READOUT_SIMILARITY,
+    readout: str = READOUT_PROJECTION,
 ) -> None:
     savefig_pub(
         _make_figure(
@@ -498,7 +539,7 @@ def _build_summary(
     out_pdf: Path,
     *,
     design_variant: str = DESIGN_STANDARD,
-    readout: str = READOUT_SIMILARITY,
+    readout: str = READOUT_PROJECTION,
 ) -> dict:
     source_summary_path = src.with_name(src.name.replace("_per_seizure.csv", "_summary.json"))
     if not source_summary_path.exists():
@@ -579,6 +620,7 @@ def run(
     out_dir: Path | None = None,
     design_variant: str = DESIGN_STANDARD,
     readout: str = READOUT_PROJECTION,
+    frozen_field_dir: Path | None = None,
 ) -> tuple[Path, Path, Path]:
     if design_variant not in DESIGN_VARIANTS:
         raise ValueError(f"unknown design_variant={design_variant!r}")
@@ -589,7 +631,12 @@ def run(
     src = Path(source_csv).resolve() if source_csv is not None else _source_csv(ds_sid)
     if not src.exists():
         raise FileNotFoundError(src)
-    df = _load_peri_onset(src, ds_sid, readout=readout)
+    df = _load_peri_onset(
+        src,
+        ds_sid,
+        readout=readout,
+        frozen_field_dir=frozen_field_dir,
+    )
     agg = _agg(df, readout=readout)
     suffix = "_journal_clean" if design_variant == DESIGN_JOURNAL_CLEAN else ""
     metric_tag = "_template_expression" if readout == READOUT_PROJECTION else "_field_similarity"
@@ -642,6 +689,12 @@ def main() -> None:
     ap.add_argument("--out-dir", type=Path, default=None)
     ap.add_argument("--design-variant", choices=DESIGN_VARIANTS, default=DESIGN_STANDARD)
     ap.add_argument("--readout", choices=READOUTS, default=READOUT_PROJECTION)
+    ap.add_argument(
+        "--frozen-field-dir",
+        type=Path,
+        default=None,
+        help="frozen shared-field directory matching the source CSV fingerprint",
+    )
     args = ap.parse_args()
     run(
         args.subject,
@@ -649,6 +702,7 @@ def main() -> None:
         out_dir=args.out_dir,
         design_variant=args.design_variant,
         readout=args.readout,
+        frozen_field_dir=args.frozen_field_dir,
     )
 
 
