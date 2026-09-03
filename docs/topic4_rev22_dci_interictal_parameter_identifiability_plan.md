@@ -264,6 +264,11 @@ OOM-risk estimate that cannot retain at least 32 GiB free RAM.
   If any expected reference unit is invalid or missing, emit the same status without
   recomputing the minimum over survivors.
 - Write a freeze file containing coordinates, source surface hash and optimization trace.
+- The controller only accepts frozen candidate ids that exist in the execution candidate
+  manifest. Therefore regenerate the execution candidate manifest as the frozen design
+  candidates plus the frozen family proposals (same `mechanisms` schema, absolute kernel angle
+  and explicit ellipse reference), re-bind the execution config to it, and commit before the
+  qualification launch. The design-only manifest hash stays recorded as the fit-stage binding.
 - Freeze qualification and confirmation seed pairs before launching either stage.
 - Do not read KMeans, OOD or held-out arrays while changing a parameter value.
 
