@@ -33,13 +33,20 @@ def _write_json(path: Path, payload: dict, *, sidecar: bool = False) -> str:
 
 
 def _patient_onsets(n_events: int = 48) -> np.ndarray:
+    rng = np.random.default_rng(20260903)
     rows = []
     for event in range(n_events):
         base = float(event % 7)
         if event % 2:
-            rows.append([base + 0.0, base + 3.0, base + 8.0, base + 11.0])
+            row = np.asarray([base + 0.0, base + 3.0, base + 8.0, base + 11.0])
         else:
-            rows.append([base + 3.0, base + 0.0, base + 11.0, base + 8.0])
+            row = np.asarray([base + 3.0, base + 0.0, base + 11.0, base + 8.0])
+        row += rng.normal(0.0, 0.9, size=4)
+        missing = rng.random(4) < np.asarray([0.04, 0.10, 0.12, 0.18])
+        if missing.sum() > 1:
+            missing[np.flatnonzero(missing)[1:]] = False
+        row[missing] = np.nan
+        rows.append(row)
     return np.asarray(rows, dtype=float)
 
 
@@ -115,6 +122,11 @@ def _make_contracts(tmp_path: Path, candidate_ids=("c0",), *, n_units: int = 4) 
         "git_commit": commit,
         "components": list(aggregate.COMPONENTS),
         "forbidden_inputs_loaded": False,
+        "floors": {
+            "draws": 12,
+            "seed": 20260903,
+            "kind": "block_split_count_matched; recruitment-thinned for D_order/D_lag",
+        },
         "patient_training_contract_npz": str(contract_path),
         "patient_training_contract_sha256": contract_hash,
     })
@@ -243,6 +255,26 @@ def test_complete_four_unit_candidate_enters_pooled_event_surfaces(tmp_path):
             expected[component]["value"]
         )
         assert candidate["jackknife_sd"][component] >= 0.0
+        floor = candidate["floor"][component]
+        assert floor["q95"] > floor["q50"]
+        expected_z = objective.standardized_excess(
+            expected[component]["value"], floor,
+        )
+        assert candidate["standardized_Z"][component] == pytest.approx(expected_z)
+        assert candidate["normalized_excess_E"][component] == pytest.approx(max(0.0, expected_z))
+        assert candidate["standardized_jackknife_sd"][component] == pytest.approx(
+            candidate["jackknife_sd"][component] /
+            (floor["q95"] - floor["q50"] + 1e-9)
+        )
+    surface = {row["component"]: row for row in payload["continuous_component_surface"]}
+    for component in aggregate.COMPONENTS:
+        assert surface[component]["raw_D"] == pytest.approx(expected[component]["value"])
+        assert surface[component]["standardized_Z"] == pytest.approx(
+            candidate["standardized_Z"][component]
+        )
+        assert surface[component]["normalized_excess_E"] == pytest.approx(
+            candidate["normalized_excess_E"][component]
+        )
     assert (ctx["output_dir"] / "fit_aggregate.json").is_file()
     assert (ctx["output_dir"] / "fit_candidate_components.csv").is_file()
     assert (ctx["output_dir"] / "fit_unit_inventory.csv").is_file()
@@ -356,3 +388,37 @@ def test_training_objective_loader_does_not_import_validation_cluster_dependency
     monkeypatch.setattr(builtins, "__import__", guarded_import)
     objective = aggregate._load_training_objective()
     assert callable(objective.component_vector)
+
+
+def test_candidate_specific_floor_is_deterministic_and_recruitment_thinned(tmp_path):
+    ctx = _make_contracts(tmp_path, candidate_ids=("full", "censored"))
+    for unit in ctx["units"]:
+        _write_worker(ctx, "full", unit["topology_seed"], n_events=16)
+        _write_worker(ctx, "censored", unit["topology_seed"], n_events=16)
+        stem = f"censored_seed_{unit['topology_seed']}"
+        npz_path = ctx["worker_dir"] / f"{stem}.npz"
+        with np.load(npz_path, allow_pickle=False) as loaded:
+            arrays = {name: np.asarray(loaded[name]) for name in loaded.files}
+        arrays["onsets"] = np.asarray(arrays["onsets"], float)
+        arrays["onsets"][::2, 3] = np.nan
+        np.savez(npz_path, **arrays)
+        payload_path = ctx["worker_dir"] / f"{stem}.json"
+        payload = json.loads(payload_path.read_text())
+        payload["arrays"]["sha256"] = _sha256(npz_path)
+        _write_json(payload_path, payload)
+
+    first = _run(ctx)
+    first_json = (ctx["output_dir"] / "fit_aggregate.json").read_bytes()
+    second = _run(ctx)
+    second_json = (ctx["output_dir"] / "fit_aggregate.json").read_bytes()
+
+    assert first_json == second_json
+    rows = {row["candidate_id"]: row for row in first["candidates"]}
+    # Equal pooled counts share unconditional floors, while recruitment-dependent
+    # conditional floors are computed under each candidate's own censoring profile.
+    for component in aggregate.UNCONDITIONAL_COMPONENTS:
+        assert rows["full"]["floor"][component] == rows["censored"]["floor"][component]
+    assert any(
+        rows["full"]["floor"][component] != rows["censored"]["floor"][component]
+        for component in aggregate.CONDITIONAL_COMPONENTS
+    )

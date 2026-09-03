@@ -44,6 +44,7 @@ MIN_RETURNED_FAMILIES = 12
 EXPECTED_FIT_UNITS = 4
 COMPONENTS = ("D_support", "D_order", "D_lag", "D_cover")
 CONDITIONAL_COMPONENTS = ("D_order", "D_lag")
+UNCONDITIONAL_COMPONENTS = ("D_support", "D_cover")
 SHAFT_ORDER = ("ICL", "SCL")
 PAIR_CLASS_ORDER = ("ICL-ICL", "SCL-SCL", "ICL-SCL")
 FORBIDDEN_PATH_MARKERS = (
@@ -606,6 +607,15 @@ def aggregate_fit(
     training["reference"] = objective.patient_reference(
         training["onsets_ms"], training["groups"], training["pairs"], training["embedding"],
     )
+    block_views = objective.PatientBlockViews(
+        training["onsets_ms"], training["block_ids"], training["groups"], training["pairs"],
+        training["embedding"], lag_cap_ms=float(objective.LAG_CAP_MS),
+    )
+    floor_contract = qualification.get("floors") or {}
+    floor_draws = int(floor_contract.get("draws", 0))
+    floor_seed = int(floor_contract.get("seed", -1))
+    if floor_draws < 1 or floor_seed < 0:
+        raise RuntimeError("objective qualification does not freeze a valid patient-floor contract")
 
     response_commit = str(design.get("git_commit") or "")
     objective_commit = str(qualification.get("git_commit") or "")
@@ -614,7 +624,7 @@ def aggregate_fit(
 
     all_units = []
     candidate_rows = []
-    surface_rows = []
+    pooled_onsets_by_candidate = {}
     input_hashes = {
         "response_design_manifest": {"path": str(response_design_path), "sha256": design_hash},
         "seed_manifest": {"path": str(seed_manifest_path), "sha256": seed_hash},
@@ -662,8 +672,13 @@ def aggregate_fit(
             "joint_feasibility": bool(all_four_feasible),
             "continuous_surface_eligible": bool(all_four_feasible),
             "pooled_candidate": None,
+            "floor": {component: None for component in COMPONENTS},
+            "standardized_Z": {component: None for component in COMPONENTS},
+            "normalized_excess_E": {component: None for component in COMPONENTS},
             "jackknife_sd": {component: None for component in COMPONENTS},
+            "standardized_jackknife_sd": {component: None for component in COMPONENTS},
             "leave_one_topology_out": [],
+            "candidate_failure_reasons": [],
             "units": unit_rows,
         }
         if all_four_feasible:
@@ -682,23 +697,110 @@ def aggregate_fit(
             }
             candidate_record["jackknife_sd"] = jackknife
             candidate_record["leave_one_topology_out"] = leave_out
-            for component in COMPONENTS:
-                surface_rows.append({
-                    "candidate_id": candidate["candidate_id"],
-                    "component": component,
-                    "value": pooled[component],
-                    "jackknife_sd": jackknife[component],
-                    "physical": candidate.get("physical"),
-                    "family_membership": candidate.get("family_membership"),
-                })
+            pooled_table = np.concatenate(
+                [np.asarray(table, float) for table in unit_onsets if table is not None], axis=0,
+            )
+            pooled_onsets_by_candidate[str(candidate["candidate_id"])] = pooled_table
         candidate_rows.append(candidate_record)
+
+    # Patient floors are candidate specific. Support and coverage need only the pooled
+    # event count, whereas order and physical lag also reproduce the candidate's
+    # recruitment censoring before the patient split-half score is calculated.
+    floor_requests = []
+    unconditional_keys = set()
+    for row in candidate_rows:
+        if not row["joint_feasibility"]:
+            continue
+        candidate_id = str(row["candidate_id"])
+        onsets = pooled_onsets_by_candidate[candidate_id]
+        n_events = int(len(onsets))
+        unconditional_key = f"n{n_events}"
+        if unconditional_key not in unconditional_keys:
+            floor_requests.append({
+                "key": unconditional_key,
+                "n": n_events,
+                "components": UNCONDITIONAL_COMPONENTS,
+                "thin_profile": None,
+            })
+            unconditional_keys.add(unconditional_key)
+        floor_requests.append({
+            "key": f"candidate::{candidate_id}",
+            "n": n_events,
+            "components": CONDITIONAL_COMPONENTS,
+            "thin_profile": objective.recruitment_profile(onsets),
+        })
+
+    floors = objective.block_split_floors(
+        block_views,
+        floor_requests,
+        draws=floor_draws,
+        seed=floor_seed,
+        n_pair_min=int(objective.N_PAIR_MIN),
+        cover_quantile=0.90,
+    ) if floor_requests else {}
+
+    surface_rows = []
+    for row in candidate_rows:
+        if not row["joint_feasibility"]:
+            continue
+        candidate_id = str(row["candidate_id"])
+        n_events = int(row["pooled_candidate"]["n_pooled_events"])
+        raw = row["pooled_candidate"]["components"]
+        normalization_ok = True
+        for component in COMPONENTS:
+            floor_key = (
+                f"candidate::{candidate_id}"
+                if component in CONDITIONAL_COMPONENTS else f"n{n_events}"
+            )
+            floor = (floors.get(floor_key) or {}).get(component)
+            row["floor"][component] = floor
+            finite_floor = bool(
+                floor is not None
+                and floor.get("q50") is not None
+                and floor.get("q95") is not None
+                and np.isfinite(float(floor["q50"]))
+                and np.isfinite(float(floor["q95"]))
+                and float(floor["q95"]) > float(floor["q50"])
+            )
+            if not finite_floor:
+                normalization_ok = False
+                row["candidate_failure_reasons"].append(
+                    f"{component}_PATIENT_FLOOR_NOT_ESTIMABLE"
+                )
+                continue
+            row["standardized_Z"][component] = objective.standardized_excess(
+                raw[component], floor,
+            )
+            row["normalized_excess_E"][component] = objective.normalized_excess(
+                raw[component], floor,
+            )
+            denominator = float(floor["q95"]) - float(floor["q50"]) + 1e-9
+            row["standardized_jackknife_sd"][component] = float(
+                row["jackknife_sd"][component] / denominator
+            )
+        row["continuous_surface_eligible"] = bool(normalization_ok)
+        if not normalization_ok:
+            continue
+        for component in COMPONENTS:
+            surface_rows.append({
+                "candidate_id": candidate_id,
+                "component": component,
+                "raw_D": raw[component],
+                "standardized_Z": row["standardized_Z"][component],
+                "normalized_excess_E": row["normalized_excess_E"][component],
+                "raw_jackknife_sd": row["jackknife_sd"][component],
+                "standardized_jackknife_sd": row["standardized_jackknife_sd"][component],
+                "floor": row["floor"][component],
+                "physical": row.get("physical"),
+                "family_membership": row.get("family_membership"),
+            })
 
     expected_count = len(candidates) * EXPECTED_FIT_UNITS
     all_artifacts_valid = len(all_units) == expected_count and all(
         row["artifact_integrity"] for row in all_units
     )
     payload = {
-        "schema_id": "topic4_rev22_dci_training_only_fit_aggregate_v1",
+        "schema_id": "topic4_rev22_dci_training_only_fit_aggregate_v2",
         "status": "FIT_AGGREGATE_COMPLETE" if all_artifacts_valid else "FIT_ARTIFACT_GRID_INCOMPLETE",
         "scientific_role": "training_only_component_response_fit_input",
         "training_only": True,
@@ -706,8 +808,18 @@ def aggregate_fit(
         "component_contract": list(COMPONENTS),
         "candidate_statistic": (
             "events pooled over the four topology units before nonlinear components are recomputed; "
-            "per-unit components are sidecars"
+            "candidate-specific count-matched and recruitment-thinned patient floors convert raw D "
+            "to standardized Z and clipped normalized excess E; per-unit components are sidecars"
         ),
+        "patient_floor_contract": {
+            "method": floor_contract.get("kind"),
+            "draws": floor_draws,
+            "seed": floor_seed,
+            "unconditional_components": list(UNCONDITIONAL_COMPONENTS),
+            "conditional_components": list(CONDITIONAL_COMPONENTS),
+            "conditional_thinning": "candidate_pooled_recruitment_profile",
+            "cover_patient_query": "all_events_in_reference_block_half",
+        },
         "eligibility_contract": {
             "expected_fit_units_per_candidate": EXPECTED_FIT_UNITS,
             "min_returned_families_per_unit": MIN_RETURNED_FAMILIES,
@@ -755,12 +867,22 @@ def aggregate_fit(
             "joint_feasibility": row["joint_feasibility"],
             "continuous_surface_eligible": row["continuous_surface_eligible"],
             **{component: pooled.get(component) for component in COMPONENTS},
+            **{f"Z_{component}": row["standardized_Z"].get(component) for component in COMPONENTS},
+            **{f"E_{component}": row["normalized_excess_E"].get(component) for component in COMPONENTS},
             **{f"JK_{component}": row["jackknife_sd"].get(component) for component in COMPONENTS},
+            **{
+                f"JK_Z_{component}": row["standardized_jackknife_sd"].get(component)
+                for component in COMPONENTS
+            },
+            "candidate_failure_reasons": "|".join(row["candidate_failure_reasons"]),
         })
     candidate_fields = [
         "candidate_id", "block", "artifact_units", "safe_units", "yield_estimable_units",
         "conditional_estimable_units", "joint_feasibility", "continuous_surface_eligible",
-        *COMPONENTS, *[f"JK_{component}" for component in COMPONENTS],
+        *COMPONENTS, *[f"Z_{component}" for component in COMPONENTS],
+        *[f"E_{component}" for component in COMPONENTS],
+        *[f"JK_{component}" for component in COMPONENTS],
+        *[f"JK_Z_{component}" for component in COMPONENTS], "candidate_failure_reasons",
     ]
     _atomic_csv(output_dir / "fit_candidate_components.csv", candidate_csv, candidate_fields)
     return payload

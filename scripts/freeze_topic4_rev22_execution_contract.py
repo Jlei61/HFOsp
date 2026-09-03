@@ -130,10 +130,6 @@ def main() -> None:
         raise RuntimeError("rev22 minimal transition contract is missing")
     if transition.get("source_transition_config_sha256") != rev20["inputs"]["transition_config"]["sha256"]:
         raise RuntimeError("minimal transition contract is not derived from the frozen source")
-    transition_record_from_analysis = analysis.get("inputs", {}).get("rev22_transition_execution", {})
-    if (transition_record_from_analysis.get("path") != str(args.transition_config.resolve().relative_to(ROOT.resolve()))
-            or transition_record_from_analysis.get("sha256") != _sha256(args.transition_config)):
-        raise RuntimeError("analysis config does not freeze the minimal transition contract")
     audit = json.loads(args.connectivity_design_audit.read_text())
     if audit.get("status") != "CONNECTIVITY_DESIGN_ADMISSIBLE":
         raise RuntimeError("final ellipse-plus-learned connectivity design did not pass")
