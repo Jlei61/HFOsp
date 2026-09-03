@@ -112,6 +112,8 @@ def main() -> None:
     parser.add_argument("--candidate-manifest-out", type=Path, default=DEFAULT_CANDIDATES)
     parser.add_argument("--transition-config", type=Path, default=DEFAULT_TRANSITION)
     parser.add_argument("--connectivity-design-audit", type=Path, default=DEFAULT_CONNECTIVITY_AUDIT)
+    parser.add_argument("--extra-candidates", type=Path, default=None,
+                        help="Task 8 proposal_candidates.json appended to the execution manifest")
     args = parser.parse_args()
 
     analysis = json.loads(args.analysis_config.read_text())
@@ -167,6 +169,25 @@ def main() -> None:
     config_sha = _atomic_json(args.execution_config_out, execution)
     commit = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, check=True,
                             capture_output=True, text=True).stdout.strip()
+    candidates = list(response["candidates"])
+    extra_record = None
+    if args.extra_candidates is not None:
+        extra = json.loads(args.extra_candidates.read_text())
+        if extra.get("schema_id") != "topic4_rev22_dci_proposal_candidates_v1":
+            raise RuntimeError("extra candidates file has an unexpected schema")
+        if extra.get("response_design_manifest_sha256") != _sha256(args.response_manifest):
+            raise RuntimeError("proposal candidates are bound to another response design")
+        known = {row["candidate_id"] for row in candidates}
+        for row in extra["candidates"]:
+            if row["candidate_id"] in known:
+                raise RuntimeError(f"proposal repeats a design candidate: {row['candidate_id']}")
+            if row.get("mechanisms", {}).get("Z_M") != "off":
+                raise RuntimeError("proposal candidate does not keep Z/M off")
+            known.add(row["candidate_id"])
+            candidates.append(row)
+        extra_record = {"path": str(args.extra_candidates.resolve()),
+                        "sha256": _sha256(args.extra_candidates),
+                        "candidate_count": len(extra["candidates"])}
     candidate_manifest = {
         "schema_id": "topic4_rev22_dci_execution_candidate_manifest_v1",
         "config_sha256": config_sha,
@@ -174,8 +195,10 @@ def main() -> None:
         "seed_manifest_sha256": _sha256(args.seed_manifest),
         "git_commit": commit,
         "branch": response["branch"],
-        "candidate_count": response["candidate_count"],
-        "candidates": response["candidates"],
+        "design_candidate_count": response["candidate_count"],
+        "proposal_candidates": extra_record,
+        "candidate_count": len(candidates),
+        "candidates": candidates,
         "claim_boundary": "Execution binding only; parameter values are copied byte-for-byte from the frozen design.",
     }
     candidate_sha = _atomic_json(args.candidate_manifest_out, candidate_manifest)
@@ -185,7 +208,7 @@ def main() -> None:
         "execution_config_sha256": config_sha,
         "candidate_manifest": str(args.candidate_manifest_out),
         "candidate_manifest_sha256": candidate_sha,
-        "candidate_count": response["candidate_count"],
+        "candidate_count": len(candidates),
     }, indent=2))
 
 
