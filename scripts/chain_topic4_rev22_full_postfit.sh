@@ -146,6 +146,9 @@ write_state "RENDERING_RESPONSE_AND_FAMILY_FIGURES"
 "$PYTHON" scripts/plot_topic4_rev22_structural_nulls.py \
     --aggregate "$STAGE/structural_nulls/structural_null_aggregate.json" \
     --out "$FIGURES/structural_nulls" || fail structural_figures
+"$PYTHON" scripts/plot_topic4_rev22_objective_qualification.py \
+    --input "$STAGE/objective_qualification/objective_qualification.json" \
+    --output-dir "$FIGURES/objective_qualification" || fail objective_qualification_figure
 
 write_state "RENDERING_FINAL_CANDIDATE_ACCEPTANCE"
 FINAL_ID_LIST="$STAGE/response_fit/final_acceptance_candidate_ids.txt"

@@ -109,6 +109,13 @@ def audit(stage: Path, worktree: Path) -> dict[str, Any]:
 
     figures = stage / "figures"
     figure_records = {"main": _verify_figure_metadata(figures / "metadata.json")}
+    objective_metadata = (
+        figures / "objective_qualification" /
+        "rev22_dci_objective_qualification_controls_metadata.json"
+    )
+    figure_records["objective_qualification"] = _verify_figure_metadata(objective_metadata)
+    if not (figures / "objective_qualification/README.md").is_file():
+        raise RuntimeError("objective-qualification figure README is missing")
     structural = figures / "structural_nulls/rev22_dci_structural_controls"
     for suffix in ("png", "pdf", "svg"):
         if not structural.with_suffix(f".{suffix}").is_file():
