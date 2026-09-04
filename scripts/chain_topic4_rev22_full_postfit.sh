@@ -178,5 +178,9 @@ for candidate_id in "${final_ids[@]}"; do
         --artifact-root "$ROOT" || fail "final_acceptance_${candidate_id}"
 done
 
+write_state "RUNNING_COMPLETION_AUDIT"
+"$PYTHON" scripts/audit_topic4_rev22_completion.py \
+    --stage "$STAGE" --worktree "$WT" || fail completion_audit
+
 write_state "COMPLETE commit=$EXECUTION_COMMIT final_candidates=${final_ids[*]}"
 notify-send "Topic 4 rev22-DCI" "Full postfit and figures complete" || true
