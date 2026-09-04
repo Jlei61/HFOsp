@@ -258,6 +258,13 @@ Fig3-B 是 intentionally selected morphology-aware TA representative。它说明
 - 模型能够复现或解释的 dynamics；
 - 仍然是假设、需要后续验证的机制。
 
+### Fig5-C/D：dual-core spatial-Z 分岔候选（2026-09-04）
+
+- 输出目录：`results/paper-ready-figure/fig5_dual_core_spatial_z/figures/`
+- C：同一 `dualcore_s39 + Joint=1.25` 快子系统中 core A 内 per-neuron mean E rate 随 `D_A=1-Z_A` 的 fixed-point branches；这是 2 mm E/I population reduction 的局部读数，不称 literal single-neuron bifurcation。
+- D：左侧为 runaway-entry 零模在 20 mm sheet 上的空间能量，右侧为固定 `Z_surround=0.80` 时独立扫描 `Z_A×Z_B` 的有限 root catalog。
+- 拼图合同：C/D 只能和同一 dual-core 底物重画的 A/B 合并；旧 `joint_04_control seed1801` 的 A/B 属于不同实验，不得直接拼接。
+
 ### Fig5-A: cm-SNN 自发双向 readout 机制示意
 
 **目的**：用最少 panel 展示同一个 stage-3 brake-off cm-SNN 底物如何产生正向和反向间期传播事件，并被同一虚拟 SEEG montage 读出。

@@ -624,7 +624,7 @@ def main() -> None:
                 "not proof of mathematical non-existence"),
         },
         "claim": (
-            "The frozen 1-mm deterministic reduction of the data-driven dual-core "
+            "The frozen 2-mm deterministic reduction of the data-driven dual-core "
             "substrate has a spatial saddle-node fold chain. The low-branch fold "
             "removes the low fixed point and therefore supplies a deterministic "
             "runaway boundary; the OU-on SNN crosses operationally earlier inside "

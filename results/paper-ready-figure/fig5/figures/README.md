@@ -1,6 +1,12 @@
 # Fig5 · data-driven 底物上的低活动到 runaway 连续轨迹
 
-> **2026-08-20 当前候选。** 作者目视选定 `seed 1801`、E→I redistribution dose
+> **2026-09-04 状态更新：本目录已降为历史候选。** 这里的 A–D 来自旧
+> `joint_04_control seed1801`，不是当前冻结的 `dualcore_s39 + Joint=1.25`。
+> 新的 Fig.5C/D 候选位于
+> `results/paper-ready-figure/fig5_dual_core_spatial_z/figures/`；在同一 dual-core
+> 底物的 A/B 重画完成前，不得跨底物拼成一张正式 Fig.5。
+
+> **2026-08-20 当时的候选。** 作者目视选定 `seed 1801`、E→I redistribution dose
 > 5% 的单轨迹工作点。该轨迹在进入后约 92% 的 20 ms 窗中同时维持多数 E
 > 神经元和多数空间分箱招募，触点频谱重心由约 16 Hz 升至 52 Hz，群体中位
 > 发放率由约 63 Hz 升至 341 Hz。它是 Fig5 的视觉与机制候选，不是多 seed

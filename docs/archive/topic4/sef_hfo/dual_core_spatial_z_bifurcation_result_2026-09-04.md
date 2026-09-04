@@ -3,7 +3,7 @@
 ## 结论先行
 
 在冻结的 `dualcore_s39 + Joint=1.25` 底物上，把原来均匀的 frozen `q` 改为沿两个 core 和 surround 分区的
-`Z(x)` 后，1 mm 粗粒化确定性快子系统存在经过双重核验的 **saddle-node fold chain**。这不是旧的连续自由场，
+`Z(x)` 后，2 mm 粗粒化确定性快子系统存在经过双重核验的 **saddle-node fold chain**。这不是旧的连续自由场，
 也不是把两个 core 合并成一个均匀 `q` 后得到的曲线。
 
 最重要的机制结论是：这个分岔结构控制 **runaway 是否成为确定性必然**，但不精确控制持续 OU 噪声下的实际
@@ -133,5 +133,6 @@ tonic 根的最大实部分别为 `-0.02237` 与 `-0.02941 ms^-1`，在这一明
 - 诊断图：`scripts/plot_topic4_dual_core_spatial_z_bifurcation.py`
 - 机器结果：`/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_dual_core_spatial_z/bifurcation/dualcore_spatial_z_bifurcation.{json,npz}`
 - 诊断图：`/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_dual_core_spatial_z/bifurcation/figures/dualcore_spatial_z_bifurcation_diagnostic.{png,pdf}`
+- Fig.5C/D 候选：`/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_dual_core_spatial_z/paper_ready_panels/figures/fig5-{panel-c-core-a-bifurcation,panel-d-spatial-z-phase,panels-cd-dual-core-spatial-z}.{png,pdf,svg}`
 - 图说明与 metadata：同目录 `README.md`、`dualcore_spatial_z_bifurcation_diagnostic.metadata.json`
 - 测试：`tests/test_topic4_patient_zm_meanfield.py` + `tests/test_topic4_dual_core_spatial_z.py`，14/14 PASS。

@@ -231,7 +231,7 @@ def main() -> None:
     readme.write_text(
         "### dualcore_spatial_z_bifurcation_diagnostic.png\n\n"
         "这是一张确定性机制诊断图，不是已经锁版的 Fig.5。A 把模型 Z 投影到冻结的 data-driven 双核几何；B 显示低根、持续招募根和折叠链；C 显示入口与恢复折点的零模空间形状；D 在固定 surround Z 下分别改变两个 core 的 Z。\n\n"
-        "它支持的是 1 mm 粗粒化快子系统存在空间 saddle-node 链，并说明 OU-on SNN 的中位转变发生在根共存区；不能据此声称真实患者存在同样的抑制场或热力学相变。\n\n"
+        "它支持的是 2 mm 粗粒化快子系统存在空间 saddle-node 链，并说明 OU-on SNN 的中位转变发生在根共存区；不能据此声称真实患者存在同样的抑制场或热力学相变。\n\n"
         "**关注点**：看 B 中两个边界与粉色 OU-on 位置的关系，以及 C/D 是否显示由单个 core 的局部模式先触发。\n")
     print(json.dumps(metadata, indent=2))
 
