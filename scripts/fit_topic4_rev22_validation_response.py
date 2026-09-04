@@ -176,6 +176,16 @@ def _unit_values(row: Mapping, endpoint: str) -> list[float]:
     return values
 
 
+def _unit_value_map(row: Mapping, endpoint: str) -> dict[int, float]:
+    values = {}
+    for unit in row.get("unit_endpoints") or []:
+        topology_seed = unit.get("topology_seed")
+        value = _finite(unit.get(endpoint))
+        if topology_seed is not None and value is not None:
+            values[int(topology_seed)] = float(value)
+    return values
+
+
 def _candidate_table(validation: Mapping, design: Mapping) -> tuple[list[dict], dict]:
     design_rows, physical, domain = _design_rows(design)
     rows = _fit_descriptive_rows(validation)
@@ -196,10 +206,85 @@ def _candidate_table(validation: Mapping, design: Mapping) -> tuple[list[dict], 
             "primary_status": status,
             "endpoints": values,
             "unit_values": {name: _unit_values(row, name) for name in ENDPOINTS},
+            "unit_value_maps": {name: _unit_value_map(row, name) for name in ENDPOINTS},
+            "heldout_count_matched_floors": row.get("heldout_count_matched_floors") or {},
             "yield_total": _yield(row),
             "not_estimable": not_estimable,
         })
     return table, domain
+
+
+def _reference_id(design: Mapping) -> str:
+    rows = design.get("candidates") or []
+    references = [str(row.get("candidate_id")) for row in rows if row.get("is_reference")]
+    if len(references) != 1:
+        raise RuntimeError("response design must identify exactly one M0000 reference")
+    return references[0]
+
+
+def _display_benchmarks(validation: Mapping, reference: Mapping) -> dict[str, dict]:
+    floors = reference.get("heldout_count_matched_floors") or {}
+    patient = validation.get("patient_recording_block_benchmark") or {}
+    floor_keys = {"D_support": "D_support", "D_order": "D_order", "D_time_ms": "D_lag"}
+    targets: dict[str, tuple[float | None, str]] = {}
+    for endpoint, floor_key in floor_keys.items():
+        target = _finite((floors.get(floor_key) or {}).get("q95"))
+        targets[endpoint] = (target, "patient split-block q95")
+    targets["recall"] = (1.0, "ideal fixed-budget recall")
+    targets["kmeans_alignment"] = (
+        _finite(patient.get("balanced_alignment")), "patient held-out natural KMeans alignment",
+    )
+    targets["ood"] = (0.0, "ideal zero OOD")
+
+    output = {}
+    for endpoint in ENDPOINTS:
+        reference_value = _finite(reference["endpoints"].get(endpoint))
+        target_value, target_role = targets[endpoint]
+        if reference_value is None or target_value is None:
+            raise RuntimeError(f"display benchmark is not estimable for {endpoint}")
+        direction = 1.0 if endpoint in HIGHER_IS_BETTER else -1.0
+        gap = direction * (target_value - reference_value)
+        if not np.isfinite(gap) or gap <= 1e-12:
+            raise RuntimeError(
+                f"display benchmark does not improve on M0000 for {endpoint}: "
+                f"reference={reference_value}, target={target_value}"
+            )
+        output[endpoint] = {
+            "reference_raw": float(reference_value),
+            "benchmark_raw": float(target_value),
+            "benchmark_role": target_role,
+            "oriented_gap_raw": float(gap),
+            "score_definition": "oriented(candidate-reference)/oriented(benchmark-reference)",
+            "reference_score": 0.0,
+            "benchmark_score": 1.0,
+        }
+    return output
+
+
+def _add_display_scores(table: list[dict], reference_id: str,
+                        benchmarks: Mapping[str, Mapping]) -> None:
+    reference = next((row for row in table if row["candidate_id"] == reference_id), None)
+    if reference is None:
+        raise RuntimeError("M0000 reference is absent from the 96-point response design")
+    for row in table:
+        row["display_score"] = {}
+        row["display_unit_values"] = {}
+        for endpoint in ENDPOINTS:
+            direction = 1.0 if endpoint in HIGHER_IS_BETTER else -1.0
+            gap = float(benchmarks[endpoint]["oriented_gap_raw"])
+            value = row["endpoints"][endpoint]
+            reference_value = reference["endpoints"][endpoint]
+            row["display_score"][endpoint] = (
+                None if value is None or reference_value is None
+                else direction * (float(value) - float(reference_value)) / gap
+            )
+            candidate_units = row["unit_value_maps"][endpoint]
+            reference_units = reference["unit_value_maps"][endpoint]
+            shared = sorted(set(candidate_units) & set(reference_units))
+            row["display_unit_values"][endpoint] = [
+                direction * (candidate_units[seed] - reference_units[seed]) / gap
+                for seed in shared
+            ]
 
 
 def _full_coordinate(frozen: Mapping, physical: Mapping[str, Sequence[float]]) -> tuple[str, list[float]]:
@@ -232,7 +317,7 @@ def _noise_for_endpoint(table: Sequence[Mapping], endpoint: str) -> tuple[np.nda
     sd_map: dict[str, float | None] = {}
     n_map: dict[str, int] = {}
     for row in table:
-        values = np.asarray(row["unit_values"][endpoint], float)
+        values = np.asarray(row["display_unit_values"][endpoint], float)
         candidate_id = str(row["candidate_id"])
         n_map[candidate_id] = int(len(values))
         sd_map[candidate_id] = (
@@ -246,7 +331,7 @@ def _noise_for_endpoint(table: Sequence[Mapping], endpoint: str) -> tuple[np.nda
         shrink["variance"].get(str(row["candidate_id"]), np.nan) for row in table
     ], float)
     return variance, {
-        "method": "pooled_shrinkage_of_topology_unit_sem",
+        "method": "pooled_shrinkage_of_paired_topology_unit_improvement_sem",
         "prior_weight": 8.0,
         "s_pool_sq": shrink.get("s_pool_sq"),
         "n_candidates_with_noise": shrink.get("n_finite"),
@@ -342,6 +427,10 @@ def fit_validation_response(*, validation_path: Path, design_path: Path,
                   "frozen candidates -> response design")
 
     table, domain = _candidate_table(validation, design)
+    reference_id = _reference_id(design)
+    reference_row = next(row for row in table if row["candidate_id"] == reference_id)
+    benchmarks = _display_benchmarks(validation, reference_row)
+    _add_display_scores(table, reference_id, benchmarks)
     physical = {row["candidate_id"]: list(row["physical"].values()) for row in table}
     full_id, center = _full_coordinate(frozen, physical)
     X = np.asarray([physical[row["candidate_id"]] for row in table], float)
@@ -349,14 +438,16 @@ def fit_validation_response(*, validation_path: Path, design_path: Path,
     noise_by_endpoint: dict[str, np.ndarray] = {}
     for index, endpoint in enumerate(ENDPOINTS):
         y = np.asarray([
-            np.nan if row["endpoints"][endpoint] is None else row["endpoints"][endpoint]
+            np.nan if row["display_score"][endpoint] is None else row["display_score"][endpoint]
             for row in table
         ], float)
         noise, noise_record = _noise_for_endpoint(table, endpoint)
         noise_by_endpoint[endpoint] = noise
         usable = np.isfinite(y) & np.isfinite(noise)
         endpoint_record: dict[str, Any] = {
-            "direction": "higher_is_better" if endpoint in HIGHER_IS_BETTER else "lower_is_better",
+            "direction": "higher_is_better",
+            "display_quantity": "fraction_of_M0000_to_benchmark_gap_closed",
+            "benchmark": benchmarks[endpoint],
             "n_estimable": int(usable.sum()), "noise": noise_record,
         }
         if usable.sum() < 3:
@@ -390,7 +481,9 @@ def fit_validation_response(*, validation_path: Path, design_path: Path,
 
     original_points = []
     for row in table:
-        record = {key: value for key, value in row.items() if key != "unit_values"}
+        record = {key: value for key, value in row.items()
+                  if key not in {"unit_values", "unit_value_maps", "display_unit_values",
+                                 "heldout_count_matched_floors"}}
         record["observation_variance"] = {}
         for endpoint in ENDPOINTS:
             idx = len(original_points)
@@ -413,6 +506,15 @@ def fit_validation_response(*, validation_path: Path, design_path: Path,
         "design_point_count": len(table),
         "parameter_order": list(PARAMETER_ORDER),
         "domain": domain,
+        "display_contract": {
+            "quantity": "fraction_of_M0000_to_benchmark_gap_closed",
+            "higher_is_better": True,
+            "reference_score": 0.0,
+            "benchmark_score": 1.0,
+            "reference_candidate_id": reference_id,
+            "benchmarks": benchmarks,
+            "raw_values_retained_in": "original_design_points[].endpoints",
+        },
         "frozen_full_model": {"candidate_id": full_id, "coordinate": dict(zip(PARAMETER_ORDER, center))},
         "original_design_points": original_points,
         "surfaces": surfaces,

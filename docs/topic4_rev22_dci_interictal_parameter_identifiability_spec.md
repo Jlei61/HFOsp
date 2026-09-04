@@ -726,9 +726,26 @@ fixed-budget recall, KMeans balanced alignment and OOD. The composite distance i
 the sidecar figure only, because it duplicates the first three rows. Each curve is a one-dimensional slice through the post-freeze
 descriptive validation surface with all other coordinates locked at reference; it is not
 called a marginal causal effect. Pale points show all response-design observations and
-open circles show rescored rev20 one-dimensional anchors. Patient self-comparison bands are
-drawn only where the same statistic and sample-size contract define them. Event yield is
-encoded by point size and remains numerically reported.
+open circles show rescored rev20 one-dimensional anchors. The main y axis is not the raw
+endpoint. It is the oriented fraction of the gap from the frozen `M0000` dual-core reference
+to a predeclared endpoint benchmark that the candidate closes:
+
+```text
+I_k(theta) = s_k [Y_k(theta) - Y_k(M0000)] /
+             {s_k [B_k - Y_k(M0000)]},
+s_k = +1 for higher-is-better and -1 for lower-is-better.
+```
+
+Thus `I=0` means no improvement over `M0000`, `I=1` reaches the benchmark, negative values
+are worse, and higher is always better. `B_k` is the reference-count patient split-block
+q95 for held-out support/order/timing, one for fixed-budget recall, patient held-out natural
+KMeans alignment for KMeans, and zero for OOD. The denominator and all benchmark raw values
+are frozen in the figure sidecar. Curves and intervals are fit from same-topology paired
+`I_k` values, not from a post-hoc subtraction of two independent GP curves. Raw distances,
+milliseconds and fractions remain in the machine-readable original-point table. Event yield is
+encoded by point size and remains
+numerically reported. This normalization is display-only and cannot alter selection,
+ranking, Pareto status or any scientific endpoint.
 
 A validation row enters Layer 1 only if its rev20 between-candidate range divided by
 within-candidate seed MAD is at least 1 under the same predeclared identifiability rule used

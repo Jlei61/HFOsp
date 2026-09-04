@@ -173,14 +173,25 @@ def _fixture(tmp_path: Path) -> dict[str, Path]:
                 "hi90": [value + 0.02 for value in mean],
             }
         surfaces[name] = {
-            "status": "OK", "direction": f"{direction}_is_better",
+            "status": "OK", "direction": "higher_is_better",
+            "display_quantity": "fraction_of_M0000_to_benchmark_gap_closed",
             "cv": {"adequate": True}, "conditional_slices": slices,
+        }
+    for point_index, point in enumerate(original_points):
+        point["display_score"] = {
+            name: 0.05 * point_index / 95 + 0.01 * endpoint_index
+            for endpoint_index, (name, _, _) in enumerate(plotter.PRIMARY)
         }
     _write(surface_path, {
         "schema_id": "topic4_rev22_dci_validation_response_surface_v1",
         "status": "DESCRIPTIVE_VALIDATION_RESPONSE_COMPLETE",
         "descriptive_only": True, "cannot_select": True, "selection_permitted": False,
         "design_point_count": 96, "original_design_points": original_points,
+        "display_contract": {
+            "quantity": "fraction_of_M0000_to_benchmark_gap_closed",
+            "reference_score": 0.0, "benchmark_score": 1.0,
+            "reference_candidate_id": "dci_p000",
+        },
         "surfaces": surfaces,
         "input_hashes": {"validation_aggregate": {"sha256": validation_hash},
                          "frozen_candidates": {"sha256": frozen_hash}},

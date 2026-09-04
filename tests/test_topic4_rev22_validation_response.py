@@ -43,6 +43,7 @@ def _fixture(tmp_path: Path) -> dict[str, Path]:
         candidates.append({
             "candidate_id": candidate_id,
             "physical": dict(zip(response.PARAMETER_ORDER, x.tolist())),
+            "is_reference": index == 0,
         })
         endpoint_values = {
             "D_support": float(0.2 + np.sum((u - 0.3) ** 2)),
@@ -61,6 +62,11 @@ def _fixture(tmp_path: Path) -> dict[str, Path]:
         validation_rows.append({
             "candidate_id": candidate_id, "primary_status": "OK",
             "primary_endpoints": endpoint_values, "unit_endpoints": unit_rows,
+            "heldout_count_matched_floors": {
+                "D_support": {"q50": 0.05, "q95": 0.10},
+                "D_order": {"q50": 0.10, "q95": 0.20},
+                "D_lag": {"q50": 3.0, "q95": 5.0},
+            },
             "secondary": {"yield_total": 80 + index},
         })
 
@@ -80,6 +86,7 @@ def _fixture(tmp_path: Path) -> dict[str, Path]:
         "schema_id": response.VALIDATION_SCHEMA, "status": "VALIDATION_AGGREGATE_COMPLETE",
         "snn_simulation_run": False,
         "input_hashes": {"response_design": design_hash, "frozen_candidates": frozen_hash},
+        "patient_recording_block_benchmark": {"balanced_alignment": 0.95},
         "fit_descriptive": {"candidate_count": 96, "candidates": validation_rows},
     })
     return {
@@ -106,10 +113,16 @@ def test_descriptive_surfaces_preserve_96_points_and_emit_no_proposal(tmp_path):
     assert payload["task8_freeze_modified"] is False
     assert payload["design_point_count"] == 96
     assert len(payload["original_design_points"]) == 96
+    assert payload["display_contract"]["reference_candidate_id"] == "dci_p000"
+    assert payload["display_contract"]["reference_score"] == 0.0
+    reference = payload["original_design_points"][0]
+    assert all(reference["display_score"][name] == pytest.approx(0.0)
+               for name in response.ENDPOINTS)
     assert list(payload["surfaces"]) == list(response.ENDPOINTS)
     for endpoint in response.ENDPOINTS:
         record = payload["surfaces"][endpoint]
         assert record["status"] == "OK"
+        assert record["display_quantity"] == "fraction_of_M0000_to_benchmark_gap_closed"
         assert record["cv"]["consequence"] == "diagnostic_only_no_selection_or_optimization"
         assert len(record["conditional_slices"]["g_LEE"]["axis"]) == 7
         assert np.asarray(record["conditional_planes"]["theta_x_AR"]["mean"]).shape == (5, 5)

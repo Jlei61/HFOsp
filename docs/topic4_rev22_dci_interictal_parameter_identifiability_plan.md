@@ -383,8 +383,11 @@ Generate:
 1. objective-qualification controls showing minority removal, SCL censoring and time stretch;
 2. conditional continuous-response atlas with parameters as columns and, subject to the
    pre-frozen display-identifiability rule, six rows: held-out support view, held-out order
-   view, held-out physical timing, fixed-budget recall, KMeans alignment and OOD. Overlay pale design
-   points, open rev20 anchors and valid patient self-comparison bands; encode yield by size;
+   view, held-out physical timing, fixed-budget recall, KMeans alignment and OOD. Before
+   fitting the descriptive surface, convert each endpoint to a same-topology paired fraction
+   of the frozen `M0000`-to-benchmark gap closed. Draw `0` as no improvement and `1` as the
+   endpoint benchmark, with upward always better. Keep all raw endpoint values in the JSON
+   sidecar; encode yield by point size;
 3. nested-family matrix with free/locked parameter cells, paired six-endpoint differences
    and intervals, plus secondary composite-distance, yield and classifier-AUC columns;
 4. branch-specific training-response atlas: `g_LEE x g_LEI` in both branches and

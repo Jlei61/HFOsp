@@ -24,6 +24,7 @@ import numpy as np
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 from matplotlib.colors import Normalize  # noqa: E402
+from matplotlib.ticker import PercentFormatter  # noqa: E402
 
 
 PARAMS = ("g_LEE", "g_LEI", "theta_FT_deg", "AR_FT")
@@ -31,7 +32,7 @@ PARAM_LABELS = ("learned E->E dose", "learned E->I dose", "axis offset (deg)", "
 PRIMARY = (
     ("D_support", "Held-out support", "lower"),
     ("D_order", "Held-out order", "lower"),
-    ("D_time_ms", "Held-out timing (ms)", "lower"),
+    ("D_time_ms", "Held-out timing", "lower"),
     ("recall", "Recall", "higher"),
     ("kmeans_alignment", "KMeans alignment", "higher"),
     ("ood", "OOD fraction", "lower"),
@@ -40,7 +41,7 @@ TRAINING = (
     ("D_support", "Training support"),
     ("D_order", "Training order"),
     ("D_lag", "Training timing"),
-    ("D_cover", "Training coverage"),
+    ("D_cover", "Training coverage shortfall"),
 )
 SECONDARY = (
     ("D_cloud_composite", "Composite", "lower"),
@@ -251,10 +252,16 @@ def _yield(row: Mapping) -> float:
 
 def plot_validation_response(data: Mapping, out: Path) -> list[Path]:
     response = data["validation_surface"]
-    rows = data["validation"]["fit_descriptive"]["candidates"]
-    yields = np.asarray([_yield(row) for row in rows], float)
+    contract = response.get("display_contract") or {}
+    if contract.get("quantity") != "fraction_of_M0000_to_benchmark_gap_closed":
+        raise RuntimeError("validation response lacks the reference-to-benchmark display contract")
+    rows = response.get("original_design_points") or []
+    if len(rows) != 96:
+        raise RuntimeError("validation response must retain all 96 display points")
+    yields = np.asarray([float(row.get("yield_total") or 0.0) for row in rows], float)
     sizes = 10.0 + 35.0 * np.sqrt(yields / max(float(yields.max()), 1.0))
-    fig, axes = plt.subplots(len(PRIMARY), len(PARAMS), figsize=(8.0, 9.2), squeeze=False)
+    fig, axes = plt.subplots(len(PRIMARY), len(PARAMS), figsize=(8.0, 9.2), squeeze=False,
+                             sharey="row")
     for i, (endpoint, label, direction) in enumerate(PRIMARY):
         surface = (response.get("surfaces") or {}).get(endpoint)
         if not isinstance(surface, Mapping):
@@ -264,7 +271,7 @@ def plot_validation_response(data: Mapping, out: Path) -> list[Path]:
             good_x, good_y, good_s, bad_x = [], [], [], []
             for size, row in zip(sizes, rows):
                 x = _finite((row.get("physical") or {}).get(parameter))
-                value = _finite((row.get("primary_endpoints") or {}).get(endpoint))
+                value = _finite((row.get("display_score") or {}).get(endpoint))
                 if x is None:
                     raise RuntimeError(f"descriptive point lacks parameter {parameter}")
                 if value is not None:
@@ -296,17 +303,20 @@ def plot_validation_response(data: Mapping, out: Path) -> list[Path]:
                 top = ax.get_ylim()[1]
                 ax.scatter(bad_x, [top] * len(bad_x), marker="x", s=20,
                            color=COLORS["red"], linewidth=0.9, clip_on=False, zorder=4)
+            ax.axhline(0.0, color="#333333", linewidth=0.7, zorder=0)
+            ax.axhline(1.0, color="#5B8E5A", linewidth=0.7, linestyle=":", zorder=0)
+            ax.yaxis.set_major_formatter(PercentFormatter(xmax=1.0, decimals=0))
             if i == 0:
                 ax.set_title(PARAM_LABELS[j])
             if j == 0:
-                ax.set_ylabel(label + ("\n(lower is better)" if direction == "lower" else
-                                       "\n(higher is better)"))
+                ax.set_ylabel(label + "\nbenchmark gap closed")
             if i == len(PRIMARY) - 1:
                 ax.set_xlabel(parameter)
             ax.spines[["top", "right"]].set_visible(False)
             ax.grid(axis="y", color="#E6E6E6", linewidth=0.5)
-    fig.suptitle("Selection-blind validation response", y=0.995, fontsize=9, fontweight="bold")
-    fig.text(0.995, 0.005, "Line and band: conditional slice and 90% CI; pale point area: yield; x: not estimable", ha="right",
+    fig.suptitle("Selection-blind validation improvement over dual-core reference",
+                 y=0.995, fontsize=9, fontweight="bold")
+    fig.text(0.995, 0.005, "0%: no gain over M0000; 100%: patient q95 or endpoint target; line/band: conditional estimate and 90% CI", ha="right",
              va="bottom", fontsize=6.2, color="#555555")
     fig.tight_layout(rect=(0, 0.012, 1, 0.985))
     return _save(fig, out, "rev22_dci_validation_response_atlas")
@@ -458,6 +468,9 @@ def plot_training_response(data: Mapping, out: Path) -> list[Path]:
                 centered = np.column_stack([x - x.mean(), y - y.mean()])
                 if np.linalg.matrix_rank(centered) >= 2:
                     ax.tricontourf(x, y, z, levels=12, cmap="viridis", norm=norm, alpha=0.72)
+                    if float(np.min(z)) <= 1.0 <= float(np.max(z)):
+                        ax.tricontour(x, y, z, levels=[1.0], colors=["#F2F2F2"],
+                                      linestyles=[":"], linewidths=[0.8])
                 row_mappable = ax.scatter(x, y, c=z, cmap="viridis", norm=norm, s=22,
                                           edgecolor="white", linewidth=0.4, zorder=3)
             if bad:
@@ -482,7 +495,8 @@ def plot_training_response(data: Mapping, out: Path) -> list[Path]:
         box = axes[i, -1].get_position()
         color_ax = fig.add_axes([0.895, box.y0, 0.012, box.height])
         colorbar = fig.colorbar(mappable, cax=color_ax)
-        colorbar.set_label("standardized excess", fontsize=6.2)
+        colorbar.set_label("patient-floor excess\n0 = q50, 1 = q95; lower is better",
+                           fontsize=6.2)
         colorbar.ax.tick_params(labelsize=5.8, width=0.5)
     return _save(fig, out, "rev22_dci_training_response_atlas")
 
@@ -559,7 +573,7 @@ def _atomic_json(path: Path, payload: Mapping) -> None:
 def _write_readme(path: Path) -> None:
     path.write_text(
         """### rev22_dci_validation_response_atlas
-六个 selection-blind 间期端点随四个连接参数的条件响应。实线及阴影来自冻结后 descriptive validation surface 在其他三个参数固定于 full-model 坐标时的一维切片及 90% 区间；96 个设计点仅以浅色散点显示，点面积表示返回事件产量，叉号表示不可估。该图是 descriptive-only 且 cannot-select，不是边际因果效应，也不能反向改变候选。
+六个 selection-blind 间期端点随四个连接参数的条件响应。纵轴统一表示相对冻结双-core参考 `M0000` 已关闭多少预定义 benchmark 缺口：0% 表示没有优于参考，100% 表示达到患者 split-block q95 或该端点的预定义目标，向上始终更好；原始距离、毫秒和比例保留在 JSON sidecar。实线及阴影来自同 topology seed 配对改善量的 descriptive validation surface，在其他三个参数固定于 full-model 坐标时的一维切片及 90% 区间；浅色点为 96 个设计点，面积表示返回事件产量，叉号表示不可估。该图是 cannot-select 描述图，不能参与选择，也不是边际因果效应。
 
 **关注点**：距离、recall、双模板一致性和 OOD 是否出现一致改善，而非由低产量换取。
 
@@ -574,7 +588,7 @@ def _write_readme(path: Path) -> None:
 **关注点**：是否存在同时向左上移动、OOD 不升且不靠少出事件的候选。
 
 ### rev22_dci_training_response_atlas
-96 点训练设计中预留的两组二维设计面：learned E→E×E→I dose，以及 primary branch 的轴向偏移×长短轴比。每行对应一个预注册训练目标分量，颜色为 standardized excess；灰叉保留不可行或不可估候选，不再把 Sobol unique-x 投影连接成折线。
+96 点训练设计中预留的两组二维设计面：learned E→E×E→I dose，以及 primary branch 的轴向偏移×长短轴比。每行对应一个预注册训练目标分量，颜色为患者 split-block 地板标准化后的超额距离：0 对应患者 q50，1 对应患者 q95，越低越好；浅色虚线为 q95 等值线。灰叉保留不可行或不可估候选，不再把 Sobol unique-x 投影连接成折线。
 
 **关注点**：哪些参数在训练目标中可辨识，以及训练改善是否与验证端一致。
 
