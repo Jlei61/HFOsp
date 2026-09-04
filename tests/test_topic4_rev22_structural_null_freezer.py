@@ -1,5 +1,7 @@
 import copy
 import importlib.util
+import subprocess
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -10,6 +12,19 @@ SPEC = importlib.util.spec_from_file_location(
     "freeze_structural", ROOT / "scripts/freeze_topic4_rev22_structural_nulls.py")
 MODULE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(MODULE)
+
+
+def test_structural_freezer_cli_loads_from_any_working_directory(tmp_path):
+    completed = subprocess.run(
+        [sys.executable, str(ROOT / "scripts/freeze_topic4_rev22_structural_nulls.py"),
+         "--help"],
+        cwd=tmp_path,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert completed.returncode == 0, completed.stderr
+    assert "--analysis-config" in completed.stdout
 
 
 def _candidate(candidate_id, g_ee=0.5, g_etoi=1.0):

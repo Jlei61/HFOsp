@@ -13,6 +13,7 @@ import copy
 import hashlib
 import json
 import subprocess
+import sys
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -21,6 +22,7 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 ARTIFACT_ROOT = Path("/home/honglab/leijiaxin/HFOsp")
 STAGE = ARTIFACT_ROOT / "results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability"
+sys.path.insert(0, str(ROOT))
 
 from src.topic4_rev20_dual_core_mechanism import dual_core_field_sha256  # noqa: E402
 from src.topic4_graph_edge_flow import array_sha256  # noqa: E402
