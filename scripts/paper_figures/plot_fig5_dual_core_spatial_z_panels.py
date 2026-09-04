@@ -115,6 +115,29 @@ def _plot_response(axis, contacts, response_grid, extent, title, vmax,
     return image
 
 
+def _plot_classified_branch(axis, x, y, codes):
+    """Draw contiguous stability-classified branch runs without connectors."""
+    x = np.asarray(x, float)
+    y = np.asarray(y, float)
+    codes = np.asarray(codes, int)
+    if x.shape != y.shape or x.shape != codes.shape:
+        raise ValueError("classified branch arrays must have matching shapes")
+    style = {
+        1: {"ls": "-", "lw": 1.55, "alpha": 0.92},
+        0: {"ls": "--", "lw": 1.55, "alpha": 0.92},
+        -1: {"ls": ":", "lw": 1.35, "alpha": 0.82},
+    }
+    starts = np.r_[0, np.flatnonzero(codes[1:] != codes[:-1]) + 1]
+    stops = np.r_[starts[1:], len(codes)]
+    for start, stop in zip(starts, stops):
+        code = int(codes[start])
+        kwargs = style.get(code, style[-1])
+        axis.plot(
+            x[start:stop], y[start:stop], color=FOLD_CHAIN,
+            solid_capstyle="round", dash_capstyle="round", **kwargs,
+        )
+
+
 def _plot_panel_c(axis, arrays, payload) -> dict:
     folds = payload["folds"]
     empirical = payload["empirical_ou_on_projection"]
@@ -140,14 +163,11 @@ def _plot_panel_c(axis, arrays, payload) -> dict:
         arrays["outer_high__s"], arrays["outer_high__core_a_hz"],
         color=HIGH, lw=2.2, solid_capstyle="round", label="tonic root",
     )
-    axis.plot(
-        arrays["recruited_arc__s"], arrays["recruited_arc__core_a_hz"],
-        color=FOLD_CHAIN, lw=1.05, alpha=0.72,
-        label="spatial fold chain",
-    )
-    axis.plot(
-        arrays["entry_fold__s"], arrays["entry_fold__core_a_hz"],
-        color=LOW, lw=1.0, ls="--", alpha=0.82,
+    _plot_classified_branch(
+        axis,
+        arrays["entry_saddle__s"],
+        arrays["entry_saddle__core_a_hz"],
+        arrays["entry_saddle__zero_delay_stability_code"],
     )
     axis.axvline(onset_median, color=OU, lw=1.3, ls=":")
 
@@ -165,8 +185,8 @@ def _plot_panel_c(axis, arrays, payload) -> dict:
         arrowprops={"arrowstyle": "->", "color": LOW, "lw": 0.8},
     )
     axis.annotate(
-        "OU-on median", xy=(onset_median, 370.0), xytext=(0.205, 405.0),
-        fontsize=7.3, color=OU,
+        "OU-on median", xy=(onset_median, 370.0), xytext=(0.370, 425.0),
+        fontsize=7.0, color=OU, ha="right",
         arrowprops={"arrowstyle": "-", "color": OU, "lw": 0.8},
     )
     axis.text(
@@ -203,17 +223,30 @@ def _plot_panel_c(axis, arrays, payload) -> dict:
     inset.set_ylabel("rate (Hz)", fontsize=5.4, labelpad=1)
     inset.tick_params(labelsize=5.0, width=0.55, length=1.8, pad=1)
     inset.spines[["top", "right"]].set_visible(False)
+    branch_codes = set(np.asarray(
+        arrays["entry_saddle__zero_delay_stability_code"], int).tolist())
+    legend_handles = [
+        Line2D([], [], color=LOW, lw=2.2, label="low root"),
+        Line2D([], [], color=HIGH, lw=2.2, label="tonic root"),
+    ]
+    if 1 in branch_codes:
+        legend_handles.append(Line2D(
+            [], [], color=FOLD_CHAIN, lw=1.5, ls="-",
+            label="stable branch"))
+    if 0 in branch_codes:
+        legend_handles.append(Line2D(
+            [], [], color=FOLD_CHAIN, lw=1.5, ls="--",
+            label="unstable branch"))
+    if -1 in branch_codes:
+        legend_handles.append(Line2D(
+            [], [], color=FOLD_CHAIN, lw=1.35, ls=":",
+            label="mixed-stability branch"))
+    legend_handles.append(Patch(
+        facecolor=COEXIST, alpha=0.65, label="low/high coexistence"))
     axis.legend(
-        handles=[
-            Line2D([], [], color=LOW, lw=2.2, label="low root"),
-            Line2D([], [], color=HIGH, lw=2.2, label="tonic root"),
-            Line2D([], [], color=FOLD_CHAIN, lw=1.1,
-                   label="spatial fold chain"),
-            Patch(facecolor=COEXIST, alpha=0.65,
-                  label="low/high coexistence"),
-        ],
-        loc="upper left", frameon=False, fontsize=6.9, ncol=2,
-        handlelength=1.8, columnspacing=0.9,
+        handles=legend_handles,
+        loc="upper left", frameon=False, fontsize=6.0, ncol=2,
+        handlelength=1.65, columnspacing=0.75,
     )
     _style_axis(axis)
     return {
@@ -227,6 +260,13 @@ def _plot_panel_c(axis, arrays, payload) -> dict:
         "ou_on_median_s": onset_median,
         "ou_on_q10_q90_s": [onset_q10, onset_q90],
         "y_scale": "log",
+        "branch_line_style": (
+            "zero-delay operating-variance-frozen stability: stable=solid, "
+            "unstable=dashed, unresolved=dotted"
+        ),
+        "branch_stability_boundary": (
+            "not a delay-aware stability classification"
+        ),
     }
 
 
@@ -555,9 +595,9 @@ def main() -> None:
     _atomic_json(metadata, metadata_path)
     (output_dir / "README.md").write_text(
         "### fig5-panel-c-core-a-bifurcation.png / .pdf / .svg\n\n"
-        "Fig.5C 候选。横轴是对称空间路径上的 core-A 失抑制 `D_A=1-Z_A`，纵轴是 core A 内每个 E 神经元的平均发放率。蓝线、红线和深红细线分别是低根、tonic 根和空间 fold chain；粉色线/带是 100 个 OU-on SNN 在 operational onset 的中位数及 q10–q90。\n\n"
+        "Fig.5C 候选。横轴是对称空间路径上的 core-A 失抑制 `D_A=1-Z_A`，纵轴是 core A 内每个 E 神经元的平均发放率。蓝线、红线分别是低根和 tonic 根；深红虚线是零延迟 Jacobian 下实测不稳定的 saddle branch，深红点线表示同一折点区段的抽样最大实特征值发生变号，不能整段判稳。粉色线/带是 100 个 OU-on SNN 在 operational onset 的中位数及 q10–q90。\n\n"
         "这不是字面意义上的单个 LIF 神经元分岔：当前确定性模型最细是 2 mm E/I population unit。图中使用 core-A per-neuron mean，是现有证据允许的局部尺度。\n\n"
-        "**关注点**：OU-on 中位转变位于低/高根共存区；继续耗竭到 `s=0.337591`，低根才在 saddle-node 消失。\n\n"
+        "**关注点**：虚线不是示意连接，而是 pseudo-arclength 实际续接并以 zero-delay、operating-variance-frozen dynamic Jacobian 分类的分支；它不构成 delay-aware 稳定性定理。OU-on 中位转变位于低/高根共存区；继续耗竭到 `s=0.337591`，低根才在 saddle-node 消失。\n\n"
         "### fig5-panel-d-state-response.png / .pdf / .svg\n\n"
         "Fig.5D 候选。同一条冻结 dual-core SNN 轨迹上，在低态 1000 ms 与 early-ictal 2615.4 ms 使用完全相同的 16 个分层随机位置和相同 16-cell 弱脉冲。每个位置均做 exact-resume paired probe–sham，图中分别对 0–50 ms descendant-only signed response 做等权位置平均。\n\n"
         "**关注点**：左右图比较同一网络两个时点的 incremental response，不是比较两个不同网络，也不丢弃强响应位置。两侧均由少数 hotspot 主导，且 early-ictal sham 已处于高态（0/16 可再作 ignition test），所以该图不是跨 seed 易感性或触发概率估计。\n\n"

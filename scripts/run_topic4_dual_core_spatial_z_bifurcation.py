@@ -311,6 +311,56 @@ def leading_dynamic_eigenvalues(model, z_map, solution, *, k=8):
             for value in values]
 
 
+def classify_branch_segments(model, z_map, points, tangent_crossings):
+    """Classify fold-delimited segments under the labelled zero-delay assay."""
+    n_points = len(points)
+    boundaries = [0] + [int(index) + 1 for index in tangent_crossings] + [n_points]
+    codes = np.full(n_points, -1, dtype=np.int8)
+    records = []
+    for segment_index, (start, stop) in enumerate(
+            zip(boundaries[:-1], boundaries[1:])):
+        if stop <= start:
+            continue
+        width = stop - start
+        lo = start + max(0, int(round(0.10 * (width - 1))))
+        hi = start + max(0, int(round(0.90 * (width - 1))))
+        sample_indices = np.unique(
+            np.rint(np.linspace(lo, hi, min(5, width))).astype(int))
+        leading = []
+        for index in sample_indices:
+            spectrum = leading_dynamic_eigenvalues(
+                model, z_map, points[int(index)].solution, k=4)
+            leading.append(float(spectrum[0]["real"]))
+        tolerance = 1e-5
+        if all(value < -tolerance for value in leading):
+            label, code = "stable", 1
+        elif all(value > tolerance for value in leading):
+            label, code = "unstable", 0
+        else:
+            label, code = "unresolved_within_segment", -1
+        codes[start:stop] = code
+        records.append({
+            "segment_index": int(segment_index),
+            "index_range_half_open": [int(start), int(stop)],
+            "s_range": [
+                float(points[start].solution.parameter),
+                float(points[stop - 1].solution.parameter),
+            ],
+            "core_a_rate_hz_range": [
+                float(regional_rates_hz(
+                    model, z_map, points[start].solution.rate_e)["core_a"]),
+                float(regional_rates_hz(
+                    model, z_map, points[stop - 1].solution.rate_e)["core_a"]),
+            ],
+            "sample_indices": sample_indices.astype(int).tolist(),
+            "sample_leading_real_per_ms": leading,
+            "classification": label,
+            "line_style": (
+                "solid" if code == 1 else "dashed" if code == 0 else "dotted"),
+        })
+    return codes, records
+
+
 def root_catalog(model, z_map, *, z_a_values, z_b_values, z_surround):
     shape = (len(z_b_values), len(z_a_values))
     root_count = np.zeros(shape, int)
@@ -513,6 +563,36 @@ def main() -> None:
         model, z_map, entry_valid, entry_eigenvalues, weights=weights,
         prefix="entry_fold", arrays=arrays)
 
+    # Continue the paired saddle branch away from the entry fold.  The spatial
+    # system snakes through several turns, so retain the computed branch and
+    # assay whether (rather than assume that) it rejoins the outer high family.
+    entry_saddle = pseudo_arclength_spatial_z(
+        model, z_map, partner_second, partner_first, step_size=1e-4,
+        n_steps=3200, max_corrector_iterations=50)
+    entry_saddle_valid = point_arrays(
+        model, z_map, entry_saddle, "entry_saddle", arrays)
+    entry_saddle_tangent = np.asarray([
+        point.tangent_parameter for point in entry_saddle_valid], float)
+    entry_saddle_turns = np.flatnonzero(
+        entry_saddle_tangent[:-1] * entry_saddle_tangent[1:] <= 0.0)
+    saddle_codes, saddle_segments = classify_branch_segments(
+        model, z_map, entry_saddle_valid, entry_saddle_turns)
+    arrays["entry_saddle__zero_delay_stability_code"] = saddle_codes
+    saddle_end = entry_saddle_valid[-1].solution
+    nearest_outer = min(
+        outer_high, key=lambda solution: abs(
+            solution.parameter - saddle_end.parameter))
+    outer_at_saddle_end = solve_spatial_z_fixed_point(
+        model, z_map, parameter=saddle_end.parameter,
+        initial_rates=nearest_outer.rates, maxfev=20000)
+    if not outer_at_saddle_end.converged:
+        raise RuntimeError("outer recruited root failed at bridge endpoint")
+    saddle_outer_max_abs_rate_difference_hz = float(
+        1000.0 * np.max(np.abs(
+            saddle_end.rates - outer_at_saddle_end.rates)))
+    saddle_connects_outer = bool(
+        saddle_outer_max_abs_rate_difference_hz < 1e-3)
+
     # A transparent, finite multi-start map: it is not advertised as exhaustive.
     z_a_values = np.linspace(0.55, 0.95, 11)
     z_b_values = np.linspace(0.55, 0.95, 11)
@@ -607,6 +687,32 @@ def main() -> None:
                 max(0, recruited_turns.size - 1)),
             "all_recruited_arc_tangent_crossing_indices": (
                 recruited_turns.astype(int).tolist()),
+        },
+        "entry_saddle_branch": {
+            "status": "COMPUTED_ARCLENGTH_BRANCH_WITH_ZERO_DELAY_STABILITY_CLASSIFIED",
+            "n_points": int(len(entry_saddle_valid)),
+            "step_size": 1e-4,
+            "n_steps": 3200,
+            "termination": "predeclared_arclength_step_limit",
+            "tangent_crossing_indices": entry_saddle_turns.astype(int).tolist(),
+            "segments": saddle_segments,
+            "stability_assay": (
+                "leading eigenvalue of the zero-delay rate/synapse Jacobian "
+                "with operating variance frozen; five interior samples per "
+                "fold-delimited segment"
+            ),
+            "line_style_contract": (
+                "stable=solid, unstable=dashed, unresolved=dotted"
+            ),
+            "connects_outer_recruited_root": saddle_connects_outer,
+            "endpoint_s": float(saddle_end.parameter),
+            "endpoint_outer_root_max_abs_rate_difference_hz": (
+                saddle_outer_max_abs_rate_difference_hz),
+            "boundary": (
+                "line style is a zero-delay stability sensitivity, not a "
+                "delay-aware stability theorem; failure to meet the endpoint "
+                "root tolerance is reported as not connected, not as proof "
+                "that the branches are topologically disconnected"),
         },
         "paired_root_audit": partner_audit,
         "empirical_ou_on_projection": empirical,

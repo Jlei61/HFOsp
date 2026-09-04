@@ -72,6 +72,20 @@
 折点；它们对应不同空间块依次加入/退出，而不是数值噪声。双核系统因此是 spatial recruitment snaking/fold
 chain，不宜再画成唯一光滑 S 曲线。
 
+### 3.3 Fig.5C 的虚线不是示意线
+
+从 runaway-entry fold 的配对根反向做 `3200` 步 pseudo-arclength continuation，得到 `3202` 个物理 fixed
+points，并在 `1995/2669/2881` 三处再次出现 `ds/dℓ` 变号。第一段从 core-A `0.832 Hz` 延伸到
+`81.15 Hz`；5 个内部采样点的 zero-delay dynamic Jacobian 最大实部均为正（`0.0177–0.0633 ms^-1`），
+因此正式 Fig.5C 可按分岔图惯例把这一段画成 **unstable dashed branch**。
+
+后面的 fold-delimited 段并不能全部套用同一个线型：其中两段的抽样最大实特征值在段内变号，所以先画为点线
+`mixed-stability branch`；另一段的 5 个采样点均为正，仍画虚线。线型只代表 zero-delay、
+operating-variance-frozen sensitivity，不是含传导延迟和 OU 噪声的稳定性定理。
+
+本次预设弧长终点没有在 `1e-3 Hz` 容差内接上独立求得的 outer tonic root。因此图中只画实际续接到的
+saddle branch，不补画推测连接；这也不能反过来证明两支在拓扑上不连通。
+
 ## 4. 与 OU-on SNN 的关系
 
 对 rev21 `coarse + timescale` 的 100 个 operational-detector-positive run，逐个在 `t_op` 最近的 slow-state
@@ -116,6 +130,9 @@ C 的底层是保留 realized incoming weights、格内经验 E-threshold distri
 组成差异的 2 mm E/I population reduction。因此系统是空间异质的，但图中纵轴只是把 core A 内各 coarse unit 的
 E rate 按 E 细胞数加权平均。准确表述是 **heterogeneous spatial system 中的 core-A local population
 saddle-node readout**；不是每个 E 神经元各自发生同一个分岔，也不是异质性分布图。
+
+C 的深红虚线现在对应上节经过 Jacobian 分类的不稳定 fixed-point branch；深红点线对应段内检测到稳定性变号、
+尚不能赋予单一线型的部分。它们都来自实际 continuation，不是为了模仿教科书 S 曲线而手工补出的连接。
 
 ### 6.2 D 必须是同位置、同剂量的状态响应
 
