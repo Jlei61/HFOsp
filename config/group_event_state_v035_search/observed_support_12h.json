@@ -1,0 +1,18 @@
+{
+  "max_epochs": 30,
+  "encoder_lr": 0.0001,
+  "state_lr": 0.001,
+  "adapter_lr": 0.003,
+  "encoder_d_contact": 24,
+  "encoder_event_dim": 48,
+  "encoder_attention_layers": 1,
+  "encoder_waveform_channels": 8,
+  "state_channels_per_tau": 3,
+  "state_taus_seconds": [300, 1800, 7200, 21600, 43200],
+  "state_update_hidden": 48,
+  "state_update_fraction_cap": 0.2,
+  "event_offsets": [1],
+  "offset_weights": [0.25],
+  "physical_loss_weight": 1.0,
+  "decoder_use_dynamic_q": false
+}

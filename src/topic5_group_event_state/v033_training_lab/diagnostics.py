@@ -377,6 +377,7 @@ def merge_seed_anchor_diagnostics(
     random_nll: Sequence[np.ndarray],
     shift_valid: np.ndarray,
     segments: np.ndarray,
+    period_mean_nll: Sequence[np.ndarray] | None = None,
 ) -> dict[str, Any]:
     """Merge optimization seeds before estimating uncertainty.
 
@@ -384,6 +385,13 @@ def merge_seed_anchor_diagnostics(
     diagnostic estimand is therefore the per-anchor median across those same
     seeds, followed by the existing within-segment moving-block bootstrap.
     Reducing one arbitrarily named seed first can reverse the patient result.
+
+    ``period_mean_nll`` (optional) is the per-seed NLL of the *period-offset
+    control*: the checkpoint state replaced by one constant vector, its mean
+    over the inner-validation anchors.  A same-segment wrong-time shift cannot
+    detect a constant period offset (the shifted state carries the same
+    mean), so the increment a constant cannot explain is reported separately
+    as ``period_mean - learned``.
     """
 
     learned = np.asarray(learned_nll, dtype=np.float64)
@@ -408,6 +416,19 @@ def merge_seed_anchor_diagnostics(
         shifted_median[ok] = np.median(shifted[:, ok], axis=0)
     shift_delta = shifted_median - learned_median
     shift_delta[~ok] = np.nan
+    period_control: dict[str, Any] | None = None
+    period_median = None
+    if period_mean_nll is not None:
+        period = np.asarray(period_mean_nll, dtype=np.float64)
+        if period.shape != learned.shape or not np.isfinite(period).all():
+            raise ValueError("period-mean NLL must align to the seed x anchor shape and be finite")
+        period_median = np.median(period, axis=0)
+        period_control = {
+            "gain_period_offset_h_minus_period_mean": _paired_ci(h - period_median, seg),
+            "beyond_period_offset_period_mean_minus_learned": _paired_ci(period_median - learned_median, seg),
+            "definition": "state replaced by its mean over inner-val anchors (one constant vector, input only); "
+                          "positive beyond-period increment = information a constant period offset cannot explain",
+        }
     return {
         "seed_merge_rule": "median per anchor across final seeds, then within-target-segment moving-block bootstrap",
         "n_seeds": int(learned.shape[0]),
@@ -423,6 +444,7 @@ def merge_seed_anchor_diagnostics(
             "learned_minus_random": _paired_ci(learned_median - random_median, seg),
             "definition": "seed-median NLL; same recipe/seed with frozen random encoder; negative favours learned encoder",
         },
+        "period_offset_control": period_control,
         "arrays": {
             "h_nll": h,
             "learned_nll_by_seed": learned,
@@ -433,6 +455,10 @@ def merge_seed_anchor_diagnostics(
             "random_nll_seed_median": random_median,
             "shift_valid": ok.astype(np.uint8),
             "bootstrap_segment": seg,
+            **({} if period_median is None else {
+                "period_mean_nll_by_seed": np.asarray(period_mean_nll, dtype=np.float64),
+                "period_mean_nll_seed_median": period_median,
+            }),
         },
     }
 
@@ -465,6 +491,7 @@ def multi_seed_card_diagnostics(
     learned_rows: list[np.ndarray] = []
     shifted_rows: list[np.ndarray] = []
     random_rows: list[np.ndarray] = []
+    period_rows: list[np.ndarray] = []
     per_seed: list[dict[str, Any]] = []
     random_root = Path(out_dir) / "random_reservoir_by_seed"
     for seed_dir in dirs:
@@ -489,6 +516,10 @@ def multi_seed_card_diagnostics(
         )
         shifted = shifted_terms.nll.detach().cpu().numpy().astype(np.float64)
         shifted[~ok] = np.nan
+        period_state = correct.state_raw.mean(dim=0, keepdim=True).expand_as(correct.state_raw).contiguous()
+        period = _terms(
+            trainable, view, learned_model, "inner_val", device, state_override=period_state
+        ).nll.detach().cpu().numpy().astype(np.float64)
 
         random_dir = random_root / f"seed_{seed}" / "run"
         random_result = train_recipe(
@@ -502,6 +533,7 @@ def multi_seed_card_diagnostics(
         learned_rows.append(learned)
         shifted_rows.append(shifted)
         random_rows.append(random)
+        period_rows.append(period)
         per_seed.append({
             "seed": seed,
             "learned_checkpoint": str(seed_dir / "checkpoint.pt"),
@@ -514,6 +546,10 @@ def multi_seed_card_diagnostics(
             "shifted_minus_correct": _paired_ci(shifted - learned, view.bootstrap_segment(idx)),
             "learned_minus_random": _paired_ci(learned - random, view.bootstrap_segment(idx)),
             "random_selected_step": random_result.get("selected_step"),
+            "gain_period_offset_h_minus_period_mean": _paired_ci(
+                trainable.h_only_nll(view, "inner_val") - period, view.bootstrap_segment(idx)
+            ),
+            "beyond_period_offset_period_mean_minus_learned": _paired_ci(period - learned, view.bootstrap_segment(idx)),
         })
 
     merged = merge_seed_anchor_diagnostics(
@@ -523,6 +559,7 @@ def multi_seed_card_diagnostics(
         random_nll=random_rows,
         shift_valid=ok,
         segments=view.bootstrap_segment(idx),
+        period_mean_nll=period_rows,
     )
     merged["blocked_inner_val_gain"].update({
         "n_anchors": int(idx.size),

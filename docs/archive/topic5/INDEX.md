@@ -1,5 +1,16 @@
 # Topic 5 Archive Index
 
+- **2026-09-03 Group-Event State v0.3.3 Training Laboratory 人体 S_N 可训练性收口 + 当日下午复审修订**：
+  [`白话版（含修订）`](group_event_state_v0_3_3_trainability_closeout_plain_2026-09-03.md) ·
+  [`技术版（含修订）`](group_event_state_v0_3_3_trainability_closeout_technical_2026-09-03.md) ·
+  [`S_G 合成恢复`](group_event_state_v033_sg_synthetic_recovery_technical_2026-09-03.md) ·
+  [`训练实验室设计`](group_event_state_v0_3_3_training_laboratory_design_2026-09-02.md) ·
+  [`v0.3.4 multi-view spec（TRAIN/synthetic 实现已授权）`](group_event_state_v0_3_4_multiview_predictive_state_spec_2026-09-03.md) ·
+  [`v0.3.4 multi-view plan（TRAIN/synthetic 实现已授权）`](group_event_state_v0_3_4_multiview_predictive_state_plan_2026-09-03.md) ·
+  [`v0.3.4 常数偏移复审响应`](group_event_state_v0_3_4_offset_review_response_2026-09-03.md) ·
+  [`旧 dual-view spec（已取代）`](group_event_state_v0_3_4_locked_evaluation_dual_view_spec_2026-09-03.md) ·
+  [`旧 dual-view plan（已取代）`](group_event_state_v0_3_4_locked_evaluation_dual_view_plan_2026-09-03.md)（当前版把常数/超慢阶段信息保留为 L1，不再作为否定 state 的 gate；新增 `S_P/S_F`、multi-horizon future block、same-prefix H2a、冻结 H2b early ictal field/path 与 H3 M0/M1/M2 核心实验；development/sealed 仍不执行）。
+  9 位患者（2 位 O1a + 7 位 broad search，48 配置 successive halving，最终 3 配方 × 5 seed）在 STATE_TRAIN/STATE_SELECTION 上训练 `S_N`（未来 0–5/5–15/15–30 min 事件数残差）。原稿计数 gain 5/9、正确时刻 2/9、胜随机 3/9、训练充分 0/9。**下午复审**：把状态换成“选择期一个常数向量”可重现 5 位的可靠增量；这说明存在记录阶段/超慢负荷水平信息，但该常数使用整个选择期输入，是非因果阶段上界，尚未证明可在每个时刻从过去稳定估计。learned 胜 random 的 3/9 保留为患者级事件历史候选证据；常数解释不了的 E1125/E384 总增益仍跨零。H_mark 在部分患者后段出现 1.3–3.3 倍的双向水平失准，粗 3 h 因果重标定能在一些患者拿回增益、也会在稀疏患者过冲。修订结论：**L1 阶段/超慢背景信息中等偏强，L2 learned-history 证据弱到中等且异质，L3 时刻特异状态未建立**。S_G 人体 O2 S1 六个 cell 全在第 1 步选中：移植 O1 配方的 encoder LR 仅 1.7e-6，实际未训练；因此 L4/L5 仍未有效检验。代码：训练卡新增 `period_offset_control`、监控 schema 9、新增 offset/recalibration 脚本。development/sealed 未打开。
 - **2026-09-02 Group-Event State v0.3.2 residual-state 阶段收口**：
   [`白话版`](group_event_state_v0_3_2_closeout_plain_2026-09-02.md) ·
   [`技术版`](group_event_state_v0_3_2_closeout_technical_2026-09-02.md) ·
@@ -434,3 +445,17 @@
   - 状态使用 nominal 5/30/120/360 min decay bank，每档 4 通道，共 16 维；自由 state-to-state mixing 使这些标签不能解释为固定生理时间尺度。输入为完整群体事件 token；本轮损失含 timing/survival、未来 count 和 contact grammar。
   - pilot 结果：9/9 训练运行完成、21/21 队列任务成功，但未运行承重的 `H+S` residual estimand；两位患者三个 seed 均选择首轮 checkpoint，另一位在预算边缘。旧 `S` vs `H` 和 `S` vs shifted 数字只作诊断，不能给出患者阳性/阴性分母。安全结论是 `instrument complete, state learning unresolved`；formal/sealed 分区未打开。
   - 独立 seizure-risk decoder 只读取冻结的 interictal-only state，使用单调离散 survival hazard；30 min 为 primary horizon。联合 seizure fine-tune 只能作 supervised extension。
+# Group-Event State v0.3.5：动态基线、完整事件状态与逐步 decoder 调制（2026-09-03）
+
+- Scientific Spec：`group_event_state_v0_3_5_dynamic_baseline_state_spec_2026-09-03.md`
+- 执行计划：`group_event_state_v0_3_5_dynamic_baseline_state_plan_2026-09-03.md`
+- 完整执行白话报告：`group_event_state_v0_3_5_full_execution_plain_2026-09-04.md`
+- 完整执行技术报告：`group_event_state_v0_3_5_full_execution_technical_2026-09-04.md`
+- 机器结果与四张核心图：`/data/hfosp_group_event_state_v0_3_5/final_reports/`；图均提供 PNG、矢量 PDF、metadata 与中文 `figures/README.md`。
+- **代码审阅与修复报告（2026-09-04）：`group_event_state_v0_3_5_code_review_and_fixes_2026-09-04.md`。** 四项已修：(1) **P0 泄漏** — 动态负荷 `q(t)` 的 session-position 用了覆盖段结束时刻，而段尾大量就是发作起点（E548 27/42、E922 21/29、E1125 14/21、E1146 13/27、E1096 9/23、E384 8/16、E253 7/21、E583 2/7），违反 spec §3.1 并触发 §11 停止条件 2；改为 `min(t−段起点, 8h)/8h`。**影响量化：对 H1 很小**（置零对照 5 min 中位 +0.1516→+0.1484；同预算换合法写法重训 5/8 正、+0.1190），**对发作风险层明显**（E1096 30 min 负荷增益 +0.0142→+0.0060，事件状态增量 +0.0080→+0.0015）。(2) block-shift 时刻对照四处锚点集不一致（E1096 5 min 136 vs 46 锚点，"增益" 1.14→0.04）。(3) H3 可采信规则由单向改为双向比值 + 零模型绝对参照（撤出 78 个发散对比，6 h 档 +19.65/+86.86 消失）。(4) H2b 长 horizon 资格由结局决定（≥6 h 时 6/8 患者的合格观察点 100% 是阳性），现记为 `NOT_ESTIMABLE`。
+- **长尺度窗口合同已修订并落地：`group_event_state_v0_3_5_long_window_contract_correction_2026-09-04.md`。** 旧的“预测窗须完整落在单一覆盖段且复用 10% 留出”可估性表作废。状态允许跨过不含发作的 `<=10 min` 短缺口继续传递；anchor 与 exposure 仍来自原始覆盖段，未观测秒数不作为静默证据，count likelihood 以真实有效观测时长作 offset。每个物理 horizon 独立预留至少 `2H` INNER 与 `3H` SELECTION；首轮新增 8 h，并以 6/8 h 为队列探索重点、12 h 为子队列探索、24 h 为个案档。跨过已知发作的窗口另行标记，并并列报告不跨发作敏感性层。H2a 第 100/500/1000 次事件独立选 checkpoint，不再与物理时间档混选。
+- 与上条互补的**原始素材供给表**在代码审阅报告 §4.6：不依赖切分规则，只数互不重叠的连续间期窗，覆盖 27 位（比现有 17 份输入多 10 位）。跨过十分钟以内的断录是拐点（24 h 窗患者数 7→14）；按"每人至少三条独立窗"则 6 h 23 位、8 h 16 位、12 h 9 位、24 h 5 位。**E1073 与 E818 不在现有输入名单内，但长窗供给排前列**，可作为扩队列候选。
+- **共享状态修订：**84 个独立 horizon rate 作业只登记为 `H_N dynamic baseline`。原 long supervisor 的 per-horizon full-state 阶段已在 0 个 GPU 作业启动时停用。完整阶段必须分别训练一个跨 horizon 共享的 `S_N` producer 与一个共享的 `S_G` producer；horizon-specific evaluator 可独立，但必须读取同一冻结轨迹。`S_G` 除逐 contact grammar 外，还分解 patient-specific community occupancy、cross-community coupling 与 repertoire mixture；只有这条线继续执行，项目才没有被长窗计数取代。
+- **原始 `full_execution` 两份报告顶部已加"仅供对照"横幅；一切依赖 `q(t)` 的数字以 `/data/hfosp_group_event_state_v0_3_5_causal/` 的因果重跑与 `group_event_state_v0_3_5_causal_rerun_{plain,technical}_2026-09-04.md` 为准。**
+- 核心修订：将 TRAIN 静态偏置纳入因果动态基线的零阶特例；按 Topic 2 的真实证据覆盖 2 min–8 h 物理时间；把 rate state 与 full-event mark state 分开；冻结成熟 contact decoder，但让状态在每个事件内 recurrence step 调制 contact-specific logits、continue/STOP 与后续传播；随后再做 frozen H2b 与显式 H3 feedback 比较。
+- 最终 development 边界：8 位注册患者中 7 位完成 3-seed 状态链，E922 明确不可估；动态负荷层有患者内信号，完整事件状态仅在多事件连续形态上有有限增量，成熟 contact grammar 未形成队列支持；H2b 为 E1146/E548 两位风险候选，early ictal field 未建立；H3 无稳定支持且 5k/10k-event 尺度不可估。formal/sealed 未打开。

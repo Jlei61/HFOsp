@@ -1,0 +1,10 @@
+{
+  "horizons_seconds": [300, 1800, 7200, 21600, 43200, 86400],
+  "taus_seconds": [120, 600, 1800, 7200, 28800],
+  "max_steps_dynamic": 2400,
+  "max_steps_residual": 2700,
+  "residual_depth": 2,
+  "residual_width": 32,
+  "lr_residual": 0.0003,
+  "residual_gate_logit": -3.0
+}

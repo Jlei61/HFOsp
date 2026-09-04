@@ -1,0 +1,13 @@
+{
+  "max_epochs": 24,
+  "encoder_lr": 0.00003,
+  "state_lr": 0.001,
+  "adapter_lr": 0.003,
+  "encoder_d_contact": 32,
+  "encoder_event_dim": 64,
+  "encoder_attention_layers": 2,
+  "encoder_waveform_channels": 16,
+  "state_channels_per_tau": 4,
+  "state_update_hidden": 64,
+  "state_update_fraction_cap": 0.2
+}

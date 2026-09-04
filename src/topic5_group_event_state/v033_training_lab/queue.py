@@ -380,8 +380,10 @@ def execute_unit(unit: Unit, *, device: str = "cpu", release_present: bool | Non
                 "state_variance_rank": state_variance_rank(trainable, view, model, device=dev),
                 "state_output_modulation": state_output_modulation(trainable, view, model, device=dev),
                 "random_reservoir_delta": merged["random_reservoir_delta"],
+                "period_offset_control": merged.get("period_offset_control"),
                 "multi_seed_diagnostics": {k: v for k, v in merged.items()
-                                           if k not in ("blocked_inner_val_gain", "shift_null", "random_reservoir_delta")},
+                                           if k not in ("blocked_inner_val_gain", "shift_null", "random_reservoir_delta",
+                                                        "period_offset_control")},
                 "synthetic_recovery": synthetic_recovery(trainable, view, cfg, int(representative["seed"]), device=dev, out_dir=out_dir,
                                                          beta=float(unit.params.get("synthetic_beta", 0.7))),
             }

@@ -25,7 +25,8 @@ FORBIDDEN_KEY_FRAGMENTS = ("dev_test", "development_test", "sealed_partition_dat
 CARD_FIELDS = (
     "format", "created_epoch", "request", "recipe", "config_hash", "split_hash", "input_hash", "code_commit",
     "curves", "best_step", "plateau", "seed_dispersion", "gradient_update", "clipping_fraction",
-    "first_active_step", "state_variance_rank", "random_reservoir_delta", "shift_null", "output_modulation",
+    "first_active_step", "state_variance_rank", "random_reservoir_delta", "shift_null", "period_offset_control",
+    "output_modulation",
     "tiny_overfit", "synthetic_recovery", "blocked_inner_val_gain", "selected_in_warmup",
     "selected_at_budget_edge", "all_groups_active_before_selection", "t0", "diagnostics", "search",
     "evidence_label", "adequacy_rule", "adequacy_reasons", "adequacy_conditions",
@@ -174,6 +175,7 @@ def build_training_card(
         "state_variance_rank": diagnostics.get("state_variance_rank"),
         "random_reservoir_delta": diagnostics.get("random_reservoir_delta"),
         "shift_null": diagnostics.get("shift_null"), "output_modulation": diagnostics.get("state_output_modulation"),
+        "period_offset_control": diagnostics.get("period_offset_control"),
         "tiny_overfit": t0.get("tiny_slice_overfit"), "synthetic_recovery": diagnostics.get("synthetic_recovery"),
         "blocked_inner_val_gain": diagnostics.get("blocked_inner_val_gain"),
         "selected_in_warmup": any(bool(row.get("selected_in_warmup")) for row in complete_seeds),
@@ -184,7 +186,8 @@ def build_training_card(
         "t0": {k: v for k, v in t0.items() if k != "tiny_slice_overfit"},
         "diagnostics": {k: v for k, v in diagnostics.items()
                         if k not in ("state_variance_rank", "random_reservoir_delta", "shift_null",
-                                     "state_output_modulation", "synthetic_recovery", "blocked_inner_val_gain")},
+                                     "state_output_modulation", "synthetic_recovery", "blocked_inner_val_gain",
+                                     "period_offset_control")},
         "search": None if search_summary is None else {k: search_summary.get(k) for k in ("incumbent", "stop_reason", "n_batches")},
         "selection_metric_is_canonical": False, "evaluator_hash": None,                     # [C5]
         "sealed_partition_opened": False, "development_evaluation_read": False,

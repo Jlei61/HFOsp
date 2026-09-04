@@ -330,8 +330,21 @@ class EventEncoder(nn.Module):
         weight = (~key_padding).float().unsqueeze(-1)
         mean = (tokens * weight).sum(1) / weight.sum(1).clamp_min(1.0)
         peak = tokens.masked_fill(key_padding.unsqueeze(-1), -1e4).amax(dim=1)
-        size = part.sum(1, keepdim=True) / max(c, 1)
-        span = torch.nan_to_num(batch["rel_delay"]).amax(dim=1, keepdim=True)
+        # The pooled summary has to obey the same modality contract as the
+        # contact tokens.  Earlier ablations disabled the structural branch
+        # but still leaked event size and delay span through these two scalars.
+        # That made "waveform only" and "multiband only" scientifically
+        # uninterpretable even though the encoder flags looked correct.
+        size = (
+            part.sum(1, keepdim=True) / max(c, 1)
+            if self.cfg.use_participation
+            else torch.zeros((b, 1), dtype=tokens.dtype, device=tokens.device)
+        )
+        span = (
+            torch.nan_to_num(batch["rel_delay"]).amax(dim=1, keepdim=True)
+            if self.cfg.use_exact_delay
+            else torch.zeros((b, 1), dtype=tokens.dtype, device=tokens.device)
+        )
         event = self.pool_proj(torch.cat([mean, peak, size, span], dim=-1))
         return event, tokens
 
