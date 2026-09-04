@@ -189,9 +189,7 @@ def _candidate_table(validation: Mapping, design: Mapping) -> tuple[list[dict], 
         endpoints = row.get("primary_endpoints") or {}
         status = str(row.get("primary_status", "MISSING_STATUS"))
         values = {name: _finite(endpoints.get(name)) for name in ENDPOINTS}
-        not_estimable = {
-            name: bool(status != "OK" or values[name] is None) for name in ENDPOINTS
-        }
+        not_estimable = {name: values[name] is None for name in ENDPOINTS}
         table.append({
             "candidate_id": candidate_id,
             "physical": dict(zip(PARAMETER_ORDER, physical[candidate_id])),

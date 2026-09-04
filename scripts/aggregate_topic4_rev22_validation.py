@@ -67,6 +67,9 @@ DEFAULT_RESPONSE_DESIGN = DEFAULT_STAGE / "response_design/response_design_manif
 PRIMARY = ("D_support", "D_order", "D_time_ms", "recall", "kmeans_alignment", "ood")
 PHASES = ("qualification", "confirmation")
 PRIMARY_NOT_ESTIMABLE = "PRIMARY_ENDPOINT_NOT_ESTIMABLE"
+PRIMARY_PARTIALLY_ESTIMABLE = "PRIMARY_ENDPOINT_PARTIALLY_ESTIMABLE"
+BOOTSTRAP_SUPPORT_UNSTABLE = "BOOTSTRAP_SUPPORT_UNSTABLE"
+MIN_BOOTSTRAP_VALID_FRACTION = 0.80
 SELECTION_BLIND = "selection-blind"
 FORBIDDEN_INPUT_MARKERS = ("patient_ictal", "seizure", "fig3", "fig5", "early_ictal")
 
@@ -640,11 +643,28 @@ def _score_candidate(units: Sequence[Mapping], context: Mapping, *, phase: str,
         "kmeans_alignment": kmeans["natural_kmeans_status"],
         "ood": "OK",
     }
-    all_primary_ok = (
-        len(valid) == expected
-        and all(component_status[name] == "OK" for name in PRIMARY)
-        and all(value is not None and np.isfinite(value) for value in endpoints.values())
-    )
+    endpoint_is_estimable = {
+        name: bool(
+            component_status[name] == "OK"
+            and endpoints[name] is not None
+            and np.isfinite(endpoints[name])
+        )
+        for name in PRIMARY
+    }
+    primary_endpoints = {
+        name: float(endpoints[name]) if endpoint_is_estimable[name] else None
+        for name in PRIMARY
+    }
+    complete_grid = len(valid) == expected
+    if not complete_grid:
+        primary_status = PRIMARY_NOT_ESTIMABLE
+        primary_endpoints = {name: None for name in PRIMARY}
+    elif all(endpoint_is_estimable.values()):
+        primary_status = "OK"
+    elif any(endpoint_is_estimable.values()):
+        primary_status = PRIMARY_PARTIALLY_ESTIMABLE
+    else:
+        primary_status = PRIMARY_NOT_ESTIMABLE
     floor = block_split_floors(
         context["held_views"], [{"key": "candidate", "n": len(all_onsets),
                                  "components": ["D_support", "D_order", "D_lag"]}],
@@ -688,8 +708,8 @@ def _score_candidate(units: Sequence[Mapping], context: Mapping, *, phase: str,
     clip_units = [clipping_fractions(unit["arrays"]["onsets"],
                                     lag_cap_ms=context["lag_cap_ms"]) for unit in valid]
     base.update(
-        primary_status="OK" if all_primary_ok else PRIMARY_NOT_ESTIMABLE,
-        primary_endpoints=endpoints if all_primary_ok else {name: None for name in PRIMARY},
+        primary_status=primary_status,
+        primary_endpoints=primary_endpoints,
         conditional_survivor_endpoints=endpoints,
         endpoint_status=component_status,
         heldout_timing={"raw_ms": endpoints["D_time_ms"],
@@ -751,20 +771,25 @@ def _primary_vector_from_units(units: Sequence[Mapping], context: Mapping, *, se
             z, context["held_z"], n_cov=context["n_cov"], r_cov=context["r_cov"],
             subsamples=recall_subsamples, seed=seed + index,
         )
-        if recall["status"] != RECALL_OK:
-            return None
-        recalls.append(recall["recall"])
+        if recall["status"] == RECALL_OK:
+            recalls.append(recall["recall"])
+    recall_value = float(np.mean(recalls)) if len(recalls) == len(units) else None
     output = {
-        "D_support": vector["D_support"]["value"],
-        "D_order": vector["D_order"]["value"],
-        "D_time_ms": vector["D_lag"]["value"],
-        "recall": float(np.mean(recalls)),
-        "kmeans_alignment": ko.get("kmeans_alignment"),
-        "ood": ko["ood_fraction"],
+        "D_support": (vector["D_support"]["value"]
+                      if vector["D_support"]["status"] == "OK" else None),
+        "D_order": (vector["D_order"]["value"]
+                    if vector["D_order"]["status"] == "OK" else None),
+        "D_time_ms": (vector["D_lag"]["value"]
+                      if vector["D_lag"]["status"] == "OK" else None),
+        "recall": recall_value,
+        "kmeans_alignment": (ko.get("kmeans_alignment")
+                             if ko.get("natural_kmeans_status") == "OK" else None),
+        "ood": ko.get("ood_fraction"),
     }
-    if any(value is None or not np.isfinite(value) for value in output.values()):
-        return None
-    return output
+    return {
+        name: (float(value) if value is not None and np.isfinite(value) else None)
+        for name, value in output.items()
+    }
 
 
 def paired_nonlinear_bootstrap(full_units: Sequence[Mapping], locked_units: Sequence[Mapping],
@@ -783,15 +808,18 @@ def paired_nonlinear_bootstrap(full_units: Sequence[Mapping], locked_units: Sequ
     point_locked = _primary_vector_from_units(locked_units, context, seed=seed,
                                               recall_subsamples=recall_subsamples)
     if point_full is None or point_locked is None:
-        return {"status": PRIMARY_NOT_ESTIMABLE, "reason": "PRIMARY_ENDPOINT_NOT_ESTIMABLE"}
+        return {"status": PRIMARY_NOT_ESTIMABLE, "reason": "INVALID_EXPECTED_UNIT"}
     point = {
-        name: ((point_full[name] - point_locked[name]) if name in ("recall", "kmeans_alignment")
-               else (point_locked[name] - point_full[name]))
+        name: (
+            None if point_full[name] is None or point_locked[name] is None else
+            ((point_full[name] - point_locked[name])
+             if name in ("recall", "kmeans_alignment")
+             else (point_locked[name] - point_full[name]))
+        )
         for name in PRIMARY
     }
     rng = np.random.default_rng(int(seed))
     samples = {name: [] for name in PRIMARY}
-    failed_draws = 0
     for draw in range(int(draws)):
         selected = rng.choice(topologies, size=len(topologies), replace=True)
         f_units = [full_by_seed[int(value)] for value in selected]
@@ -805,23 +833,40 @@ def paired_nonlinear_bootstrap(full_units: Sequence[Mapping], locked_units: Sequ
             recall_subsamples=recall_subsamples,
         )
         if f_score is None or l_score is None:
-            failed_draws += 1
             continue
         for name in PRIMARY:
+            if f_score[name] is None or l_score[name] is None:
+                continue
             delta = (f_score[name] - l_score[name]) if name in ("recall", "kmeans_alignment") else (
                 l_score[name] - f_score[name]
             )
             samples[name].append(float(delta))
-    if failed_draws or any(len(values) != int(draws) for values in samples.values()):
-        return {"status": PRIMARY_NOT_ESTIMABLE, "reason": "BOOTSTRAP_DRAW_NOT_ESTIMABLE",
-                "failed_draws": int(failed_draws), "draws": int(draws)}
-    endpoints = {
-        name: {"status": "OK", "delta": float(point[name]),
-               "lo": float(np.quantile(samples[name], 0.05)),
-               "hi": float(np.quantile(samples[name], 0.95)),
-               "draws": int(draws), "positive_is_better": True}
-        for name in PRIMARY
-    }
+    endpoints = {}
+    for name in PRIMARY:
+        valid_draws = len(samples[name])
+        valid_fraction = valid_draws / int(draws) if int(draws) else 0.0
+        stable = point[name] is not None and valid_fraction >= MIN_BOOTSTRAP_VALID_FRACTION
+        endpoints[name] = {
+            "status": "OK" if stable else BOOTSTRAP_SUPPORT_UNSTABLE,
+            "delta": None if point[name] is None else float(point[name]),
+            "lo": (float(np.quantile(samples[name], 0.05)) if stable else None),
+            "hi": (float(np.quantile(samples[name], 0.95)) if stable else None),
+            "draws": int(draws),
+            "valid_draws": int(valid_draws),
+            "valid_fraction": float(valid_fraction),
+            "minimum_valid_fraction": MIN_BOOTSTRAP_VALID_FRACTION,
+            "positive_is_better": True,
+        }
+    if any(record["status"] != "OK" for record in endpoints.values()):
+        return {
+            "status": "NON_IDENTIFIABLE_AT_CURRENT_SEEDS",
+            "reason": "ENDPOINT_SUPPORT_UNSTABLE",
+            "endpoints": endpoints,
+            "bootstrap_method": (
+                "paired_topology_resample_then_repool_and_rescore_each_nonlinear_endpoint"
+            ),
+            "draws": int(draws), "seed": int(seed),
+        }
     points = np.asarray([point[name] for name in PRIMARY], float)
     intervals = [(endpoints[name]["lo"], endpoints[name]["hi"]) for name in PRIMARY]
     if np.any(points < 0):
@@ -834,7 +879,7 @@ def paired_nonlinear_bootstrap(full_units: Sequence[Mapping], locked_units: Sequ
         status = "TRADEOFF"
     return {
         "status": status, "endpoints": endpoints,
-        "bootstrap_method": "paired_topology_resample_then_repool_and_rescore_all_nonlinear_endpoints",
+        "bootstrap_method": "paired_topology_resample_then_repool_and_rescore_each_nonlinear_endpoint",
         "draws": int(draws), "seed": int(seed),
     }
 

@@ -267,7 +267,7 @@ def plot_validation_response(data: Mapping, out: Path) -> list[Path]:
                 value = _finite((row.get("primary_endpoints") or {}).get(endpoint))
                 if x is None:
                     raise RuntimeError(f"descriptive point lacks parameter {parameter}")
-                if row.get("primary_status") == "OK" and value is not None:
+                if value is not None:
                     good_x.append(x); good_y.append(value); good_s.append(size)
                 else:
                     bad_x.append(x)
@@ -391,7 +391,7 @@ def plot_pareto(data: Mapping, families: Mapping[str, str], out: Path) -> list[P
     for row in rows:
         endpoints = row.get("primary_endpoints") or {}
         x, y, ood = (_finite(endpoints.get(key)) for key in ("D_order", "kmeans_alignment", "ood"))
-        if row.get("primary_status") == "OK" and None not in (x, y, ood):
+        if None not in (x, y, ood):
             usable.append((row, x, y, ood))
     if usable:
         oods = np.asarray([item[3] for item in usable], float)

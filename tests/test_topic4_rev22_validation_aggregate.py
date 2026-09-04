@@ -323,7 +323,10 @@ def test_low_yield_recall_is_not_replaced_by_zero(tmp_path):
                 if row["candidate_id"] == "full")
     assert full["endpoint_status"]["recall"] == "NOT_ESTIMABLE_LOW_YIELD"
     assert full["conditional_survivor_endpoints"]["recall"] is None
-    assert full["primary_status"] == validation.PRIMARY_NOT_ESTIMABLE
+    assert full["primary_status"] == validation.PRIMARY_PARTIALLY_ESTIMABLE
+    assert full["primary_endpoints"]["recall"] is None
+    assert all(full["primary_endpoints"][name] is not None
+               for name in validation.PRIMARY if name != "recall")
     assert all(row["recall"] is None for row in full["recall_units"])
 
 
@@ -385,3 +388,30 @@ def test_formal_bootstrap_repools_and_rescores_every_topology_draw(monkeypatch):
     assert all(row["delta"] > 0 for row in result["endpoints"].values())
     assert len(calls) == 2 * (1 + 7)
     assert all(len(topologies) == 4 for topologies, _, _ in calls)
+
+
+def test_bootstrap_retains_stable_endpoints_when_recall_support_is_incomplete(monkeypatch):
+    calls = 0
+
+    def fake_score(units, _context, *, seed, recall_subsamples):
+        nonlocal calls
+        calls += 1
+        mean = float(np.mean([unit["value"] for unit in units]))
+        recall = None if calls in {1, 2, 5, 8} else 1.0 - mean
+        return {"D_support": mean, "D_order": mean, "D_time_ms": mean,
+                "recall": recall, "kmeans_alignment": 1.0 - mean, "ood": mean}
+
+    monkeypatch.setattr(validation, "_primary_vector_from_units", fake_score)
+    full = [{"topology_seed": i, "primary_eligible": True, "value": 0.1 + i * 0.01}
+            for i in range(4)]
+    locked = [{"topology_seed": i, "primary_eligible": True, "value": 0.2 + i * 0.01}
+              for i in range(4)]
+    result = validation.paired_nonlinear_bootstrap(
+        full, locked, {}, draws=10, seed=3, recall_subsamples=2,
+    )
+    assert result["status"] == "NON_IDENTIFIABLE_AT_CURRENT_SEEDS"
+    assert result["reason"] == "ENDPOINT_SUPPORT_UNSTABLE"
+    assert result["endpoints"]["recall"]["status"] == validation.BOOTSTRAP_SUPPORT_UNSTABLE
+    assert result["endpoints"]["recall"]["delta"] is None
+    assert all(result["endpoints"][name]["status"] == "OK"
+               for name in validation.PRIMARY if name != "recall")

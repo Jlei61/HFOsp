@@ -165,3 +165,19 @@ def test_not_estimable_point_is_retained_but_excluded_from_surface(tmp_path):
     assert point["candidate_id"] == "dci_p003"
     assert all(point["not_estimable"].values())
     assert result["surfaces"]["D_support"]["n_estimable"] == 95
+
+
+def test_partially_estimable_point_contributes_only_available_endpoints(tmp_path):
+    paths = _fixture(tmp_path)
+    payload = json.loads(paths["validation"].read_text())
+    row = payload["fit_descriptive"]["candidates"][3]
+    row["primary_status"] = "PRIMARY_ENDPOINT_PARTIALLY_ESTIMABLE"
+    row["primary_endpoints"]["recall"] = None
+    _write(paths["validation"], payload)
+    result = _run(paths)
+    point = result["original_design_points"][3]
+    assert point["not_estimable"]["recall"] is True
+    assert all(point["not_estimable"][name] is False
+               for name in response.ENDPOINTS if name != "recall")
+    assert result["surfaces"]["recall"]["n_estimable"] == 95
+    assert result["surfaces"]["D_support"]["n_estimable"] == 96
