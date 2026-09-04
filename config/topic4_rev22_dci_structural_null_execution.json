@@ -1,5 +1,5 @@
 {
-  "candidate_manifest": "results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/response_fit/final_execution_candidate_manifest.json",
+  "candidate_manifest": "results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/structural_nulls/candidate_manifest.json",
   "claim_boundary": "Development-only one-patient identifiability of learned-connectivity redistribution parameters on a frozen dual-core substrate; no anatomical-core, biological-synapse, tract-direction, patient-generalization, ictal or patient-causal claim",
   "complete_distribution": {
     "floor_draws": 256,
@@ -72,9 +72,17 @@
       "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/connectivity_design_audit/connectivity_design_audit.json",
       "sha256": "1b357b811183c871ddb6370f99bb6f246988f41a30f4fb627457c6fbfe9d3c10"
     },
+    "final_execution_manifest": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/response_fit/final_execution_candidate_manifest.json",
+      "sha256": "667b987f5ff5673ec642ea4af4afc55cd6f7b2b0ad030640fb90d742596c3377"
+    },
     "fit_aggregate_script": {
       "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-rev22-postfit/scripts/aggregate_topic4_rev22_fit.py",
       "sha256": "ec05bf79be7448998af0f0efe5434e33ca958a1e60ae83460c0f71516eaf41d4"
+    },
+    "frozen_candidates": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/response_fit/frozen_candidates.json",
+      "sha256": "7483057174ba9ad5d783fb0e4576d0496cd7b30bfbe2a22809a321c322d8bb38"
     },
     "geometry_domain": {
       "kind": "task3_geometry_domain",
@@ -84,6 +92,14 @@
     "minimal_transition_config": {
       "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-rev22-postfit/config/topic4_rev22_dci_transition_execution.json",
       "sha256": "ac7d9ab0c71dec1a8b733d9d386a8effe8a6ff886a2ef9f44b79a8ba15b1f026"
+    },
+    "node_factor_exact_dual_anchor": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_node_dualmode_rev17/dual_field_selection/candidate_manifest.json",
+      "sha256": "46a01e6d39891c332f882c29ef53edac1133d54d54d48f6072f297fdec7bfa98"
+    },
+    "node_factor_v62_density_t050": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_core_field_rev10_sa/observation_invariant_field_v6_2_final/candidate_manifest.json",
+      "sha256": "1c30be6f2121ed54f1c42ab312a8fae334902bd0a4246fcb5bcf4e42bbbb7298"
     },
     "plan": {
       "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-rev22-postfit/docs/topic4_rev22_dci_interictal_parameter_identifiability_plan.md",
@@ -214,6 +230,12 @@
     "persistence_frames": 2
   },
   "spec": "docs/topic4_rev22_dci_interictal_parameter_identifiability_spec.md",
+  "structural_null_execution": {
+    "candidate_count": 18,
+    "expected_trajectories": 108,
+    "seed_count": 6,
+    "selection_eligible": false
+  },
   "validation": {
     "minimum_fig4_readable_contacts": 3,
     "natural_kmeans_seed": 20260902,
