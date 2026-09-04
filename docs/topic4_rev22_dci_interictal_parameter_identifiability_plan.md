@@ -283,6 +283,8 @@ OOM-risk estimate that cannot retain at least 32 GiB free RAM.
 ## Task 9: new-seed qualification
 
 - Run every frozen family candidate on six new topology seeds, one dynamics seed each.
+- Use the same pooled budget-unit contract: at least 72 returned families in the six-unit
+  pool and 60 in every leave-one-topology-out pool; per-unit counts remain sidecars.
 - Compare each observed training component with its surface prediction and interval.
 - Do not drop a family because the first seeds point in an unfavorable direction.
 - Parameter values cannot be revised after this stage. A badly predicted optimum is retained
@@ -297,6 +299,9 @@ fallback-branch proposals, plus predeclared GP/tree disagreement duplicates if a
   seed each: 12 units per candidate, totaling 144 trajectories in the primary branch or 48
   in the fallback branch, structurally identical to the rev20 confirmation.
 - Preserve common random numbers across candidates.
+- Require at least 144 pooled returned families and 132 in every leave-one-topology-out
+  pool. Bootstrap resamples that lose conditional support are counted as non-estimable;
+  report a percentile interval only if at least 80% of frozen draws remain estimable.
 - Complete all candidates regardless of interim direction unless an engineering safety stop
   is triggered.
 - Freeze the worker aggregate and hashes before opening selection-blind validation.

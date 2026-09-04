@@ -397,6 +397,9 @@ the continuous response surface only when all four artifacts are complete, finit
 non-runaway, and both the full pooled statistic and every leave-one-topology-out replicate
 are estimable for `D_order` and `D_lag`. A single unit below 12 remains an explicit low-yield
 sidecar but does not by itself discard an otherwise pooled-and-jackknife-estimable candidate.
+The same budget-unit rule scales without changing the threshold in later stages:
+qualification requires at least 72 pooled families and 60 in every leave-one-out pool;
+confirmation requires 144 and 132, respectively.
 
 All other completed trajectories remain results. They enter a separate feasibility surface
 with two explicit dimensions:
@@ -611,7 +614,11 @@ development rounds, the whole revision remains development-only.
 The independent unit is the topology seed with its single dynamics seed, not an event;
 inside the decomposition block it is the crossed topology-dynamics unit. Candidate-level
 statistics are pooled over units (section 5.3) and their uncertainty comes from resampling
-units, never events. Report
+units, never events.
+Ordinary network-bootstrap draws that lose conditional joint support are retained as
+non-estimable draws, never imputed. A percentile interval is reported only when at least 80%
+of the frozen bootstrap draws remain estimable; otherwise its status is
+`BOOTSTRAP_SUPPORT_UNSTABLE` while the pooled point estimate remains reported.
 paired differences to `M0000` and nested contrasts between `M1111` and each
 leave-one-locked family. Use a paired network bootstrap over topology seeds, exactly as rev20; in the
 decomposition block use topology-first hierarchical resampling. Event bootstrap is only a

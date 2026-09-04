@@ -181,10 +181,18 @@ def _verify_bindings(
         raise RuntimeError("response fit seed binding mismatch")
 
 
-def _score_tables(tables: Sequence[np.ndarray], *, training: Mapping[str, Any], objective: Any) -> dict:
+def _score_tables(
+    tables: Sequence[np.ndarray], *, training: Mapping[str, Any], objective: Any,
+    minimum_events: int = 0,
+) -> dict:
     if not tables:
         raise ValueError("at least one topology event table is required")
     combined = np.concatenate([np.asarray(table, float) for table in tables], axis=0)
+    if len(combined) < int(minimum_events):
+        raise RuntimeError(
+            f"pooled event yield {len(combined)} is below the registered minimum "
+            f"{minimum_events}"
+        )
     vector = objective.component_vector(
         combined, training["reference"], training["groups"], training["pairs"],
         training["embedding"], composite=False,
@@ -240,20 +248,32 @@ def _bootstrap_candidate(
     rng = np.random.default_rng(seed)
     replicates = {component: [] for component in COMPONENTS}
     n_units = len(tables)
+    invalid = 0
     for _ in range(int(draws)):
         indices = rng.integers(0, n_units, size=n_units)
-        values = _score_tables([tables[index] for index in indices],
-                               training=training, objective=objective)["components"]
+        try:
+            values = _score_tables(
+                [tables[index] for index in indices], training=training, objective=objective,
+                minimum_events=FIT.MIN_RETURNED_FAMILIES * n_units,
+            )["components"]
+        except RuntimeError:
+            invalid += 1
+            continue
         for component in COMPONENTS:
             replicates[component].append(values[component])
-    return {
-        component: {
-            "median": float(np.median(values)),
-            "q05": float(np.quantile(values, 0.05)),
-            "q95": float(np.quantile(values, 0.95)),
+    valid_fraction = (int(draws) - invalid) / int(draws)
+    output = {}
+    for component, values in replicates.items():
+        stable = bool(values and valid_fraction >= 0.80)
+        output[component] = {
+            "status": "OK" if stable else "BOOTSTRAP_SUPPORT_UNSTABLE",
+            "median": float(np.median(values)) if stable else None,
+            "q05": float(np.quantile(values, 0.05)) if stable else None,
+            "q95": float(np.quantile(values, 0.95)) if stable else None,
+            "valid_draws": len(values), "invalid_draws": invalid,
+            "valid_fraction": float(valid_fraction),
         }
-        for component, values in replicates.items()
-    }
+    return output
 
 
 def _paired_bootstrap(
@@ -264,23 +284,39 @@ def _paired_bootstrap(
         raise ValueError("paired bootstrap requires aligned topology tables")
     rng = np.random.default_rng(seed)
     replicates = {component: [] for component in COMPONENTS}
+    invalid = 0
     for _ in range(int(draws)):
         indices = rng.integers(0, len(left_tables), size=len(left_tables))
-        left = _score_tables([left_tables[index] for index in indices],
-                             training=training, objective=objective)["components"]
-        right = _score_tables([right_tables[index] for index in indices],
-                              training=training, objective=objective)["components"]
+        try:
+            left = _score_tables(
+                [left_tables[index] for index in indices], training=training,
+                objective=objective,
+                minimum_events=FIT.MIN_RETURNED_FAMILIES * len(left_tables),
+            )["components"]
+            right = _score_tables(
+                [right_tables[index] for index in indices], training=training,
+                objective=objective,
+                minimum_events=FIT.MIN_RETURNED_FAMILIES * len(right_tables),
+            )["components"]
+        except RuntimeError:
+            invalid += 1
+            continue
         for component in COMPONENTS:
             # Positive means the left candidate has lower training distance.
             replicates[component].append(right[component] - left[component])
-    return {
-        component: {
-            "median": float(np.median(values)),
-            "q05": float(np.quantile(values, 0.05)),
-            "q95": float(np.quantile(values, 0.95)),
+    valid_fraction = (int(draws) - invalid) / int(draws)
+    output = {}
+    for component, values in replicates.items():
+        stable = bool(values and valid_fraction >= 0.80)
+        output[component] = {
+            "status": "OK" if stable else "BOOTSTRAP_SUPPORT_UNSTABLE",
+            "median": float(np.median(values)) if stable else None,
+            "q05": float(np.quantile(values, 0.05)) if stable else None,
+            "q95": float(np.quantile(values, 0.95)) if stable else None,
+            "valid_draws": len(values), "invalid_draws": invalid,
+            "valid_fraction": float(valid_fraction),
         }
-        for component, values in replicates.items()
-    }
+    return output
 
 
 def _prediction_rows(response_fit: Mapping[str, Any], frozen: Mapping[str, Any]) -> list[dict]:
@@ -453,7 +489,11 @@ def aggregate_frozen_stages(
                 if onsets is not None:
                     tables.append(onsets)
             expected = EXPECTED_UNITS[phase]
-            primary_estimable = bool(len(rows) == expected and all(row["feasibility"] for row in rows))
+            all_safe = bool(
+                len(rows) == expected
+                and len(tables) == expected
+                and all(row["artifact_integrity"] and row["safe"] for row in rows)
+            )
             record = {
                 "candidate_id": candidate_id,
                 "family_membership": candidate.get("family_membership") or [],
@@ -462,29 +502,52 @@ def aggregate_frozen_stages(
                 "safe_units": int(sum(row["safe"] for row in rows)),
                 "yield_estimable_units": int(sum(row["event_yield_estimable"] for row in rows)),
                 "conditional_estimable_units": int(sum(row["conditional_estimable"] for row in rows)),
-                "primary_estimable": primary_estimable,
+                "primary_estimable": False,
                 "n_returned_families_by_unit": [int(row["n_returned_families"]) for row in rows],
                 "failure_reasons": sorted({reason for row in rows for reason in row["failure_reasons"]}),
                 "pooled": None, "floor": None, "standardized_Z": None,
-                "bootstrap_90": None, "units": rows,
+                "bootstrap_90": None, "leave_one_topology_out": [], "units": rows,
             }
-            if primary_estimable:
-                if len(tables) != expected:
-                    raise RuntimeError("estimable candidate lacks an expected event table")
-                pooled = _score_tables(tables, training=training, objective=objective)
-                normalization = _patient_floors(
-                    pooled, candidate_id=candidate_id, block_views=block_views,
-                    objective=objective, floor_draws=floor_draws, floor_seed=floor_seed,
-                )
-                record.update(
-                    pooled={"method": "pool_topology_events_then_recompute", **pooled},
-                    floor=normalization["floor"], standardized_Z=normalization["standardized_Z"],
-                    bootstrap_90=_bootstrap_candidate(
+            if all_safe:
+                try:
+                    pooled = _score_tables(
                         tables, training=training, objective=objective,
-                        draws=bootstrap_draws, seed=bootstrap_seed + (0 if phase == "qualification" else 10000),
-                    ),
-                )
-                tables_by_phase[phase][candidate_id] = tables
+                        minimum_events=FIT.MIN_RETURNED_FAMILIES * expected,
+                    )
+                    leave_out = []
+                    for omitted, unit in enumerate(units):
+                        score = _score_tables(
+                            [table for index, table in enumerate(tables) if index != omitted],
+                            training=training, objective=objective,
+                            minimum_events=FIT.MIN_RETURNED_FAMILIES * (expected - 1),
+                        )
+                        leave_out.append({
+                            "omitted_topology_seed": int(unit["topology_seed"]), **score,
+                        })
+                except RuntimeError as error:
+                    record["failure_reasons"].append(
+                        f"POOLED_OR_LOO_NOT_ESTIMABLE:{error}"
+                    )
+                else:
+                    normalization = _patient_floors(
+                        pooled, candidate_id=candidate_id, block_views=block_views,
+                        objective=objective, floor_draws=floor_draws, floor_seed=floor_seed,
+                    )
+                    record.update(
+                        primary_estimable=True,
+                        pooled={"method": "pool_topology_events_then_recompute", **pooled},
+                        floor=normalization["floor"],
+                        standardized_Z=normalization["standardized_Z"],
+                        bootstrap_90=_bootstrap_candidate(
+                            tables, training=training, objective=objective,
+                            draws=bootstrap_draws,
+                            seed=bootstrap_seed + (0 if phase == "qualification" else 10000),
+                        ),
+                        leave_one_topology_out=leave_out,
+                    )
+                    tables_by_phase[phase][candidate_id] = tables
+            else:
+                record["failure_reasons"].append("MISSING_UNSAFE_OR_NONFINITE_STAGE_UNIT")
             candidates[candidate_id] = record
         phase_results[phase] = {
             "expected_units_per_candidate": EXPECTED_UNITS[phase],
@@ -552,10 +615,16 @@ def aggregate_frozen_stages(
             "unit": "paired topology seed", "draws": int(bootstrap_draws),
             "seed": int(bootstrap_seed), "interval": "percentile_90",
             "recompute_after_every_topology_resample": True,
+            "minimum_valid_fraction": 0.80,
+            "nonestimable_resamples_reported_not_imputed": True,
         },
         "eligibility_contract": {
-            "min_returned_families_per_unit": int(FIT.MIN_RETURNED_FAMILIES),
-            "missing_runaway_nonfinite_low_yield_fail_closed": True,
+            "per_unit_low_yield_sidecar_threshold": int(FIT.MIN_RETURNED_FAMILIES),
+            "qualification_min_pooled": int(FIT.MIN_RETURNED_FAMILIES * EXPECTED_UNITS["qualification"]),
+            "qualification_min_leave_one_out": int(FIT.MIN_RETURNED_FAMILIES * (EXPECTED_UNITS["qualification"] - 1)),
+            "confirmation_min_pooled": int(FIT.MIN_RETURNED_FAMILIES * EXPECTED_UNITS["confirmation"]),
+            "confirmation_min_leave_one_out": int(FIT.MIN_RETURNED_FAMILIES * (EXPECTED_UNITS["confirmation"] - 1)),
+            "missing_runaway_nonfinite_fail_closed": True,
             "failed_units_retained_in_feasibility_sidecar": True,
         },
         "inventory": {

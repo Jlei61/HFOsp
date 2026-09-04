@@ -204,12 +204,12 @@ def test_every_bootstrap_draw_rescores_repoolled_event_tables(tmp_path, monkeypa
 
     monkeypatch.setattr(stage, "_score_tables", counted)
     _run(ctx, bootstrap_draws=3)
-    # Six point estimates + 18 candidate bootstraps + three paired contrasts,
-    # each rescoring both members for all three draws.
-    assert calls == 6 + 18 + 18
+    # Six point estimates + 54 leave-one-topology-out rescored pools + 18 candidate
+    # bootstraps + three paired contrasts, each rescoring both members for all three draws.
+    assert calls == 6 + 54 + 18 + 18
 
 
-@pytest.mark.parametrize("failure", ["missing", "runaway", "nonfinite", "low_yield"])
+@pytest.mark.parametrize("failure", ["missing", "runaway", "nonfinite", "pooled_low_yield"])
 def test_expected_unit_failures_are_fail_closed_and_retained(tmp_path, failure):
     ctx = _context(tmp_path)
     _populate(ctx)
@@ -220,8 +220,12 @@ def test_expected_unit_failures_are_fail_closed_and_retained(tmp_path, failure):
         (root / f"{stem}.json").unlink()
         (root / f"{stem}.npz").unlink()
     else:
-        _worker(ctx, "qualification", "full", topology,
-                n_events=8 if failure == "low_yield" else 14,
+        if failure == "pooled_low_yield":
+            for unit in ctx["seeds"]["qualification"]["units"]:
+                _worker(ctx, "qualification", "full", unit["topology_seed"], n_events=8)
+        else:
+            _worker(ctx, "qualification", "full", topology,
+                n_events=14,
                 runaway=failure == "runaway", nonfinite=failure == "nonfinite")
 
     payload = _run(ctx)
@@ -233,9 +237,45 @@ def test_expected_unit_failures_are_fail_closed_and_retained(tmp_path, failure):
     reasons = "|".join(full["failure_reasons"])
     expected = {
         "missing": "MISSING_WORKER_JSON", "runaway": "RUNAWAY",
-        "nonfinite": "NPZ_INVALID", "low_yield": "LOW_RETURNED_FAMILY_YIELD",
+        "nonfinite": "NPZ_INVALID", "pooled_low_yield": "LOW_RETURNED_FAMILY_YIELD",
     }
     assert expected[failure] in reasons
+
+
+def test_one_low_yield_unit_is_retained_when_stage_pool_and_loo_are_estimable(tmp_path):
+    ctx = _context(tmp_path)
+    _populate(ctx)
+    topology = ctx["seeds"]["qualification"]["units"][0]["topology_seed"]
+    _worker(ctx, "qualification", "full", topology, n_events=8)
+
+    payload = _run(ctx)
+
+    full = payload["phases"]["qualification"]["candidates"]["full"]
+    assert full["yield_estimable_units"] == 5
+    assert full["primary_estimable"] is True
+    assert full["pooled"]["n_events"] >= 72
+    assert len(full["leave_one_topology_out"]) == 6
+    assert min(row["n_events"] for row in full["leave_one_topology_out"]) >= 60
+
+
+def test_bootstrap_marks_support_instability_without_imputation(monkeypatch):
+    calls = 0
+
+    def alternating_score(*_args, **_kwargs):
+        nonlocal calls
+        calls += 1
+        if calls % 2 == 0:
+            raise RuntimeError("synthetic low support")
+        return {"components": {component: 1.0 for component in stage.COMPONENTS}}
+
+    monkeypatch.setattr(stage, "_score_tables", alternating_score)
+    result = stage._bootstrap_candidate(
+        [object(), object()], training={}, objective=None, draws=10, seed=1,
+    )
+    assert all(row["status"] == "BOOTSTRAP_SUPPORT_UNSTABLE" for row in result.values())
+    assert all(row["median"] is None for row in result.values())
+    assert all(row["valid_draws"] == 5 and row["invalid_draws"] == 5
+               for row in result.values())
 
 
 def test_out_of_interval_qualification_result_is_reported_not_deleted(tmp_path):
