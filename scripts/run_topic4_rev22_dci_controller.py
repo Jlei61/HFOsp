@@ -394,7 +394,10 @@ def _contracts_unchanged(expected: Mapping[Path, str]) -> bool:
         return False
 
 
-def _artifact_complete(job: Mapping[str, Any], commit: str, config_sha256: str) -> bool:
+def _artifact_complete(
+    job: Mapping[str, Any], commit: str, config_sha256: str,
+    compatible_complete_commits: tuple[str, ...] = (),
+) -> bool:
     json_path, npz_path = Path(job["json"]), Path(job["npz"])
     if not json_path.is_file() or not npz_path.is_file():
         return False
@@ -402,6 +405,7 @@ def _artifact_complete(job: Mapping[str, Any], commit: str, config_sha256: str) 
         payload = json.loads(json_path.read_text(encoding="utf-8"))
         provenance = payload.get("provenance", {})
         arrays = payload.get("arrays", {})
+        artifact_commit = provenance.get("expected_git_commit")
         return bool(
             payload.get("status") == WORKER_COMPLETE
             and payload.get("candidate_id") == job["candidate_id"]
@@ -411,7 +415,7 @@ def _artifact_complete(job: Mapping[str, Any], commit: str, config_sha256: str) 
             and payload.get("seed_mode") == job["seed_mode"]
             and Path(arrays.get("path", "")).resolve() == npz_path.resolve()
             and arrays.get("sha256") == _sha256(npz_path)
-            and provenance.get("expected_git_commit") == commit
+            and artifact_commit in {commit, *compatible_complete_commits}
             and provenance.get("config_sha256") == config_sha256
             and provenance.get("config_sha256_at_expected_commit") == config_sha256
             and bool(provenance.get("runtime_modules_match_expected_commit"))
@@ -428,8 +432,11 @@ def _systemd_active(unit: str) -> bool:
     ).returncode == 0
 
 
-def _job_state(job: Mapping[str, Any], commit: str, config_sha256: str) -> str:
-    if _artifact_complete(job, commit, config_sha256):
+def _job_state(
+    job: Mapping[str, Any], commit: str, config_sha256: str,
+    compatible_complete_commits: tuple[str, ...] = (),
+) -> str:
+    if _artifact_complete(job, commit, config_sha256, compatible_complete_commits):
         return "complete"
     status_path = Path(job["status"])
     status_text = status_path.read_text(encoding="utf-8").strip() if status_path.is_file() else ""
@@ -446,6 +453,38 @@ def _job_state(job: Mapping[str, Any], commit: str, config_sha256: str) -> str:
     if Path(job["json"]).exists() or Path(job["npz"]).exists() or Path(job["log"]).exists():
         return "invalid_artifact"
     return "pending"
+
+
+_ISOTROPIC_RESUME_ALLOWED_DIFFS = {
+    "src/topic4_zm_ictal_transition.py",
+    "scripts/run_topic4_rev22_dci_controller.py",
+    "tests/test_topic4_rev22_seed_split.py",
+    "tests/test_topic4_rev22_dci_controller.py",
+}
+
+
+def _validate_compatible_complete_commits(
+    commits: list[str], *, current_commit: str, phase: str,
+) -> tuple[str, ...]:
+    if commits and phase != "structural_nulls":
+        raise RuntimeError("compatible predecessor artifacts are restricted to structural_nulls")
+    resolved = []
+    for value in commits:
+        predecessor = _git_output(["rev-parse", value])
+        if subprocess.run(
+            ["git", "merge-base", "--is-ancestor", predecessor, current_commit],
+            cwd=ROOT, check=False,
+        ).returncode != 0:
+            raise RuntimeError("compatible artifact commit is not an ancestor")
+        changed = set(filter(None, _git_output([
+            "diff", "--name-only", predecessor, current_commit,
+        ]).splitlines()))
+        if "src/topic4_zm_ictal_transition.py" not in changed:
+            raise RuntimeError("compatible resume lacks the isotropic-reference fix")
+        if not changed.issubset(_ISOTROPIC_RESUME_ALLOWED_DIFFS):
+            raise RuntimeError(f"compatible resume changes unauthorized paths: {sorted(changed)}")
+        resolved.append(predecessor)
+    return tuple(dict.fromkeys(resolved))
 
 
 def _available_memory_gib() -> float:
@@ -520,6 +559,7 @@ def main() -> None:
     parser.add_argument("--expected-commit", required=True)
     parser.add_argument("--artifact-root", type=Path, default=ARTIFACT_ROOT)
     parser.add_argument("--maximum-workers-override", type=int)
+    parser.add_argument("--compatible-complete-commit", action="append", default=[])
     args = parser.parse_args()
 
     artifact_root = args.artifact_root.resolve()
@@ -537,6 +577,9 @@ def main() -> None:
     commit = _git_output(["rev-parse", args.expected_commit])
     if _git_output(["rev-parse", "HEAD"]) != commit:
         raise RuntimeError("controller HEAD differs from expected commit")
+    compatible_complete_commits = _validate_compatible_complete_commits(
+        args.compatible_complete_commit, current_commit=commit, phase=args.phase,
+    )
     config, manifest, seeds = validate_contracts(
         config_path, candidate_path, seed_path, commit,
     )
@@ -580,7 +623,10 @@ def main() -> None:
         contract_hashes[frozen_path.resolve()] = _sha256(frozen_path)
 
     while True:
-        states = [_job_state(job, commit, config_sha) for job in jobs]
+        states = [
+            _job_state(job, commit, config_sha, compatible_complete_commits)
+            for job in jobs
+        ]
         bad_states = {
             "failed", "invalid_artifact", "orphaned", "hash_drift", "invalid_status",
         }
@@ -598,6 +644,7 @@ def main() -> None:
             "schema_id": "topic4_rev22_dci_controller_v1",
             "phase": args.phase,
             "git_commit": commit,
+            "compatible_complete_commits": list(compatible_complete_commits),
             "config_sha256": config_sha,
             "candidate_manifest_sha256": contract_hashes[candidate_path],
             "seed_manifest_sha256": contract_hashes[seed_path],

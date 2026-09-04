@@ -217,6 +217,16 @@ def test_resume_skips_complete_artifact_and_rejects_partial_output(tmp_path):
     assert _job_state(partial, COMMIT, config_sha) == "invalid_artifact"
 
 
+def test_resume_accepts_explicit_compatible_predecessor_artifact(tmp_path):
+    config_sha = "b" * 64
+    complete = expand_jobs("fit", _manifest(), _seeds(), tmp_path, COMMIT)[0]
+    _write_complete_artifact(complete, config_sha)
+    current = "c" * 40
+    assert not _artifact_complete(complete, current, config_sha)
+    assert _artifact_complete(complete, current, config_sha, (COMMIT,))
+    assert _job_state(complete, current, config_sha, (COMMIT,)) == "complete"
+
+
 def test_worker_limit_reserves_32_gib_and_caps_at_sixteen():
     assert _worker_limit(
         available_gib=200.0, worker_gib=8.0, configured_cap=30, running=0,
