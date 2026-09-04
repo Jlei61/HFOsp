@@ -436,8 +436,13 @@ def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=No
             raise RuntimeError(
                 "ellipse reference angle must equal the registered graph kernel axis "
                 f"({reg['theta_deg']!r}), got {ee_ellipse_reference_angle_deg!r}")
-        if abs(float(ee_ellipse_reference_aspect_ratio) - float(engine["AR"])) > 1e-12:
-            raise RuntimeError("ellipse reference aspect ratio must equal the graph kernel AR")
+        # The operator reference is frozen to the graph on which it was learned. A
+        # rebuilt-topology null may deliberately change the effective graph AR while
+        # applying that same frozen operator.
+        if abs(float(ee_ellipse_reference_aspect_ratio) - frozen_graph_aspect_ratio) > 1e-12:
+            raise RuntimeError(
+                "ellipse reference aspect ratio must equal the frozen graph kernel AR"
+            )
         ellipse_reference = {
             "reference_angle_deg": float(ee_ellipse_reference_angle_deg),
             "reference_aspect_ratio": float(ee_ellipse_reference_aspect_ratio),
