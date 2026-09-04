@@ -188,10 +188,19 @@ def test_frozen_edge_coefficient_override_changes_weights_not_topology(legacy):
 @pytest.mark.slow
 @pytest.mark.integration
 def test_isotropic_graph_override_rebuilds_topology_with_same_in_degree(legacy):
-    isotropic = _build(SEED_A, graph_aspect_ratio_override=1.0)
+    reference_angle = float(legacy.extras["placement"]["theta_deg"])
+    isotropic = _build(
+        SEED_A,
+        graph_aspect_ratio_override=1.0,
+        ee_ellipse_angle_deg=reference_angle,
+        ee_ellipse_aspect_ratio=2.0,
+        ee_ellipse_reference_angle_deg=reference_angle,
+        ee_ellipse_reference_aspect_ratio=2.0,
+    )
     assert isotropic.extras["graph_aspect_ratio_frozen"] == 2.0
     assert isotropic.extras["graph_aspect_ratio_effective"] == 1.0
     assert isotropic.extras["graph_topology_override"] is True
+    assert isotropic.extras["ellipse_audit"]["exact_noop"] is True
     assert _graph_hashes(isotropic)["topology"] != _graph_hashes(legacy)["topology"]
     assert np.array_equal(isotropic.h_e, legacy.h_e)
 
