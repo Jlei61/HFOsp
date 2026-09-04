@@ -35,6 +35,7 @@
 
 - 2026-08-19 **data-driven Z/M 间期→持续高活动转变（阶段 1 = Fig5 基础版，preliminary）**：`docs/archive/topic4/data_driven_zm_ictal_transition/stage1_fig5_2026-08-19.md`。把按患者摆位的冻结底物（节点场 + E→E + E→I 全开）配上逐细胞两个慢变量（抑制松劲 z + 细胞疲劳 m），不给外部刺激只留背景噪声，看它自己滑进持续高活动。**慢变量开 12/12 进入、同种子关掉 0/3**；图严格复刻旧 qI/gK runaway 三列连续轨迹语法（慢变量空间场｜同时刻二维活动｜一条不断的 15 触点读出），重放与被分析轨迹逐位一致。⚠️ 先前记的"慢电流累积主要在病灶核周边"**已撤回**（量的是瞬时项不是累积；改用 1 秒时间平均后低活动态核内/非核基本相等、发作前差 2.2 倍）。**未做**：阶段 2 状态×扰动、阶段 3 连接性 2×2 因子（12 对种子）、阶段 4 特异性对照 —— 因此**任何数字都不得进 `docs/topic4_sef_hfo.md` 主文档**。⚠️ 五条已撤回说法（2 秒点不是安静基线 / 四臂非严格单调 / 曲目闸门原实现什么都没测到 / 发作前存档点必然漏存 / "等长间期窗"在爬升里）见该文档表格。⚠️ "进入时刻"是操作口径（20ms 平滑群体率 ≥120Hz 持续 100ms），**不是临床发作**。
 - 2026-09-02 **冻结双-core 单因素机制响应图（rev20-DC）**：`docs/archive/topic4/sef_hfo/rev20_dc_dual_core_mechanism_atlas_result_2026-09-02.md`。31×4 screen 只以训练完整事件分布选水平，随后 9×12 新网络独立打开 held-out/KMeans/OOD。`Joint=1.25` 是唯一三项同时改善的平衡候选；单独加强 EE 或各向异性会把事件压入较窄支持区但牺牲第二模板，aspect=4.0 为 4/4 runaway。**完整患者分布仍未进入地板，结论限于单患者 development 机制响应。**
+- 2026-09-04 **冻结双-core spatial-Z 分岔**：`docs/archive/topic4/sef_hfo/dual_core_spatial_z_bifurcation_result_2026-09-04.md`。在同一 `dualcore_s39 + Joint=1.25` realized graph 的 10×10 deterministic reduction 上，pseudo-arclength 折返和 fixed-point Jacobian 实零模共同确认 spatial saddle-node fold chain；mixed cell 使用 `E[Z]`/`E[Z²]` closure。低支 fold 是 deterministic runaway boundary；100 个 rev21 OU-on SNN 转变的中位 Z 位于低/高根共存区，所以噪声可早于 fold 触发。边界：单 topology、2 mm coarse、frozen Z、`eta_m=0`，不是患者抑制场或热力学相变。
 
 ## 数据侧（paper-A）：rate vs 传播几何（探索性，与上面的模型侧并行）
 

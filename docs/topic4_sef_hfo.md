@@ -61,6 +61,19 @@
 > model-ictal 合格单元。状态为 `NO_CROSS_STATE_WORKPOINT_IN_FROZEN_TIMESCALE_GRID`；未跑 confirmation、
 > 未打开患者发作 target、未生成 Fig.5。详见
 > `docs/archive/topic4/sef_hfo/rev21_dual_core_zm_cross_state_result_2026-09-03.md`。
+>
+> **data-driven dual-core 的 spatial-Z 分岔（2026-09-04，development）：** 在同一冻结
+> `dualcore_s39 + Joint=1.25` realized graph 上，把 homogeneous frozen `q` 改为 core A/core B/surround
+> 分区的 `Z(x)`。10×10 coarse deterministic fast subsystem 出现经 pseudo-arclength 折返与 fixed-point
+> Jacobian 实零模同步过零共同确认的 saddle-node fold chain：低支在 `s=0.337591`
+>（`Z_A=Z_B=0.6624, Z_sur=0.7637`）消失，入口零模 93.69% 能量定位 core A；一条 recruited branch
+> 在 `s=0.090589` 恢复折返，且另有 4 个空间 recruitment folds。rev21 的 100 个 OU-on operational
+> transition 中位落在 `s=0.28736`，此时确定性低根与 352.8 Hz tonic 根仍共存：因此 fold 控制
+> deterministic runaway boundary，但 OU 噪声可在 coexistence 区提前触发；同点 zero-delay/
+> frozen-variance sensitivity 下低根和 tonic 根最大实部均为负。这里 data-driven 的是双核几何，
+> 不是患者测得的 Z 场；当前仅单 topology、2 mm coarse、frozen-Z/`eta_m=0`，mixed cell 采用
+> `E[Z]`/`E[Z²]` moment closure，不得称热力学相变或临床发作阈值。
+> 详见 `docs/archive/topic4/sef_hfo/dual_core_spatial_z_bifurcation_result_2026-09-04.md`。
 
 ---
 
