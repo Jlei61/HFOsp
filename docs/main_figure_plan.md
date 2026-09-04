@@ -261,8 +261,10 @@ Fig3-B 是 intentionally selected morphology-aware TA representative。它说明
 ### Fig5-C/D：dual-core spatial-Z 分岔候选（2026-09-04）
 
 - 输出目录：`results/paper-ready-figure/fig5_dual_core_spatial_z/figures/`
-- C：同一 `dualcore_s39 + Joint=1.25` 快子系统中 core A 内 per-neuron mean E rate 随 `D_A=1-Z_A` 的 fixed-point branches；这是 2 mm E/I population reduction 的局部读数，不称 literal single-neuron bifurcation。
-- D：左侧为 runaway-entry 零模在 20 mm sheet 上的空间能量，右侧为固定 `Z_surround=0.80` 时独立扫描 `Z_A×Z_B` 的有限 root catalog。
+- C：同一 `dualcore_s39 + Joint=1.25` 异质快子系统中，core A 内 per-neuron mean E rate 随 `D_A=1-Z_A` 的 fixed-point branches。它是保留局部连接、阈值分布与 core/surround 混合差异的 2 mm E/I population reduction 的区域加权读数；不是 literal single-neuron bifurcation，也不是异质性分布图。
+- D：同一冻结 SNN 轨迹、同一组 16 个分层随机位置与同一 16-cell 弱脉冲，在 runaway 前低态和 early-ictal 状态分别做 exact-resume paired probe–sham；左右图是各状态 0–50 ms descendant-only signed response 的等权位置平均。该 panel 比较状态依赖的空间易感性，不比较两个不同网络。
+- D 当前读数：低态与 early-ictal 的站点均值分别为 `1770.4` 与 `2012.3` excess spikes/50 ms，没有复现旧底物中 high-state 响应近零的形状；两侧最大热点分别占绝对响应 `63.0%` 与 `87.7%`。因此只报告单轨迹下的 hotspot reorganization，不写成 high-state susceptibility 普遍下降。
+- 机制补图：runaway-entry 零模的 20 mm 空间图与固定 `Z_surround=0.80` 的 `Z_A×Z_B` finite root catalog 保留为 supplement，不占用 Fig.5D 语义。
 - 拼图合同：C/D 只能和同一 dual-core 底物重画的 A/B 合并；旧 `joint_04_control seed1801` 的 A/B 属于不同实验，不得直接拼接。
 
 ### Fig5-A: cm-SNN 自发双向 readout 机制示意

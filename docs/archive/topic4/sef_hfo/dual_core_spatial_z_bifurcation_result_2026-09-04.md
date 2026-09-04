@@ -108,7 +108,39 @@ tonic 根的最大实部分别为 `-0.02237` 与 `-0.02941 ms^-1`，在这一明
 因此，**两个 core 不需要 homogeneous、也不需要严格同步耗竭**。对称 `Z_A=Z_B` 只是用于定义一条可比较的
 主 continuation path；真正的空间系统允许单核先触发，随后通过 realized graph 招募另一核和 surround。
 
-## 6. 科学边界与下一步
+## 6. Fig.5C/D 的尺度与响应语义核验
+
+### 6.1 C 不是单神经元分岔
+
+C 的底层是保留 realized incoming weights、格内经验 E-threshold distribution 以及 core/surround mixed-cell
+组成差异的 2 mm E/I population reduction。因此系统是空间异质的，但图中纵轴只是把 core A 内各 coarse unit 的
+E rate 按 E 细胞数加权平均。准确表述是 **heterogeneous spatial system 中的 core-A local population
+saddle-node readout**；不是每个 E 神经元各自发生同一个分岔，也不是异质性分布图。
+
+### 6.2 D 必须是同位置、同剂量的状态响应
+
+正式 D 已恢复作者指定语义：在同一 `rev21_ts_tz3000_ta500`、topology 2542 / dynamics 2642 SNN 轨迹上，
+先 exact replay 并在低态 `1000.0 ms` 与 early-ictal `2615.4 ms` 保存 checkpoint。重放的 `rate_E` 与原始
+rev21 worker 在 26,155 个时间步上逐点完全一致。随后固定 4×4 分层随机的 16 个位置（seed 20260820）和
+16-cell 弱脉冲，每个位置做 paired probe–sham；图中是 0–50 ms、去掉强制注入 frame 后的 descendant-only
+signed spike difference，再对 16 个位置等权平均。所有位置均保留。
+
+站点级结果显示该响应是 hotspot-dominated，而不是均匀易感性：
+
+- low activity：mean `1770.4`、median `9.5` excess spikes/50 ms；最大站点占绝对响应 `63.0%`；16/16
+  站点满足低态 E1 evaluability，未出现 probe-only ignition；
+- early ictal：mean `2012.3`、median `-3.0`；最大站点占绝对响应 `87.7%`。此时 sham 已经处于高态，
+  所以 0/16 满足“可再测试 ignition”的 E1 条件；这不删除站点，也不妨碍 D 作为 high-state incremental
+  response contrast，但禁止把它写成发作触发概率。
+
+因此，新 dual-core D 没有复现旧 `joint_04_control seed1801` 图中“early-runaway 响应近乎消失”的形状。
+它显示的是响应热点从低态的中上部斜带重排到 early-ictal 的 sheet 上缘；总增量均值未下降。当前 D 在 panel
+语义上正确，但科学证据仍是 single realized trajectory、single frozen dose 的探索性状态对比。
+
+原先占用 D 的 runaway-entry zero-mode map 与 `Z_A×Z_B` finite root catalog 已改为
+`fig5-supp-spatial-z-mechanism`，只作为分岔定位的机制补图。
+
+## 7. 科学边界与下一步
 
 当前可以写：冻结 data-driven 双核底物的确定性 fast subsystem 存在空间 saddle-node fold chain；其中低支 fold
 是 runaway 的确定性边界，OU 噪声可在 coexistence 区提前触发持续高态。
@@ -125,7 +157,7 @@ tonic 根的最大实部分别为 `-0.02237` 与 `-0.02941 ms^-1`，在这一明
 验证是：增加 per-core Z recorder，做 3 topology 的 coarse-resolution sensitivity，并把 full-SNN transition 在
 `(Z_A,Z_B,Z_surround)` 相图上逐时刻投影；在此之前不把本图直接升格为正式 Fig.5 panel。
 
-## 7. 产出
+## 8. 产出
 
 - 模型构建：`scripts/build_topic4_dual_core_spatial_z_meanfield.py`
 - spatial-Z 数学与 continuation：`src/topic4_dual_core_spatial_z.py`
@@ -133,6 +165,9 @@ tonic 根的最大实部分别为 `-0.02237` 与 `-0.02941 ms^-1`，在这一明
 - 诊断图：`scripts/plot_topic4_dual_core_spatial_z_bifurcation.py`
 - 机器结果：`/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_dual_core_spatial_z/bifurcation/dualcore_spatial_z_bifurcation.{json,npz}`
 - 诊断图：`/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_dual_core_spatial_z/bifurcation/figures/dualcore_spatial_z_bifurcation_diagnostic.{png,pdf}`
-- Fig.5C/D 候选：`/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_dual_core_spatial_z/paper_ready_panels/figures/fig5-{panel-c-core-a-bifurcation,panel-d-spatial-z-phase,panels-cd-dual-core-spatial-z}.{png,pdf,svg}`
-- 图说明与 metadata：同目录 `README.md`、`dualcore_spatial_z_bifurcation_diagnostic.metadata.json`
-- 测试：`tests/test_topic4_patient_zm_meanfield.py` + `tests/test_topic4_dual_core_spatial_z.py`，14/14 PASS。
+- exact checkpoints：`/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_dual_core_spatial_z/perturbation/checkpoints/`
+- Fig.5D 状态响应：`/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_dual_core_spatial_z/perturbation/dualcore_rev21_state_contrast.{json,npz}`
+- Fig.5C/D 候选：`/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_dual_core_spatial_z/paper_ready_panels/figures/fig5-{panel-c-core-a-bifurcation,panel-d-state-response,panels-cd-dual-core-spatial-z}.{png,pdf,svg}`
+- 机制补图：同目录 `fig5-supp-spatial-z-mechanism.{png,pdf,svg}`
+- 图说明与 metadata：同目录 `README.md`、`fig5-dual-core-spatial-z-cd-metadata.json`
+- 测试：`tests/test_topic4_patient_zm_meanfield.py` + `tests/test_topic4_dual_core_spatial_z.py` + `tests/test_topic4_rev21_fig5_random_perturbation.py`，17/17 PASS。
