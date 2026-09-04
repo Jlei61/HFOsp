@@ -42,6 +42,8 @@ DEFAULT_OUT = DEFAULT_STAGE / "fit/aggregate"
 
 MIN_RETURNED_FAMILIES = 12
 EXPECTED_FIT_UNITS = 4
+MIN_POOLED_RETURNED_FAMILIES = MIN_RETURNED_FAMILIES * EXPECTED_FIT_UNITS
+MIN_LOO_RETURNED_FAMILIES = MIN_RETURNED_FAMILIES * (EXPECTED_FIT_UNITS - 1)
 COMPONENTS = ("D_support", "D_order", "D_lag", "D_cover")
 CONDITIONAL_COMPONENTS = ("D_order", "D_lag")
 UNCONDITIONAL_COMPONENTS = ("D_support", "D_cover")
@@ -469,7 +471,7 @@ def _validate_and_score_unit(
         worker_runtime_commit=runtime_commit or None,
         runaway_early_stop_ms=(payload.get("simulation") or {}).get("runaway_early_stop_ms"),
     )
-    if not yield_ok or returned_onsets is None:
+    if not safe or returned_onsets is None:
         return row, None
 
     try:
@@ -478,7 +480,7 @@ def _validate_and_score_unit(
             training["embedding"], composite=False,
         )
     except Exception as error:
-        row["failure_reasons"].append(f"COMPONENT_SCORING_FAILED:{error}")
+        row["failure_reasons"].append(f"PER_UNIT_COMPONENT_SCORING_FAILED:{error}")
         return row, returned_onsets
     statuses = {name: vector[name]["status"] for name in COMPONENTS}
     values = {name: vector[name]["value"] for name in COMPONENTS}
@@ -512,8 +514,13 @@ def _pooled_event_candidate(
     if len(unit_rows) != len(unit_onsets) or len(unit_rows) < 2:
         raise ValueError("pooled candidate needs aligned rows and at least two topology units")
 
-    def score(tables: Sequence[np.ndarray]) -> dict[str, float]:
+    def score(tables: Sequence[np.ndarray], *, minimum_events: int) -> dict[str, float]:
         combined = np.concatenate([np.asarray(table, float) for table in tables], axis=0)
+        if len(combined) < int(minimum_events):
+            raise RuntimeError(
+                f"pooled event yield {len(combined)} is below the registered minimum "
+                f"{minimum_events}"
+            )
         vector = objective.component_vector(
             combined,
             training["reference"],
@@ -529,11 +536,14 @@ def _pooled_event_candidate(
             values[component] = float(vector[component]["value"])
         return values
 
-    pooled = score(unit_onsets)
+    pooled = score(unit_onsets, minimum_events=MIN_POOLED_RETURNED_FAMILIES)
     leave_out = []
     for omitted, row in enumerate(unit_rows):
         record = {"omitted_topology_seed": int(row["topology_seed"])}
-        record.update(score([table for index, table in enumerate(unit_onsets) if index != omitted]))
+        record.update(score(
+            [table for index, table in enumerate(unit_onsets) if index != omitted],
+            minimum_events=MIN_LOO_RETURNED_FAMILIES,
+        ))
         leave_out.append(record)
     jackknife = {}
     m = len(unit_rows)
@@ -658,9 +668,9 @@ def aggregate_fit(
             unit_key = f"{candidate['candidate_id']}::{topology_seed}::{dynamics_seed}"
             input_hashes["workers"][unit_key] = row["input_hashes"] or None
 
-        all_four_feasible = len(unit_rows) == EXPECTED_FIT_UNITS and all(
-            row["feasibility"] for row in unit_rows
-        )
+        all_four_safe = len(unit_rows) == EXPECTED_FIT_UNITS and all(
+            row["artifact_integrity"] and row["safe"] for row in unit_rows
+        ) and all(table is not None for table in unit_onsets)
         candidate_record = {
             "candidate_id": candidate["candidate_id"],
             "block": candidate.get("block"),
@@ -671,8 +681,8 @@ def aggregate_fit(
             "safe_units": int(sum(row["safe"] for row in unit_rows)),
             "yield_estimable_units": int(sum(row["event_yield_estimable"] for row in unit_rows)),
             "conditional_estimable_units": int(sum(row["conditional_estimable"] for row in unit_rows)),
-            "joint_feasibility": bool(all_four_feasible),
-            "continuous_surface_eligible": bool(all_four_feasible),
+            "joint_feasibility": False,
+            "continuous_surface_eligible": False,
             "pooled_candidate": None,
             "floor": {component: None for component in COMPONENTS},
             "standardized_Z": {component: None for component in COMPONENTS},
@@ -683,26 +693,41 @@ def aggregate_fit(
             "candidate_failure_reasons": [],
             "units": unit_rows,
         }
-        if all_four_feasible:
-            if any(table is None for table in unit_onsets):
-                raise RuntimeError("feasible candidate unexpectedly lacks a returned-event table")
-            pooled, jackknife, leave_out = _pooled_event_candidate(
-                unit_rows,
-                unit_onsets,
-                training=training,
-                objective=objective,
+        if all_four_safe:
+            try:
+                pooled, jackknife, leave_out = _pooled_event_candidate(
+                    unit_rows,
+                    unit_onsets,
+                    training=training,
+                    objective=objective,
+                )
+            except RuntimeError as error:
+                candidate_record["candidate_failure_reasons"].append(
+                    f"POOLED_OR_LOO_NOT_ESTIMABLE:{error}"
+                )
+            else:
+                candidate_record["joint_feasibility"] = True
+                candidate_record["continuous_surface_eligible"] = True
+                candidate_record["pooled_candidate"] = {
+                    "method": (
+                        "concatenate_four_topology_event_tables_then_recompute_components; "
+                        "all leave-one-topology-out pooled replicates re-estimable"
+                    ),
+                    "n_pooled_events": int(sum(
+                        len(table) for table in unit_onsets if table is not None
+                    )),
+                    "components": pooled,
+                }
+                candidate_record["jackknife_sd"] = jackknife
+                candidate_record["leave_one_topology_out"] = leave_out
+                pooled_table = np.concatenate(
+                    [np.asarray(table, float) for table in unit_onsets if table is not None], axis=0,
+                )
+                pooled_onsets_by_candidate[str(candidate["candidate_id"])] = pooled_table
+        else:
+            candidate_record["candidate_failure_reasons"].append(
+                "MISSING_UNSAFE_OR_NONFINITE_FIT_UNIT"
             )
-            candidate_record["pooled_candidate"] = {
-                "method": "concatenate_four_topology_event_tables_then_recompute_components",
-                "n_pooled_events": int(sum(len(table) for table in unit_onsets if table is not None)),
-                "components": pooled,
-            }
-            candidate_record["jackknife_sd"] = jackknife
-            candidate_record["leave_one_topology_out"] = leave_out
-            pooled_table = np.concatenate(
-                [np.asarray(table, float) for table in unit_onsets if table is not None], axis=0,
-            )
-            pooled_onsets_by_candidate[str(candidate["candidate_id"])] = pooled_table
         candidate_rows.append(candidate_record)
 
     # Patient floors are candidate specific. Support and coverage need only the pooled
@@ -824,9 +849,11 @@ def aggregate_fit(
         },
         "eligibility_contract": {
             "expected_fit_units_per_candidate": EXPECTED_FIT_UNITS,
-            "min_returned_families_per_unit": MIN_RETURNED_FAMILIES,
+            "per_unit_low_yield_sidecar_threshold": MIN_RETURNED_FAMILIES,
+            "min_pooled_returned_families": MIN_POOLED_RETURNED_FAMILIES,
+            "min_leave_one_topology_out_returned_families": MIN_LOO_RETURNED_FAMILIES,
             "requires_safe_finite_nonrunaway": True,
-            "requires_D_order_and_D_lag_estimable_in_every_unit": True,
+            "requires_D_order_and_D_lag_estimable_in_pooled_and_every_leave_one_out": True,
             "failed_units_are_retained": True,
         },
         "inventory": {

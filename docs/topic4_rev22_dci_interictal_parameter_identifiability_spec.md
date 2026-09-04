@@ -388,17 +388,22 @@ interpretation came from KMeans validation.
 
 ### 6.1 Fit estimability and feasibility
 
-The response surface requires at least 12 complete returned isolated causal families in
-each 20 s candidate-seed trajectory. Twelve is a measurement-estimability threshold, not a
-biological event-count gate. A candidate point enters the continuous response surface of a component only when all
-four fit units reach this minimum, none is runaway or nonfinite, and, for `D_order` and
-`D_lag`, none is `NOT_ESTIMABLE_LOW_JOINT_SUPPORT`.
+The response surface uses 12 returned isolated causal families per 20 s topology unit as a
+registered **budget unit**, not as four separate hard gates. For the four-unit fit stage, the
+pooled candidate must therefore contain at least `4 x 12 = 48` families, and each
+leave-one-topology-out pooled replicate must contain at least `3 x 12 = 36`. Twelve is a
+measurement-estimability scale, not a biological event-count gate. A candidate point enters
+the continuous response surface only when all four artifacts are complete, finite and
+non-runaway, and both the full pooled statistic and every leave-one-topology-out replicate
+are estimable for `D_order` and `D_lag`. A single unit below 12 remains an explicit low-yield
+sidecar but does not by itself discard an otherwise pooled-and-jackknife-estimable candidate.
 
 All other completed trajectories remain results. They enter a separate feasibility surface
 with two explicit dimensions:
 
 ```text
-event_yield_estimable = n_returned_families >= 12
+event_yield_estimable_per_unit = n_returned_families >= 12
+candidate_yield_estimable = pooled_n >= 48 and every_LOO_pooled_n >= 36
 safe = not runaway and all outputs finite
 ```
 

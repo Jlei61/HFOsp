@@ -197,9 +197,11 @@ relaxed band is flagged (spec section 3.2).
 - Aggregate raw seed-level component scores with equal weight per topology unit. Add
   rescored rev20 one-dimensional points as flagged axis anchors; never relabel them as
   rev22 fit observations.
-- Exclude a point from a component's continuous surface unless all four fit units have at
-  least 12 complete returned families, are finite/non-runaway and, for order and lag, are
-  joint-support estimable. Fit a separate feasibility classifier to every completed point.
+- Exclude a point from a component's continuous surface unless all four fit artifacts are
+  finite/non-runaway, their pooled event table contains at least 48 returned families, every
+  leave-one-topology-out pooled table contains at least 36, and order/lag are estimable in the
+  full pool and every leave-one-out pool. Keep the per-unit 12-family indicator as a low-yield
+  sidecar, not a separate hard gate. Fit a feasibility classifier to every completed point.
 - Fit one heteroskedastic Matérn-5/2 GP per training component using the pooled-shrinkage
   noise formula in spec section 7; never fit a surface to `J_fit` or to any maximum.
 - Fit the per-component tree-ensemble sensitivity model without changing proposal rules.
@@ -243,9 +245,10 @@ OOM-risk estimate that cannot retain at least 32 GiB free RAM.
 - Maximum concurrency is the lesser of 16 workers and the measured RSS-based safe count.
 - Monitor at 600 s intervals; the monitor exits and notifies on completion, provenance drift,
   memory pressure, low disk or failed workers. Do not continuously poll.
-- Zero/low event yield is a valid model result, but a trajectory with fewer than 12 complete
-  returned families enters the feasibility surface rather than the continuous response
-  surface. This is an estimability rule, not a 20-event biological gate.
+- Zero/low event yield is a valid model result. Candidate eligibility is decided from the
+  four-unit pooled and leave-one-topology-out budgets in Task 5; a single trajectory below
+  12 is flagged but does not automatically remove the candidate. This remains a measurement
+  estimability rule, not a biological event-count gate.
 - Aggregate training components only. The producer must fail if it can import KMeans/OOD,
   patient held-out or patient ictal inputs during this stage.
 

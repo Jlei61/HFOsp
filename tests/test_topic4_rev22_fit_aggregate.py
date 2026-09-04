@@ -294,6 +294,34 @@ def test_complete_four_unit_candidate_enters_pooled_event_surfaces(tmp_path):
     assert (ctx["output_dir"] / "fit_unit_inventory.csv").is_file()
 
 
+def test_one_low_yield_unit_does_not_discard_estimable_pooled_candidate(tmp_path):
+    ctx = _make_contracts(tmp_path)
+    low_seed = ctx["units"][0]["topology_seed"]
+    for unit in ctx["units"]:
+        _write_worker(
+            ctx,
+            "c0",
+            unit["topology_seed"],
+            n_events=8 if unit["topology_seed"] == low_seed else 16,
+        )
+
+    payload = _run(ctx)
+
+    candidate = payload["candidates"][0]
+    low = next(row for row in candidate["units"] if row["topology_seed"] == low_seed)
+    assert low["event_yield_estimable"] is False
+    assert "LOW_RETURNED_FAMILY_YIELD" in low["failure_reasons"]
+    assert candidate["pooled_candidate"]["n_pooled_events"] == 56
+    assert min(
+        56 - next(
+            row["n_returned_families"] for row in candidate["units"]
+            if row["topology_seed"] == loo["omitted_topology_seed"]
+        )
+        for loo in candidate["leave_one_topology_out"]
+    ) >= aggregate.MIN_LOO_RETURNED_FAMILIES
+    assert candidate["continuous_surface_eligible"] is True
+
+
 @pytest.mark.parametrize("failure", ["missing", "runaway", "low_yield", "nonfinite", "bad_hash"])
 def test_failed_unit_is_retained_and_never_enters_surface(tmp_path, failure):
     ctx = _make_contracts(tmp_path)
@@ -339,26 +367,26 @@ def test_seed_manifest_requires_exact_four_unit_cartesian_product(tmp_path):
         _run(ctx)
 
 
-def test_low_joint_support_blocks_every_continuous_component_surface(tmp_path):
+def test_pooled_low_joint_support_blocks_every_continuous_component_surface(tmp_path):
     ctx = _make_contracts(tmp_path)
-    failed_seed = ctx["units"][1]["topology_seed"]
     for unit in ctx["units"]:
         _write_worker(
             ctx, "c0", unit["topology_seed"], n_events=12,
-            drop_scl=unit["topology_seed"] == failed_seed,
+            drop_scl=True,
         )
 
     payload = _run(ctx)
 
-    failed = next(
-        row for row in payload["candidates"][0]["units"]
-        if row["topology_seed"] == failed_seed
+    candidate = payload["candidates"][0]
+    assert all(row["artifact_integrity"] is True for row in candidate["units"])
+    assert all(row["safe"] is True for row in candidate["units"])
+    assert all(row["event_yield_estimable"] is True for row in candidate["units"])
+    assert candidate["continuous_surface_eligible"] is False
+    assert candidate["pooled_candidate"] is None
+    assert any(
+        reason.startswith("POOLED_OR_LOO_NOT_ESTIMABLE:")
+        for reason in candidate["candidate_failure_reasons"]
     )
-    assert failed["artifact_integrity"] is True
-    assert failed["safe"] is True
-    assert failed["event_yield_estimable"] is True
-    assert failed["conditional_estimable"] is False
-    assert payload["candidates"][0]["continuous_surface_eligible"] is False
     assert payload["continuous_component_surface"] == []
 
 
