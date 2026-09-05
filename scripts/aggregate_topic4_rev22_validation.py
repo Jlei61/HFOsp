@@ -83,18 +83,27 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def _configured_input_path(
-    config: Mapping[str, Any], name: str, *, repo_root: Path = ROOT,
+def _verified_record_path(
+    record: Mapping[str, Any], label: str, *, repo_root: Path = ROOT,
     artifact_root: Path = ARTIFACT_ROOT,
 ) -> Path:
     """Resolve tracked inputs from the worktree and results from artifact root."""
-    record = config["inputs"][name]
     relative = Path(record["path"])
     root = artifact_root if relative.parts[0] == "results" else repo_root
     path = root / relative
     if not path.is_file() or _sha256(path) != record["sha256"]:
-        raise RuntimeError(f"configured input changed: {name}")
+        raise RuntimeError(f"configured input changed: {label}")
     return path
+
+
+def _configured_input_path(
+    config: Mapping[str, Any], name: str, *, repo_root: Path = ROOT,
+    artifact_root: Path = ARTIFACT_ROOT,
+) -> Path:
+    return _verified_record_path(
+        config["inputs"][name], name,
+        repo_root=repo_root, artifact_root=artifact_root,
+    )
 
 
 def _json_safe(value: Any) -> Any:
@@ -1298,9 +1307,10 @@ def main() -> None:
     support_config_path = config_path("patient_support_config")
     support = json.loads(support_config_path.read_text(encoding="utf-8"))
     classifier_record = support["inputs"]["old_ab_train_only_classifier"]
-    classifier_path = root / classifier_record["path"]
-    if not classifier_path.is_file() or _sha256(classifier_path) != classifier_record["sha256"]:
-        raise RuntimeError("configured direction classifier changed")
+    classifier_path = _verified_record_path(
+        classifier_record, "direction classifier",
+        repo_root=ROOT, artifact_root=ARTIFACT_ROOT,
+    )
     response_fit = json.loads((DEFAULT_STAGE / "response_fit/response_fit.json").read_text())
     budget = response_fit["recall_support_budget"]
     if budget.get("status") != "OK" or budget.get("n_cov") is None or budget.get("r_cov") is None:

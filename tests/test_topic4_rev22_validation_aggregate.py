@@ -60,6 +60,10 @@ def test_configured_input_uses_separate_worktree_and_artifact_roots(tmp_path):
         config, "patient_training_target", repo_root=repo_root,
         artifact_root=artifact_root,
     ) == result
+    assert validation._verified_record_path(
+        config["inputs"]["patient_training_target"], "direction classifier",
+        repo_root=repo_root, artifact_root=artifact_root,
+    ) == result
 
     frozen.write_text('{"value": 3}\n')
     with pytest.raises(RuntimeError, match="configured input changed"):
