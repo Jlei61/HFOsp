@@ -32,6 +32,29 @@ def _json(path: Path, payload: dict) -> str:
     return _sha(path)
 
 
+def test_configured_input_is_resolved_from_executing_worktree(tmp_path):
+    frozen = tmp_path / "config/frozen.json"
+    digest = _json(frozen, {"value": 1})
+    config = {
+        "inputs": {
+            "patient_support_config": {
+                "path": "config/frozen.json",
+                "sha256": digest,
+            }
+        }
+    }
+
+    assert validation._configured_input_path(
+        config, "patient_support_config", repo_root=tmp_path,
+    ) == frozen
+
+    frozen.write_text('{"value": 2}\n')
+    with pytest.raises(RuntimeError, match="configured input changed"):
+        validation._configured_input_path(
+            config, "patient_support_config", repo_root=tmp_path,
+        )
+
+
 def _contract() -> dict:
     contacts = [
         {"contact_index": 0, "shaft_id": "ICL", "within_shaft_order_by_shared_axis": 0},

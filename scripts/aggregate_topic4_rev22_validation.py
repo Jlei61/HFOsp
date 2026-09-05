@@ -82,6 +82,17 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _configured_input_path(
+    config: Mapping[str, Any], name: str, *, repo_root: Path = ROOT,
+) -> Path:
+    """Resolve and verify a frozen input against the executing worktree."""
+    record = config["inputs"][name]
+    path = repo_root / record["path"]
+    if not path.is_file() or _sha256(path) != record["sha256"]:
+        raise RuntimeError(f"configured input changed: {name}")
+    return path
+
+
 def _json_safe(value: Any) -> Any:
     if isinstance(value, Mapping):
         return {str(key): _json_safe(item) for key, item in value.items()}
@@ -1276,13 +1287,8 @@ def main() -> None:
     parser.add_argument("--expected-fit-candidates", type=int, default=96)
     args = parser.parse_args()
     config = json.loads(args.config.read_text(encoding="utf-8"))
-    root = Path("/home/honglab/leijiaxin/HFOsp")
     def config_path(name: str) -> Path:
-        record = config["inputs"][name]
-        path = root / record["path"]
-        if not path.is_file() or _sha256(path) != record["sha256"]:
-            raise RuntimeError(f"configured input changed: {name}")
-        return path
+        return _configured_input_path(config, name, repo_root=ROOT)
     support_config_path = config_path("patient_support_config")
     support = json.loads(support_config_path.read_text(encoding="utf-8"))
     classifier_record = support["inputs"]["old_ab_train_only_classifier"]
