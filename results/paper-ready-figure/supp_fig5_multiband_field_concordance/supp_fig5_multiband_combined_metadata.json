@@ -1,0 +1,460 @@
+{
+  "figure": "Supplementary Figure 5",
+  "caption": "Supplementary Fig. 5 | Multiband ictal concordance with Timing + 3D direction templates. A, Patient-level field-concordance difference (Δ) across seven frequency bands in 17 patients. For each patient and band, D is the median early-ictal dense-grid spatial concordance with the better-matching TA or TB field defined by Timing + 3D direction clustering after resolving sign and transverse-mirror symmetry, and Δ is D minus the median of that patient's all-contact permutation null (1000 draws); points denote patients, violins the distributions and black horizontal lines the cohort medians. Red violins and stars denote a coherent cohort spatial-null test within that frequency band (one-sided permutation P < 0.05, uncorrected across the seven bands). B, Heat map of the same patient-by-band Δ values, with rows ordered by the number of bands exceeding the patient's own null and the bottom row showing cohort medians; outlined stars denote one-sided empirical patient-versus-own-null P < 0.05 and are not cohort-level or multiplicity-corrected. Bands are δ (1–4 Hz), θ (4–8 Hz), α (8–13 Hz), β (13–30 Hz), γ (30–80 Hz), R (80–150 Hz) and FR (150–250 Hz). Five bands passed the per-band spatial-null test, whereas no band passed the seven-band maxT correction (minimum P_FWER = 0.058); the direct between-band omnibus test was also not significant (calibrated P = 0.522).",
+  "source": "results/topic5_ictal_recruitment/field_concordance_grid_method_sensitivity/n161_subject_fixed_timing_plus_3d_direction/multiband_subject_null_draws.npz",
+  "n_subjects": 17,
+  "n_bands": 7,
+  "n_null_draws_per_subject_band": 1000,
+  "interictal_template_source": "Timing + 3D direction",
+  "panel_a": {
+    "cell_source": "results/topic5_ictal_recruitment/field_concordance_grid_method_sensitivity/n161_subject_fixed_timing_plus_3d_direction/multiband_subject.csv",
+    "estimand": "subject-level D minus own all-contact null median",
+    "star": "within-band coherent cohort spatial-null permutation P<0.05; uncorrected across seven bands",
+    "cohort_per_band_p": {
+      "delta_HYP_slow": 0.0199800199800199,
+      "theta_preictal_PAC": 0.0339660339660339,
+      "alpha_sharp_leq13": 0.0089910089910089,
+      "beta_LVFA_low": 0.0099900099900099,
+      "gamma_LVFA": 0.0339660339660339,
+      "hg_low_ripple": 0.1988011988011988,
+      "ripple_high": 0.1428571428571428
+    },
+    "cohort_pfwer_by_band": {
+      "delta_HYP_slow": 0.0739260739260739,
+      "theta_preictal_PAC": 0.1538461538461538,
+      "alpha_sharp_leq13": 0.0719280719280719,
+      "beta_LVFA_low": 0.0579420579420579,
+      "gamma_LVFA": 0.2007992007992008,
+      "hg_low_ripple": 0.6763236763236763,
+      "ripple_high": 0.6003996003996004
+    }
+  },
+  "panel_b": {
+    "cell_value": "D - median(subject all-contact null draws)",
+    "cell_star": "one-sided empirical subject-vs-own-null P<0.05; not cohort maxT-FWER",
+    "row_sort": "descending number of subject-self-null P<0.05 cells, then descending median delta, then subject identifier",
+    "subjects": [
+      {
+        "display_order": 1,
+        "patient_id": "E7",
+        "n_self_null_p_lt_0_05": 7,
+        "median_delta": 0.11579394060653414,
+        "delta_by_band": {
+          "delta_HYP_slow": 0.11579394060653414,
+          "theta_preictal_PAC": 0.13680760581925522,
+          "alpha_sharp_leq13": 0.16588893992674425,
+          "beta_LVFA_low": 0.17400320069578556,
+          "gamma_LVFA": 0.10224426718883084,
+          "hg_low_ripple": 0.08466808951633864,
+          "ripple_high": 0.1060291138807814
+        },
+        "subject_self_null_p_by_band": {
+          "delta_HYP_slow": 0.024975024975024976,
+          "theta_preictal_PAC": 0.004995004995004995,
+          "alpha_sharp_leq13": 0.002997002997002997,
+          "beta_LVFA_low": 0.000999000999000999,
+          "gamma_LVFA": 0.03196803196803197,
+          "hg_low_ripple": 0.03896103896103896,
+          "ripple_high": 0.023976023976023976
+        }
+      },
+      {
+        "display_order": 2,
+        "patient_id": "E14",
+        "n_self_null_p_lt_0_05": 6,
+        "median_delta": 0.10116732545399387,
+        "delta_by_band": {
+          "delta_HYP_slow": 0.11432750479618026,
+          "theta_preictal_PAC": 0.10116732545399387,
+          "alpha_sharp_leq13": 0.11291918025149372,
+          "beta_LVFA_low": 0.02562782521949558,
+          "gamma_LVFA": 0.09435888097465184,
+          "hg_low_ripple": 0.09261947939127502,
+          "ripple_high": 0.10451265931207943
+        },
+        "subject_self_null_p_by_band": {
+          "delta_HYP_slow": 0.001998001998001998,
+          "theta_preictal_PAC": 0.002997002997002997,
+          "alpha_sharp_leq13": 0.001998001998001998,
+          "beta_LVFA_low": 0.21878121878121878,
+          "gamma_LVFA": 0.003996003996003996,
+          "hg_low_ripple": 0.002997002997002997,
+          "ripple_high": 0.001998001998001998
+        }
+      },
+      {
+        "display_order": 3,
+        "patient_id": "E5",
+        "n_self_null_p_lt_0_05": 5,
+        "median_delta": 0.20625565484719055,
+        "delta_by_band": {
+          "delta_HYP_slow": 0.26084318433307163,
+          "theta_preictal_PAC": 0.178868614662529,
+          "alpha_sharp_leq13": 0.20625565484719055,
+          "beta_LVFA_low": 0.2133727615984491,
+          "gamma_LVFA": 0.2107588114798007,
+          "hg_low_ripple": 0.12107020443423266,
+          "ripple_high": 0.026619007767790137
+        },
+        "subject_self_null_p_by_band": {
+          "delta_HYP_slow": 0.000999000999000999,
+          "theta_preictal_PAC": 0.017982017982017984,
+          "alpha_sharp_leq13": 0.002997002997002997,
+          "beta_LVFA_low": 0.002997002997002997,
+          "gamma_LVFA": 0.003996003996003996,
+          "hg_low_ripple": 0.08391608391608392,
+          "ripple_high": 0.3966033966033966
+        }
+      },
+      {
+        "display_order": 4,
+        "patient_id": "E10",
+        "n_self_null_p_lt_0_05": 5,
+        "median_delta": 0.11794425713849321,
+        "delta_by_band": {
+          "delta_HYP_slow": 0.11794425713849321,
+          "theta_preictal_PAC": 0.1784434758466713,
+          "alpha_sharp_leq13": 0.20232456341378324,
+          "beta_LVFA_low": 0.012236997117738513,
+          "gamma_LVFA": 0.06993177870931044,
+          "hg_low_ripple": 0.15372284156881377,
+          "ripple_high": 0.11064639346766669
+        },
+        "subject_self_null_p_by_band": {
+          "delta_HYP_slow": 0.023976023976023976,
+          "theta_preictal_PAC": 0.000999000999000999,
+          "alpha_sharp_leq13": 0.000999000999000999,
+          "beta_LVFA_low": 0.3996003996003996,
+          "gamma_LVFA": 0.11788211788211789,
+          "hg_low_ripple": 0.000999000999000999,
+          "ripple_high": 0.026973026973026972
+        }
+      },
+      {
+        "display_order": 5,
+        "patient_id": "E18",
+        "n_self_null_p_lt_0_05": 4,
+        "median_delta": 0.2015792583551822,
+        "delta_by_band": {
+          "delta_HYP_slow": 0.02229016055197086,
+          "theta_preictal_PAC": 0.17949607996165506,
+          "alpha_sharp_leq13": -0.15680314350519797,
+          "beta_LVFA_low": 0.25985034161948284,
+          "gamma_LVFA": 0.21155672415013627,
+          "hg_low_ripple": 0.26132694653274346,
+          "ripple_high": 0.2015792583551822
+        },
+        "subject_self_null_p_by_band": {
+          "delta_HYP_slow": 0.4485514485514486,
+          "theta_preictal_PAC": 0.11388611388611389,
+          "alpha_sharp_leq13": 0.7922077922077922,
+          "beta_LVFA_low": 0.017982017982017984,
+          "gamma_LVFA": 0.04495504495504495,
+          "hg_low_ripple": 0.001998001998001998,
+          "ripple_high": 0.04395604395604396
+        }
+      },
+      {
+        "display_order": 6,
+        "patient_id": "Y16",
+        "n_self_null_p_lt_0_05": 3,
+        "median_delta": 0.1755764249667927,
+        "delta_by_band": {
+          "delta_HYP_slow": 0.378632252722942,
+          "theta_preictal_PAC": 0.46073431711129886,
+          "alpha_sharp_leq13": 0.30911647618763627,
+          "beta_LVFA_low": 0.0720763021564026,
+          "gamma_LVFA": -0.09084485460951125,
+          "hg_low_ripple": 0.1755764249667927,
+          "ripple_high": 0.059021032617352476
+        },
+        "subject_self_null_p_by_band": {
+          "delta_HYP_slow": 0.01098901098901099,
+          "theta_preictal_PAC": 0.000999000999000999,
+          "alpha_sharp_leq13": 0.03596403596403597,
+          "beta_LVFA_low": 0.35364635364635366,
+          "gamma_LVFA": 0.6373626373626373,
+          "hg_low_ripple": 0.23376623376623376,
+          "ripple_high": 0.3956043956043956
+        }
+      },
+      {
+        "display_order": 7,
+        "patient_id": "E17",
+        "n_self_null_p_lt_0_05": 3,
+        "median_delta": 0.057568719209517116,
+        "delta_by_band": {
+          "delta_HYP_slow": 0.018094741413684612,
+          "theta_preictal_PAC": 0.04600522057263645,
+          "alpha_sharp_leq13": 0.1654247678936961,
+          "beta_LVFA_low": 0.11387378709362794,
+          "gamma_LVFA": 0.057568719209517116,
+          "hg_low_ripple": 0.026443556014148828,
+          "ripple_high": 0.15218800766591556
+        },
+        "subject_self_null_p_by_band": {
+          "delta_HYP_slow": 0.3886113886113886,
+          "theta_preictal_PAC": 0.2097902097902098,
+          "alpha_sharp_leq13": 0.000999000999000999,
+          "beta_LVFA_low": 0.023976023976023976,
+          "gamma_LVFA": 0.18281718281718282,
+          "hg_low_ripple": 0.35264735264735264,
+          "ripple_high": 0.003996003996003996
+        }
+      },
+      {
+        "display_order": 8,
+        "patient_id": "E1",
+        "n_self_null_p_lt_0_05": 2,
+        "median_delta": 0.13212135935207925,
+        "delta_by_band": {
+          "delta_HYP_slow": -0.04800602184918967,
+          "theta_preictal_PAC": 0.13212135935207925,
+          "alpha_sharp_leq13": 0.1672922646065672,
+          "beta_LVFA_low": 0.3647144774044969,
+          "gamma_LVFA": 0.372382180984679,
+          "hg_low_ripple": 0.0888419224002529,
+          "ripple_high": 0.015804316169040433
+        },
+        "subject_self_null_p_by_band": {
+          "delta_HYP_slow": 0.6103896103896104,
+          "theta_preictal_PAC": 0.22277722277722278,
+          "alpha_sharp_leq13": 0.11188811188811189,
+          "beta_LVFA_low": 0.000999000999000999,
+          "gamma_LVFA": 0.000999000999000999,
+          "hg_low_ripple": 0.3006993006993007,
+          "ripple_high": 0.46353646353646355
+        }
+      },
+      {
+        "display_order": 9,
+        "patient_id": "E2",
+        "n_self_null_p_lt_0_05": 2,
+        "median_delta": 0.041982470364649915,
+        "delta_by_band": {
+          "delta_HYP_slow": 0.04213236279721433,
+          "theta_preictal_PAC": 0.041982470364649915,
+          "alpha_sharp_leq13": -0.03904858013178991,
+          "beta_LVFA_low": -0.026008926168673285,
+          "gamma_LVFA": 0.027292504619248814,
+          "hg_low_ripple": 0.12075653272100051,
+          "ripple_high": 0.23914961293386428
+        },
+        "subject_self_null_p_by_band": {
+          "delta_HYP_slow": 0.08291708291708291,
+          "theta_preictal_PAC": 0.07892107892107893,
+          "alpha_sharp_leq13": 0.9020979020979021,
+          "beta_LVFA_low": 0.8101898101898102,
+          "gamma_LVFA": 0.18081918081918083,
+          "hg_low_ripple": 0.000999000999000999,
+          "ripple_high": 0.000999000999000999
+        }
+      },
+      {
+        "display_order": 10,
+        "patient_id": "E3",
+        "n_self_null_p_lt_0_05": 1,
+        "median_delta": 0.0021528850616886475,
+        "delta_by_band": {
+          "delta_HYP_slow": 0.11649953963760717,
+          "theta_preictal_PAC": 0.10355134766671503,
+          "alpha_sharp_leq13": 0.16009084531189566,
+          "beta_LVFA_low": 0.0021528850616886475,
+          "gamma_LVFA": -0.1476595742021074,
+          "hg_low_ripple": -0.09175566002033647,
+          "ripple_high": -0.1530967525417844
+        },
+        "subject_self_null_p_by_band": {
+          "delta_HYP_slow": 0.1008991008991009,
+          "theta_preictal_PAC": 0.11588411588411589,
+          "alpha_sharp_leq13": 0.03296703296703297,
+          "beta_LVFA_low": 0.4945054945054945,
+          "gamma_LVFA": 0.945054945054945,
+          "hg_low_ripple": 0.8381618381618382,
+          "ripple_high": 0.949050949050949
+        }
+      },
+      {
+        "display_order": 11,
+        "patient_id": "E12",
+        "n_self_null_p_lt_0_05": 1,
+        "median_delta": -0.12804550363965905,
+        "delta_by_band": {
+          "delta_HYP_slow": 0.18658441358955735,
+          "theta_preictal_PAC": 0.1669102546688913,
+          "alpha_sharp_leq13": -0.050709846400275205,
+          "beta_LVFA_low": -0.31582873713110504,
+          "gamma_LVFA": -0.18296471999438224,
+          "hg_low_ripple": -0.12804550363965905,
+          "ripple_high": -0.19129530184451693
+        },
+        "subject_self_null_p_by_band": {
+          "delta_HYP_slow": 0.03196803196803197,
+          "theta_preictal_PAC": 0.061938061938061936,
+          "alpha_sharp_leq13": 0.6413586413586414,
+          "beta_LVFA_low": 0.97002997002997,
+          "gamma_LVFA": 0.8741258741258742,
+          "hg_low_ripple": 0.7942057942057942,
+          "ripple_high": 0.8981018981018981
+        }
+      },
+      {
+        "display_order": 12,
+        "patient_id": "E9",
+        "n_self_null_p_lt_0_05": 0,
+        "median_delta": 0.06759638817956704,
+        "delta_by_band": {
+          "delta_HYP_slow": 0.1504618205892937,
+          "theta_preictal_PAC": 0.13544923202479342,
+          "alpha_sharp_leq13": 0.21513783573868417,
+          "beta_LVFA_low": -0.08814586656817502,
+          "gamma_LVFA": -0.17972140729103903,
+          "hg_low_ripple": -0.04358748776657051,
+          "ripple_high": 0.06759638817956704
+        },
+        "subject_self_null_p_by_band": {
+          "delta_HYP_slow": 0.2127872127872128,
+          "theta_preictal_PAC": 0.24875124875124874,
+          "alpha_sharp_leq13": 0.06593406593406594,
+          "beta_LVFA_low": 0.6323676323676324,
+          "gamma_LVFA": 0.7692307692307693,
+          "hg_low_ripple": 0.5814185814185814,
+          "ripple_high": 0.37162837162837165
+        }
+      },
+      {
+        "display_order": 13,
+        "patient_id": "E6",
+        "n_self_null_p_lt_0_05": 0,
+        "median_delta": 0.04179603690684963,
+        "delta_by_band": {
+          "delta_HYP_slow": 0.05528699479599175,
+          "theta_preictal_PAC": -0.06050250499046339,
+          "alpha_sharp_leq13": -0.12502350778223548,
+          "beta_LVFA_low": 0.013286944286101665,
+          "gamma_LVFA": 0.04445517336609728,
+          "hg_low_ripple": 0.09722735390725945,
+          "ripple_high": 0.04179603690684963
+        },
+        "subject_self_null_p_by_band": {
+          "delta_HYP_slow": 0.3066933066933067,
+          "theta_preictal_PAC": 0.7072927072927073,
+          "alpha_sharp_leq13": 0.8731268731268731,
+          "beta_LVFA_low": 0.42357642357642356,
+          "gamma_LVFA": 0.3206793206793207,
+          "hg_low_ripple": 0.13986013986013987,
+          "ripple_high": 0.3106893106893107
+        }
+      },
+      {
+        "display_order": 14,
+        "patient_id": "E15",
+        "n_self_null_p_lt_0_05": 0,
+        "median_delta": -0.027730649751979253,
+        "delta_by_band": {
+          "delta_HYP_slow": 0.047533055889193876,
+          "theta_preictal_PAC": -0.027730649751979253,
+          "alpha_sharp_leq13": -0.06763605139231721,
+          "beta_LVFA_low": -0.059291532051852336,
+          "gamma_LVFA": 0.013289174843495344,
+          "hg_low_ripple": -0.0896824738160954,
+          "ripple_high": 0.0020169054907327455
+        },
+        "subject_self_null_p_by_band": {
+          "delta_HYP_slow": 0.3206793206793207,
+          "theta_preictal_PAC": 0.6013986013986014,
+          "alpha_sharp_leq13": 0.7682317682317682,
+          "beta_LVFA_low": 0.6833166833166833,
+          "gamma_LVFA": 0.45054945054945056,
+          "hg_low_ripple": 0.7972027972027972,
+          "ripple_high": 0.4965034965034965
+        }
+      },
+      {
+        "display_order": 15,
+        "patient_id": "E20",
+        "n_self_null_p_lt_0_05": 0,
+        "median_delta": -0.04339556152196844,
+        "delta_by_band": {
+          "delta_HYP_slow": -0.005872258451891765,
+          "theta_preictal_PAC": -0.0767069571563056,
+          "alpha_sharp_leq13": -0.06272913877199138,
+          "beta_LVFA_low": -0.019310068414664316,
+          "gamma_LVFA": -0.04339556152196844,
+          "hg_low_ripple": -0.08641667409055764,
+          "ripple_high": -0.004463689264380566
+        },
+        "subject_self_null_p_by_band": {
+          "delta_HYP_slow": 0.5664335664335665,
+          "theta_preictal_PAC": 0.9560439560439561,
+          "alpha_sharp_leq13": 0.9080919080919081,
+          "beta_LVFA_low": 0.6953046953046953,
+          "gamma_LVFA": 0.8441558441558441,
+          "hg_low_ripple": 0.9500499500499501,
+          "ripple_high": 0.5454545454545454
+        }
+      },
+      {
+        "display_order": 16,
+        "patient_id": "E4",
+        "n_self_null_p_lt_0_05": 0,
+        "median_delta": -0.06434383559991164,
+        "delta_by_band": {
+          "delta_HYP_slow": -0.09754293598698027,
+          "theta_preictal_PAC": -0.17059914340916116,
+          "alpha_sharp_leq13": -0.19627469515188367,
+          "beta_LVFA_low": -0.06434383559991164,
+          "gamma_LVFA": -0.01892011170377761,
+          "hg_low_ripple": -0.014131234741446064,
+          "ripple_high": -0.019790836535269807
+        },
+        "subject_self_null_p_by_band": {
+          "delta_HYP_slow": 0.996003996003996,
+          "theta_preictal_PAC": 1.0,
+          "alpha_sharp_leq13": 1.0,
+          "beta_LVFA_low": 0.9590409590409591,
+          "gamma_LVFA": 0.7202797202797203,
+          "hg_low_ripple": 0.6283716283716284,
+          "ripple_high": 0.7102897102897103
+        }
+      },
+      {
+        "display_order": 17,
+        "patient_id": "E16",
+        "n_self_null_p_lt_0_05": 0,
+        "median_delta": -0.08151895792917385,
+        "delta_by_band": {
+          "delta_HYP_slow": 0.33226395387655017,
+          "theta_preictal_PAC": -0.08151895792917385,
+          "alpha_sharp_leq13": -0.5163495834123988,
+          "beta_LVFA_low": 0.1274483342862882,
+          "gamma_LVFA": 0.10109012195892497,
+          "hg_low_ripple": -0.5783008238178693,
+          "ripple_high": -0.13368029581743301
+        },
+        "subject_self_null_p_by_band": {
+          "delta_HYP_slow": 0.061938061938061936,
+          "theta_preictal_PAC": 0.5884115884115884,
+          "alpha_sharp_leq13": 0.955044955044955,
+          "beta_LVFA_low": 0.34765234765234765,
+          "gamma_LVFA": 0.29270729270729273,
+          "hg_low_ripple": 0.986013986013986,
+          "ripple_high": 0.6643356643356644
+        }
+      }
+    ]
+  },
+  "direct_between_band_test": {
+    "n_subjects": 17,
+    "n_bands": 7,
+    "friedman_statistic": 5.243697478991635,
+    "kendall_w": 0.05140879881364348,
+    "calibrated_p": 0.5217947820521794,
+    "n_permutations": 100000
+  },
+  "claim_boundary": "Bandwise significance against each band's own null does not establish a difference between bands; use the direct omnibus test for that question.",
+  "outputs": {
+    "png": "results/paper-ready-figure/supp_fig5_multiband_field_concordance/figures/supp_fig5_multiband_cohort_and_subject_heatmap.png",
+    "pdf": "results/paper-ready-figure/supp_fig5_multiband_field_concordance/figures/supp_fig5_multiband_cohort_and_subject_heatmap.pdf"
+  }
+}

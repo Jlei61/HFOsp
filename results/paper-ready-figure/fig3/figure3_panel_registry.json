@@ -1,5 +1,5 @@
 {
-  "schema_version": "paper_figure3_panels_and_complete_layout_v11",
+  "schema_version": "paper_figure3_panels_and_complete_layout_v12",
   "producer": "scripts/paper_figures/build_main_figure_3.py",
   "panel_letters_in_individual_files": false,
   "panel_letters_in_complete_layout": true,
@@ -50,7 +50,7 @@
     "b": "continuous representative E10 SZ8 SCL9 versus E20 SZ8 HRB1 band-power trajectories with 0-s onset markers, dB y labels, and unobstructed Broadband/Gamma legend",
     "c": "title-free all-event Timing+Space interictal TA field with Fig2-matched normalized ranks versus E10 | SZ3 early ictal field; power colorbar shown as z",
     "d": "all-event Timing+Space clinical-onset gradient-field cohort, n=17/16/11",
-    "e": "E10 all-event Timing+Space amplitude-aware template expression trajectories with per-axis upper-left stacked legends",
+    "e": "E10 all-event Timing+Space amplitude-aware template expression trajectories with per-axis upper-right framed stacked legends",
     "f": "17-subject all-event Timing+Space signed A/B contrast heatmap"
   },
   "final_typography_contract": {
@@ -70,7 +70,7 @@
     "exceptions": {
       "a_raw_channel_names": "dense tick tier",
       "f_subject_labels": "dense tick tier"
-    },
-    "layout_changed": "top-row A/B width allocation only; C-F unchanged"
-  }
+    }
+  },
+  "layout_changed": "A/B placement unchanged; C and E share one left-block width, D and F share one compact right-block width, and rendered E/F heights are matched"
 }

@@ -1,0 +1,21 @@
+{
+  "figure": "Supplementary Figure 1",
+  "status": "legacy morphology and spectral validation asset",
+  "source_tiff": "ReplayIED/tiffs/fig_s2_画板 1.tif",
+  "source_producers": [
+    "ReplayIED/inter_events/yuquan_24h_perPatientAnalysis_dropRef/plotting_fig4_hfoSpike_clusterAnalysis_specs.py",
+    "ReplayIED/inter_events/yuquan_24h_perPatientAnalysis_dropRef/plotting_fig4_hfoSpike_clusterAnalysis_specsNorm.py"
+  ],
+  "manual_annotation_counts": {
+    "HFO": 178,
+    "Spike": 202,
+    "Coupled": 296
+  },
+  "claim_boundary": "Legacy manually annotated event-phenotype validation; not a current-cohort denominator or a re-estimated two-cohort statistic.",
+  "caption_zh": "人工标注的间期 HFO、棘波与耦合事件具有可区分的形态和频谱特征。A，三类事件的单事件波形、平均波形以及平均原始和基线归一化时频图。B，三类事件的平均归一化频谱能量曲线；HFO 事件在约 80 Hz 处呈现主要高频峰，棘波以低频成分为主，耦合事件在约 120 Hz 处呈现独立高频峰。图中 n 表示历史人工标注验证集中的事件数，不作为当前双队列分析的患者分母。",
+  "outputs": {
+    "preview_png": "results/paper-ready-figure/supp_fig1_interictal_event_phenotypes/figures/supp_fig1_interictal_event_phenotypes.png",
+    "publication_pdf": "results/paper-ready-figure/supp_fig1_interictal_event_phenotypes/figures/supp_fig1_interictal_event_phenotypes.pdf",
+    "publication_tiff": "results/paper-ready-figure/supp_fig1_interictal_event_phenotypes/figures/supp_fig1_interictal_event_phenotypes.tif"
+  }
+}

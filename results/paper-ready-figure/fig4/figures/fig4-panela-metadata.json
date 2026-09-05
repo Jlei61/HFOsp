@@ -1,0 +1,144 @@
+{
+  "status": "AUTHOR_ACCEPTED_CANONICAL",
+  "producer": "scripts/paper_figures/build_fig4_panel_a_combined.py",
+  "composition_only": false,
+  "simulation_rerun": false,
+  "scientific_values_recomputed": false,
+  "panel_a_redrawn": false,
+  "right_substrate_rendering": "same frozen figdata with redundant display layers suppressed",
+  "sources": {
+    "local_circuit": {
+      "path": "results/paper-ready-figure/archive/2026-09-03_pre_combined_fig4_ab/fig4/figures/fig4-panela.png",
+      "sha256": "830ff538160851c8f4c6f3533c567b97cd2277aa048481dbd6638843371f5880"
+    },
+    "patient_substrate": {
+      "path": "results/paper-ready-figure/archive/2026-09-03_pre_combined_fig4_ab/fig4/figures/fig4-panelb.png",
+      "sha256": "46535ddd902819f05ba2d1be3983fa454cc8a00e156123ba9debc3e7f27211bb",
+      "role": "accepted visual lineage; clean right panel uses the same frozen figdata"
+    },
+    "clean_patient_substrate": {
+      "figdata_path": "results/topic4_sef_hfo/field_swap_subject_snn/figdata_epilepsiae_1146_gradient_shared_corefrozen_cr1p5_s5_20260722.npz",
+      "figdata_sha256": "a8f46627fe2726fa73ef0130cbc3342414906d53f08f2ebc714173c0223056d2",
+      "removed_display_layers": [
+        "anisotropic E-to-E corridor and label",
+        "possible data driven core contours and label",
+        "historical discrete core outlines, labels, and connecting line"
+      ],
+      "preserved_information": [
+        "frozen E-neuron positions",
+        "deterministically reconstructed I-neuron positions",
+        "patient contact geometry",
+        "E/I neuron legend"
+      ],
+      "seeg_sampling_overlay": {
+        "readout": "virtual-contact firing-density envelope used by Figure 4F",
+        "kernel": "normalized isotropic Gaussian without hard cutoff",
+        "sigma_mm": 0.25,
+        "displayed_radius": "theoretical 95% mass radius",
+        "displayed_radius_mm": 0.6119367076702041,
+        "contact_span_xy_mm": [
+          16.0,
+          12.394053650997996
+        ],
+        "color": "#245C3F",
+        "alpha": 0.12,
+        "not_the_current_lfp_cutoff": "LFPRecorder Rr=0.278 mm is a separate path"
+      }
+    }
+  },
+  "layout": {
+    "canvas_px": [
+      6000,
+      3000
+    ],
+    "local_circuit_role": "smaller left-side conceptual detail",
+    "patient_substrate_role": "larger right-side main panel",
+    "a_crop_px": [
+      187,
+      0,
+      2773,
+      2218
+    ],
+    "a_placed_box_px": [
+      183,
+      470,
+      2596,
+      2540
+    ],
+    "a_dashed_inset_box_px": [
+      153,
+      630,
+      2626,
+      2570
+    ],
+    "a_title": {
+      "text": "Local E/I circuit",
+      "position": "centered above dashed inset box",
+      "font_px_at_600_dpi": 112
+    },
+    "a_scale_bar": {
+      "label_mm": 0.5,
+      "length_px": 738,
+      "calibration": "outer A ellipse is assigned to the e^-1 contour of the frozen elliptical-exponential E-to-E kernel; its full long-axis diameter is 2*l_par",
+      "l_EE_mm": 0.38,
+      "AR": 2.0,
+      "l_par_mm": 0.5374011537017762,
+      "outer_ellipse_diameter_mm": 1.0748023074035524
+    },
+    "b_placed_box_px": [
+      3260,
+      90,
+      5840,
+      2670
+    ],
+    "b_xy_frame": {
+      "style": "solid",
+      "xlim_mm": [
+        -10.0,
+        10.0
+      ],
+      "ylim_mm": [
+        -10.0,
+        10.0
+      ],
+      "ticks_mm": [
+        -10,
+        0,
+        10
+      ],
+      "labels": [
+        "x (mm)",
+        "y (mm)"
+      ]
+    },
+    "zoom_center": {
+      "contact": "SCL9",
+      "xy_mm": [
+        -4.502,
+        6.197
+      ]
+    },
+    "zoom_field_of_view_mm": [
+      1.6754742547425474,
+      1.3143631436314362
+    ],
+    "zoom_data_box_mm": [
+      -5.339737127371274,
+      5.539818428184282,
+      -3.664262872628726,
+      6.854181571815718
+    ],
+    "representative_callout_canvas_box_px": [
+      3861,
+      496,
+      4077,
+      665
+    ],
+    "connector_style": "dashed"
+  },
+  "semantic_boundary": "The callout indicates a representative local E/I neighbourhood. Panel A is a conceptual mechanism schematic, not a coordinate-exact crop of panel B and not a recovered anatomical core. The right panel retains only E/I positions and patient contact geometry.",
+  "outputs": [
+    "results/paper-ready-figure/fig4/figures/fig4-panela.png",
+    "results/paper-ready-figure/fig4/figures/fig4-panela.pdf"
+  ]
+}

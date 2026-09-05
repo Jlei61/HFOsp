@@ -1,0 +1,168 @@
+{
+  "figure": "Supplementary Figure 2",
+  "caption": "Supplementary Fig. 2 | SOZ localization of raw and group-event-filtered interictal HFO burden. A, Subject-level receiver operating characteristic curves for distinguishing clinically labelled seizure onset zone (SOZ) from non-SOZ contacts using contact-wise group-event-filtered high-frequency oscillation (HFO) burden in the Yuquan (20 patients) and Epilepsiae (15 patients) cohorts; grey lines denote individual patients, coloured lines the cohort mean, shading the s.e.m., and inset points the patient-level area under the curve (AUC), with the black line indicating the mean. Mean AUC was 0.873 in Yuquan and 0.955 in Epilepsiae. B, Paired patient-level AUC before (Raw) and after restricting refined HFO detections to accepted population-event windows (Synchronized); bars and black horizontal lines indicate cohort means, and points joined by lines denote paired patients (Yuquan, 0.837 versus 0.873; Epilepsiae, 0.939 versus 0.955). Statistical significance was assessed using a two-sided paired Wilcoxon test; *P < 0.05; n.s., P ≥ 0.05.",
+  "panel_a": {
+    "question": "Does synchronized/refined interictal HFO burden distinguish clinical SOZ from non-SOZ contacts within subjects?",
+    "score": "refined events_count per contact",
+    "roc": {
+      "yuquan": {
+        "dataset": "yuquan",
+        "n_subjects": 20,
+        "mean_subject_auc": 0.8725709572552504,
+        "median_subject_auc": 0.9132387532771389,
+        "axis_limits": {
+          "fpr": [
+            0.0,
+            1.0
+          ],
+          "tpr": [
+            0.0,
+            1.0
+          ]
+        },
+        "curve_band": "SEM across subject ROC curves after interpolation to 201 FPR points",
+        "patients": [
+          "Y3",
+          "Y12",
+          "Y19",
+          "Y13",
+          "Y14",
+          "Y4",
+          "Y15",
+          "Y5",
+          "Y2",
+          "Y6",
+          "Y18",
+          "Y20",
+          "Y16",
+          "Y7",
+          "Y8",
+          "Y17",
+          "Y1",
+          "Y9",
+          "Y10",
+          "Y11"
+        ]
+      },
+      "epilepsiae": {
+        "dataset": "epilepsiae",
+        "n_subjects": 15,
+        "mean_subject_auc": 0.9547759656025334,
+        "median_subject_auc": 0.9791666666666666,
+        "axis_limits": {
+          "fpr": [
+            0.0,
+            1.0
+          ],
+          "tpr": [
+            0.0,
+            1.0
+          ]
+        },
+        "curve_band": "SEM across subject ROC curves after interpolation to 201 FPR points",
+        "patients": [
+          "E8",
+          "E18",
+          "E2",
+          "E1",
+          "E10",
+          "E6",
+          "E16",
+          "E9",
+          "E7",
+          "E14",
+          "E13",
+          "E5",
+          "E20",
+          "E4",
+          "E3"
+        ]
+      }
+    },
+    "auc_inset": "one dot per subject; black bar is subject-mean AUC"
+  },
+  "panel_b": {
+    "question": "Does restricting raw HFO detections to accepted group-event windows improve subject-level SOZ AUC?",
+    "paired_subject_contract": {
+      "yuquan": {
+        "dataset": "yuquan",
+        "n_subjects_paired": 20,
+        "raw_mean_auc": 0.8366505460387025,
+        "raw_median_auc": 0.8491943760262726,
+        "synchronized_mean_auc": 0.8725709572552504,
+        "synchronized_median_auc": 0.9132387532771389,
+        "mean_delta_auc": 0.035920411216547835,
+        "median_delta_auc": 0.023461095092973727,
+        "n_improved": 14,
+        "wilcoxon_two_sided_statistic": 27.0,
+        "wilcoxon_two_sided_p": 0.010843698055191907,
+        "patients": [
+          "Y3",
+          "Y12",
+          "Y19",
+          "Y13",
+          "Y14",
+          "Y4",
+          "Y15",
+          "Y5",
+          "Y2",
+          "Y6",
+          "Y18",
+          "Y20",
+          "Y16",
+          "Y7",
+          "Y8",
+          "Y17",
+          "Y1",
+          "Y9",
+          "Y10",
+          "Y11"
+        ]
+      },
+      "epilepsiae": {
+        "dataset": "epilepsiae",
+        "n_subjects_paired": 15,
+        "raw_mean_auc": 0.93895364711883,
+        "raw_median_auc": 0.9475655430711611,
+        "synchronized_mean_auc": 0.9547759656025334,
+        "synchronized_median_auc": 0.9791666666666666,
+        "mean_delta_auc": 0.01582231848370359,
+        "median_delta_auc": 0.029962546816479363,
+        "n_improved": 10,
+        "wilcoxon_two_sided_statistic": 24.0,
+        "wilcoxon_two_sided_p": 0.13295729296233563,
+        "patients": [
+          "E8",
+          "E18",
+          "E2",
+          "E1",
+          "E10",
+          "E6",
+          "E16",
+          "E9",
+          "E7",
+          "E14",
+          "E13",
+          "E5",
+          "E20",
+          "E4",
+          "E3"
+        ]
+      }
+    },
+    "test": "two-sided paired Wilcoxon, matching the accepted SOZ validation producer",
+    "terminology": "Synchronized = refined HFO count inside accepted group-event windows; identical to the current _refineGpu event-count artifact."
+  },
+  "source_artifacts": [
+    "results/hfo_detection/<subject>/*_gpu.npz",
+    "results/hfo_detection/<subject>/_refineGpu.npz",
+    "results/yuquan_soz_core_channels.json",
+    "results/epilepsiae_soz_core_channels.json",
+    "config/subject_params.json"
+  ],
+  "subject_table": "results/paper-ready-figure/supp_fig2_soz_auc/subject_auc_raw_vs_synchronized.csv",
+  "outputs": {
+    "png": "results/paper-ready-figure/supp_fig2_soz_auc/figures/supp_fig2_soz_auc_raw_vs_synchronized.png",
+    "pdf": "results/paper-ready-figure/supp_fig2_soz_auc/figures/supp_fig2_soz_auc_raw_vs_synchronized.pdf"
+  }
+}

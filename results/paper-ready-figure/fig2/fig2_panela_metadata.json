@@ -1,0 +1,222 @@
+{
+  "schema_version": "fig2_mixed_subject_implant_projection_2x2_v7",
+  "subject_id": "epilepsiae_1146",
+  "display_label": "E10",
+  "overview_subject_id": "yuquan_zhaochenxi",
+  "overview_display_label": "Y9",
+  "subject_continuity_across_panels": false,
+  "input_artifact": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/template_gradient_fields/per_subject/epilepsiae_1146.json",
+  "input_contract": "topic5_interictal_template_fields_v1",
+  "input_fingerprint_algorithm": "sha256_v1p1_nonfinite_canonical",
+  "input_fingerprint_sha256": "18bf1de782f41878a97b940f85ff1ceedbd9dfcacb9fe79779772b44f9aae056",
+  "coordinate_space": "mni152_1mm",
+  "visual_story": [
+    "author_supplied_y9_implantation_overview",
+    "subject_t1_local_cutaway",
+    "local_electrode_geometry_to_plane",
+    "contact_projection_with_gaussian_support_coverage"
+  ],
+  "implantation_overview": {
+    "source_image": "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/assets/fig2_y9_implantation_overview.png",
+    "source_image_sha256": "631a4b737ed9c779ed74ce8d799a17b53b6f83b704c7e79ff0ece01955b717a2",
+    "source_image_shape_px": [
+      392,
+      488
+    ],
+    "subject_id": "yuquan_zhaochenxi",
+    "display_label": "Y9",
+    "role": "representative implantation overview",
+    "same_subject_as_projection_stages": false
+  },
+  "anatomical_context": {
+    "source_t1": "/home/honglab/leijiaxin/HFOsp/exports/epilepsiae_1146_mni_bundle/epilepsiae_1146_T1_mni152_1mm.nii.gz",
+    "source_t1_sha256": "2445dc2fbffa7c02cc2dbe266eac988eb48db0262a56278ca6774e31d47a4a46",
+    "source_t1_shape": [
+      182,
+      218,
+      182
+    ],
+    "source_t1_affine": [
+      [
+        -1.0,
+        0.0,
+        0.0,
+        90.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        -126.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        -72.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "source_t1_description": "subject-specific skull-stripped T1",
+    "local_cutaway": "three orthogonal T1 planes through local-contact centroid",
+    "world_coordinate_convention": "RAS+",
+    "normalization_certainty": "grid_confirmed_warp_type_unverified"
+  },
+  "implantation": {
+    "n_all_invasive_contacts": 114,
+    "local_context_shafts": [
+      "ICL",
+      "SCL"
+    ],
+    "n_local_context_contacts": 20,
+    "local_context_contacts": [
+      "ICL1",
+      "ICL10",
+      "ICL11",
+      "ICL2",
+      "ICL3",
+      "ICL4",
+      "ICL5",
+      "ICL6",
+      "ICL7",
+      "ICL8",
+      "ICL9",
+      "SCL1",
+      "SCL2",
+      "SCL3",
+      "SCL4",
+      "SCL5",
+      "SCL6",
+      "SCL7",
+      "SCL8",
+      "SCL9"
+    ],
+    "n_analysis_contacts": 15,
+    "analysis_contacts": [
+      "SCL6",
+      "SCL7",
+      "SCL8",
+      "SCL9",
+      "ICL1",
+      "ICL2",
+      "ICL3",
+      "ICL4",
+      "ICL5",
+      "ICL6",
+      "ICL7",
+      "ICL8",
+      "ICL9",
+      "ICL10",
+      "ICL11"
+    ],
+    "local_context_not_selected": [
+      "SCL1",
+      "SCL2",
+      "SCL3",
+      "SCL4",
+      "SCL5"
+    ],
+    "selection_contract": "joint_valid_mapped_and_positive_support_in_both_TA_TB",
+    "selected_subset_of_local_context": true
+  },
+  "projection_plane": {
+    "source": "frozen_patient_shared_plane",
+    "u": [
+      0.9217298176159541,
+      0.38770567763339253,
+      0.009922240094450367
+    ],
+    "w_after_display_sign": [
+      -0.0716871663855997,
+      0.14517423772509694,
+      0.9868056500023397
+    ],
+    "normal": [
+      0.38114969958438033,
+      -0.9102794890756184,
+      0.1616049450820355
+    ],
+    "origin_mm": [
+      -26.466666666666665,
+      -80.06666666666666,
+      0.7333333333333333
+    ],
+    "transverse_sign": -1,
+    "selected_normal_residual_max_abs_mm": 0.8217342200558203,
+    "selected_normal_residual_rms_mm": 0.43184575486657,
+    "local_context_normal_residual_max_abs_mm": 4.40742532868511,
+    "projection_contact_marker_contract": "grey local-context contacts may lie farther from the frozen plane than selected analysis contacts; the measured 2-D coordinates are unchanged"
+  },
+  "rendering": {
+    "layout": "2x2",
+    "projection_focus_shafts": [
+      "ICL",
+      "SCL"
+    ],
+    "straight_shaft_display_fit": {
+      "ICL": {
+        "n_contacts": 11,
+        "max_residual_mm": 0.6058926337075232,
+        "rms_residual_mm": 0.39418986883109014
+      },
+      "SCL": {
+        "n_contacts": 9,
+        "max_residual_mm": 0.5333716727324938,
+        "rms_residual_mm": 0.34898864708074584
+      }
+    },
+    "normal_display_exaggeration": 3.0,
+    "normal_display_exaggeration_scope": "3-D electrode-geometry stage only; measured x/y projection is unchanged",
+    "display_plane_normal_offset_units": -1.15,
+    "display_plane_offset_scope": "3-D display separation only; frozen 2-D coordinates are unchanged",
+    "pipeline_arrows_rendered": false,
+    "panel_grid_equal_width_height": true,
+    "narrative_panel_titles_rendered": false,
+    "view_identity_source": "figure legend",
+    "legend_rendered": false,
+    "geometry_padding_fraction": 0.18,
+    "geometry_box_zoom": 1.0,
+    "geometry_panel_vertical_shift_figure_fraction": 0.015,
+    "projection_panel_scale_in_cell": 0.84,
+    "shaft_labels_rendered": {
+      "e1146_anatomy": [
+        "ICL",
+        "SCL"
+      ],
+      "electrodes_projection": [
+        "ICL",
+        "SCL"
+      ],
+      "local_field": [
+        "ICL",
+        "SCL"
+      ]
+    },
+    "figure_size_inches": [
+      5.8,
+      3.85
+    ],
+    "propagation_direction_glyphs_rendered": true,
+    "propagation_direction_glyphs_scope": "present only inside the author-supplied Y9 implantation overview; the E10 anatomy, projection geometry, and Gaussian-support stages remain direction-free",
+    "e1146_projection_direction_glyphs_rendered": false,
+    "template_labels_rendered": false,
+    "template_rank_fields_rendered": false,
+    "continuous_template_rank_interpolation_rendered": false,
+    "rank_colormap_rendered": false,
+    "gaussian_support_coverage_rendered": true,
+    "gaussian_support_source": "mean_of_frozen_support_a_and_support_b",
+    "gaussian_display_sigma_mm": 6.0,
+    "gaussian_kernel_exemplar_contact": "ICL3",
+    "gaussian_support_is_measured_tissue_field": false,
+    "context_contact_color": "#D9DEE0",
+    "analysis_contact_color": "#2B7C87",
+    "png_dpi": 600,
+    "pdf_fonttype": 42
+  },
+  "claim_boundary": "Spatial-method illustration only. The Y9 overview and the E10 projection stages are representative examples from different subjects and are labelled as such; the ordered 2x2 layout is not a same-subject zoom. E10 anatomy and contact locations use its frozen MNI-grid bundle, whose historical warp type is unverified. The 6-mm Gaussian layer shows display support coverage, not measured tissue activity or the analysis scoring kernel. The direction glyphs visible in the supplied Y9 overview are not propagated into the E10 projection stages, and no rank field is shown."
+}

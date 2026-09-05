@@ -1,0 +1,570 @@
+{
+  "schema_id": "fig2c_interictal_event_envelope_field_candidate_v13",
+  "status": "paper-ready Fig2-C candidate; representative subject, not final locked panel",
+  "ds_sid": "epilepsiae_1146",
+  "public_patient_label": "E10",
+  "canonical_producer": "scripts/paper_figures/build_main_figures_1_2.py",
+  "source_producer": "scripts/paper_figures/plot_fig2c_interictal_event_envelope_field.py",
+  "core_renderer": "scripts/plot_topic5_interictal_event_envelope_field.py",
+  "source_metadata": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/event_envelope_fields/epilepsiae_1146_event_envelope_field.json",
+  "frozen_fingerprint": "18bf1de782f41878a97b940f85ff1ceedbd9dfcacb9fe79779772b44f9aae056",
+  "frozen_contract": "axis/shared plane/contact_order reused; nothing refit",
+  "claim_scope": "raw-EEG-derived envelope timing cross-check on a previously frozen interictal axis; NOT an independent data validation (axis, TA/TB labels, exemplar selection, participants and window all come from the template pipeline)",
+  "exemplar": {
+    "TA": {
+      "selection_mode": "explicit_event_pos_after_locked_candidate_screen",
+      "selected_event_pos": 6344,
+      "caveat": "direction-qualified illustrative exemplar selected under the locked candidate-screen contract; NOT an unconditional representative of all TA/TB events",
+      "event_pos": 6344,
+      "block": "114600102_0026",
+      "t_in_block_sec": 3378.15700006485,
+      "packed_window_ms": 250.0,
+      "concurrent_interval_ms": 43.9453125,
+      "fs_hz": 1024.0,
+      "n_participating": 15,
+      "n_with_usable_fig1a_centroid": 15,
+      "stored_spread_ms": 42.28669436548582,
+      "fig1a_centroid_vs_stored_rho": 0.9892857142857142,
+      "fig1a_centroid_vs_stored_median_abs_dt_ms": 0.9353308374604463,
+      "fig1a_centroid_alignment": {
+        "n_centroids": 15,
+        "minimum_display_weight_at_nearest_cell": 0.8293270784819422,
+        "median_display_weight_at_nearest_cell": 0.9920004938284176,
+        "acceptance_threshold": 0.7,
+        "all_centroids_pass": true,
+        "centroids": [
+          {
+            "channel_index": 0,
+            "event_index_within_panel": 0,
+            "time_within_event_sec": 0.12670011533076578,
+            "frequency_hz": 108.68420755737205,
+            "display_weight_at_nearest_cell": 0.9560588019493931
+          },
+          {
+            "channel_index": 1,
+            "event_index_within_panel": 0,
+            "time_within_event_sec": 0.11774878016699275,
+            "frequency_hz": 140.39011808861034,
+            "display_weight_at_nearest_cell": 1.0
+          },
+          {
+            "channel_index": 2,
+            "event_index_within_panel": 0,
+            "time_within_event_sec": 0.12104868432883518,
+            "frequency_hz": 144.19442564885892,
+            "display_weight_at_nearest_cell": 0.9920004938284176
+          },
+          {
+            "channel_index": 3,
+            "event_index_within_panel": 0,
+            "time_within_event_sec": 0.11239860956037312,
+            "frequency_hz": 108.02112352456794,
+            "display_weight_at_nearest_cell": 0.9904707263039522
+          },
+          {
+            "channel_index": 4,
+            "event_index_within_panel": 0,
+            "time_within_event_sec": 0.15523511859568656,
+            "frequency_hz": 77.68945152564194,
+            "display_weight_at_nearest_cell": 0.9576672409014956
+          },
+          {
+            "channel_index": 5,
+            "event_index_within_panel": 0,
+            "time_within_event_sec": 0.147972791415374,
+            "frequency_hz": 97.17041943167578,
+            "display_weight_at_nearest_cell": 1.0
+          },
+          {
+            "channel_index": 6,
+            "event_index_within_panel": 0,
+            "time_within_event_sec": 0.14358059043817206,
+            "frequency_hz": 76.59619277181554,
+            "display_weight_at_nearest_cell": 0.96927337053361
+          },
+          {
+            "channel_index": 7,
+            "event_index_within_panel": 0,
+            "time_within_event_sec": 0.14138358624220948,
+            "frequency_hz": 150.18992966775377,
+            "display_weight_at_nearest_cell": 0.9962030225628944
+          },
+          {
+            "channel_index": 8,
+            "event_index_within_panel": 0,
+            "time_within_event_sec": 0.14186393178228673,
+            "frequency_hz": 94.84321867940484,
+            "display_weight_at_nearest_cell": 0.8331831325111885
+          },
+          {
+            "channel_index": 9,
+            "event_index_within_panel": 0,
+            "time_within_event_sec": 0.12629949809109892,
+            "frequency_hz": 151.4860728075556,
+            "display_weight_at_nearest_cell": 1.0
+          },
+          {
+            "channel_index": 10,
+            "event_index_within_panel": 0,
+            "time_within_event_sec": 0.12281154287133739,
+            "frequency_hz": 96.55228092558009,
+            "display_weight_at_nearest_cell": 0.9563301663947991
+          },
+          {
+            "channel_index": 11,
+            "event_index_within_panel": 0,
+            "time_within_event_sec": 0.11894399686594875,
+            "frequency_hz": 126.80722456305487,
+            "display_weight_at_nearest_cell": 0.8293270784819422
+          },
+          {
+            "channel_index": 12,
+            "event_index_within_panel": 0,
+            "time_within_event_sec": 0.11763427836365797,
+            "frequency_hz": 96.19259745827713,
+            "display_weight_at_nearest_cell": 0.9998060120772964
+          },
+          {
+            "channel_index": 13,
+            "event_index_within_panel": 0,
+            "time_within_event_sec": 0.11832447608452366,
+            "frequency_hz": 113.6548366325641,
+            "display_weight_at_nearest_cell": 1.0
+          },
+          {
+            "channel_index": 14,
+            "event_index_within_panel": 0,
+            "time_within_event_sec": 0.11455961968691773,
+            "frequency_hz": 116.36145542904495,
+            "display_weight_at_nearest_cell": 1.0
+          }
+        ]
+      },
+      "stats": {
+        "all_participants": {
+          "n": 15,
+          "fig1a_centroid_vs_axis_rho": 0.9285714285714284,
+          "n_fig1a_centroid": 15,
+          "stored_lag_vs_axis_rho": 0.9249999999999998,
+          "n_stored": 15,
+          "centroid_range_ms": [
+            0.0,
+            42.836509035169
+          ]
+        },
+        "shaft_ICL": {
+          "n": 11,
+          "fig1a_centroid_vs_axis_rho": 0.9818181818181818,
+          "n_fig1a_centroid": 11,
+          "stored_lag_vs_axis_rho": 0.990909090909091,
+          "n_stored": 11,
+          "centroid_range_ms": [
+            2.1610101266560378,
+            42.836509035169
+          ]
+        },
+        "shaft_SCL": {
+          "n": 4,
+          "fig1a_centroid_vs_axis_rho": 0.7999999999999999,
+          "n_fig1a_centroid": 4,
+          "stored_lag_vs_axis_rho": 0.7999999999999999,
+          "n_stored": 4,
+          "centroid_range_ms": [
+            0.0,
+            14.301505770163203
+          ]
+        }
+      }
+    },
+    "TB": {
+      "selection_mode": "explicit_event_pos_after_locked_candidate_screen",
+      "selected_event_pos": 937,
+      "caveat": "direction-qualified illustrative exemplar selected under the locked candidate-screen contract; NOT an unconditional representative of all TA/TB events",
+      "event_pos": 937,
+      "block": "114600102_0009",
+      "t_in_block_sec": 2856.191999912262,
+      "packed_window_ms": 250.0,
+      "concurrent_interval_ms": 41.015625,
+      "fs_hz": 1024.0,
+      "n_participating": 11,
+      "n_with_usable_fig1a_centroid": 11,
+      "stored_spread_ms": 74.07557570402746,
+      "fig1a_centroid_vs_stored_rho": 0.9454545454545454,
+      "fig1a_centroid_vs_stored_median_abs_dt_ms": 2.364288891586014,
+      "fig1a_centroid_alignment": {
+        "n_centroids": 15,
+        "minimum_display_weight_at_nearest_cell": 0.9342552866120535,
+        "median_display_weight_at_nearest_cell": 0.9861901164629848,
+        "acceptance_threshold": 0.7,
+        "all_centroids_pass": true,
+        "centroids": [
+          {
+            "channel_index": 0,
+            "event_index_within_panel": 0,
+            "time_within_event_sec": 0.1331475027464608,
+            "frequency_hz": 102.88355188346185,
+            "display_weight_at_nearest_cell": 0.9742539363795917
+          },
+          {
+            "channel_index": 1,
+            "event_index_within_panel": 0,
+            "time_within_event_sec": 0.1379738679688975,
+            "frequency_hz": 114.85540151384888,
+            "display_weight_at_nearest_cell": 1.0
+          },
+          {
+            "channel_index": 2,
+            "event_index_within_panel": 0,
+            "time_within_event_sec": 0.083924671324017,
+            "frequency_hz": 117.64616106106843,
+            "display_weight_at_nearest_cell": 0.9342552866120535
+          },
+          {
+            "channel_index": 3,
+            "event_index_within_panel": 0,
+            "time_within_event_sec": 0.0702488842903169,
+            "frequency_hz": 109.86050663952307,
+            "display_weight_at_nearest_cell": 0.9824008889512166
+          },
+          {
+            "channel_index": 4,
+            "event_index_within_panel": 0,
+            "time_within_event_sec": 0.08301129858658768,
+            "frequency_hz": 122.03533884259275,
+            "display_weight_at_nearest_cell": 0.9881425158272873
+          },
+          {
+            "channel_index": 5,
+            "event_index_within_panel": 0,
+            "time_within_event_sec": 0.09159813132966517,
+            "frequency_hz": 126.1178979805497,
+            "display_weight_at_nearest_cell": 0.9746816412723897
+          },
+          {
+            "channel_index": 6,
+            "event_index_within_panel": 0,
+            "time_within_event_sec": 0.09416392566527773,
+            "frequency_hz": 128.29424056872068,
+            "display_weight_at_nearest_cell": 0.9798750357085156
+          },
+          {
+            "channel_index": 7,
+            "event_index_within_panel": 0,
+            "time_within_event_sec": 0.09817408705528516,
+            "frequency_hz": 134.5807038313078,
+            "display_weight_at_nearest_cell": 1.0
+          },
+          {
+            "channel_index": 8,
+            "event_index_within_panel": 0,
+            "time_within_event_sec": 0.10275849928250552,
+            "frequency_hz": 130.09748479727847,
+            "display_weight_at_nearest_cell": 1.0
+          },
+          {
+            "channel_index": 9,
+            "event_index_within_panel": 0,
+            "time_within_event_sec": 0.1241034412137168,
+            "frequency_hz": 138.55448126059673,
+            "display_weight_at_nearest_cell": 1.0
+          },
+          {
+            "channel_index": 10,
+            "event_index_within_panel": 0,
+            "time_within_event_sec": 0.14137730877836568,
+            "frequency_hz": 142.49896113509828,
+            "display_weight_at_nearest_cell": 1.0
+          },
+          {
+            "channel_index": 11,
+            "event_index_within_panel": 0,
+            "time_within_event_sec": 0.14460906192121806,
+            "frequency_hz": 114.54331352549426,
+            "display_weight_at_nearest_cell": 0.9740542406462688
+          },
+          {
+            "channel_index": 12,
+            "event_index_within_panel": 0,
+            "time_within_event_sec": 0.15945116318218908,
+            "frequency_hz": 131.30594055940895,
+            "display_weight_at_nearest_cell": 1.0
+          },
+          {
+            "channel_index": 13,
+            "event_index_within_panel": 0,
+            "time_within_event_sec": 0.14655662769795005,
+            "frequency_hz": 128.96191543695653,
+            "display_weight_at_nearest_cell": 0.9603591459586749
+          },
+          {
+            "channel_index": 14,
+            "event_index_within_panel": 0,
+            "time_within_event_sec": 0.13383131458886724,
+            "frequency_hz": 128.27338529972658,
+            "display_weight_at_nearest_cell": 0.9861901164629848
+          }
+        ]
+      },
+      "stats": {
+        "all_participants": {
+          "n": 11,
+          "fig1a_centroid_vs_axis_rho": -0.8454545454545455,
+          "n_fig1a_centroid": 11,
+          "stored_lag_vs_axis_rho": -0.8636363636363636,
+          "n_stored": 11,
+          "centroid_range_ms": [
+            0.0,
+            76.43986459561347
+          ]
+        },
+        "shaft_ICL": {
+          "n": 9,
+          "fig1a_centroid_vs_axis_rho": -0.8166666666666667,
+          "n_fig1a_centroid": 9,
+          "stored_lag_vs_axis_rho": -0.8166666666666667,
+          "n_stored": 9,
+          "centroid_range_ms": [
+            0.0,
+            76.43986459561347
+          ]
+        },
+        "shaft_SCL": {
+          "n": 2,
+          "fig1a_centroid_vs_axis_rho": NaN,
+          "n_fig1a_centroid": 2,
+          "stored_lag_vs_axis_rho": NaN,
+          "n_stored": 2,
+          "centroid_range_ms": [
+            50.136204160025954,
+            54.96256938249644
+          ]
+        }
+      }
+    }
+  },
+  "static": {
+    "figure": "/tmp/hfosp_fig2c_samples_20260902/fig2c_candidate_E10_interictal_event_envelope_field.png",
+    "extra_outputs": [
+      "/tmp/hfosp_fig2c_samples_20260902/fig2c_candidate_E10_interictal_event_envelope_field.pdf"
+    ],
+    "panel_c_outputs": [
+      "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig2/figures/fig2-panelc.png",
+      "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig2/figures/fig2-panelc.pdf"
+    ],
+    "panel_d_outputs": [
+      "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig2/figures/fig2-paneld.png",
+      "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig2/figures/fig2-paneld.pdf"
+    ],
+    "t_lo_ms": -8.0,
+    "t_hi_ms": 50.0,
+    "vmax": 1.0,
+    "frame_times_ms": [
+      0.0,
+      16.0,
+      32.0,
+      48.0
+    ],
+    "support_mode": "participant",
+    "cmap": "fig2c_soft_teal_navy",
+    "normalization_mode": "per_frame_participant_top3_mean_robust_z",
+    "display_norm": "fixed_power_norm_gamma_0p50",
+    "display_gamma": 0.5,
+    "frame_normalization_scales_robust_z": {
+      "TA": [
+        37.37540274281549,
+        22.790493773588157,
+        16.774942171529407,
+        20.273114951349953
+      ],
+      "TB": [
+        12.001662516424423,
+        10.273386279570246,
+        20.474945467764744,
+        24.22842893882537
+      ]
+    },
+    "frame_normalization_reference": "within each displayed static frame, mean of the three strongest participating-contact envelopes equals 1; values are clipped to 0..1",
+    "selection_normalization_mode": "per_event_participant_q99_over_complete_display_window",
+    "complete_window_q99_robust_z_for_selection_and_audit": {
+      "TA": 52.76633443816466,
+      "TB": 27.9388852194599
+    },
+    "static_frame_selection": {
+      "selection_mode": "equal_interval_full_field_hotspot_v6",
+      "rendered_pixels_used": false,
+      "times_are_equally_spaced": true,
+      "equal_interval_ms": 16.0,
+      "grid_step_ms": 2.0,
+      "minimum_gap_ms": 8.0,
+      "minimum_joint_visibility": 0.24,
+      "minimum_axis_span_mm": 12.0,
+      "minimum_contact_state_distance": 0.09,
+      "minimum_abs_centroid_time_rho": 0.7,
+      "minimum_endpoint_handoff_per_step": 0.1,
+      "minimum_full_participant_visibility": 0.3,
+      "minimum_full_centroid_step_mm": 2.0,
+      "minimum_top3_hotspot_step_mm": 4.0,
+      "objective_score": 20.581143975470873,
+      "joint_visibility": [
+        0.42032505475612236,
+        0.25872248890856536,
+        0.2826459953120111,
+        0.3842054819083071
+      ],
+      "ta_axis_centroids_mm": [
+        -8.612863058333069,
+        -0.6731011145711919,
+        4.891746712466823,
+        7.834950581807596
+      ],
+      "tb_axis_centroids_mm": [
+        6.187421101316708,
+        0.8232263938837907,
+        -4.810501472097681,
+        -7.213993109833449
+      ],
+      "ta_centroid_vs_time_rho": 1.0,
+      "tb_centroid_vs_time_rho": -1.0,
+      "ta_contact_state_step_rms": [
+        0.20213951210583542,
+        0.10918673266940665,
+        0.11941917167397482
+      ],
+      "tb_contact_state_step_rms": [
+        0.1886937106451772,
+        0.3023380771614575,
+        0.29420572111901644
+      ],
+      "joint_contact_state_step_rms": [
+        0.1886937106451772,
+        0.10918673266940665,
+        0.11941917167397482
+      ],
+      "ta_right_minus_left_endpoint_energy": [
+        -0.4286826251511016,
+        -0.053227470318082004,
+        0.13900273636998317,
+        0.24131006599200294
+      ],
+      "tb_right_minus_left_endpoint_energy": [
+        0.3748143313136344,
+        0.1192742330293673,
+        -0.21127776970249534,
+        -0.6822558334680521
+      ],
+      "ta_endpoint_handoff_step": [
+        0.3754551548330196,
+        0.19223020668806517,
+        0.10230732962201977
+      ],
+      "tb_endpoint_handoff_step": [
+        0.2555400982842671,
+        0.33055200273186264,
+        0.47097806376555673
+      ],
+      "joint_endpoint_handoff_step": [
+        0.2555400982842671,
+        0.19223020668806517,
+        0.10230732962201977
+      ],
+      "joint_full_participant_visibility": [
+        0.4295684105558036,
+        0.3677092410406791,
+        0.3179099391713001,
+        0.3842054819083071
+      ],
+      "ta_full_centroids_mm": [
+        -6.388606247209152,
+        -0.8673605554206985,
+        3.224737125352995,
+        7.069483392015486
+      ],
+      "tb_full_centroids_mm": [
+        5.145397213272677,
+        0.8394835733797511,
+        -3.3793161910590648,
+        -6.305467510658816
+      ],
+      "ta_full_centroid_step_mm": [
+        5.521245691788454,
+        4.092097680773693,
+        3.844746266662491
+      ],
+      "tb_full_centroid_step_mm": [
+        4.305913639892926,
+        4.218799764438816,
+        2.926151319599751
+      ],
+      "joint_full_centroid_step_mm": [
+        4.305913639892926,
+        4.092097680773693,
+        2.926151319599751
+      ],
+      "ta_top3_hotspots_mm": [
+        -5.548804856768015,
+        -1.0183564286692788,
+        7.712036629097171,
+        15.188221617470095
+      ],
+      "tb_top3_hotspots_mm": [
+        12.367863731043398,
+        0.48637181124701917,
+        -6.494665952772043,
+        -10.836567328902868
+      ],
+      "ta_top3_hotspot_step_mm": [
+        4.530448428098737,
+        8.73039305776645,
+        7.476184988372924
+      ],
+      "tb_top3_hotspot_step_mm": [
+        11.881491919796378,
+        6.981037764019062,
+        4.341901376130825
+      ],
+      "joint_top3_hotspot_step_mm": [
+        4.530448428098737,
+        6.981037764019062,
+        4.341901376130825
+      ],
+      "ta_axis_span_mm": 16.447813640140666,
+      "tb_axis_span_mm": 13.401414211150158
+    },
+    "field_colorbars": "one labeled relative HFO envelope bar per TA/TB row; each static frame uses its own participant top-three mean reference",
+    "readout_colorbars": "one labeled normalized-magnitude 0..1 bar per TA/TB row",
+    "template_colorbars": "one viridis bar per TA/TB row titled ranks; normalized 0..1 ticks with separate early/late endpoint text",
+    "template_colorbar_range": [
+      0.0,
+      1.0
+    ],
+    "template_rank_normalization": "linear min-max within each frozen template; 0=earliest, 1=latest",
+    "template_rank_ranges": {
+      "TA": [
+        0.0,
+        14.0
+      ],
+      "TB": [
+        0.0,
+        14.0
+      ]
+    },
+    "panel_order": "single-event readout | readout colorbar | gap | event envelope frames | envelope colorbar | gap | frozen template rank field | template colorbar",
+    "readout_xlim_ms": [
+      -83.01129858637069,
+      137.60139043961317
+    ],
+    "readout_xlim_mode": "common intersection of the two recorded STFT windows",
+    "display_sigma_mm": 6.0,
+    "display_xlim_mm": [
+      -20.573022904345923,
+      22.826977095654076
+    ],
+    "display_ylim_mm": [
+      -16.341981674293592,
+      27.058018325706406
+    ],
+    "transverse_sign": -1,
+    "dpi": 600
+  },
+  "gif": null
+}

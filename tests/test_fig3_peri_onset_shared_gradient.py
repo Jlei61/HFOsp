@@ -289,12 +289,21 @@ def test_journal_clean_design_moves_titles_to_axes_and_omits_panel_text() -> Non
         assert ax0.get_xlabel() == "Time (s)"
         assert ax1.get_xlabel() == "Time (s)"
         assert [text.get_text() for text in ax1.get_legend().get_texts()] == ["TA", "TB"]
-        assert ax0.get_legend()._loc == 2
-        assert ax1.get_legend()._loc == 2
-        assert ax0.get_legend()._ncols == 1
-        assert ax1.get_legend()._ncols == 1
+        for legend in (ax0.get_legend(), ax1.get_legend()):
+            assert legend._loc == 1
+            assert legend._ncols == 1
+            assert legend.get_frame().get_visible()
+            assert legend.get_frame().get_linewidth() == pytest.approx(0.8)
+            assert all(
+                text.get_fontsize() == render.JOURNAL_CLEAN_LEGEND_FONTSIZE
+                for text in legend.get_texts()
+            )
+            assert ax0.xaxis.label.get_fontsize() == render.JOURNAL_CLEAN_AXIS_LABEL_FONTSIZE
+            assert ax1.xaxis.label.get_fontsize() == render.JOURNAL_CLEAN_AXIS_LABEL_FONTSIZE
         assert len(fig.texts) == 0
         assert tuple(fig.get_size_inches()) == pytest.approx((14.0, 5.6))
+        assert render.JOURNAL_CLEAN_WSPACE == pytest.approx(0.22)
+        assert ax1.get_position().x0 - ax0.get_position().x1 < 0.10
     finally:
         render.plt.close(fig)
 

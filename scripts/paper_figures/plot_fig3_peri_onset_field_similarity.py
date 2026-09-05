@@ -74,6 +74,13 @@ DESIGN_VARIANTS = (DESIGN_STANDARD, DESIGN_JOURNAL_CLEAN)
 READOUT_PROJECTION = "template_projection"
 READOUT_SIMILARITY = "similarity"
 READOUTS = (READOUT_PROJECTION, READOUT_SIMILARITY)
+JOURNAL_CLEAN_WSPACE = 0.22
+# The journal-clean source is substantially wider than its final left-column
+# slot.  Compensate for that known compositor reduction locally; A/B retain
+# their accepted signal-context hierarchy.
+JOURNAL_CLEAN_AXIS_LABEL_FONTSIZE = 21.0
+JOURNAL_CLEAN_TICK_FONTSIZE = 17.0
+JOURNAL_CLEAN_LEGEND_FONTSIZE = 19.0
 
 
 def _subject_label(ds_sid: str) -> str:
@@ -475,22 +482,43 @@ def _make_figure(
             ax.legend(
                 handles,
                 labels,
-                loc="upper left",
-                bbox_to_anchor=(0.015, 0.985),
+                loc="upper right",
+                bbox_to_anchor=(0.985, 0.985),
                 ncol=1,
-                frameon=False,
+                frameon=True,
+                facecolor="white",
+                edgecolor="0.45",
+                framealpha=0.94,
                 handlelength=1.7,
                 labelspacing=0.35,
+                borderpad=0.28,
                 borderaxespad=0.0,
             )
             ax.xaxis.set_major_locator(MaxNLocator(nbins=5, integer=True))
-        fig.subplots_adjust(left=0.105, right=0.99, bottom=0.24, top=0.72, wspace=0.42)
+        fig.subplots_adjust(
+            left=0.105,
+            right=0.99,
+            bottom=0.24,
+            top=0.72,
+            wspace=JOURNAL_CLEAN_WSPACE,
+        )
         apply_panel_aware_figure_typography(
             fig,
             spec=DENSE_MULTIPANEL_TYPOGRAPHY,
             policy=LOCKED_PANEL_TYPOGRAPHY_POLICY,
             enforce_atomic_axis_gate=False,
         )
+        for ax in axes:
+            ax.xaxis.label.set_fontsize(JOURNAL_CLEAN_AXIS_LABEL_FONTSIZE)
+            ax.yaxis.label.set_fontsize(JOURNAL_CLEAN_AXIS_LABEL_FONTSIZE)
+            ax.tick_params(
+                axis="both",
+                labelsize=JOURNAL_CLEAN_TICK_FONTSIZE,
+            )
+            legend = ax.get_legend()
+            for text in legend.get_texts():
+                text.set_fontsize(JOURNAL_CLEAN_LEGEND_FONTSIZE)
+            legend.get_frame().set_linewidth(0.8)
     else:
         fig.subplots_adjust(left=0.09, right=0.99, bottom=0.18, top=0.84, wspace=0.34)
     return fig

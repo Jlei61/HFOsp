@@ -20,7 +20,7 @@
         "b": {
           "producer": "scripts/paper_figures/plot_interictal_spatial_information_gain.py",
           "analysis_root": "results/interictal_propagation_masked/spatial_information_gain_all_events",
-          "staging_root": "results/paper-ready-figure/fig2_all_events_timing_plus_space",
+          "staging_root": "results/paper-ready-figure/archive/2026-09-02_noncanonical_staging_qa_cleanup/fig2_all_events_timing_plus_space",
           "canonical_png": "results/paper-ready-figure/fig2/figures/fig2-panelb.png",
           "canonical_pdf": "results/paper-ready-figure/fig2/figures/fig2-panelb.pdf",
           "required_inputs": {
@@ -41,7 +41,7 @@
         "e": {
           "producer": "scripts/paper_figures/plot_fig2e_all_event_shared_fields.py",
           "analysis_root": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space",
-          "staging_root": "results/paper-ready-figure/fig2_all_events_timing_plus_space",
+          "staging_root": "results/paper-ready-figure/archive/2026-09-02_noncanonical_staging_qa_cleanup/fig2_all_events_timing_plus_space",
           "canonical_png": "results/paper-ready-figure/fig2/figures/fig2-panele.png",
           "canonical_pdf": "results/paper-ready-figure/fig2/figures/fig2-panele.pdf",
           "required_inputs": {
@@ -54,7 +54,7 @@
         "f": {
           "producer": "scripts/paper_figures/plot_fig2f_all_event_shared_field_reversal.py",
           "analysis_root": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space",
-          "staging_root": "results/paper-ready-figure/fig2_all_events_timing_plus_space",
+          "staging_root": "results/paper-ready-figure/archive/2026-09-02_noncanonical_staging_qa_cleanup/fig2_all_events_timing_plus_space",
           "canonical_png": "results/paper-ready-figure/fig2/figures/fig2-panelf.png",
           "canonical_pdf": "results/paper-ready-figure/fig2/figures/fig2-panelf.pdf",
           "required_inputs": {
@@ -79,8 +79,8 @@
         "preserved_panels": ["a", "b"],
         "c": {
           "producer": "scripts/paper_figures/plot_fig3b_interictal_ictal_shared_field.py",
-          "source_pdf": "results/paper-ready-figure/fig3_all_events_timing_plus_space_sources/fig3c/figures/epilepsiae_1146_seizure_02_interictal_ictal_shared_field.pdf",
-          "source_sha256": "ca35d9534ed6fdf043b08874eea578a9542f39f6c0bb1be97246ca20800a5067",
+          "source_pdf": "results/paper-ready-figure/archive/2026-09-02_noncanonical_staging_qa_cleanup/fig3_all_events_timing_plus_space_sources/fig3c/figures/epilepsiae_1146_seizure_02_interictal_ictal_shared_field.pdf",
+          "source_sha256": "cfe3ab7f4968d2f8646694630a05c587c7ef26e1b449232e57a9c3cd3c354add",
           "template_root": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space",
           "canonical_png": "results/paper-ready-figure/fig3/figures/fig3-panelc.png",
           "canonical_pdf": "results/paper-ready-figure/fig3/figures/fig3-panelc.pdf"
@@ -89,24 +89,24 @@
           "producer": "scripts/paper_figures/plot_fig3_clinical_onset_gradient_field_cohort.py",
           "analysis_producer": "scripts/run_topic5_clinical_onset_gradient_field_cohort_stat.py",
           "analysis_root": "results/topic5_ictal_recruitment/clinical_onset_gradient_field_all_events_timing_plus_space",
-          "source_pdf": "results/paper-ready-figure/fig3_all_events_timing_plus_space_sources/fig3d/figures/clinical_onset_gradient_field_cohort_stat.pdf",
-          "source_sha256": "b799ecc821ff34973805218ea82fc8fd37bf974b15b64632d3984c8525a3e8f6",
+          "source_pdf": "results/paper-ready-figure/archive/2026-09-02_noncanonical_staging_qa_cleanup/fig3_all_events_timing_plus_space_sources/fig3d/figures/clinical_onset_gradient_field_cohort_stat.pdf",
+          "source_sha256": "609605880afe56afc667a32a03ac51aea13b1a80157a482b1bcec8b46f755f73",
           "canonical_png": "results/paper-ready-figure/fig3/figures/fig3-paneld.png",
           "canonical_pdf": "results/paper-ready-figure/fig3/figures/fig3-paneld.pdf"
         },
         "e": {
           "producer": "scripts/paper_figures/plot_fig3_peri_onset_field_similarity.py",
           "analysis_root": "results/topic5_ictal_recruitment/field_dynamics_signed_all_events_timing_plus_space",
-          "source_pdf": "results/paper-ready-figure/fig3_all_events_timing_plus_space_sources/fig3e/figures/epilepsiae_1146_peri_onset_template_expression_paper_ready_journal_clean.pdf",
-          "source_sha256": "15ede8afe99c9634eeba321a176eb9d00676f9e8a7685bb6a7154297f02b069f",
+          "source_pdf": "results/paper-ready-figure/archive/2026-09-02_noncanonical_staging_qa_cleanup/fig3_all_events_timing_plus_space_sources/fig3e/figures/epilepsiae_1146_peri_onset_template_expression_paper_ready_journal_clean.pdf",
+          "source_sha256": "55b79e2dfb94946b03f74f7ea0571e0f382b5e27e4cfcd2747c7598f726f1e3d",
           "canonical_png": "results/paper-ready-figure/fig3/figures/fig3-panele.png",
           "canonical_pdf": "results/paper-ready-figure/fig3/figures/fig3-panele.pdf"
         },
         "f": {
           "producer": "scripts/paper_figures/plot_fig3f_ab_dominance_cohort.py",
-          "analysis_root": "results/paper-ready-figure/fig3f_ab_dominance_cohort_all_events_timing_plus_space",
-          "source_pdf": "results/paper-ready-figure/fig3_all_events_timing_plus_space_sources/fig3f/figures/fig3f_ab_dominance_heatmap.pdf",
-          "source_sha256": "7b824e4fb063dd1c9ef311cc723b299925e78fc4ad662124dd274f0a91e9a891",
+          "analysis_root": "results/paper-ready-figure/archive/2026-09-02_noncanonical_staging_qa_cleanup/fig3f_ab_dominance_cohort_all_events_timing_plus_space",
+          "source_pdf": "results/paper-ready-figure/archive/2026-09-02_noncanonical_staging_qa_cleanup/fig3_all_events_timing_plus_space_sources/fig3f/figures/fig3f_ab_dominance_heatmap.pdf",
+          "source_sha256": "c3d4715a8c8cbb89c23f47ea30e15d73b74933050073a8e8df70efd07173f7fe",
           "canonical_png": "results/paper-ready-figure/fig3/figures/fig3-panelf.png",
           "canonical_pdf": "results/paper-ready-figure/fig3/figures/fig3-panelf.pdf"
         }

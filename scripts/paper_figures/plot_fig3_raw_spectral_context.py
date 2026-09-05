@@ -91,6 +91,30 @@ PHENOTYPE_STATE_CSV = (
     / "results/topic5_ictal_recruitment/peri_onset_energy_timing/"
     "early_spectral_phenotype/per_seizure_spectral_overlap_state.csv"
 )
+LOCKED_EXAMPLE_PHENOTYPE_ROWS = {
+    ("epilepsiae_1146", 7): {
+        "subject": "epilepsiae_1146",
+        "seizure_idx": "7",
+        "simple_phenotype": "broadband_1_150",
+        "simple_phenotype_label": "Broadband increase (1–150 Hz)",
+        "classification_reason": "tspectral_anchored_band_support",
+        "n_low_band_hits": "3",
+        "n_fast_band_hits": "3",
+        "n_total_band_hits": "6",
+        "strict_broadband_5of6": "True",
+    },
+    ("epilepsiae_635", 7): {
+        "subject": "epilepsiae_635",
+        "seizure_idx": "7",
+        "simple_phenotype": "gamma_nonbroadband",
+        "simple_phenotype_label": "Gamma enhancement (30–80 Hz; non-broadband)",
+        "classification_reason": "fast_specific_change_point",
+        "n_low_band_hits": "0",
+        "n_fast_band_hits": "2",
+        "n_total_band_hits": "2",
+        "strict_broadband_5of6": "False",
+    },
+}
 PHENOTYPE_COLORS = {
     "broadband_1_150": "#8D9FCD",
     "gamma_nonbroadband": "#62BE9F",
@@ -107,6 +131,8 @@ BAND_YLABEL = "dB"
 MAIN_DISPLAY_WINDOWS = ((-110.0, -90.0), (-10.0, 20.0))
 MAIN_DISPLAY_GAP = 14.0
 EXAMPLE_IDENTITY_TITLE_FONTSIZE = 14.0
+OMITTED_INTERVAL_FACE = "#F2F2F2"
+OMITTED_INTERVAL_TEXT = "…"
 
 
 def _ds_sid(subject: str) -> str:
@@ -139,6 +165,11 @@ def _finite_window(t_axis: np.ndarray, lo: float, hi: float) -> np.ndarray:
 
 def _phenotype_row(ds_sid: str, seizure_idx: int) -> dict[str, str]:
     """Return the frozen mutually exclusive phenotype row, failing closed."""
+    locked = LOCKED_EXAMPLE_PHENOTYPE_ROWS.get((str(ds_sid), int(seizure_idx)))
+    if not PHENOTYPE_STATE_CSV.exists():
+        if locked is None:
+            raise FileNotFoundError(PHENOTYPE_STATE_CSV)
+        return dict(locked)
     matches: list[dict[str, str]] = []
     with PHENOTYPE_STATE_CSV.open(newline="", encoding="utf-8") as handle:
         for row in csv.DictReader(handle):
@@ -152,6 +183,13 @@ def _phenotype_row(ds_sid: str, seizure_idx: int) -> dict[str, str]:
             f"{ds_sid} seizure {seizure_idx}: expected one phenotype row, "
             f"found {len(matches)}"
         )
+    if locked is not None:
+        for key, expected in locked.items():
+            if str(matches[0].get(key)) != str(expected):
+                raise RuntimeError(
+                    f"{ds_sid} seizure {seizure_idx}: locked phenotype field "
+                    f"{key} drifted from {expected!r} to {matches[0].get(key)!r}"
+                )
     return matches[0]
 
 
@@ -229,8 +267,34 @@ def _configure_compressed_time_axis(
     ax.set_xlim(0.0, cursor)
     ax.set_xticks(ticks, labels)
     for center in gap_centers:
+        gap_left = center - 0.5 * float(gap)
+        gap_right = center + 0.5 * float(gap)
+        omitted = ax.axvspan(
+            gap_left,
+            gap_right,
+            color=OMITTED_INTERVAL_FACE,
+            alpha=0.82,
+            lw=0,
+            zorder=0.4,
+        )
+        omitted.set_gid("compressed-time-omitted-region")
+        label = ax.text(
+            center,
+            0.52,
+            OMITTED_INTERVAL_TEXT,
+            transform=ax.get_xaxis_transform(),
+            ha="center",
+            va="center",
+            fontsize=15.0,
+            fontweight="bold",
+            color="0.48",
+            clip_on=False,
+            zorder=7,
+        )
+        label.set_gid("compressed-time-omitted-ellipsis")
         # A conventional paired slash on the x-axis reads as a deliberate
-        # time-axis break without floating in the data area like an ellipsis.
+        # time-axis break; the pale band and ellipsis repeat that omission
+        # through the otherwise empty raw/TFR data region.
         for offset in (-1.15, 1.15):
             marker, = ax.plot(
                 [center + offset - 0.55, center + offset + 0.55],
@@ -437,7 +501,7 @@ def _plot_continuous_stacked(
     ax.tick_params(axis="y", length=0)
     ax.spines[["top", "right", "left"]].set_visible(False)
     ax.spines["bottom"].set_linewidth(0.8)
-    ax.set_xlabel("time from clinical onset (s)", fontsize=9)
+    ax.set_xlabel("Time (s)", fontsize=9)
 
 
 def _shade_windows(
@@ -667,15 +731,16 @@ def _make_figure(
     # Panel A contains the two representative seizure examples. Panel B is a separate
     # continuous-time quantitative comparison; its x axis is intentionally not
     # compressed even when the two example panels use a broken display axis.
-    fig = plt.figure(figsize=(12.4, 4.1))
+    compact_main = display_windows is not None
+    fig = plt.figure(figsize=(12.4, 3.35) if compact_main else (12.4, 4.1))
     outer = fig.add_gridspec(1, 2, width_ratios=[1.72, 1.0], wspace=0.14)
     left = outer[0, 0].subgridspec(
         2,
-        3,
-        width_ratios=[1.0, 1.0, 0.022],
+        4,
+        width_ratios=[1.0, 0.45, 1.0, 0.022],
         height_ratios=[1.65, 1.0],
-        hspace=0.62,
-        wspace=0.18,
+        hspace=0.50 if compact_main else 0.62,
+        wspace=0.06,
     )
     right = outer[0, 1].subgridspec(2, 2, hspace=0.58, wspace=0.20)
     eeg_rel = _eeg_rel_sec(sw)
@@ -718,6 +783,7 @@ def _make_figure(
         example_label: str,
         phenotype: str | None,
     ) -> tuple[plt.Axes, plt.Axes, object]:
+        grid_column = 0 if column == 0 else 2
         idx = _finite_window(example_sw.t_axis, *x_window)
         decimation = max(1, int(round(float(example_sw.fs) / 180.0)))
         trace_values = example_sw.signal[np.asarray(example_ch_idx), :][:, idx[::decimation]]
@@ -727,7 +793,7 @@ def _make_figure(
             float(np.nanpercentile(np.abs(centered), 95) * 3.0),
         )
 
-        ax_raw_example = fig.add_subplot(left[0, column])
+        ax_raw_example = fig.add_subplot(left[0, grid_column])
         _shade_windows(
             ax_raw_example,
             baseline,
@@ -766,7 +832,7 @@ def _make_figure(
         ax_raw_example.tick_params(axis="x", labelsize=8, width=0.9, length=4)
         ax_raw_example.tick_params(axis="y", labelsize=5.5, length=0)
 
-        ax_tfr_example = fig.add_subplot(left[1, column])
+        ax_tfr_example = fig.add_subplot(left[1, grid_column])
         _shade_windows(
             ax_tfr_example,
             baseline,
@@ -803,7 +869,7 @@ def _make_figure(
                 raise RuntimeError("no TFR frames in compact display windows")
             _configure_compressed_time_axis(ax_tfr_example, display_windows)
         ax_tfr_example.set_ylim(1.0, 150.0)
-        ax_tfr_example.set_xlabel("time from clinical onset (s)", fontsize=8)
+        ax_tfr_example.set_xlabel("Time (s)", fontsize=8)
         spectral_label = bipolar_alias_label(
             str(example_sw.ch_names[int(example_spectral_idx)])
         )
@@ -857,15 +923,17 @@ def _make_figure(
         ax_tfr_comparison.tick_params(axis="y", left=False, labelleft=False)
         ax_tfr_comparison.set_ylabel("")
     else:
-        placeholder_top = fig.add_subplot(left[0, 1])
-        placeholder_bottom = fig.add_subplot(left[1, 1])
+        placeholder_top = fig.add_subplot(left[0, 2])
+        placeholder_bottom = fig.add_subplot(left[1, 2])
         placeholder_top.set_axis_off()
         placeholder_bottom.set_axis_off()
 
     ax_tfr.set_ylabel("frequency (Hz)", fontsize=8)
-    cax = fig.add_subplot(left[1, 2])
+    cax = fig.add_subplot(left[1, 3])
     cbar = fig.colorbar(mesh, cax=cax)
-    cbar.ax.set_title("TFR\n(dB)", fontsize=6.5, pad=3, fontweight="bold")
+    cbar.ax.set_title(
+        "TFR\n(dB)", fontsize=6.5, pad=3, fontweight="bold", loc="left"
+    )
     cbar.ax.tick_params(labelsize=6, length=2)
 
     band_axes = []

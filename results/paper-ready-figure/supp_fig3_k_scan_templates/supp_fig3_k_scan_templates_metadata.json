@@ -1,0 +1,106 @@
+{
+  "figure": "Supplementary Figure 3",
+  "caption": "Supplementary Fig. 3 | Model-order scanning identifies two temporal templates in most patients while retaining higher-order solutions. A, Unsupervised clustering was evaluated for K = 2–10 using event-by-contact recruitment-rank features after masking non-participating contacts in 40 patients; for each patient, K was selected as the solution with the highest median silhouette among those with median adjusted mutual information (AMI) ≥ 0.70 across seeds and a smallest-cluster fraction ≥ 0.10. The left panel shows the selected-K distribution (34/40 patients selected K = 2), the middle panel shows each patient's silhouette difference relative to K = 2 with the cohort median and interquartile range, and the right panel shows the percentage of patients passing both gates at each K. B, Recruitment-order maps for two K = 4 solutions (E11 and E19) and one K = 6 solution (Y10), with 2,500 displayed population events per patient; colour denotes relative within-event recruitment order from first to last, light grey denotes a non-participating contact and hatched gaps separate templates. Profiles at right show the contact-wise mean rank for each template, with shading indicating ±1 s.d.",
+  "feature_contract": "masked lagPatRank features with non-participating channels imputed by each event's participating-channel median",
+  "scan_range": [
+    2,
+    10
+  ],
+  "n_subjects": 40,
+  "selection_rule": "highest median silhouette among K passing median AMI >= 0.70 and worst minimum cluster fraction >= 0.10",
+  "extended_selected_k_distribution": {
+    "2": 34,
+    "3": 1,
+    "4": 2,
+    "5": 2,
+    "6": 1,
+    "7": 0,
+    "8": 0,
+    "9": 0,
+    "10": 0
+  },
+  "canonical_k2_to_k8_distribution": {
+    "2": 34,
+    "3": 1,
+    "4": 2,
+    "5": 2,
+    "6": 1
+  },
+  "selection_changes_after_extending_to_k10": [],
+  "example_selection": "fixed manuscript-labelled cases comprising two K=4 solutions and one K=6 solution",
+  "example_painter": "Figure-1E-compatible masked event heatmap and mean-rank profile; non-K=2 cases retain all selected clusters",
+  "examples": [
+    {
+      "dataset": "epilepsiae",
+      "patient_id": "E11",
+      "selected_k": 4,
+      "inter_template_spearman_r": NaN,
+      "n_valid_events": 93204,
+      "n_displayed_events": 2500,
+      "n_channels": 6,
+      "channel_order": [
+        "AM1",
+        "AM2",
+        "AH1",
+        "AH2",
+        "AH3",
+        "AH4"
+      ],
+      "cluster_counts": {
+        "T1": 33415,
+        "T2": 25312,
+        "T3": 20061,
+        "T4": 14416
+      }
+    },
+    {
+      "dataset": "epilepsiae",
+      "patient_id": "E19",
+      "selected_k": 4,
+      "inter_template_spearman_r": NaN,
+      "n_valid_events": 11337,
+      "n_displayed_events": 2500,
+      "n_channels": 5,
+      "channel_order": [
+        "TBB3",
+        "TBC6",
+        "TBC5",
+        "TBA3",
+        "TBB4"
+      ],
+      "cluster_counts": {
+        "T1": 5615,
+        "T2": 2150,
+        "T3": 1921,
+        "T4": 1651
+      }
+    },
+    {
+      "dataset": "yuquan",
+      "patient_id": "Y10",
+      "selected_k": 6,
+      "inter_template_spearman_r": NaN,
+      "n_valid_events": 46855,
+      "n_displayed_events": 2500,
+      "n_channels": 4,
+      "channel_order": [
+        "F5",
+        "F7",
+        "F6",
+        "F8"
+      ],
+      "cluster_counts": {
+        "T1": 9376,
+        "T2": 8308,
+        "T3": 8193,
+        "T4": 7793,
+        "T5": 7110,
+        "T6": 6075
+      }
+    }
+  ],
+  "outputs": {
+    "scan_png": "results/paper-ready-figure/supp_fig3_k_scan_templates/figures/supp_fig3a_k2_to_k10_scan.png",
+    "combined_png": "results/paper-ready-figure/supp_fig3_k_scan_templates/figures/supp_fig3_k_scan_and_multipatient_templates.png"
+  }
+}

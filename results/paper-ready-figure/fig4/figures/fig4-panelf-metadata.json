@@ -1,0 +1,390 @@
+{
+  "schema_version": "fig4e_data_driven_snn_cohort_v1",
+  "source": {
+    "path": "results/topic4_sef_hfo/data_driven_snn_cohort_v1/formal/cohort_result.json",
+    "sha256": "16a3c5ca119fa3879e784bd4d38cd840eb797efc5e3733338ca8e246baec4da0"
+  },
+  "display_contract": {
+    "left": "nested cohort counts: eligible, model loss below matched null, and the subset also recovering both patient modes in one network",
+    "right": "paired canonical-layout held-out weakest-mode loss for the data-driven model and each subject's within-shaft contact-identity permutation null median; unlabeled points and lines are subjects",
+    "right_p": "pre-registered two-sided subject-level Wilcoxon signed-rank test",
+    "significance_symbols": "ns: P>=0.05; *: P<0.05; **: P<0.01; ***: P<0.001"
+  },
+  "summary": {
+    "group_counts": {
+      "both": 11,
+      "kmeans_only": 4,
+      "heldout_only": 12,
+      "neither": 7
+    },
+    "n_subjects": 34,
+    "n_heldout_pass": 23,
+    "n_kmeans_pass": 15,
+    "n_both": 11,
+    "n_real_geometry": 28,
+    "n_real_geometry_pass": 13,
+    "real_geometry_sign_agreement": 14,
+    "n_both_with_real_geometry": 10,
+    "n_both_with_positive_real_geometry": 6,
+    "confirmation_seeds": [
+      1681,
+      1682,
+      1683,
+      1684
+    ],
+    "status": "SAME_NETWORK_K2_INSUFFICIENT",
+    "failed_gates": [
+      "SAME_NETWORK_K2_INSUFFICIENT",
+      "OBSERVATION_LAYOUT_DEPENDENCE_UNRESOLVED"
+    ]
+  },
+  "subject_order": [
+    {
+      "subject_id": "epilepsiae_139",
+      "short_id": "E139",
+      "group": "both",
+      "heldout_pass": true,
+      "canonical_advantage": 0.0474054115456546,
+      "kmeans_positive_networks": 4,
+      "kmeans_subject_pass": true,
+      "real_geometry_advantage": 0.04131190472205204
+    },
+    {
+      "subject_id": "epilepsiae_1150",
+      "short_id": "E1150",
+      "group": "both",
+      "heldout_pass": true,
+      "canonical_advantage": 0.01708984068702815,
+      "kmeans_positive_networks": 4,
+      "kmeans_subject_pass": true,
+      "real_geometry_advantage": -0.026844721776002542
+    },
+    {
+      "subject_id": "epilepsiae_442",
+      "short_id": "E442",
+      "group": "both",
+      "heldout_pass": true,
+      "canonical_advantage": 0.010284394948237893,
+      "kmeans_positive_networks": 4,
+      "kmeans_subject_pass": true,
+      "real_geometry_advantage": 0.0015478861374841613
+    },
+    {
+      "subject_id": "yuquan_zhaochenxi",
+      "short_id": "Y16",
+      "group": "both",
+      "heldout_pass": true,
+      "canonical_advantage": 0.007547644223479269,
+      "kmeans_positive_networks": 4,
+      "kmeans_subject_pass": true,
+      "real_geometry_advantage": -0.010277814087857759
+    },
+    {
+      "subject_id": "epilepsiae_1096",
+      "short_id": "E1096",
+      "group": "both",
+      "heldout_pass": true,
+      "canonical_advantage": 0.0029002950221506257,
+      "kmeans_positive_networks": 4,
+      "kmeans_subject_pass": true,
+      "real_geometry_advantage": 0.0025950752225496337
+    },
+    {
+      "subject_id": "epilepsiae_620",
+      "short_id": "E620",
+      "group": "both",
+      "heldout_pass": true,
+      "canonical_advantage": 0.0500149199251752,
+      "kmeans_positive_networks": 3,
+      "kmeans_subject_pass": true,
+      "real_geometry_advantage": 0.04157890027390708
+    },
+    {
+      "subject_id": "epilepsiae_1125",
+      "short_id": "E1125",
+      "group": "both",
+      "heldout_pass": true,
+      "canonical_advantage": 0.044535440249661065,
+      "kmeans_positive_networks": 3,
+      "kmeans_subject_pass": true,
+      "real_geometry_advantage": -0.049831466014846046
+    },
+    {
+      "subject_id": "yuquan_chengshuai",
+      "short_id": "Y1",
+      "group": "both",
+      "heldout_pass": true,
+      "canonical_advantage": 0.02912003667258535,
+      "kmeans_positive_networks": 3,
+      "kmeans_subject_pass": true,
+      "real_geometry_advantage": 0.02801717663298882
+    },
+    {
+      "subject_id": "yuquan_zhangjiaqi",
+      "short_id": "Y14",
+      "group": "both",
+      "heldout_pass": true,
+      "canonical_advantage": 0.01944601055882529,
+      "kmeans_positive_networks": 3,
+      "kmeans_subject_pass": true,
+      "real_geometry_advantage": 0.04996248243163155
+    },
+    {
+      "subject_id": "yuquan_gaolan",
+      "short_id": "Y3",
+      "group": "both",
+      "heldout_pass": true,
+      "canonical_advantage": 0.00461766538636435,
+      "kmeans_positive_networks": 3,
+      "kmeans_subject_pass": true,
+      "real_geometry_advantage": null
+    },
+    {
+      "subject_id": "epilepsiae_253",
+      "short_id": "E253",
+      "group": "both",
+      "heldout_pass": true,
+      "canonical_advantage": 0.0020663000422722205,
+      "kmeans_positive_networks": 3,
+      "kmeans_subject_pass": true,
+      "real_geometry_advantage": -0.011960515110482753
+    },
+    {
+      "subject_id": "epilepsiae_635",
+      "short_id": "E635",
+      "group": "kmeans_only",
+      "heldout_pass": false,
+      "canonical_advantage": -0.003136996311684015,
+      "kmeans_positive_networks": 4,
+      "kmeans_subject_pass": true,
+      "real_geometry_advantage": 0.03643784092900934
+    },
+    {
+      "subject_id": "yuquan_xuxinyi",
+      "short_id": "Y12",
+      "group": "kmeans_only",
+      "heldout_pass": false,
+      "canonical_advantage": -0.006494458306179146,
+      "kmeans_positive_networks": 4,
+      "kmeans_subject_pass": true,
+      "real_geometry_advantage": -0.022761974191209386
+    },
+    {
+      "subject_id": "epilepsiae_1077",
+      "short_id": "E1077",
+      "group": "kmeans_only",
+      "heldout_pass": false,
+      "canonical_advantage": -0.018339965637929084,
+      "kmeans_positive_networks": 4,
+      "kmeans_subject_pass": true,
+      "real_geometry_advantage": 0.004460130520798702
+    },
+    {
+      "subject_id": "yuquan_hanyuxuan",
+      "short_id": "Y4",
+      "group": "kmeans_only",
+      "heldout_pass": false,
+      "canonical_advantage": -0.008323397771226565,
+      "kmeans_positive_networks": 3,
+      "kmeans_subject_pass": true,
+      "real_geometry_advantage": null
+    },
+    {
+      "subject_id": "epilepsiae_1146",
+      "short_id": "E1146",
+      "group": "heldout_only",
+      "heldout_pass": true,
+      "canonical_advantage": 0.031015175710697007,
+      "kmeans_positive_networks": 2,
+      "kmeans_subject_pass": false,
+      "real_geometry_advantage": 0.012672154717632958
+    },
+    {
+      "subject_id": "yuquan_sunyuanxin",
+      "short_id": "Y10",
+      "group": "heldout_only",
+      "heldout_pass": true,
+      "canonical_advantage": 0.016214210619999586,
+      "kmeans_positive_networks": 2,
+      "kmeans_subject_pass": false,
+      "real_geometry_advantage": null
+    },
+    {
+      "subject_id": "epilepsiae_384",
+      "short_id": "E384",
+      "group": "heldout_only",
+      "heldout_pass": true,
+      "canonical_advantage": 0.011375884102897901,
+      "kmeans_positive_networks": 2,
+      "kmeans_subject_pass": false,
+      "real_geometry_advantage": -0.006113474056750501
+    },
+    {
+      "subject_id": "yuquan_wangyiyang",
+      "short_id": "Y11",
+      "group": "heldout_only",
+      "heldout_pass": true,
+      "canonical_advantage": 0.010340374138372688,
+      "kmeans_positive_networks": 2,
+      "kmeans_subject_pass": false,
+      "real_geometry_advantage": null
+    },
+    {
+      "subject_id": "yuquan_liyouran",
+      "short_id": "Y7",
+      "group": "heldout_only",
+      "heldout_pass": true,
+      "canonical_advantage": 0.00899797414917626,
+      "kmeans_positive_networks": 2,
+      "kmeans_subject_pass": false,
+      "real_geometry_advantage": -0.013386962614715905
+    },
+    {
+      "subject_id": "yuquan_litengsheng",
+      "short_id": "Y6",
+      "group": "heldout_only",
+      "heldout_pass": true,
+      "canonical_advantage": 0.00845677880643493,
+      "kmeans_positive_networks": 2,
+      "kmeans_subject_pass": false,
+      "real_geometry_advantage": 0.009677119559356781
+    },
+    {
+      "subject_id": "yuquan_chenziyang",
+      "short_id": "Y2",
+      "group": "heldout_only",
+      "heldout_pass": true,
+      "canonical_advantage": 0.005073338371728825,
+      "kmeans_positive_networks": 2,
+      "kmeans_subject_pass": false,
+      "real_geometry_advantage": null
+    },
+    {
+      "subject_id": "epilepsiae_958",
+      "short_id": "E958",
+      "group": "heldout_only",
+      "heldout_pass": true,
+      "canonical_advantage": 0.0037206340612727096,
+      "kmeans_positive_networks": 2,
+      "kmeans_subject_pass": false,
+      "real_geometry_advantage": -0.01865783184781393
+    },
+    {
+      "subject_id": "yuquan_zhangbichen",
+      "short_id": "Y13",
+      "group": "heldout_only",
+      "heldout_pass": true,
+      "canonical_advantage": 0.002054834237884093,
+      "kmeans_positive_networks": 2,
+      "kmeans_subject_pass": false,
+      "real_geometry_advantage": -0.001304972700496329
+    },
+    {
+      "subject_id": "epilepsiae_922",
+      "short_id": "E922",
+      "group": "heldout_only",
+      "heldout_pass": true,
+      "canonical_advantage": 0.010906451099337577,
+      "kmeans_positive_networks": 1,
+      "kmeans_subject_pass": false,
+      "real_geometry_advantage": 0.0
+    },
+    {
+      "subject_id": "epilepsiae_590",
+      "short_id": "E590",
+      "group": "heldout_only",
+      "heldout_pass": true,
+      "canonical_advantage": 0.0075403539900752575,
+      "kmeans_positive_networks": 1,
+      "kmeans_subject_pass": false,
+      "real_geometry_advantage": -0.002985322510621391
+    },
+    {
+      "subject_id": "yuquan_pengzihang",
+      "short_id": "Y8",
+      "group": "heldout_only",
+      "heldout_pass": true,
+      "canonical_advantage": 0.03608128271674928,
+      "kmeans_positive_networks": 0,
+      "kmeans_subject_pass": false,
+      "real_geometry_advantage": 0.03481491675002181
+    },
+    {
+      "subject_id": "epilepsiae_1084",
+      "short_id": "E1084",
+      "group": "neither",
+      "heldout_pass": false,
+      "canonical_advantage": -0.010851232862170337,
+      "kmeans_positive_networks": 2,
+      "kmeans_subject_pass": false,
+      "real_geometry_advantage": -0.02057281097832303
+    },
+    {
+      "subject_id": "yuquan_zhangkexuan",
+      "short_id": "Y15",
+      "group": "neither",
+      "heldout_pass": false,
+      "canonical_advantage": -0.015732890992379192,
+      "kmeans_positive_networks": 2,
+      "kmeans_subject_pass": false,
+      "real_geometry_advantage": 0.0010360753961400349
+    },
+    {
+      "subject_id": "yuquan_huanghanwen",
+      "short_id": "Y5",
+      "group": "neither",
+      "heldout_pass": false,
+      "canonical_advantage": -0.017584816967039507,
+      "kmeans_positive_networks": 2,
+      "kmeans_subject_pass": false,
+      "real_geometry_advantage": -0.014123710957645766
+    },
+    {
+      "subject_id": "epilepsiae_548",
+      "short_id": "E548",
+      "group": "neither",
+      "heldout_pass": false,
+      "canonical_advantage": -0.017712428374846184,
+      "kmeans_positive_networks": 1,
+      "kmeans_subject_pass": false,
+      "real_geometry_advantage": 0.00841401073701338
+    },
+    {
+      "subject_id": "yuquan_songzishuo",
+      "short_id": "Y9",
+      "group": "neither",
+      "heldout_pass": false,
+      "canonical_advantage": -0.006908580376542725,
+      "kmeans_positive_networks": 0,
+      "kmeans_subject_pass": false,
+      "real_geometry_advantage": -0.004864881410204483
+    },
+    {
+      "subject_id": "epilepsiae_1073",
+      "short_id": "E1073",
+      "group": "neither",
+      "heldout_pass": false,
+      "canonical_advantage": -0.0072886651437278765,
+      "kmeans_positive_networks": 0,
+      "kmeans_subject_pass": false,
+      "real_geometry_advantage": null
+    },
+    {
+      "subject_id": "epilepsiae_583",
+      "short_id": "E583",
+      "group": "neither",
+      "heldout_pass": false,
+      "canonical_advantage": -0.00962330045934652,
+      "kmeans_positive_networks": 0,
+      "kmeans_subject_pass": false,
+      "real_geometry_advantage": -0.02043062890631432
+    }
+  ],
+  "scientific_boundary": "The 11/34 joint count is descriptive: no joint KMeans-plus-loss null was pre-registered. P=0.043 applies only to the continuous canonical paired model-versus-null loss comparison. The real-geometry sensitivity is not displayed (P=0.98); the same-network KMeans fraction and observation-layout sensitivity gates were not met.",
+  "files": {
+    "png": "results/paper-ready-figure/fig4/figures/fig4-panelf.png",
+    "png_sha256": "363961c023f1cb26965a6f12c6cf417cac26b144acd955ce83872ff63901ca96",
+    "pdf": "results/paper-ready-figure/fig4/figures/fig4-panelf.pdf",
+    "pdf_sha256": "3b5beabb7b7172ab46e923679c8801be230f8d07b49b7c07de77e28091f1f43a"
+  }
+}

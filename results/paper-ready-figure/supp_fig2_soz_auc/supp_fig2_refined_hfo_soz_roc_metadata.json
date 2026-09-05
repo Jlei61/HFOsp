@@ -1,0 +1,93 @@
+{
+  "figure": "Supplementary Figure 2",
+  "scientific_question": "Does refined interictal HFO event burden distinguish clinical SOZ from non-SOZ contacts within subjects?",
+  "score": "refined events_count per contact",
+  "positive_label": "clinical SOZ contact",
+  "aggregation": "subject ROC curves interpolated to 201 FPR points; thick curve is the cohort mean and shading is the across-subject SEM",
+  "source_producer": "scripts/paper_figures/plot_fig1_interictal_hfo_temporal_scaffold.py",
+  "source_artifacts": [
+    "results/hfo_detection/<subject>/*_refineGpu.npz",
+    "results/yuquan_soz_core_channels.json",
+    "results/epilepsiae_soz_core_channels.json",
+    "config/subject_params.json"
+  ],
+  "cohorts": {
+    "yuquan": {
+      "dataset": "yuquan",
+      "n_subjects": 20,
+      "mean_subject_auc": 0.8725709572552504,
+      "median_subject_auc": 0.9132387532771389,
+      "axis_limits": {
+        "fpr": [
+          0.0,
+          1.0
+        ],
+        "tpr": [
+          0.0,
+          1.0
+        ]
+      },
+      "curve_band": "SEM across subject ROC curves after interpolation to 201 FPR points",
+      "subjects": [
+        "chengshuai",
+        "chenziyang",
+        "gaolan",
+        "hanyuxuan",
+        "huanghanwen",
+        "huangwanling",
+        "litengsheng",
+        "liyouran",
+        "pengzihang",
+        "songzishuo",
+        "sunyuanxin",
+        "wangyiyang",
+        "xuxinyi",
+        "zhangbichen",
+        "zhangjiaqi",
+        "zhangjinhan",
+        "zhangkexuan",
+        "zhaochenxi",
+        "zhaojinrui",
+        "zhourongxuan"
+      ]
+    },
+    "epilepsiae": {
+      "dataset": "epilepsiae",
+      "n_subjects": 15,
+      "mean_subject_auc": 0.9547759656025334,
+      "median_subject_auc": 0.9791666666666666,
+      "axis_limits": {
+        "fpr": [
+          0.0,
+          1.0
+        ],
+        "tpr": [
+          0.0,
+          1.0
+        ]
+      },
+      "curve_band": "SEM across subject ROC curves after interpolation to 201 FPR points",
+      "subjects": [
+        "1073",
+        "1077",
+        "1084",
+        "1096",
+        "1146",
+        "1150",
+        "139",
+        "253",
+        "442",
+        "548",
+        "583",
+        "590",
+        "635",
+        "922",
+        "958"
+      ]
+    }
+  },
+  "outputs": {
+    "png": "results/paper-ready-figure/supp_fig2_soz_auc/figures/supp_fig2_refined_hfo_soz_roc.png",
+    "pdf": "results/paper-ready-figure/supp_fig2_soz_auc/figures/supp_fig2_refined_hfo_soz_roc.pdf"
+  }
+}

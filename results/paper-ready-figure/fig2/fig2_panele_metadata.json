@@ -1,0 +1,61 @@
+{
+  "schema_version": "fig2e_all_event_timing_plus_space_v4",
+  "input_root": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space",
+  "input_summary_sha256": "9cfdaf4f8825c8ac28a6d5d54779353780cb310e5ec43362665f846d033c946f",
+  "cohort_shared_2d_n": 18,
+  "selection_rule": "four fixed illustrative shared 2D fields with a negative TA-TB correlation at channel-permutation p<0.05, >= 7 contacts across >= 2 shafts, >= 5 consecutive contacts on at least one shaft, and full support inside one 70x70 mm display window; E1 and Y9 pass channel-level BH-FDR, while E12 and E5 are nominally significant continuous multi-contact morphology examples; cohort inference remains in Fig. 2F",
+  "examples": [
+    {
+      "subject_id": "epilepsiae_1096",
+      "display_id": "E1",
+      "n_contacts": 7,
+      "n_shafts": 2,
+      "max_contiguous_contacts": 6,
+      "r": -0.9978611189329324,
+      "channel_p_negative": 0.0003968253968253968,
+      "channel_q_bh": 0.0023809523809523807,
+      "x_span_mm": 22.15689382945738,
+      "y_span_mm": 23.401134181823856
+    },
+    {
+      "subject_id": "epilepsiae_620",
+      "display_id": "E12",
+      "n_contacts": 9,
+      "n_shafts": 2,
+      "max_contiguous_contacts": 8,
+      "r": -0.9003328764957335,
+      "channel_p_negative": 0.016298370162983702,
+      "channel_q_bh": 0.06170811490279543,
+      "x_span_mm": 14.491518325850311,
+      "y_span_mm": 38.3812587139948
+    },
+    {
+      "subject_id": "epilepsiae_590",
+      "display_id": "E5",
+      "n_contacts": 16,
+      "n_shafts": 4,
+      "max_contiguous_contacts": 6,
+      "r": -0.7582159122497263,
+      "channel_p_negative": 0.018698130186981302,
+      "channel_q_bh": 0.06170811490279543,
+      "x_span_mm": 51.73672100612767,
+      "y_span_mm": 60.61968516404785
+    },
+    {
+      "subject_id": "yuquan_zhaochenxi",
+      "display_id": "Y9",
+      "n_contacts": 26,
+      "n_shafts": 5,
+      "max_contiguous_contacts": 7,
+      "r": -0.786815475021195,
+      "channel_p_negative": 0.00029997000299970003,
+      "channel_q_bh": 0.0023809523809523807,
+      "x_span_mm": 15.552557987600736,
+      "y_span_mm": 33.834397370966805
+    }
+  ],
+  "outputs": {
+    "png": "results/paper-ready-figure/fig2_all_events_timing_plus_space/figures/fig2-panele.png",
+    "pdf": "results/paper-ready-figure/fig2_all_events_timing_plus_space/figures/fig2-panele.pdf"
+  }
+}

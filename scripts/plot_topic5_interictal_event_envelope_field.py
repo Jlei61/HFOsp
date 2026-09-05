@@ -650,12 +650,16 @@ def _template_panel(ax, fz, template, *, show_y, show_x):
         contact_size=TEMPLATE_CONTACT_SIZE,
         contact_outline_lw=TEMPLATE_CONTACT_OUTLINE_LW,
     )
-    ax.set_title(
-        f"{template} template", fontsize=TEMPLATE_LABEL_SIZE,
-        color=TEMPLATE_COLORS[template], fontweight="bold",
-    )
+    ax.set_title("")
     ax.set_xlabel("shared TA axis (mm)" if show_x else "", fontsize=AXIS_LABELSIZE)
     ax.set_ylabel("y (mm)" if show_y else "", fontsize=AXIS_LABELSIZE)
+    if show_y:
+        ax.text(
+            -0.52, 0.5, f"{template} field", transform=ax.transAxes,
+            ha="center", va="center", rotation=90,
+            fontsize=TEMPLATE_LABEL_SIZE, color=TEMPLATE_COLORS[template],
+            fontweight="bold",
+        )
     ax.tick_params(axis="both", labelsize=FIELD_TICK_LABELSIZE, length=TICK_LENGTH)
     if not show_y:
         ax.set_yticklabels([])
@@ -743,7 +747,7 @@ def render(
         axes[r, TEMPLATE_GAP_COL].set_axis_off()
         spec_im, _, _, _ = _readout(
             axes[r, READOUT_COL], e, fz, order, readout_xlim, st,
-            title=f"Sample from {lab}", template=lab, show_xlabel=True, row_label=lab,
+            title=f"{lab} samples", template=lab, show_xlabel=True, row_label=lab,
         )
         spec_cax = axes[r, READOUT_CBAR_COL]
         spec_cax.set_box_aspect(1.0 / SPEC_CBAR_WIDTH_RATIO)
@@ -832,7 +836,7 @@ def render_gif(
     for r, (lab, e, st) in enumerate((("TA", ea, sa), ("TB", eb, sb))):
         spec_im, _, _, _ = _readout(
             axes[r, 0], e, fz, order, readout_xlim, st,
-            title=f"Sample from {lab}", template=lab, show_xlabel=True, row_label=lab,
+            title=f"{lab} samples", template=lab, show_xlabel=True, row_label=lab,
         )
         cursor_lines.append(
             axes[r, 0].axvline(

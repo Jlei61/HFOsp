@@ -36,3 +36,15 @@ def test_panel_c_has_no_global_title_and_uses_compact_right_labels() -> None:
     assert "fig.suptitle(" not in source
     assert fig3c.ICTAL_FIELD_TITLE == "Early ictal field"
     assert fig3c.POWER_COLORBAR_TITLE == "power\nz"
+
+
+def test_panel_c_colorbars_match_square_field_height() -> None:
+    assert fig3c.COLORBAR_HEIGHT_FRACTION == pytest.approx(1.0)
+
+
+def test_panel_c_uses_compact_field_spacing_and_two_y_labels() -> None:
+    source = open(fig3c.__file__, encoding="utf-8").read()
+    assert fig3c.FIELD_GRID_WSPACE < 0.04
+    assert fig3c.COLORBAR_GAP_FIGURE_FRACTION == pytest.approx(0.016)
+    assert fig3c.LEFT_FIELD_GROUP_INWARD_SHIFT == pytest.approx(0.028)
+    assert source.count("show_y=True") >= 2

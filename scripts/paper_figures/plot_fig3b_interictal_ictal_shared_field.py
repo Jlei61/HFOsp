@@ -82,15 +82,24 @@ SCHEMA_ID = "fig3b_interictal_ictal_shared_field_locked_v7"
 INTERICTAL_CMAP = "viridis"
 ICTAL_CMAP = "Blues"
 TEMPLATE_COLORS = {"A": "#B2182B", "B": "#2166AC"}
-FIGSIZE = (7.25, 3.65)
+# Match the wide two-panel aspect used by Fig3E after placement in the
+# manuscript grid; this changes only the available horizontal canvas.
+FIGSIZE = (9.60, 3.65)
 DISPLAY_DPI = 300
-AXIS_LABEL_FONTSIZE = 13.0
-TICK_LABEL_FONTSIZE = 10.5
-COLORBAR_LABEL_FONTSIZE = 10.5
-COLORBAR_TICK_FONTSIZE = 9.5
-FIELD_TITLE_FONTSIZE = 12.5
+# C is exported on a wider source canvas than D/F and is width-fitted into the
+# manuscript left column.  These producer sizes compensate that measured
+# reduction so its final visible type matches E without changing panel layout.
+AXIS_LABEL_FONTSIZE = 14.5
+TICK_LABEL_FONTSIZE = 11.5
+COLORBAR_LABEL_FONTSIZE = 11.5
+COLORBAR_TICK_FONTSIZE = 10.5
+FIELD_TITLE_FONTSIZE = 14.0
 ICTAL_FIELD_TITLE = "Early ictal field"
 POWER_COLORBAR_TITLE = "power\nz"
+COLORBAR_HEIGHT_FRACTION = 1.0
+FIELD_GRID_WSPACE = 0.025
+COLORBAR_GAP_FIGURE_FRACTION = 0.016
+LEFT_FIELD_GROUP_INWARD_SHIFT = 0.028
 LOCKED_SEIZURE_IDX = 2
 MORPHOLOGY_CANDIDATE_IDXS = (2, 10, 23, 1)
 DIRECT_EARLY_CORR_MIN = 0.35
@@ -447,7 +456,11 @@ def render(
     pretty = f"{public_patient_label(dataset, raw_subject)} | SZ{LOCKED_SEIZURE_IDX + 1}"
 
     fig = plt.figure(figsize=FIGSIZE, layout="constrained", facecolor="white")
-    grid = fig.add_gridspec(1, 4, width_ratios=[1.0, 0.045, 1.0, 0.045], wspace=0.08)
+    grid = fig.add_gridspec(
+        1, 4,
+        width_ratios=[1.0, 0.045, 1.0, 0.045],
+        wspace=FIELD_GRID_WSPACE,
+    )
     left = fig.add_subplot(grid[0, 0])
     right = fig.add_subplot(grid[0, 2], sharey=left)
     left_map = _draw_field(
@@ -470,14 +483,16 @@ def render(
         colorbar_values=activation,
         title=f"{pretty}\n{ICTAL_FIELD_TITLE}",
         title_color="black",
-        show_y=False,
+        show_y=True,
     )
 
+    cax_left = fig.add_subplot(grid[0, 1])
     cbar_left, (rank_lo, rank_hi) = _normalized_rank_colorbar(
-        fig, fig.add_subplot(grid[0, 1]), rank
+        fig, cax_left, rank
     )
 
-    cbar_right = fig.colorbar(right_map, cax=fig.add_subplot(grid[0, 3]))
+    cax_right = fig.add_subplot(grid[0, 3])
+    cbar_right = fig.colorbar(right_map, cax=cax_right)
     power_lo = float(np.nanmin(activation))
     power_hi = float(np.nanmax(activation))
     power_ticks = np.linspace(power_lo, power_hi, 4)
@@ -488,6 +503,32 @@ def render(
     )
     cbar_right.ax.tick_params(labelsize=COLORBAR_TICK_FONTSIZE, length=2)
 
+    # Keep dedicated colorbar columns and align each bar exactly to the
+    # corresponding square field axis.
+    fig.canvas.draw()
+    # Freeze the constrained-layout solution before applying the explicit
+    # field-to-colorbar gap; otherwise savefig can reflow the field axes after
+    # the colorbars have been positioned and collapse the intended gap.
+    fig.set_layout_engine(None)
+    left_pos = left.get_position()
+    left.set_position([
+        left_pos.x0 + LEFT_FIELD_GROUP_INWARD_SHIFT,
+        left_pos.y0,
+        left_pos.width,
+        left_pos.height,
+    ])
+    for cax, owner in ((cax_left, left), (cax_right, right)):
+        owner_pos = owner.get_position()
+        cax_pos = cax.get_position()
+        height = owner_pos.height * COLORBAR_HEIGHT_FRACTION
+        cax.set_in_layout(False)
+        cax.set_position([
+            owner_pos.x1 + COLORBAR_GAP_FIGURE_FRACTION,
+            owner_pos.y0 + 0.5 * (owner_pos.height - height),
+            cax_pos.width,
+            height,
+        ])
+
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=DISPLAY_DPI, bbox_inches="tight", facecolor="white")
     fig.savefig(out_pdf, bbox_inches="tight", facecolor="white")
@@ -495,6 +536,10 @@ def render(
     return {
         "figure_size_in": list(map(float, FIGSIZE)),
         "png_dpi": int(DISPLAY_DPI),
+        "colorbar_height_fraction_of_field": COLORBAR_HEIGHT_FRACTION,
+        "field_grid_wspace": FIELD_GRID_WSPACE,
+        "colorbar_gap_figure_fraction": COLORBAR_GAP_FIGURE_FRACTION,
+        "left_field_group_inward_shift": LEFT_FIELD_GROUP_INWARD_SHIFT,
         "display_xlim_mm": list(map(float, fz["display_xlim_mm"])),
         "display_ylim_mm": list(map(float, fz["display_ylim_mm"])),
         "display_sigma_mm": float(fz["display_sigma_mm"]),
@@ -530,7 +575,7 @@ def _write_readme(out_dir: Path, stem: str, seizure_idx: int) -> Path:
 
 记录 raw seizure、临床窗、远端 baseline、频谱参数、冻结 fingerprint、A/B 匹配分数、逐触点原始值与显示归一化。重画时必须先通过 checkpoint score parity，不能从 ictal 值重拟合轴、平面、support 或 kernel。
 
-**关注点**：左侧 colorbar 与 Fig2 共用 normalized-rank `0 early / 0.5 / 1 late` 显示语法，原始 rank 范围保留在 metadata；右侧 colorbar 用 `power` / `z` 简写并保留 robust-z 数值。`Blues` 令高 broadband power 为深色，与左图“早期为深色”的视觉方向一致。锁定的 {public_seizure} 在 15/15 触点均为正，并通过局部源区形态 gate；空间相关仍只表达触点间相对模式。右图不是 contact rank，也不改变当前 maxAB 科学统计。
+**关注点**：左侧 colorbar 与 Fig2 共用 normalized-rank `0 early / 0.5 / 1 late` 显示语法，原始 rank 范围保留在 metadata；右侧 colorbar 用 `power` / `z` 简写并保留 robust-z 数值。两条 colorbar 与所属正方形 field 等高并贴近，左右 field 都显示 `Y (mm)`。`Blues` 令高 broadband power 为深色，与左图“早期为深色”的视觉方向一致。锁定的 {public_seizure} 在 15/15 触点均为正，并通过局部源区形态 gate；空间相关仍只表达触点间相对模式。右图不是 contact rank，也不改变当前 maxAB 科学统计。
 
 ### candidates_positive_ta_morphology/
 

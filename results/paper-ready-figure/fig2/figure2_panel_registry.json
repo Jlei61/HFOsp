@@ -1,0 +1,56 @@
+{
+  "schema_version": "paper_figure2_panels_and_complete_layout_v4",
+  "source_contract": "all_event_timing_plus_space_no_hard_qc_v1",
+  "updated_panels": [
+    "a",
+    "b",
+    "c",
+    "d"
+  ],
+  "preserved_panels": [
+    "e",
+    "f"
+  ],
+  "composite_emitted": true,
+  "png_dpi": 600,
+  "panels": {
+    "a": [
+      "results/paper-ready-figure/fig2/figures/fig2-panela.png",
+      "results/paper-ready-figure/fig2/figures/fig2-panela.pdf",
+      "results/paper-ready-figure/fig2/figures/fig2-panela.svg"
+    ],
+    "b": [
+      "results/paper-ready-figure/fig2/figures/fig2-panelb.png",
+      "results/paper-ready-figure/fig2/figures/fig2-panelb.pdf"
+    ],
+    "c": [
+      "results/paper-ready-figure/fig2/figures/fig2-panelc.png",
+      "results/paper-ready-figure/fig2/figures/fig2-panelc.pdf"
+    ],
+    "d": [
+      "results/paper-ready-figure/fig2/figures/fig2-paneld.png",
+      "results/paper-ready-figure/fig2/figures/fig2-paneld.pdf"
+    ],
+    "e": [
+      "results/paper-ready-figure/fig2/figures/fig2-panele.png",
+      "results/paper-ready-figure/fig2/figures/fig2-panele.pdf"
+    ],
+    "f": [
+      "results/paper-ready-figure/fig2/figures/fig2-panelf.png",
+      "results/paper-ready-figure/fig2/figures/fig2-panelf.pdf"
+    ]
+  },
+  "complete_layout": [
+    "results/paper-ready-figure/fig2/figures/fig2-complete-layout.png",
+    "results/paper-ready-figure/fig2/figures/fig2-complete-layout.pdf"
+  ],
+  "panel_letters_in_individual_files": false,
+  "panel_letters_in_complete_layout": true,
+  "panel_a_version_note": "schema fig2_mixed_subject_implant_projection_2x2_v7 keeps the accepted equal-width 2x2 arrangement and scientific content, but uses a 84%-scale 2D-support viewport plus tighter local gaps and outer margins. No panel was reordered or removed.",
+  "panel_c_version_note": "canonical v13 producer uses four equally spaced all-participant hotspot-selected frames, per-frame participant-top3 relative scaling, and a fixed-gamma soft teal-to-navy envelope colormap. C row labels are TA samples and TB samples; D retains TA field and TB field as left-side row labels. No narrative subplot titles were added.",
+  "panel_b_version_note": "all-event timing-plus-3D-direction reclustering; 26 patients, 22/26 have higher held-out direction score after adding real 3D event direction; examples display anonymized labels E10/E14. Main typography is enlarged by 1.28x with local bottom clearance and unchanged panel placement.",
+  "panel_e_version_note": "v4 four-column visual-QA selection from the latest 18-patient geometry-supported shared-axis cohort: E1, E12, E5 and Y9 all have >=7 contacts, >=2 shafts, >=5 consecutive contacts on at least one shaft, negative TA-TB channel-permutation p<0.05, and full support inside a shared 70x70 mm display window. E12 contributes a continuous HR3-HR10 reversal and replaces sparse-contact E20. E1 and Y9 pass channel-level BH-FDR; E12 and E5 are nominally significant morphology examples. Cohort inference remains in Fig2F.",
+  "panel_f_version_note": "latest all-event timing-plus-3D-direction reclustering: 28 axis-pair fits, 20 collinear pairs with abs(cosine)>=0.5 and a constructible shared axis, 18 with supported 2D geometry entering Fig2F, and 15/18 negative shared-field correlations. The observed IQR bar is retained. Upper and lower diamonds are strictly aligned because both encode the same observed raw cohort median r; the lower density is the matching raw-r full-contact-shuffle cohort-median null. Significance display separates negative prevalence (**) from the spatial-null permutation (***), with exact P values retained only in metadata/README.",
+  "complete_layout_state": "rebuilt after synchronizing compact A, enlarged B, relabeled C, left-labeled D, accepted E, and F with separate negative-prevalence and spatial-null significance annotations; complete-layout PNG/PDF and individual panel files are from the same canonical state.",
+  "supplementary_video_1": null
+}

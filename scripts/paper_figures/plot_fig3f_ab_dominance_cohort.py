@@ -44,11 +44,14 @@ COL_NONSIG = "#A9A9A9"
 COL_MEDIAN = "#202020"
 START_SEC, STOP_SEC, STEP_SEC = -120.0, 20.0, 2.0
 HEATMAP_SORT_WINDOW = (-30.0, 20.0)
-HEATMAP_AXIS_LABEL_FONTSIZE = 14.0
-HEATMAP_X_TICK_FONTSIZE = 11.5
-HEATMAP_DENSE_Y_TICK_FONTSIZE = 10.0
-HEATMAP_COLORBAR_LABEL_FONTSIZE = 12.5
-HEATMAP_COLORBAR_TICK_FONTSIZE = 11.0
+# F is reduced more strongly than the left-column panels in the final board.
+# Keep patient IDs dense, but compensate the source type for that reduction.
+HEATMAP_AXIS_LABEL_FONTSIZE = 17.5
+HEATMAP_X_TICK_FONTSIZE = 14.5
+HEATMAP_DENSE_Y_TICK_FONTSIZE = 12.5
+HEATMAP_COLORBAR_LABEL_FONTSIZE = 15.5
+HEATMAP_COLORBAR_TICK_FONTSIZE = 13.5
+HEATMAP_FIGSIZE = (6.10, 3.20)
 
 
 def _literal_list_assignment(path: Path, variable: str) -> list[str]:
@@ -328,7 +331,7 @@ def make_heatmap_figure(payload: dict, *, data_dir: Path = DATA_DIR) -> plt.Figu
     matrix = np.vstack([item["trajectory"] for item in items])
     vmax = max(0.5, float(np.nanpercentile(np.abs(matrix), 98)))
 
-    fig, ax = plt.subplots(figsize=(5.15, 4.15), facecolor="white")
+    fig, ax = plt.subplots(figsize=HEATMAP_FIGSIZE, facecolor="white")
     image = ax.imshow(
         matrix,
         aspect="auto",
@@ -371,7 +374,7 @@ def make_heatmap_figure(payload: dict, *, data_dir: Path = DATA_DIR) -> plt.Figu
         if group_ranks[index] != group_ranks[index - 1]:
             ax.hlines(index - 0.5, START_SEC, STOP_SEC, color="white",
                       lw=1.5, zorder=3, clip_on=True)
-    fig.subplots_adjust(left=0.18, right=0.91, bottom=0.14, top=0.94)
+    fig.subplots_adjust(left=0.15, right=0.92, bottom=0.18, top=0.94)
     return fig
 
 
@@ -460,8 +463,10 @@ def main() -> None:
         help="directory containing per_subject timecourses; defaults to input JSON parent",
     )
     args = parser.parse_args()
-    data_dir = args.input.resolve().parent if args.data_dir is None else args.data_dir
-    payload = json.loads(args.input.read_text())
+    input_path = args.input.resolve()
+    output_dir = args.out_dir.resolve()
+    data_dir = input_path.parent if args.data_dir is None else args.data_dir.resolve()
+    payload = json.loads(input_path.read_text())
     plt.rcParams.update({
         "font.family": "DejaVu Sans",
         "axes.spines.top": False,
@@ -469,17 +474,17 @@ def main() -> None:
         "pdf.fonttype": 42,
         "ps.fonttype": 42,
     })
-    args.out_dir.mkdir(parents=True, exist_ok=True)
+    output_dir.mkdir(parents=True, exist_ok=True)
     paths: dict[str, Path] = {}
     for stem, maker in (
         (PAIRED_STEM, make_paired_figure),
         (HEATMAP_STEM, lambda item: make_heatmap_figure(item, data_dir=data_dir)),
     ):
         for suffix in ("png", "pdf"):
-            path = args.out_dir / f"{stem}.{suffix}"
+            path = output_dir / f"{stem}.{suffix}"
             savefig_pub(maker(payload), path, dpi=300)
             paths[f"{stem}_{suffix}"] = path
-    _write_sidecars(payload, paths, fig_dir=args.out_dir, data_dir=data_dir)
+    _write_sidecars(payload, paths, fig_dir=output_dir, data_dir=data_dir)
 
 
 if __name__ == "__main__":

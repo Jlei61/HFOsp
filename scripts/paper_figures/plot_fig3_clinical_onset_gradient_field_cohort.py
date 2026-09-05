@@ -58,6 +58,7 @@ def plot_clinical_onset_gradient_field_cohort(
             "display_p": float(stat.wilcoxon_one_sided_data_gt_null_p),
             "p_label": "one-sided p",
             "x_label": f"{SHORT_LABELS[group_id]}\n$n={int(stat.n_subjects)}$",
+            "bracket_fontsize": 16.0,
         })
     plot_paired_data_null_groups(
         groups,
@@ -69,10 +70,10 @@ def plot_clinical_onset_gradient_field_cohort(
         figsize=(5.8, 3.45),
         pair_gap=0.62,
         group_gap=1.75,
-        ylabel_fontsize=14.0,
-        tick_fontsize=11.5,
-        group_tick_fontsize=11.5,
-        legend_fontsize=11.5,
+        ylabel_fontsize=17.0,
+        tick_fontsize=14.0,
+        group_tick_fontsize=14.0,
+        legend_fontsize=14.0,
     )
 
 

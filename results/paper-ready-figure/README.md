@@ -1,152 +1,88 @@
-# Paper-Ready Figure Outputs — 总索引
+# Paper-ready figure outputs
 
-本目录收集供论文组装用的图输出。约定：每个主图 / panel 组用自己的子目录，子目录内有
-`figures/README.md` 说明这张图展示什么、哪个文件是接受版本。**本目录被 `.gitignore` 忽略**
-（图是产物，由脚本再生），所以这里的结构是组织约定、不进版本控制。
+这里的顶层只保存当前主图组装包 `fig1/`–`fig5/`、正式补图包 `supp_fig1_*`–`supp_fig7_*`，
+以及投稿级补充视频文件。source、候选、诊断和历史模型包放入 `archive/`，不与正式稿件入口并列。
 
-> **2026-09-03 Figure 4 当前入口**：`fig4/figures/fig4-complete-layout.{png,pdf}`。
-> A、C–G 有独立文件；B 使用右上留白预留，当前无独立文件，后续用于 data-driven
-> 参数对患者间期事件复现的影响。producer 为
-> `scripts/paper_figures/build_main_figure_4.py`；原 KMeans panel 位于 FigS7-E。
+唯一登记入口：[`docs/paper_figure_registry.md`](../../docs/paper_figure_registry.md)。
 
-> **2026-06-30 整理记录**：① 删除 scratch 子目录 `fig_subject_snn_epilepsiae_1146_style_preview`
-> （仅样式预览）、`fig_m3a_v2_1_qigk_trajectory`（单文件孤儿预览）。② 把 24 个 per-subject
-> subject-SNN 读出图按主题打包进 `fig4_subject_snn_cohort/`（E1146 headline + 其变体仍留顶层，
-> 因 `FIGURE_INDEX.md` 直接引用 E1146 路径）。③ 本 README 重写为完整索引。
-> **Caveat**：subject-SNN 生成脚本（`plot_fig_subject_snn*.py`）默认把 `fig_subject_snn_<subject>/`
-> 写到**顶层**；若整批重跑，新输出会重新散到顶层，需再跑一次本打包步骤（或改脚本输出根目录）。
+## 使用规则
 
----
+1. 引用格式统一为 `asset_id (paper_slot)`，例如
+   `ictal_field_scaffold (Fig3-A–F)`。
+2. 只有登记为 `LOCKED` 的资产可直接进入当前稿件；`CANDIDATE` 仍需总拼版或作者锁图。
+3. `SOURCE` 只提供正式 panel 的素材或 renderer，不能作为独立结论引用。
+4. 正式 supplementary 保留在顶层；source、诊断和模型谱系只从 `archive/` 查找。
+5. 旧版不删除，统一移到 `archive/<date>_<reason>/`；顶层不再保留多个同义入口。
+6. 每个实际含图的 `figures/` 目录必须有中文 `README.md`，并指出接受版本和科学边界。
+7. 独立 panel 内不画左上角字母；每张主图同时保留一个带字母的 `figN-complete-layout.{png,pdf}`。
 
-## Fig1 — 间期 HFO 群体事件素材
+## 当前主文入口
 
-- `fig1_hfo_group_event_demo/` — **Fig1-a1/a2 源素材**：legacy 人工标注 HFO n=178 形态图 + Yuquan Y3 群体事件示例。
-  脚本为 `scripts/paper_figures/plot_fig1_single_hfo_schematic.py` 与 `plot_fig1_hfo_group_event_legacy_style.py`；正式 panel 文件位于 `fig1_interictal_hfo_temporal_scaffold/figures/`。
+| paper slot | asset_id | status | canonical path |
+|---|---|---|---|
+| Fig1-B–F | `interictal_hfo_temporal_scaffold` | `LOCKED` | `fig1/figures/` |
+| Fig2-A–F | `interictal_spatial_scaffold` | `CANDIDATE` | `fig2/figures/` |
+| Fig3-A–F | `ictal_field_scaffold` | `LOCKED` | `fig3/figures/` |
+| Fig4-A–G | `data_driven_interictal_snn_fig4` | `LAYOUT_INCOMPLETE_RESERVED_PANEL_B` | `fig4/figures/` |
+| Fig5-A–D | `data_driven_zm_transition_fig5` | `CANDIDATE` | `fig5/figures/` |
+Fig1-A 是从登记的 legacy supplementary TIFF 固定裁剪得到的代表性植入脑图；裁剪后的 source asset 随 producer 入库，不重新绘制科学内容。Fig1/2/3 的独立 panel 均不含左上角字母；完整排版分别为
+`fig1-complete-layout`、`fig2-complete-layout` 和 `fig3-complete-layout`，仅完整排版带 panel 字母。
+旧素材与 producer/source 包不作为论文组装入口，正式引用只回到 `fig1/figures/`、`fig2/figures/`、
+`fig3/figures/`、`fig4/figures/` 或 `fig5/figures/`。
 
-> Fig2（单 subject 间期传播时序素材）不在本目录：它由 Topic 1 propagation 主绘图器生成，
-> 见 `results/interictal_propagation_masked/figures/per_subject/` + `docs/fig2_temporal_propagation_panel_spec.md`。
-> Fig2-B 模板匹配预览脚本 `scripts/paper_figures/plot_fig2b_template_matching_preview.py` 仍只作历史 preview；间期-vs-ictal paired field 已改列 Fig3-B。
-- `fig2c_interictal_event_envelope_field/` — **Fig2-C paper-ready candidate**：E1146 两次真实 TA/TB
-  代表事件的 Fig1a 质心 readout + 冻结 shared-plane 包络 frame；同时输出同一合同的 2 ms 生物学步长
-  GIF。canonical producer 为 `scripts/paper_figures/plot_fig2c_interictal_event_envelope_field.py`，唯一
-  frame/GIF 规范为 `docs/fig2c_interictal_event_envelope_field_spec.md`。该合同只管 TA/TB 每行一个
-  exemplar 的单事件版本；未来多事件 GIF 单独建规范。定位是 representative
-  raw-envelope timing cross-check，不是 template-free/cohort/traveling-wave 证明。
-- `fig2e_interictal_template_fields/` — **Fig2-E paper-ready candidate**：患者特异 TA/TB 静态 rank
-  field；与 Fig2-C 共用冻结轴/平面，但不使用事件包络时间轴。
-- `fig2_shared_field_reversal/` — **Fig2-F 最后一行 paper-ready candidate**：12名 shared-axis +
-  有效二维几何患者的 TA–TB contact-field signed `r`；左侧复用统一 renderer 展示匿名投稿代号 E15/E14/E13/Y9
-  四个几何易读的负相关 TA/TB Viridis 场，右上为完整12人分布，右下为全触点 channel-shuffle
-  cohort-median null。
-  当前8/12为负、中位 `r=-0.353`，`Δmedian=-0.339`，`P_perm=0.01840`；不做关系分组。
-- `fig_interictal_ab_direction_axis/` — **间期空间方向候选图**：A/B 独立 earliness gradient、过门后的共享线、
-  subject-native 脑表面 early→late 箭头与描述性解剖 overlay。主触点池与 expanded-contact sensitivity 并存；
-  脚本 `scripts/paper_figures/plot_interictal_ab_direction_axis.py`。
+Fig1-F 自 2026-09-02 起以 `fig1/figures/fig1-panelf.{png,pdf}` 的 v5 配对 inset 版为唯一
+canonical 输出：主散点右下比较 single-template 与 multi-cluster MI，显示患者配对连线、均值柱和
+paired Wilcoxon 括号；旧灰色 `median ΔMI` 小字版已被替代，不得作为后续拼版或重建来源。
 
-## Fig3 — 间期传播场 vs 发作早期激活场一致性
+Fig4 同样遵守无角标独立 panel + 带字母完整排版规则。当前 A–G 按 2026-09-03 最新作者顺序重排：A 为已确认的 local E/I circuit + patient-specific substrate；B 使用 A 右侧现有留白明确预留，当前不放图和占位文字；C 为 Node field + Model TA/MTB；D 为模型/患者 rank profile；E 为 cross-fit matrix；F 为 recruitment-onset-span readout；G 为 34 人 cohort。原 KMeans heatmap/rank distribution 保留在 FigS7-E。当前状态为 `LAYOUT_INCOMPLETE_RESERVED_PANEL_B`；该视觉状态不扩大 development-level scientific claim。
 
-- `fig3a_raw_spectral_context/` — **Fig3-A 正式版**：E1146 seizure 7 的 raw SEEG、严格对齐的 SCL9 TFR 与
-  low bands / gamma / high-gamma / broadband 2×2 band-power context。右侧按行共享 y 轴；只标 baseline 与
-  clinical-onset `[0,10) s` 阴影。脚本 `scripts/paper_figures/plot_fig3_raw_spectral_context.py`；完整规范见
-  `docs/figure_style_guide.md` §5a。
-- `fig3b_interictal_ictal_shared_field/` — **Fig3-B paper-ready candidate**：E1146 的冻结 TA timing
-  field 与当前 25 次 complete / exact 1–150 Hz 发作中 `shared_a_signed` 最高的 seizure 15 broadband power 场。
-  左右共用 shared plane、TA support、extent 和 6 mm display sigma；`TA fields` 标题固定红色，右图为 `magma_r`
-  连续 min–max 插值、无 rank/sign flip，两个 panel 各自写 xlabel。colorbar 直接报告 propagation rank / robust-z，
-  深色统一表示最早传播或最高 broadband power。
-  producer 为 `scripts/paper_figures/plot_fig3b_interictal_ictal_shared_field.py`，合同为
-  `docs/fig3b_interictal_ictal_shared_field_spec.md`。
-- `fig3_field_concordance_cohort_stat/` — **Fig3 field-concordance cohort statistic（panel 编号待总拼版）**：cohort 级 Data-vs-Null 统计面板
-  （maxAB 可评估 subject 上间期传播场与发作早期激活场整体高于 channel-shuffle null）。正式图现在包含
-  `BB 1-45 maxAB`、line-noise-masked `BB 1-150 maxAB` 和 `HFA 60-100 maxAB` 三组配对统计。
-  脚本 `scripts/paper_figures/plot_fig3_field_concordance_cohort_stat.py`。
-- `fig3_sup1_multiband_field_alignment/` — **Fig3-Sup1**（V2 Phase-1，multi-band supplement）：3 panel
-  A 观测 subject×band maxAB 热图（narrow>broad、band-generic）/ B 每 primary 带 per-subject Δ vs 弱空间
-  null violin（6/7 过 family-wise、ripple_high n.s.=NOT ripple-specific）/ C per-subject 稳定性（cohort
-  6/7 是聚合、narrow 中位 2/7 = 承重 caveat）。**tier=exploratory candidate scaffold（cohort 层，非
-  formal/机制）**；formal within-shaft Gate A 未评估(2/20)、Gate B/C 未跑。脚本
-  `scripts/paper_figures/plot_fig3_sup1_multiband_field_alignment.py`；归档
-  `docs/archive/topic5/v2_phase1_band_scan_backbone_2026-07-02.md`。
-- `fig3_sup2_raw_spectral_context/` — Fig3-A 定稿前的历史输出路径；保留溯源，不再作为 canonical panel 引用。
-- `fig_topic5_field_extrapolation_energy/` — **Topic 5 energy-field paper-ready 主图**：A E1146 真实电极布局上的测试设计
-  （core-field vs own-order 预测 hidden seizure energy）/ B cohort Δ 直接裁决 / C 证据阶梯。
-  结论边界：network extension supported，但 core-field 不系统性优于 hidden 电极自身间期顺序。
-  脚本 `scripts/paper_figures/plot_fig_topic5_field_extrapolation_energy.py`。
-- `fig_topic5_network_extension_null/` — **Topic 5 network-extension three-way 独立统计图**：每个频段同图放
-  core-field prediction / hidden own-order C1 / channel-shuffle null，三条 bracket 分别裁决 core>null、
-  own>null、core>own。脚本 `scripts/paper_figures/plot_fig_topic5_network_extension_null.py`。
+## 当前补充视频入口
 
-## Fig4 — Subject-specific SNN 读出（病人真实电极几何）
+| paper slot | asset_id | status | canonical path |
+|---|---|---|---|
+| Supplementary Video 1 | `interictal_single_event_propagation_video` | author-locked | `supplementary-video-1.gif` |
+| Supplementary Video 2 | `fig3c_peri_onset_field_evolution_video` | author-locked | `supplementary-video-2.gif` |
 
-**Headline（E1146，顶层；被 `FIGURE_INDEX.md` 引用）：**
+Supplementary Video 1 展示 E10 一次 TA 和一次 TB 代表事件在冻结 shared axis/plane 上的 HFO
+amplitude-envelope 演化。共 30 帧，生物学步长 2 ms，播放 12.5 fps（80 ms/frame）；中间场使用色盲友好的 soft
+teal-to-navy 顺序色图、固定 `PowerNorm(gamma=0.5)` 和每事件完整显示窗 participant-only q99。
+最右 TA/TB template field 保持冻结 `viridis` 场，但各自的 rank colorbar 线性归一化为 `0–1`，
+端点分别表示 early / late。
+它只支持 representative raw-envelope timing cross-check，不是 template-free、cohort、连续组织
+traveling-wave 或机制证据。完整合同和 SHA-256 见 `supplementary-video-1_metadata.json`。
 
-- `fig_subject_snn_epilepsiae_1146/` — **Fig4A/B/C**：E1146 真实电极布局 subject-specific SNN
-  读出（A）+ KMeans k=2 核验（B）+ 模型 vs 真实间期模板一致性（C）。
-  脚本 `plot_fig_subject_snn.py` / `plot_fig_subject_snn_kmeans2.py` / `..._realvsmodel.py`。
-- `fig_subject_snn_epilepsiae_1146_mechanism/` — E1146 独立高清**机制面板**（E/I 神经元 + source
-  core + AR=2 的 E→E 长轴连接 lobe），脚本 `plot_fig_subject_snn_mechanism.py`。
-- `fig_subject_snn_epilepsiae_1146_stimulation/` — E1146 真实几何上的**刺激示意图**
-  （刺激前传播事件 vs 刺激打开后局部事件 + readout 刺激窗），脚本 `plot_fig_subject_snn_stimulation.py`。
-- `fig_subject_snn_epilepsiae_1146_COVERAGE_VARIANT/` — **覆盖优先对照样张**，被 archive
-  `docs/archive/topic4/sef_hfo/cohort_field_swap_snn_coverage_tradeoff_2026-06-27.md` 引用为证据；
-  保留（非 scratch）。
-- `fig_subject_snn_epilepsiae_1146_CR1p5_S4_T20000_20260706/` — **E1146 小核长时重跑版**：
-  `core_r=1.5, seed=4, T=20000 ms`，Fig4A 使用椭圆 E→E 长轴 footprint + 完整 20 秒 readout；
-  Fig4B 使用 active-contact KMeans（>=30% clean-event participation）减少灰格。双向仍存在但偏
-  reverse（5/11），KMeans purity=0.8125；用于长时 sensitivity，不替代 headline seed3 正式图。
+Supplementary Video 2 的正式投稿入口为 `supplementary-video-2.gif`，生成与海报 sidecar 位于
+`supplementary-video-2-fig3c-peri-onset-field/figures/`。该视频把主图
+Fig3C 的 E10 | SZ3 右侧发作场扩展到临床起始前 120 s 至起始后 20 s。动画固定 shared TA plane、
+15 个触点、support、6 mm 显示核和 power-z 色标，仅更新 10 s 滑窗内的 1–150 Hz robust-z 场；
+下方幅度感知模板表达量 `Q=max(|q_A|,|q_B|)` 用红蓝点标出当时由 TA/TB 主导，并以游标同步当前帧。该视频是单病例动态
+配套，不是 onset-emergent alignment、template-free replay 或 cohort 证据。完整合同和 SHA-256 见
+`supplementary-video-2_metadata.json`。
 
-**Cohort（按主题打包）：**
+## 补图与计算材料
 
-- `fig4_subject_snn_cohort/` — 24 个 per-subject subject-SNN 读出图（14 epilepsiae + 10 yuquan），
-  与 E1146 同一套四列标准、按各自真实电极布局。每个子目录见其内文件 + metadata。
-- `_cohort_field_swap_snn/` — **Fig4 cohort 接触片**（contact sheet 4A/4B）+ cohort 统计/索引。
-  脚本 `run_cohort_field_swap_snn.py` + `cohort_field_swap_summary.py`。
+正式 empirical FigS1–FigS5 位于本目录顶层，分别为 `supp_fig1_interictal_event_phenotypes/`、
+`supp_fig2_soz_auc/`、`supp_fig3_k_scan_templates/`、`supp_fig4_axis_geometry/` 和
+`supp_fig5_multiband_field_concordance/`。原 `supp_fig5_early_seizure_phenotypes/` 已并入主图 Fig3，
+`supp_fig6_multiband_field_concordance/` 为编号调整前的历史导出，二者均不再是正式补图入口。
+FigS7 位于 `supp_fig7_nlc_pathway_confirmation/`；其 A–D 是从旧 Fig4 supporting source 标准化出来的
+连接路径消融图，E 是从主 Fig4 移入的 KMeans heatmap/rank-distribution panel；上游冻结仿真和统计结果不迁移。
 
-## Fig5 — 核心模型 S3 brake-off
+尚有编号冲突或未锁定的计算材料继续保存在归档中。当前 `fig5/` 只保留 v5 最新完整候选；其 metadata 的科学边界仍是单 seed operational model transition，且形态闸门为 `NOT_SUSTAINED_ICTAL_MORPHOLOGY`，不能写成临床发作起始或多 seed 确认。
 
-- `fig5_core_model_s3_brakeoff/` — **Fig5**：模型底物可产生自发双向传播、虚拟 SEEG 可读出方向
-  （只支持"能产生 + 可读方向"，不单独证明真实病人机制）。脚本 `plot_fig5_core_model_s3_brakeoff.py`。
+## 归档
 
-## Fig6 — RNN / contact-field computational supplements
-
-- `fig_topic5_minimal_sequence_kernel_closeout/` — **当前最小序列结构收口图**：主六联图把
-  where（稳定 contact scaffold）、how（contact choice 只需当前和前一 rank；第三 rank
-  主要改善 STOP）和 when（现有 event-reset 模型不检验真实时间）明确分开；辅助三联图
-  报告 0–2 ms timing sensitivity、early-ictal target reliability gate 与 IEI-aware
-  跨事件 feasibility。结论为 supplementary bounded result；不支持脑流形、真实时间慢状态
-  或 ordered residual 的 early-ictal 增量。producer 为
-  `scripts/paper_figures/plot_topic5_minimal_sequence_kernel_closeout_v0_2.py`。
-- `fig6_static_contact_topography/` — 六块固定验收图：target-sealed contact-field 合同、
-  formal heldout order gain 与 matched perturbation 的区别、signed primary、sign-free spatial
-  morphology、full GRU 相对静态/一阶/打乱对照的增量，以及 contact-confound sensitivity。
-  当前只支持患者特异 interictal contact topography 与 early-ictal energy 的
-  orientation-free static correspondence；不支持 GRU-specific recurrent-order increment、
-  自动 physical-axis 恢复或 seizure trajectory prediction。脚本
-  `scripts/paper_figures/plot_fig6_static_scaffold_fixed_readout.py`。
-- `fig6_ordered_history_architecture_audit/` — 六块顺序信息与架构控制图：精确定义事件内
-  rank-step state、比较 static/unordered/linear/rate/GRU/low-rank、匹配 rank-shuffle、
-  reverse/drop/reset 干预、clinical-onset early-ictal 条件增量和预先固定的 E1146 contact
-  field。target-blind linear-state 有 heldout 顺序增量，但 7 个预注册递归家族仅 1 个通过
-  family-wise inference；early-ictal 条件增量未建立。producer 为
-  `scripts/paper_figures/plot_topic5_ordered_history_architecture_audit_v0_1.py`。
-
-## 模型机制诊断图（M3A-v2.x，visual diagnostic，非主图 claim）
-
-> 这些是 M3A-v2 慢变量场闭环 screen（一致 NEGATIVE）的目视诊断图。统计判读以 sweep + 归档
-> doc 为准，不在这些图。详见 `docs/topic4_m3_stage.md` §2 + `docs/archive/topic4/m3a_v2_2_carrier_exploration_2026-06-29.md`。
-
-**M3A-v2.2（sustained 协议 + `h_G` 载体，主收口图）：**
-
-- `fig_m3a_v2_2_explore_summary/` — 读 3184-sim sweep 的三联结果汇总图。
-- `fig_m3a_v2_2_dynamics/` — 代表性四列动力学示意（单 seed 重跑）。
-- `fig_m3a_v2_2_hG_runaway_transition/` — 全局恢复 `h_G` 单轨迹 GIF（减法式刹车拉不回 runaway）。
-- `fig_m3a_v2_2_qI_runaway_transition_epilepsiae_1146/` — `q_I` 载体 + 轴向 `g_K` 疲劳 runaway GIF（E1146 几何）。
-- `fig_m3a_v2_2_qI_stim_runaway_epilepsiae_1146/` — 刺激 vs 不刺激对照 GIF（中段 `V_th` clamp 把
-  runaway 推后 +834 ms；外部预防式压制示意，非治疗主张）。
-
-**M3A-v2.1 / Step4（诊断 + h_G-OFF 对照基线）：**
-
-- `fig_m3a_v2_1_qigk_runaway_transition/` — v2.1 `q_I/g_K` runaway GIF；是 v2.2 `h_G` 图的 **h_G-OFF 对照基线**。
-- `fig_m3a_v2_1_qigk_runaway_transition_epilepsiae_1146/` — 同上 E1146 几何变体。
-- `fig_m3a_v2_1_qigk_gap_dynamics/`、`..._L20/` — v2.1 gap-sweep 代表状态四列诊断（L=默认 / L=20）。
-- `fig_m3a_v2_step4_dynamics/` — M3A-v2 Step4 低-q / g_K 闭环负结果代表动力学（visual diagnostic）。
+- `archive/2026-08-09_stale_aliases/`：第一批已撤回、被替代或重复的顶层入口。
+- `archive/2026-08-09_unused_subject_snn_reruns/`：三套无仓库引用的 E1146 参数重跑输出。
+- `archive/2026-08-09_fig1_pre_panel_contract/`：Figure 1 旧 panel 字母与联合输出。
+- `archive/2026-08-09_fig1_source_material/`：Figure 1B 的原始 HFO 素材。
+- `archive/2026-08-09_fig2_pre_panel_contract/`：Figure 2 旧分散目录与 E+F 联合输出。
+- `archive/2026-08-13_non_main_figure_packages/`：现保留 54 个 Fig3/Fig4 source、Fig5/Fig6 候选、
+  Topic 4 诊断图和历史模型谱系；六个正式 `supp_fig*` 已于 2026-08-19 恢复至顶层。
+- `archive/2026-08-19_pre_a_g_fig4/`：Fig4 从旧 A–H 改为 data-driven A–G 前的完整可恢复快照。
+- `archive/2026-08-19_rejected_a_g_fig4/`：按错误 A–G 语义生成、随后撤回的版本；仅保留用于恢复与 provenance。
+- `archive/2026-09-03_pre_combined_fig4_ab/`：本次将原 Fig4A/B 合并为新 Panel A 前的完整 A–H 素材包；包含原始独立 panel、旧完整拼板和过渡候选，仅用于恢复与 provenance。
+- `archive/2026-09-03_pre_fig4_a_e_reorder/`：Fig4 从 A–G 精简重排前的完整快照；其中 masked-rank KMeans panel 已移入 FigS7-E，cross-fit 保留在主图。
+- `archive/2026-09-03_pre_fig4_reserved_panel_b/`：B 预留为空之前的 A–F canonical 快照；原 B–F 内容在当前主图中原样顺延为 C–G。
+- `archive/2026-09-02_noncanonical_staging_qa_cleanup/`：本轮从顶层移走的 Fig2–4 producer staging、comparison、source 和 typography visual-QA 包。
+- 归档是路径迁移，不是删除；旧图只能用于 provenance，不再参与当前稿件组装。

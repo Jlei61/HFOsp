@@ -1,0 +1,241 @@
+{
+  "figure": "Supplementary Figure 4",
+  "caption": "Supplementary Fig. 4 | Three-dimensional direction shifts paired template axes and improves held-out directional organization. A, Paired half-rose distributions of the directed angular separation between the full-fit TA and TB axes obtained using Timing-only (blue) and Timing + 3D direction (orange) clustering in 28 patients. 0° denotes the same direction and 180° the opposite direction; overlapping bars show the fraction of patients in 30° bins, with the blended region denoting the shared fraction. Coloured diamonds mark means and outer arcs show mean ± 1 s.d. The mean separation was 101.3° ± 45.0° for Timing-only and 134.6° ± 34.4° for Timing + 3D direction. B, Paired patient-level direction scores for Timing-only and Timing + 3D direction clustering, evaluated by alternating-recording-block cross-validation. All interictal events contributed timing features, whereas events with finite direction estimates additionally contributed the masked spatial view. The score is the equal-fold, equal-template mean signed cosine between each held-out event direction and its assigned training-template axis. Points denote patients, lines preserve patient pairing, violins show the distributions, boxes show IQRs and black horizontal lines mark medians. The median score increased from 0.435 to 0.479; 22 of 26 patients improved, with a median paired gain of 0.042 (95% bootstrap CI, 0.011–0.064; one-sided paired Wilcoxon P = 9.54e-06). C, The same held-out direction scores compared with the patient-specific median of each method's direction-shuffle null. Open and filled distributions denote null and observed scores, respectively; grey lines preserve within-patient pairing. Timing-only and Timing + 3D direction scores both exceeded their respective nulls (26 of 26 patients for each method; one-sided paired Wilcoxon P = 1.49e-08 and 1.49e-08, respectively). The upper bracket compares the two observed methods (one-sided paired Wilcoxon P = 9.54e-06). D, Clinical SOZ-contact compactness relative to each patient's mapped invasive-contact geometry. The SOZ RMS radius was divided by the median radius of 20,000 equally sized random contact subsets from the same patient; the dashed line marks the null ratio of 1. Points denote patients (blue, Yuquan, n = 15; purple, Epilepsiae, n = 14), filled points indicate a patient-level empirical P < 0.05, and horizontal and vertical black lines mark medians and IQRs. Brackets show one-sided within-dataset Wilcoxon signed-rank tests of log2 ratios against 0 (Yuquan, P = 3.1e-05; Epilepsiae, P = 0.00012; *** denotes P < 0.001). Across both cohorts, the median ratio was 0.375 (95% bootstrap CI, 0.261–0.478; n = 29 patients; one-sided Wilcoxon P = 3.7e-09).",
+  "main_figure_field_panel_repeated": false,
+  "panel_a": {
+    "timing_only_source": "results/interictal_propagation_masked/template_gradient_fields/axis_cohort.csv",
+    "timing_plus_3d_direction_source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/axis_cohort.csv",
+    "definition": "Paired directed TA-TB axis-angle distributions from Timing-only and Timing + 3D direction full fits",
+    "n": 28,
+    "bin_edges_deg": [
+      0.0,
+      30.0,
+      60.0,
+      90.0,
+      120.0,
+      150.0,
+      180.0
+    ],
+    "bin_counts": {
+      "timing_only": [
+        2,
+        3,
+        6,
+        8,
+        5,
+        4
+      ],
+      "timing_plus_3d": [
+        0,
+        0,
+        4,
+        4,
+        11,
+        9
+      ]
+    },
+    "timing_only": {
+      "n": 28,
+      "mean_deg": 101.33913015801113,
+      "sd_deg": 44.96650845319131,
+      "median_deg": 103.55696456682315,
+      "iqr_deg": [
+        70.89690461193993,
+        132.6239192519382
+      ],
+      "n_negative_cosine": 17,
+      "n_angle_ge_120": 9
+    },
+    "timing_plus_3d_direction": {
+      "n": 28,
+      "mean_deg": 134.56306177093896,
+      "sd_deg": 34.38236417158948,
+      "median_deg": 137.04621165403753,
+      "iqr_deg": [
+        113.32000393944493,
+        162.9784324303305
+      ],
+      "n_negative_cosine": 24,
+      "n_angle_ge_120": 20
+    },
+    "paired_median_angle_increase_deg": 22.49848225260501,
+    "n_angle_increased": 18,
+    "paired_wilcoxon_greater_p": 0.001473495727165652
+  },
+  "panel_b": {
+    "source_table": "results/interictal_propagation_masked/spatial_information_gain_all_events/subject_spatial_information_gain.csv",
+    "source_summary": "results/interictal_propagation_masked/spatial_information_gain_all_events/spatial_information_gain_summary.json",
+    "definition": "Two-way alternating-recording-block cross-fit comparison of Timing-only and Timing + 3D direction clustering; held-out score is the equal-fold, equal-template mean signed cosine between each event direction and its assigned training-template axis",
+    "cohort_flow": {
+      "n_requested": 26,
+      "n_eligible": 26,
+      "n_skipped": 0,
+      "skipped": []
+    },
+    "summary": {
+      "n": 26,
+      "timing_only_median": 0.43514521948670226,
+      "timing_plus_space_median": 0.47900192162099997,
+      "median_gain": 0.04156536735053562,
+      "median_gain_bootstrap_ci95": [
+        0.010716364789677413,
+        0.06413847699491079
+      ],
+      "n_positive_gain": 22,
+      "n_negative_gain": 4,
+      "paired_wilcoxon_greater_p": 9.5367431640625e-06,
+      "direction_shuffle_null": {
+        "n_draws": 1000,
+        "cohort_median_null_median": -0.010356619830823843,
+        "cohort_median_null_ci95": [
+          -0.01462037482265406,
+          -0.006184753706548988
+        ],
+        "empirical_p_observed_median_greater": 0.000999000999000999
+      },
+      "dataset_sensitivity": {
+        "epilepsiae": {
+          "n": 16,
+          "median_gain": 0.04815709194105522,
+          "n_positive": 16
+        },
+        "yuquan": {
+          "n": 10,
+          "median_gain": 0.013235098388836686,
+          "n_positive": 6
+        }
+      },
+      "absolute_direction_scores": {
+        "timing_only_median": 0.43514521948670226,
+        "timing_only_bootstrap_ci95": [
+          0.3662570233191414,
+          0.4797149879642689
+        ],
+        "timing_plus_space_median": 0.47900192162099997,
+        "timing_plus_space_bootstrap_ci95": [
+          0.43571624809099574,
+          0.5431981401438175
+        ],
+        "hybrid_direction_shuffle_null_median": 0.08447832670104856,
+        "hybrid_direction_shuffle_null_ci95": [
+          0.07887281157291262,
+          0.09005209470555765
+        ],
+        "hybrid_observed_vs_null_empirical_p": 0.000999000999000999
+      }
+    }
+  },
+  "panel_c": {
+    "source": "results/interictal_propagation_masked/spatial_information_gain_all_events/cohort_direction_shuffle_null.npz",
+    "definition": "Patient-level observed held-out direction scores versus each method's own within-recording-block direction-shuffle null median, plus the paired comparison between observed methods",
+    "summary": {
+      "n": 26,
+      "timing_only": {
+        "median": 0.43514521948670226,
+        "iqr": [
+          0.2987190052091374,
+          0.5005661434052682
+        ]
+      },
+      "timing_only_null": {
+        "median": 0.11667000221993026,
+        "iqr": [
+          0.07290739624908402,
+          0.19762677335535694
+        ]
+      },
+      "timing_plus_3d_direction": {
+        "median": 0.47900192162099997,
+        "iqr": [
+          0.4267811540412109,
+          0.5599793156647529
+        ]
+      },
+      "timing_plus_3d_direction_null": {
+        "median": 0.08465468444293639,
+        "iqr": [
+          0.03554572799757004,
+          0.1486000101830327
+        ]
+      },
+      "timing_only_vs_null_p": 1.4901161193847656e-08,
+      "timing_plus_3d_direction_vs_null_p": 1.4901161193847656e-08,
+      "timing_plus_3d_direction_vs_timing_only_p": 9.5367431640625e-06
+    }
+  },
+  "panel_d": {
+    "source_summary": "results/spatial_modulation/soz_contact_compactness/cohort_summary.json",
+    "source_table": "results/spatial_modulation/soz_contact_compactness/subject_compactness.csv",
+    "definition": "Clinical SOZ-contact RMS radius divided by the median radius of equal-size subsets drawn from all mapped invasive contacts within subject",
+    "n_null_per_subject": 20000,
+    "summary": {
+      "overall": {
+        "n": 29,
+        "median_observed_to_null_ratio": 0.37545310936066956,
+        "median_ratio_bootstrap_95ci": [
+          0.26056860493935613,
+          0.47836710481440664
+        ],
+        "n_ratio_below_1": 28,
+        "n_subject_p_lt_0_05": 27,
+        "wilcoxon_log2_ratio_less_than_0": {
+          "statistic": 1.0,
+          "p_value": 3.725290298461914e-09
+        },
+        "binomial_subject_pass_rate_vs_0.05": {
+          "successes": 27,
+          "trials": 29,
+          "p_value": 2.7402862906456025e-33
+        }
+      },
+      "yuquan": {
+        "n": 15,
+        "median_observed_to_null_ratio": 0.37545310936066956,
+        "median_ratio_bootstrap_95ci": [
+          0.26056860493935613,
+          0.5406574247681377
+        ],
+        "n_ratio_below_1": 15,
+        "n_subject_p_lt_0_05": 15,
+        "wilcoxon_log2_ratio_less_than_0": {
+          "statistic": 0.0,
+          "p_value": 3.0517578125e-05
+        },
+        "binomial_subject_pass_rate_vs_0.05": {
+          "successes": 15,
+          "trials": 15,
+          "p_value": 3.0517578125000026e-20
+        }
+      },
+      "epilepsiae": {
+        "n": 14,
+        "median_observed_to_null_ratio": 0.37549103454410937,
+        "median_ratio_bootstrap_95ci": [
+          0.19781224548758683,
+          0.511865499854883
+        ],
+        "n_ratio_below_1": 13,
+        "n_subject_p_lt_0_05": 12,
+        "wilcoxon_log2_ratio_less_than_0": {
+          "statistic": 1.0,
+          "p_value": 0.0001220703125
+        },
+        "binomial_subject_pass_rate_vs_0.05": {
+          "successes": 12,
+          "trials": 14,
+          "p_value": 2.021362304687501e-14
+        }
+      }
+    },
+    "claim_boundary": [
+      "Supports or rejects spatial compactness of clinical SOZ contacts in 3D SEEG contact space.",
+      "Does not test whether propagation endpoints are SOZ-enriched.",
+      "Does not establish that population-event contacts are confined to clinical SOZ.",
+      "Yuquan native-RAS and Epilepsiae MNI coordinates are analyzed only within subject; point clouds are never pooled."
+    ]
+  },
+  "outputs": {
+    "png": "results/paper-ready-figure/supp_fig4_axis_geometry/figures/supp_fig4_axis_direction_and_heldout_readback.png",
+    "pdf": "results/paper-ready-figure/supp_fig4_axis_geometry/figures/supp_fig4_axis_direction_and_heldout_readback.pdf"
+  }
+}

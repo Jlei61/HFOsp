@@ -1,0 +1,95 @@
+{
+  "schema_version": "supplementary_figure7_nlc_pathway_and_kmeans_v3",
+  "status": "SUPPLEMENTARY_FIGURE_7_REVISION_READY",
+  "asset_id": "data_driven_snn_nlc_pathway_confirmation",
+  "paper_slot": "FigS7-A-E",
+  "source": {
+    "endpoint_status": "PRE_REGISTERED_INDEPENDENT_CONFIRMATION",
+    "source_verdict": "results/topic4_sef_hfo/data_driven_local_connectivity_rev11_nlc/pathway_mechanism_confirmation/mechanism_verdict.json",
+    "new_confirmation_required_for_main_claim": false,
+    "root": "results/topic4_sef_hfo/data_driven_local_connectivity_rev11_nlc/pathway_mechanism_confirmation",
+    "mechanism_verdict_sha256": "f96763fffad0f6e2eaa2cf40993721c0af65021f41fa6777e0c4c84d727b05f4",
+    "config": "config/topic4_rev11_nlc_pathway_mechanism_confirmation.json",
+    "config_sha256": "145fab72eb383a35e114c43c218af4463001bc130bf335275d71f7f28a1c838d"
+  },
+  "network_seeds": [
+    1581,
+    1582,
+    1583,
+    1584,
+    1585,
+    1586,
+    1587,
+    1588,
+    1589,
+    1590,
+    1591,
+    1592
+  ],
+  "n_paired_networks": 12,
+  "independent_unit": "network seed",
+  "arm_order": [
+    "node_baseline",
+    "joint_04_ee_only",
+    "joint_04_etoi_only",
+    "joint_04_control"
+  ],
+  "panel_contract": {
+    "a": "Mode 1 share (%)",
+    "b": "Mode 2 share (%)",
+    "c": "de novo KMeans K=2 balanced match with frozen Mode 1/2 labels (%)",
+    "d": "returned-event OOD fraction (%)",
+    "e": "masked-rank KMeans heatmap and per-contact rank distribution"
+  },
+  "statistics": {
+    "summary": "equal-network mean and 90% network-bootstrap interval; raw paired networks shown",
+    "star_rule": "paired arm-minus-Node 90% network-bootstrap CI excludes zero",
+    "bootstrap_draws": 4096,
+    "multiplicity_correction": "none",
+    "annotated_arm_vs_node": {
+      "Mode 1 share (%)": [
+        "joint_04_etoi_only"
+      ],
+      "Mode 2 share (%)": [
+        "joint_04_etoi_only"
+      ],
+      "KMeans match (%)": [
+        "joint_04_control"
+      ],
+      "OOD (%)": [
+        "joint_04_etoi_only",
+        "joint_04_control"
+      ]
+    },
+    "panel_e_kmeans": {
+      "source_registry": "results/paper-ready-figure/archive/2026-09-03_pre_fig4_a_e_reorder/fig4/figure4_panel_registry.json",
+      "source_registry_sha256": "6a008309ec61712c29d5e655c35a719a07a10c66b566590d2891f5ad97c3d037",
+      "mode_counts": [
+        437,
+        190
+      ],
+      "event_subset": "formal clean events with at least three participating contacts; clean events below that support are outside the KMeans input, so Fig4B event totals are smaller than the Fig4A mode counts",
+      "former_main_panel": "Figure 4E in the pre-reorder A-G package",
+      "display": "masked-rank heatmap, per-contact rank distribution, one shared colorbar"
+    }
+  },
+  "scientific_boundary": "development-only, model-internal static-pathway effect pattern; not patient causal connectivity, anatomical-core recovery, or real-geometry/patient-blind generalization",
+  "panel_files_have_internal_letters": false,
+  "complete_layout_has_panel_letters": true,
+  "visual_status": "CODEX_RENDER_QA_PASSED_PENDING_AUTHOR_ACCEPTANCE",
+  "outputs": {
+    "results/paper-ready-figure/supp_fig7_nlc_pathway_confirmation/figures/supp_fig7-panela.png": "8eacd3210b4614b4b0d71186b67b5538a485c1f0ca79cb8433a5f2e65d4b81b1",
+    "results/paper-ready-figure/supp_fig7_nlc_pathway_confirmation/figures/supp_fig7-panela.pdf": "41756b65f5554f5f8f568ce7884ca9b38b7ab2a5c0b0628f3d70d88415790084",
+    "results/paper-ready-figure/supp_fig7_nlc_pathway_confirmation/figures/supp_fig7-panelb.png": "8a79ef0b449cfc156f9b7b4bd5eb598123434dacfb66a1b8a04cf4d75a99eb4a",
+    "results/paper-ready-figure/supp_fig7_nlc_pathway_confirmation/figures/supp_fig7-panelb.pdf": "16478066aa5dcaa03892484b5765ce80f4afe7c89792c05b23ae45c654780adc",
+    "results/paper-ready-figure/supp_fig7_nlc_pathway_confirmation/figures/supp_fig7-panelc.png": "c6144a901ae50e69b7b4118334aede266c15029e053cc2ed8d11cc66e7f8a4f5",
+    "results/paper-ready-figure/supp_fig7_nlc_pathway_confirmation/figures/supp_fig7-panelc.pdf": "a2e85dbcdcccf10094bf58272a0f007dce87250c3220fa1f93af1be8a7027b6b",
+    "results/paper-ready-figure/supp_fig7_nlc_pathway_confirmation/figures/supp_fig7-paneld.png": "eb82bf7eb369e0ea1cc57b32dfeac3c8b7007361cca576d83db45ba01156b7af",
+    "results/paper-ready-figure/supp_fig7_nlc_pathway_confirmation/figures/supp_fig7-paneld.pdf": "ffff864ba5bf27f3297d50f4adafcce505d8678f59064e2d366638614d20902a",
+    "results/paper-ready-figure/supp_fig7_nlc_pathway_confirmation/figures/supp_fig7-panele.png": "0835af9f9a39fe48f34edfd87ddb1ad96c4b3bd0e30743f4508b395910acd513",
+    "results/paper-ready-figure/supp_fig7_nlc_pathway_confirmation/figures/supp_fig7-panele.pdf": "322f493dc6d0415bd46df2373e08b088ad6408e5f54a2c9c1a2f67ae1c5aec87",
+    "results/paper-ready-figure/supp_fig7_nlc_pathway_confirmation/figures/supp_fig7-complete-layout.png": "8e9225bafaf91de9124dc822e4d46b6fd9508fcc78c3c998b5379c4e0cafaf71",
+    "results/paper-ready-figure/supp_fig7_nlc_pathway_confirmation/figures/supp_fig7-complete-layout.pdf": "e9a2db85156417c5a2a4f22129dcd8475bb920aae4c7d17cdee6cb96bf6d926a"
+  },
+  "readme": "results/paper-ready-figure/supp_fig7_nlc_pathway_confirmation/figures/README.md"
+}

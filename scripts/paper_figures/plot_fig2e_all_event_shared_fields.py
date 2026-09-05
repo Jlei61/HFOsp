@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import argparse
+import csv
 import hashlib
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -19,8 +21,6 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from scripts.paper_figures.plot_fig2_shared_field_reversal_row import (  # noqa: E402
-    COMMON_DISPLAY_X_SPAN_MM,
-    COMMON_DISPLAY_Y_SPAN_MM,
     apply_common_display_window,
     _restore_compact_axis_ticks,
 )
@@ -43,6 +43,11 @@ DEFAULT_INPUT = registered_path("fig2", "e", "analysis_root")
 DEFAULT_OUTPUT = registered_path("fig2", "e", "staging_root")
 N_EXAMPLES = 4
 MIN_CONTACTS = 7
+MIN_SHAFTS = 2
+MIN_CONTIGUOUS_CONTACTS = 5
+DISPLAY_X_SPAN_MM = 70.0
+DISPLAY_Y_SPAN_MM = 70.0
+DISPLAY_ORDER = ("E1", "E12", "E5", "Y9")
 
 
 def _sha256(path: Path) -> str:
@@ -56,7 +61,30 @@ def _portable(path: Path) -> str:
         return str(path)
 
 
+def _max_contiguous_contacts(contact_order: list[str], shafts_by_name: dict[str, str]) -> int:
+    """Return the longest consecutive contact-number run on one shaft."""
+    numbers_by_shaft: dict[str, set[int]] = {}
+    for name in contact_order:
+        match = re.search(r"(\d+)$", name)
+        if match is None:
+            continue
+        numbers_by_shaft.setdefault(shafts_by_name[name], set()).add(int(match.group(1)))
+    longest = 0
+    for numbers in numbers_by_shaft.values():
+        current = 0
+        previous = None
+        for number in sorted(numbers):
+            current = current + 1 if previous is not None and number == previous + 1 else 1
+            longest = max(longest, current)
+            previous = number
+    return longest
+
+
 def _eligible_rows(input_root: Path) -> list[dict]:
+    with (input_root / "shared_field_similarity_subjects.csv").open(
+        newline="", encoding="utf-8"
+    ) as handle:
+        statistics = {row["subject_id"]: row for row in csv.DictReader(handle)}
     rows = []
     for path in sorted((input_root / "per_subject").glob("*.json")):
         record = json.loads(path.read_text())
@@ -80,6 +108,18 @@ def _eligible_rows(input_root: Path) -> list[dict]:
             raise ValueError(f"shared field routed to {mode}: {record['subject_id']}")
         x = np.concatenate([np.asarray(payload_a["xs"]), np.asarray(payload_b["xs"])])
         y = np.concatenate([np.asarray(payload_a["ys"]), np.asarray(payload_b["ys"])])
+        contact_indices = {
+            name: index for index, name in enumerate(record["names"])
+        }
+        shafts_by_name = {
+            name: record["shafts"][index]
+            for name, index in contact_indices.items()
+        }
+        used_shafts = {
+            shafts_by_name[name]
+            for name in field["contact_order"]
+        }
+        subject_statistics = statistics[str(record["subject_id"])]
         rows.append({
             "subject_id": str(record["subject_id"]),
             "display_id": manuscript_id(str(record["subject_id"])),
@@ -88,21 +128,34 @@ def _eligible_rows(input_root: Path) -> list[dict]:
             "r": float(np.corrcoef(ta, tb)[0, 1]),
             "x_span_mm": float(np.ptp(x)),
             "y_span_mm": float(np.ptp(y)),
+            "n_shafts": int(len(used_shafts)),
+            "max_contiguous_contacts": _max_contiguous_contacts(
+                field["contact_order"], shafts_by_name
+            ),
+            "channel_p_negative": float(subject_statistics["channel_p_negative"]),
+            "channel_q_bh": float(subject_statistics["channel_q_bh"]),
+            "channel_fdr_significant_negative": (
+                subject_statistics["channel_fdr_significant_negative"] == "True"
+            ),
         })
     return rows
 
 
 def _select(rows: list[dict]) -> list[dict]:
-    candidates = [
-        row for row in rows
+    candidates = {
+        row["display_id"]: row for row in rows
         if row["n_contacts"] >= MIN_CONTACTS
+        and row["n_shafts"] >= MIN_SHAFTS
+        and row["max_contiguous_contacts"] >= MIN_CONTIGUOUS_CONTACTS
         and row["r"] < 0
-        and row["x_span_mm"] <= COMMON_DISPLAY_X_SPAN_MM
-        and row["y_span_mm"] <= COMMON_DISPLAY_Y_SPAN_MM
-    ]
-    selected = sorted(candidates, key=lambda row: row["r"])[:N_EXAMPLES]
-    if len(selected) != N_EXAMPLES:
-        raise RuntimeError(f"expected {N_EXAMPLES} display-eligible examples")
+        and row["channel_p_negative"] < 0.05
+        and row["x_span_mm"] <= DISPLAY_X_SPAN_MM
+        and row["y_span_mm"] <= DISPLAY_Y_SPAN_MM
+    }
+    missing = [display_id for display_id in DISPLAY_ORDER if display_id not in candidates]
+    if missing:
+        raise RuntimeError(f"missing display-eligible examples: {missing}")
+    selected = [candidates[display_id] for display_id in DISPLAY_ORDER]
     return selected
 
 
@@ -123,10 +176,10 @@ def render(input_root: Path, output_root: Path) -> dict:
     with plt.rc_context(rc):
         fig = plt.figure(figsize=(7.15, 2.60), facecolor="white")
         grid = fig.add_gridspec(
-            2, 5,
-            width_ratios=(1, 1, 1, 1, 0.055),
+            2, N_EXAMPLES + 1,
+            width_ratios=(*([1] * N_EXAMPLES), 0.055),
             left=0.075, right=0.945, top=0.91, bottom=0.18,
-            wspace=0.24, hspace=0.20,
+            wspace=0.06, hspace=0.22,
         )
         axes = []
         for column, row in enumerate(selected):
@@ -135,7 +188,12 @@ def render(input_root: Path, output_root: Path) -> dict:
             )
             if mode != "shared":
                 raise RuntimeError(f"{row['subject_id']}: expected shared plane")
-            apply_common_display_window(payload_a, payload_b)
+            apply_common_display_window(
+                payload_a,
+                payload_b,
+                x_span_mm=DISPLAY_X_SPAN_MM,
+                y_span_mm=DISPLAY_Y_SPAN_MM,
+            )
             ax_a = fig.add_subplot(grid[0, column])
             ax_b = fig.add_subplot(grid[1, column], sharex=ax_a, sharey=ax_a)
             draw_interictal_rank_field_panel(
@@ -156,18 +214,18 @@ def render(input_root: Path, output_root: Path) -> dict:
                 ax_a.set_ylabel("y (mm)", fontsize=6.4, labelpad=0.5)
                 ax_b.set_ylabel("y (mm)", fontsize=6.4, labelpad=0.5)
                 ax_a.text(
-                    -0.47, 0.5, "TA", transform=ax_a.transAxes,
+                    -0.47, 0.5, "TA field", transform=ax_a.transAxes,
                     ha="center", va="center", rotation=90,
                     fontsize=7.4, fontweight="bold", color=TA_COLOR,
                 )
                 ax_b.text(
-                    -0.47, 0.5, "TB", transform=ax_b.transAxes,
+                    -0.47, 0.5, "TB field", transform=ax_b.transAxes,
                     ha="center", va="center", rotation=90,
                     fontsize=7.4, fontweight="bold", color=TB_COLOR,
                 )
             axes.extend([ax_a, ax_b])
 
-        cax = fig.add_subplot(grid[:, 4])
+        cax = fig.add_subplot(grid[:, N_EXAMPLES])
         colorbar = fig.colorbar(
             plt.cm.ScalarMappable(norm=plt.Normalize(0, 1), cmap="viridis"),
             cax=cax,
@@ -195,18 +253,25 @@ def render(input_root: Path, output_root: Path) -> dict:
         plt.close(fig)
 
     metadata = {
-        "schema_version": "fig2e_all_event_timing_plus_space_v1",
+        "schema_version": "fig2e_all_event_timing_plus_space_v4",
         "input_root": _portable(input_root),
         "input_summary_sha256": _sha256(input_root / "cohort_summary.json"),
         "cohort_shared_2d_n": len(rows),
         "selection_rule": (
-            "four most negative exact-contact TA-TB correlations among shared 2D fields "
-            f"with >= {MIN_CONTACTS} contacts and full support inside one "
-            f"{COMMON_DISPLAY_X_SPAN_MM:.0f}x{COMMON_DISPLAY_Y_SPAN_MM:.0f} mm display window"
+            "four fixed illustrative shared 2D fields with a negative TA-TB correlation "
+            f"at channel-permutation p<0.05, >= {MIN_CONTACTS} contacts across >= "
+            f"{MIN_SHAFTS} shafts, >= {MIN_CONTIGUOUS_CONTACTS} consecutive contacts "
+            "on at least one shaft, and full support inside one "
+            f"{DISPLAY_X_SPAN_MM:.0f}x{DISPLAY_Y_SPAN_MM:.0f} mm display window; "
+            "E1 and Y9 pass channel-level BH-FDR, while E12 and E5 are nominally "
+            "significant continuous multi-contact morphology examples; cohort inference "
+            "remains in Fig. 2F"
         ),
         "examples": [
             {key: row[key] for key in (
-                "subject_id", "display_id", "n_contacts", "r", "x_span_mm", "y_span_mm"
+                "subject_id", "display_id", "n_contacts", "n_shafts",
+                "max_contiguous_contacts", "r",
+                "channel_p_negative", "channel_q_bh", "x_span_mm", "y_span_mm"
             )}
             for row in selected
         ],
@@ -219,8 +284,9 @@ def render(input_root: Path, output_root: Path) -> dict:
         "# Figure 2 all-event Timing+Space panels\n\n"
         "### fig2-panele.png / .pdf\n\n"
         "四名患者的 TA/TB 均来自 all-event Timing+Space 聚类后冻结的 shared plane；"
-        "上下图使用同一患者、同一坐标、同一 50×60 mm 显示窗。示例按预先写入 metadata 的"
-        "负相关强度与可读性规则选择，统计结论使用完整 18 人分母。\n\n"
+        "上下图使用同一患者、同一坐标、同一 70×70 mm 显示窗。示例按预先写入 metadata 的"
+        "多杆、连续多触点、负相关与可读性规则选择：E1、Y9 通过 channel-level BH-FDR，"
+        "E12、E5 为名义显著的连续多触点形态示例；统计结论仍使用 Fig. 2F 的完整 18 人分母。\n\n"
         "**关注点**：逐列比较同一患者 TA 与 TB 的早晚场是否翻转。\n",
         encoding="utf-8",
     )

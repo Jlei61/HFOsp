@@ -1,0 +1,350 @@
+{
+  "schema_version": "paper_figure1_independent_panels_v6",
+  "panelf_canonical_contract": {
+    "contract_id": "fig1f_single_template_vs_multi_cluster_paired_inset_v1",
+    "locked_on": "2026-09-02",
+    "required_visual": "paired subject lines and points, mean bars, and paired Wilcoxon bracket in the lower-right inset",
+    "forbidden_visual": "gray median-delta summary text in the lower-right region",
+    "statistics": "two-sided paired Wilcoxon on adaptive_cluster.overall_tau vs adaptive_cluster.within_cluster_tau_mean"
+  },
+  "panele_canonical_contract": {
+    "contract_id": "fig1e_ta_red_tb_blue_semantic_colors_v1",
+    "template_semantic_colors": {
+      "TA": "#B2182B",
+      "TB": "#2166AC"
+    },
+    "required_visual": "TA labels and mean-rank profile are red; TB labels and mean-rank profile are blue"
+  },
+  "claim_scope": "Interictal HFO population events exhibit recurrent patient-specific temporal organization.",
+  "forbidden_upgrade": "This figure alone does not establish a shared 3D propagation axis.",
+  "producer": "scripts/paper_figures/plot_fig1_interictal_hfo_temporal_scaffold.py",
+  "panel_id_stamped": {
+    "individual_panels": false,
+    "note": "panel letters are added only by fig1-complete-layout; Figure 1A is supplied by the main builder from a legacy supplementary TIFF"
+  },
+    "figure1a": {
+    "files": [
+      "results/paper-ready-figure/fig1/figures/fig1-panela.png",
+      "results/paper-ready-figure/fig1/figures/fig1-panela.pdf"
+    ],
+    "source_asset": "scripts/paper_figures/assets/fig1a_legacy_brain_crop.png",
+    "source_asset_sha256": "08a0ecb718d70e6b363214603da65fd113ad053e622ce28632b7fed671c7a70f",
+    "source_tiff": "ReplayIED/tiffs/fig_s6_画板 1.tif",
+    "source_tiff_sha256": "adff696602c6090a63bda3925a6743c5a461217de4005d511f0d0954ff95ac6d",
+    "source_frame": 0,
+    "source_crop_pixels": [
+      990,
+      150,
+      2090,
+      1250
+    ],
+    "source_image_size_pixels": [
+      3759,
+      2706
+    ],
+    "export_size_pixels": [
+      2200,
+      2200
+    ],
+    "source_panel": "legacy Supplementary Figure S6A, upper brain rendering",
+    "paper_role": "representative SEEG implantation context",
+    "identity_semantics": "no patient identity is asserted in Figure 1A",
+    "rendering": "registered fixed crop only; no scientific elements redrawn"
+  },
+  "composite_emitted": true,
+  "split_half_included": false,
+  "paneld_statistic": "masked shared-participant MI (phantom ranks excluded); 40/40 significant, cohort median 0.228.",
+  "outputs": [
+    "results/paper-ready-figure/fig1/figures/fig1-panela.png",
+    "results/paper-ready-figure/fig1/figures/fig1-panela.pdf",
+    "results/paper-ready-figure/fig1/figures/fig1-panelb1.png",
+    "results/paper-ready-figure/fig1/figures/fig1-panelb1.pdf",
+    "results/paper-ready-figure/fig1/figures/fig1-panelb2.png",
+    "results/paper-ready-figure/fig1/figures/fig1-panelb2.pdf",
+    "results/paper-ready-figure/fig1/figures/fig1-panelc.png",
+    "results/paper-ready-figure/fig1/figures/fig1-panelc.pdf",
+    "results/paper-ready-figure/fig1/figures/fig1-paneld.png",
+    "results/paper-ready-figure/fig1/figures/fig1-paneld.pdf",
+    "results/paper-ready-figure/fig1/figures/fig1-panele.png",
+    "results/paper-ready-figure/fig1/figures/fig1-panele.pdf",
+    "results/paper-ready-figure/fig1/figures/fig1-panelf.png",
+    "results/paper-ready-figure/fig1/figures/fig1-panelf.pdf"
+  ],
+  "panels": {
+    "a": {
+      "files": [
+        "results/paper-ready-figure/fig1/figures/fig1-panela.png",
+        "results/paper-ready-figure/fig1/figures/fig1-panela.pdf"
+      ],
+      "source_asset": "scripts/paper_figures/assets/fig1a_legacy_brain_crop.png",
+      "source_asset_sha256": "08a0ecb718d70e6b363214603da65fd113ad053e622ce28632b7fed671c7a70f",
+      "source_tiff": "ReplayIED/tiffs/fig_s6_画板 1.tif",
+      "source_tiff_sha256": "adff696602c6090a63bda3925a6743c5a461217de4005d511f0d0954ff95ac6d",
+      "source_frame": 0,
+      "source_crop_pixels": [
+        990,
+        150,
+        2090,
+        1250
+      ],
+      "source_image_size_pixels": [
+        3759,
+        2706
+      ],
+      "export_size_pixels": [
+        2200,
+        2200
+      ],
+      "source_panel": "legacy Supplementary Figure S6A, upper brain rendering",
+      "paper_role": "representative SEEG implantation context",
+      "identity_semantics": "no patient identity is asserted in Figure 1A",
+      "rendering": "registered fixed crop only; no scientific elements redrawn"
+    },
+    "b1": {
+      "panel_id": "b1",
+      "files": [
+        "results/paper-ready-figure/fig1/figures/fig1-panelb1.png",
+        "results/paper-ready-figure/fig1/figures/fig1-panelb1.pdf"
+      ],
+      "producer": "scripts/paper_figures/plot_fig1_single_hfo_schematic.py",
+      "reused_from": "results/paper-ready-figure/fig1/figures/fig1-panelb1.png",
+      "source_set": "legacy manually annotated HFO morphology artifact",
+      "n_hfo_snippets": 178,
+      "artifacts": [
+        "ReplayIED/inter_events/yuquan_24h_perPatientAnalysis_dropRef/zhangkexuan_pickSigs.npz",
+        "ReplayIED/inter_events/yuquan_24h_perPatientAnalysis_dropRef/zhangkexuan_annot_v4.pik"
+      ],
+      "content": "178 overlaid HFO snippets + yellow mean, raw and baseline-normalized mean spectrograms"
+    },
+    "b2": {
+      "panel_id": "b2",
+      "files": [
+        "results/paper-ready-figure/fig1/figures/fig1-panelb2.png",
+        "results/paper-ready-figure/fig1/figures/fig1-panelb2.pdf"
+      ],
+      "producer": "scripts/paper_figures/plot_fig1_hfo_group_event_legacy_style.py",
+      "reused_from": "results/paper-ready-figure/fig1/figures/fig1-panelb2.png",
+      "public_patient_label": "Yuquan Y3",
+      "artifacts": [
+        "/mnt/yuquan_data/yuquan_24h_edf/chengshuai/FC10477Q.edf",
+        "/mnt/yuquan_data/yuquan_24h_edf/chengshuai/FC10477Q_gpu.npz",
+        "/mnt/yuquan_data/yuquan_24h_edf/chengshuai/FC10477Q_packedTimes.npy"
+      ]
+    },
+    "c": {
+      "panel_id": "c",
+      "files": [
+        "results/paper-ready-figure/fig1/figures/fig1-panelc.png",
+        "results/paper-ready-figure/fig1/figures/fig1-panelc.pdf"
+      ],
+      "producer_source": "scripts/plot_interictal_propagation.py --masked-features --pr3 --paper-style",
+      "layout": "time-ordered heatmap, day/night strip, colorbar, and rank distributions",
+      "figure_size_inches": [
+        11.6,
+        3.35
+      ],
+      "axis_label_fontsize_points": 10.5,
+      "channel_label_fontsize_points": 9.5,
+      "colorbar_label_fontsize_points": 10.5,
+      "rank_colorbar": {
+        "title": "Heatmap rank\nFirst → Last",
+        "placement": "horizontal title above colorbar",
+        "side_label_removed": true
+      },
+      "panel_column_order": [
+        "event_heatmap",
+        "colorbar",
+        "rank_summary"
+      ],
+      "record": "results/interictal_propagation_masked/per_subject/epilepsiae_442.json",
+      "public_patient_label": "Epilepsiae E7",
+      "n_valid_events": 6556,
+      "displayed_events": 2000,
+      "masked_features": true,
+      "daynight_strip": true,
+      "daynight_legend": {
+        "labels": [
+          "Day",
+          "Night"
+        ],
+        "placement": "same title row as patient label, upper-right of heatmap",
+        "removed_from_xlabel": true
+      },
+      "masked_mi_mean": 0.35608426215503697,
+      "rank_distribution_helper": "scripts/plot_interictal_propagation.py::_plot_rank_histogram"
+    },
+    "d": {
+      "panel_id": "d",
+      "files": [
+        "results/paper-ready-figure/fig1/figures/fig1-paneld.png",
+        "results/paper-ready-figure/fig1/figures/fig1-paneld.pdf"
+      ],
+      "producer_source": "scripts/plot_interictal_propagation.py --masked-features",
+      "records": "results/interictal_propagation_masked/per_subject/*.json",
+      "matching_index": {
+        "yuquan": {
+          "n": 20,
+          "n_significant": 20,
+          "data_median": 0.18301425643076696,
+          "null_median": 5.5666442230071815e-05,
+          "p_value_mannwhitney_greater": 3.397807564086679e-08,
+          "all_mi_records_masked": true
+        },
+        "epilepsiae": {
+          "n": 20,
+          "n_significant": 20,
+          "data_median": 0.26201202560976666,
+          "null_median": 5.904675455609148e-05,
+          "p_value_mannwhitney_greater": 3.397807564086679e-08,
+          "all_mi_records_masked": true
+        }
+      },
+      "status": "masked_shared_participant",
+      "masked_mi_hard_check": true,
+      "summary_display": "shared violin_with_scatter helper: violin + box/IQR + whiskers + subject points",
+      "significance_display": "shared add_significance_bracket helper; Mann-Whitney U, data > null",
+      "y_axis_starts_at_zero": true,
+      "paired_panel_geometry": {
+        "matched_to": "fig1-panelf",
+        "figure_size_inches": [
+          3.9,
+          3.9
+        ],
+        "axes_box_aspect": 1.0,
+        "subplot_adjust": {
+          "left": 0.2,
+          "right": 0.97,
+          "bottom": 0.22,
+          "top": 0.84
+        },
+        "tight_bbox": false
+      }
+    },
+    "e": {
+      "panel_id": "e",
+      "files": [
+        "results/paper-ready-figure/fig1/figures/fig1-panele.png",
+        "results/paper-ready-figure/fig1/figures/fig1-panele.pdf"
+      ],
+      "producer_source": "scripts/plot_interictal_propagation.py --masked-features --pr3 --paper-style",
+      "record": "results/interictal_propagation_masked/per_subject/epilepsiae_442.json",
+      "n_valid_events": 6556,
+      "displayed_events": 6556,
+      "cluster_counts": {
+        "0": 4621,
+        "1": 1935
+      },
+      "all_valid_events_displayed": true,
+      "cluster_separator": {
+        "style": "white gap with gray diagonal hatch and interrupted x-axis spine",
+        "boundary_event_index": 4621,
+        "gap_half_width_events": 39
+      },
+      "masked_features": true,
+      "template_semantic_colors": {
+        "TA": "#B2182B",
+        "TB": "#2166AC"
+      },
+      "template_labels_bold": true,
+      "rank_colorbar": {
+        "title": "Heatmap rank\nFirst → Last",
+        "placement": "horizontal title above colorbar",
+        "side_label_removed": true
+      },
+      "chosen_k": 2,
+      "within_cluster_tau": 0.22383149114306042,
+      "overall_tau": 0.20085628610469092,
+      "inter_template_spearman_r": 0.1714285714285714
+    },
+    "f": {
+      "panel_id": "f",
+      "files": [
+        "results/paper-ready-figure/fig1/figures/fig1-panelf.png",
+        "results/paper-ready-figure/fig1/figures/fig1-panelf.pdf"
+      ],
+      "producer_source": "scripts/plot_interictal_propagation.py --masked-features",
+      "records": "results/interictal_propagation_masked/per_subject/*.json",
+      "uplift": {
+        "n": 40,
+        "median_uplift": 0.1977050153113532,
+        "median_matching_index_uplift": 0.1977050153113532,
+        "n_above_diagonal": 40,
+        "display_labels": [
+          "Overall MI",
+          "Within-template MI"
+        ],
+        "underlying_fields": [
+          "adaptive_cluster.overall_tau",
+          "adaptive_cluster.within_cluster_tau_mean"
+        ],
+        "gray_below_diagonal_region": true,
+        "gray_summary_text_removed": true,
+        "paired_distribution_inset": {
+          "n_paired": 40,
+          "single_template_mean": 0.11371868185318075,
+          "single_template_median": 0.08445096354736137,
+          "multi_cluster_mean": 0.34683028284360334,
+          "multi_cluster_median": 0.2913253661099341,
+          "mean_delta": 0.23311160099042255,
+          "median_delta": 0.1977050153113532,
+          "n_improved": 40,
+          "wilcoxon_two_sided_statistic": 0.0,
+          "wilcoxon_two_sided_p": 1.8189894035458565e-12,
+          "significance_label": "***",
+          "display": "paired subject points and lines, mean bars, and paired Wilcoxon bracket",
+          "reference_grammar": "Supplementary Fig. 2 raw-vs-synchronized HFO AUC",
+          "layout_bounds_axes_fraction": [
+            0.68,
+            0.13,
+            0.28,
+            0.36
+          ],
+          "layout_aspect": "narrow portrait inset, not square",
+          "ylabel_fontsize_points": 9.0,
+          "tick_label_fontsize_points": 8.0,
+          "x_tick_labels": [
+            "Single",
+            "Multi"
+          ],
+          "x_tick_label_meanings": {
+            "Single": "single-template MI",
+            "Multi": "multi-cluster MI"
+          },
+          "x_tick_labels_single_line": true
+        },
+        "axis_limits_start_at_zero": true,
+        "dataset_legend": true,
+        "dataset_legend_frame": {
+          "visible": true,
+          "facecolor": "white",
+          "edgecolor": "0.55",
+          "linewidth": 0.8,
+          "producer_fontsize_points": 7.5,
+          "rendered_fontsize_points": 12.0,
+          "marker_size_points": 5.0
+        }
+      },
+      "paired_panel_geometry": {
+        "matched_to": "fig1-paneld",
+        "figure_size_inches": [
+          3.9,
+          3.9
+        ],
+        "axes_box_aspect": 1.0,
+        "subplot_adjust": {
+          "left": 0.2,
+          "right": 0.97,
+          "bottom": 0.22,
+          "top": 0.84
+        },
+        "tight_bbox": false
+      }
+    }
+  },
+  "complete_layout": [
+    "results/paper-ready-figure/fig1/figures/fig1-complete-layout.png",
+    "results/paper-ready-figure/fig1/figures/fig1-complete-layout.pdf"
+  ],
+  "panel_letters_in_individual_files": false,
+  "panel_letters_in_complete_layout": true
+}
