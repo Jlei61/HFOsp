@@ -26,6 +26,7 @@ from sklearn.mixture import GaussianMixture
 from sklearn.model_selection import GroupKFold
 
 ROOT = Path(__file__).resolve().parents[1]
+ARTIFACT_ROOT = Path("/home/honglab/leijiaxin/HFOsp")
 if str(ROOT) not in __import__("sys").path:
     __import__("sys").path.insert(0, str(ROOT))
 
@@ -84,10 +85,13 @@ def _sha256(path: Path) -> str:
 
 def _configured_input_path(
     config: Mapping[str, Any], name: str, *, repo_root: Path = ROOT,
+    artifact_root: Path = ARTIFACT_ROOT,
 ) -> Path:
-    """Resolve and verify a frozen input against the executing worktree."""
+    """Resolve tracked inputs from the worktree and results from artifact root."""
     record = config["inputs"][name]
-    path = repo_root / record["path"]
+    relative = Path(record["path"])
+    root = artifact_root if relative.parts[0] == "results" else repo_root
+    path = root / relative
     if not path.is_file() or _sha256(path) != record["sha256"]:
         raise RuntimeError(f"configured input changed: {name}")
     return path
@@ -1288,7 +1292,9 @@ def main() -> None:
     args = parser.parse_args()
     config = json.loads(args.config.read_text(encoding="utf-8"))
     def config_path(name: str) -> Path:
-        return _configured_input_path(config, name, repo_root=ROOT)
+        return _configured_input_path(
+            config, name, repo_root=ROOT, artifact_root=ARTIFACT_ROOT,
+        )
     support_config_path = config_path("patient_support_config")
     support = json.loads(support_config_path.read_text(encoding="utf-8"))
     classifier_record = support["inputs"]["old_ab_train_only_classifier"]

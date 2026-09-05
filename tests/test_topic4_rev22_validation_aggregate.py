@@ -32,26 +32,40 @@ def _json(path: Path, payload: dict) -> str:
     return _sha(path)
 
 
-def test_configured_input_is_resolved_from_executing_worktree(tmp_path):
-    frozen = tmp_path / "config/frozen.json"
-    digest = _json(frozen, {"value": 1})
+def test_configured_input_uses_separate_worktree_and_artifact_roots(tmp_path):
+    repo_root = tmp_path / "worktree"
+    artifact_root = tmp_path / "artifact-root"
+    frozen = repo_root / "config/frozen.json"
+    result = artifact_root / "results/frozen.json"
+    config_digest = _json(frozen, {"value": 1})
+    result_digest = _json(result, {"value": 2})
     config = {
         "inputs": {
             "patient_support_config": {
                 "path": "config/frozen.json",
-                "sha256": digest,
+                "sha256": config_digest,
+            },
+            "patient_training_target": {
+                "path": "results/frozen.json",
+                "sha256": result_digest,
             }
         }
     }
 
     assert validation._configured_input_path(
-        config, "patient_support_config", repo_root=tmp_path,
+        config, "patient_support_config", repo_root=repo_root,
+        artifact_root=artifact_root,
     ) == frozen
+    assert validation._configured_input_path(
+        config, "patient_training_target", repo_root=repo_root,
+        artifact_root=artifact_root,
+    ) == result
 
-    frozen.write_text('{"value": 2}\n')
+    frozen.write_text('{"value": 3}\n')
     with pytest.raises(RuntimeError, match="configured input changed"):
         validation._configured_input_path(
-            config, "patient_support_config", repo_root=tmp_path,
+            config, "patient_support_config", repo_root=repo_root,
+            artifact_root=artifact_root,
         )
 
 
