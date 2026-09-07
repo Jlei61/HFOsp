@@ -120,7 +120,8 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                   dump_pathway_trace=False, pathway_trace_dt_ms=1.0,
                   feedback_gain=0.0, feedback_tau_ms=0.0, dump_fb=False,
                   fb_override_trace=None, ee_std_mode="local",
-                  external_e_rate_drive=None, node_accessibility=None):
+                  external_e_rate_drive=None, node_accessibility=None,
+                  initial_voltage=None, step_observer=None):
     """Verbatim copy of model.simulate's integration loop, with ONE addition:
     a localized transient kick on the external Poisson rate. The kick adds
     `KICK_BOOST` (extra external rate, 1/ms) to the E neurons in a disk of
@@ -130,6 +131,16 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
     assay hook. Together they inject one exact E-neuron presynaptic spike packet
     on the simulation time grid; the packet then follows the ordinary reset,
     refractory, delay-ring and synaptic-weight path.
+
+    `initial_voltage` (ISCP-v1, off by default) is an explicit t=0 membrane
+    voltage for every neuron. None keeps the literal `V = V_reset` line. It is
+    copied, validated (shape (N,), finite, strictly below the effective
+    threshold) and assigned ONCE before the recorder RNG draws, so it consumes
+    no simulation RNG and touches no other state; it is mutually exclusive
+    with `resume_state`. `step_observer` (off by default) is a read-only
+    per-step observer (`observe(t, tm, xi, nu_now, ext, delta_rate, V, I_E,
+    I_I, spk)`) used for streaming external-input digests and state traces; it
+    must not draw from the simulation RNG or write to the arrays it receives.
 
     Returns the standard recorders plus per-step inside/outside-disk E-spike
     counts. Use slow=None (epilepsy layer off). KICK_BOOST=0 -> pure control
@@ -222,7 +233,25 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
     # ========================================================================
 
     # ---- state ---- (identical)
-    V = np.full(N, p.V_reset, dtype=np.float64)
+    # ISCP-v1 initial voltage: None -> literal pre-existing line (byte parity).
+    # Otherwise copy + validate + assign once, BEFORE the recorder RNG draws
+    # below (no simulation RNG consumed; s, I, ref, rings and xi untouched).
+    if initial_voltage is None:
+        V = np.full(N, p.V_reset, dtype=np.float64)
+    else:
+        if resume_state is not None:
+            raise ValueError("initial_voltage and resume_state are mutually exclusive")
+        V = np.array(initial_voltage, dtype=np.float64, copy=True)
+        if V.shape != (N,):
+            raise ValueError("initial_voltage must have shape (N,)")
+        if not np.isfinite(V).all():
+            raise ValueError("initial_voltage must be finite")
+        _vth_initial = (p.V_th if V_th_per_neuron is None
+                        else np.asarray(V_th_per_neuron, dtype=np.float64))
+        if np.any(V >= _vth_initial):
+            raise ValueError(
+                "initial_voltage must lie strictly below the effective threshold")
+    initial_V = V.copy()
     ref = np.zeros(N, dtype=np.int32)
     s_E = np.zeros(N); I_E = np.zeros(N)
     s_I = np.zeros(N); I_I = np.zeros(N)
@@ -529,6 +558,11 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         spk_inside[t] = spk[kick_mask].sum()
         spk_outside[t] = spk[outside_mask].sum()
         E_spk_bool[t] = spk[:NE]
+        if step_observer is not None:                                # ISCP-v1 read-only observer (no RNG, no writes)
+            step_observer.observe(
+                t, tm, xi, nu_now, ext,
+                delta_rate if external_e_rate_drive is not None else None,
+                V, I_E, I_I, spk)
         if early_stop_runaway:                                       # runaway detected -> break before the O(N) scatter
             _es_ema += _es_alpha * (rate_E[t] / NE / dt * 1e3 - _es_ema)   # 20ms-EMA per-neuron rate (Hz)
             _es_run = _es_run + 1 if _es_ema >= es_thresh_hz else 0
@@ -635,6 +669,7 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
     )
     res["post_runaway_recorded_ms"] = (
         0.0 if _detect_t is None else round((nsteps - _detect_t) * dt, 1))
+    res["initial_V"] = initial_V                              # ISCP-v1: the t=0 membrane voltage actually used
     if dump_i_spikes:
         res["I_spk_bool"] = I_spk_bool
     if dump_drive:
