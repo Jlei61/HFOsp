@@ -771,24 +771,32 @@ def compose_final(design):
                 a = q[f"{arm}_M{mode}"]
                 if a["D_off_run_mean"] is None or b0["D_off_run_mean"] is None:
                     continue
+                ci_a, ci_b = a["D_off_run_ci95"], b0["D_off_run_ci95"]
+                separated = bool(ci_a and ci_b and (ci_a[1] < ci_b[0] or ci_b[1] < ci_a[0]))
                 rows.append({"arm": arm, "mode": mode,
-                             "D_off_lower_than_B0": a["D_off_run_mean"] < b0["D_off_run_mean"],
-                             "participation_closer_than_B0": (a["participation_mae_vs_FIT"] is not None and b0["participation_mae_vs_FIT"] is not None
-                                                              and a["participation_mae_vs_FIT"] < b0["participation_mae_vs_FIT"]),
-                             "timing_closer_than_B0": (a["pair_signed_median_residual_mae_ms"] is not None and b0["pair_signed_median_residual_mae_ms"] is not None
-                                                       and a["pair_signed_median_residual_mae_ms"] < b0["pair_signed_median_residual_mae_ms"]),
+                             "D_off_run_mean": a["D_off_run_mean"], "B0_D_off_run_mean": b0["D_off_run_mean"],
+                             "D_off_lower_than_B0_descriptive": a["D_off_run_mean"] < b0["D_off_run_mean"],
+                             "D_off_run_level_intervals_separated_from_B0": separated,
+                             "participation_closer_than_B0_descriptive": (a["participation_mae_vs_FIT"] is not None and b0["participation_mae_vs_FIT"] is not None
+                                                                          and a["participation_mae_vs_FIT"] < b0["participation_mae_vs_FIT"]),
+                             "timing_closer_than_B0_descriptive": (a["pair_signed_median_residual_mae_ms"] is not None and b0["pair_signed_median_residual_mae_ms"] is not None
+                                                                   and a["pair_signed_median_residual_mae_ms"] < b0["pair_signed_median_residual_mae_ms"]),
                              "inside_patient_band": quality_conclusion[s]["run_mean_inside_patient_matched_band"][f"{arm}_M{mode}"]})
         return rows
     propagation_rows = {s: improved(s) for s in stages}
     any_inside = any(r["inside_patient_band"] for rows in propagation_rows.values() for r in rows)
-    any_all_better = any(r["D_off_lower_than_B0"] and r["participation_closer_than_B0"] and r["timing_closer_than_B0"]
-                         for rows in propagation_rows.values() for r in rows)
+    any_separated_better = any(r["D_off_lower_than_B0_descriptive"] and r["D_off_run_level_intervals_separated_from_B0"]
+                               and r["participation_closer_than_B0_descriptive"] and r["timing_closer_than_B0_descriptive"]
+                               for rows in propagation_rows.values() for r in rows)
+    # Tiers are descriptive: "closer" requires the run-level D_off intervals of the arm
+    # and of B0 not to overlap AND both other readouts to move the same way; otherwise
+    # small descriptive differences are reported but not named an improvement.
     if any_inside:
         patient_conditional = "SOME_ARM_MODE_RUN_MEAN_INSIDE_MATCHED_PATIENT_BAND_DESCRIPTIVE_ONLY"
-    elif any_all_better:
-        patient_conditional = "CLOSER_THAN_COMMON_RESET_BUT_OUTSIDE_PATIENT_BAND"
+    elif any_separated_better:
+        patient_conditional = "CLOSER_THAN_COMMON_RESET_ON_ALL_THREE_READOUTS_BUT_OUTSIDE_PATIENT_BAND"
     else:
-        patient_conditional = "STRUCTURE_GAP_UNRESOLVED_NO_ARM_CLOSER_ON_ALL_THREE_READOUTS"
+        patient_conditional = "STRUCTURE_GAP_UNRESOLVED_ALL_ARM_MODE_OUTSIDE_PATIENT_BAND_NO_SEPARATED_IMPROVEMENT_VS_B0"
     final = {
         "status": "INITIAL_STATE_ROUND_COMPLETE_PENDING_SCIENTIFIC_REVIEW",
         "created_unix": time.time(),

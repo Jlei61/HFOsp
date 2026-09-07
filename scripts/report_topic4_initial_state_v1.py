@@ -38,10 +38,16 @@ def stage_paragraph(name, e):
                 f"{fmt(100 * pc['observed_mean_of_estimable_pairs'] if pc['observed_mean_of_estimable_pairs'] is not None else None)} 个百分点，"
                 f"缺失对取 ±1 时全 12 对均值界限 [{fmt(100 * bounds[0])}, {fmt(100 * bounds[1])}] 个百分点。判定 {e['verdict']}。")
     eff = pc["effect"]
+    inst = eff["instability"]
+    flags = [k for k in ("single_pair_dominates", "leave_one_out_sign_flip", "bootstrap_exchange_disagree") if inst[k]]
+    near_zero = abs(eff["mean"]) < 0.02
+    note = ""
+    if inst["leave_one_out_sign_flip"] and near_zero:
+        note = "（去一对后均值变号只是均值≈0 时的必然现象，不改变'区间落在 ±10 点内'的判定）"
     return (f"- {name}：12/12 对可估计。B1−B2 的 12–24 s M0 比例差 Δ = {fmt(e['delta_percentage_points'])} 个百分点，"
             f"95% 配对 bootstrap 区间 [{fmt(e['ci95_percentage_points'][0])}, {fmt(e['ci95_percentage_points'][1])}]，"
-            f"双侧配对交换 p = {e['exchange_p']:.4f}（4096 种符号分配），不稳标志 {'有' if e['unstable'] else '无'}"
-            f"（最大单对贡献 {pct(eff['instability']['max_single_pair_contribution'])}）。判定 {e['verdict']}。")
+            f"双侧配对交换 p = {e['exchange_p']:.4f}（4096 种符号分配）；预注册不稳标志：{('、'.join(flags) if flags else '无')}{note}；"
+            f"最大单对贡献 {pct(inst['max_single_pair_contribution'])}。判定 {e['verdict']}。")
 
 
 def main():
@@ -147,6 +153,14 @@ def main():
                        f"（区间 {v['D_off_run_ci95']}），患者匹配带 {None if band is None else [round(x, 4) for x in band]}，"
                        f"参与率 MAE {fmt(v['participation_mae_vs_FIT'], 3)}，成对时差残差 MAE {fmt(v['pair_signed_median_residual_mae_ms'])} ms，"
                        f"顺序 TV {fmt(v['order_TV_at_2ms_mean'], 3)}，支持/OOD 比例 {pct(v['supported_fraction_pooled'])}/{pct(v['unsupported_fraction_pooled'])}")
+    rep += ["", "相对共同基线 B0 的描述性比较（不是检验）："]
+    for s, rows in f["propagation_comparison_vs_B0"].items():
+        for r in rows:
+            rep.append(f"  - {s} {r['arm']} M{r['mode']}: D_off {fmt(r['D_off_run_mean'], 4)} vs B0 {fmt(r['B0_D_off_run_mean'], 4)}"
+                       f"（run 级区间{'不' if r['D_off_run_level_intervals_separated_from_B0'] else ''}重叠），"
+                       f"参与率{'更近' if r['participation_closer_than_B0_descriptive'] else '未更近'}，"
+                       f"成对时差{'更近' if r['timing_closer_than_B0_descriptive'] else '未更近'}，"
+                       f"落入患者匹配带 {r['inside_patient_band']}")
     rep += ["", "## 6. 完成数与工程状态", "",
             f"正式 24 s 运行 {n_runs} 次（设计 {36 * len(stages)}），提前终止（runaway 门）{n_runaway} 次，"
             f"单次墙钟中位 {fmt(sorted(wall)[len(wall) // 2] / 60 if wall else None)} 分钟。",
