@@ -1,0 +1,43 @@
+{
+  "version": "xy_round1_fig5_development_v1",
+  "scientific_role": "new_XY_substrate_development_analysis_not_author_accepted",
+  "upstream_service": "codex-t4-xy-relative-round1-20260905.service",
+  "upstream_required_status": "ROUND1_COMPLETE_AWAITING_SCIENTIFIC_REVIEW",
+  "candidate_rule": "Lowest eligible selection J_round1 among whole_sheet/interior before confirmation; require all six confirmation units. No confirmation reselection or historical fallback.",
+  "confirmation_seeds": [2731, 2732, 2733, 2734, 2735, 2736],
+  "analysis_topology_seeds": [2731, 2732, 2733],
+  "pilot_dynamics_seeds": [2831, 2832, 2833],
+  "validation_dynamics_seeds": [2851, 2852, 2853],
+  "duration_ms": 20000.0,
+  "zm_reference": {
+    "use_z": true, "use_m": true,
+    "I_th_EI": 95.19851312666987,
+    "tau_z": 5000.0, "tau_adp": 500.0,
+    "eta_m": 0.007451594355587098,
+    "trace_stride_steps": 100
+  },
+  "reference_note": "Mechanism starting values from topic4_data_driven_zm_ictal_transition_v1.json; not a transferred old s39 working point. Spatial per-neuron equations inherited unchanged.",
+  "threshold_factors": [1.0, 0.5, 0.25, 2.0],
+  "tau_z_ms": [5000.0, 1000.0, 20000.0],
+  "sensitivity_factors": {"eta_m": [0.5, 2.0], "tau_adp": [0.5, 2.0]},
+  "mechanism_selection_rule": "First prespecified active configuration with a tonic plateau, >=2 s pretransition and >=2 self-terminating population excursions in >=2/3 pilot seeds; validate this single configuration on three new dynamics seeds. No reranking on validation.",
+  "recurrence_check": "Existing active-fraction detector at the inherited threshold; exclude first 200 ms and stop return assessment at onset minus 200 ms. Population excursions are diagnostic, not patient causal families or two propagation modes. New-noise slow-off controls must retain bounded recurrent events.",
+  "controls": ["slow_off", "clamp_z"],
+  "probe": {
+    "baseline_ms": 1000.0,
+    "pre_onset_offset_ms": 200.0,
+    "duration_ms": 300.0,
+    "site_coordinates_mm": [4.0, 10.0, 16.0],
+    "forced_E_neurons": 16,
+    "assay": "Identical checkpoint, all RNG states, slow variables and native delay rings; sham vs one forced E spike packet per site. Common noise within each state, paired sites across states. Report collisions and all signed responses. Exploratory 3x3 spatial grid."
+  },
+  "runtime": {
+    "maximum_workers": 24,
+    "memory_reserve_gib": 40.0,
+    "worker_address_space_gib": 25.0,
+    "minimum_free_disk_gib": 30.0,
+    "numeric_threads": 1,
+    "poll_seconds": 30
+  },
+  "claim_boundary": "Operational tonic runaway, finite horizon censoring and state/parameter sensitivity only. No clinical seizure, physiological identification or bifurcation type established. No inherited old fold/escape value. No patient heldout or ictal data opened."
+}

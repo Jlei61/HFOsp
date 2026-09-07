@@ -197,7 +197,8 @@ def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=No
                     ee_ellipse_reference_angle_deg=None,
                     ee_ellipse_reference_aspect_ratio=None,
                     artifact_root=None,
-                    topology_seed=None, dynamics_seed=None):
+                    topology_seed=None, dynamics_seed=None,
+                    network_cache_record=None):
     """Reconstruct one frozen arm on one network seed.
 
     ``topology_seed`` seeds neuron placement and connectivity sampling (it is
@@ -290,9 +291,14 @@ def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=No
         _placement(stage) if artifact_root is None
         else _placement_with_artifact_root(stage, artifact_root)
     )
-    with _artifact_working_directory(artifact_root):
-        net, n_e, n_i, cache_hit, cache_source = _load_network(
-            params, stage, reg, topology_seed, base, str(cache_dir))
+    if network_cache_record is None:
+        with _artifact_working_directory(artifact_root):
+            net, n_e, n_i, cache_hit, cache_source = _load_network(
+                params, stage, reg, topology_seed, base, str(cache_dir))
+    else:
+        from src.topic4_xy_search import load_corrected_network
+        net, n_e, n_i, cache_hit, cache_source = load_corrected_network(
+            network_cache_record, params, reg['theta_deg'], stage['engine']['AR'])
     positions = np.asarray(net["pos"][:n_e], float)
     positions_i = np.asarray(net["pos"][n_e:], float)
 

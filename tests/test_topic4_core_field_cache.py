@@ -11,6 +11,8 @@ class _P:
     l_EE = 0.380; l_IE = 0.250; l_EI = 0.250; l_II = 0.250
     rho_EE = 0.6; rho_IE = 0.0; rho_EI = 0.0; rho_II = 0.0
     tau0 = 0.1; v_axon = 0.3; delay_dt = 0.1
+    dt = 0.1; w_EE = 0.1575; w_IE = 0.2625
+    tau_m_E = 20.0; tau_m_I = 10.0; tau_r_AMPA = 0.7; tau_r_GABA = 0.5
 
 
 def test_cache_key_is_stable_for_an_unchanged_config():

@@ -30,7 +30,9 @@ from scipy.spatial import cKDTree
 
 # Reuse the original isotropic machinery verbatim for E->I, I->E, I->I and the
 # delay-grouping. ONLY the E->E branch gets the rotated kernel.
-from connectivity import _kernel_logweights, _sample_partners, _group_by_delay
+from connectivity import (
+    _kernel_logweights, _sample_partners, _group_by_delay, _positive_weight_keys,
+)
 
 
 def _kernel_logweights_rot(dz, l_par, l_perp, theta):
@@ -78,7 +80,7 @@ def _sample_partners_rot(pos_t, src_pos, C, l_par, l_perp, theta, rng,
     Ns = len(cand)
     if Cc >= Ns:
         return cand[w > 0.0]
-    keys = rng.standard_exponential(Ns) / np.where(w > 0.0, w, np.inf)
+    keys = _positive_weight_keys(w, rng)
     return cand[np.argpartition(keys, Cc - 1)[:Cc]]
 
 

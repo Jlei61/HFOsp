@@ -124,6 +124,13 @@ def connectivity_config(p, theta_deg, ar, *, git_commit=None):
     cfg["AR"] = float(ar)
     cfg["numpy_version"] = np.__version__
     cfg["rng_bit_generator"] = "PCG64"
+    # An explicit sampler identity also invalidates caches in an uncommitted
+    # checkout or when callers intentionally retain a historical git identity.
+    from src.snn_engine.connectivity import PARTNER_SAMPLER_VERSION
+    cfg["partner_sampler_version"] = PARTNER_SAMPLER_VERSION
+    for field in ("dt", "w_EE", "w_IE", "tau_m_E", "tau_m_I",
+                  "tau_r_AMPA", "tau_r_GABA"):
+        cfg[field] = getattr(p, field)
     cfg["git_commit"] = (
         _git("rev-parse", "HEAD") if git_commit is None else str(git_commit)
     )

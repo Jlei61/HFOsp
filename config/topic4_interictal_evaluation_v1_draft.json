@@ -1,0 +1,82 @@
+{
+  "version": "interictal_model_evaluation_v1_definition_draft",
+  "status": "DEFINITIONS_DRAFT_CALIBRATION_AND_QUALIFICATION_PENDING",
+  "scientific_target": "Reproducible patient interictal propagation modes under one fixed model and noise law; mode coverage and patient-supported generation separated from mixture and within-mode variance.",
+  "contract_document": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/docs/archive/topic4/sef_hfo/interictal_model_evaluation_contract_draft_2026-09-06.md",
+  "contract_sha256": "ee6405c805a7f59e79c65e4bd34d1b060fecd1e4f1203fb0d112a9cdf08509b1",
+  "new_search_ready": false,
+  "existing_v4_changed": false,
+  "fig5_hold_released": false,
+  "fit_diagnostics": [
+    "joint_event_kernel_distance",
+    "contact_participation_probability",
+    "event_contact_count_distribution",
+    "joint_participation_probability",
+    "pair_order_state_distribution",
+    "absolute_pair_lag_distribution_ms"
+  ],
+  "primary_development_evaluation": [
+    "stable_patient_mode_coverage_macro_and_per_mode",
+    "patient_supported_generated_fraction",
+    "unsupported_generated_fraction",
+    "indeterminate_generated_fraction",
+    "template_conditional_participation_order_timing_fidelity",
+    "cross_network_repeatability"
+  ],
+  "additional_evaluation": [
+    "signed_behavioral_direction_distribution_with_unresolved_mass",
+    "mode_mixture_proportions",
+    "within_mode_rank_lag_direction_spread",
+    "native_field_and_readout_sensitivity",
+    "observable_event_yield"
+  ],
+  "parameter_groups": [
+    "dual_core_xy_and_geometry",
+    "vth_distribution_mapping_and_gain",
+    "EE_EI_IE_II_pathway_strengths",
+    "connection_spatial_geometry_and_degree",
+    "explicit_global_EI_balance_definition",
+    "membrane_synapse_conduction_time_scales",
+    "fixed_noise_law_parameters"
+  ],
+  "direction_contract": {
+    "core_line": "undirected model input geometry modulo pi",
+    "EE_axis": "undirected model structural parameter modulo pi",
+    "propagation": "measured early-to-late output direction modulo 2pi"
+  },
+  "current_metric_caveats": {
+    "D_order": "JS divergence of before/after/tie probabilities conditional on joint participation; current tie tolerance 1e-9 ms is numerical, not measurement uncertainty.",
+    "D_lag": "Wasserstein distance of absolute pair lags capped at 180 ms, not absolute event-time error.",
+    "joint_loss": "Gaussian RFF mean distance, not arithmetic sum of D_support/D_order/D_lag."
+  },
+  "independence": "A different metric is not automatically independent evidence. Metrics used to select models are development metrics; final evidence requires untouched patient blocks and fresh network seeds with audited upstream provenance.",
+  "calibration": {
+    "status": "PENDING",
+    "actual_patient_partition_manifest": null,
+    "stable_mode_count": null,
+    "stable_modes": null,
+    "measurement_tie_tolerance_ms": null,
+    "support_neighborhood_definition": null,
+    "mode_support_thresholds": null,
+    "joint_acceptance_rule": null,
+    "sample_size_calibration": "actual N and block/network dependence; do not substitute next larger N bin",
+    "baseline": "disjoint patient-block pseudo-model comparisons"
+  },
+  "required_controls": [
+    "patient_vs_patient_disjoint_blocks",
+    "delete_stable_mode",
+    "inject_unsupported_patterns",
+    "shuffle_order_preserving_participation",
+    "stretch_time_preserving_order",
+    "collapse_within_mode_variation",
+    "change_mode_mixture_only",
+    "patient_compatible_noise",
+    "empty_low_support_quiet_outputs",
+    "cross_seed_known_geometry_retrieval"
+  ],
+  "reference_sources": [
+    "https://proceedings.neurips.cc/paper/2019/hash/0234c510bc6d908b28c70ff313743079-Abstract.html",
+    "https://proceedings.mlr.press/v119/naeem20a.html"
+  ],
+  "parameter_scope": "After evaluator qualification, EE/EI, spatial connectivity and time constants may be fitted together with XY/VTH in staged experiments; a qualified XY-only solution is not a prerequisite. Mechanism-necessity experiments remain a later stage."
+}

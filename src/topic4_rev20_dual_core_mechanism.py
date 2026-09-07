@@ -177,6 +177,56 @@ def _elliptical_radius(displacement, *, length_scale, angle_deg, aspect_ratio):
     return np.sqrt((u / parallel) ** 2 + (v / perpendicular) ** 2)
 
 
+def _weighted_displacement_summary(bins, positions, n_e):
+    """Stream exact second moments and a weighted distance histogram for E->E."""
+    distance_edges = np.linspace(0.0, 30.0, 301)
+    moment = np.zeros((2, 2), dtype=np.float64)
+    distance_weight = np.zeros(len(distance_edges) - 1, dtype=np.float64)
+    total_weight = 0.0
+    edge_count = 0
+    for matrix in bins:
+        coo = matrix.tocoo(copy=False)
+        mask = (np.asarray(coo.row) < n_e) & (np.asarray(coo.col) < n_e)
+        rows = np.asarray(coo.row[mask], np.int64)
+        cols = np.asarray(coo.col[mask], np.int64)
+        weights = np.asarray(coo.data[mask], np.float64)
+        displacement = positions[cols] - positions[rows]
+        total_weight += float(weights.sum(dtype=np.float64))
+        edge_count += int(len(weights))
+        moment += (displacement * weights[:, None]).T @ displacement
+        distance_weight += np.histogram(
+            np.linalg.norm(displacement, axis=1), bins=distance_edges,
+            weights=weights,
+        )[0]
+    if not total_weight > 0.0:
+        raise RuntimeError("E-to-E geometry audit has no positive weight")
+    moment /= total_weight
+    eigenvalues, eigenvectors = np.linalg.eigh(moment)
+    order = np.argsort(eigenvalues)[::-1]
+    eigenvalues = eigenvalues[order]
+    axis = eigenvectors[:, order[0]]
+    angle = float(np.degrees(np.arctan2(axis[1], axis[0])))
+    # An unoriented axis is reported in [-90, 90); its sign has no meaning.
+    angle = ((angle + 90.0) % 180.0) - 90.0
+    ratio = float(np.sqrt(eigenvalues[0] / eigenvalues[1]))
+    identifiable = bool(ratio >= 1.05)
+    return {
+        "definition": "weighted uncentered source-minus-target displacement second moment",
+        "edge_count": edge_count,
+        "total_weight": total_weight,
+        "second_moment_mm2": moment.tolist(),
+        "eigenvalues_mm2": eigenvalues.tolist(),
+        "sqrt_eigenvalue_ratio": ratio,
+        "major_axis_deg_unoriented": angle if identifiable else None,
+        "axis_identifiable_ratio_ge_1p05": identifiable,
+        "weighted_distance_histogram": {
+            "bin_edges_mm": distance_edges.tolist(),
+            "weight": distance_weight.tolist(),
+            "overflow_weight": float(max(0.0, total_weight - distance_weight.sum())),
+        },
+    }
+
+
 def fixed_topology_ee_ellipse_redistribution(
     net,
     positions,
@@ -193,6 +243,7 @@ def fixed_topology_ee_ellipse_redistribution(
     if positions.shape[0] < n_e or positions.shape[1:] != (2,):
         raise ValueError("positions must cover all neurons with two coordinates")
     old_bins = net["ampa_by_delay"]
+    before_geometry = _weighted_displacement_summary(old_bins, positions, n_e)
     old_topology = _hash_sparse_bins(old_bins, include_data=False)
     old_data = _hash_sparse_bins(old_bins)
     old_gaba = _hash_sparse_bins(net["gaba_by_delay"])
@@ -213,6 +264,10 @@ def fixed_topology_ee_ellipse_redistribution(
             "gaba_unchanged": True,
             "ampa_data_unchanged": True,
             "maximum_abs_incoming_EE_error": 0.0,
+            "mean_abs_incoming_EE_error": 0.0,
+            "per_target_total_input_expected": "unchanged from immutable cached graph",
+            "weighted_geometry_before": before_geometry,
+            "weighted_geometry_after": before_geometry,
             "edge_ratio": {"min": 1.0, "median": 1.0, "max": 1.0},
         }
 
@@ -278,6 +333,7 @@ def fixed_topology_ee_ellipse_redistribution(
             weights=np.asarray(coo.data[mask], float), minlength=n_e,
         )
     error = np.abs(current - incoming)
+    after_geometry = _weighted_displacement_summary(new_bins, positions, n_e)
     new_net = copy.copy(net)
     new_net["ampa_by_delay"] = new_bins
     removed = _invalidate_ampa_caches(new_net)
@@ -299,6 +355,16 @@ def fixed_topology_ee_ellipse_redistribution(
         "ampa_data_unchanged": _hash_sparse_bins(new_bins) == old_data,
         "maximum_abs_incoming_EE_error": float(np.max(error, initial=0.0)),
         "mean_abs_incoming_EE_error": float(np.mean(error)),
+        "maximum_relative_incoming_EE_error": float(np.max(
+            np.divide(error, incoming, out=np.zeros_like(error), where=incoming > 0),
+            initial=0.0,
+        )),
+        "mean_relative_incoming_EE_error": float(np.mean(np.divide(
+            error, incoming, out=np.zeros_like(error), where=incoming > 0,
+        ))),
+        "per_target_total_input_expected": "unchanged from immutable cached graph",
+        "weighted_geometry_before": before_geometry,
+        "weighted_geometry_after": after_geometry,
         "edge_ratio": {
             "min": float(np.min(samples)),
             "median": float(np.median(samples)),
