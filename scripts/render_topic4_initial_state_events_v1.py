@@ -124,7 +124,7 @@ def strobograms(run, folder, centers, radius):
     return pages
 
 
-def movie(run, xy, folder, centers, radius, step_ms=8.0):
+def movie(run, xy, folder, centers, radius, step_ms=12.0):
     z, rec = run["arrays"], run["record"]
     names = z["contact_names"].astype(str).tolist()
     table = np.asarray(z["centroid_ms"], float)
@@ -143,7 +143,7 @@ def movie(run, xy, folder, centers, radius, step_ms=8.0):
     kernel = np.ones(20) / 20.0
     core_a = np.convolve(np.asarray(z["trace_coreA_mean_V"], float), kernel, mode="same")
     core_b = np.convolve(np.asarray(z["trace_coreB_mean_V"], float), kernel, mode="same")
-    fig, axs = plt.subplots(2, 2, figsize=(11, 6.6), dpi=72)
+    fig, axs = plt.subplots(2, 2, figsize=(11, 6.6), dpi=64)
     fig.subplots_adjust(left=0.06, right=0.975, bottom=0.09, top=0.84, hspace=0.5, wspace=0.3)
     raw, heat, timeline, state_ax = axs.ravel()
     raw.set(title="Native sheet: active E counts / 2 ms", xlabel="x (mm)", ylabel="y (mm)", xlim=(0, 20), ylim=(0, 20))
@@ -204,7 +204,7 @@ def movie(run, xy, folder, centers, radius, step_ms=8.0):
             stamp.set_text(f"t = {centers_t[f] / 1000:.3f} s\ncentroid lag {rel:+.0f} ms")
             fig.canvas.draw()
             rgb = np.asarray(fig.canvas.buffer_rgba())[:, :, :3]
-            frames.append(Image.fromarray(rgb).quantize(colors=128, method=Image.Quantize.FASTOCTREE))
+            frames.append(Image.fromarray(rgb).quantize(colors=96, method=Image.Quantize.FASTOCTREE))
             durations.append(400 if j == 0 else 60)
         records.append({"detected_event_number": i + 1, "window_ms": [float(start), float(stop)],
                         "primary": i in primary, "mode": int(modes[i]), "support_state": int(states[i]),
