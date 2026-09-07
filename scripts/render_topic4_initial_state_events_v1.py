@@ -75,10 +75,10 @@ def montage(run, xy, folder):
         state = {1: "supported", 0: "uncertain", -1: "OOD"}[int(states[i])] if modes[i] >= 0 else "unreadable"
         contact_map(axes[i], xy, t[i], f"#{i + 1}  {windows[i][0] / 1000:.2f} s | M{modes[i]} {state}\n{status}", names,
                     labels=(i == 0))
-    fig.subplots_adjust(top=1 - 0.9 / height, bottom=0.7 / height, hspace=0.45, wspace=0.08)
+    fig.subplots_adjust(top=1 - 1.5 / height, bottom=0.7 / height, hspace=0.45, wspace=0.08)
     fig.suptitle(f"{ARM_LABEL[rec['arm']]} | graph {rec['topology_seed']} | seed {rec['dynamics_seed']}\n"
                  "All detected windows in chronological order; colour = relative centroid 0-100 ms; hollow = absent",
-                 fontsize=10)
+                 fontsize=10, y=1 - 0.25 / height)
     sm = plt.cm.ScalarMappable(norm=plt.Normalize(0, 100), cmap="viridis")
     fig.colorbar(sm, cax=fig.add_axes([0.3, 0.25 / height, 0.4, 0.12 / height]), orientation="horizontal",
                  label="Relative centroid (ms); values above 100 clipped in colour only")
@@ -252,6 +252,7 @@ def main():
     parser.add_argument("--design", type=Path, default=rt.DESIGN_PATH)
     parser.add_argument("--stage", choices=("screen", "replication"), required=True)
     parser.add_argument("--skip-gif", action="store_true")
+    parser.add_argument("--montage-only", action="store_true", help="re-render only the featured contact-map montages")
     parser.add_argument("--source", choices=("formal", "qualification"), default="formal")
     args = parser.parse_args()
     design = rt.load_design(args.design)
@@ -269,6 +270,13 @@ def main():
     for run in runs:
         rec = run["record"]
         stem = run["job"]["stem"]
+        if args.montage_only:
+            if rec["dynamics_seed"] == seed:
+                folder = out / "figures" / f"events_seed{seed}" / rec["arm"]
+                folder.mkdir(parents=True, exist_ok=True)
+                print("montage", stem, montage(run, xy, folder), flush=True)
+            run["arrays"].close()
+            continue
         if rec["dynamics_seed"] == seed:
             folder = out / "figures" / f"events_seed{seed}" / rec["arm"]
             folder.mkdir(parents=True, exist_ok=True)
@@ -287,6 +295,9 @@ def main():
             write_event_table(run, folder)
             report["other_runs"][stem] = {"strobogram_pages": pages, "n_windows": int(len(run["arrays"]["windows_ms"]))}
         run["arrays"].close()
+    if args.montage_only:
+        print({"stage": args.stage, "seed": seed, "montage_only": True})
+        return
     rt.write(out / "figures" / "events_render_metadata.json", report)
     print({"stage": args.stage, "seed": seed, "featured": list(report["featured"]), "other_runs": len(report["other_runs"])})
 

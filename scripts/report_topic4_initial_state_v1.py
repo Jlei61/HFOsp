@@ -150,7 +150,7 @@ def main():
         for key, v in qs[s]["arm_mode"].items():
             band = v["patient_matched_band"]
             rep.append(f"  - {key}: 可估计运行 {v['runs_estimable']}，run 级 D_off 均值 {fmt(v['D_off_run_mean'], 4)}"
-                       f"（区间 {v['D_off_run_ci95']}），患者匹配带 {None if band is None else [round(x, 4) for x in band]}，"
+                       f"（区间 {None if v['D_off_run_ci95'] is None else [round(x, 4) for x in v['D_off_run_ci95']]}），患者匹配带 {None if band is None else [round(x, 4) for x in band]}，"
                        f"参与率 MAE {fmt(v['participation_mae_vs_FIT'], 3)}，成对时差残差 MAE {fmt(v['pair_signed_median_residual_mae_ms'])} ms，"
                        f"顺序 TV {fmt(v['order_TV_at_2ms_mean'], 3)}，支持/OOD 比例 {pct(v['supported_fraction_pooled'])}/{pct(v['unsupported_fraction_pooled'])}")
     rep += ["", "相对共同基线 B0 的描述性比较（不是检验）："]
