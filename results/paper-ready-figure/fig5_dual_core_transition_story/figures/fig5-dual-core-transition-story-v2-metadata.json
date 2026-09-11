@@ -1,0 +1,405 @@
+{
+  "claim_boundary": "A--C are one development-only E1146 dual-core SNN trajectory; D is a separate clinical cohort data bridge, not individualized SNN prediction; E is a 2-mm deterministic frozen fast-subsystem branch atlas; F is an existing 3x3 operational-latency screen. The figure does not establish a clinical seizure mechanism, a thermodynamic phase transition, or delay-aware stability along every branch.",
+  "outputs": {
+    "pdf": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-dual-core-z-bifurcation/results/paper-ready-figure/fig5_dual_core_transition_story/figures/fig5-dual-core-transition-story-v2.pdf",
+      "sha256": "9b3e531480313872c230dd25330114a2da885e5239e0c28f8248733d53752f21"
+    },
+    "png": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-dual-core-z-bifurcation/results/paper-ready-figure/fig5_dual_core_transition_story/figures/fig5-dual-core-transition-story-v2.png",
+      "sha256": "23303ffe9fa886edb6071ee4d80e0a17ac0faac3b1eab541551ef3ab42aa9262"
+    },
+    "svg": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-dual-core-z-bifurcation/results/paper-ready-figure/fig5_dual_core_transition_story/figures/fig5-dual-core-transition-story-v2.svg",
+      "sha256": "e6244df3fc4c50cde64673f54cc69a2466b49adc6c04ba63e568d72511b43360"
+    }
+  },
+  "panel_A": {
+    "majority_threshold": 0.5,
+    "readout": "current-based virtual-contact proxy, signed 30\u201380 Hz",
+    "recruitment": "active-E fraction and fraction of 1-mm bins with at least 50% local recruitment",
+    "scaling": "one p99 amplitude scale frozen on all pre-onset samples"
+  },
+  "panel_B": {
+    "activity": "population E firing rate in the frozen 20-ms bins",
+    "adaptation": "core mean A=eta_m*m",
+    "eta_m": 0.007451594355587098,
+    "tonic_boundary": "the accepted endpoint is a tonic recruited plateau; 10\u2013250 Hz band-limited virtual-contact power decreases after onset and is therefore not used as a surrogate for runaway magnitude",
+    "z": "core and surround mean inhibitory efficacy"
+  },
+  "panel_C": {
+    "absolute_cosine_alignment": [
+      0.9947231490081795,
+      0.9923327420388385,
+      0.9457147822305454
+    ],
+    "core_contours": "actual union-core neurons split by nearest frozen core center; 10% within-bin membership contour",
+    "map_measure": "mean local E spike rate in 0.5-mm bins, log10(1+Hz)",
+    "rate_gradient": "least-squares gradient of log(1+local E rate)",
+    "reference_axis": "least-squares spatial gradient of the selected returned interictal event onset map; positive direction is early-to-late",
+    "reference_axis_unit_xy": [
+      -0.8617860532826498,
+      -0.5072719175821918
+    ],
+    "shared_normalization": [
+      0.0,
+      2.862973699065465
+    ],
+    "windows_ms": [
+      [
+        1402.0,
+        1674.0
+      ],
+      [
+        2015.4,
+        2515.4
+      ],
+      [
+        2615.4,
+        3015.4
+      ]
+    ]
+  },
+  "panel_D": {
+    "boundary": "clinical data bridge, not a cohort of individualized two-core SNNs; channel shuffle is weaker than a within-shaft null",
+    "data_median": 0.7844528485241351,
+    "inference": "one-sided paired Wilcoxon, observed > channel-null median",
+    "metric": "within-subject absolute spatial correlation between the frozen interictal A/B propagation field and clinical-onset 0\u201310 s, 1\u2013150 Hz early-ictal energy field; seizures are collapsed within subject before the cohort statistic",
+    "n_data_gt_null": 12,
+    "n_own_fallback_subjects": 9,
+    "n_seizures": 106,
+    "n_shared_subjects": 7,
+    "n_subjects": 16,
+    "null": "per-subject median after shuffling field values across all contacts while preserving the implanted contact geometry",
+    "null_median": 0.7801704024669022,
+    "wilcoxon_one_sided_data_gt_null_p": 0.019317626953125
+  },
+  "panel_E": {
+    "branch_families": {
+      "core_a_entry_family": {
+        "fold_count": 6,
+        "fold_indices": [
+          1995,
+          2669,
+          2881,
+          5126,
+          6851,
+          7048
+        ],
+        "n_points": 8002,
+        "provenance": "independent continuation from the low-branch zero-mode partner; a core-A-localized spatial family",
+        "s_range": [
+          0.14413997611104437,
+          0.3554043599817443
+        ]
+      },
+      "cross_family_match": {
+        "entry_index": 889,
+        "entry_s": 0.24878667947048078,
+        "full_state_rms_hz": 7.2899756243298865,
+        "interpretation": "the available continuations are distinct full-state loci; no line is inserted between them",
+        "match_established": false,
+        "recruited_index": 6413,
+        "recruited_s": 0.24880636107522622,
+        "s_match_tolerance": 2e-05
+      },
+      "global_recruited_family": {
+        "fold_count": 14,
+        "fold_indices": [
+          185,
+          315,
+          672,
+          684,
+          784,
+          1255,
+          1314,
+          1939,
+          2311,
+          2705,
+          2754,
+          4660,
+          5266,
+          6386
+        ],
+        "n_points": 21332,
+        "provenance": "continued from the global tonic outer root through exact, bit-identical pseudo-arclength restart states",
+        "s_range": [
+          0.09059087815211853,
+          0.24885470556451572
+        ]
+      },
+      "source": {
+        "base_npz": {
+          "path": "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_dual_core_spatial_z/bifurcation/dualcore_spatial_z_bifurcation.npz",
+          "sha256": "d1f01d4e6bf8273b8e755da13278fb0f0a8fd4c5a3e62743ef1aad6ce71385f1"
+        },
+        "extensions": [
+          {
+            "path": "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_dual_core_spatial_z/bifurcation/branch_extensions/recruited_arc_plus8000.npz",
+            "sha256": "644ad19f722ab1f57cda241cfc9f21f91122079221a5500baac4a67353606cb2"
+          },
+          {
+            "path": "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_dual_core_spatial_z/bifurcation/branch_extensions/recruited_arc_refined_bt10_plus3000.npz",
+            "sha256": "3488f83b9adecb9c4d0c2595235d525d23990ad15f87d783cc8ace05986457f3"
+          },
+          {
+            "path": "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_dual_core_spatial_z/bifurcation/branch_extensions/recruited_arc_refined2_plus5000.npz",
+            "sha256": "a196d8e09e824a57f466d10313fce19e669e81f862ec06455a90456dc7511d73"
+          },
+          {
+            "path": "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_dual_core_spatial_z/bifurcation/branch_extensions/recruited_arc_refined3_plus10000.npz",
+            "sha256": "f60163b88ee32648dda4b4b230ae0d6bb829b1544a6433fdb373ee7f62052d43"
+          }
+        ],
+        "result_json": {
+          "path": "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_dual_core_spatial_z/bifurcation/dualcore_spatial_z_bifurcation.json",
+          "sha256": "33faeef487bb14e1e011cee7111b5d56efa72c9a22041dfe56667a4bb1e0d03c"
+        }
+      },
+      "stability_contract": "branch loci and folds only; no line style in this atlas encodes zero-delay or delay-aware stability",
+      "status": "DUAL_CORE_SPATIAL_Z_MULTIBRANCH_ATLAS_COMPLETE"
+    },
+    "branch_line_style": "all continuation loci are solid; line style does not encode stability",
+    "operating_ou_residence": {
+      "contract": {
+        "coarse_projection": "original neuron-level SpatialOUDrive averaged onto the same grid",
+        "duration_ms": 300.0,
+        "ell_mm": 0.38,
+        "grid_spacing_mm": 0.4,
+        "mode": "local",
+        "role": "frozen accessibility process; not optimized",
+        "seed_offset": 500000,
+        "seeds": [
+          6101,
+          6102,
+          6103
+        ],
+        "sigma_rate_per_ms": 0.1,
+        "tau_ms": 20.0,
+        "update_interval_ms": 1.0,
+        "variance": "recurrent and clipped external variance recomputed each step"
+      },
+      "duration_ms": 300.0,
+      "retained_initial_root_n": 7,
+      "trajectory_n": 18
+    },
+    "operating_root_catalog_n": 6,
+    "operating_root_delay_classification": [
+      {
+        "classification": "stable",
+        "core_a_rate_hz": 0.47954063831901916,
+        "growth_rate_per_ms": -0.022585307138952068,
+        "mean_e_rate_hz": 0.05031780455944945,
+        "root_index": 0
+      },
+      {
+        "classification": "unstable",
+        "core_a_rate_hz": 1.845104982030289,
+        "growth_rate_per_ms": 0.021479051530795042,
+        "mean_e_rate_hz": 0.08743945510197478,
+        "root_index": 1
+      },
+      {
+        "classification": "unstable",
+        "core_a_rate_hz": 0.4795406424139464,
+        "growth_rate_per_ms": 0.03400866999055003,
+        "mean_e_rate_hz": 0.09133363750956422,
+        "root_index": 2
+      },
+      {
+        "classification": "unstable",
+        "core_a_rate_hz": 383.8397352242591,
+        "growth_rate_per_ms": 0.013146676860628106,
+        "mean_e_rate_hz": 40.195427416143595,
+        "root_index": 3
+      },
+      {
+        "classification": "unstable",
+        "core_a_rate_hz": 383.8392965407874,
+        "growth_rate_per_ms": 0.05713391333535165,
+        "mean_e_rate_hz": 41.2545286104626,
+        "root_index": 4
+      },
+      {
+        "classification": "unstable",
+        "core_a_rate_hz": 392.5893378114039,
+        "growth_rate_per_ms": 0.010058806645797594,
+        "mean_e_rate_hz": 352.82997111457144,
+        "root_index": 5
+      }
+    ],
+    "ou_on_median_s": 0.2873612940311432,
+    "ou_on_q10_q90_s": [
+      0.24613657593727112,
+      0.3188965797424317
+    ],
+    "recruited_recovery_s": 0.09058923327133096,
+    "runaway_entry_s": 0.33759138010148526,
+    "semantic": "core-A per-neuron mean E rate along the symmetric spatial-Z fixed-point continuation; not a literal single-neuron bifurcation",
+    "stability_boundary": "delay-aware power assay and nonlinear OU residence are reported only for the tested operating section, not extrapolated along the continuation loci",
+    "x_definition": "D_A=1-Z_A=s on Z_A=Z_B=1-s, Z_surround=1-0.70s",
+    "y_scale": "log"
+  },
+  "panel_F": {
+    "boundary": "existing 3x3 timescale library; every cell has four operational transitions, but only one run passed the stricter rev21 model-ictal qualification and the library did not freeze a formal work point",
+    "cell_denominator": 4,
+    "detector": "20-ms causal EMA of E rate >=120 Hz for >=100 ms",
+    "median_operational_latency_s": [
+      [
+        2.36405,
+        2.1075500000000003,
+        2.02475
+      ],
+      [
+        3.27995,
+        3.598,
+        3.7174
+      ],
+      [
+        5.23235,
+        5.246149999999999,
+        5.31675
+      ]
+    ],
+    "n_transition_runs": [
+      [
+        4,
+        4,
+        4
+      ],
+      [
+        4,
+        4,
+        4
+      ],
+      [
+        4,
+        4,
+        4
+      ]
+    ],
+    "tau_m_s": [
+      0.25,
+      0.5,
+      1.0
+    ],
+    "tau_z_s": [
+      3.0,
+      5.0,
+      8.0
+    ]
+  },
+  "representative_run": {
+    "candidate_id": "rev21_ts_tz3000_ta500",
+    "continuous_ou": true,
+    "dynamics_seed": 2642,
+    "model_state_eligible_rev21": true,
+    "topology_seed": 2542,
+    "z_and_m_active": true
+  },
+  "selected_interictal_event": {
+    "cascade_id": 77,
+    "detector_fragment_indices": [
+      6
+    ],
+    "duration_ms": 272.0,
+    "event_index": 1,
+    "lineage_id": 77,
+    "lineage_ids": [
+      77
+    ],
+    "maximum_fragment_collision_fraction": 0.0018433394099569402,
+    "minimum_fragment_dominance": 0.9879426994746192,
+    "n_detector_fragments": 1,
+    "n_recruited_contacts": 15,
+    "peak_active_fraction": 0.089875,
+    "reset_start_ms": null,
+    "returned": 1,
+    "root_count": 1,
+    "selection_rule": "latest returned event with complete 15-contact onset readout",
+    "t_off_ms": 1674.0,
+    "t_on_ms": 1402.0,
+    "trigger_t_off_ms": 1611.0,
+    "trigger_t_on_ms": 1436.0
+  },
+  "sources": {
+    "bifurcation_json": {
+      "path": "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_dual_core_spatial_z/bifurcation/dualcore_spatial_z_bifurcation.json",
+      "sha256": "33faeef487bb14e1e011cee7111b5d56efa72c9a22041dfe56667a4bb1e0d03c"
+    },
+    "bifurcation_npz": {
+      "path": "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_dual_core_spatial_z/bifurcation/dualcore_spatial_z_bifurcation.npz",
+      "sha256": "d1f01d4e6bf8273b8e755da13278fb0f0a8fd4c5a3e62743ef1aad6ce71385f1"
+    },
+    "branch_atlas_json": {
+      "path": "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_dual_core_spatial_z/bifurcation/branch_atlas/dualcore_spatial_z_branch_atlas.json",
+      "sha256": "6973b2251f5baee44c9560a12832f054eebd24939d9d7546d929cbe346015ad7"
+    },
+    "branch_atlas_npz": {
+      "path": "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_dual_core_spatial_z/bifurcation/branch_atlas/dualcore_spatial_z_branch_atlas.npz",
+      "sha256": "429d2181eb9bad3461f6b4b2ccf8a5674a448080079980a74b9335d4ecb0481d"
+    },
+    "clinical_cohort_csv": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/tspectral_field_concordance/clinical_onset_gradient_field_cohort_stat_cohort.csv",
+      "sha256": "1a496dbae85ce68c4102c3dc6f6b21e0c388c207adcbad3f432740db13871a83"
+    },
+    "clinical_subject_csv": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/tspectral_field_concordance/clinical_onset_gradient_field_cohort_stat_subject.csv",
+      "sha256": "2d8d32d8e1b6919b4c9f9cf619385665893f5193821259ac53bfd8cfa080c07f"
+    },
+    "frozen_rev21_config": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-dual-core-z-bifurcation/config/topic4_rev21_dual_core_zm_transition.json",
+      "sha256": "e7bb57aa264a4ee53887dbac349c7c6342bb5972cda6ff2798b63b4270f29498"
+    },
+    "stability_assay_json": {
+      "path": "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_dual_core_spatial_z/bifurcation/stability_assay/delay_ou_operating_section.json",
+      "sha256": "e78d22810026f3b14db8e608e88856e1b648880afd287d6debced25f2acea4bb"
+    },
+    "timescale_aggregate_json": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_zm_transition/timescale/aggregate.json",
+      "sha256": "3a5f6a1262e737efddf2b8f1d1823ea9219419f6b0d98b68a780d33bf1356feb"
+    },
+    "worker_json": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_zm_transition/timescale/workers/rev21_ts_tz3000_ta500_topology_2542_dynamics_2642.json",
+      "sha256": "6998e40293db440d7136b7c3b13cc29f648ad91b2e4262fe47d3a639c1df7e33"
+    },
+    "worker_npz": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_zm_transition/timescale/workers/rev21_ts_tz3000_ta500_topology_2542_dynamics_2642.npz",
+      "sha256": "84662a16beac4d8f9c95172803541bd87a8093c73de334b617ff97a09e1abfce"
+    }
+  },
+  "status": "FIG5_DUAL_CORE_TRANSITION_STORY_V2_CANDIDATE",
+  "substrate": "dualcore_s39 + Joint=1.25",
+  "time_contract": {
+    "A_B_axes_identical": true,
+    "C_windows_are_exact_subsets_of_A_B": true,
+    "display_ms": [
+      0.0,
+      3815.4
+    ],
+    "early_ictal_ms": [
+      2615.4,
+      3015.4
+    ],
+    "interictal_ms": [
+      1402.0,
+      1674.0
+    ],
+    "onset_definition": "rev21 scientific model-state onset = operational detector time minus the frozen 100-ms offset",
+    "onset_ms": 2515.4,
+    "pre_onset_ms": [
+      2015.4,
+      2515.4
+    ],
+    "returned_interictal_ms": [
+      [
+        738.0,
+        980.0
+      ],
+      [
+        1402.0,
+        1674.0
+      ]
+    ]
+  }
+}

@@ -46,6 +46,8 @@ class ZMTracedSlowVars(MZSlowVars):
         self._frame_calls = 0
         self._frames = []
         self._frame_steps = []
+        self._region_masks = None
+        self._region_trace = None
         if trace_weights_E is None:
             self._trace_weights = None
             self._weighted_trace = None
@@ -139,9 +141,54 @@ class ZMTracedSlowVars(MZSlowVars):
         return {"net_slow_current": np.asarray(self._frames, dtype=np.float32),
                 "call_index": np.asarray(self._frame_steps, dtype=np.int64)}
 
+    # ---- named spatial-region traces ----
+    def enable_region_traces(self, masks_E):
+        """Record Z/M means for explicit E-cell regions at the normal stride.
+
+        ``core_mask_E`` in the frozen engine only distinguishes the union of
+        all core cells from surround.  A dual-core analysis needs core A and B
+        separately, so the runner may install named boolean masks here without
+        changing any dynamical equation or random-number consumption.
+        """
+        checked = {}
+        for name, mask in dict(masks_E).items():
+            key = str(name)
+            if not key or key in checked:
+                raise ValueError("region trace names must be unique and non-empty")
+            values = np.asarray(mask, dtype=bool)
+            if values.shape != (self.NE,):
+                raise ValueError(f"region mask {key!r} must have shape ({self.NE},)")
+            if not np.any(values):
+                raise ValueError(f"region mask {key!r} is empty")
+            checked[key] = values
+        if not checked:
+            raise ValueError("at least one region trace mask is required")
+        self._region_masks = checked
+        self._region_trace = {
+            f"{name}_{variable}_mean": []
+            for name in checked for variable in ("z", "m")
+        }
+
+    def region_trace_arrays(self):
+        if self._region_trace is None:
+            return None
+        result = {
+            name: np.asarray(values, dtype=np.float32)
+            for name, values in self._region_trace.items()
+        }
+        result["time_ms"] = self.trace_arrays()["time_ms"]
+        return result
+
     # ---- h-weighted trajectory ----
     def _record_trace(self, spikes, dt):
         super()._record_trace(spikes, dt)
+        if self._region_trace is not None:
+            z_e, m_e = self.z[:self.NE], self.m[:self.NE]
+            for name, mask in self._region_masks.items():
+                self._region_trace[f"{name}_z_mean"].append(
+                    float(np.mean(z_e[mask])))
+                self._region_trace[f"{name}_m_mean"].append(
+                    float(np.mean(m_e[mask])))
         if self._weighted_trace is None:
             return
         weights = self._trace_weights

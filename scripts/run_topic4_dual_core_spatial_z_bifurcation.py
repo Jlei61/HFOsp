@@ -74,7 +74,7 @@ def load_z_map(path: Path) -> DualCoreSpatialZMap:
     return result
 
 
-def point_arrays(model, z_map, points, prefix, arrays):
+def point_arrays(model, z_map, points, prefix, arrays, *, save_rates=False):
     valid = [point for point in points
              if point.solution.converged and point.solution.physical]
     arrays[f"{prefix}__s"] = np.asarray(
@@ -88,10 +88,14 @@ def point_arrays(model, z_map, points, prefix, arrays):
             regional_rates_hz(model, z_map, point.solution.rate_e)[region]
             for point in valid
         ], float)
+    if save_rates:
+        arrays[f"{prefix}__rates"] = np.asarray([
+            point.solution.rates for point in valid
+        ], float)
     return valid
 
 
-def solution_arrays(model, z_map, solutions, prefix, arrays):
+def solution_arrays(model, z_map, solutions, prefix, arrays, *, save_rates=False):
     valid = [solution for solution in solutions
              if solution.converged and solution.physical]
     arrays[f"{prefix}__s"] = np.asarray(
@@ -102,6 +106,10 @@ def solution_arrays(model, z_map, solutions, prefix, arrays):
         arrays[f"{prefix}__{region}_hz"] = np.asarray([
             regional_rates_hz(model, z_map, solution.rate_e)[region]
             for solution in valid
+        ], float)
+    if save_rates:
+        arrays[f"{prefix}__rates"] = np.asarray([
+            solution.rates for solution in valid
         ], float)
     return valid
 
@@ -459,7 +467,8 @@ def main() -> None:
         model, z_map, high_first, high_second, step_size=1e-4,
         n_steps=800, max_corrector_iterations=40)
     recruited_valid = point_arrays(
-        model, z_map, recruited_arc, "recruited_arc", arrays)
+        model, z_map, recruited_arc, "recruited_arc", arrays,
+        save_rates=True)
     recruited_tangent = np.asarray(
         [item.tangent_parameter for item in recruited_valid])
     recruited_turns = np.flatnonzero(
@@ -503,7 +512,8 @@ def main() -> None:
     outer_high = sorted(
         high_down + high_up[1:] + high_upper,
         key=lambda solution: solution.parameter)
-    solution_arrays(model, z_map, outer_high, "outer_high", arrays)
+    solution_arrays(
+        model, z_map, outer_high, "outer_high", arrays, save_rates=True)
 
     # Refine the first recovery fold on the recruited branch.
     index = int(recruited_turns[0])
@@ -521,7 +531,9 @@ def main() -> None:
         model, z_map, recovery_valid, recovery_eigenvalues, weights=weights,
         prefix="recovery_fold", arrays=arrays)
 
-    # Low branch and its paired unstable root at the runaway-entry fold.
+    # Low branch and its paired unstable root at the low-state fold.  Native
+    # delayed trajectories can land on a bounded localized attractor after
+    # this root disappears, so this must not be labelled a runaway boundary.
     low_branch = []
     previous = solve_spatial_z_fixed_point(
         model, z_map, parameter=0.0,
@@ -557,7 +569,7 @@ def main() -> None:
         model, z_map, entry_fine, "entry_fold", arrays)
     entry_fold, entry_eigenvalues = fold_evidence(
         model, z_map, entry_valid, weights=weights,
-        label="low_branch_runaway_entry_fold")
+        label="low_branch_disappearance_fold")
     arrays["entry_fold__eigen_real"] = entry_eigenvalues
     entry_mode = critical_mode_summary(
         model, z_map, entry_valid, entry_eigenvalues, weights=weights,
@@ -568,9 +580,9 @@ def main() -> None:
     # assay whether (rather than assume that) it rejoins the outer high family.
     entry_saddle = pseudo_arclength_spatial_z(
         model, z_map, partner_second, partner_first, step_size=1e-4,
-        n_steps=3200, max_corrector_iterations=50)
+        n_steps=8000, max_corrector_iterations=50)
     entry_saddle_valid = point_arrays(
-        model, z_map, entry_saddle, "entry_saddle", arrays)
+        model, z_map, entry_saddle, "entry_saddle", arrays, save_rates=True)
     entry_saddle_tangent = np.asarray([
         point.tangent_parameter for point in entry_saddle_valid], float)
     entry_saddle_turns = np.flatnonzero(
@@ -679,9 +691,12 @@ def main() -> None:
                 "the observed median ratio is reported separately, not refit."),
         },
         "folds": {
+            "low_state_disappearance": entry_fold,
+            "low_state_disappearance_critical_mode": entry_mode,
             "runaway_entry": entry_fold,
             "recruited_recovery": recovery_fold,
             "runaway_entry_critical_mode": entry_mode,
+            "runaway_entry_key_deprecated": True,
             "recruited_recovery_critical_mode": recovery_mode,
             "additional_recruited_branch_fold_count": int(
                 max(0, recruited_turns.size - 1)),
@@ -692,7 +707,7 @@ def main() -> None:
             "status": "COMPUTED_ARCLENGTH_BRANCH_WITH_ZERO_DELAY_STABILITY_CLASSIFIED",
             "n_points": int(len(entry_saddle_valid)),
             "step_size": 1e-4,
-            "n_steps": 3200,
+            "n_steps": 8000,
             "termination": "predeclared_arclength_step_limit",
             "tangent_crossing_indices": entry_saddle_turns.astype(int).tolist(),
             "segments": saddle_segments,
@@ -732,10 +747,10 @@ def main() -> None:
         "claim": (
             "The frozen 2-mm deterministic reduction of the data-driven dual-core "
             "substrate has a spatial saddle-node fold chain. The low-branch fold "
-            "removes the low fixed point and therefore supplies a deterministic "
-            "runaway boundary; the OU-on SNN crosses operationally earlier inside "
-            "the coexistence region, so the fold organizes susceptibility but does "
-            "not by itself time the stochastic transition."),
+            "removes the near-silent fixed point and therefore supplies a "
+            "deterministic low-root existence boundary. Native-delay trajectories "
+            "can remain on bounded localized attractors after this fold, so it is "
+            "not by itself a stable-to-runaway boundary."),
         "claim_boundary": (
             "This establishes folds in a coarse deterministic fast subsystem, not "
             "a thermodynamic phase transition, a delay-aware stability theorem, or "
@@ -758,7 +773,7 @@ def main() -> None:
     atomic_json(payload, output)
     print(json.dumps({
         "status": payload["status"], "output": str(output),
-        "runaway_entry_fold": entry_fold,
+        "low_state_disappearance_fold": entry_fold,
         "recruited_recovery_fold": recovery_fold,
         "additional_recruited_folds": payload["folds"][
             "additional_recruited_branch_fold_count"],

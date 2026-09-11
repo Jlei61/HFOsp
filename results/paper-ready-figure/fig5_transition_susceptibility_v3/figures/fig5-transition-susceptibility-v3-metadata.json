@@ -1,0 +1,335 @@
+{
+  "status": "FIG5_TRANSITION_SUSCEPTIBILITY_V3_CANDIDATE",
+  "author_acceptance": false,
+  "substrate": "dualcore_s39 + Joint=1.25; predecessor of rev22, not the rev22 optimum",
+  "topology_seed": 2542,
+  "dynamics_seed": 2642,
+  "stages": {
+    "display_ms": [
+      0.0,
+      3815.4
+    ],
+    "interictal_ms": [
+      1402.0,
+      1674.0
+    ],
+    "returned_interictal_ms": [
+      [
+        738.0,
+        980.0
+      ],
+      [
+        1402.0,
+        1674.0
+      ]
+    ],
+    "pre_onset_ms": [
+      2015.4,
+      2515.4
+    ],
+    "early_ictal_ms": [
+      2615.4,
+      3015.4
+    ],
+    "onset_ms": 2515.4
+  },
+  "A_B_same_time_axis": true,
+  "panel_A": {
+    "display_contacts": [
+      "ICL11",
+      "ICL8",
+      "ICL5",
+      "ICL2",
+      "SCL9",
+      "SCL8",
+      "SCL7",
+      "SCL6"
+    ],
+    "selection": "four fixed ICL contacts spanning the shaft plus all four SCL contacts",
+    "scaling": "per-contact baseline median subtraction, one shared pre-onset p99.5 absolute amplitude scale",
+    "scale_au": 1932.846813087464,
+    "filter": "none",
+    "unit": "model current-based LFP proxy, arbitrary units"
+  },
+  "panel_C": {
+    "axis_order_fix": "producer (time,y,x) converted to (time,x,y) before occupancy division; imshow transpose only at rendering",
+    "shared_rate_vmax_hz": 455.23809523809524,
+    "color_normalization": "PowerNorm gamma=0.5",
+    "reference_axis_unit_xy": [
+      -0.5072719175821915,
+      -0.86178605328265
+    ],
+    "absolute_gradient_cosines": [
+      0.9958902490370064,
+      0.9927354812654426,
+      0.9471628591523331
+    ],
+    "log_rate_plane_r2": [
+      0.28049543351988016,
+      0.8243056066950252,
+      0.8852505277340024
+    ],
+    "population_rate_conservation": [
+      {
+        "spatial_mean_hz": 40.86350446428571,
+        "source_mean_hz": 40.86349868774414
+      },
+      {
+        "spatial_mean_hz": 83.854,
+        "source_mean_hz": 83.85400390625
+      },
+      {
+        "spatial_mean_hz": 189.60015625,
+        "source_mean_hz": 189.6001434326172
+      }
+    ],
+    "reference_axis": "selected returned interictal event recruitment-onset gradient, fixed across all three maps",
+    "core_outline": "nominal 1.8-mm circles around frozen centers; membership is budget matched",
+    "frame_center_selection_windows_ms": [
+      [
+        1402.0,
+        1674.0
+      ],
+      [
+        2015.4,
+        2515.4
+      ],
+      [
+        2615.4,
+        3015.4
+      ]
+    ]
+  },
+  "panel_D": {
+    "measurement": "signed descendant E spikes: pulse minus exact sham; injected spikes excluded",
+    "window_ms": [
+      0,
+      50
+    ],
+    "dose_cells": 16,
+    "all_sites_retained": true,
+    "low_mean": 1770.4375,
+    "pre_mean": 754.25,
+    "low_median": 9.5,
+    "pre_median": 175.5,
+    "sites_with_increased_response": 10,
+    "low_site_responses": [
+      0.0,
+      0.0,
+      0.0,
+      2.0,
+      0.0,
+      -3.0,
+      -50.0,
+      59.0,
+      31.0,
+      38.0,
+      -6.0,
+      6099.0,
+      17.0,
+      344.0,
+      17932.0,
+      3864.0
+    ],
+    "pre_site_responses": [
+      38.0,
+      -17.0,
+      -98.0,
+      66.0,
+      2.0,
+      122.0,
+      962.0,
+      19.0,
+      909.0,
+      5900.0,
+      1485.0,
+      229.0,
+      1430.0,
+      648.0,
+      16.0,
+      357.0
+    ],
+    "window_sensitivity": {
+      "low_0_200_mean": -4488.4375,
+      "pre_0_200_mean": 569.9375,
+      "low_0_200_median": 163.5,
+      "pre_0_200_median": 193.5,
+      "sites_increased_0_200": 7
+    },
+    "state_times_ms": {
+      "low_activity": 1000.0,
+      "pre_onset": 2015.4
+    },
+    "causal_scope": "state-dependent response on one frozen trajectory; no anisotropy rotation/isotropic intervention",
+    "future_noise_pairing": "probe and sham share the future within each state; low and pre-onset use their own trajectory futures, not matched independent noise ensembles across states",
+    "color_normalization": "signed symlog, linear within +/-1 extra spike, shared symmetric range",
+    "color_vmax": 17932.0
+  },
+  "panel_E": {
+    "gain_scale": 1.0,
+    "tail_ms": 1000.0,
+    "duration_ms": 10000.0,
+    "same_gate_as_summary": true,
+    "population_definition": "unweighted mean of the 100 coarse E-population rates, as in the frozen boundary gate",
+    "meaning": "10-second outcomes from two defined initial preparations; connecting lines guide the eye, not equilibrium continuation"
+  },
+  "panel_F": {
+    "codes": [
+      [
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2
+      ],
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2
+      ]
+    ],
+    "labels": [
+      "both bounded",
+      "preparation dependent",
+      "both runaway",
+      "unresolved"
+    ],
+    "meaning": "two tested preparations at each sampled point, not exhaustive attractor counting",
+    "s_values": [
+      0.36,
+      0.38,
+      0.4,
+      0.42,
+      0.428,
+      0.429,
+      0.44,
+      0.46,
+      0.48,
+      0.5
+    ],
+    "m_gain_scales": [
+      0.0,
+      1.0,
+      2.0,
+      4.0
+    ],
+    "interpolation": "none; midpoint rectangles around sampled s values"
+  },
+  "panel_B": {
+    "eta_m": 0.003725797177793549,
+    "Z": "pooled union-core mean and surround mean; does not assert core A = core B",
+    "M": "pooled core mean adaptation current eta_M*M"
+  },
+  "sources": {
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_zm_transition/timescale/workers/rev21_ts_tz3000_ta500_topology_2542_dynamics_2642.json": "6998e40293db440d7136b7c3b13cc29f648ad91b2e4262fe47d3a639c1df7e33",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_zm_transition/timescale/workers/rev21_ts_tz3000_ta500_topology_2542_dynamics_2642.npz": "84662a16beac4d8f9c95172803541bd87a8093c73de334b617ff97a09e1abfce",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-dual-core-z-bifurcation/config/topic4_rev21_dual_core_zm_transition.json": "e7bb57aa264a4ee53887dbac349c7c6342bb5972cda6ff2798b63b4270f29498",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_zm_transition/timescale/candidate_manifest.json": "c305ca87dec1b3da36766a8058ea3dfc93506188cae8ed3befd4e9a17ce931a3",
+    "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_dual_core_spatial_z/bifurcation/dualcore_spatial_z_bifurcation.json": "33faeef487bb14e1e011cee7111b5d56efa72c9a22041dfe56667a4bb1e0d03c",
+    "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_dual_core_spatial_z/perturbation/preonset_20260905/state_contrast.json": "3a642b5b0eb02e12b62106fcf51264c0840344d9d9ef4a28bb51c8ae982e5106",
+    "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_dual_core_spatial_z/perturbation/preonset_20260905/state_contrast.npz": "c971ce500d8e593dcca121751c5df8d8496175482326785fea45393a6a1a1f39",
+    "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_dual_core_spatial_z/upper_runaway_map_20260905/summary.json": "79f732e5f922a2cd97df8e5888c4acf6791a2bd0beec1ad44102c8dc84e075e5",
+    "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_dual_core_spatial_z/runaway_boundary/localized_to_global_fold_m1.json": "b3ffa27b21850407036fd9590e0f56e0bc43429cee72be0d2e5fd8e438e608aa",
+    "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_dual_core_spatial_z/runaway_boundary/native_edge_tracking_0p428_to_0p429.json": "397d667ee0b3691d7e7b41fafb6b42f5d94b22aeaa9dad737334f5ef2f7988bd",
+    "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_dual_core_spatial_z/runaway_boundary/native_edge_tracking_0p428_to_0p429.npz": "170b1a28e2244d408c506cfeae154f49c244cab9b585fa208068b7b2273e1363",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-dual-core-z-bifurcation/scripts/paper_figures/build_fig5_transition_susceptibility.py": "3144c593ea443ed1bdd9eeb3c9863ade7f631af578491eb6aa1711e1624a629d",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-dual-core-z-bifurcation/scripts/paper_figures/plot_fig5_dual_core_transition_story.py": "1add70605370cd6f281eac608ca55caa2789b32b2ff32d45655cd7401a163173"
+  },
+  "outputs": {
+    "png": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-dual-core-z-bifurcation/results/paper-ready-figure/fig5_transition_susceptibility_v3/figures/fig5-transition-susceptibility-v3.png",
+      "sha256": "bb3528035656a152dcd9012188398f2b0a073b4affa7c838ecf514d628a126b9"
+    },
+    "pdf": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-dual-core-z-bifurcation/results/paper-ready-figure/fig5_transition_susceptibility_v3/figures/fig5-transition-susceptibility-v3.pdf",
+      "sha256": "27e17fd2bd3220c19e609200a68b78ad6953fb016a2ce45c26770c14683e759f"
+    },
+    "svg": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-dual-core-z-bifurcation/results/paper-ready-figure/fig5_transition_susceptibility_v3/figures/fig5-transition-susceptibility-v3.svg",
+      "sha256": "a6895d7e3d6f4eb18125314cdbac22b25a70dafd6634605836c3776b1c92074d"
+    }
+  },
+  "diagnostic_outputs": {
+    "png": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-dual-core-z-bifurcation/results/paper-ready-figure/fig5_transition_susceptibility_v3/figures/fig5-transition-susceptibility-diagnostics.png",
+      "sha256": "3c3c0c50fe583f4652997fb3d1a3d15dcd167f041b9a8ab8585697a2e015a087"
+    },
+    "pdf": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-dual-core-z-bifurcation/results/paper-ready-figure/fig5_transition_susceptibility_v3/figures/fig5-transition-susceptibility-diagnostics.pdf",
+      "sha256": "71efa74bcd3f56540fbd024b67a75cb029b84fddde9227a5c9919dedcdbcfa8f"
+    },
+    "svg": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-dual-core-z-bifurcation/results/paper-ready-figure/fig5_transition_susceptibility_v3/figures/fig5-transition-susceptibility-diagnostics.svg",
+      "sha256": "9c58f9d90be17c01a4ef861b1b299fe31544766a4a16cfe769209ec44624aab5"
+    }
+  },
+  "response_field_outputs": {
+    "png": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-dual-core-z-bifurcation/results/paper-ready-figure/fig5_transition_susceptibility_v3/figures/fig5-perturbation-response-fields.png",
+      "sha256": "cc8f4d33e37b859c1b12ad36ff6ac4725a313b8fc1d8ef3efbbd63be6f3545f0"
+    },
+    "pdf": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-dual-core-z-bifurcation/results/paper-ready-figure/fig5_transition_susceptibility_v3/figures/fig5-perturbation-response-fields.pdf",
+      "sha256": "5a7d19366fbfcfcc6d78188811d11c33946f9175708b40e4c530290feaf23294"
+    },
+    "svg": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-dual-core-z-bifurcation/results/paper-ready-figure/fig5_transition_susceptibility_v3/figures/fig5-perturbation-response-fields.svg",
+      "sha256": "5c88db29e93389f4971f0b4ee80807e2ee7384e2ddc9d45434dbf3a4e811b3fd"
+    }
+  },
+  "response_field_contract": {
+    "mean_over": 16,
+    "spatial_bin_mm": 0.5,
+    "display_gaussian_sigma_bins": 0.7,
+    "smoothing": "smooth signed spike numerator and cell-count denominator separately, then divide",
+    "windows_ms": [
+      [
+        0,
+        50
+      ],
+      [
+        0,
+        200
+      ]
+    ],
+    "scale": "shared symmetric linear scale within each row",
+    "meaning": "where extra response spikes occur after averaging all 16 stimulation sites; not a map of injection-site susceptibility"
+  },
+  "claim_boundary": "single development substrate; full SNN A-D and deterministic frozen-Z dynamic-M coarse E-F. Operational tonic runaway only. No specific local bifurcation type, clinical seizure reproduction, cohort prediction, or causal anisotropy susceptibility established."
+}

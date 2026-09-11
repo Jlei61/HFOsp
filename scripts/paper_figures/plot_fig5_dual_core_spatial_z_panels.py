@@ -28,7 +28,6 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import BoundaryNorm, ListedColormap, PowerNorm
-from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 from scipy.ndimage import gaussian_filter
 
@@ -41,7 +40,9 @@ from src.topic4_patient_zm_meanfield import load_patient_coarse_model  # noqa: E
 
 LOW = "#355C8A"
 HIGH = "#C7472F"
-FOLD_CHAIN = "#8F2D1E"
+GLOBAL_BRANCH = "#B8794B"
+LOCAL_BRANCH = "#777777"
+FOLD_MARKER = "#333333"
 OU = "#D62745"
 COEXIST = "#D8D2E8"
 RECRUITED_ONLY = "#E88963"
@@ -115,30 +116,8 @@ def _plot_response(axis, contacts, response_grid, extent, title, vmax,
     return image
 
 
-def _plot_classified_branch(axis, x, y, codes):
-    """Draw contiguous stability-classified branch runs without connectors."""
-    x = np.asarray(x, float)
-    y = np.asarray(y, float)
-    codes = np.asarray(codes, int)
-    if x.shape != y.shape or x.shape != codes.shape:
-        raise ValueError("classified branch arrays must have matching shapes")
-    style = {
-        1: {"ls": "-", "lw": 1.55, "alpha": 0.92},
-        0: {"ls": "--", "lw": 1.55, "alpha": 0.92},
-        -1: {"ls": ":", "lw": 1.35, "alpha": 0.82},
-    }
-    starts = np.r_[0, np.flatnonzero(codes[1:] != codes[:-1]) + 1]
-    stops = np.r_[starts[1:], len(codes)]
-    for start, stop in zip(starts, stops):
-        code = int(codes[start])
-        kwargs = style.get(code, style[-1])
-        axis.plot(
-            x[start:stop], y[start:stop], color=FOLD_CHAIN,
-            solid_capstyle="round", dash_capstyle="round", **kwargs,
-        )
-
-
-def _plot_panel_c(axis, arrays, payload) -> dict:
+def _plot_panel_c(axis, arrays, payload, atlas, atlas_payload,
+                  stability_payload) -> dict:
     folds = payload["folds"]
     empirical = payload["empirical_ou_on_projection"]
     recovery = float(folds["recruited_recovery"]["s"])
@@ -155,19 +134,34 @@ def _plot_panel_c(axis, arrays, payload) -> dict:
         onset_q10, onset_q90, color=OU, alpha=0.10, lw=0,
         label="OU-on onset q10–q90",
     )
+    global_s = np.asarray(atlas["global_recruited__s"], float)
+    global_rate = np.asarray(atlas["global_recruited__core_a_hz"], float)
+    local_s = np.asarray(atlas["core_a_entry__s"], float)
+    local_rate = np.asarray(atlas["core_a_entry__core_a_hz"], float)
+    global_folds = np.asarray(
+        atlas["global_recruited__fold_indices"], int)
+    local_folds = np.asarray(atlas["core_a_entry__fold_indices"], int)
+    axis.plot(
+        global_s, global_rate, color=GLOBAL_BRANCH, lw=0.72, alpha=0.66,
+        solid_capstyle="round", label="global-recruited family",
+    )
+    axis.plot(
+        local_s, local_rate, color=LOCAL_BRANCH, lw=0.72, alpha=0.64,
+        solid_capstyle="round", label="core-A-localized family",
+    )
+    axis.scatter(
+        global_s[global_folds], global_rate[global_folds], s=13,
+        facecolor="white", edgecolor=GLOBAL_BRANCH, lw=0.65, zorder=5)
+    axis.scatter(
+        local_s[local_folds], local_rate[local_folds], s=13,
+        facecolor="white", edgecolor=FOLD_MARKER, lw=0.65, zorder=5)
     axis.plot(
         arrays["low_branch__s"], arrays["low_branch__core_a_hz"],
-        color=LOW, lw=2.2, solid_capstyle="round", label="low root",
+        color=LOW, lw=2.15, solid_capstyle="round", label="low outer root",
     )
     axis.plot(
         arrays["outer_high__s"], arrays["outer_high__core_a_hz"],
-        color=HIGH, lw=2.2, solid_capstyle="round", label="tonic root",
-    )
-    _plot_classified_branch(
-        axis,
-        arrays["entry_saddle__s"],
-        arrays["entry_saddle__core_a_hz"],
-        arrays["entry_saddle__zero_delay_stability_code"],
+        color=HIGH, lw=2.15, solid_capstyle="round", label="tonic outer root",
     )
     axis.axvline(onset_median, color=OU, lw=1.3, ls=":")
 
@@ -177,77 +171,53 @@ def _plot_panel_c(axis, arrays, payload) -> dict:
         folds["runaway_entry"]["regional_e_rate_hz"]["core_a"])
     axis.scatter(
         [recovery, entry], [recovery_rate, entry_rate], s=34,
-        c=[FOLD_CHAIN, LOW], edgecolor="white", lw=0.7, zorder=6,
+        c=[GLOBAL_BRANCH, LOW], edgecolor="white", lw=0.7, zorder=6,
     )
     axis.annotate(
-        "low root ends", xy=(entry, entry_rate), xytext=(0.245, 2.0),
-        fontsize=7.3, color=LOW,
-        arrowprops={"arrowstyle": "->", "color": LOW, "lw": 0.8},
+        "low fold", xy=(entry, entry_rate), xytext=(0.305, 1.45),
+        fontsize=7.0, color=LOW, ha="right",
+        arrowprops={"arrowstyle": "->", "color": LOW, "lw": 0.75},
     )
-    axis.annotate(
-        "OU-on median", xy=(onset_median, 370.0), xytext=(0.370, 425.0),
-        fontsize=7.0, color=OU, ha="right",
-        arrowprops={"arrowstyle": "-", "color": OU, "lw": 0.8},
+    operating_roots = stability_payload["root_catalog"]
+    operating_rates = np.asarray([
+        root["regional_e_rate_hz"]["core_a"] for root in operating_roots
+    ], float)
+    axis.scatter(
+        np.full(operating_rates.size, onset_median), operating_rates,
+        s=20, facecolor="white", edgecolor="#262626", lw=0.75, zorder=7,
     )
     axis.text(
-        0.196, 0.17, "coexistence", transform=axis.get_xaxis_transform(),
-        fontsize=7.1, color="#5C536B", ha="center",
+        onset_median + 0.006, 13.0,
+        f"{operating_rates.size} coexisting full states\n"
+        f"({np.unique(np.round(operating_rates, 2)).size} projected levels)",
+        fontsize=6.7, color="#262626", ha="left", va="center")
+    # The upper-left quadrant is empty in the computed atlas.  Use it as an
+    # unboxed key so neither the paths nor the fold markers are covered.
+    key_rows = (
+        (430.0, LOW, 2.15, "low outer"),
+        (255.0, HIGH, 2.15, "tonic outer"),
+        (150.0, GLOBAL_BRANCH, 0.9, "global-recruited family"),
+        (88.0, LOCAL_BRANCH, 0.9, "core-A-localized family"),
     )
+    for y_value, color, width, label in key_rows:
+        axis.plot([0.010, 0.027], [y_value, y_value], color=color, lw=width,
+                  solid_capstyle="round", clip_on=False)
+        axis.text(0.032, y_value, label, color=color, fontsize=6.3,
+                  ha="left", va="center")
+    axis.scatter([0.0185], [52.0], s=13, facecolor="white",
+                 edgecolor=FOLD_MARKER, lw=0.65)
+    axis.text(0.032, 52.0, "continuation fold", color=FOLD_MARKER,
+              fontsize=6.3, ha="left", va="center")
+    axis.text(
+        onset_median - 0.004, 0.19, "OU-on median", color=OU,
+        fontsize=6.5, rotation=90, ha="right", va="bottom")
     axis.set_yscale("log")
     axis.set_xlim(0.0, 0.405)
     axis.set_ylim(0.15, 520.0)
     axis.set_xlabel(r"Core disinhibition  $D_A=1-Z_A$", fontsize=9.0)
     axis.set_ylabel("Mean E rate within core A (Hz)", fontsize=9.0)
-    axis.set_title("Core-A local population fixed points", fontsize=10.2,
+    axis.set_title("Core-A fixed-point branch atlas", fontsize=10.2,
                    fontweight="bold", pad=8)
-    # The main log-scale view hides the very narrow arclength turn.  The inset
-    # shows the actual fold geometry and reports the independent zero-mode
-    # bracket, rather than representing a solver jump as a bifurcation.
-    inset = axis.inset_axes([0.565, 0.17, 0.385, 0.235])
-    fold_s = np.asarray(arrays["entry_fold__s"], float)
-    fold_rate = np.asarray(arrays["entry_fold__core_a_hz"], float)
-    inset.plot((fold_s - entry) * 1e6, fold_rate, color=LOW, lw=1.2)
-    inset.scatter([0.0], [entry_rate], s=14, color=LOW,
-                  edgecolor="white", lw=0.45, zorder=4)
-    inset.axvline(0.0, color="0.45", lw=0.6, ls=":")
-    eigen_bracket = folds["runaway_entry"][
-        "fixed_point_eigenvalue_real_bracket"]
-    inset.text(
-        0.04, 0.08,
-        rf"Re $\lambda$: {eigen_bracket[0] * 1e5:.1f} $\to$ {eigen_bracket[1] * 1e5:.1f} $\times10^{{-5}}$",
-        transform=inset.transAxes, fontsize=5.6, color="0.30",
-    )
-    inset.set_title("saddle-node zoom", fontsize=6.3, pad=2)
-    inset.set_xlabel(r"$D_A-D_{fold}$  ($\times10^{-6}$)", fontsize=5.4,
-                     labelpad=1)
-    inset.set_ylabel("rate (Hz)", fontsize=5.4, labelpad=1)
-    inset.tick_params(labelsize=5.0, width=0.55, length=1.8, pad=1)
-    inset.spines[["top", "right"]].set_visible(False)
-    branch_codes = set(np.asarray(
-        arrays["entry_saddle__zero_delay_stability_code"], int).tolist())
-    legend_handles = [
-        Line2D([], [], color=LOW, lw=2.2, label="low root"),
-        Line2D([], [], color=HIGH, lw=2.2, label="tonic root"),
-    ]
-    if 1 in branch_codes:
-        legend_handles.append(Line2D(
-            [], [], color=FOLD_CHAIN, lw=1.5, ls="-",
-            label="stable branch"))
-    if 0 in branch_codes:
-        legend_handles.append(Line2D(
-            [], [], color=FOLD_CHAIN, lw=1.5, ls="--",
-            label="unstable branch"))
-    if -1 in branch_codes:
-        legend_handles.append(Line2D(
-            [], [], color=FOLD_CHAIN, lw=1.35, ls=":",
-            label="mixed-stability branch"))
-    legend_handles.append(Patch(
-        facecolor=COEXIST, alpha=0.65, label="low/high coexistence"))
-    axis.legend(
-        handles=legend_handles,
-        loc="upper left", frameon=False, fontsize=6.0, ncol=2,
-        handlelength=1.65, columnspacing=0.75,
-    )
     _style_axis(axis)
     return {
         "semantic": (
@@ -255,17 +225,44 @@ def _plot_panel_c(axis, arrays, payload) -> dict:
             "fixed-point continuation; not a literal single-neuron bifurcation"
         ),
         "x_definition": "D_A=1-Z_A=s on Z_A=Z_B=1-s, Z_surround=1-0.70s",
-        "runaway_entry_s": entry,
+        "low_state_fold_s": entry,
+        "runaway_entry_s": entry,  # deprecated metadata alias
         "recruited_recovery_s": recovery,
         "ou_on_median_s": onset_median,
         "ou_on_q10_q90_s": [onset_q10, onset_q90],
         "y_scale": "log",
         "branch_line_style": (
-            "zero-delay operating-variance-frozen stability: stable=solid, "
-            "unstable=dashed, unresolved=dotted"
+            "all continuation loci are solid; line style does not encode "
+            "stability"
         ),
-        "branch_stability_boundary": (
-            "not a delay-aware stability classification"
+        "branch_families": atlas_payload,
+        "operating_root_catalog_n": int(len(operating_roots)),
+        "operating_root_delay_classification": [
+            {
+                "root_index": int(root["root_index"]),
+                "mean_e_rate_hz": float(root["mean_e_rate_hz"]),
+                "core_a_rate_hz": float(
+                    root["regional_e_rate_hz"]["core_a"]),
+                "classification": root[
+                    "delay_aware_native_dt"]["classification"],
+                "growth_rate_per_ms": float(root[
+                    "delay_aware_native_dt"]["growth_rate_per_ms"]),
+            }
+            for root in operating_roots
+        ],
+        "operating_ou_residence": {
+            "duration_ms": float(
+                stability_payload["ou_contract"]["duration_ms"]),
+            "retained_initial_root_n": int(sum(
+                record["retained_initial_root"]
+                for record in stability_payload["ou_residence"])),
+            "trajectory_n": int(len(stability_payload["ou_residence"])),
+            "contract": stability_payload["ou_contract"],
+        },
+        "stability_boundary": (
+            "delay-aware power assay and nonlinear OU residence are reported "
+            "only for the tested operating section, not extrapolated along "
+            "the continuation loci"
         ),
     }
 
@@ -305,7 +302,7 @@ def _plot_mode_map(axis, arrays, payload, model, z_map):
     axis.set_ylim(0.0, model.sheet_l_mm)
     axis.set_xlabel("sheet x (mm)", fontsize=8.4)
     axis.set_ylabel("sheet y (mm)", fontsize=8.4)
-    axis.set_title("Runaway-entry zero mode", fontsize=9.4,
+    axis.set_title("Low-state fold zero mode", fontsize=9.4,
                    fontweight="bold", pad=7)
     axis.text(
         0.03, 0.97,
@@ -392,6 +389,12 @@ def main() -> None:
         "--state-contrast", default=base
         + "/perturbation/dualcore_rev21_state_contrast.json")
     parser.add_argument(
+        "--branch-atlas", default=base
+        + "/bifurcation/branch_atlas/dualcore_spatial_z_branch_atlas.json")
+    parser.add_argument(
+        "--stability-assay", default=base
+        + "/bifurcation/stability_assay/delay_ou_operating_section.json")
+    parser.add_argument(
         "--out-dir",
         default="results/paper-ready-figure/fig5_dual_core_spatial_z/figures",
     )
@@ -403,6 +406,24 @@ def main() -> None:
     if payload.get("status") != "DUAL_CORE_SPATIAL_Z_FOLD_CHAIN_ESTABLISHED":
         raise RuntimeError("Figure 5C/D requires the verified spatial-Z fold result")
     arrays = np.load(arrays_path, allow_pickle=False)
+    atlas_path = Path(args.branch_atlas).resolve()
+    atlas_payload = json.loads(atlas_path.read_text(encoding="utf-8"))
+    if atlas_payload.get("status") != (
+            "DUAL_CORE_SPATIAL_Z_MULTIBRANCH_ATLAS_COMPLETE"):
+        raise RuntimeError("Figure 5C requires the verified multibranch atlas")
+    if atlas_payload["cross_family_match"]["match_established"]:
+        raise RuntimeError("Figure contract unexpectedly found a branch-family match")
+    atlas_arrays_path = atlas_path.with_suffix(".npz")
+    atlas = np.load(atlas_arrays_path, allow_pickle=False)
+    stability_path = Path(args.stability_assay).resolve()
+    stability_payload = json.loads(stability_path.read_text(encoding="utf-8"))
+    if stability_payload.get("status") != (
+            "DUAL_CORE_SPATIAL_Z_DELAY_OU_ASSAY_COMPLETE"):
+        raise RuntimeError("Figure 5C requires the delay/OU operating assay")
+    if not np.isclose(
+            stability_payload["operating_parameter"]["s"],
+            payload["empirical_ou_on_projection"]["s_from_core_median"]):
+        raise RuntimeError("branch atlas and delay/OU assay use different sections")
     model_path = Path(payload["substrate"]["model"]["path"])
     z_map_path = Path(payload["substrate"]["z_map"]["path"])
     model = load_patient_coarse_model(model_path)
@@ -459,7 +480,8 @@ def main() -> None:
 
     # Standalone C for direct insertion into the main figure.
     fig_c, axis_c = plt.subplots(figsize=(4.35, 3.35))
-    panel_c_meta = _plot_panel_c(axis_c, arrays, payload)
+    panel_c_meta = _plot_panel_c(
+        axis_c, arrays, payload, atlas, atlas_payload, stability_payload)
     _panel_label(axis_c, "C", x=-0.18, y=1.13)
     fig_c.tight_layout(pad=0.5)
     outputs_c = _save_all(
@@ -501,7 +523,8 @@ def main() -> None:
     axis_c = combined.add_subplot(grid[0, 0])
     axis_d1 = combined.add_subplot(grid[0, 1])
     axis_d2 = combined.add_subplot(grid[0, 2])
-    _plot_panel_c(axis_c, arrays, payload)
+    _plot_panel_c(
+        axis_c, arrays, payload, atlas, atlas_payload, stability_payload)
     response_image = _plot_response(
         axis_d1, contacts, low_grid, extent,
         "Low-activity mean response", response_vmax)
@@ -552,6 +575,15 @@ def main() -> None:
                             "sha256": _sha256(result_path)},
             "arrays_npz": {"path": str(arrays_path),
                            "sha256": _sha256(arrays_path)},
+            "branch_atlas_json": {"path": str(atlas_path),
+                                  "sha256": _sha256(atlas_path)},
+            "branch_atlas_npz": {"path": str(atlas_arrays_path),
+                                 "sha256": _sha256(atlas_arrays_path)},
+            "stability_assay_json": {"path": str(stability_path),
+                                     "sha256": _sha256(stability_path)},
+            "stability_assay_npz": {
+                "path": str(stability_path.with_suffix(".npz")),
+                "sha256": _sha256(stability_path.with_suffix(".npz"))},
             "model": {"path": str(model_path), "sha256": _sha256(model_path)},
             "z_map": {"path": str(z_map_path), "sha256": _sha256(z_map_path)},
             "state_contrast_json": {
@@ -595,17 +627,17 @@ def main() -> None:
     _atomic_json(metadata, metadata_path)
     (output_dir / "README.md").write_text(
         "### fig5-panel-c-core-a-bifurcation.png / .pdf / .svg\n\n"
-        "Fig.5C 候选。横轴是对称空间路径上的 core-A 失抑制 `D_A=1-Z_A`，纵轴是 core A 内每个 E 神经元的平均发放率。蓝线、红线分别是低根和 tonic 根；深红虚线是零延迟 Jacobian 下实测不稳定的 saddle branch，深红点线表示同一折点区段的抽样最大实特征值发生变号，不能整段判稳。粉色线/带是 100 个 OU-on SNN 在 operational onset 的中位数及 q10–q90。\n\n"
+        "Fig.5C 候选。横轴是对称空间路径上的 core-A 失抑制 `D_A=1-Z_A`，纵轴是 core A 内每个 E 神经元的平均发放率。蓝/橙粗线是低态与 tonic 外根；棕色细线是从 tonic 外根实际续接的 global-recruited family，灰色细线是从低支零模配对根独立续接的 core-A-localized family，空心圆是全部 continuation folds。粉色线/带是 100 个 OU-on SNN 的 operational onset 中位数及 q10–q90。\n\n"
         "这不是字面意义上的单个 LIF 神经元分岔：当前确定性模型最细是 2 mm E/I population unit。图中使用 core-A per-neuron mean，是现有证据允许的局部尺度。\n\n"
-        "**关注点**：虚线不是示意连接，而是 pseudo-arclength 实际续接并以 zero-delay、operating-variance-frozen dynamic Jacobian 分类的分支；它不构成 delay-aware 稳定性定理。OU-on 中位转变位于低/高根共存区；继续耗竭到 `s=0.337591`，低根才在 saddle-node 消失。\n\n"
+        "**关注点**：主图没有 inset、没有手工补线，也没有用线型外推稳定性。global-recruited 与 core-A-localized 两族在相同参数处最近仍相差 7.29 Hz full-state RMS，所以保持分开；这不等于证明它们在未续接区间永不相连。OU-on 中位截面找到 6 个完整空间根，但投影到 core-A 均值只有 4 个高度。含全部实际 delay bins、mean gain 与 diffusion-variance gain 的稳定性和 nonlinear OU residence 只在这个工作截面报告，不扩展为整条分支定理。\n\n"
         "### fig5-panel-d-state-response.png / .pdf / .svg\n\n"
         "Fig.5D 候选。同一条冻结 dual-core SNN 轨迹上，在低态 1000 ms 与 early-ictal 2615.4 ms 使用完全相同的 16 个分层随机位置和相同 16-cell 弱脉冲。每个位置均做 exact-resume paired probe–sham，图中分别对 0–50 ms descendant-only signed response 做等权位置平均。\n\n"
         "**关注点**：左右图比较同一网络两个时点的 incremental response，不是比较两个不同网络，也不丢弃强响应位置。两侧均由少数 hotspot 主导，且 early-ictal sham 已处于高态（0/16 可再作 ignition test），所以该图不是跨 seed 易感性或触发概率估计。\n\n"
         "### fig5-panels-cd-dual-core-spatial-z.png / .pdf / .svg\n\n"
-        "C/D 同行 proof sheet，尺寸比例按 Fig.5 下排版准备。只允许与同一 `dualcore_s39 + Joint=1.25` 底物重画的 A/B 合并；不能直接与旧 `joint_04_control seed1801` A/B 拼成同一实验。\n\n"
+        "C/D 同行 proof sheet，尺寸比例按 Fig.5 下排版准备。C 是多分支 fixed-point atlas，D 保持同位置扰动的 low/early-ictal 状态响应。只允许与同一 `dualcore_s39 + Joint=1.25` 底物重画的 A/B 合并；不能直接与旧 `joint_04_control seed1801` A/B 拼成同一实验。\n\n"
         "**关注点**：C 回答 core-A 局部群体快系统有什么分支，D 回答相同局部扰动在 runaway 前后如何产生不同空间响应。\n\n"
         "### fig5-supp-spatial-z-mechanism.png / .pdf / .svg\n\n"
-        "机制补图。左图是 runaway-entry fixed-point 零模在 20 mm 双核 sheet 上的位置；右图是固定 `Z_surround=0.80` 后独立扫描 `Z_A` 与 `Z_B` 的有限 multi-start root catalog。它们解释分岔如何落到空间，但不再冒充正式 Fig.5D。\n\n"
+        "机制补图。左图是 low-state fixed-point fold 零模在 20 mm 双核 sheet 上的位置；右图是固定 `Z_surround=0.80` 后独立扫描 `Z_A` 与 `Z_B` 的有限 multi-start root catalog。它们解释低根消失如何落到空间，但不再冒充 stable/runaway 分界或正式 Fig.5D。\n\n"
         "**关注点**：零模 93.7% 的能量位于 core A；相图只报告有限 root catalog，不把未找到的根写成数学不存在。\n",
         encoding="utf-8",
     )

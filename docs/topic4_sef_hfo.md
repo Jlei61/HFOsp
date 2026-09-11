@@ -66,14 +66,60 @@
 > `dualcore_s39 + Joint=1.25` realized graph 上，把 homogeneous frozen `q` 改为 core A/core B/surround
 > 分区的 `Z(x)`。10×10 coarse deterministic fast subsystem 出现经 pseudo-arclength 折返与 fixed-point
 > Jacobian 实零模同步过零共同确认的 saddle-node fold chain：低支在 `s=0.337591`
->（`Z_A=Z_B=0.6624, Z_sur=0.7637`）消失，入口零模 93.69% 能量定位 core A；一条 recruited branch
-> 在 `s=0.090589` 恢复折返，且另有 4 个空间 recruitment folds。rev21 的 100 个 OU-on operational
-> transition 中位落在 `s=0.28736`，此时确定性低根与 352.8 Hz tonic 根仍共存：因此 fold 控制
-> deterministic runaway boundary，但 OU 噪声可在 coexistence 区提前触发；同点 zero-delay/
-> frozen-variance sensitivity 下低根和 tonic 根最大实部均为负。这里 data-driven 的是双核几何，
-> 不是患者测得的 Z 场；当前仅单 topology、2 mm coarse、frozen-Z/`eta_m=0`，mixed cell 采用
-> `E[Z]`/`E[Z²]` moment closure，不得称热力学相变或临床发作阈值。
+>（`Z_A=Z_B=0.6624, Z_sur=0.7637`）消失，入口零模 93.69% 能量定位 core A。补长 continuation 后，
+> 从 tonic 外根出发的 global-recruited family 有 21,332 点/14 folds，从低支零模配对根出发的
+> core-A-localized family 有 8,002 点/6 folds；两族在相同 `s` 处最近仍差 7.29 Hz full-state RMS，
+> 因此 Fig.5C 不再手工补成一条 S 曲线，也不以虚/点线外推全分支稳定性。rev21 的 100 个 OU-on
+> operational transition 中位为 `s=0.28736`；该截面找到 6 个空间根。保留全部 realized delay bins
+>（最长 35.4 ms）且包含 mean/instantaneous diffusion-variance gain 的 matched coarse assay 中，仅低根稳定，其余 5 个 fixed points 线性失稳；300 ms OU
+> 非线性轨迹仍可驻留在邻近高活动 regime。因此 fold 控制低根的存在边界，但不单独给出随机转变时刻或高态
+> attractor 拓扑。这里 data-driven 的是双核几何，不是患者测得的 Z 场；当前仅单 topology、2 mm coarse、
+> frozen-Z/`eta_m=0`，不得称热力学相变、临床发作阈值或完整 SNN 的 delay-stability theorem。
 > 详见 `docs/archive/topic4/sef_hfo/dual_core_spatial_z_bifurcation_result_2026-09-04.md`。
+>
+> **Fig.5 六联证据链候选（2026-09-04，development）：** 新 producer 已把同一条 40,000-cell
+> dual-core、OU-on、Z/M-on SNN 轨迹的虚拟 SEEG、群体率、`Z` 与 `A=eta_m*m` 严格共轴；三个
+> trajectory window 的空间 activity map、独立临床 cohort bridge、spatial-Z branch atlas 与现有
+> `tau_z×tau_m` operational-runaway latency screen 分层排入 A–F。当前 tonic plateau 的群体率与全片
+> 招募上升，但 10–250 Hz virtual-contact band power 不升，故 B 不把它伪画成 broadband-energy runaway。
+> **振荡相收敛审计（2026-09-05，development）：** 在同一 two-core reduction 上把 high-state outcome
+> 显式分成 localized、tonic 与 oscillatory recruited，并扫描 `s × tau_d_GABA`。0.2 ms 精扫唯一通过点
+> `s=0.28, tau_GABA=8 ms`（31 Hz、depth 0.223）在原生 0.1 ms 下变为 32 Hz、depth 0.172 的 tonic state；
+> 但完整原生 25 格重算找到不同的 `s=0.27,tau_GABA=9 ms` 窄窗：30 Hz、depth 0.207，延长 5 s 后稳定，
+> 同参数 low/high 初值分别留在 low 与 oscillatory-recruited basin；15 格 zoom 仅 2 格通过，沿 localized→tonic
+> 边界成窄 ridge。进一步完成含 4×/8× M 边界扩展的 77 格原生 spatial-Z × dynamic-M 图：low/pre-fold
+> 初态为 58 low + 19 localized，recruited 初态为 16 localized + 59 tonic + 2 oscillatory；两个 oscillatory
+> 格仍只在 `s=0.27`，4–8× M 只把该处 recruited boundary 推到约 `s=0.28`。fold 后
+> `s=0.34/0.36` 的 low/pre-fold 轨迹延长 5 s 仍稳定在 localized state，说明 low-root fold 只控制低根消失，
+> 不保证 global runaway。完整 40,000-cell `tau_GABA=8/4/2 ms` 及 `si=0.8,tau_GABA=9 ms` 探针虽达到全区域
+> 高率和 52/59/66/54-Hz 群体主峰，但用 250-ms + 100-ms 联合 contact persistence 后 SCL 都是 0/4；4-ms
+> SCL 在 250-ms 粗窗可假通过，却只占 2–4/10 个 100-ms 窗。因此它们属于病理轴高频波纹或 SCL 间歇 burst
+> 叠加 tonic runaway，不是持续全空间 runaway oscillation，也不能替换 Fig.5A。当前 E 只是 branch atlas、F
+> 只是 latency response surface；新版可用本轮 native-step Z×M basin/regime map 作为 E 的候选证据，但 F 仍须
+> 补含 no-transition/right-censor 的概率-潜伏期图。
+>
+> **stable / tonic-runaway boundary 修正（2026-09-05，development）：** 作者接受近饱和 tonic plateau
+> 作为本轮 runaway 后，按预先冻结的严格门槛（末 1 s population `>=300 Hz`、core A/core B/surround
+> 各 `>=250 Hz`、半窗漂移 `<=5 Hz`）重算。带 rev21 动态 M 的 core-A-localized equilibrium family 在
+> `s=0.355450824` 有经 pseudo-arclength 折返和 residual-Jacobian 实零模共同确认的 saddle-node；但保留
+> realized delays 后，fold 两侧 fixed points 都有约 37.26-Hz、`+0.0314 ms^-1` 的不稳定复模，所以该 fold
+> **不是** delay-system 的 stable/runaway bifurcation。原生 `dt=0.1 ms`、同 low/pre-fold 初值的 10-s 精扫
+> 将 operational boundary 夹在 `0.428 < s_c <= 0.429`：两侧分别为 `221.8 Hz`、surround `211.3 Hz`
+> 的 bounded partial state，和 `316.2 Hz`、surround `310.9 Hz` 的 near-saturated tonic runaway；两侧末窗
+> 漂移均约 `0.02 Hz`。原生 carried-state 检验再先于 `s=0.428` 驻留 10 s，并把 rates/synapses/全部
+> delay histories/M 原样带到 `s=0.429`；轨迹仍在 2.889 s 后越过 300 Hz 并稳定到 `316.24 Hz`，所以该
+> bracket 确实夹住 bounded attractor 的上侧 escape boundary，而不只是标准初值分类线。同一 `s=0.40` 的
+> low/high 初值仍分别落入约 `105/398 Hz`，说明存在 basin dependence。
+> 连续保持 rates/synapses/delay histories/M 的 0.5-ms discovery 上/下扫进一步出现强滞后：bounded 上扫到
+> `0.465→0.470` 才完成 runaway 驻留，而 runaway 下扫至 `s=0.30` 仍未退出。该数值尚需原生步长复核，
+> 但已排除无历史依赖的唯一一维阈值。当前可称 **nonlinear attractor bifurcation/escape bracket**；在
+> periodic-orbit continuation/Floquet 分析前，不在 limit-cycle fold 与 boundary crisis 之间定型。机器结果、
+> 诊断图与口径见 archive §7.4。
+> 证据和诊断图见
+> `docs/archive/topic4/sef_hfo/dual_core_spatial_z_bifurcation_result_2026-09-04.md` §7。
+> C 仍是单条代表轨迹；D 是临床场的一致性检验，不是逐患者 two-core SNN 预测；F 还不是 depletion
+> strength×recovery phase map。入口与待补分析见
+> `docs/archive/topic4/sef_hfo/fig5_dual_core_transition_story_v2_2026-09-04.md`。
 
 ---
 

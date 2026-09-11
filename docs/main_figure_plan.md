@@ -258,14 +258,49 @@ Fig3-B 是 intentionally selected morphology-aware TA representative。它说明
 - 模型能够复现或解释的 dynamics；
 - 仍然是假设、需要后续验证的机制。
 
-### Fig5-C/D：dual-core spatial-Z 分岔候选（2026-09-04）
+### Fig5-A–F：dual-core Z/M transition story v2 候选（2026-09-04）
+
+**2026-09-05 状态修正**：作者未接受该候选作为新版 Fig.5。A 的 endpoint 是近 tonic plateau，不是所需的持续
+runaway oscillation；E 是 fixed-point branch atlas，F 是 operational-latency table，二者都不等于已建立的
+振荡相图。`s×tau_d_GABA` 精扫在 0.2 ms 下的唯一 oscillatory 单格没有通过原生 0.1 ms 复核，因此不得用它
+替换 E/F 或从中截取 A。后续原生 25 格与 15 格 zoom 找到 `s≈0.27,tau_GABA≈9 ms` 的 5-s 持续窄 ridge
+（同参数 low/high basin 共存），但通过点只有 1/25 与 2/15，尚非稳健 phase。新增含 4×/8× M 边界扩展的
+77 格 native spatial-Z × dynamic-M 图已显式分开 low/pre-fold 与 recruited 初态：前者 58 low + 19 localized，
+后者 16 localized + 59 tonic + 2 oscillatory；fold 后 `s=0.34/0.36` 延长 5 s 仍停在 localized state。完整 SNN 的 8/4/2-ms GABA
+和 `si=0.8,9-ms` 探针虽有全区域高率及 52/59/66/54-Hz 群体主峰，但用 250-ms + 100-ms 联合 persistence
+时 SCL 均为 0/4，仍不满足持续全空间 runaway oscillation。当前 v2 只保留为排版/语义原型；新 E 可基于
+native-step Z×M basin/regime map 重做，新 F 必须同时含 no-transition probability 和 right-censor-aware latency；
+新 A 还要通过跨 shaft 的 contact coverage。证据见
+`docs/archive/topic4/sef_hfo/dual_core_spatial_z_bifurcation_result_2026-09-04.md` §7。
+
+**2026-09-05 stable/runaway 分界补充**：近饱和 tonic runaway 的严格 10-s 原生步长边界已在固定
+low/pre-fold 初值下夹到 `0.428 < s_c <= 0.429`。较早的 adapted equilibrium fold 位于
+`s=0.355450824`，但 fold 两侧 fixed points 都被 realized-delay 37-Hz 复模线性失稳，因此 E 不能再用该
+fold 单独表示“stable 变 runaway”。新版 E 至少要同时画 `equilibrium fold` 与 `native-delay operational
+boundary`，并显示其间的 bounded partial-recruitment 区；若连续状态上/下扫确认滞后，则 E 应改成 basin/
+hysteresis 图，而不是单一 S 曲线。当前 0.5-ms discovery 已确认强滞后（上扫完成 runaway 驻留约
+`0.465→0.470`，下扫到 `s=0.30` 仍保持 runaway）；数值边界尚需 native-dt 复核，但 E 的语义现已确定为
+basin/hysteresis，而不是唯一 local bifurcation。机器结果与当前诊断图见 archive §7.4。
+
+- 输出目录：`results/paper-ready-figure/fig5_dual_core_transition_story/figures/`
+- 复现入口：`scripts/paper_figures/plot_fig5_dual_core_transition_story.py`
+- **A/B 共用时间轴**：同一条 `dualcore_s39 + Joint=1.25`、topology 2542 / dynamics 2642、连续 OU 驱动且 Z/M 同时开启的 40,000-cell SNN 轨迹，严格共用 `0–3.815 s`。A 画 30–80 Hz virtual-contact readout 与全片招募；B 画 population E rate、core/surround `Z` 和 core `A=eta_m*m`。由于当前 endpoint 是 tonic plateau，10–250 Hz band-limited virtual-contact power 在 onset 后下降，主图不把它伪装成 runaway energy；runaway 由直接群体率和招募比例定义。
+- **C 三时段空间图**：只取 A/B 内精确的 returned interictal、pre-onset、early-recruited 三个窗口，统一显示 0.5-mm local-E rate 的 `log10(1+Hz)`。参考轴由规则选中的 returned interictal event onset map 做平面拟合；三个窗口的 rate-gradient 绝对余弦为 `0.995 / 0.992 / 0.946`。该值说明这条代表轨迹的活动梯度保留同一空间方向，不是 cohort 结果。
+- **D 临床 cohort 桥**：复用冻结 strict-broadband 统计，不冒充跨患者 SNN。指标是每患者 frozen interictal A/B field 与 clinical onset 后 `0–10 s`、`1–150 Hz` early-ictal energy field 的绝对空间相关，患者内折叠后与 all-contact channel-shuffle 中位数配对；`12/16` 高于 null，单侧 paired Wilcoxon `p=0.0193`。该 null 比 within-shaft null 弱，图中和正文必须保留这条边界。
+- **E spatial-Z 分支**：把原 Fig5-C 的 verified multi-branch fixed-point atlas 移到 E。pseudo-arclength fold 与 Jacobian 零特征值证据不变；所有 continuation loci 用实线且不编码 delay-aware 稳定性，OU-on 只标已测工作截面。
+- **F 现有潜伏期网格**：使用已完成的 `tau_z × tau_m` 3×3 library，每格 2 topology × 2 dynamics，全部 `4/4` 到达 operational runaway。cell median latency 随 `tau_z=3/5/8 s` 约为 `2.11/3.60/5.25 s`；这是 operational-detector latency，不是临床 seizure latency，也不是正式 cross-state workpoint qualification。
+- 详细审阅与补算边界：`docs/archive/topic4/sef_hfo/fig5_dual_core_transition_story_v2_2026-09-04.md`。
+
+**尚需补齐**：第一优先是同一底物上的 `depletion strength × tau_z` 多 seed 专扫，并把未转变 run 当 right-censored，而不是只报告条件中位数；第二优先是 C 的 spatial-axis alignment 在冻结的多 topology/dynamics seeds 上确认；第三优先是 D 改用 within-shaft null 或把其明确留作 Fig3 的临床桥。完成这些之前，v2 是 paper-layout candidate，不是锁图。
+
+### Fig5-C/D：dual-core spatial-Z 原始 source package（2026-09-04）
 
 - 输出目录：`results/paper-ready-figure/fig5_dual_core_spatial_z/figures/`
-- C：同一 `dualcore_s39 + Joint=1.25` 异质快子系统中，core A 内 per-neuron mean E rate 随 `D_A=1-Z_A` 的 fixed-point branches。它是保留局部连接、阈值分布与 core/surround 混合差异的 2 mm E/I population reduction 的区域加权读数；不是 literal single-neuron bifurcation，也不是异质性分布图。深红虚线只画 pseudo-arclength 实际续接且 zero-delay dynamic Jacobian 最大实部为正的不稳定支；段内抽样符号发生变化的 snaking 部分画点线，不用手工虚线连接到 tonic 外支。
+- C：同一 `dualcore_s39 + Joint=1.25` 异质快子系统中，core A 内 per-neuron mean E rate 随 `D_A=1-Z_A` 的 multi-branch fixed-point atlas。它是保留局部连接、阈值分布与 core/surround 混合差异的 2 mm E/I population reduction 的区域加权读数；不是 literal single-neuron bifurcation。蓝/橙粗线为低态/tonic 外根，棕/灰细线分别为从 tonic 外根实际续接的 global-recruited family 与从低支零模配对根独立续接的 core-A-localized family，空心圆为全部 folds。两族不手工补接，主图无 inset，所有 branch loci 用实线且不编码稳定性。delay+OU 只在 OU-on 中位工作截面报告：delay tangent 保留全部 realized bins 并包含 mean 与 instantaneous diffusion-variance gain；6 个 full-state roots 中仅低根稳定，高率 fixed points 线性失稳但 300 ms nonlinear OU 下仍可驻留在邻近高活动 regime。不得外推成全分支或完整 SNN 的稳定性定理。
 - D：同一冻结 SNN 轨迹、同一组 16 个分层随机位置与同一 16-cell 弱脉冲，在 runaway 前低态和 early-ictal 状态分别做 exact-resume paired probe–sham；左右图是各状态 0–50 ms descendant-only signed response 的等权位置平均。该 panel 比较状态依赖的空间易感性，不比较两个不同网络。
 - D 当前读数：低态与 early-ictal 的站点均值分别为 `1770.4` 与 `2012.3` excess spikes/50 ms，没有复现旧底物中 high-state 响应近零的形状；两侧最大热点分别占绝对响应 `63.0%` 与 `87.7%`。因此只报告单轨迹下的 hotspot reorganization，不写成 high-state susceptibility 普遍下降。
 - 机制补图：runaway-entry 零模的 20 mm 空间图与固定 `Z_surround=0.80` 的 `Z_A×Z_B` finite root catalog 保留为 supplement，不占用 Fig.5D 语义。
-- 拼图合同：C/D 只能和同一 dual-core 底物重画的 A/B 合并；旧 `joint_04_control seed1801` 的 A/B 属于不同实验，不得直接拼接。
+- 当前角色：分支图已进入新 v2 的 E；同位置 perturbation response 保留为机制 supplement，不再占用新 Fig.5D。旧 `joint_04_control seed1801` 的 A/B 仍属于不同实验，不得回拼。
 
 ### Fig5-A: cm-SNN 自发双向 readout 机制示意
 

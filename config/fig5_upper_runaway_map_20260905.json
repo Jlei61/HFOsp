@@ -1,0 +1,12 @@
+{
+  "substrate": "dualcore_s39 + Joint=1.25",
+  "s_values": [0.36, 0.38, 0.40, 0.42, 0.428, 0.429, 0.44, 0.46, 0.48, 0.50],
+  "m_gain_scales": [0.0, 1.0, 2.0, 4.0],
+  "duration_ms": 10000.0,
+  "tail_ms": 1000.0,
+  "dt_ms": 0.1,
+  "preparations": ["pre_fold", "recruited"],
+  "preparation_contract": "Same pre-fold rate seed at every s and M gain; recruited rates from the frozen high branch nearest each s. Synapses and delay history initialized consistently from rates; M starts at its rate-matched equilibrium. This is a finite-preparation map, not exhaustive basin stability.",
+  "analysis_contract": "Use the existing strict tonic endpoint. Preserve indeterminate and nonstationary cells. Native delays, frozen spatial Z, dynamic M, zero added OU. No recovery or oscillation-depth requirement.",
+  "scope": "single topology 2542, 10x10 deterministic coarse system; not full-SNN transition probability"
+}
