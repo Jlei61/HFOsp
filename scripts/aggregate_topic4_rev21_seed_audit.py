@@ -114,10 +114,6 @@ def main() -> None:
             "old_ab_train_only_classifier"]["sha256"]:
         raise RuntimeError("direction classifier changed")
     classifier = json.loads(classifier_path.read_text())["direction_classifier"]
-    heldout = _load_npz(_resolve(
-        artifact_root, config["inputs"]["patient_heldout_npz"]["path"],
-    ))
-
     topology_seeds = [int(v) for v in config["search"]["canary_network_seeds"]]
     dynamics_seeds = [int(v) for v in config["search"]["seed_audit_dynamics_seeds"]]
     rows = []
@@ -139,9 +135,6 @@ def main() -> None:
                 contract=contract, training_arrays=training,
                 classifier=classifier,
                 kmeans_seed=int(config["validation"]["natural_kmeans_seed"]),
-                patient_reference_onsets=heldout["heldout_onsets"],
-                patient_reference_ranks=heldout["heldout_ranks"],
-                patient_reference_labels=heldout["heldout_old_labels"],
             )
             rows.append({
                 "topology_seed": topology, "dynamics_seed": dynamics,
@@ -159,9 +152,6 @@ def main() -> None:
     endpoints = {
         "training_complete_distribution": matrix(
             lambda row: row["selection"]["complete_distribution_distance_training"]),
-        "heldout_complete_distribution": matrix(
-            lambda row: row["validation"].get(
-                "complete_distribution_distance_reference")),
         "two_template_alignment": matrix(
             lambda row: row["validation"].get("direction_balanced_alignment")),
         "ood_all_returned": matrix(
@@ -189,9 +179,11 @@ def main() -> None:
         "natural_kmeans_ok_cells": natural_ok,
         "both_clusters_present_cells": both_clusters,
         "patient_ictal_inputs_read": False,
+        "patient_heldout_opened": False,
         "interpretation_boundary": (
             "topology and dynamics are crossed fixed audit factors; residual contains "
-            "their interaction because there is one run per cell"
+            "their interaction because there is one run per cell; patient held-out "
+            "events remain sealed until the Z/M work point is frozen"
         ),
     }
     output = output_root / "seed_audit/seed_factorization_audit.json"

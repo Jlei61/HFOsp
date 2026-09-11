@@ -15,6 +15,7 @@ def rolling_full_field_recruitment(
     stride_ms=5.0,
     spatial_bin_mm=1.0,
     recruited_bin_fraction=0.5,
+    minimum_bin_occupancy=1,
 ):
     """Measure how much of the E population and sheet is active per window."""
     spikes = np.asarray(spikes, bool)
@@ -32,7 +33,12 @@ def rolling_full_field_recruitment(
                  0, n_bins - 1)
     flat = ix * n_bins + iy
     occupancy = np.bincount(flat, minlength=n_bins * n_bins).astype(float)
-    occupied = occupancy > 0
+    minimum_bin_occupancy = int(minimum_bin_occupancy)
+    if minimum_bin_occupancy < 1:
+        raise ValueError("minimum_bin_occupancy must be at least one")
+    occupied = occupancy >= minimum_bin_occupancy
+    if not np.any(occupied):
+        raise ValueError("no spatial bin meets minimum_bin_occupancy")
     ends = np.arange(window, spikes.shape[0] + 1, stride, dtype=int)
     neuron_fraction = np.empty(len(ends), float)
     spatial_coverage = np.empty(len(ends), float)
@@ -53,6 +59,9 @@ def rolling_full_field_recruitment(
         "stride_ms": float(stride_ms),
         "spatial_bin_mm": float(spatial_bin_mm),
         "recruited_bin_fraction": float(recruited_bin_fraction),
+        "minimum_bin_occupancy": minimum_bin_occupancy,
+        "eligible_spatial_bins": int(np.sum(occupied)),
+        "minimum_eligible_bin_occupancy": float(np.min(occupancy[occupied])),
     }
 
 

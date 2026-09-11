@@ -1,4 +1,5 @@
 import numpy as np
+from pathlib import Path
 
 from scripts.aggregate_topic4_rev21_seed_audit import crossed_variance
 from scripts.audit_topic4_rev21_seed_parity import arrays_equal
@@ -27,3 +28,9 @@ def test_crossed_variance_attributes_pure_dynamics_effect():
 
 def test_crossed_variance_refuses_missing_cells():
     assert crossed_variance([[1.0, np.nan], [2.0, 3.0]])["status"] == "NOT_ESTIMABLE"
+
+
+def test_seed_audit_keeps_patient_heldout_sealed():
+    source = Path("scripts/aggregate_topic4_rev21_seed_audit.py").read_text()
+    assert 'config["inputs"]["patient_heldout_npz"]' not in source
+    assert '"patient_heldout_opened": False' in source

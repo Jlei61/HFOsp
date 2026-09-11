@@ -176,11 +176,18 @@ Event rate, onset latency and estimability are sidecars. A lower OOD caused by
 event suppression, unreadability or one-cluster collapse is a tradeoff, not an
 improvement.
 
-The Z/M-off orthogonal audit defines the substrate reference distribution. A
-candidate is `INTERICTAL_SUBSTRATE_RETAINED` only when all three endpoints are
-estimable and its paired deterioration is inside the predeclared 90% reference
-support. Pooled two-cluster presence is required, but no per-network minimum
-event count is imposed.
+The 12-cell Z/M-off orthogonal audit defines the substrate reference
+distribution. The coarse screen additionally runs Z/M-off on the same four
+topology/dynamics cells as every active candidate. For each endpoint it reports
+both (i) the paired candidate-minus-off difference and (ii) the candidate
+aggregate relative to the 5th--95th percentile of the independent 12-cell off
+reference. A candidate is `INTERICTAL_SUBSTRATE_RETAINED` only when all three
+aggregate endpoints are estimable and lie on the admissible side of that 90%
+reference support: distribution distance and OOD no higher than q95, and
+two-template alignment no lower than q05. Pooled two-cluster presence is
+required, but no per-network minimum event count is imposed. Paired differences
+remain effect estimates and cannot by themselves rescue an out-of-support
+candidate.
 
 ## 8. Work-point selection
 
