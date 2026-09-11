@@ -19,6 +19,6 @@ isotropic独立修复原提交为4d9878cb：椭圆算子参考宽高比应核对
 
 ## 关闭状态
 
-当前：远端保全已验证，等待此索引进入main后移除4个checkout。移除前占用总计约1.50GB（不跟随符号链接）；实际释放以执行记录为准。
+已完成：远端保全与main索引均验证后，使用git worktree remove（无force）移除了4个checkout，worktree总数15→11。每个目录移除前再次检查Git状态、ignored文件、进程cwd/命令行/打开文件；均无使用者且ignored内容仅Python/pytest缓存。移除目录原占用1,497,649,152字节，约1.50GB；共享Git对象和分支保留，不计为回收。
 
 保留其余11个worktree。本轮未替换Figure5候选、未清理shared results、未处理主目录4个冲突。最新Figure5仍由原活跃任务迭代，后续候选发布与旧模型源码迁移均不在此归档完成声明内。

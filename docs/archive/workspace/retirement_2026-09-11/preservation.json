@@ -10,7 +10,9 @@
       "bytes_before": 455942144,
       "guidance_sha256": "49e7594ab7f6db45f65eb76523c44fc29b75319ec155aeb8ae6be4f4c52a9df6",
       "preserved_head": "2f46052adad76b1412c70454821be10259ecc0ec",
-      "remote_verified": true
+      "remote_verified": true,
+      "removed_at": "2026-09-11T17:01:21.092806+08:00",
+      "removal": "git worktree remove (no force)"
     },
     {
       "name": "topic4-dual-core-mechanism-scan",
@@ -21,7 +23,9 @@
       "bytes_before": 365379584,
       "guidance_sha256": "a89442ebb8facefaf3ddc9b1f998916426eb9dc6231cddc6c7aa1a529078e4cd",
       "preserved_head": "a50b1982be1c59bf39e50ed8df2759a46d03112d",
-      "remote_verified": true
+      "remote_verified": true,
+      "removed_at": "2026-09-11T17:01:21.345496+08:00",
+      "removal": "git worktree remove (no force)"
     },
     {
       "name": "topic4-rev22-final-audit",
@@ -32,7 +36,9 @@
       "bytes_before": 338206720,
       "guidance_sha256": "a89442ebb8facefaf3ddc9b1f998916426eb9dc6231cddc6c7aa1a529078e4cd",
       "preserved_head": "0cfb8e0a9dd47ae7e0857a6054d9d9dee1b18453",
-      "remote_verified": true
+      "remote_verified": true,
+      "removed_at": "2026-09-11T17:01:21.544661+08:00",
+      "removal": "git worktree remove (no force)"
     },
     {
       "name": "topic4-rev22-isotropic-fix",
@@ -43,10 +49,12 @@
       "bytes_before": 338120704,
       "guidance_sha256": "a89442ebb8facefaf3ddc9b1f998916426eb9dc6231cddc6c7aa1a529078e4cd",
       "preserved_head": "fc6b0918273840d49886062548582901f90aec4c",
-      "remote_verified": true
+      "remote_verified": true,
+      "removed_at": "2026-09-11T17:01:21.741453+08:00",
+      "removal": "git worktree remove (no force)"
     }
   ],
-  "status": "PRESERVED_REMOTE_READY_FOR_WORKTREE_REMOVAL",
+  "status": "COMPLETE_FOUR_CHECKOUTS_REMOVED_BRANCHES_PRESERVED",
   "integration_scope": "Archive index only; historical rev22 runtime implementation remains on preserved branches, not merged into main runtime.",
   "patches": {
     "isotropic_operator_fix.patch.gz": {
@@ -55,5 +63,7 @@
     "shared_guidance.patch.gz": {
       "uncompressed_sha256": "7eb8d1634b30f3d98019727a05fc78c5140362059d071fa9a968210358f626a2"
     }
-  }
+  },
+  "removed_checkout_bytes_before": 1497649152,
+  "remaining_worktree_count": 11
 }
