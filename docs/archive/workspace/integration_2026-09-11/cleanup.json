@@ -1,0 +1,57 @@
+{
+  "completed_utc": "2026-09-11T09:41:36.877397+00:00",
+  "integration_main_commit": "5412642bcfe4905966c6137704cb2e2179d0b9c3",
+  "removed": [
+    {
+      "name": "rnn-v038-contact-bridge-tests-20260905",
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/rnn-v038-contact-bridge-tests-20260905",
+      "preserved_head": "428af3e87a297f832b158f81e3fcf36a34fd8bfd",
+      "remote_verified": true,
+      "clean": true,
+      "checkout_allocated_kib": 305428,
+      "external_data_links": [],
+      "removed": true
+    },
+    {
+      "name": "topic4-dual-core-zm-ictal",
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-dual-core-zm-ictal",
+      "preserved_head": "ffeefb993c661c6b8de974549c994f4c83e30b5a",
+      "remote_verified": true,
+      "clean": true,
+      "checkout_allocated_kib": 329708,
+      "external_data_links": [],
+      "removed": true
+    },
+    {
+      "name": "topic4-initial-state-propagation-v1",
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-initial-state-propagation-v1",
+      "preserved_head": "8df5071ca94d166d82d17582951114dd9b55a525",
+      "remote_verified": true,
+      "clean": true,
+      "checkout_allocated_kib": 333228,
+      "external_data_links": [],
+      "removed": true
+    },
+    {
+      "name": "topic4-state-s-native-z-pilot",
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-state-s-native-z-pilot",
+      "preserved_head": "2602b69fef52a1d366f404b97e44d6188b8d535b",
+      "remote_verified": true,
+      "clean": true,
+      "checkout_allocated_kib": 307740,
+      "external_data_links": [
+        {
+          "link": "results/topic4_sef_hfo/state_s_native_z_pilot",
+          "target": "/data/hfosp/topic4_sef_hfo/state_s_native_z_pilot_20260909"
+        }
+      ],
+      "removed": true
+    }
+  ],
+  "released_checkout_allocated_kib": 1276104,
+  "retained_source_dependency": "topic4-dual-core-z-bifurcation",
+  "retained_reason": "Active Figure5 builders load this checkout by absolute source paths.",
+  "registered_worktree_count": 7,
+  "remaining_worktree_porcelain": "worktree /home/honglab/leijiaxin/HFOsp\nHEAD bcafd00088429fa11313ca030f67fedc8da73bd7\nbranch refs/heads/codex/topic5-state-r1-5-h3-long\n\nworktree /home/honglab/leijiaxin/HFOsp/.worktrees/main-cherry\nHEAD 5412642bcfe4905966c6137704cb2e2179d0b9c3\nbranch refs/heads/main\n\nworktree /home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1\nHEAD f01db07cdb1dbb28c2695f54ce9742915747e093\nbranch refs/heads/codex/topic4-continuous-core-state-r1\n\nworktree /home/honglab/leijiaxin/HFOsp/.worktrees/topic4-dual-core-z-bifurcation\nHEAD a30326e6b13a07687288c07c4d31326efcb4c10f\nbranch refs/heads/codex/topic4-dual-core-z-bifurcation\n\nworktree /home/honglab/leijiaxin/HFOsp/.worktrees/topic4-rev22-postfit\nHEAD 836d1d2db1e576eddaec4de5b9d62e6063a324c3\nbranch refs/heads/codex/topic4-rev22-postfit\n\nworktree /home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix\nHEAD 336800aabfed51f0d2a8bf008b90fc1d94e0046c\nbranch refs/heads/codex/topic4-substrate-autapse-fix\n\nworktree /home/honglab/leijiaxin/HFOsp/.worktrees/topic5-ges-v033-training-lab\nHEAD f27f048cd2372efeacd6801c9cf5326a974179db\nbranch refs/heads/codex/topic5-ges-v033-training-lab\n\n",
+  "process_audit": "No source cwd, command argument or open-file reference for removed worktrees at removal."
+}

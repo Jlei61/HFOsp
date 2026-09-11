@@ -30,8 +30,8 @@
 - initial-state v2只读输入审计重新运行，未调用evaluator.metrics、未评分新的非FIT数据。v1同一2511拓扑/820101动力学种子在旧工作树与main分别重建，11项位置、阈值、mask、AMPA/GABA边和权重哈希逐项一致；没有进行新长时程仿真。
 - 扩展检查test_mz_slow_vars.py有28项失败、13项通过；从未修改main提取的相同测试与源文件复核得到相同28项失败。它们是原main慢变量/泵测试与实现不匹配，本次未覆盖修复，不宣称全仓库测试通过。
 
-## 清理安排
+## 清理结果
 
-原始五分支均保留远端。整合push后可移除RNN contact-bridge、旧ZM、initial-state、state-S四个checkout。旧Z分岔仍被主目录validate_topic4_fixed_rate_base.py及活跃R1/底物任务的Figure5构建器按绝对路径读取，因此保留该checkout作为现有运行的源码依赖；已完成main整合不等于可以删除它。不能在这里改写另一个活跃任务的物理来源。
+原始五分支均保留远端。实现提交5412642b已合入main并push，随后已移除RNN contact-bridge、旧ZM、initial-state、state-S四个checkout；移除前核对远端提交、干净状态、忽略文件及进程cwd/命令行/打开文件。工作树由11减到7，移除checkout占用合计约1.22 GiB；state-S的/data结果目录保持存在。详情见[cleanup.json](cleanup.json)。旧Z分岔仍被主目录validate_topic4_fixed_rate_base.py及活跃R1/底物任务的Figure5构建器按绝对路径读取，因此保留该checkout作为现有运行的源码依赖；已完成main整合不等于可以删除它。不能在这里改写另一个活跃任务的物理来源。
 
 旧顶层topic文档、Figure5身份文件与AGENTS快照存于historical_context/，仅为原状态追溯，不覆盖main的正式图登记或科学状态。原始结果数据继续留在/data与共享results；当前root中的冲突与其他工作树未修改。
