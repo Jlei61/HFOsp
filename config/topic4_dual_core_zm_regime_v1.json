@@ -1,0 +1,36 @@
+{
+  "schema_id": "topic4_dual_core_zm_regime_v1",
+  "scientific_role": "development_only_native_dt_frozen_spatial_z_dynamic_m_regime_map",
+  "substrate": "dualcore_s39 + Joint=1.25",
+  "topology_seed": 2542,
+  "axes": {
+    "core_disinhibition_s": [0.24, 0.26, 0.27, 0.28, 0.3, 0.32, 0.33, 0.335, 0.34, 0.35, 0.36],
+    "adaptation_gain_scale": [0.0, 0.5, 1.0, 1.5, 2.0]
+  },
+  "dynamics": {
+    "tau_d_GABA_ms": 9.0,
+    "base_eta_m": 0.003725797177793549,
+    "tau_m_ms": 500.0,
+    "duration_ms": 2000.0,
+    "tail_ms": 1000.0,
+    "window_ms": 250.0,
+    "integration_dt_ms": 0.1,
+    "perturbation_fraction": 0.01,
+    "perturbation_floor_per_ms": 0.0001,
+    "deterministic_zero_ou": true
+  },
+  "spatial_z_path": {
+    "core_a_weight": 1.0,
+    "core_b_weight": 1.0,
+    "surround_weight": 0.7
+  },
+  "state_gate": {
+    "minimum_high_rate_hz": 120.0,
+    "minimum_regional_rate_hz": 30.0,
+    "target_frequency_hz": [30.0, 80.0],
+    "minimum_whole_tail_modulation_depth": 0.2,
+    "minimum_window_modulation_depth": 0.15,
+    "minimum_passing_windows_of_four": 3
+  },
+  "claim_boundary": "This is a native-step deterministic delayed coarse-system regime and basin map. Z is frozen as a dual-core spatial field and M is dynamic. It is not a thermodynamic phase diagram and does not establish a stochastic full-SNN transition probability."
+}

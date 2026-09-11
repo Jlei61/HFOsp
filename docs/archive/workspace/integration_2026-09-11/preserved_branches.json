@@ -1,0 +1,570 @@
+[
+  {
+    "name": "rnn-v038-contact-bridge-tests-20260905",
+    "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/rnn-v038-contact-bridge-tests-20260905",
+    "files": [
+      {
+        "status": "??",
+        "path": "docs/archive/topic5/rnn_v038_contact_bridge_contract_2026-09-05.md"
+      },
+      {
+        "status": "??",
+        "path": "docs/archive/topic5/rnn_v038_contact_bridge_results_2026-09-05.md"
+      },
+      {
+        "status": "??",
+        "path": "scripts/audit_rnn_v038_contact_bridge.py"
+      },
+      {
+        "status": "??",
+        "path": "scripts/contact_bridge_metrics.py"
+      },
+      {
+        "status": "??",
+        "path": "scripts/report_rnn_v038_contact_bridge.py"
+      },
+      {
+        "status": "??",
+        "path": "scripts/run_rnn_v038_contact_bridge_batch.py"
+      },
+      {
+        "status": "??",
+        "path": "scripts/summarize_rnn_v038_contact_bridge.py"
+      },
+      {
+        "status": "??",
+        "path": "tests/test_rnn_v038_contact_bridge.py"
+      }
+    ],
+    "original_head": "f27f048cd2372efeacd6801c9cf5326a974179db",
+    "branch": "codex/rnn-v038-contact-bridge-tests-20260905",
+    "preserved_ignored_figures": [],
+    "preserved_head": "428af3e87a297f832b158f81e3fcf36a34fd8bfd",
+    "source_hashes": {
+      "docs/archive/topic5/rnn_v038_contact_bridge_contract_2026-09-05.md": "6bfee303b43d5a820d0a05a9ee0d954be830aeccdc0fbbaa417e263b9c27e4a4",
+      "docs/archive/topic5/rnn_v038_contact_bridge_results_2026-09-05.md": "1f58e02bfa78f259215001646b3761994c2450a72956dc641633b1af3cb0ff2a",
+      "scripts/audit_rnn_v038_contact_bridge.py": "2fb699d445059f81be4144ba808b2833eaa0094ad201af69b4a997ada4bff1be",
+      "scripts/contact_bridge_metrics.py": "f8dd3f1f23efddb9381a329097d337f44e3c5ab2488f72abace26fb475c7871b",
+      "scripts/report_rnn_v038_contact_bridge.py": "3a7c8863b95a3106cd13a280dfa1be8c6b5d38f5907ab115a2a6e3f4b9f7e725",
+      "scripts/run_rnn_v038_contact_bridge_batch.py": "4d54db23a9529e1d3460d232d424f303e6702d94c00a5139b0a5a04a6b3032e6",
+      "scripts/summarize_rnn_v038_contact_bridge.py": "4cf6ac7dd8e796e532c96151c8ad771da5e42e471a1a10bbe7288fd9402e644e",
+      "tests/test_rnn_v038_contact_bridge.py": "0e776cfbdff971523dfd0cd842e0d33420c399aa28506b32a5905e7e7c2cea0c"
+    },
+    "remote_verified": true
+  },
+  {
+    "name": "topic4-dual-core-z-bifurcation",
+    "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-dual-core-z-bifurcation",
+    "files": [
+      {
+        "status": " M",
+        "path": "AGENTS.md"
+      },
+      {
+        "status": " M",
+        "path": "docs/archive/topic4/INDEX.md"
+      },
+      {
+        "status": " M",
+        "path": "docs/archive/topic4/sef_hfo/dual_core_spatial_z_bifurcation_result_2026-09-04.md"
+      },
+      {
+        "status": " M",
+        "path": "docs/main_figure_plan.md"
+      },
+      {
+        "status": " M",
+        "path": "docs/paper_figure_registry.md"
+      },
+      {
+        "status": " M",
+        "path": "docs/paper_overview.md"
+      },
+      {
+        "status": " M",
+        "path": "docs/topic4_sef_hfo.md"
+      },
+      {
+        "status": " M",
+        "path": "results/paper-ready-figure/fig5/FIGURE_STATUS.json"
+      },
+      {
+        "status": " M",
+        "path": "scripts/paper_figures/plot_fig5_dual_core_spatial_z_panels.py"
+      },
+      {
+        "status": " M",
+        "path": "scripts/run_topic4_dual_core_spatial_z_bifurcation.py"
+      },
+      {
+        "status": " M",
+        "path": "src/topic4_zm_slow_vars.py"
+      },
+      {
+        "status": " M",
+        "path": "tests/test_topic4_dual_core_spatial_z.py"
+      },
+      {
+        "status": " M",
+        "path": "tests/test_zm_traced_slow_vars.py"
+      },
+      {
+        "status": "??",
+        "path": "config/fig5_upper_runaway_map_20260905.json"
+      },
+      {
+        "status": "??",
+        "path": "config/topic4_dual_core_oscillatory_phase_v1.json"
+      },
+      {
+        "status": "??",
+        "path": "config/topic4_dual_core_runaway_boundary_v1.json"
+      },
+      {
+        "status": "??",
+        "path": "config/topic4_dual_core_zm_regime_v1.json"
+      },
+      {
+        "status": "??",
+        "path": "docs/archive/topic4/sef_hfo/fig5_dual_core_transition_story_v2_2026-09-04.md"
+      },
+      {
+        "status": "??",
+        "path": "docs/archive/topic4/sef_hfo/fig5_model_lineage_and_susceptibility_audit_2026-09-05.md"
+      },
+      {
+        "status": "??",
+        "path": "docs/archive/topic4/sef_hfo/fig5_rev22_core_axis_and_freeze_audit_2026-09-05.md"
+      },
+      {
+        "status": "??",
+        "path": "scripts/audit_fig5_substrate_geometry.py"
+      },
+      {
+        "status": "??",
+        "path": "scripts/audit_topic4_dual_core_oscillatory_snn_probe.py"
+      },
+      {
+        "status": "??",
+        "path": "scripts/build_topic4_dual_core_spatial_z_branch_atlas.py"
+      },
+      {
+        "status": "??",
+        "path": "scripts/extend_topic4_dual_core_spatial_z_branch.py"
+      },
+      {
+        "status": "??",
+        "path": "scripts/paper_figures/build_fig5_transition_susceptibility.py"
+      },
+      {
+        "status": "??",
+        "path": "scripts/paper_figures/plot_fig5_dual_core_transition_story.py"
+      },
+      {
+        "status": "??",
+        "path": "scripts/plot_topic4_dual_core_native_regime_audit.py"
+      },
+      {
+        "status": "??",
+        "path": "scripts/plot_topic4_dual_core_oscillation_phase_audit.py"
+      },
+      {
+        "status": "??",
+        "path": "scripts/plot_topic4_dual_core_oscillatory_snn_probe.py"
+      },
+      {
+        "status": "??",
+        "path": "scripts/plot_topic4_dual_core_runaway_boundary.py"
+      },
+      {
+        "status": "??",
+        "path": "scripts/plot_topic4_dual_core_zm_regime_map.py"
+      },
+      {
+        "status": "??",
+        "path": "scripts/prepare_fig5_preonset_checkpoint.py"
+      },
+      {
+        "status": "??",
+        "path": "scripts/run_fig5_preonset_perturbation.py"
+      },
+      {
+        "status": "??",
+        "path": "scripts/run_fig5_upper_runaway_map.py"
+      },
+      {
+        "status": "??",
+        "path": "scripts/run_topic4_dual_core_oscillatory_phase_map.py"
+      },
+      {
+        "status": "??",
+        "path": "scripts/run_topic4_dual_core_oscillatory_snn_probe.py"
+      },
+      {
+        "status": "??",
+        "path": "scripts/run_topic4_dual_core_runaway_delay_spectrum.py"
+      },
+      {
+        "status": "??",
+        "path": "scripts/run_topic4_dual_core_runaway_edge_tracking.py"
+      },
+      {
+        "status": "??",
+        "path": "scripts/run_topic4_dual_core_runaway_fold.py"
+      },
+      {
+        "status": "??",
+        "path": "scripts/run_topic4_dual_core_runaway_hysteresis.py"
+      },
+      {
+        "status": "??",
+        "path": "scripts/run_topic4_dual_core_spatial_z_stability_assay.py"
+      },
+      {
+        "status": "??",
+        "path": "scripts/run_topic4_dual_core_zm_regime_map.py"
+      },
+      {
+        "status": "??",
+        "path": "src/topic4_dual_core_oscillation_phase.py"
+      },
+      {
+        "status": "??",
+        "path": "src/topic4_dual_core_spatial_z_delay.py"
+      },
+      {
+        "status": "??",
+        "path": "tests/test_fig5_dual_core_transition_story.py"
+      },
+      {
+        "status": "??",
+        "path": "tests/test_fig5_upper_runaway_map.py"
+      },
+      {
+        "status": "??",
+        "path": "tests/test_topic4_dual_core_oscillation_phase.py"
+      }
+    ],
+    "original_head": "c488481700e5e44392cc839038f6574bcc3a9636",
+    "branch": "codex/topic4-dual-core-z-bifurcation",
+    "preserved_ignored_figures": [
+      "results/paper-ready-figure/fig5_dual_core_spatial_z/figures/README.md",
+      "results/paper-ready-figure/fig5_dual_core_spatial_z/figures/fig5-dual-core-spatial-z-cd-metadata.json",
+      "results/paper-ready-figure/fig5_dual_core_spatial_z/figures/fig5-panel-c-core-a-bifurcation.pdf",
+      "results/paper-ready-figure/fig5_dual_core_spatial_z/figures/fig5-panel-c-core-a-bifurcation.png",
+      "results/paper-ready-figure/fig5_dual_core_spatial_z/figures/fig5-panel-c-core-a-bifurcation.svg",
+      "results/paper-ready-figure/fig5_dual_core_spatial_z/figures/fig5-panel-d-state-response.pdf",
+      "results/paper-ready-figure/fig5_dual_core_spatial_z/figures/fig5-panel-d-state-response.png",
+      "results/paper-ready-figure/fig5_dual_core_spatial_z/figures/fig5-panel-d-state-response.svg",
+      "results/paper-ready-figure/fig5_dual_core_spatial_z/figures/fig5-panels-cd-dual-core-spatial-z.pdf",
+      "results/paper-ready-figure/fig5_dual_core_spatial_z/figures/fig5-panels-cd-dual-core-spatial-z.png",
+      "results/paper-ready-figure/fig5_dual_core_spatial_z/figures/fig5-panels-cd-dual-core-spatial-z.svg",
+      "results/paper-ready-figure/fig5_dual_core_spatial_z/figures/fig5-supp-spatial-z-mechanism.pdf",
+      "results/paper-ready-figure/fig5_dual_core_spatial_z/figures/fig5-supp-spatial-z-mechanism.png",
+      "results/paper-ready-figure/fig5_dual_core_spatial_z/figures/fig5-supp-spatial-z-mechanism.svg",
+      "results/paper-ready-figure/fig5_dual_core_transition_story/figures/README.md",
+      "results/paper-ready-figure/fig5_dual_core_transition_story/figures/fig5-dual-core-transition-story-v1-metadata.json",
+      "results/paper-ready-figure/fig5_dual_core_transition_story/figures/fig5-dual-core-transition-story-v1.pdf",
+      "results/paper-ready-figure/fig5_dual_core_transition_story/figures/fig5-dual-core-transition-story-v1.png",
+      "results/paper-ready-figure/fig5_dual_core_transition_story/figures/fig5-dual-core-transition-story-v1.svg",
+      "results/paper-ready-figure/fig5_dual_core_transition_story/figures/fig5-dual-core-transition-story-v2-metadata.json",
+      "results/paper-ready-figure/fig5_dual_core_transition_story/figures/fig5-dual-core-transition-story-v2.pdf",
+      "results/paper-ready-figure/fig5_dual_core_transition_story/figures/fig5-dual-core-transition-story-v2.png",
+      "results/paper-ready-figure/fig5_dual_core_transition_story/figures/fig5-dual-core-transition-story-v2.svg",
+      "results/paper-ready-figure/fig5_transition_susceptibility_v3/figures/README.md",
+      "results/paper-ready-figure/fig5_transition_susceptibility_v3/figures/fig5-perturbation-response-fields.pdf",
+      "results/paper-ready-figure/fig5_transition_susceptibility_v3/figures/fig5-perturbation-response-fields.png",
+      "results/paper-ready-figure/fig5_transition_susceptibility_v3/figures/fig5-perturbation-response-fields.svg",
+      "results/paper-ready-figure/fig5_transition_susceptibility_v3/figures/fig5-transition-susceptibility-diagnostics.pdf",
+      "results/paper-ready-figure/fig5_transition_susceptibility_v3/figures/fig5-transition-susceptibility-diagnostics.png",
+      "results/paper-ready-figure/fig5_transition_susceptibility_v3/figures/fig5-transition-susceptibility-diagnostics.svg",
+      "results/paper-ready-figure/fig5_transition_susceptibility_v3/figures/fig5-transition-susceptibility-v3-metadata.json",
+      "results/paper-ready-figure/fig5_transition_susceptibility_v3/figures/fig5-transition-susceptibility-v3.pdf",
+      "results/paper-ready-figure/fig5_transition_susceptibility_v3/figures/fig5-transition-susceptibility-v3.png",
+      "results/paper-ready-figure/fig5_transition_susceptibility_v3/figures/fig5-transition-susceptibility-v3.svg",
+      "results/paper-ready-figure/fig5_transition_susceptibility_v3/prior_figure_status_20260905.json",
+      "results/topic4_sef_hfo/fig5_substrate_geometry_audit/figures/README.md",
+      "results/topic4_sef_hfo/fig5_substrate_geometry_audit/figures/core_geometry_and_connection_axis.pdf",
+      "results/topic4_sef_hfo/fig5_substrate_geometry_audit/figures/core_geometry_and_connection_axis.png",
+      "results/topic4_sef_hfo/fig5_substrate_geometry_audit/figures/core_geometry_and_connection_axis.svg",
+      "results/topic4_sef_hfo/fig5_substrate_geometry_audit/geometry_arrays.npz",
+      "results/topic4_sef_hfo/fig5_substrate_geometry_audit/geometry_audit.json"
+    ],
+    "preserved_head": "a30326e6b13a07687288c07c4d31326efcb4c10f",
+    "source_hashes": {
+      "AGENTS.md": "a89442ebb8facefaf3ddc9b1f998916426eb9dc6231cddc6c7aa1a529078e4cd",
+      "docs/archive/topic4/INDEX.md": "f5c8a6e86341f2a439d06148bb3417de245d06462e0becdbd03fa8dd2369d62d",
+      "docs/archive/topic4/sef_hfo/dual_core_spatial_z_bifurcation_result_2026-09-04.md": "13a111ba26e745c6608714cf514d874b44f470f5ea9c88d19e3e1c9255765421",
+      "docs/main_figure_plan.md": "2a19711191fced5369151d75dc80be58b813a258dfdd4cffc4ea9e2de18004c6",
+      "docs/paper_figure_registry.md": "16ba3e4b754fe6e0416473388c587e64bffe6a5aa18b22d9b52e53aff9567df2",
+      "docs/paper_overview.md": "e335d1dc4695467c599cafbb994716ecdf79487e2b5b6ecf82c523b167b5cc77",
+      "docs/topic4_sef_hfo.md": "e70f297c4692cf00b100dcbbd73fbb7e355a68a07a93ce8a1454bdcdd76e402a",
+      "results/paper-ready-figure/fig5/FIGURE_STATUS.json": "1b41b0f36eb8799d83e7ada5ba79eff3a6c3b1cb3e8e82d7fad58fce4afae6be",
+      "scripts/paper_figures/plot_fig5_dual_core_spatial_z_panels.py": "ca0818af63229030adf785042d92670312b27344150e8f00725496ee45832278",
+      "scripts/run_topic4_dual_core_spatial_z_bifurcation.py": "09c1ebc1af3d9d034d3bdfe5674a93ac46aa95cf4b822ddc6e6fc62a8b2c2b2f",
+      "src/topic4_zm_slow_vars.py": "44c8cbda0da4a6d6590937dc95d111a61c66b1a7f7241d0750812b367b08c09c",
+      "tests/test_topic4_dual_core_spatial_z.py": "b475bbb5e94457e19b23a079ac0ff48cf829e0cce1bac68ac31c95e1b2aa1c7d",
+      "tests/test_zm_traced_slow_vars.py": "1c620bafbae9fcdff7009728a4f05aef161061449b83d4b53b661a614673ae06",
+      "config/fig5_upper_runaway_map_20260905.json": "7f9bbd71edf8acedda766108c545b3791bb069615c9d4ab3b9a6f7bab3232b39",
+      "config/topic4_dual_core_oscillatory_phase_v1.json": "242516893f3fd48de0fc9f53d2c11c48b68be0311d6b19a2256657b518faf111",
+      "config/topic4_dual_core_runaway_boundary_v1.json": "d87229d760b501f74549549c4d11073b8d68ea8a53dfab4a29a7cc91859579cb",
+      "config/topic4_dual_core_zm_regime_v1.json": "a0962a79183e94705389142df3c4bda78296d2773c3c468a58dbfaaf79374afe",
+      "docs/archive/topic4/sef_hfo/fig5_dual_core_transition_story_v2_2026-09-04.md": "6f4ea09280f40a2dc2e2651d2cde023dceea22059ff886f5ddf10e77fbc6713a",
+      "docs/archive/topic4/sef_hfo/fig5_model_lineage_and_susceptibility_audit_2026-09-05.md": "80a8a21ae2e2b70f1a2f421c9837c606e561c07dafbbc1d078fb8e94009d4f26",
+      "docs/archive/topic4/sef_hfo/fig5_rev22_core_axis_and_freeze_audit_2026-09-05.md": "901115a23d367b54c2f7e87d555c2c37b5e00f3dfc62d248789760cb0f648363",
+      "scripts/audit_fig5_substrate_geometry.py": "82b14379b77a9bc747086aeefee06abeead6202df4babcf47117d938e0ee58f1",
+      "scripts/audit_topic4_dual_core_oscillatory_snn_probe.py": "f11dd2716d56e9a3b3c4e6fe7a4ca8ddaaa3d8797e3dedb0d6ca8c74f2f61b13",
+      "scripts/build_topic4_dual_core_spatial_z_branch_atlas.py": "efc3c95c9114a7855e5c10a4e7ba7e8f45d3b7c9efcd9b4b9422086e71a9e858",
+      "scripts/extend_topic4_dual_core_spatial_z_branch.py": "8873950ddbfb8e470663becd3f320d8ab038fe582024784b0ff36c575812ec58",
+      "scripts/paper_figures/build_fig5_transition_susceptibility.py": "3144c593ea443ed1bdd9eeb3c9863ade7f631af578491eb6aa1711e1624a629d",
+      "scripts/paper_figures/plot_fig5_dual_core_transition_story.py": "1add70605370cd6f281eac608ca55caa2789b32b2ff32d45655cd7401a163173",
+      "scripts/plot_topic4_dual_core_native_regime_audit.py": "409e340af03855d05320e87652028a1b911f5e5df364e5f22f5e3ab9f591b4bc",
+      "scripts/plot_topic4_dual_core_oscillation_phase_audit.py": "55352f3b2f8df8c9e1db0907dea1881fb55b049ea5a804ccd1d8e27ccfcfa79a",
+      "scripts/plot_topic4_dual_core_oscillatory_snn_probe.py": "9f2e3223cd05e6626f7ae1376b4af29252ebe35c32768f13981852f35598e88d",
+      "scripts/plot_topic4_dual_core_runaway_boundary.py": "6f5b50fa3cfaa3fca7c9d0d5b3f38826ee0d2d9348b7cf1cc5e05548b42ddd64",
+      "scripts/plot_topic4_dual_core_zm_regime_map.py": "547b0f5fcacd38fde762b848897837b0eaba195e18989f3315c3025bc7305835",
+      "scripts/prepare_fig5_preonset_checkpoint.py": "73ae1df904525f80448bcb953f2d616d87969cfae6bd36cb4205a9092ee1f47c",
+      "scripts/run_fig5_preonset_perturbation.py": "d4b5d54e6af034a509975552772b34078c87eed7feb42e9c5e2a912e0d139372",
+      "scripts/run_fig5_upper_runaway_map.py": "725cb9a0591ecf6201aac8c760cce70afb3e540f9ced7d69ee778c72e674c4fc",
+      "scripts/run_topic4_dual_core_oscillatory_phase_map.py": "1ef41a84c90fbe8e49d6292d0a9a16684e7e70158468c110e55303cddc829a73",
+      "scripts/run_topic4_dual_core_oscillatory_snn_probe.py": "2c6612d3571992dc34d800627dd874f0e80787df989e3f07b87c00f622aab15d",
+      "scripts/run_topic4_dual_core_runaway_delay_spectrum.py": "9430b337786fa44831047800c7cdf3af332b9aca24d3e75e6d6d4586a9fc0937",
+      "scripts/run_topic4_dual_core_runaway_edge_tracking.py": "4020a0989febb419ef86346c2d73702e058d90daf3b8fc688cf2481067863f6d",
+      "scripts/run_topic4_dual_core_runaway_fold.py": "7aed82676621e78f1c19a2f76ccab501ed87030a718328b009f080339da4b4c5",
+      "scripts/run_topic4_dual_core_runaway_hysteresis.py": "af8bcb5827a3deb16ce31a568bcd1e524111fef9ea82c685b204759235cfe51d",
+      "scripts/run_topic4_dual_core_spatial_z_stability_assay.py": "94489c311f98b04b9d8ff6bd4865f3ab7c76a4788fc4c93f158771d11c8e7094",
+      "scripts/run_topic4_dual_core_zm_regime_map.py": "201061b9deb3022a51e2d47770f0633daa798db46f1219e2da5c7e311683bdd9",
+      "src/topic4_dual_core_oscillation_phase.py": "e30d6ba63accff1c7d86f563f4c55e69913a7aee2ff4638d83a4a8d3bd063e50",
+      "src/topic4_dual_core_spatial_z_delay.py": "4d9fa81916a52f29db826327c2b1081947c27b63436d6ab1c32d196a017e5bf8",
+      "tests/test_fig5_dual_core_transition_story.py": "b8d0a7c76b4ea1fc2e7164237aaecf3434ce2e8c8e2f778aa580bc3467a966df",
+      "tests/test_fig5_upper_runaway_map.py": "a23b094cf3b8e458c1e762c770f1f1c03ed1dab112c1a4d39cea9c036adae317",
+      "tests/test_topic4_dual_core_oscillation_phase.py": "65ede2c860bb6bb7fdc37ffabe07262e7dffa39f789103758da5e43b5b24cc11",
+      "results/paper-ready-figure/fig5_dual_core_spatial_z/figures/README.md": "8817515de9c86d21310190bb33f51554ef717bc7abdfe37902989052a0aceaa2",
+      "results/paper-ready-figure/fig5_dual_core_spatial_z/figures/fig5-dual-core-spatial-z-cd-metadata.json": "76d9d049cb07b8248f7fba5b69279141de14a9711e403598aacee2086d443bdf",
+      "results/paper-ready-figure/fig5_dual_core_spatial_z/figures/fig5-panel-c-core-a-bifurcation.pdf": "05bb9c642ad8d6cd9a70b8464d0550de6c98ea75d9681d33a6202bf499309d75",
+      "results/paper-ready-figure/fig5_dual_core_spatial_z/figures/fig5-panel-c-core-a-bifurcation.png": "ccb6fe88465098347e34f7df20c906e8c69f31b8a5f33b9708d04a5fa28d3523",
+      "results/paper-ready-figure/fig5_dual_core_spatial_z/figures/fig5-panel-c-core-a-bifurcation.svg": "aaeb0c1e924118835c0250940167e8a7b174d02ce2d1ed1d729d602a002c223a",
+      "results/paper-ready-figure/fig5_dual_core_spatial_z/figures/fig5-panel-d-state-response.pdf": "74317443d687a7bbb5620375ed06c0fdc5a4d4f3b1e20a10fbadb2f0fb5616dc",
+      "results/paper-ready-figure/fig5_dual_core_spatial_z/figures/fig5-panel-d-state-response.png": "a79fdf83ba856a6b9006d6a844eb3dda51624b178461bf7aa150048a326be00f",
+      "results/paper-ready-figure/fig5_dual_core_spatial_z/figures/fig5-panel-d-state-response.svg": "9831a5bb834adb6b7c6a20a938692ddb27085830af87e04d63fd13fd071cdf1e",
+      "results/paper-ready-figure/fig5_dual_core_spatial_z/figures/fig5-panels-cd-dual-core-spatial-z.pdf": "f41156f5bc0f18f41bc2f974616a197ec378273f61435f6099988ceb6c5ae5c8",
+      "results/paper-ready-figure/fig5_dual_core_spatial_z/figures/fig5-panels-cd-dual-core-spatial-z.png": "796f0173c9f267aa98a9aec8be36f8339b5145eafc388c759fe1c1df3f7b23d5",
+      "results/paper-ready-figure/fig5_dual_core_spatial_z/figures/fig5-panels-cd-dual-core-spatial-z.svg": "75b5d084b85e6e77e7417a72b57ef046ddc4168e4582f888be662e92bc1e2636",
+      "results/paper-ready-figure/fig5_dual_core_spatial_z/figures/fig5-supp-spatial-z-mechanism.pdf": "4749498524a2766b6dc81dced48966ee3797b871bfc65150b65723825d6dc340",
+      "results/paper-ready-figure/fig5_dual_core_spatial_z/figures/fig5-supp-spatial-z-mechanism.png": "07aa5b44ea69e94123f46c5b553353471b7ab2d7de25d2e58f0f85d44fd81155",
+      "results/paper-ready-figure/fig5_dual_core_spatial_z/figures/fig5-supp-spatial-z-mechanism.svg": "2ed601a15d39b5f4c20782965857a694be58e520f08b2fe71d1a985d7c542c82",
+      "results/paper-ready-figure/fig5_dual_core_transition_story/figures/README.md": "ef01b88af2d5aa5360040558945e5706f9f7ba19a19d3c509ad266ea4d9f5ff7",
+      "results/paper-ready-figure/fig5_dual_core_transition_story/figures/fig5-dual-core-transition-story-v1-metadata.json": "7744af1aa4353b8cda473871550a495b8441616b2c7f61a0432ff74f93ded886",
+      "results/paper-ready-figure/fig5_dual_core_transition_story/figures/fig5-dual-core-transition-story-v1.pdf": "84494e5563dcc512b4d715a2cca8bd9ec7359c85a5d2bbbcd4b156143ed7d9e6",
+      "results/paper-ready-figure/fig5_dual_core_transition_story/figures/fig5-dual-core-transition-story-v1.png": "c85ec0f2ab99a43e6c2d7a44165966c5e1ddf3b948d2de029149592fee51f154",
+      "results/paper-ready-figure/fig5_dual_core_transition_story/figures/fig5-dual-core-transition-story-v1.svg": "72c7a493967fddd19e368b8e6775fc0d2685f1f6d3e70739ec5a90a97414da64",
+      "results/paper-ready-figure/fig5_dual_core_transition_story/figures/fig5-dual-core-transition-story-v2-metadata.json": "03452bce9f0336abce415968ae176e6d9249d2bda7cb0e45458dfd88869650ee",
+      "results/paper-ready-figure/fig5_dual_core_transition_story/figures/fig5-dual-core-transition-story-v2.pdf": "9b3e531480313872c230dd25330114a2da885e5239e0c28f8248733d53752f21",
+      "results/paper-ready-figure/fig5_dual_core_transition_story/figures/fig5-dual-core-transition-story-v2.png": "23303ffe9fa886edb6071ee4d80e0a17ac0faac3b1eab541551ef3ab42aa9262",
+      "results/paper-ready-figure/fig5_dual_core_transition_story/figures/fig5-dual-core-transition-story-v2.svg": "e6244df3fc4c50cde64673f54cc69a2466b49adc6c04ba63e568d72511b43360",
+      "results/paper-ready-figure/fig5_transition_susceptibility_v3/figures/README.md": "f8aad05f10a3f103558a5e925f3a05fe1b182b3c77c76c8311b84973357110d5",
+      "results/paper-ready-figure/fig5_transition_susceptibility_v3/figures/fig5-perturbation-response-fields.pdf": "5a7d19366fbfcfcc6d78188811d11c33946f9175708b40e4c530290feaf23294",
+      "results/paper-ready-figure/fig5_transition_susceptibility_v3/figures/fig5-perturbation-response-fields.png": "cc8f4d33e37b859c1b12ad36ff6ac4725a313b8fc1d8ef3efbbd63be6f3545f0",
+      "results/paper-ready-figure/fig5_transition_susceptibility_v3/figures/fig5-perturbation-response-fields.svg": "5c88db29e93389f4971f0b4ee80807e2ee7384e2ddc9d45434dbf3a4e811b3fd",
+      "results/paper-ready-figure/fig5_transition_susceptibility_v3/figures/fig5-transition-susceptibility-diagnostics.pdf": "71efa74bcd3f56540fbd024b67a75cb029b84fddde9227a5c9919dedcdbcfa8f",
+      "results/paper-ready-figure/fig5_transition_susceptibility_v3/figures/fig5-transition-susceptibility-diagnostics.png": "3c3c0c50fe583f4652997fb3d1a3d15dcd167f041b9a8ab8585697a2e015a087",
+      "results/paper-ready-figure/fig5_transition_susceptibility_v3/figures/fig5-transition-susceptibility-diagnostics.svg": "9c58f9d90be17c01a4ef861b1b299fe31544766a4a16cfe769209ec44624aab5",
+      "results/paper-ready-figure/fig5_transition_susceptibility_v3/figures/fig5-transition-susceptibility-v3-metadata.json": "275eda8f96c2a054b3627ffa8f9f35d107533749d8b9e292ea821f242090b2cf",
+      "results/paper-ready-figure/fig5_transition_susceptibility_v3/figures/fig5-transition-susceptibility-v3.pdf": "27e17fd2bd3220c19e609200a68b78ad6953fb016a2ce45c26770c14683e759f",
+      "results/paper-ready-figure/fig5_transition_susceptibility_v3/figures/fig5-transition-susceptibility-v3.png": "bb3528035656a152dcd9012188398f2b0a073b4affa7c838ecf514d628a126b9",
+      "results/paper-ready-figure/fig5_transition_susceptibility_v3/figures/fig5-transition-susceptibility-v3.svg": "a6895d7e3d6f4eb18125314cdbac22b25a70dafd6634605836c3776b1c92074d",
+      "results/paper-ready-figure/fig5_transition_susceptibility_v3/prior_figure_status_20260905.json": "073bffc383edf3569cb75bc99848c0a9edce641ed7655215b660ed7826dbfc95",
+      "results/topic4_sef_hfo/fig5_substrate_geometry_audit/figures/README.md": "f2bcc2c869cc23c8a1f139d51accf9476a2e6496cc2681bdaf5353c9e93f7ac1",
+      "results/topic4_sef_hfo/fig5_substrate_geometry_audit/figures/core_geometry_and_connection_axis.pdf": "1986cd937580e21ab3bc763db290e3d509475a18173eb2062e6779db9999b03a",
+      "results/topic4_sef_hfo/fig5_substrate_geometry_audit/figures/core_geometry_and_connection_axis.png": "7de3d871c7ac1969be51ea457186acf6579b4a9eac2ace9971e6c4045e1f6e73",
+      "results/topic4_sef_hfo/fig5_substrate_geometry_audit/figures/core_geometry_and_connection_axis.svg": "f5983413902d6030f2365aed2f72b419b2035c3859de3c66db4440538c755a0c",
+      "results/topic4_sef_hfo/fig5_substrate_geometry_audit/geometry_arrays.npz": "dbec6d1d0d5cac0f9741e9ffed8e91255beabc44b7cb8c2df9f2f23994cbb6fb",
+      "results/topic4_sef_hfo/fig5_substrate_geometry_audit/geometry_audit.json": "cdd5748ff425c9500b0b6aaaad2c7913093bd2308fa40463baa48b089e64848c"
+    },
+    "remote_verified": true
+  },
+  {
+    "name": "topic4-dual-core-zm-ictal",
+    "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-dual-core-zm-ictal",
+    "files": [
+      {
+        "status": " M",
+        "path": "AGENTS.md"
+      },
+      {
+        "status": "M ",
+        "path": "docs/topic4_rev21_dual_core_zm_transition_plan.md"
+      },
+      {
+        "status": "M ",
+        "path": "docs/topic4_rev21_dual_core_zm_transition_spec.md"
+      },
+      {
+        "status": "M ",
+        "path": "scripts/aggregate_topic4_rev21_seed_audit.py"
+      },
+      {
+        "status": "A ",
+        "path": "scripts/aggregate_topic4_rev21_zm_canary.py"
+      },
+      {
+        "status": "A ",
+        "path": "scripts/run_topic4_rev21_zm_screen_controller.py"
+      },
+      {
+        "status": "A ",
+        "path": "src/topic4_rev21_zm_transition.py"
+      },
+      {
+        "status": "M ",
+        "path": "src/topic4_runaway_morphology.py"
+      },
+      {
+        "status": "M ",
+        "path": "tests/test_topic4_rev21_seed_audit.py"
+      },
+      {
+        "status": "A ",
+        "path": "tests/test_topic4_rev21_zm_canary.py"
+      },
+      {
+        "status": "A ",
+        "path": "tests/test_topic4_rev21_zm_screen_controller.py"
+      },
+      {
+        "status": "A ",
+        "path": "tests/test_topic4_rev21_zm_transition.py"
+      }
+    ],
+    "original_head": "49c0ee359f901bd970d290e714a7690425ade673",
+    "branch": "codex/topic4-dual-core-zm-ictal-v1",
+    "preserved_ignored_figures": [],
+    "preserved_head": "ffeefb993c661c6b8de974549c994f4c83e30b5a",
+    "source_hashes": {
+      "AGENTS.md": "a89442ebb8facefaf3ddc9b1f998916426eb9dc6231cddc6c7aa1a529078e4cd",
+      "docs/topic4_rev21_dual_core_zm_transition_plan.md": "12377db4189b9d01b06e05fab48cc6737dbc634df5dcf51a6bb63a297349f1f9",
+      "docs/topic4_rev21_dual_core_zm_transition_spec.md": "e5766a587658f3b4c5ebbec5c23220d7bcdbee601cbb82fcc7c24399f158b21e",
+      "scripts/aggregate_topic4_rev21_seed_audit.py": "4657839c17c292b91f4f78a70dbb60708a79d963561df2ef6948ee0d4bf6d2c8",
+      "scripts/aggregate_topic4_rev21_zm_canary.py": "9a36f12059f85f9775c585c48542143a686d1219f79f69943baad02333dd051e",
+      "scripts/run_topic4_rev21_zm_screen_controller.py": "a7d054b0094cf6547da1ed287ae8a211ca4d044584dc722a5b74d0358a6ceed2",
+      "src/topic4_rev21_zm_transition.py": "c8edd2eadaf2911f98fd1c605c09fd3b6199f3479a8c957dac98cc874a0827d6",
+      "src/topic4_runaway_morphology.py": "be72be9396f208b85841fd37ee2678092cce256b10672b2cdfb03ccc605e1d4c",
+      "tests/test_topic4_rev21_seed_audit.py": "8ba53b92bda77a24be6865c1c446d8762b78ed40dcaa17626b42bcbfa49753d4",
+      "tests/test_topic4_rev21_zm_canary.py": "8496269d01acdc7e4fefbe61b925adf817a211b1954270911e45e43be5bec8bc",
+      "tests/test_topic4_rev21_zm_screen_controller.py": "78d6cda2ad48403826b891c7ffa86d0f37ab4d156225d67d204e647b114484c9",
+      "tests/test_topic4_rev21_zm_transition.py": "fd11e06611b86d454080fc6bce8730a3a7ea5b93105e665d903f8860bb25b370"
+    },
+    "remote_verified": true
+  },
+  {
+    "name": "topic4-initial-state-propagation-v1",
+    "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-initial-state-propagation-v1",
+    "files": [
+      {
+        "status": " M",
+        "path": "AGENTS.md"
+      },
+      {
+        "status": " M",
+        "path": "docs/topic4_sef_hfo.md"
+      },
+      {
+        "status": "??",
+        "path": "config/topic4_event_state_distribution_v2.json"
+      },
+      {
+        "status": "??",
+        "path": "docs/archive/topic4/sef_hfo/event_state_distribution_execution_prompt_v2_2026-09-08.md"
+      },
+      {
+        "status": "??",
+        "path": "docs/archive/topic4/sef_hfo/event_state_distribution_input_audit_v2_2026-09-08.json"
+      },
+      {
+        "status": "??",
+        "path": "docs/archive/topic4/sef_hfo/event_state_distribution_plan_v2_2026-09-08.md"
+      },
+      {
+        "status": "??",
+        "path": "scripts/audit_topic4_event_state_plan_inputs_v2.py"
+      }
+    ],
+    "original_head": "f01db07cdb1dbb28c2695f54ce9742915747e093",
+    "branch": "codex/topic4-initial-state-propagation-v1",
+    "preserved_ignored_figures": [],
+    "preserved_head": "8df5071ca94d166d82d17582951114dd9b55a525",
+    "source_hashes": {
+      "AGENTS.md": "a89442ebb8facefaf3ddc9b1f998916426eb9dc6231cddc6c7aa1a529078e4cd",
+      "docs/topic4_sef_hfo.md": "776bad8354cac4fefc99da7e77cc26e91a91c2d54db6ba9b8a60a8dbf1f0cb13",
+      "config/topic4_event_state_distribution_v2.json": "541ccd4ca2c23cdf995c39b3aca32dac2b2e265538c18792c8eb5a523abafe07",
+      "docs/archive/topic4/sef_hfo/event_state_distribution_execution_prompt_v2_2026-09-08.md": "6f03f01b19c8dbb7e2cb898ecc22615887c59634fda48a242e36b71466306275",
+      "docs/archive/topic4/sef_hfo/event_state_distribution_input_audit_v2_2026-09-08.json": "5a621335326ce0fa7289e234ff6e6b572ea5880c8dd61cc82bcb2197f3c7bc0a",
+      "docs/archive/topic4/sef_hfo/event_state_distribution_plan_v2_2026-09-08.md": "00bb4e194be75ddf928c9e0f4b3de49dfabc19dfe68d49bb43ddb547fba6927f",
+      "scripts/audit_topic4_event_state_plan_inputs_v2.py": "89f568f74232f4ca57fefdec8b27155e9109a90c893e1c2e7bfcdcdd1d6c1929"
+    },
+    "remote_verified": true
+  },
+  {
+    "name": "topic4-state-s-native-z-pilot",
+    "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-state-s-native-z-pilot",
+    "files": [
+      {
+        "status": "??",
+        "path": "config/topic4_state_s_native_z_pilot.json"
+      },
+      {
+        "status": "??",
+        "path": "config/topic4_state_s_native_z_pilot_sources.json"
+      },
+      {
+        "status": "??",
+        "path": "docs/archive/topic4/sef_hfo/state_s_native_z_pilot_2026-09-09.md"
+      },
+      {
+        "status": "??",
+        "path": "scripts/analyze_topic4_state_s_native_z_pilot.py"
+      },
+      {
+        "status": "??",
+        "path": "scripts/pilot_topic4_state_s_native_z.py"
+      },
+      {
+        "status": "??",
+        "path": "scripts/review_topic4_state_s_native_z_pilot.py"
+      },
+      {
+        "status": "??",
+        "path": "scripts/state_s_z_pilot/engine.py"
+      },
+      {
+        "status": "??",
+        "path": "scripts/state_s_z_pilot/engine_parent.py"
+      },
+      {
+        "status": "??",
+        "path": "scripts/state_s_z_pilot/native_zm.py"
+      },
+      {
+        "status": "??",
+        "path": "scripts/state_s_z_pilot/state_projection.py"
+      }
+    ],
+    "original_head": "bcafd00088429fa11313ca030f67fedc8da73bd7",
+    "branch": "codex/topic4-state-s-native-z-pilot",
+    "preserved_ignored_figures": [],
+    "preserved_head": "2602b69fef52a1d366f404b97e44d6188b8d535b",
+    "source_hashes": {
+      "config/topic4_state_s_native_z_pilot.json": "b126cb29ac04951655536325406bf7151716031baa48206258c3713969454118",
+      "config/topic4_state_s_native_z_pilot_sources.json": "287ef4e8ad2ce7e7510a62197db3a42f9d1da4c6da4df8731457a8df50594fa1",
+      "docs/archive/topic4/sef_hfo/state_s_native_z_pilot_2026-09-09.md": "9bbf35c1cd246671aefbb6fb8d1a326b8c74569106b7590743cc75aac41d38ce",
+      "scripts/analyze_topic4_state_s_native_z_pilot.py": "f4a53d6712a824d13dfa77fa232b77627e8ebf2618b92d8699b02d5c7afd39cb",
+      "scripts/pilot_topic4_state_s_native_z.py": "d50bb26a3c8ef5ca0b1cfc696b2ad3a7862f99b26e9e9adae3198a3ec8ba7f56",
+      "scripts/review_topic4_state_s_native_z_pilot.py": "26d4b250809f8a69a951499f2974ac6065efbc867f4b61126b54deb38b6d0c61",
+      "scripts/state_s_z_pilot/engine.py": "1125e95ed27d09a5ada5e81b523bd4140c01b2fe9df7eca7177cd596124e8e54",
+      "scripts/state_s_z_pilot/engine_parent.py": "66d464112c5ec8e13342aa1bb5786b3fb3fbd61db1be0452f3cb8640aa66bee6",
+      "scripts/state_s_z_pilot/native_zm.py": "cc80980ff7539ea5c9c72f3724d810b838d7e230550e905d08a437d642dd11d3",
+      "scripts/state_s_z_pilot/state_projection.py": "cdb8a8ba7da5e340209bc791af088138ad52dbb6db5540486431dcf90bcc5970"
+    },
+    "remote_verified": true
+  }
+]

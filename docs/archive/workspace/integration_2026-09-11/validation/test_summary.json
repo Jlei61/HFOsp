@@ -1,0 +1,23 @@
+{
+  "related_tests": {
+    "passed": 124,
+    "failed": 0,
+    "test_files": 18,
+    "junit": "tests.xml"
+  },
+  "preexisting_main_mz_suite": {
+    "failed": 28,
+    "passed": 13,
+    "reproduced_on_unmodified_main": true,
+    "baseline_main": "c27f92ac5cfbd90987369caa6f7f345694f352b8"
+  },
+  "source_validation": {
+    "mapped_files": 220,
+    "python_compile_passed": 140,
+    "historical_figure_assets_byte_preserved": 41,
+    "default_builder_unchanged": true,
+    "default_graph_sampler_unchanged": true,
+    "canonical_figure_registry_unchanged": true
+  },
+  "diff_check": "passed excluding original byte-preserved SVG generator whitespace"
+}

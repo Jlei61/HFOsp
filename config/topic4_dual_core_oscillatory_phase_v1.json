@@ -1,0 +1,37 @@
+{
+  "schema_id": "topic4_dual_core_oscillatory_phase_v1",
+  "scientific_role": "development_only_dual_core_fast_inhibition_phase_map",
+  "substrate": "dualcore_s39 + Joint=1.25",
+  "topology_seed": 2542,
+  "axes": {
+    "core_disinhibition_s": [0.14, 0.16, 0.18, 0.2, 0.22, 0.24, 0.26, 0.28, 0.3, 0.32, 0.34, 0.36, 0.38, 0.4],
+    "tau_d_GABA_ms": [4.0, 5.0, 6.0, 7.0, 8.0, 10.0, 12.0, 15.0, 18.0]
+  },
+  "spatial_z_path": {
+    "core_a_weight": 1.0,
+    "core_b_weight": 1.0,
+    "surround_weight": 0.7
+  },
+  "discovery": {
+    "delay_dt_coarsening_factor": 5,
+    "duration_ms": 1500.0,
+    "tail_ms": 1000.0,
+    "window_ms": 250.0,
+    "perturbation_fraction": 0.01,
+    "perturbation_floor_per_ms": 0.0001
+  },
+  "state_gate": {
+    "minimum_high_rate_hz": 120.0,
+    "minimum_regional_rate_hz": 30.0,
+    "target_frequency_hz": [30.0, 80.0],
+    "minimum_whole_tail_modulation_depth": 0.2,
+    "minimum_window_modulation_depth": 0.15,
+    "minimum_passing_windows_of_four": 3
+  },
+  "required_followup": {
+    "native_dt_boundary_validation": true,
+    "full_snn_confirmation_seeds": 3,
+    "dynamic_zm_crossing_required_for_panel_a": true
+  },
+  "claim_boundary": "The discovery map is a nonlinear delayed 2-mm coarse reduction. It locates candidates but cannot establish a full-SNN oscillatory phase without native-dt and 40,000-cell confirmation."
+}

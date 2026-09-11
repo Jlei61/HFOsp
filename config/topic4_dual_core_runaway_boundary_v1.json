@@ -1,0 +1,25 @@
+{
+  "schema_id": "topic4_dual_core_runaway_boundary_v1",
+  "scientific_role": "development_only_native_delay_bounded_to_tonic_runaway_boundary",
+  "substrate": "dualcore_s39 + Joint=1.25",
+  "spatial_z_path": "Z_A=Z_B=1-s; Z_surround=1-0.70*s",
+  "dynamics": {
+    "tau_d_GABA_ms": 9.0,
+    "eta_m": 0.003725797177793549,
+    "tau_m_ms": 500.0,
+    "integration_dt_ms": 0.1,
+    "deterministic_zero_ou": true
+  },
+  "predeclared_tonic_runaway_gate": {
+    "tail_duration_ms": 1000.0,
+    "minimum_population_mean_rate_hz": 300.0,
+    "minimum_each_regional_rate_hz": 250.0,
+    "maximum_absolute_half_tail_drift_hz": 5.0,
+    "interpretation": "near-saturated sustained global tonic plateau; oscillation depth is not required"
+  },
+  "bounded_gate": {
+    "maximum_population_mean_rate_hz": 250.0,
+    "interpretation": "low or spatially localized/partially recruited attractor"
+  },
+  "claim_boundary": "The fixed-point saddle-node, delay-system attractor boundary, and finite-time threshold crossing are reported separately. A sharp operational boundary is not called a local bifurcation without continuation or stability evidence for the relevant attractor."
+}

@@ -1,0 +1,50 @@
+{
+  "status": "DUAL_CORE_FULL_FIG5_V2_REJECTED_LAYOUT_PROTOTYPE",
+  "author_acceptance": false,
+  "candidate_asset": "results/paper-ready-figure/fig5_dual_core_transition_story/figures/fig5-dual-core-transition-story-v2.png",
+  "candidate_pdf": "results/paper-ready-figure/fig5_dual_core_transition_story/figures/fig5-dual-core-transition-story-v2.pdf",
+  "candidate_svg": "results/paper-ready-figure/fig5_dual_core_transition_story/figures/fig5-dual-core-transition-story-v2.svg",
+  "producer": "scripts/paper_figures/plot_fig5_dual_core_transition_story.py",
+  "substrate": "dualcore_s39 + Joint=1.25",
+  "representative_run": "rev21_ts_tz3000_ta500; topology 2542; dynamics 2642; continuous OU; Z and M active",
+  "panel_a_b_time_contract": "same 0-3.815 s trajectory, same onset line and same stage windows",
+  "panel_a_semantic": "30-80 Hz virtual-contact readout plus active-E and recruited-sheet fractions during recurrent events, pre-onset amplification and tonic runaway recruitment",
+  "panel_b_semantic": "population E rate, core/surround inhibitory efficacy Z, and core adaptation A=eta_m*m on the identical time axis",
+  "panel_b_broadband_boundary": "the accepted endpoint is tonic; 10-250 Hz band-limited virtual-contact power decreases after onset and is not presented as increasing runaway energy",
+  "panel_c_semantic": "0.5-mm local-E rate maps in exact interictal, pre-onset and early-recruited windows; shared arrow is the selected returned-event onset gradient",
+  "panel_c_alignment_abs_cosine": [
+    0.9947231490081795,
+    0.9923327420388385,
+    0.9457147822305454
+  ],
+  "panel_d_semantic": "independent clinical strict-broadband cohort bridge, not individualized two-core SNN prediction",
+  "panel_d_result": "12/16 subjects have observed interictal-to-early-ictal field concordance above the all-contact channel-shuffle median; one-sided paired Wilcoxon p=0.0193",
+  "panel_e_semantic": "development target is a basin/hysteresis diagram separating the adapted equilibrium fold, bounded partial recruitment and native-delay tonic-runaway boundary; the old multi-branch atlas alone is insufficient",
+  "panel_f_semantic": "existing tau_z-by-tau_m 3x3 SNN grid; each cell has 2 topology x 2 dynamics and 4/4 operational runaway transitions",
+  "claim_boundary": "author-rejected layout prototype. Panel A lacks persistent cross-shaft high-frequency recruitment; E is a branch atlas and F is a latency response surface rather than a dynamical-regime map. No clinical seizure reproduction, cross-patient SNN validation, thermodynamic phase transition or full delay-aware branch stability claim",
+  "refined_2026_09_05_evidence": {
+    "native_coarse_regime": "s=0.27, tau_GABA=9 ms persists for 5 s at 30 Hz and depth 0.207, with a coexisting low basin; only 1/25 main-grid and 2/15 zoom-grid cells pass, so this is a narrow ridge candidate, not a robust phase",
+    "native_spatial_z_dynamic_m_regime": "77 native-dt cells at tau_GABA=9 ms including 4x/8x M extension: low/pre-fold initial gives 58 low + 19 localized and no global recruited outcome; recruited initial gives 16 localized + 59 tonic + 2 oscillatory. The two oscillatory cells are s=0.27 at M-gain scales 0 and 0.5; 4x/8x M shifts that local recruited boundary to about s=0.28. This is a basin/regime map, not a thermodynamic phase diagram",
+    "tonic_runaway_boundary": "with the author-accepted near-saturated tonic endpoint and a frozen terminal gate (population >=300 Hz, every region >=250 Hz, absolute half-tail drift <=5 Hz), native-dt 10-s low/pre-fold-initial runs bracket the operational boundary at 0.428 < s_c <= 0.429. Native carried-state tracking settles the bounded state at s=0.428, carries rates/synapses/all delay histories/M unchanged to s=0.429, and still escapes above 300 Hz after 2.889 s, confirming an upper attractor escape bracket rather than only an initial-condition classification. The adapted equilibrium saddle-node is earlier at s=0.355450824, but both adjacent equilibria are native-delay unstable near 37.26 Hz and therefore do not define the stable/runaway bifurcation. A continuous-hidden-state 0.5-ms discovery sweep shows strong hysteresis (up-sweep completes runaway residence at 0.465-0.470; down-sweep remains runaway to s=0.30), so there is no history-independent one-dimensional threshold. The local type remains unresolved between a limit-cycle fold and a boundary crisis",
+    "full_snn_tau_gaba_8_ms": "global regional high rate and 52-Hz population peak, but depth 0.064; joint 250-ms and 100-ms terminal persistence gives ICL 9/11, SCL 0/4",
+    "full_snn_tau_gaba_4_ms": "global regional high rate and 59-Hz population peak, but depth 0.079; whole-window PSD and 250-ms windows are false positives for SCL, whose contacts pass only 2-4/10 fine windows; joint persistence gives ICL 11/11, SCL 0/4",
+    "full_snn_si0p8_tau_gaba_9_ms": "global regional high rate and 54-Hz population peak, but depth 0.0365 and joint terminal persistence ICL 11/11, SCL 0/4; final mean Z=0.667, so retuning fast inhibition moved the dynamic-Z operating point away from the frozen-Z ridge",
+    "full_snn_tau_gaba_2_ms": "global regional high rate and 66-Hz population peak, but depth 0.0967 and joint terminal persistence ICL 11/11, SCL 0/4; SCL peaks enter 60-72 Hz but occupy only 2-3/10 fine windows. Regional recorder gives final Z_A/Z_B/Z_surround=0.547/0.503/0.690, establishing heterogeneous two-core Z dynamics in this run"
+  },
+  "required_before_lock": [
+    "native-dt continuous-hidden-state hysteresis and, if a local bifurcation label is retained, periodic-orbit continuation of the bounded spatial attractor",
+    "dynamic-Z full-SNN reproduction of the native narrow ridge with persistent cross-shaft contact coverage",
+    "depletion-strength by tau_z multi-seed grid with right-censored latency",
+    "multi-seed confirmation of the panel-C spatial-axis metric",
+    "panel-D within-shaft null or an explicit decision to retain it only as the clinical data bridge",
+    "spatial-Z topology and coarse-resolution sensitivity"
+  ],
+  "historical_candidate": {
+    "status": "HISTORICAL_DIFFERENT_SUBSTRATE",
+    "asset": "results/paper-ready-figure/fig5/figures/fig5-data-driven-zm-etoi005-main-v4.png",
+    "substrate": "joint_04_control seed1801",
+    "boundary": "must not be mixed with the current dual-core candidate"
+  },
+  "source_package": "results/paper-ready-figure/fig5_dual_core_spatial_z/figures/",
+  "source_package_role": "spatial-Z branch and perturbation-response source/supplement; no longer the full current Fig5 candidate"
+}

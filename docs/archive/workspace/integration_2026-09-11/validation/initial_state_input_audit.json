@@ -1,0 +1,828 @@
+{
+  "schema": "topic4_event_state_plan_input_audit_v2",
+  "date": "2026-09-08",
+  "scope": "read-only completed development results and analytical time-scale calculations",
+  "new_SNN_simulations": 0,
+  "new_RNN_training": 0,
+  "v1": {
+    "n_runs": 36,
+    "physical_status_counts": {
+      "COMPLETE_NO_RUNAWAY_BY_EXISTING_GATE": 36
+    },
+    "n_detected_windows": 1992,
+    "screen": {
+      "delta_percentage_points": -0.8884563722025021,
+      "ci95_percentage_points": [
+        -9.03290198578511,
+        6.2560554519726335
+      ],
+      "exchange_p": 0.833984375,
+      "unstable": true,
+      "verdict": "SMALL_EFFECT_BOUNDED_FOR_TESTED_PROBE",
+      "n_runs_loaded": 36,
+      "n_runs_design": 36
+    },
+    "external_input_crosscheck": {
+      "screen": {
+        "stage": "screen",
+        "static_identity_equal_across_all_runs": true,
+        "static_identity_matches_historical_mainline_worker": true,
+        "n_digest_comparisons": 24,
+        "all_external_input_digests_equal_across_arms": true,
+        "prefix_only_seeds": []
+      }
+    },
+    "qualification_status": "I0_QUALIFICATION_PASS",
+    "qualification_checks_passed": 20,
+    "qualification_checks_total": 20,
+    "verdict_caveat": "Reported small-effect verdict coexists with unstable=true; original plan gave instability precedence.",
+    "all_arm_mode_outside_patient_band": true
+  },
+  "baseline_time_support": {
+    "n_primary_events": 333,
+    "n_parent_runs": 12,
+    "qualifying_duration_ms": {
+      "p10": 34.0,
+      "p50": 64.0,
+      "p90": 82.0
+    },
+    "first_primary_after_cold_reset_ms": {
+      "p10": 649.8,
+      "p50": 1049.0,
+      "p90": 2257.2000000000003
+    },
+    "fixed_clock_probes": {
+      "interpretation": "Descriptive overlapping parent support, not independent initialization trials; not the v2 null rate.",
+      "n_windows": 84,
+      "carryover_fraction": 0.10714285714285714,
+      "any_new_event_fraction": 1.0,
+      "first_new_event_primary_fraction": 0.5476190476190477,
+      "first_latency_ms": {
+        "p10": 38.6,
+        "p50": 174.0,
+        "p90": 574.8000000000002
+      },
+      "windows": [
+        {
+          "parent_seed": 820101,
+          "clock_ms": 2000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 348.0
+        },
+        {
+          "parent_seed": 820101,
+          "clock_ms": 5000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 366.0
+        },
+        {
+          "parent_seed": 820101,
+          "clock_ms": 8000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 1136.0
+        },
+        {
+          "parent_seed": 820101,
+          "clock_ms": 11000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": false,
+          "first_latency_ms": 442.0
+        },
+        {
+          "parent_seed": 820101,
+          "clock_ms": 14000,
+          "carryover": true,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 288.0
+        },
+        {
+          "parent_seed": 820101,
+          "clock_ms": 17000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": false,
+          "first_latency_ms": 246.0
+        },
+        {
+          "parent_seed": 820101,
+          "clock_ms": 20000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": false,
+          "first_latency_ms": 156.0
+        },
+        {
+          "parent_seed": 820102,
+          "clock_ms": 2000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": false,
+          "first_latency_ms": 134.0
+        },
+        {
+          "parent_seed": 820102,
+          "clock_ms": 5000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": false,
+          "first_latency_ms": 50.0
+        },
+        {
+          "parent_seed": 820102,
+          "clock_ms": 8000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 220.0
+        },
+        {
+          "parent_seed": 820102,
+          "clock_ms": 11000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 420.0
+        },
+        {
+          "parent_seed": 820102,
+          "clock_ms": 14000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": false,
+          "first_latency_ms": 94.0
+        },
+        {
+          "parent_seed": 820102,
+          "clock_ms": 17000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": false,
+          "first_latency_ms": 886.0
+        },
+        {
+          "parent_seed": 820102,
+          "clock_ms": 20000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 46.0
+        },
+        {
+          "parent_seed": 820103,
+          "clock_ms": 2000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": false,
+          "first_latency_ms": 120.0
+        },
+        {
+          "parent_seed": 820103,
+          "clock_ms": 5000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": false,
+          "first_latency_ms": 30.0
+        },
+        {
+          "parent_seed": 820103,
+          "clock_ms": 8000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 40.0
+        },
+        {
+          "parent_seed": 820103,
+          "clock_ms": 11000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": false,
+          "first_latency_ms": 452.0
+        },
+        {
+          "parent_seed": 820103,
+          "clock_ms": 14000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 354.0
+        },
+        {
+          "parent_seed": 820103,
+          "clock_ms": 17000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 264.0
+        },
+        {
+          "parent_seed": 820103,
+          "clock_ms": 20000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": false,
+          "first_latency_ms": 530.0
+        },
+        {
+          "parent_seed": 820104,
+          "clock_ms": 2000,
+          "carryover": true,
+          "any_new_event": true,
+          "first_new_is_primary": false,
+          "first_latency_ms": 240.0
+        },
+        {
+          "parent_seed": 820104,
+          "clock_ms": 5000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 22.0
+        },
+        {
+          "parent_seed": 820104,
+          "clock_ms": 8000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 298.0
+        },
+        {
+          "parent_seed": 820104,
+          "clock_ms": 11000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": false,
+          "first_latency_ms": 46.0
+        },
+        {
+          "parent_seed": 820104,
+          "clock_ms": 14000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": false,
+          "first_latency_ms": 682.0
+        },
+        {
+          "parent_seed": 820104,
+          "clock_ms": 17000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 74.0
+        },
+        {
+          "parent_seed": 820104,
+          "clock_ms": 20000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 284.0
+        },
+        {
+          "parent_seed": 820105,
+          "clock_ms": 2000,
+          "carryover": true,
+          "any_new_event": true,
+          "first_new_is_primary": false,
+          "first_latency_ms": 230.0
+        },
+        {
+          "parent_seed": 820105,
+          "clock_ms": 5000,
+          "carryover": true,
+          "any_new_event": true,
+          "first_new_is_primary": false,
+          "first_latency_ms": 236.0
+        },
+        {
+          "parent_seed": 820105,
+          "clock_ms": 8000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 84.0
+        },
+        {
+          "parent_seed": 820105,
+          "clock_ms": 11000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": false,
+          "first_latency_ms": 38.0
+        },
+        {
+          "parent_seed": 820105,
+          "clock_ms": 14000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 316.0
+        },
+        {
+          "parent_seed": 820105,
+          "clock_ms": 17000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": false,
+          "first_latency_ms": 16.0
+        },
+        {
+          "parent_seed": 820105,
+          "clock_ms": 20000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": false,
+          "first_latency_ms": 594.0
+        },
+        {
+          "parent_seed": 820106,
+          "clock_ms": 2000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 268.0
+        },
+        {
+          "parent_seed": 820106,
+          "clock_ms": 5000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 118.0
+        },
+        {
+          "parent_seed": 820106,
+          "clock_ms": 8000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": false,
+          "first_latency_ms": 174.0
+        },
+        {
+          "parent_seed": 820106,
+          "clock_ms": 11000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": false,
+          "first_latency_ms": 136.0
+        },
+        {
+          "parent_seed": 820106,
+          "clock_ms": 14000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 874.0
+        },
+        {
+          "parent_seed": 820106,
+          "clock_ms": 17000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": false,
+          "first_latency_ms": 44.0
+        },
+        {
+          "parent_seed": 820106,
+          "clock_ms": 20000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": false,
+          "first_latency_ms": 138.0
+        },
+        {
+          "parent_seed": 820107,
+          "clock_ms": 2000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 32.0
+        },
+        {
+          "parent_seed": 820107,
+          "clock_ms": 5000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 176.0
+        },
+        {
+          "parent_seed": 820107,
+          "clock_ms": 8000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": false,
+          "first_latency_ms": 72.0
+        },
+        {
+          "parent_seed": 820107,
+          "clock_ms": 11000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 88.0
+        },
+        {
+          "parent_seed": 820107,
+          "clock_ms": 14000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 180.0
+        },
+        {
+          "parent_seed": 820107,
+          "clock_ms": 17000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": false,
+          "first_latency_ms": 42.0
+        },
+        {
+          "parent_seed": 820107,
+          "clock_ms": 20000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 118.0
+        },
+        {
+          "parent_seed": 820108,
+          "clock_ms": 2000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 982.0
+        },
+        {
+          "parent_seed": 820108,
+          "clock_ms": 5000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 152.0
+        },
+        {
+          "parent_seed": 820108,
+          "clock_ms": 8000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 42.0
+        },
+        {
+          "parent_seed": 820108,
+          "clock_ms": 11000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 164.0
+        },
+        {
+          "parent_seed": 820108,
+          "clock_ms": 14000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 50.0
+        },
+        {
+          "parent_seed": 820108,
+          "clock_ms": 17000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 236.0
+        },
+        {
+          "parent_seed": 820108,
+          "clock_ms": 20000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": false,
+          "first_latency_ms": 134.0
+        },
+        {
+          "parent_seed": 820109,
+          "clock_ms": 2000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": false,
+          "first_latency_ms": 90.0
+        },
+        {
+          "parent_seed": 820109,
+          "clock_ms": 5000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 372.0
+        },
+        {
+          "parent_seed": 820109,
+          "clock_ms": 8000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 8.0
+        },
+        {
+          "parent_seed": 820109,
+          "clock_ms": 11000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": false,
+          "first_latency_ms": 30.0
+        },
+        {
+          "parent_seed": 820109,
+          "clock_ms": 14000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 192.0
+        },
+        {
+          "parent_seed": 820109,
+          "clock_ms": 17000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": false,
+          "first_latency_ms": 406.0
+        },
+        {
+          "parent_seed": 820109,
+          "clock_ms": 20000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 48.0
+        },
+        {
+          "parent_seed": 820110,
+          "clock_ms": 2000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 600.0
+        },
+        {
+          "parent_seed": 820110,
+          "clock_ms": 5000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 478.0
+        },
+        {
+          "parent_seed": 820110,
+          "clock_ms": 8000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 8.0
+        },
+        {
+          "parent_seed": 820110,
+          "clock_ms": 11000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 126.0
+        },
+        {
+          "parent_seed": 820110,
+          "clock_ms": 14000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 182.0
+        },
+        {
+          "parent_seed": 820110,
+          "clock_ms": 17000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": false,
+          "first_latency_ms": 180.0
+        },
+        {
+          "parent_seed": 820110,
+          "clock_ms": 20000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": false,
+          "first_latency_ms": 140.0
+        },
+        {
+          "parent_seed": 820111,
+          "clock_ms": 2000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": false,
+          "first_latency_ms": 130.0
+        },
+        {
+          "parent_seed": 820111,
+          "clock_ms": 5000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": false,
+          "first_latency_ms": 32.0
+        },
+        {
+          "parent_seed": 820111,
+          "clock_ms": 8000,
+          "carryover": true,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 624.0
+        },
+        {
+          "parent_seed": 820111,
+          "clock_ms": 11000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 58.0
+        },
+        {
+          "parent_seed": 820111,
+          "clock_ms": 14000,
+          "carryover": true,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 324.0
+        },
+        {
+          "parent_seed": 820111,
+          "clock_ms": 17000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 450.0
+        },
+        {
+          "parent_seed": 820111,
+          "clock_ms": 20000,
+          "carryover": true,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 398.0
+        },
+        {
+          "parent_seed": 820112,
+          "clock_ms": 2000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": false,
+          "first_latency_ms": 142.0
+        },
+        {
+          "parent_seed": 820112,
+          "clock_ms": 5000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": false,
+          "first_latency_ms": 56.0
+        },
+        {
+          "parent_seed": 820112,
+          "clock_ms": 8000,
+          "carryover": true,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 234.0
+        },
+        {
+          "parent_seed": 820112,
+          "clock_ms": 11000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": false,
+          "first_latency_ms": 78.0
+        },
+        {
+          "parent_seed": 820112,
+          "clock_ms": 14000,
+          "carryover": true,
+          "any_new_event": true,
+          "first_new_is_primary": false,
+          "first_latency_ms": 174.0
+        },
+        {
+          "parent_seed": 820112,
+          "clock_ms": 17000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": false,
+          "first_latency_ms": 300.0
+        },
+        {
+          "parent_seed": 820112,
+          "clock_ms": 20000,
+          "carryover": false,
+          "any_new_event": true,
+          "first_new_is_primary": true,
+          "first_latency_ms": 638.0
+        }
+      ]
+    }
+  },
+  "analytical_checks_not_patient_time_constant_estimates": {
+    "uncoupled_voltage_remaining_at_500ms_tau20ms": 1.3887943864964021e-11,
+    "proposed_s_remaining_over_median_event_tau1000ms": 0.9380049995307295
+  },
+  "patient": {
+    "fit_event_count": 19770,
+    "fit_block_count": 28,
+    "fit_mode_counts": {
+      "0": 6605,
+      "1": 13165
+    },
+    "selected_k": 2,
+    "stored_historical_k_scan": [
+      {
+        "k": 2,
+        "silhouette": 0.276139128126648,
+        "cross_block_probe_AMI": 0.9103999449987252,
+        "minimum_fit_fraction": 0.3340920586747597,
+        "eligible": true
+      },
+      {
+        "k": 3,
+        "silhouette": 0.12415892821218119,
+        "cross_block_probe_AMI": 0.8860847259273333,
+        "minimum_fit_fraction": 0.2949418310571573,
+        "eligible": true
+      },
+      {
+        "k": 4,
+        "silhouette": 0.14995769671850118,
+        "cross_block_probe_AMI": 0.5229735850397508,
+        "minimum_fit_fraction": 0.14977238239757207,
+        "eligible": false
+      },
+      {
+        "k": 5,
+        "silhouette": 0.09759454556469538,
+        "cross_block_probe_AMI": 0.591369338411407,
+        "minimum_fit_fraction": 0.13323216995447648,
+        "eligible": false
+      }
+    ],
+    "discovery_caveat": "Historical K stability used PROBE; stored metadata is not fresh validation.",
+    "new_non_fit_scoring_performed": false
+  },
+  "rnn_v034_leaked_oracle_diagnostic": {
+    "epilepsiae_548": {
+      "constant_inner_val": 0.6225346704919943,
+      "oracle_inner_val": 0.6010376772008352,
+      "gain": 0.02149699329115906,
+      "interpretation": "DIAGNOSTIC positive control; the oracle state leaks future participation and is never a science arm"
+    },
+    "epilepsiae_583": {
+      "constant_inner_val": 0.5970626428162586,
+      "oracle_inner_val": 0.5920448566565772,
+      "gain": 0.005017786159681403,
+      "interpretation": "DIAGNOSTIC positive control; the oracle state leaks future participation and is never a science arm"
+    },
+    "epilepsiae_1146": {
+      "constant_inner_val": 0.4931838749478039,
+      "oracle_inner_val": 0.49318428593553787,
+      "gain": -4.1098773395642496e-07,
+      "interpretation": "DIAGNOSTIC positive control; the oracle state leaks future participation and is never a science arm"
+    },
+    "epilepsiae_253": {
+      "constant_inner_val": 0.6403469626276161,
+      "oracle_inner_val": 0.5967261807560191,
+      "gain": 0.043620781871597014,
+      "interpretation": "DIAGNOSTIC positive control; the oracle state leaks future participation and is never a science arm"
+    }
+  },
+  "source_sha256": {
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/initial_state_conditioned_propagation_v1/primary_effect.json": "4d955ce2a0499e319fb49ac1da0bd580aa700bffa2864369a911a488bb51ca2d",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/initial_state_conditioned_propagation_v1/qualification.json": "e609066400e4cfbb8547fab5d97e1a760a9a588a070baf7567ae2be291a6ef7b",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/initial_state_conditioned_propagation_v1/screen/all_events.csv": "21db94b6cd4b79ac7c208ffa565cb149a45c2b90ab8a626a2f2f86c8a8d935ac",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/initial_state_conditioned_propagation_v1/screen/run_summary.csv": "ba803138c97461660a77d2387d9842e1c0f5153cafc3de999c7b5a4e74a214ee",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multidimensional_interictal_observation_repair_v2/evaluator.pkl": "cf0207113956420eadfe70ddca126cd050f7ea9e514ea15b044c869a210ad2d5",
+    "/data/hfosp_group_event_state_v0_3_4/we_state/oracle_control.json": "83d312d9db20bf49edb0de40ecc96375bde9b7fcbf1c87539b908287add2a63d",
+    "/data/hfosp_group_event_state_v0_3_4/we_state/oracle_control_b.json": "f6ed44ecefb31a37aee8f0f9db731b0c775b24d1400ac72538900715e316a34c",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-ges-v033-training-lab/src/topic5_group_event_state/v034_spatial_state/we_decoder.py": "9970a142c83039c963c97ca446c22bfda2f972ff2c5f99153a307973d510c32c",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-ges-v033-training-lab/src/topic5_group_event_state/v035/stepwise_decoder.py": "7f19d23c432bbd67de90be596bee0410e74ed1f5adf728f41c9c888c313766ad",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-ges-v033-training-lab/docs/archive/topic5/group_event_state_v0_3_4_we_decoder_state_first_run_2026-09-03.md": "0fb6c2a97742c12523e8430a582d3b1281409302fb9f7bd51f4a87068ba23939",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-ges-v033-training-lab/docs/archive/topic5/group_event_state_v0_3_7_repaired_closeout_technical_2026-09-05.md": "a6c939c7f8b5999c7437014af600b4077139dde0d71a8d9dbd6f3ced8c05fb4d",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-ges-v033-training-lab/docs/archive/topic5/group_event_state_v0_3_12_independent_scientific_review_2026-09-07.md": "afbcaee6cc5f9743518277681769068918bbe5b0f7083356e447832b65a3bb40",
+    "/data/hfosp_rnn_v038_contact_bridge_20260905/contact_bridge_report_zh.md": "1f58e02bfa78f259215001646b3761994c2450a72956dc641633b1af3cb0ff2a",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/params.py": "c2036d1e1548c3db89adab27f8a7a57f9cdf584b5fed360963c966004cf88884"
+  }
+}

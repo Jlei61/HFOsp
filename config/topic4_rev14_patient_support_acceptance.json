@@ -1,0 +1,63 @@
+{
+  "schema_id": "topic4_rev14_patient_support_acceptance_config_v2",
+  "scientific_role": "training_only_patient_support_acceptance",
+  "subject": "epilepsiae_1146",
+  "inputs": {
+    "patient_training_target": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/shaft_aware_patient_training_target.npz",
+      "sha256": "7d11100c0f431479f8decb17b6de97575a91dcb889887ce9e2cedbbdcd54140b"
+    },
+    "old_ab_train_only_classifier": {
+      "path": "results/topic4_sef_hfo/data_driven_local_connectivity_rev11_nlc/frozen_substrate_confirmation/candidate_manifest.json",
+      "sha256": "545b029d2d7947de5a27979e7166f6bc55ea2b01c64a67a9b736977ec960fcbb"
+    },
+    "contact_contract": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/contact_shaft_contract.json",
+      "sha256": "548643b6e89b61408b8bdf4cbc1566133937204dc36e8d512049cb25762fde91"
+    }
+  },
+  "classifier": {
+    "semantics": "FULL_TIMING",
+    "accessed_keys": [
+      "coef",
+      "intercept",
+      "class_centers",
+      "class_precisions",
+      "ood_distance_thresholds",
+      "ood_quantile",
+      "regularization_c",
+      "n_train"
+    ],
+    "prediction_role": "assign_formal_patient_train_ood_class",
+    "ood_reference_label": "classifier_assigned_labels",
+    "primary_label_key": "patient_train_old_labels",
+    "replace_primary_labels": false,
+    "refit_n_splits": 6,
+    "refit_atol": 1e-12,
+    "refit_rtol": 0.0
+  },
+  "floor": {
+    "sample_size_per_side": 6,
+    "draws": 4096,
+    "joint_draws": 512,
+    "joint_inner_draws": 512,
+    "seed": 20260827,
+    "tie_tolerance": 1e-12,
+    "quantile": 0.95,
+    "quantile_method": "linear",
+    "sampling": "one event per distinct recording block; left and right blocks disjoint"
+  },
+  "output": {
+    "directory": "results/topic4_sef_hfo/data_driven_node_dualmode_rev14/patient_support_acceptance",
+    "manifest": "patient_support_acceptance_manifest_v2.json",
+    "npz": "patient_support_acceptance_v2.npz"
+  },
+  "forbidden": {
+    "patient_evaluation_split": true,
+    "seizure_data": true,
+    "model_artifacts": true,
+    "candidate_scores": true,
+    "candidate_selection": true,
+    "simulation": true
+  }
+}

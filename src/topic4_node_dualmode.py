@@ -1,0 +1,2916 @@
+"""Metrics for the rev12-ND Node-only dual-mode refit.
+
+The module contains no patient or simulator I/O.  It keeps contact-distribution
+fit and sheet-level source-topology reproducibility separate so that a good rank
+prototype cannot hide unstable multi-site nucleation.
+"""
+from __future__ import annotations
+
+from itertools import combinations
+
+import numpy as np
+from scipy.ndimage import binary_dilation
+from scipy.ndimage import label as connected_component_labels
+from scipy.stats import spearmanr
+
+
+def merge_detected_event_fragments(events: list[dict], *,
+                                   maximum_gap_ms: float,
+                                   sample_dt_ms: float) -> list[dict]:
+    """Merge detector fragments into settling-consistent biological episodes."""
+    maximum_gap_ms = float(maximum_gap_ms)
+    sample_dt_ms = float(sample_dt_ms)
+    if maximum_gap_ms < 0.0 or sample_dt_ms <= 0.0:
+        raise ValueError("merge gap must be nonnegative and sample_dt_ms positive")
+    merged: list[dict] = []
+    for detector_index, event in enumerate(events):
+        row = dict(event)
+        row["detector_fragment_indices"] = [int(detector_index)]
+        row["fragment_count"] = 1
+        if merged:
+            gap = float(row["t_on"]) - float(merged[-1]["t_off"])
+            if gap <= maximum_gap_ms:
+                previous = merged[-1]
+                previous["t_off"] = float(max(previous["t_off"], row["t_off"]))
+                previous["dur_ms"] = float(
+                    previous["t_off"] - previous["t_on"] + sample_dt_ms
+                )
+                previous["peak_ext"] = float(max(
+                    previous["peak_ext"], row["peak_ext"],
+                ))
+                previous["returned"] = bool(
+                    previous["returned"] and row["returned"]
+                )
+                previous["detector_fragment_indices"].append(int(detector_index))
+                previous["fragment_count"] += 1
+                continue
+        merged.append(row)
+    return merged
+
+
+def _stable_low_start(values: np.ndarray, *, start: int, stop: int,
+                      threshold: float, required_steps: int) -> int | None:
+    """Return the first low-state dwell start inside ``[start, stop)``."""
+    values = np.asarray(values, float)
+    start = max(0, int(start))
+    stop = min(len(values), int(stop))
+    required_steps = int(required_steps)
+    if required_steps <= 0:
+        raise ValueError("required_steps must be positive")
+    if stop - start < required_steps:
+        return None
+    low = values[start:stop] <= float(threshold)
+    padded = np.concatenate(([False], low, [False])).astype(np.int8)
+    changes = np.flatnonzero(np.diff(padded))
+    for left, right in zip(changes[::2], changes[1::2]):
+        if right - left >= required_steps:
+            return int(start + left)
+    return None
+
+
+def population_excursion_episodes(events: list[dict], active_fraction: np.ndarray,
+                                  *, sample_dt_ms: float,
+                                  event_on_threshold: float,
+                                  low_threshold_fraction: float,
+                                  reset_ms: float,
+                                  pre_roll_ms: float) -> list[dict]:
+    """Group threshold fragments until the fast population state truly resets.
+
+    Boundaries depend only on the latent population activity, never on virtual
+    contact placement or recruitment.  A new episode starts only after activity
+    has stayed below ``low_threshold_fraction * event_on_threshold`` for a full
+    fast-state reset interval.
+    """
+    values = np.asarray(active_fraction, float)
+    sample_dt_ms = float(sample_dt_ms)
+    event_on_threshold = float(event_on_threshold)
+    low_threshold_fraction = float(low_threshold_fraction)
+    reset_ms = float(reset_ms)
+    pre_roll_ms = float(pre_roll_ms)
+    if values.ndim != 1 or not np.all(np.isfinite(values)):
+        raise ValueError("active_fraction must be a finite one-dimensional trace")
+    if sample_dt_ms <= 0.0 or event_on_threshold <= 0.0:
+        raise ValueError("sample_dt_ms and event_on_threshold must be positive")
+    if not 0.0 < low_threshold_fraction < 1.0:
+        raise ValueError("low_threshold_fraction must lie in (0, 1)")
+    if reset_ms <= 0.0 or pre_roll_ms < 0.0:
+        raise ValueError("reset_ms must be positive and pre_roll_ms nonnegative")
+    if not events:
+        return []
+    required_steps = max(1, int(np.ceil(reset_ms / sample_dt_ms)))
+    low_threshold = low_threshold_fraction * event_on_threshold
+    ordered = sorted(
+        enumerate(events), key=lambda item: (float(item[1]["t_on"]), item[0]),
+    )
+    groups: list[tuple[list[tuple[int, dict]], int | None]] = []
+    current = [ordered[0]]
+    for detector_index, event in ordered[1:]:
+        previous = current[-1][1]
+        gap_start = int(np.floor(float(previous["t_off"]) / sample_dt_ms)) + 1
+        gap_stop = int(np.ceil(float(event["t_on"]) / sample_dt_ms))
+        reset_start = _stable_low_start(
+            values, start=gap_start, stop=gap_stop,
+            threshold=low_threshold, required_steps=required_steps,
+        )
+        if reset_start is None:
+            current.append((detector_index, event))
+        else:
+            groups.append((current, reset_start))
+            current = [(detector_index, event)]
+    last_event = current[-1][1]
+    final_start = int(np.floor(float(last_event["t_off"]) / sample_dt_ms)) + 1
+    final_reset = _stable_low_start(
+        values, start=final_start, stop=len(values),
+        threshold=low_threshold, required_steps=required_steps,
+    )
+    groups.append((current, final_reset))
+
+    output = []
+    total_ms = len(values) * sample_dt_ms
+    for group, reset_start in groups:
+        fragment_indices = [int(index) for index, _ in group]
+        trigger_on = float(group[0][1]["t_on"])
+        trigger_off = float(group[-1][1]["t_off"])
+        analysis_on = max(0.0, trigger_on - pre_roll_ms)
+        analysis_off = (
+            float(reset_start * sample_dt_ms)
+            if reset_start is not None else total_ms
+        )
+        start_step = max(0, int(np.floor(analysis_on / sample_dt_ms)))
+        stop_step = min(len(values), int(np.ceil(analysis_off / sample_dt_ms)) + 1)
+        peak = float(np.max(values[start_step:stop_step]))
+        output.append({
+            "t_on": analysis_on,
+            "t_off": analysis_off,
+            "dur_ms": float(max(sample_dt_ms, analysis_off - analysis_on)),
+            "peak_ext": peak,
+            "returned": reset_start is not None,
+            "trigger_t_on": trigger_on,
+            "trigger_t_off": trigger_off,
+            "reset_start_ms": (
+                None if reset_start is None else float(reset_start * sample_dt_ms)
+            ),
+            "detector_fragment_indices": fragment_indices,
+            "fragment_count": int(len(fragment_indices)),
+            "event_unit": "population_excursion",
+            "low_threshold": float(low_threshold),
+            "reset_ms": reset_ms,
+            "pre_roll_ms": pre_roll_ms,
+        })
+    return output
+
+
+def event_features(normalized_ranks: np.ndarray) -> np.ndarray:
+    """Build fixed-contact [recruitment, masked normalized rank] features."""
+    ranks = np.asarray(normalized_ranks, float)
+    if ranks.ndim != 2:
+        raise ValueError("normalized_ranks must have shape (event, contact)")
+    mask = np.isfinite(ranks).astype(float)
+    return np.concatenate([mask, np.nan_to_num(ranks, nan=0.0)], axis=1)
+
+
+def normalize_event_ranks(ranks: np.ndarray) -> np.ndarray:
+    """Normalize every finite event row to [0, 1] without filling missing contacts."""
+    values = np.asarray(ranks, float)
+    if values.ndim != 2:
+        raise ValueError("ranks must have shape (event, contact)")
+    output = np.full_like(values, np.nan, dtype=float)
+    for index, row in enumerate(values):
+        finite = np.isfinite(row)
+        if not np.any(finite):
+            continue
+        low = float(np.min(row[finite]))
+        span = float(np.max(row[finite]) - low)
+        output[index, finite] = (row[finite] - low) / span if span > 0 else 0.0
+    return output
+
+
+def _shaft_names(contact_names: np.ndarray) -> np.ndarray:
+    return np.asarray([
+        "".join(character for character in str(name) if not character.isdigit())
+        for name in np.asarray(contact_names).astype(str)
+    ])
+
+
+def shaft_balanced_feature_weights(contact_names: np.ndarray) -> np.ndarray:
+    """Give recruitment/rank and ICL/SCL equal total weight."""
+    shafts = _shaft_names(contact_names)
+    weights = np.zeros(2 * len(shafts), float)
+    for offset in (0, len(shafts)):
+        for shaft in ("ICL", "SCL"):
+            selected = np.flatnonzero(shafts == shaft)
+            if not len(selected):
+                raise ValueError(f"contact contract misses shaft {shaft}")
+            weights[offset + selected] = 0.25 / len(selected)
+    return weights
+
+
+def weighted_r2(events: np.ndarray, labels: np.ndarray, prototypes: np.ndarray,
+                global_mean: np.ndarray, weights: np.ndarray) -> float:
+    """Variance explained relative to a fixed global-mean reference."""
+    events = np.asarray(events, float)
+    labels = np.asarray(labels, int)
+    prototypes = np.asarray(prototypes, float)
+    global_mean = np.asarray(global_mean, float)
+    weights = np.asarray(weights, float)
+    if events.ndim != 2 or labels.shape != (len(events),):
+        raise ValueError("events and labels do not align")
+    if np.any((labels < 0) | (labels >= len(prototypes))):
+        raise ValueError("labels do not index prototypes")
+    sst = float(np.sum((events - global_mean) ** 2 * weights))
+    sse = float(np.sum((events - prototypes[labels]) ** 2 * weights))
+    return float("nan") if sst <= 0.0 else float(1.0 - sse / sst)
+
+
+def contrast_r2(model_prototypes: np.ndarray,
+                patient_train_prototypes: np.ndarray,
+                patient_heldout_prototypes: np.ndarray,
+                weights: np.ndarray) -> dict:
+    """Evaluate a TA-TB contrast with one nonnegative scale fitted on train."""
+    model = np.asarray(model_prototypes, float)
+    train = np.asarray(patient_train_prototypes, float)
+    heldout = np.asarray(patient_heldout_prototypes, float)
+    weights = np.asarray(weights, float)
+    model_delta = model[0] - model[1]
+    train_delta = train[0] - train[1]
+    heldout_delta = heldout[0] - heldout[1]
+    energy = float(np.sum(weights * model_delta ** 2))
+    scale = (
+        0.0 if energy <= 0.0 else max(
+            0.0, float(np.sum(weights * train_delta * model_delta) / energy),
+        )
+    )
+    denominator = float(np.sum(weights * heldout_delta ** 2))
+    raw_sse = float(np.sum(weights * (heldout_delta - model_delta) ** 2))
+    scaled_sse = float(np.sum(weights * (heldout_delta - scale * model_delta) ** 2))
+    cosine_denominator = float(np.sqrt(
+        np.sum(weights * heldout_delta ** 2) * np.sum(weights * model_delta ** 2)
+    ))
+    return {
+        "train_fitted_nonnegative_scale": scale,
+        "heldout_raw_r2": (
+            float("nan") if denominator <= 0.0 else float(1.0 - raw_sse / denominator)
+        ),
+        "heldout_train_scaled_r2": (
+            float("nan") if denominator <= 0.0 else float(1.0 - scaled_sse / denominator)
+        ),
+        "heldout_weighted_cosine": (
+            float("nan") if cosine_denominator <= 0.0
+            else float(np.sum(weights * heldout_delta * model_delta) / cosine_denominator)
+        ),
+    }
+
+
+def lse_max(values: np.ndarray, tau: float = 0.25) -> float:
+    """Smooth maximum with zero offset for equal inputs."""
+    values = np.asarray(values, float)
+    if values.ndim != 1 or not len(values) or not np.all(np.isfinite(values)):
+        raise ValueError("LSE inputs must be a finite non-empty vector")
+    tau = float(tau)
+    if tau <= 0.0:
+        raise ValueError("tau must be positive")
+    maximum = float(np.max(values))
+    return float(maximum + tau * np.log(np.mean(np.exp((values - maximum) / tau))))
+
+
+def _weighted_quantile_grid(values: np.ndarray, n_quantiles: int) -> np.ndarray:
+    values = np.asarray(values, float)
+    if not len(values):
+        raise ValueError("cannot form quantiles from an empty sample")
+    quantiles = np.linspace(0.0, 1.0, int(n_quantiles))
+    # An empirical inverse CDF is invariant to exact replication of a sample.
+    # Linear order-statistic interpolation is not: repeating every event changes
+    # interpolation knots and would let event count leak into the objective.
+    return np.quantile(values, quantiles, method="inverted_cdf")
+
+
+def _normalized_event_weights(weights: np.ndarray, n_events: int) -> np.ndarray:
+    values = np.asarray(weights, float)
+    if values.shape != (int(n_events),) or not np.all(np.isfinite(values)):
+        raise ValueError("event weights must be finite and align with events")
+    if np.any(values < 0.0) or float(np.sum(values)) <= 0.0:
+        raise ValueError("event weights must be nonnegative with positive mass")
+    return values / float(np.sum(values))
+
+
+def _weighted_empirical_quantiles(values: np.ndarray, weights: np.ndarray,
+                                  n_quantiles: int) -> np.ndarray:
+    values = np.asarray(values, float)
+    weights = _normalized_event_weights(weights, len(values))
+    order = np.argsort(values, kind="stable")
+    ordered = values[order]
+    unique, inverse = np.unique(ordered, return_inverse=True)
+    unique_weights = np.bincount(
+        inverse, weights=weights[order], minlength=len(unique),
+    )
+    cumulative = np.cumsum(unique_weights)
+    cumulative[-1] = 1.0
+    quantiles = np.linspace(0.0, 1.0, int(n_quantiles))
+    indices = np.searchsorted(cumulative, quantiles, side="left")
+    return unique[np.clip(indices, 0, len(unique) - 1)]
+
+
+def fixed_projection_matrix(n_features: int, *, n_directions: int = 64,
+                            seed: int = 20260821) -> np.ndarray:
+    """Generate deterministic unit directions for sliced-Wasserstein scoring."""
+    rng = np.random.default_rng(int(seed))
+    matrix = rng.normal(size=(int(n_directions), int(n_features)))
+    norm = np.linalg.norm(matrix, axis=1, keepdims=True)
+    if np.any(norm == 0.0):
+        raise RuntimeError("projection generator produced a zero direction")
+    return matrix / norm
+
+
+def sliced_wasserstein(x: np.ndarray, y: np.ndarray, *, weights: np.ndarray,
+                       projections: np.ndarray, n_quantiles: int = 101) -> float:
+    """Matched-quantile sliced-Wasserstein distance with fixed feature weights."""
+    x = np.asarray(x, float)
+    y = np.asarray(y, float)
+    weights = np.asarray(weights, float)
+    projections = np.asarray(projections, float)
+    if x.ndim != 2 or y.ndim != 2 or x.shape[1] != y.shape[1]:
+        raise ValueError("event samples must share a feature dimension")
+    if not len(x) or not len(y):
+        raise ValueError("event samples must be non-empty")
+    if weights.shape != (x.shape[1],) or projections.shape[1] != x.shape[1]:
+        raise ValueError("weights or projections do not match event features")
+    scale = np.sqrt(weights / np.sum(weights))
+    x_projection = (x * scale) @ projections.T
+    y_projection = (y * scale) @ projections.T
+    distances = []
+    for direction in range(projections.shape[0]):
+        xq = _weighted_quantile_grid(x_projection[:, direction], n_quantiles)
+        yq = _weighted_quantile_grid(y_projection[:, direction], n_quantiles)
+        distances.append(float(np.sqrt(np.mean((xq - yq) ** 2))))
+    return float(np.mean(distances))
+
+
+def weighted_sliced_wasserstein(
+        x: np.ndarray, y: np.ndarray, *, x_event_weights: np.ndarray,
+        weights: np.ndarray, projections: np.ndarray,
+        y_event_weights: np.ndarray | None = None,
+        n_quantiles: int = 101) -> float:
+    """Sliced-Wasserstein distance for a probability-weighted event cloud."""
+    x = np.asarray(x, float)
+    y = np.asarray(y, float)
+    feature_weights = np.asarray(weights, float)
+    projections = np.asarray(projections, float)
+    if x.ndim != 2 or y.ndim != 2 or x.shape[1] != y.shape[1]:
+        raise ValueError("event samples must share a feature dimension")
+    if not len(x) or not len(y):
+        raise ValueError("event samples must be non-empty")
+    x_weights = _normalized_event_weights(x_event_weights, len(x))
+    y_weights = _normalized_event_weights(
+        np.ones(len(y), float) if y_event_weights is None else y_event_weights,
+        len(y),
+    )
+    if (feature_weights.shape != (x.shape[1],)
+            or projections.shape[1] != x.shape[1]):
+        raise ValueError("weights or projections do not match event features")
+    scale = np.sqrt(feature_weights / np.sum(feature_weights))
+    x_projection = (x * scale) @ projections.T
+    y_projection = (y * scale) @ projections.T
+    distances = []
+    for direction in range(projections.shape[0]):
+        xq = _weighted_empirical_quantiles(
+            x_projection[:, direction], x_weights, n_quantiles,
+        )
+        yq = _weighted_empirical_quantiles(
+            y_projection[:, direction], y_weights, n_quantiles,
+        )
+        distances.append(float(np.sqrt(np.mean((xq - yq) ** 2))))
+    return float(np.mean(distances))
+
+
+def js_divergence(p: np.ndarray, q: np.ndarray, epsilon: float = 1e-12) -> float:
+    """Jensen-Shannon divergence in nats."""
+    p = np.asarray(p, float)
+    q = np.asarray(q, float)
+    if p.shape != q.shape or p.ndim != 1:
+        raise ValueError("probability vectors must align")
+    if np.any(p < 0.0) or np.any(q < 0.0) or p.sum() <= 0.0 or q.sum() <= 0.0:
+        raise ValueError("probability vectors must be nonnegative and non-empty")
+    p = p / p.sum()
+    q = q / q.sum()
+    midpoint = 0.5 * (p + q)
+    return float(0.5 * np.sum(p * np.log((p + epsilon) / (midpoint + epsilon)))
+                 + 0.5 * np.sum(q * np.log((q + epsilon) / (midpoint + epsilon))))
+
+
+def recruitment_loss(model_ranks: np.ndarray, patient_ranks: np.ndarray,
+                     contact_names: np.ndarray) -> float:
+    """Shaft-balanced recruitment-probability MAE."""
+    model = np.isfinite(np.asarray(model_ranks, float)).mean(axis=0)
+    patient = np.isfinite(np.asarray(patient_ranks, float)).mean(axis=0)
+    shafts = _shaft_names(contact_names)
+    errors = []
+    for shaft in ("ICL", "SCL"):
+        selected = shafts == shaft
+        errors.append(float(np.mean(np.abs(model[selected] - patient[selected]))))
+    return float(np.mean(errors))
+
+
+def _precedence_distribution(ranks: np.ndarray, i: int, j: int) -> np.ndarray:
+    values = np.asarray(ranks, float)
+    both = np.isfinite(values[:, i]) & np.isfinite(values[:, j])
+    i_before = both & (values[:, i] < values[:, j])
+    j_before = both & (values[:, j] < values[:, i])
+    tied = both & ~(i_before | j_before)
+    # Ties contribute equally to the two directional states; missing remains explicit.
+    return np.asarray([
+        np.sum(i_before) + 0.5 * np.sum(tied),
+        np.sum(j_before) + 0.5 * np.sum(tied),
+        np.sum(~both),
+    ], float) / max(1, len(values))
+
+
+def precedence_loss(model_ranks: np.ndarray, patient_ranks: np.ndarray,
+                    contact_names: np.ndarray) -> dict:
+    """Pair-class balanced JS loss including not-jointly-recruited events."""
+    shafts = _shaft_names(contact_names)
+    classes = {"ICL-ICL": [], "SCL-SCL": [], "ICL-SCL": []}
+    for i, j in combinations(range(len(shafts)), 2):
+        pair = f"{shafts[i]}-{shafts[j]}"
+        if pair == "SCL-ICL":
+            pair = "ICL-SCL"
+        model = _precedence_distribution(model_ranks, i, j)
+        patient = _precedence_distribution(patient_ranks, i, j)
+        classes[pair].append(js_divergence(model, patient))
+    output = {
+        name: float(np.mean(values)) for name, values in classes.items()
+    }
+    output["balanced_mean"] = float(np.mean(list(output.values())))
+    return output
+
+
+def profile_loss(model_ranks: np.ndarray, patient_ranks: np.ndarray,
+                 contact_names: np.ndarray) -> float:
+    """Weighted error between mode mean recruitment/rank profiles."""
+    model = np.mean(event_features(normalize_event_ranks(model_ranks)), axis=0)
+    patient = np.mean(event_features(normalize_event_ranks(patient_ranks)), axis=0)
+    weights = shaft_balanced_feature_weights(contact_names)
+    return float(np.sqrt(np.sum(weights * (model - patient) ** 2)))
+
+
+def mode_distribution_components(model_ranks: np.ndarray, patient_ranks: np.ndarray,
+                                 contact_names: np.ndarray,
+                                 projections: np.ndarray) -> dict:
+    """Four complementary distances for one patient-defined mode."""
+    model_normalized = normalize_event_ranks(model_ranks)
+    patient_normalized = normalize_event_ranks(patient_ranks)
+    weights = shaft_balanced_feature_weights(contact_names)
+    model_features = event_features(model_normalized)
+    patient_features = event_features(patient_normalized)
+    precedence = precedence_loss(model_normalized, patient_normalized, contact_names)
+    return {
+        "recruitment": recruitment_loss(model_normalized, patient_normalized, contact_names),
+        "precedence": precedence["balanced_mean"],
+        "precedence_classes": precedence,
+        "profile": profile_loss(model_normalized, patient_normalized, contact_names),
+        "cloud": sliced_wasserstein(
+            model_features, patient_features, weights=weights,
+            projections=projections,
+        ),
+    }
+
+
+def _weighted_precedence_distribution(ranks: np.ndarray, event_weights: np.ndarray,
+                                      i: int, j: int) -> np.ndarray:
+    values = np.asarray(ranks, float)
+    weights = _normalized_event_weights(event_weights, len(values))
+    both = np.isfinite(values[:, i]) & np.isfinite(values[:, j])
+    i_before = both & (values[:, i] < values[:, j])
+    j_before = both & (values[:, j] < values[:, i])
+    tied = both & ~(i_before | j_before)
+    return np.asarray([
+        np.sum(weights[i_before]) + 0.5 * np.sum(weights[tied]),
+        np.sum(weights[j_before]) + 0.5 * np.sum(weights[tied]),
+        np.sum(weights[~both]),
+    ], float)
+
+
+def weighted_mode_distribution_components(
+        model_ranks: np.ndarray, model_event_weights: np.ndarray,
+        patient_ranks: np.ndarray, contact_names: np.ndarray,
+        projections: np.ndarray) -> dict:
+    """Four patient-mode distances with continuous model event membership."""
+    model_normalized = normalize_event_ranks(model_ranks)
+    patient_normalized = normalize_event_ranks(patient_ranks)
+    event_weights = _normalized_event_weights(
+        model_event_weights, len(model_normalized),
+    )
+    feature_weights = shaft_balanced_feature_weights(contact_names)
+    model_features = event_features(model_normalized)
+    patient_features = event_features(patient_normalized)
+    shafts = _shaft_names(contact_names)
+
+    model_recruitment = np.sum(
+        event_weights[:, None] * np.isfinite(model_normalized), axis=0,
+    )
+    patient_recruitment = np.isfinite(patient_normalized).mean(axis=0)
+    recruitment = float(np.mean([
+        np.mean(np.abs(
+            model_recruitment[shafts == shaft]
+            - patient_recruitment[shafts == shaft]
+        ))
+        for shaft in ("ICL", "SCL")
+    ]))
+
+    pair_classes = {"ICL-ICL": [], "SCL-SCL": [], "ICL-SCL": []}
+    for i, j in combinations(range(len(shafts)), 2):
+        pair = f"{shafts[i]}-{shafts[j]}"
+        if pair == "SCL-ICL":
+            pair = "ICL-SCL"
+        model_distribution = _weighted_precedence_distribution(
+            model_normalized, event_weights, i, j,
+        )
+        patient_distribution = _precedence_distribution(
+            patient_normalized, i, j,
+        )
+        pair_classes[pair].append(
+            js_divergence(model_distribution, patient_distribution)
+        )
+    precedence_classes = {
+        name: float(np.mean(values)) for name, values in pair_classes.items()
+    }
+    model_profile = np.sum(event_weights[:, None] * model_features, axis=0)
+    patient_profile = np.mean(patient_features, axis=0)
+    profile = float(np.sqrt(np.sum(
+        feature_weights * (model_profile - patient_profile) ** 2
+    )))
+    return {
+        "recruitment": recruitment,
+        "precedence": float(np.mean(list(precedence_classes.values()))),
+        "precedence_classes": precedence_classes,
+        "profile": profile,
+        "cloud": weighted_sliced_wasserstein(
+            model_features, patient_features,
+            x_event_weights=event_weights,
+            weights=feature_weights, projections=projections,
+        ),
+    }
+
+
+def _soft_prototype_contrast(model_ranks: np.ndarray,
+                             probability_b: np.ndarray,
+                             patient_ranks: np.ndarray,
+                             patient_labels: np.ndarray,
+                             contact_names: np.ndarray) -> dict:
+    model_features = event_features(normalize_event_ranks(model_ranks))
+    patient_features = event_features(normalize_event_ranks(patient_ranks))
+    probabilities = np.asarray(probability_b, float)
+    weights = shaft_balanced_feature_weights(contact_names)
+    mode_weights = (1.0 - probabilities, probabilities)
+    if any(float(np.sum(current)) <= 1e-12 for current in mode_weights):
+        return {
+            "loss": 1.0,
+            "alignment": 0.0,
+            "weighted_cosine": 0.0,
+            "model_to_patient_amplitude_ratio": 0.0,
+            "amplitude_agreement": 0.0,
+            "model_prototypes": None,
+        }
+    model_prototypes = np.asarray([
+        np.sum(
+            _normalized_event_weights(current, len(model_features))[:, None]
+            * model_features,
+            axis=0,
+        )
+        for current in mode_weights
+    ])
+    patient_prototypes = np.asarray([
+        np.mean(patient_features[np.asarray(patient_labels, int) == mode], axis=0)
+        for mode in (0, 1)
+    ])
+    model_delta = model_prototypes[0] - model_prototypes[1]
+    patient_delta = patient_prototypes[0] - patient_prototypes[1]
+    model_norm = float(np.sqrt(np.sum(weights * model_delta ** 2)))
+    patient_norm = float(np.sqrt(np.sum(weights * patient_delta ** 2)))
+    denominator = model_norm * patient_norm
+    cosine = (
+        0.0 if denominator <= 0.0
+        else float(np.sum(weights * model_delta * patient_delta) / denominator)
+    )
+    ratio = 0.0 if patient_norm <= 0.0 else model_norm / patient_norm
+    amplitude_agreement = (
+        0.0 if ratio <= 0.0 else float(np.exp(-abs(np.log(ratio))))
+    )
+    alignment = float(max(0.0, cosine) * amplitude_agreement)
+    return {
+        "loss": float(1.0 - alignment),
+        "alignment": alignment,
+        "weighted_cosine": cosine,
+        "model_to_patient_amplitude_ratio": ratio,
+        "amplitude_agreement": amplitude_agreement,
+        "model_prototypes": model_prototypes,
+    }
+
+
+def soft_dual_mode_objective(
+        model_ranks: np.ndarray, probability_b: np.ndarray,
+        patient_ranks: np.ndarray, patient_labels: np.ndarray,
+        contact_names: np.ndarray, *, projections: np.ndarray,
+        calibration: dict, tau: float = 0.25,
+        occupancy_weight: float = 0.5,
+        ambiguity_weight: float = 0.25,
+        contrast_weight: float = 0.5) -> dict:
+    """Continuous patient-mode objective without a 0.5 label discontinuity."""
+    model_ranks = np.asarray(model_ranks, float)
+    probabilities = np.asarray(probability_b, float)
+    patient_ranks = np.asarray(patient_ranks, float)
+    patient_labels = np.asarray(patient_labels, int)
+    if (model_ranks.ndim != 2 or probabilities.shape != (len(model_ranks),)
+            or patient_ranks.ndim != 2
+            or model_ranks.shape[1] != patient_ranks.shape[1]
+            or patient_labels.shape != (len(patient_ranks),)
+            or not np.all(np.isfinite(probabilities))
+            or np.any((probabilities < 0.0) | (probabilities > 1.0))):
+        raise ValueError("soft dual-mode arrays do not align")
+    if not len(model_ranks):
+        raise ValueError("soft dual-mode objective requires returned model events")
+    per_mode, losses = {}, []
+    for mode, mode_weights in enumerate((1.0 - probabilities, probabilities)):
+        if float(np.sum(mode_weights)) <= 1e-12:
+            normalized = {
+                key: 2.0 for key in ("recruitment", "precedence", "profile", "cloud")
+            }
+            raw = None
+            missing = True
+        else:
+            raw = weighted_mode_distribution_components(
+                model_ranks, mode_weights,
+                patient_ranks[patient_labels == mode], contact_names, projections,
+            )
+            normalized = normalize_components_floor_ratio(raw, calibration, mode)
+            missing = False
+        mean = float(np.mean(list(normalized.values())))
+        normalized_mass = float(np.mean(mode_weights))
+        effective_events = float(
+            np.sum(mode_weights) ** 2 / max(np.sum(mode_weights ** 2), 1e-12)
+        )
+        per_mode[str(mode)] = {
+            **normalized,
+            "raw": raw,
+            "missing": missing,
+            "mean": mean,
+            "soft_occupancy": normalized_mass,
+            "effective_events": effective_events,
+        }
+        losses.append(mean)
+    model_occupancy = np.asarray([
+        np.mean(1.0 - probabilities), np.mean(probabilities),
+    ])
+    patient_occupancy = np.bincount(patient_labels, minlength=2).astype(float)
+    occupancy = js_divergence(model_occupancy, patient_occupancy)
+    ambiguity = float(np.mean(4.0 * probabilities * (1.0 - probabilities)))
+    contrast = _soft_prototype_contrast(
+        model_ranks, probabilities, patient_ranks, patient_labels, contact_names,
+    )
+    weakest = lse_max(np.asarray(losses), tau=tau)
+    objective = (
+        weakest + float(occupancy_weight) * occupancy
+        + float(ambiguity_weight) * ambiguity
+        + float(contrast_weight) * contrast["loss"]
+    )
+    return {
+        "modes": per_mode,
+        "weakest_mode_lse": weakest,
+        "occupancy_js": occupancy,
+        "ambiguity": ambiguity,
+        "contrast": contrast,
+        "objective": float(objective),
+        "weights": {
+            "weakest_mode_lse": 1.0,
+            "occupancy_js": float(occupancy_weight),
+            "ambiguity": float(ambiguity_weight),
+            "contrast_loss": float(contrast_weight),
+        },
+    }
+
+
+def calibrate_component_scales(patient_ranks: np.ndarray,
+                               patient_labels: np.ndarray,
+                               patient_blocks: np.ndarray,
+                               contact_names: np.ndarray,
+                               projections: np.ndarray, *,
+                               sample_size: int = 6,
+                               draws: int = 256,
+                               seed: int = 20260821) -> dict:
+    """Put all four distances in patient recording-block excess-noise units."""
+    ranks = np.asarray(patient_ranks, float)
+    labels = np.asarray(patient_labels, int)
+    blocks = np.asarray(patient_blocks)
+    if (ranks.ndim != 2 or labels.shape != (len(ranks),)
+            or blocks.shape != (len(ranks),)):
+        raise ValueError("patient calibration arrays do not align")
+    rng = np.random.default_rng(int(seed))
+    keys = ("recruitment", "precedence", "profile", "cloud")
+    output = {}
+    for mode in (0, 1):
+        mode_index = np.flatnonzero(labels == mode)
+        eligible_blocks = np.asarray([
+            block for block in np.unique(blocks)
+            if np.sum((blocks == block) & (labels == mode)) >= int(sample_size)
+        ])
+        if len(eligible_blocks) < 2:
+            raise ValueError("patient mode lacks two eligible recording blocks")
+        floor = {key: [] for key in keys}
+        null = {key: [] for key in keys}
+        for _ in range(int(draws)):
+            target_block, self_block = rng.choice(
+                eligible_blocks, size=2, replace=False,
+            )
+            target_index = np.flatnonzero(
+                (blocks == target_block) & (labels == mode)
+            )
+            self_index = np.flatnonzero(
+                (blocks == self_block) & (labels == mode)
+            )
+            target = ranks[rng.choice(
+                target_index, size=int(sample_size), replace=False,
+            )]
+            self_sample = ranks[rng.choice(
+                self_index, size=int(sample_size), replace=False,
+            )]
+            pooled = ranks[rng.choice(len(ranks), size=int(sample_size), replace=False)]
+            self_components = mode_distribution_components(
+                self_sample, target, contact_names, projections,
+            )
+            null_components = mode_distribution_components(
+                pooled, target, contact_names, projections,
+            )
+            for key in keys:
+                floor[key].append(float(self_components[key]))
+                null[key].append(float(null_components[key]))
+        output[str(mode)] = {}
+        for key in keys:
+            floor_median = float(np.median(floor[key]))
+            floor_q95 = float(np.quantile(floor[key], 0.95))
+            null_median = float(np.median(null[key]))
+            null_q95 = float(np.quantile(null[key], 0.95))
+            scale = floor_q95 - floor_median
+            reference = "patient_block_floor_q95"
+            if scale <= 1e-8:
+                scale = null_q95 - floor_median
+                reference = "pooled_global_null_q95_fallback"
+            if scale <= 1e-8:
+                raise RuntimeError(
+                    f"patient calibration has no {key} dynamic range for mode {mode}"
+                )
+            output[str(mode)][key] = {
+                "floor_median": floor_median,
+                "floor_q95": floor_q95,
+                "global_null_median": null_median,
+                "global_null_q95": null_q95,
+                "scale": scale,
+                "scale_reference": reference,
+            }
+    return {
+        "modes": output,
+        "sample_size_per_side": int(sample_size),
+        "draws": int(draws),
+        "seed": int(seed),
+        "floor_resampling": "different recording blocks within the same mode",
+        "global_null_resampling": "pooled patient training events across modes",
+        "unit": (
+            "0=patient block floor median; 1=patient block floor q95; "
+            "pooled-null q95 is used only if the block floor is degenerate"
+        ),
+    }
+
+
+def normalize_components(components: dict, calibration: dict, mode: int) -> dict:
+    normalized = {}
+    for key in ("recruitment", "precedence", "profile", "cloud"):
+        contract = calibration["modes"][str(int(mode))][key]
+        normalized[key] = max(
+            0.0,
+            (float(components[key]) - float(contract["floor_median"]))
+            / float(contract["scale"]),
+        )
+    return normalized
+
+
+def dual_mode_objective(model_ranks: np.ndarray, model_labels: np.ndarray,
+                        patient_ranks: np.ndarray, patient_labels: np.ndarray,
+                        contact_names: np.ndarray, *,
+                        missing_mode_penalty: float,
+                        projections: np.ndarray,
+                        calibration: dict | None = None,
+                        tau: float = 0.25) -> dict:
+    """Worst-mode patient loss with explicit occupancy mismatch."""
+    model_labels = np.asarray(model_labels, int)
+    patient_labels = np.asarray(patient_labels, int)
+    per_mode, losses = {}, []
+    for mode in (0, 1):
+        model_selected = np.asarray(model_ranks)[model_labels == mode]
+        patient_selected = np.asarray(patient_ranks)[patient_labels == mode]
+        if not len(model_selected):
+            if calibration is None:
+                raw = None
+                components = {
+                    key: float(missing_mode_penalty)
+                    for key in ("recruitment", "precedence", "profile", "cloud")
+                }
+            else:
+                raw = mode_distribution_components(
+                    np.full((1, np.asarray(patient_ranks).shape[1]), np.nan),
+                    patient_selected, contact_names, projections,
+                )
+                normalized = normalize_components(raw, calibration, mode)
+                components = {
+                    key: max(float(missing_mode_penalty), normalized[key])
+                    for key in ("recruitment", "precedence", "profile", "cloud")
+                }
+            components["raw"] = raw
+            components["missing"] = True
+        else:
+            raw = mode_distribution_components(
+                model_selected, patient_selected, contact_names, projections,
+            )
+            components = (
+                dict(raw) if calibration is None
+                else normalize_components(raw, calibration, mode)
+            )
+            components["raw"] = dict(raw)
+            components["missing"] = False
+        components["mean"] = float(np.mean([
+            components[key] for key in ("recruitment", "precedence", "profile", "cloud")
+        ]))
+        per_mode[str(mode)] = components
+        losses.append(components["mean"])
+    model_count = np.bincount(model_labels, minlength=2).astype(float)
+    patient_count = np.bincount(patient_labels, minlength=2).astype(float)
+    # Zero returned events are a valid negative simulation result, not missing
+    # data.  They carry the maximum binary JS occupancy penalty while both mode
+    # distances above retain the explicit missing-mode penalty.
+    occupancy = (
+        float(np.log(2.0)) if model_count.sum() == 0.0
+        else js_divergence(model_count, patient_count)
+    )
+    weakest = lse_max(np.asarray(losses), tau=tau)
+    return {
+        "modes": per_mode,
+        "weakest_mode_lse": weakest,
+        "occupancy_js": occupancy,
+        "objective": float(weakest + 0.25 * occupancy),
+    }
+
+
+def persistent_recruitment_onsets(event_counts: np.ndarray,
+                                  baseline_counts: np.ndarray,
+                                  relative_times_ms: np.ndarray, *,
+                                  minimum_active_neurons: int = 2,
+                                  persistence_frames: int = 2) -> np.ndarray:
+    """First binwise pre-event-q99 exceedance sustained across frames."""
+    event_counts = np.asarray(event_counts, float)
+    baseline_counts = np.asarray(baseline_counts, float)
+    times = np.asarray(relative_times_ms, float)
+    if event_counts.ndim != 3 or baseline_counts.ndim != 3:
+        raise ValueError("source counts must have shape (time, y, x)")
+    if event_counts.shape[1:] != baseline_counts.shape[1:] or len(times) != len(event_counts):
+        raise ValueError("source count arrays do not align")
+    threshold = np.maximum(
+        np.quantile(baseline_counts, 0.99, axis=0),
+        float(minimum_active_neurons - 1),
+    )
+    above = event_counts > threshold
+    sustained = np.zeros_like(above)
+    for frame in range(len(above) - int(persistence_frames) + 1):
+        sustained[frame] = np.all(above[frame:frame + int(persistence_frames)], axis=0)
+    onset = np.full(above.shape[1:], np.nan)
+    for frame, time_ms in enumerate(times):
+        new = sustained[frame] & ~np.isfinite(onset)
+        onset[new] = time_ms
+    return onset
+
+
+def sheet_bin_indices(positions: np.ndarray, *, bin_mm: float,
+                      sheet_mm: float) -> tuple[np.ndarray, int]:
+    """Map E-neuron positions to a fixed square sheet grid."""
+    positions = np.asarray(positions, float)
+    if positions.ndim != 2 or positions.shape[1] != 2:
+        raise ValueError("positions must have shape (neuron, 2)")
+    size = int(round(float(sheet_mm) / float(bin_mm)))
+    if size <= 0 or not np.isclose(size * float(bin_mm), float(sheet_mm)):
+        raise ValueError("bin size must tile the square sheet")
+    xy = np.floor(positions / float(bin_mm)).astype(int)
+    xy = np.clip(xy, 0, size - 1)
+    return xy[:, 1] * size + xy[:, 0], size
+
+
+def _distinct_activity_frames(spikes: np.ndarray, *, dt_ms: float,
+                              centers_ms: np.ndarray, width_ms: float,
+                              neuron_bins: np.ndarray, size: int) -> np.ndarray:
+    spikes = np.asarray(spikes, bool)
+    centers_ms = np.asarray(centers_ms, float)
+    if spikes.ndim != 2 or neuron_bins.shape != (spikes.shape[1],):
+        raise ValueError("spikes and neuron bins must align")
+    half_steps = int(round(0.5 * float(width_ms) / float(dt_ms)))
+    output = np.zeros((len(centers_ms), size, size), float)
+    for frame, center_ms in enumerate(centers_ms):
+        center = int(round(float(center_ms) / float(dt_ms)))
+        low, high = center - half_steps, center + half_steps + 1
+        if low < 0 or high > len(spikes):
+            raise ValueError("source-topology frame falls outside the simulation")
+        active = np.any(spikes[low:high], axis=0)
+        output[frame] = np.bincount(
+            neuron_bins[active], minlength=size * size,
+        ).reshape(size, size)
+    return output
+
+
+def sheet_activity_movie(spikes: np.ndarray, positions: np.ndarray, *,
+                         dt_ms: float, frame_ms: float,
+                         bin_mm: float, sheet_mm: float) -> dict:
+    """Store a whole-run neuron-level sheet movie for event-unit re-audits."""
+    spikes = np.asarray(spikes, bool)
+    dt_ms = float(dt_ms)
+    frame_ms = float(frame_ms)
+    if spikes.ndim != 2 or dt_ms <= 0.0 or frame_ms <= 0.0:
+        raise ValueError("spikes must be 2-D and movie time steps positive")
+    steps = int(round(frame_ms / dt_ms))
+    if steps <= 0 or not np.isclose(steps * dt_ms, frame_ms):
+        raise ValueError("frame_ms must be an integer multiple of dt_ms")
+    neuron_bins, size = sheet_bin_indices(
+        positions, bin_mm=bin_mm, sheet_mm=sheet_mm,
+    )
+    if neuron_bins.shape != (spikes.shape[1],):
+        raise ValueError("spikes and positions do not align")
+    n_frames = int(np.ceil(len(spikes) / steps))
+    output = np.zeros((n_frames, size, size), dtype=np.uint16)
+    for frame in range(n_frames):
+        active = np.any(
+            spikes[frame * steps:min(len(spikes), (frame + 1) * steps)], axis=0,
+        )
+        counts = np.bincount(neuron_bins[active], minlength=size * size)
+        if np.max(counts, initial=0) > np.iinfo(np.uint16).max:
+            raise RuntimeError("sheet movie frame exceeds uint16 storage")
+        output[frame] = counts.reshape(size, size).astype(np.uint16)
+    return {
+        "activity_counts": output,
+        "frame_ms": frame_ms,
+        "bin_mm": float(bin_mm),
+        "sheet_mm": float(sheet_mm),
+    }
+
+
+def excitatory_psp_tail_support_ms(*, tau_r_ms: float, tau_d_ms: float,
+                                   tau_m_ms: float, dt_ms: float,
+                                   tail_fraction: float) -> float:
+    """Time from AMPA arrival until the linear E-cell PSP falls below a tail.
+
+    The recurrence follows the same exponential-Euler order as the SNN engine:
+    AMPA gating drives synaptic current, which then drives the membrane.  The
+    absolute spike weight cancels because only a fraction of the peak is used.
+    """
+    tau_r_ms, tau_d_ms = float(tau_r_ms), float(tau_d_ms)
+    tau_m_ms, dt_ms = float(tau_m_ms), float(dt_ms)
+    tail_fraction = float(tail_fraction)
+    if (min(tau_r_ms, tau_d_ms, tau_m_ms, dt_ms) <= 0.0
+            or not 0.0 < tail_fraction < 1.0):
+        raise ValueError("PSP timescales and tail fraction are invalid")
+    decay_s = np.exp(-dt_ms / tau_r_ms)
+    decay_i = np.exp(-dt_ms / tau_d_ms)
+    decay_v = np.exp(-dt_ms / tau_m_ms)
+    gating, current, voltage = tau_m_ms / tau_r_ms, 0.0, 0.0
+    values = []
+    maximum_steps = int(np.ceil(20.0 * max(
+        tau_r_ms, tau_d_ms, tau_m_ms,
+    ) / dt_ms))
+    for _ in range(maximum_steps):
+        current = gating + (current - gating) * decay_i
+        voltage = current + (voltage - current) * decay_v
+        values.append(voltage)
+        gating *= decay_s
+    response = np.asarray(values, float)
+    peak_index = int(np.argmax(response))
+    threshold = tail_fraction * float(response[peak_index])
+    crossing = np.flatnonzero(response[peak_index:] <= threshold)
+    if not len(crossing):
+        raise RuntimeError("PSP tail did not decay inside the integration horizon")
+    return float((peak_index + int(crossing[0])) * dt_ms)
+
+
+def local_ee_delay_quantile_ms(ampa_by_delay: list, positions_e: np.ndarray, *,
+                               dt_ms: float, bin_mm: float,
+                               neighborhood_bins: int,
+                               quantile: float) -> float:
+    """Delay support for E-to-E edges compatible with the movie parent cone."""
+    positions = np.asarray(positions_e, float)
+    dt_ms, bin_mm = float(dt_ms), float(bin_mm)
+    neighborhood_bins, quantile = int(neighborhood_bins), float(quantile)
+    if (positions.ndim != 2 or positions.shape[1] != 2 or dt_ms <= 0.0
+            or bin_mm <= 0.0 or neighborhood_bins < 0
+            or not 0.0 < quantile <= 1.0):
+        raise ValueError("local E-to-E delay contract is invalid")
+    n_e = len(positions)
+    bins = np.floor(positions / bin_mm).astype(np.int32)
+    counts = np.zeros(len(ampa_by_delay), np.int64)
+    for delay_index, matrix in enumerate(ampa_by_delay):
+        edges = matrix[:n_e, :n_e].tocoo()
+        if not edges.nnz:
+            continue
+        compatible = np.max(
+            np.abs(bins[edges.row] - bins[edges.col]), axis=1,
+        ) <= neighborhood_bins
+        counts[delay_index] = int(np.sum(compatible))
+    total = int(np.sum(counts))
+    if total == 0:
+        raise RuntimeError("movie parent cone contains no E-to-E edge")
+    target = quantile * total
+    delay_index = int(np.searchsorted(np.cumsum(counts), target, side="left"))
+    return float(delay_index * dt_ms)
+
+
+def spatiotemporal_cascade_labels(activity_counts: np.ndarray, *,
+                                  minimum_active_neurons: int) -> dict:
+    """Find contact-independent cascades in a binned neuron-activity movie.
+
+    Nodes are active sheet bins in one movie frame.  Nodes in the same or
+    adjacent sheet bins connect within a frame and to the immediately adjacent
+    frames.  At the frozen 2 ms / 1 mm resolution this is the conservative
+    propagation cone for the 0.3 mm/ms axonal velocity.  This is an operational
+    cascade definition, not proof of synaptic causation.
+    """
+    counts = np.asarray(activity_counts)
+    minimum_active_neurons = int(minimum_active_neurons)
+    if counts.ndim != 3 or not np.issubdtype(counts.dtype, np.number):
+        raise ValueError("activity_counts must have shape (time, y, x)")
+    if minimum_active_neurons <= 0 or np.any(counts < 0):
+        raise ValueError("activity counts and threshold must be nonnegative")
+    structure = np.ones((3, 3, 3), dtype=bool)
+    labels, n_components = connected_component_labels(
+        counts >= minimum_active_neurons, structure=structure,
+    )
+    flat_labels = labels.ravel()
+    node_count = np.bincount(flat_labels, minlength=n_components + 1)[1:]
+    activity_mass = np.bincount(
+        flat_labels, weights=counts.ravel(), minlength=n_components + 1,
+    )[1:]
+    components = []
+    for component in range(1, n_components + 1):
+        frames = np.flatnonzero(np.any(labels == component, axis=(1, 2)))
+        components.append({
+            "cascade_id": component,
+            "start_frame": int(frames[0]),
+            "stop_frame": int(frames[-1]),
+            "duration_frames": int(frames[-1] - frames[0] + 1),
+            "active_bin_frames": int(node_count[component - 1]),
+            "activity_mass": float(activity_mass[component - 1]),
+        })
+    return {
+        "labels": labels.astype(np.int32, copy=False),
+        "components": components,
+        "minimum_active_neurons": minimum_active_neurons,
+        "neighborhood": "3x3 sheet bins across adjacent movie frames",
+    }
+
+
+def directed_spatiotemporal_lineages(activity_counts: np.ndarray, *,
+                                     minimum_active_neurons: int,
+                                     maximum_parent_gap_frames: int = 1,
+                                     parent_neighborhood_bins: int = 1) -> dict:
+    """Trace forward-time activity lineages without merging colliding roots.
+
+    A contiguous active patch inherits roots from the nearest recent frame that
+    still lies inside the frozen fast-state memory.  Patches reached by multiple
+    roots are marked as collisions; their parents remain separate.  This is a
+    directed observational lineage at the frozen movie resolution, not proof of
+    a particular synaptic path.
+    """
+    counts = np.asarray(activity_counts)
+    minimum_active_neurons = int(minimum_active_neurons)
+    maximum_parent_gap_frames = int(maximum_parent_gap_frames)
+    parent_neighborhood_bins = int(parent_neighborhood_bins)
+    if counts.ndim != 3 or not np.issubdtype(counts.dtype, np.number):
+        raise ValueError("activity_counts must have shape (time, y, x)")
+    if (minimum_active_neurons <= 0 or np.any(counts < 0)
+            or maximum_parent_gap_frames <= 0
+            or parent_neighborhood_bins < 0):
+        raise ValueError("activity counts and threshold must be nonnegative")
+
+    active = counts >= minimum_active_neurons
+    patch_structure = np.ones((3, 3), dtype=bool)
+    lineage_labels = np.zeros(counts.shape, dtype=np.int32)
+    collision_mask = np.zeros(counts.shape, dtype=bool)
+    roots: dict[int, dict] = {}
+    next_root = 1
+    for frame in range(len(active)):
+        resumed_roots_this_frame: set[int] = set()
+        patches, n_patches = connected_component_labels(
+            active[frame], structure=patch_structure,
+        )
+        for patch_id in range(1, n_patches + 1):
+            patch = patches == patch_id
+            neighborhood = (
+                patch if parent_neighborhood_bins == 0 else binary_dilation(
+                    patch, structure=patch_structure,
+                    iterations=parent_neighborhood_bins,
+                )
+            )
+            inherited = np.asarray([], int)
+            parent_labels = None
+            parent_gap = None
+            for gap in range(1, min(maximum_parent_gap_frames, frame) + 1):
+                prior = lineage_labels[frame - gap]
+                candidates = np.unique(prior[neighborhood])
+                candidates = candidates[candidates > 0].astype(int)
+                if len(candidates):
+                    inherited = candidates
+                    parent_labels = prior
+                    parent_gap = gap
+                    break
+            if not len(inherited):
+                inherited = np.asarray([next_root], int)
+                roots[next_root] = {
+                    "cascade_id": next_root,
+                    "lineage_id": next_root,
+                    "start_frame": int(frame),
+                    "stop_frame": int(frame),
+                    "last_any_frame": int(frame),
+                    "active_bin_frames": 0,
+                    "activity_mass": 0.0,
+                    "collision_bin_frames": 0,
+                    "collision_activity_mass": 0.0,
+                    "resumed_after_gap_count": 0,
+                    "maximum_parent_gap_frames_observed": 0,
+                }
+                next_root += 1
+                parent_gap = 0
+            if len(inherited) == 1:
+                lineage_labels[frame][patch] = int(inherited[0])
+            else:
+                if parent_labels is None:
+                    raise RuntimeError("multiple roots require a resolved parent frame")
+                coordinates = np.argwhere(patch)
+                distance_rows = []
+                for root_id in inherited:
+                    source = np.argwhere(parent_labels == root_id)
+                    delta = coordinates[:, None, :] - source[None, :, :]
+                    distance_rows.append(np.min(np.sum(delta * delta, axis=2), axis=1))
+                distances = np.asarray(distance_rows, float)
+                minimum = np.min(distances, axis=0)
+                winners = np.isclose(distances, minimum[None, :])
+                unique = np.sum(winners, axis=0) == 1
+                selected = np.argmax(winners, axis=0)
+                for local_index, coordinate in enumerate(coordinates):
+                    location = (int(coordinate[0]), int(coordinate[1]))
+                    if unique[local_index]:
+                        lineage_labels[frame][location] = int(inherited[selected[local_index]])
+                    else:
+                        lineage_labels[frame][location] = -1
+                        collision_mask[frame][location] = True
+
+            for root_id in inherited:
+                selected = (lineage_labels[frame] == root_id) & patch
+                if np.any(selected):
+                    row = roots[int(root_id)]
+                    row["stop_frame"] = int(frame)
+                    row["last_any_frame"] = int(frame)
+                    row["active_bin_frames"] += int(np.sum(selected))
+                    row["activity_mass"] += float(np.sum(counts[frame][selected]))
+                    row["maximum_parent_gap_frames_observed"] = max(
+                        int(row["maximum_parent_gap_frames_observed"]),
+                        int(parent_gap),
+                    )
+                    if (int(parent_gap) > 1
+                            and int(root_id) not in resumed_roots_this_frame):
+                        row["resumed_after_gap_count"] += 1
+                        resumed_roots_this_frame.add(int(root_id))
+            collision = collision_mask[frame] & patch
+            if np.any(collision):
+                collision_bins = int(np.sum(collision))
+                collision_mass = float(np.sum(counts[frame][collision]))
+                for root_id in inherited:
+                    row = roots[int(root_id)]
+                    row["last_any_frame"] = int(frame)
+                    row["collision_bin_frames"] += collision_bins
+                    row["collision_activity_mass"] += collision_mass
+    components = []
+    for root_id in sorted(roots):
+        row = dict(roots[root_id])
+        row["duration_frames"] = int(row["stop_frame"] - row["start_frame"] + 1)
+        row["root_collision_observed"] = bool(row["collision_bin_frames"] > 0)
+        components.append(row)
+    return {
+        "labels": lineage_labels,
+        "collision_mask": collision_mask,
+        "components": components,
+        "minimum_active_neurons": minimum_active_neurons,
+        "maximum_parent_gap_frames": maximum_parent_gap_frames,
+        "parent_neighborhood_bins": parent_neighborhood_bins,
+        "causal_rule": (
+            "forward seeded watershed from the nearest recent parent frame within "
+            f"{maximum_parent_gap_frames} frame(s) and a "
+            f"{parent_neighborhood_bins}-bin spatial neighborhood; "
+            "multiple inherited roots remain separate and only equidistant boundaries "
+            "are marked as collisions"
+        ),
+    }
+
+
+def binned_ee_delay_support(ampa_by_delay: list, positions_e: np.ndarray, *,
+                            dt_ms: float, frame_ms: float, bin_mm: float,
+                            sheet_mm: float,
+                            delay_rounding: str = "nearest") -> dict:
+    """Aggregate frozen E-to-E weights into delayed sheet-bin support.
+
+    The returned tensor is normalized so multiplying one ``[source_bin]`` row
+    by the number of active source neurons estimates the fraction of the
+    target bin's total incoming E budget attributable to those sources.  It is
+    an observation-independent structural support measure; contacts and event
+    labels are not inputs.
+    """
+    positions = np.asarray(positions_e, float)
+    dt_ms, frame_ms = float(dt_ms), float(frame_ms)
+    if dt_ms <= 0.0 or frame_ms <= 0.0:
+        raise ValueError("delay-support time steps must be positive")
+    if delay_rounding not in {"floor", "nearest", "ceil"}:
+        raise ValueError("delay rounding must be floor, nearest or ceil")
+    neuron_bins, size = sheet_bin_indices(
+        positions, bin_mm=float(bin_mm), sheet_mm=float(sheet_mm),
+    )
+    n_e = len(positions)
+    n_bins = size * size
+    source_population = np.bincount(
+        neuron_bins, minlength=n_bins,
+    ).astype(float)
+
+    def delay_frame(delay_ms: float) -> int:
+        value = delay_ms / frame_ms
+        if delay_rounding == "floor":
+            rounded = int(np.floor(value))
+        elif delay_rounding == "ceil":
+            rounded = int(np.ceil(value))
+        else:
+            rounded = int(np.floor(value + 0.5))
+        # The movie does not resolve within-frame spike order.  A parent must
+        # therefore precede its child by at least one complete movie frame.
+        return max(1, rounded)
+
+    maximum_lag = max(
+        [delay_frame(index * dt_ms) for index, matrix in enumerate(ampa_by_delay)
+         if matrix.nnz] or [1]
+    )
+    weights = np.zeros(
+        (maximum_lag + 1, n_bins, n_bins), dtype=np.float32,
+    )
+    incoming = np.zeros(n_bins, dtype=float)
+    edge_count = 0
+    for delay_index, matrix in enumerate(ampa_by_delay):
+        ee = matrix[:n_e, :n_e]
+        if not ee.nnz:
+            continue
+        coo = ee.tocoo()
+        target_bins = neuron_bins[np.asarray(coo.row, int)]
+        source_bins = neuron_bins[np.asarray(coo.col, int)]
+        values = np.asarray(coo.data, np.float32)
+        lag = delay_frame(delay_index * dt_ms)
+        np.add.at(weights[lag], (target_bins, source_bins), values)
+        np.add.at(incoming, target_bins, values.astype(float))
+        edge_count += int(coo.nnz)
+    if edge_count == 0:
+        raise RuntimeError("E-to-E support requires at least one frozen edge")
+    source_denominator = np.where(
+        source_population > 0.0, source_population, 1.0,
+    ).astype(np.float32)
+    incoming_denominator = np.where(incoming > 0.0, incoming, 1.0).astype(
+        np.float32,
+    )
+    weights /= source_denominator[None, None, :]
+    weights /= incoming_denominator[None, :, None]
+    return {
+        "support_by_lag": weights,
+        "source_population": source_population,
+        "target_incoming_weight": incoming,
+        "empty_source_bins": np.flatnonzero(source_population == 0.0),
+        "zero_incoming_target_bins": np.flatnonzero(incoming == 0.0),
+        "delay_rounding": delay_rounding,
+        "frame_ms": frame_ms,
+        "bin_mm": float(bin_mm),
+        "sheet_mm": float(sheet_mm),
+        "edge_count": edge_count,
+    }
+
+
+def edge_supported_root_families(activity_counts: np.ndarray,
+                                 root_labels: np.ndarray,
+                                 support_by_lag: np.ndarray, *,
+                                 minimum_active_neurons: int,
+                                 minimum_parent_support: float,
+                                 minimum_parent_dominance: float) -> dict:
+    """Merge local roots only when frozen delayed E-to-E support is strong.
+
+    Local movie lineages remain the conservative starting partition.  A later
+    root joins an earlier family only when active neurons in that family can
+    deliver enough delayed E-to-E input to the new root's birth patch and one
+    family accounts for the frozen dominance fraction.  This repairs long-range
+    propagation that a local geometric cone would otherwise split, without
+    allowing a long detector window to merge unrelated roots.
+    """
+    counts = np.asarray(activity_counts)
+    labels = np.asarray(root_labels, int)
+    support = np.asarray(support_by_lag, float)
+    minimum_active_neurons = int(minimum_active_neurons)
+    minimum_parent_support = float(minimum_parent_support)
+    minimum_parent_dominance = float(minimum_parent_dominance)
+    if counts.shape != labels.shape or counts.ndim != 3:
+        raise ValueError("activity and local-root labels must align")
+    n_bins = counts.shape[1] * counts.shape[2]
+    if support.ndim != 3 or support.shape[1:] != (n_bins, n_bins):
+        raise ValueError("delayed E-to-E support does not match the sheet grid")
+    if (minimum_active_neurons <= 0 or minimum_parent_support < 0.0
+            or not 0.5 < minimum_parent_dominance <= 1.0
+            or np.any(support < 0.0) or not np.all(np.isfinite(support))):
+        raise ValueError("invalid edge-supported root-family contract")
+
+    root_ids = np.unique(labels)
+    root_ids = root_ids[root_ids > 0].astype(int)
+    parent = {int(root_id): int(root_id) for root_id in root_ids}
+
+    def find(root_id: int) -> int:
+        root_id = int(root_id)
+        trail = []
+        while parent[root_id] != root_id:
+            trail.append(root_id)
+            root_id = parent[root_id]
+        for member in trail:
+            parent[member] = root_id
+        return root_id
+
+    positive_coordinates = np.argwhere(labels > 0)
+    positive_roots = labels[labels > 0].astype(int)
+    coordinates_by_root: dict[int, list[np.ndarray]] = {
+        int(root_id): [] for root_id in root_ids
+    }
+    for coordinate, root_id in zip(positive_coordinates, positive_roots):
+        coordinates_by_root[int(root_id)].append(coordinate)
+    births = []
+    for root_id in root_ids:
+        coordinates = np.asarray(coordinates_by_root[int(root_id)], int)
+        births.append((int(np.min(coordinates[:, 0])), int(root_id), coordinates))
+    births.sort()
+    active = counts >= minimum_active_neurons
+    birth_audit = []
+    merged = 0
+    for frame, root_id, coordinates in births:
+        target = coordinates[coordinates[:, 0] == frame]
+        target_bins = np.unique(
+            target[:, 1] * counts.shape[2] + target[:, 2]
+        ).astype(int)
+        family_support: dict[int, float] = {}
+        for lag in range(1, min(len(support), frame + 1)):
+            source_frame = frame - lag
+            source_bins = np.flatnonzero(active[source_frame].ravel())
+            if not len(source_bins):
+                continue
+            source_roots = labels[source_frame].ravel()[source_bins]
+            keep = source_roots > 0
+            source_bins = source_bins[keep]
+            source_roots = source_roots[keep]
+            if not len(source_bins):
+                continue
+            source_activity = counts[source_frame].ravel()[source_bins].astype(float)
+            contribution = np.mean(
+                support[lag][np.ix_(target_bins, source_bins)], axis=0,
+            ) * source_activity
+            for source_root in np.unique(source_roots):
+                family = find(int(source_root))
+                value = float(np.sum(contribution[source_roots == source_root]))
+                family_support[family] = family_support.get(family, 0.0) + value
+        total_support = float(sum(family_support.values()))
+        if family_support:
+            dominant_family, dominant_support = max(
+                family_support.items(), key=lambda item: item[1],
+            )
+            dominance = (
+                float(dominant_support / total_support)
+                if total_support > 0.0 else 0.0
+            )
+        else:
+            dominant_family, dominant_support, dominance = None, 0.0, 0.0
+        should_merge = bool(
+            dominant_family is not None
+            and dominant_support >= minimum_parent_support
+            and dominance >= minimum_parent_dominance
+        )
+        if should_merge:
+            parent[int(root_id)] = find(int(dominant_family))
+            merged += 1
+        birth_audit.append({
+            "root_id": int(root_id),
+            "birth_frame": int(frame),
+            "dominant_parent_family": (
+                None if dominant_family is None else int(dominant_family)
+            ),
+            "dominant_parent_support": float(dominant_support),
+            "total_parent_support": total_support,
+            "parent_dominance": dominance,
+            "merged": should_merge,
+        })
+
+    family_map = {int(root_id): find(int(root_id)) for root_id in root_ids}
+    family_labels = np.array(labels, copy=True)
+    lookup = np.arange(int(np.max(root_ids)) + 1, dtype=np.int32)
+    for root_id, family in family_map.items():
+        lookup[int(root_id)] = int(family)
+    positive = labels > 0
+    family_labels[positive] = lookup[labels[positive]]
+    positive_coordinates = np.argwhere(family_labels > 0)
+    positive_families = family_labels[family_labels > 0].astype(int)
+    positive_mass = counts[family_labels > 0].astype(float)
+    coordinates_by_family: dict[int, list[np.ndarray]] = {}
+    mass_by_family: dict[int, float] = {}
+    for coordinate, family, mass in zip(
+            positive_coordinates, positive_families, positive_mass):
+        family = int(family)
+        coordinates_by_family.setdefault(family, []).append(coordinate)
+        mass_by_family[family] = mass_by_family.get(family, 0.0) + float(mass)
+    components = []
+    for family in sorted(set(family_map.values())):
+        coordinates = np.asarray(coordinates_by_family[int(family)], int)
+        frames = coordinates[:, 0]
+        members = sorted([
+            root_id for root_id, mapped in family_map.items() if mapped == family
+        ])
+        components.append({
+            "cascade_id": int(family),
+            "lineage_id": int(family),
+            "member_lineage_ids": members,
+            "start_frame": int(np.min(frames)),
+            "stop_frame": int(np.max(frames)),
+            "duration_frames": int(np.max(frames) - np.min(frames) + 1),
+            "active_bin_frames": int(len(coordinates)),
+            "activity_mass": float(mass_by_family[int(family)]),
+        })
+    return {
+        "labels": family_labels,
+        "components": components,
+        "family_map": family_map,
+        "birth_audit": birth_audit,
+        "n_local_roots": int(len(root_ids)),
+        "n_edge_supported_families": int(len(components)),
+        "n_merged_births": int(merged),
+        "minimum_parent_support": minimum_parent_support,
+        "minimum_parent_dominance": minimum_parent_dominance,
+    }
+
+
+def assign_detector_fragments_to_directed_lineages(
+        activity_counts: np.ndarray, lineage_labels: np.ndarray,
+        fragments: list[dict], *, frame_ms: float,
+        minimum_dominance: float) -> list[dict]:
+    """Assign fragments by root mass while counting collision mass as ambiguity."""
+    counts = np.asarray(activity_counts, float)
+    labels = np.asarray(lineage_labels, int)
+    frame_ms = float(frame_ms)
+    minimum_dominance = float(minimum_dominance)
+    if counts.shape != labels.shape or counts.ndim != 3:
+        raise ValueError("activity counts and directed lineage labels must align")
+    if frame_ms <= 0.0 or not 0.5 < minimum_dominance <= 1.0:
+        raise ValueError("invalid frame duration or lineage dominance threshold")
+    output = []
+    for index, fragment in enumerate(fragments):
+        start = max(0, int(np.floor(float(fragment["t_on"]) / frame_ms)))
+        stop = min(len(counts), int(np.floor(float(fragment["t_off"]) / frame_ms)) + 1)
+        local_labels = labels[start:stop].ravel()
+        local_counts = counts[start:stop].ravel()
+        positive = local_labels > 0
+        collision = local_labels < 0
+        masses = np.bincount(
+            local_labels[positive], weights=local_counts[positive],
+        ) if np.any(positive) else np.zeros(1, float)
+        positive_mass = float(np.sum(masses[1:])) if len(masses) > 1 else 0.0
+        collision_mass = float(np.sum(local_counts[collision]))
+        total = positive_mass + collision_mass
+        if positive_mass <= 0.0 or total <= 0.0:
+            dominant_id, dominance, second = None, 0.0, 0.0
+        else:
+            order = np.argsort(masses[1:])[::-1] + 1
+            dominant_id = int(order[0])
+            dominance = float(masses[dominant_id] / total)
+            second = float(masses[order[1]] / total) if len(order) > 1 else 0.0
+        output.append({
+            "detector_fragment_index": int(index),
+            "dominant_cascade_id": dominant_id,
+            "dominant_lineage_id": dominant_id,
+            "dominant_activity_fraction": dominance,
+            "second_activity_fraction": second,
+            "collision_activity_fraction": (
+                float(collision_mass / total) if total > 0.0 else 0.0
+            ),
+            "lineage_activity_fractions": [
+                {
+                    "lineage_id": int(root_id),
+                    "fraction": float(masses[root_id] / total),
+                }
+                for root_id in np.flatnonzero(masses > 0.0)
+                if int(root_id) > 0 and total > 0.0
+            ],
+            "compound": bool(dominant_id is None or dominance < minimum_dominance),
+        })
+    return output
+
+
+def directed_lineage_onset_maps(lineage_labels: np.ndarray,
+                                events: list[dict], *,
+                                frame_ms: float) -> dict:
+    """Return each directed root's first-arrival map at movie resolution."""
+    labels = np.asarray(lineage_labels, int)
+    frame_ms = float(frame_ms)
+    if labels.ndim != 3 or frame_ms <= 0.0:
+        raise ValueError("lineage labels must be 3-D and frame_ms positive")
+    maps = np.full((len(events), *labels.shape[1:]), np.nan, np.float32)
+    evaluable = np.zeros(len(events), bool)
+    for event_index, event in enumerate(events):
+        lineage_ids = event.get("lineage_ids")
+        if lineage_ids is None:
+            cascade_id = event.get("cascade_id")
+            lineage_ids = [] if cascade_id is None else [cascade_id]
+        lineage_ids = np.asarray(lineage_ids, int)
+        if not len(lineage_ids):
+            continue
+        support = np.isin(labels, lineage_ids)
+        start = max(0, int(np.floor(float(event.get("t_on", 0.0)) / frame_ms)))
+        stop = min(len(labels), int(np.ceil(
+            float(event.get("t_off", len(labels) * frame_ms)) / frame_ms,
+        )))
+        support[:start] = False
+        support[stop:] = False
+        if not np.any(support):
+            continue
+        frames, ys, xs = np.nonzero(support)
+        first = np.full(labels.shape[1:], np.inf, float)
+        np.minimum.at(first, (ys, xs), frames.astype(float) * frame_ms)
+        finite = np.isfinite(first)
+        first[finite] -= float(np.min(first[finite]))
+        maps[event_index, finite] = first[finite].astype(np.float32)
+        evaluable[event_index] = True
+    return {"onset_maps_ms": maps, "evaluable": evaluable}
+
+
+def sheet_contact_sampling_weights(contact_xy: np.ndarray,
+                                   bin_population: np.ndarray, *,
+                                   bin_mm: float,
+                                   kernel_width_mm: float) -> np.ndarray:
+    """Approximate the per-neuron Gaussian readout on a binned sheet.
+
+    The denominator uses the number of E neurons in each sheet bin.  This is the
+    binned equivalent of normalizing the original per-neuron Gaussian weights,
+    rather than incorrectly giving every occupied sheet bin equal weight.
+    """
+    contacts = np.asarray(contact_xy, float)
+    population = np.asarray(bin_population, float)
+    bin_mm = float(bin_mm)
+    kernel_width_mm = float(kernel_width_mm)
+    if (contacts.ndim != 2 or contacts.shape[1] != 2
+            or population.ndim != 2 or np.any(population < 0)
+            or bin_mm <= 0.0 or kernel_width_mm <= 0.0):
+        raise ValueError("invalid contact geometry or sheet population")
+    y_index, x_index = np.indices(population.shape)
+    centers = np.column_stack((
+        (x_index.ravel() + 0.5) * bin_mm,
+        (y_index.ravel() + 0.5) * bin_mm,
+    ))
+    weights = []
+    for contact in contacts:
+        distance2 = np.sum((centers - contact[None, :]) ** 2, axis=1)
+        row = np.exp(-distance2 / (2.0 * kernel_width_mm ** 2))
+        denominator = float(np.sum(row * population.ravel()))
+        if denominator <= 0.0:
+            raise RuntimeError("contact Gaussian footprint contains no E neurons")
+        weights.append(row / denominator)
+    return np.asarray(weights, float).reshape(len(contacts), *population.shape)
+
+
+def binned_contact_envelope(activity_counts: np.ndarray,
+                            contact_weights: np.ndarray, *,
+                            frame_ms: float,
+                            smooth_ms: float) -> np.ndarray:
+    """Project a binned E-activity movie through the frozen contact sampler."""
+    counts = np.asarray(activity_counts, float)
+    weights = np.asarray(contact_weights, float)
+    frame_ms = float(frame_ms)
+    smooth_ms = float(smooth_ms)
+    if (counts.ndim != 3 or weights.ndim != 3
+            or counts.shape[1:] != weights.shape[1:]
+            or frame_ms <= 0.0 or smooth_ms <= 0.0):
+        raise ValueError("activity movie and contact weights do not align")
+    raw = counts.reshape(len(counts), -1) @ weights.reshape(len(weights), -1).T
+    sigma = max(1e-6, smooth_ms / frame_ms)
+    half = int(np.ceil(3.0 * sigma))
+    axis = np.arange(-half, half + 1)
+    kernel = np.exp(-(axis ** 2) / (2.0 * sigma ** 2))
+    kernel /= np.sum(kernel)
+    output = []
+    center = (len(kernel) - 1) // 2
+    for contact in range(raw.shape[1]):
+        full = np.convolve(raw[:, contact], kernel, mode="full")
+        output.append(full[center:center + len(raw)])
+    return np.stack(output)
+
+
+def neuron_contact_sampling_weights(positions: np.ndarray,
+                                    contacts: np.ndarray, *,
+                                    kernel_width_mm: float) -> np.ndarray:
+    """Return the exact normalized per-neuron Gaussian contact sampler."""
+    positions = np.asarray(positions, float)
+    contacts = np.asarray(contacts, float)
+    kernel_width_mm = float(kernel_width_mm)
+    if (positions.ndim != 2 or positions.shape[1] != 2
+            or contacts.ndim != 2 or contacts.shape[1] != 2
+            or kernel_width_mm <= 0.0):
+        raise ValueError("neuron positions, contacts and kernel width are invalid")
+    distance2 = np.sum(
+        (contacts[:, None, :] - positions[None, :, :]) ** 2, axis=2,
+    )
+    weights = np.exp(-distance2 / (2.0 * kernel_width_mm ** 2))
+    denominator = np.sum(weights, axis=1, keepdims=True)
+    if np.any(denominator <= 0.0):
+        raise RuntimeError("contact Gaussian footprint contains no E neurons")
+    return weights / denominator
+
+
+def bin_neuron_spikes(spikes: np.ndarray, *, dt_ms: float,
+                      frame_ms: float) -> np.ndarray:
+    """Bin per-neuron spikes onto the directed-lineage movie frames."""
+    spikes = np.asarray(spikes, bool)
+    dt_ms = float(dt_ms)
+    frame_ms = float(frame_ms)
+    if spikes.ndim != 2 or dt_ms <= 0.0 or frame_ms <= 0.0:
+        raise ValueError("spikes and frame durations are invalid")
+    steps = int(round(frame_ms / dt_ms))
+    if steps <= 0 or not np.isclose(steps * dt_ms, frame_ms):
+        raise ValueError("frame_ms must be an integer multiple of dt_ms")
+    n_frames = len(spikes) // steps
+    maximum = steps
+    dtype = np.uint8 if maximum <= np.iinfo(np.uint8).max else np.uint16
+    return spikes[:n_frames * steps].reshape(
+        n_frames, steps, spikes.shape[1],
+    ).sum(axis=1, dtype=dtype)
+
+
+def _smooth_contact_series(raw: np.ndarray, *, frame_ms: float,
+                           smooth_ms: float) -> np.ndarray:
+    raw = np.asarray(raw, float)
+    sigma = float(smooth_ms) / float(frame_ms)
+    if raw.ndim != 2 or sigma <= 0.0:
+        raise ValueError("contact series and smoothing scale are invalid")
+    half = int(np.ceil(3.0 * sigma))
+    axis = np.arange(-half, half + 1)
+    kernel = np.exp(-(axis ** 2) / (2.0 * sigma ** 2))
+    kernel /= np.sum(kernel)
+    center = (len(kernel) - 1) // 2
+    output = []
+    for contact in range(raw.shape[1]):
+        full = np.convolve(raw[:, contact], kernel, mode="full")
+        output.append(full[center:center + len(raw)])
+    return np.stack(output)
+
+
+def lineage_restricted_neuron_contact_readout(
+        binned_spikes: np.ndarray, neuron_bins: np.ndarray,
+        lineage_labels: np.ndarray, events: list[dict],
+        contact_weights: np.ndarray, *, frame_ms: float, smooth_ms: float,
+        participation_margin_fraction: float,
+        timing_fraction: float) -> dict:
+    """Read contacts from exact neuron spikes assigned to one directed root."""
+    binned = np.asarray(binned_spikes)
+    neuron_bins = np.asarray(neuron_bins, int)
+    labels = np.asarray(lineage_labels, int)
+    weights = np.asarray(contact_weights, float)
+    frame_ms = float(frame_ms)
+    smooth_ms = float(smooth_ms)
+    margin = float(participation_margin_fraction)
+    timing = float(timing_fraction)
+    if (binned.ndim != 2 or labels.ndim != 3
+            or len(binned) > len(labels)
+            or neuron_bins.shape != (binned.shape[1],)
+            or weights.shape[1] != binned.shape[1]
+            or frame_ms <= 0.0 or smooth_ms <= 0.0
+            or not 0.0 < margin < 1.0 or not 0.0 < timing <= 1.0):
+        raise ValueError("neuron lineage readout arrays do not align")
+    flat_labels = labels[:len(binned)].reshape(len(binned), -1)
+    if np.any(neuron_bins < 0) or np.max(neuron_bins, initial=-1) >= flat_labels.shape[1]:
+        raise ValueError("neuron bin index lies outside lineage movie")
+    n_contacts = len(weights)
+    onset_rows = np.full((len(events), n_contacts), np.nan)
+    rank_rows = np.full((len(events), n_contacts), np.nan)
+    pad = int(np.ceil(3.0 * smooth_ms / frame_ms))
+    for event_index, event in enumerate(events):
+        lineage_ids = np.asarray(
+            event.get("lineage_ids", [event["cascade_id"]]), int,
+        )
+        start = max(0, int(round(float(event["t_on"]) / frame_ms)))
+        stop = min(len(binned), int(round(float(event["t_off"]) / frame_ms)))
+        if stop <= start:
+            continue
+        local_start, local_stop = max(0, start - pad), min(len(binned), stop + pad)
+        root_per_neuron = (
+            np.isin(
+                flat_labels[local_start:local_stop, neuron_bins], lineage_ids,
+            )
+        )
+        selected = binned[local_start:local_stop] * root_per_neuron
+        raw = np.asarray(selected, float) @ weights.T
+        envelope = _smooth_contact_series(
+            raw, frame_ms=frame_ms, smooth_ms=smooth_ms,
+        )
+        segment = envelope[:, start - local_start:stop - local_start]
+        if not segment.size:
+            continue
+        floor = float(np.min(segment))
+        peak = np.max(segment, axis=1)
+        participation_bar = floor + margin * (float(np.max(segment)) - floor)
+        participating = peak > participation_bar
+        onsets = np.full(n_contacts, np.nan)
+        for contact in np.flatnonzero(participating):
+            crossing = np.flatnonzero(segment[contact] >= timing * peak[contact])
+            if len(crossing):
+                onsets[contact] = (start + int(crossing[0])) * frame_ms
+        onset_rows[event_index] = onsets
+        rank_rows[event_index] = _dense_onset_ranks(onsets)
+    return {"onsets": onset_rows, "ranks": rank_rows}
+
+
+def _dense_onset_ranks(onsets: np.ndarray) -> np.ndarray:
+    ranks = np.full(len(onsets), np.nan)
+    finite = np.flatnonzero(np.isfinite(onsets))
+    if not len(finite):
+        return ranks
+    order = finite[np.argsort(onsets[finite], kind="mergesort")]
+    rank = 0.0
+    previous = float(onsets[order[0]])
+    ranks[order[0]] = rank
+    for index in order[1:]:
+        value = float(onsets[index])
+        if value > previous:
+            rank += 1.0
+            previous = value
+        ranks[index] = rank
+    return ranks
+
+
+def lineage_restricted_contact_readout(activity_counts: np.ndarray,
+                                       lineage_labels: np.ndarray,
+                                       events: list[dict],
+                                       contact_weights: np.ndarray, *,
+                                       frame_ms: float,
+                                       smooth_ms: float,
+                                       participation_margin_fraction: float,
+                                       timing_fraction: float) -> dict:
+    """Extract contact ranks using only activity assigned to each event root."""
+    counts = np.asarray(activity_counts, float)
+    labels = np.asarray(lineage_labels, int)
+    weights = np.asarray(contact_weights, float)
+    frame_ms = float(frame_ms)
+    smooth_ms = float(smooth_ms)
+    margin = float(participation_margin_fraction)
+    timing = float(timing_fraction)
+    if counts.shape != labels.shape or counts.ndim != 3:
+        raise ValueError("activity counts and lineage labels must align")
+    if (weights.ndim != 3 or weights.shape[1:] != counts.shape[1:]
+            or frame_ms <= 0.0 or smooth_ms <= 0.0
+            or not 0.0 < margin < 1.0 or not 0.0 < timing <= 1.0):
+        raise ValueError("invalid lineage contact-readout contract")
+    n_contacts = len(weights)
+    onset_rows = np.full((len(events), n_contacts), np.nan)
+    rank_rows = np.full((len(events), n_contacts), np.nan)
+    sigma = smooth_ms / frame_ms
+    pad = int(np.ceil(3.0 * sigma))
+    for event_index, event in enumerate(events):
+        lineage_ids = np.asarray(
+            event.get("lineage_ids", [event["cascade_id"]]), int,
+        )
+        start = max(0, int(round(float(event["t_on"]) / frame_ms)))
+        stop = min(len(counts), int(round(float(event["t_off"]) / frame_ms)))
+        if stop <= start:
+            continue
+        local_start, local_stop = max(0, start - pad), min(len(counts), stop + pad)
+        selected = counts[local_start:local_stop] * (
+            np.isin(labels[local_start:local_stop], lineage_ids)
+        )
+        envelope = binned_contact_envelope(
+            selected, weights, frame_ms=frame_ms, smooth_ms=smooth_ms,
+        )
+        segment = envelope[:, start - local_start:stop - local_start]
+        if not segment.size:
+            continue
+        floor = float(np.min(segment))
+        peak = np.max(segment, axis=1)
+        participation_bar = floor + margin * (float(np.max(segment)) - floor)
+        participating = peak > participation_bar
+        onsets = np.full(n_contacts, np.nan)
+        for contact in np.flatnonzero(participating):
+            crossing = np.flatnonzero(segment[contact] >= timing * peak[contact])
+            if len(crossing):
+                onsets[contact] = (start + int(crossing[0])) * frame_ms
+        onset_rows[event_index] = onsets
+        rank_rows[event_index] = _dense_onset_ranks(onsets)
+    return {"onsets": onset_rows, "ranks": rank_rows}
+
+
+def assign_detector_fragments_to_cascades(activity_counts: np.ndarray,
+                                          cascade_labels: np.ndarray,
+                                          fragments: list[dict], *,
+                                          frame_ms: float,
+                                          minimum_dominance: float) -> list[dict]:
+    """Assign detector fragments to a dominant cascade or mark them compound."""
+    counts = np.asarray(activity_counts, float)
+    labels = np.asarray(cascade_labels, int)
+    frame_ms = float(frame_ms)
+    minimum_dominance = float(minimum_dominance)
+    if counts.shape != labels.shape or counts.ndim != 3:
+        raise ValueError("activity counts and cascade labels must align")
+    if frame_ms <= 0.0 or not 0.5 < minimum_dominance <= 1.0:
+        raise ValueError("invalid frame duration or cascade dominance threshold")
+    output = []
+    for index, fragment in enumerate(fragments):
+        start = max(0, int(np.floor(float(fragment["t_on"]) / frame_ms)))
+        stop = min(len(counts), int(np.floor(float(fragment["t_off"]) / frame_ms)) + 1)
+        local_labels = labels[start:stop].ravel()
+        local_counts = counts[start:stop].ravel()
+        valid = local_labels > 0
+        masses = np.bincount(
+            local_labels[valid], weights=local_counts[valid],
+        ) if np.any(valid) else np.zeros(1, float)
+        if len(masses) <= 1 or float(np.sum(masses[1:])) <= 0.0:
+            dominant_id, dominance, second = None, 0.0, 0.0
+        else:
+            order = np.argsort(masses[1:])[::-1] + 1
+            total = float(np.sum(masses[1:]))
+            dominant_id = int(order[0])
+            dominance = float(masses[dominant_id] / total)
+            second = float(masses[order[1]] / total) if len(order) > 1 else 0.0
+        output.append({
+            "detector_fragment_index": int(index),
+            "dominant_cascade_id": dominant_id,
+            "dominant_activity_fraction": dominance,
+            "second_activity_fraction": second,
+            "compound": bool(dominant_id is None or dominance < minimum_dominance),
+        })
+    return output
+
+
+def cascade_event_windows(components: list[dict], assignments: list[dict],
+                          fragments: list[dict], *, frame_ms: float,
+                          total_ms: float) -> tuple[list[dict], list[dict]]:
+    """Build causal-consistent event windows and retain compounds separately."""
+    frame_ms = float(frame_ms)
+    total_ms = float(total_ms)
+    if frame_ms <= 0.0 or total_ms <= 0.0 or len(assignments) != len(fragments):
+        raise ValueError("cascade event inputs are inconsistent")
+    component_by_id = {int(row["cascade_id"]): row for row in components}
+    groups: dict[int, list[int]] = {}
+    compounds = []
+    for assignment, fragment in zip(assignments, fragments):
+        fragment_index = int(assignment["detector_fragment_index"])
+        if assignment["compound"] or assignment["dominant_cascade_id"] is None:
+            compounds.append({
+                "detector_fragment_indices": [fragment_index],
+                "t_on": float(fragment["t_on"]),
+                "t_off": float(fragment["t_off"]),
+                "compound": True,
+                "dominant_activity_fraction": float(
+                    assignment["dominant_activity_fraction"]
+                ),
+            })
+            continue
+        cascade_id = int(assignment["dominant_cascade_id"])
+        if cascade_id not in component_by_id:
+            raise RuntimeError("fragment references an absent cascade")
+        groups.setdefault(cascade_id, []).append(fragment_index)
+    events = []
+    for cascade_id, fragment_indices in groups.items():
+        component = component_by_id[cascade_id]
+        selected = [fragments[index] for index in fragment_indices]
+        component_on = float(component["start_frame"]) * frame_ms
+        component_off = float(component["stop_frame"] + 1) * frame_ms
+        t_on = max(0.0, min(component_on, min(
+            float(fragment["t_on"]) for fragment in selected
+        )))
+        t_off = min(total_ms, max(component_off, max(
+            float(fragment["t_off"]) for fragment in selected
+        )))
+        events.append({
+            "cascade_id": cascade_id,
+            "detector_fragment_indices": sorted(fragment_indices),
+            "trigger_t_on": float(min(
+                fragment["t_on"] for fragment in selected
+            )),
+            "trigger_t_off": float(max(
+                fragment["t_off"] for fragment in selected
+            )),
+            "t_on": t_on,
+            "t_off": t_off,
+            "dur_ms": float(max(frame_ms, t_off - t_on)),
+            "returned": bool(
+                t_off < total_ms
+                and all(bool(fragment.get("returned", True)) for fragment in selected)
+            ),
+            "compound": False,
+            "activity_mass": float(component["activity_mass"]),
+            "active_bin_frames": int(component["active_bin_frames"]),
+        })
+    events.sort(key=lambda row: (row["t_on"], row["cascade_id"]))
+    compounds.sort(key=lambda row: row["t_on"])
+    return events, compounds
+
+
+def causal_root_event_windows(components: list[dict], assignments: list[dict],
+                              fragments: list[dict], *, frame_ms: float,
+                              total_ms: float) -> tuple[list[dict], list[dict]]:
+    """Use one directed root as one event and retain mixed fragments separately.
+
+    Detector fragments establish observability only.  They never expand a
+    root's latent start or stop time, and a mixed fragment is not forced into a
+    patient direction class.
+    """
+    frame_ms = float(frame_ms)
+    total_ms = float(total_ms)
+    if frame_ms <= 0.0 or total_ms <= 0.0 or len(assignments) != len(fragments):
+        raise ValueError("causal-root event inputs are inconsistent")
+    component_by_id = {int(row["cascade_id"]): row for row in components}
+    groups: dict[int, list[int]] = {}
+    compounds = []
+    for assignment, fragment in zip(assignments, fragments):
+        fragment_index = int(assignment["detector_fragment_index"])
+        root_id = assignment.get("dominant_lineage_id")
+        if assignment["compound"] or root_id is None:
+            compounds.append({
+                "detector_fragment_index": fragment_index,
+                "detector_fragment_indices": [fragment_index],
+                "trigger_t_on": float(fragment["t_on"]),
+                "trigger_t_off": float(fragment["t_off"]),
+                "compound": True,
+                "dominant_activity_fraction": float(
+                    assignment["dominant_activity_fraction"]
+                ),
+                "second_activity_fraction": float(
+                    assignment["second_activity_fraction"]
+                ),
+                "collision_activity_fraction": float(
+                    assignment["collision_activity_fraction"]
+                ),
+            })
+            continue
+        root_id = int(root_id)
+        if root_id not in component_by_id:
+            raise RuntimeError("fragment references an absent directed root")
+        groups.setdefault(root_id, []).append(fragment_index)
+
+    events = []
+    for root_id, fragment_indices in groups.items():
+        component = component_by_id[root_id]
+        selected = [fragments[index] for index in fragment_indices]
+        t_on = max(0.0, float(component["start_frame"]) * frame_ms)
+        t_off = min(total_ms, float(component["stop_frame"] + 1) * frame_ms)
+        events.append({
+            "cascade_id": root_id,
+            "lineage_ids": [root_id],
+            "root_count": 1,
+            "detector_fragment_indices": sorted(fragment_indices),
+            "trigger_t_on": float(min(row["t_on"] for row in selected)),
+            "trigger_t_off": float(max(row["t_off"] for row in selected)),
+            "t_on": t_on,
+            "t_off": t_off,
+            "dur_ms": float(max(frame_ms, t_off - t_on)),
+            "returned": bool(
+                t_off < total_ms
+                and all(bool(row.get("returned", True)) for row in selected)
+            ),
+            "compound": False,
+            "activity_mass": float(component["activity_mass"]),
+            "active_bin_frames": int(component["active_bin_frames"]),
+        })
+    events.sort(key=lambda row: (row["t_on"], row["cascade_id"]))
+    compounds.sort(key=lambda row: row["trigger_t_on"])
+    represented = {
+        int(index) for event in events
+        for index in event["detector_fragment_indices"]
+    }.union({
+        int(row["detector_fragment_indices"][0]) for row in compounds
+    })
+    if represented != set(range(len(fragments))):
+        raise RuntimeError("causal-root observations dropped detector fragments")
+    return events, compounds
+
+
+def annotate_population_excursions_with_lineages(
+        events: list[dict], activity_counts: np.ndarray,
+        lineage_labels: np.ndarray, *, frame_ms: float) -> list[dict]:
+    """Attach persistent-root topology without changing population episodes.
+
+    Event boundaries are already fixed from the contact-independent population
+    reset.  Every root active inside that interval remains a separate topology
+    label, while the complete episode stays one statistical observation.
+    """
+    counts = np.asarray(activity_counts, float)
+    labels = np.asarray(lineage_labels, int)
+    frame_ms = float(frame_ms)
+    if counts.shape != labels.shape or counts.ndim != 3 or frame_ms <= 0.0:
+        raise ValueError("population episode topology arrays do not align")
+    output = []
+    for event in events:
+        start = max(0, int(np.floor(float(event["t_on"]) / frame_ms)))
+        stop = min(len(counts), int(np.ceil(float(event["t_off"]) / frame_ms)))
+        if stop <= start:
+            raise ValueError("population episode contains no movie frame")
+        local_labels = labels[start:stop].ravel()
+        local_counts = counts[start:stop].ravel()
+        positive = local_labels > 0
+        collision = local_labels < 0
+        masses = np.bincount(
+            local_labels[positive], weights=local_counts[positive],
+        ) if np.any(positive) else np.zeros(1, float)
+        lineage_ids = [
+            int(root_id) for root_id in np.flatnonzero(masses > 0.0)
+            if int(root_id) > 0
+        ]
+        attributable = float(np.sum(masses[1:])) if len(masses) > 1 else 0.0
+        collision_mass = float(np.sum(local_counts[collision]))
+        total = attributable + collision_mass
+        row = dict(event)
+        row.update({
+            "event_unit": "causal_population_excursion",
+            "cascade_id": lineage_ids[0] if lineage_ids else None,
+            "lineage_ids": lineage_ids,
+            "root_count": int(len(lineage_ids)),
+            "multi_root": bool(len(lineage_ids) > 1),
+            "root_activity_fractions": [
+                {
+                    "lineage_id": int(root_id),
+                    "fraction": float(masses[root_id] / total),
+                }
+                for root_id in lineage_ids if total > 0.0
+            ],
+            "root_attributable_activity_fraction": (
+                attributable / total if total > 0.0 else 0.0
+            ),
+            "collision_activity_fraction": (
+                collision_mass / total if total > 0.0 else 0.0
+            ),
+        })
+        output.append(row)
+    return output
+
+
+def root_coactivity_event_windows(
+        components: list[dict], assignments: list[dict], fragments: list[dict],
+        lineage_labels: np.ndarray, *, frame_ms: float,
+        total_ms: float) -> list[dict]:
+    """Build complete observations from persistent roots that truly co-occur.
+
+    A long detector fragment cannot merge roots that are only sequential.  Roots
+    active in the same movie frame form one observable ensemble, and ensembles
+    from separate fragments merge only when they share a persistent root.
+    Every positive-mass root is retained; detector dominance is not used.
+    """
+    labels = np.asarray(lineage_labels, int)
+    frame_ms = float(frame_ms)
+    total_ms = float(total_ms)
+    if (labels.ndim != 3 or frame_ms <= 0.0 or total_ms <= 0.0
+            or len(assignments) != len(fragments)):
+        raise ValueError("root-coactivity event inputs are inconsistent")
+    components_by_id = {int(row["cascade_id"]): row for row in components}
+    root_frames = {
+        root_id: set(map(int, np.flatnonzero(np.any(labels == root_id, axis=(1, 2)))))
+        for root_id in components_by_id
+    }
+    nodes: list[dict] = []
+    for fragment_index, (assignment, fragment) in enumerate(zip(assignments, fragments)):
+        roots = sorted({
+            int(row["lineage_id"])
+            for row in assignment.get("lineage_activity_fractions", [])
+            if float(row["fraction"]) > 0.0
+        })
+        if not roots:
+            raise RuntimeError("detector fragment contains no persistent root")
+        start = max(0, int(np.floor(float(fragment["t_on"]) / frame_ms)))
+        stop = min(len(labels), int(np.floor(float(fragment["t_off"]) / frame_ms)) + 1)
+        local_frames = set(range(start, stop))
+        parent = {root_id: root_id for root_id in roots}
+
+        def find(root_id: int) -> int:
+            while parent[root_id] != root_id:
+                parent[root_id] = parent[parent[root_id]]
+                root_id = parent[root_id]
+            return root_id
+
+        def union(left: int, right: int) -> None:
+            left, right = find(left), find(right)
+            if left != right:
+                parent[right] = left
+
+        for left_index, left in enumerate(roots):
+            left_frames = root_frames[left] & local_frames
+            for right in roots[left_index + 1:]:
+                if left_frames & root_frames[right]:
+                    union(left, right)
+        groups: dict[int, set[int]] = {}
+        for root_id in roots:
+            groups.setdefault(find(root_id), set()).add(root_id)
+        for group in groups.values():
+            nodes.append({
+                "fragment_index": int(fragment_index),
+                "lineage_ids": set(group),
+            })
+
+    parent_nodes = list(range(len(nodes)))
+
+    def find_node(index: int) -> int:
+        while parent_nodes[index] != index:
+            parent_nodes[index] = parent_nodes[parent_nodes[index]]
+            index = parent_nodes[index]
+        return index
+
+    def union_nodes(left: int, right: int) -> None:
+        left, right = find_node(left), find_node(right)
+        if left != right:
+            parent_nodes[right] = left
+
+    root_to_nodes: dict[int, list[int]] = {}
+    for node_index, node in enumerate(nodes):
+        for root_id in node["lineage_ids"]:
+            root_to_nodes.setdefault(root_id, []).append(node_index)
+    for indices in root_to_nodes.values():
+        for index in indices[1:]:
+            union_nodes(indices[0], index)
+    groups: dict[int, list[int]] = {}
+    for node_index in range(len(nodes)):
+        groups.setdefault(find_node(node_index), []).append(node_index)
+
+    events = []
+    for node_indices in groups.values():
+        lineage_ids = sorted({
+            root_id for index in node_indices for root_id in nodes[index]["lineage_ids"]
+        })
+        fragment_indices = sorted({
+            int(nodes[index]["fragment_index"]) for index in node_indices
+        })
+        selected_fragments = [fragments[index] for index in fragment_indices]
+        selected_components = [components_by_id[root_id] for root_id in lineage_ids]
+        t_on = max(0.0, min(
+            float(row["start_frame"]) * frame_ms for row in selected_components
+        ))
+        t_off = min(total_ms, max(
+            float(row["stop_frame"] + 1) * frame_ms for row in selected_components
+        ))
+        events.append({
+            "cascade_id": int(lineage_ids[0]),
+            "lineage_ids": lineage_ids,
+            "root_count": int(len(lineage_ids)),
+            "detector_fragment_indices": fragment_indices,
+            "trigger_t_on": float(min(row["t_on"] for row in selected_fragments)),
+            "trigger_t_off": float(max(row["t_off"] for row in selected_fragments)),
+            "t_on": t_on,
+            "t_off": t_off,
+            "dur_ms": float(max(frame_ms, t_off - t_on)),
+            "returned": bool(
+                t_off < total_ms
+                and all(bool(row.get("returned", True)) for row in selected_fragments)
+            ),
+            "compound": bool(len(lineage_ids) > 1),
+            "activity_mass": float(sum(
+                row["activity_mass"] for row in selected_components
+            )),
+            "active_bin_frames": int(sum(
+                row["active_bin_frames"] for row in selected_components
+            )),
+        })
+    events.sort(key=lambda row: (row["t_on"], row["cascade_id"]))
+    represented = {
+        int(fragment_index) for event in events
+        for fragment_index in event["detector_fragment_indices"]
+    }
+    if represented != set(range(len(fragments))):
+        raise RuntimeError("root-coactivity events dropped detector fragments")
+    return events
+
+
+def normalize_components_floor_ratio(components: dict, calibration: dict,
+                                     mode: int) -> dict:
+    """Continuously scale distances by the patient block-floor q95."""
+    output = {}
+    for key in ("recruitment", "precedence", "profile", "cloud"):
+        q95 = float(calibration["modes"][str(int(mode))][key]["floor_q95"])
+        if not np.isfinite(q95) or q95 <= 0.0:
+            raise ValueError("patient floor q95 must be finite and positive")
+        output[key] = float(components[key]) / q95
+    return output
+
+
+def matched_sample_dual_mode_objective(model_ranks: np.ndarray,
+                                       model_labels: np.ndarray,
+                                       patient_ranks: np.ndarray,
+                                       patient_labels: np.ndarray,
+                                       patient_blocks: np.ndarray,
+                                       contact_names: np.ndarray, *,
+                                       projections: np.ndarray,
+                                       calibration: dict,
+                                       sample_size: int = 6,
+                                       draws: int = 64,
+                                       seed: int = 20260824,
+                                       missing_mode_penalty: float = 2.0,
+                                       tau: float = 0.25) -> dict:
+    """Matched 6-vs-6 continuous loss for the cascade-event objective."""
+    model_ranks = np.asarray(model_ranks, float)
+    model_labels = np.asarray(model_labels, int)
+    patient_ranks = np.asarray(patient_ranks, float)
+    patient_labels = np.asarray(patient_labels, int)
+    patient_blocks = np.asarray(patient_blocks)
+    sample_size, draws = int(sample_size), int(draws)
+    if (model_ranks.ndim != 2 or patient_ranks.ndim != 2
+            or model_ranks.shape[1] != patient_ranks.shape[1]
+            or model_labels.shape != (len(model_ranks),)
+            or patient_labels.shape != (len(patient_ranks),)
+            or patient_blocks.shape != (len(patient_ranks),)
+            or sample_size <= 0 or draws <= 0):
+        raise ValueError("matched-sample objective arrays do not align")
+    rng = np.random.default_rng(int(seed))
+    per_mode, losses = {}, []
+    for mode in (0, 1):
+        model_index = np.flatnonzero(model_labels == mode)
+        eligible_blocks = [
+            block for block in np.unique(patient_blocks)
+            if np.sum((patient_blocks == block) & (patient_labels == mode))
+            >= sample_size
+        ]
+        if not eligible_blocks:
+            raise ValueError(f"patient mode {mode} has no matched-sample block")
+        if len(model_index) < sample_size:
+            normalized = {
+                key: float(missing_mode_penalty)
+                for key in ("recruitment", "precedence", "profile", "cloud")
+            }
+            raw_mean = None
+            missing = True
+        else:
+            normalized_draws = []
+            raw_draws = []
+            for _ in range(draws):
+                block = eligible_blocks[int(rng.integers(len(eligible_blocks)))]
+                patient_index = np.flatnonzero(
+                    (patient_blocks == block) & (patient_labels == mode)
+                )
+                model_sample = model_ranks[rng.choice(
+                    model_index, size=sample_size, replace=False,
+                )]
+                patient_sample = patient_ranks[rng.choice(
+                    patient_index, size=sample_size, replace=False,
+                )]
+                raw = mode_distribution_components(
+                    model_sample, patient_sample, contact_names, projections,
+                )
+                raw_draws.append(raw)
+                normalized_draws.append(
+                    normalize_components_floor_ratio(raw, calibration, mode)
+                )
+            normalized = {
+                key: float(np.mean([row[key] for row in normalized_draws]))
+                for key in ("recruitment", "precedence", "profile", "cloud")
+            }
+            raw_mean = {
+                key: float(np.mean([row[key] for row in raw_draws]))
+                for key in ("recruitment", "precedence", "profile", "cloud")
+            }
+            missing = False
+        mean = float(np.mean(list(normalized.values())))
+        per_mode[str(mode)] = {
+            **normalized, "raw": raw_mean, "missing": missing, "mean": mean,
+            "n_model_events": int(len(model_index)),
+        }
+        losses.append(mean)
+    model_count = np.bincount(model_labels, minlength=2).astype(float)
+    patient_count = np.bincount(patient_labels, minlength=2).astype(float)
+    occupancy = (
+        float(np.log(2.0)) if model_count.sum() == 0.0
+        else js_divergence(model_count, patient_count)
+    )
+    weakest = lse_max(np.asarray(losses), tau=tau)
+    return {
+        "modes": per_mode,
+        "weakest_mode_lse": weakest,
+        "occupancy_js": occupancy,
+        "objective": float(weakest + 0.25 * occupancy),
+        "sample_size_per_side": sample_size,
+        "draws": draws,
+        "normalization": "raw_distance_divided_by_patient_block_floor_q95",
+    }
+
+
+def event_source_onset_maps(spikes: np.ndarray, positions: np.ndarray,
+                            event_onsets_ms: np.ndarray,
+                            event_selected: np.ndarray, *, dt_ms: float,
+                            sheet_mm: float, bin_mm: float = 1.0,
+                            event_relative_ms: np.ndarray | None = None,
+                            baseline_relative_ms: np.ndarray | None = None,
+                            frame_width_ms: float = 3.0) -> dict:
+    """Reduce full spikes to one 1-mm local recruitment-onset map per event."""
+    spikes = np.asarray(spikes, bool)
+    event_onsets_ms = np.asarray(event_onsets_ms, float)
+    selected = np.asarray(event_selected, bool)
+    if selected.shape != event_onsets_ms.shape:
+        raise ValueError("event selection and onset times must align")
+    relative = (
+        np.arange(-20.0, 80.0 + 1e-9, 2.0) if event_relative_ms is None
+        else np.asarray(event_relative_ms, float)
+    )
+    baseline_relative = (
+        np.arange(-120.0, -20.0 + 1e-9, 2.0) if baseline_relative_ms is None
+        else np.asarray(baseline_relative_ms, float)
+    )
+    neuron_bins, size = sheet_bin_indices(
+        positions, bin_mm=bin_mm, sheet_mm=sheet_mm,
+    )
+    maps = np.full((len(event_onsets_ms), size, size), np.nan, dtype=np.float32)
+    activity = np.zeros(
+        (len(event_onsets_ms), len(relative), size, size), dtype=np.uint16,
+    )
+    evaluable = np.zeros(len(event_onsets_ms), bool)
+    for event_index in np.flatnonzero(selected):
+        center = float(event_onsets_ms[event_index])
+        all_centers = center + np.concatenate([baseline_relative, relative])
+        half_width = 0.5 * float(frame_width_ms)
+        if (np.min(all_centers) - half_width < 0.0
+                or np.max(all_centers) + half_width >= len(spikes) * float(dt_ms)):
+            continue
+        baseline = _distinct_activity_frames(
+            spikes, dt_ms=dt_ms, centers_ms=center + baseline_relative,
+            width_ms=frame_width_ms, neuron_bins=neuron_bins, size=size,
+        )
+        event = _distinct_activity_frames(
+            spikes, dt_ms=dt_ms, centers_ms=center + relative,
+            width_ms=frame_width_ms, neuron_bins=neuron_bins, size=size,
+        )
+        maps[event_index] = persistent_recruitment_onsets(
+            event, baseline, relative,
+        ).astype(np.float32)
+        if np.max(event) > np.iinfo(np.uint16).max:
+            raise RuntimeError("event source activity exceeds uint16 storage")
+        activity[event_index] = event.astype(np.uint16)
+        evaluable[event_index] = True
+    return {
+        "onset_maps_ms": maps,
+        "activity_counts": activity,
+        "evaluable": evaluable,
+        "relative_times_ms": relative,
+        "baseline_relative_times_ms": baseline_relative,
+        "bin_mm": float(bin_mm),
+        "sheet_mm": float(sheet_mm),
+    }
+
+
+def source_topology_features(onset_maps: np.ndarray) -> np.ndarray:
+    """Encode early source support and normalized local onset for each event."""
+    values = np.asarray(onset_maps, float)
+    if values.ndim != 3:
+        raise ValueError("onset maps must have shape (event, y, x)")
+    output = []
+    for onset in values:
+        finite = np.isfinite(onset)
+        early = np.zeros_like(onset, dtype=float)
+        normalized = np.zeros_like(onset, dtype=float)
+        if np.any(finite):
+            count = int(np.sum(finite))
+            early_count = min(count, max(1, int(np.ceil(0.10 * count))))
+            threshold = np.partition(onset[finite], early_count - 1)[early_count - 1]
+            early[finite & (onset <= threshold)] = 1.0
+            low = float(np.min(onset[finite]))
+            span = float(np.max(onset[finite]) - low)
+            normalized[finite] = (onset[finite] - low) / span if span > 0.0 else 0.0
+        output.append(np.concatenate([early.ravel(), normalized.ravel()]))
+    return np.asarray(output, float)
+
+
+def cosine_similarity(a: np.ndarray, b: np.ndarray) -> float:
+    a = np.asarray(a, float)
+    b = np.asarray(b, float)
+    denominator = float(np.linalg.norm(a) * np.linalg.norm(b))
+    return float("nan") if denominator <= 0.0 else float(np.dot(a, b) / denominator)
+
+
+def topology_reproducibility(onset_maps: np.ndarray, labels: np.ndarray) -> dict:
+    """Odd-even within-mode reliability and between-mode template distance."""
+    features = source_topology_features(onset_maps)
+    labels = np.asarray(labels, int)
+    if labels.shape != (len(features),):
+        raise ValueError("topology labels do not align")
+    modes, reliabilities, templates = {}, [], []
+    for mode in (0, 1):
+        selected = features[labels == mode]
+        if len(selected) < 2:
+            reliability = float("nan")
+            template = np.mean(selected, axis=0) if len(selected) else np.zeros(features.shape[1])
+        else:
+            first = np.mean(selected[::2], axis=0)
+            second = np.mean(selected[1::2], axis=0)
+            reliability = cosine_similarity(first, second)
+            template = np.mean(selected, axis=0)
+        modes[str(mode)] = {"n_events": int(len(selected)), "split_half_cosine": reliability}
+        reliabilities.append(reliability)
+        templates.append(template)
+    separation = 1.0 - cosine_similarity(templates[0], templates[1])
+    finite = np.asarray(reliabilities, float)
+    mean_reliability = float(np.mean(finite[np.isfinite(finite)])) if np.any(np.isfinite(finite)) else float("nan")
+    loss = (
+        float("nan") if not np.isfinite(mean_reliability) or not np.isfinite(separation)
+        else float(0.5 * (1.0 - mean_reliability) + 0.5 * (1.0 - separation))
+    )
+    return {
+        "modes": modes,
+        "mean_within_mode_reliability": mean_reliability,
+        "between_mode_distance": separation,
+        "topology_loss": loss,
+    }
+
+
+def topology_network_reproducibility(onset_maps_by_network: list[np.ndarray],
+                                     labels_by_network: list[np.ndarray]) -> dict:
+    """Equal-network source-template reliability and mode separation."""
+    if len(onset_maps_by_network) != len(labels_by_network):
+        raise ValueError("network source maps and labels do not align")
+    mode_templates = {0: [], 1: []}
+    within_network = []
+    for maps, labels in zip(onset_maps_by_network, labels_by_network):
+        maps = np.asarray(maps, float)
+        labels = np.asarray(labels, int)
+        if maps.ndim != 3 or labels.shape != (len(maps),):
+            raise ValueError("one network source map bundle does not align")
+        if len(maps):
+            diagnostic = topology_reproducibility(maps, labels)
+            if np.isfinite(diagnostic["mean_within_mode_reliability"]):
+                within_network.append(diagnostic["mean_within_mode_reliability"])
+            features = source_topology_features(maps)
+            for mode in (0, 1):
+                if np.any(labels == mode):
+                    mode_templates[mode].append(np.mean(features[labels == mode], axis=0))
+    modes, equal_network_templates = {}, []
+    for mode in (0, 1):
+        templates = mode_templates[mode]
+        similarities = [
+            cosine_similarity(templates[left], templates[right])
+            for left, right in combinations(range(len(templates)), 2)
+        ]
+        similarities = np.asarray(similarities, float)
+        similarities = similarities[np.isfinite(similarities)]
+        modes[str(mode)] = {
+            "n_networks": int(len(templates)),
+            "pairwise_network_cosine_mean": (
+                float(np.mean(similarities)) if len(similarities) else float("nan")
+            ),
+        }
+        equal_network_templates.append(
+            np.mean(templates, axis=0) if templates else None
+        )
+    if any(template is None for template in equal_network_templates):
+        separation = float("nan")
+    else:
+        separation = 1.0 - cosine_similarity(
+            equal_network_templates[0], equal_network_templates[1],
+        )
+    across = np.asarray([
+        modes[str(mode)]["pairwise_network_cosine_mean"] for mode in (0, 1)
+    ], float)
+    across = across[np.isfinite(across)]
+    return {
+        "modes": modes,
+        "mean_within_network_split_half_cosine": (
+            float(np.mean(within_network)) if within_network else float("nan")
+        ),
+        "mean_across_network_template_cosine": (
+            float(np.mean(across)) if len(across) else float("nan")
+        ),
+        "equal_network_between_mode_distance": separation,
+    }
+
+
+def soft_topology_network_reproducibility(
+        onset_maps_by_network: list[np.ndarray],
+        probability_b_by_network: list[np.ndarray]) -> dict:
+    """Equal-network source topology with continuous patient-mode membership."""
+    if len(onset_maps_by_network) != len(probability_b_by_network):
+        raise ValueError("network source maps and probabilities do not align")
+    mode_templates = {0: [], 1: []}
+    within_network = []
+    per_network = []
+    for maps, probabilities in zip(
+            onset_maps_by_network, probability_b_by_network):
+        maps = np.asarray(maps, float)
+        probabilities = np.asarray(probabilities, float)
+        if maps.ndim != 3 or probabilities.shape != (len(maps),):
+            raise ValueError("one network source map bundle does not align")
+        if (not np.all(np.isfinite(probabilities))
+                or np.any((probabilities < 0.0) | (probabilities > 1.0))):
+            raise ValueError("mode probabilities must lie in [0, 1]")
+        if not len(maps):
+            continue
+        features = source_topology_features(maps)
+        row = {"modes": {}}
+        network_reliabilities = []
+        for mode, weights in enumerate((1.0 - probabilities, probabilities)):
+            total = float(np.sum(weights))
+            if total <= 1e-12:
+                row["modes"][str(mode)] = {
+                    "soft_mass": total,
+                    "split_half_cosine": float("nan"),
+                }
+                continue
+            normalized = _normalized_event_weights(weights, len(features))
+            template = np.sum(normalized[:, None] * features, axis=0)
+            mode_templates[mode].append(template)
+            halves = []
+            for selected in (np.arange(len(features)) % 2 == 0,
+                             np.arange(len(features)) % 2 == 1):
+                half_weights = weights[selected]
+                if not np.any(selected) or float(np.sum(half_weights)) <= 1e-12:
+                    halves.append(None)
+                else:
+                    normalized_half = _normalized_event_weights(
+                        half_weights, int(np.sum(selected)),
+                    )
+                    halves.append(np.sum(
+                        normalized_half[:, None] * features[selected], axis=0,
+                    ))
+            reliability = (
+                float("nan") if any(half is None for half in halves)
+                else cosine_similarity(halves[0], halves[1])
+            )
+            if np.isfinite(reliability):
+                network_reliabilities.append(reliability)
+                within_network.append(reliability)
+            row["modes"][str(mode)] = {
+                "soft_mass": total,
+                "effective_events": float(
+                    total ** 2 / max(np.sum(weights ** 2), 1e-12)
+                ),
+                "split_half_cosine": reliability,
+            }
+        row["mean_split_half_cosine"] = (
+            float(np.mean(network_reliabilities))
+            if network_reliabilities else float("nan")
+        )
+        per_network.append(row)
+    modes, equal_network_templates = {}, []
+    for mode in (0, 1):
+        templates = mode_templates[mode]
+        similarities = np.asarray([
+            cosine_similarity(templates[left], templates[right])
+            for left, right in combinations(range(len(templates)), 2)
+        ], float)
+        similarities = similarities[np.isfinite(similarities)]
+        modes[str(mode)] = {
+            "n_networks": int(len(templates)),
+            "pairwise_network_cosine_mean": (
+                float(np.mean(similarities)) if len(similarities) else float("nan")
+            ),
+        }
+        equal_network_templates.append(
+            np.mean(templates, axis=0) if templates else None
+        )
+    separation = (
+        float("nan") if any(template is None for template in equal_network_templates)
+        else 1.0 - cosine_similarity(
+            equal_network_templates[0], equal_network_templates[1],
+        )
+    )
+    across = np.asarray([
+        modes[str(mode)]["pairwise_network_cosine_mean"] for mode in (0, 1)
+    ], float)
+    across = across[np.isfinite(across)]
+    return {
+        "modes": modes,
+        "mean_within_network_split_half_cosine": (
+            float(np.mean(within_network)) if within_network else float("nan")
+        ),
+        "mean_across_network_template_cosine": (
+            float(np.mean(across)) if len(across) else float("nan")
+        ),
+        "equal_network_between_mode_distance": separation,
+        "per_network": per_network,
+    }
+
+
+def causal_root_displacement(onset_map: np.ndarray, *, bin_mm: float = 1.0,
+                             tail_fraction: float = 0.2) -> dict:
+    """Measure one root's early-to-late displacement from its onset map.
+
+    The map is indexed as ``(y, x)`` and contains onset times only for bins that
+    belong to the selected causal root.  Earliest and latest quantile supports
+    are disjoint by construction, so simultaneous or spatially stationary roots
+    cannot look directional merely because their support is broad.
+    """
+    onset = np.asarray(onset_map, float)
+    if onset.ndim != 2 or float(bin_mm) <= 0.0:
+        raise ValueError("one causal-root onset map and positive bin size are required")
+    if not 0.0 < float(tail_fraction) <= 0.5:
+        raise ValueError("tail_fraction must be in (0, 0.5]")
+    y_index, x_index = np.where(np.isfinite(onset))
+    n_bins = int(len(x_index))
+    if n_bins < 4:
+        return {
+            "evaluable": False, "n_bins": n_bins,
+            "displacement_xy_mm": [float("nan"), float("nan")],
+            "distance_mm": float("nan"),
+        }
+    values = onset[y_index, x_index]
+    order = np.argsort(values, kind="stable")
+    count = min(n_bins // 2, max(1, int(np.ceil(float(tail_fraction) * n_bins))))
+    early = order[:count]
+    late = order[-count:]
+    coordinates = float(bin_mm) * np.column_stack([
+        x_index.astype(float) + 0.5,
+        y_index.astype(float) + 0.5,
+    ])
+    displacement = coordinates[late].mean(axis=0) - coordinates[early].mean(axis=0)
+    distance = float(np.linalg.norm(displacement))
+    return {
+        "evaluable": bool(np.isfinite(distance) and distance > 0.0),
+        "n_bins": n_bins,
+        "tail_count": int(count),
+        "displacement_xy_mm": displacement.tolist(),
+        "distance_mm": distance,
+    }
+
+
+def causal_direction_alignment(onset_maps: np.ndarray, labels: np.ndarray, *,
+                               axis_unit: np.ndarray,
+                               expected_mode_signs: np.ndarray,
+                               bin_mm: float = 1.0,
+                               tail_fraction: float = 0.2) -> dict:
+    """Score whether two patient-labelled root modes propagate oppositely.
+
+    A mode earns credit only for displacement along its patient-training
+    direction.  Orthogonal, stationary and sign-reversed roots receive zero,
+    which prevents two contact-rank clusters on one spatial wave from satisfying
+    the bidirectional endpoint.
+    """
+    maps = np.asarray(onset_maps, float)
+    labels = np.asarray(labels, int)
+    axis = np.asarray(axis_unit, float)
+    signs = np.asarray(expected_mode_signs, float)
+    if maps.ndim != 3 or labels.shape != (len(maps),):
+        raise ValueError("causal-root onset maps and labels do not align")
+    if axis.shape != (2,) or not np.all(np.isfinite(axis)):
+        raise ValueError("axis_unit must be a finite 2-D vector")
+    norm = float(np.linalg.norm(axis))
+    if norm <= 0.0 or signs.shape != (2,) or set(np.sign(signs).tolist()) != {-1.0, 1.0}:
+        raise ValueError("patient axis and opposite mode signs are required")
+    axis = axis / norm
+    rows = []
+    for onset, label in zip(maps, labels):
+        record = causal_root_displacement(
+            onset, bin_mm=bin_mm, tail_fraction=tail_fraction,
+        )
+        if not record["evaluable"] or label not in (0, 1):
+            continue
+        displacement = np.asarray(record["displacement_xy_mm"], float)
+        signed_cosine = float(
+            signs[label] * np.dot(displacement, axis) / record["distance_mm"]
+        )
+        rows.append({
+            "mode": int(label),
+            "signed_axis_cosine": signed_cosine,
+            **record,
+        })
+    modes = {}
+    mode_scores = []
+    for mode in (0, 1):
+        selected = [row for row in rows if row["mode"] == mode]
+        signed = float(np.mean([row["signed_axis_cosine"] for row in selected])) \
+            if selected else float("nan")
+        # Clip only after the mode-level signed mean.  Event-wise clipping would
+        # reward a 50/50 mixture of opposite waves even though the mode has no
+        # reproducible direction.
+        score = float(max(0.0, signed)) if selected else 0.0
+        modes[str(mode)] = {
+            "n_evaluable": int(len(selected)),
+            "mean_signed_axis_cosine": signed,
+            "alignment_score": score,
+            "positive_direction_fraction": (
+                float(np.mean([
+                    row["signed_axis_cosine"] > 0.0 for row in selected
+                ])) if selected else 0.0
+            ),
+        }
+        mode_scores.append(score)
+    return {
+        "score": float(min(mode_scores)),
+        "weakest_mode_protected": True,
+        "modes": modes,
+        "n_evaluable": int(len(rows)),
+        "tail_fraction": float(tail_fraction),
+        "bin_mm": float(bin_mm),
+    }
+
+
+def soft_causal_direction_alignment(
+        onset_maps: np.ndarray, probability_b: np.ndarray, *,
+        axis_unit: np.ndarray, expected_mode_signs: np.ndarray,
+        bin_mm: float = 1.0, tail_fraction: float = 0.2) -> dict:
+    """Continuously couple patient-mode probability to opposite root motion."""
+    maps = np.asarray(onset_maps, float)
+    probabilities = np.asarray(probability_b, float)
+    axis = np.asarray(axis_unit, float)
+    signs = np.asarray(expected_mode_signs, float)
+    if maps.ndim != 3 or probabilities.shape != (len(maps),):
+        raise ValueError("causal-root maps and mode probabilities do not align")
+    if (not np.all(np.isfinite(probabilities))
+            or np.any((probabilities < 0.0) | (probabilities > 1.0))):
+        raise ValueError("mode probabilities must lie in [0, 1]")
+    if axis.shape != (2,) or not np.all(np.isfinite(axis)):
+        raise ValueError("axis_unit must be a finite 2-D vector")
+    norm = float(np.linalg.norm(axis))
+    if norm <= 0.0 or signs.shape != (2,) or set(np.sign(signs).tolist()) != {-1.0, 1.0}:
+        raise ValueError("patient axis and opposite mode signs are required")
+    axis = axis / norm
+    projections, selected_probabilities = [], []
+    for onset, probability in zip(maps, probabilities):
+        record = causal_root_displacement(
+            onset, bin_mm=bin_mm, tail_fraction=tail_fraction,
+        )
+        if not record["evaluable"]:
+            continue
+        displacement = np.asarray(record["displacement_xy_mm"], float)
+        projections.append(float(
+            np.dot(displacement, axis) / record["distance_mm"]
+        ))
+        selected_probabilities.append(float(probability))
+    projections = np.asarray(projections, float)
+    selected_probabilities = np.asarray(selected_probabilities, float)
+    modes, scores = {}, []
+    for mode, mode_weights in enumerate(
+            (1.0 - selected_probabilities, selected_probabilities)):
+        if not len(projections) or float(np.sum(mode_weights)) <= 1e-12:
+            signed, score, effective = float("nan"), 0.0, 0.0
+        else:
+            normalized = _normalized_event_weights(mode_weights, len(projections))
+            signed = float(signs[mode] * np.sum(normalized * projections))
+            score = float(max(0.0, signed))
+            effective = float(
+                np.sum(mode_weights) ** 2 / max(np.sum(mode_weights ** 2), 1e-12)
+            )
+        modes[str(mode)] = {
+            "soft_mass": float(np.sum(mode_weights)),
+            "effective_events": effective,
+            "mean_signed_axis_cosine": signed,
+            "alignment_score": score,
+        }
+        scores.append(score)
+    return {
+        "score": float(min(scores)),
+        "weakest_mode_protected": True,
+        "modes": modes,
+        "n_evaluable": int(len(projections)),
+        "tail_fraction": float(tail_fraction),
+        "bin_mm": float(bin_mm),
+    }
+
+
+def causal_wave_monotonicity(onset_map: np.ndarray, *, axis_unit: np.ndarray,
+                             bin_mm: float = 1.0) -> dict:
+    """Measure whether recruitment time changes monotonically along one axis.
+
+    Unlike the early-to-late centroid displacement, this diagnostic uses every
+    recruited sheet bin.  A spatially broad flash or two synchronous hotspots
+    therefore cannot receive credit merely because their outer centroids are
+    separated.
+    """
+    onset = np.asarray(onset_map, float)
+    axis = np.asarray(axis_unit, float)
+    if onset.ndim != 2 or axis.shape != (2,) or float(bin_mm) <= 0.0:
+        raise ValueError("one onset map, a 2-D axis and positive bin size are required")
+    norm = float(np.linalg.norm(axis))
+    if not np.isfinite(norm) or norm <= 0.0:
+        raise ValueError("axis_unit must be finite and non-zero")
+    axis = axis / norm
+    y_index, x_index = np.where(np.isfinite(onset))
+    if len(x_index) < 4:
+        return {
+            "evaluable": False, "n_bins": int(len(x_index)),
+            "axis_time_spearman": float("nan"),
+            "axis_span_mm": float("nan"),
+        }
+    coordinates = float(bin_mm) * np.column_stack([
+        x_index.astype(float) + 0.5,
+        y_index.astype(float) + 0.5,
+    ])
+    projection = coordinates @ axis
+    values = onset[y_index, x_index]
+    axis_span = float(np.ptp(projection))
+    if axis_span <= 0.0 or float(np.ptp(values)) <= 0.0:
+        correlation = float("nan")
+    else:
+        correlation = float(spearmanr(projection, values).statistic)
+    return {
+        "evaluable": bool(np.isfinite(correlation)),
+        "n_bins": int(len(x_index)),
+        "axis_time_spearman": correlation,
+        "axis_span_mm": axis_span,
+    }
+
+
+def causal_wave_monotonicity_alignment(
+        onset_maps: np.ndarray, labels: np.ndarray, *, axis_unit: np.ndarray,
+        expected_mode_signs: np.ndarray, bin_mm: float = 1.0) -> dict:
+    """Protect the weaker mode's full-map axial onset monotonicity."""
+    maps = np.asarray(onset_maps, float)
+    labels = np.asarray(labels, int)
+    signs = np.asarray(expected_mode_signs, float)
+    if maps.ndim != 3 or labels.shape != (len(maps),):
+        raise ValueError("causal-root onset maps and labels do not align")
+    if signs.shape != (2,) or set(np.sign(signs).tolist()) != {-1.0, 1.0}:
+        raise ValueError("opposite expected mode signs are required")
+    rows = []
+    for onset, label in zip(maps, labels):
+        record = causal_wave_monotonicity(
+            onset, axis_unit=axis_unit, bin_mm=bin_mm,
+        )
+        if not record["evaluable"] or label not in (0, 1):
+            continue
+        signed = float(signs[label] * record["axis_time_spearman"])
+        rows.append({
+            "mode": int(label), "signed_axis_time_spearman": signed,
+            **record,
+        })
+    modes, scores = {}, []
+    for mode in (0, 1):
+        selected = [row for row in rows if row["mode"] == mode]
+        signed = float(np.mean([
+            row["signed_axis_time_spearman"] for row in selected
+        ])) if selected else float("nan")
+        score = float(max(0.0, signed)) if selected else 0.0
+        modes[str(mode)] = {
+            "n_evaluable": int(len(selected)),
+            "mean_signed_axis_time_spearman": signed,
+            "alignment_score": score,
+            "positive_direction_fraction": (
+                float(np.mean([
+                    row["signed_axis_time_spearman"] > 0.0
+                    for row in selected
+                ])) if selected else 0.0
+            ),
+        }
+        scores.append(score)
+    return {
+        "score": float(min(scores)),
+        "weakest_mode_protected": True,
+        "modes": modes,
+        "n_evaluable": int(len(rows)),
+        "bin_mm": float(bin_mm),
+    }
+
+
+def soft_causal_wave_monotonicity_alignment(
+        onset_maps: np.ndarray, probability_b: np.ndarray, *,
+        axis_unit: np.ndarray, expected_mode_signs: np.ndarray,
+        bin_mm: float = 1.0) -> dict:
+    """Continuously couple patient-mode probability to axial wave monotonicity."""
+    maps = np.asarray(onset_maps, float)
+    probabilities = np.asarray(probability_b, float)
+    signs = np.asarray(expected_mode_signs, float)
+    if maps.ndim != 3 or probabilities.shape != (len(maps),):
+        raise ValueError("causal-root maps and mode probabilities do not align")
+    if (not np.all(np.isfinite(probabilities))
+            or np.any((probabilities < 0.0) | (probabilities > 1.0))):
+        raise ValueError("mode probabilities must lie in [0, 1]")
+    if signs.shape != (2,) or set(np.sign(signs).tolist()) != {-1.0, 1.0}:
+        raise ValueError("opposite expected mode signs are required")
+    correlations, selected_probabilities = [], []
+    for onset, probability in zip(maps, probabilities):
+        record = causal_wave_monotonicity(
+            onset, axis_unit=axis_unit, bin_mm=bin_mm,
+        )
+        if not record["evaluable"]:
+            continue
+        correlations.append(float(record["axis_time_spearman"]))
+        selected_probabilities.append(float(probability))
+    correlations = np.asarray(correlations, float)
+    selected_probabilities = np.asarray(selected_probabilities, float)
+    modes, scores = {}, []
+    for mode, mode_weights in enumerate(
+            (1.0 - selected_probabilities, selected_probabilities)):
+        if not len(correlations) or float(np.sum(mode_weights)) <= 1e-12:
+            signed, score, effective = float("nan"), 0.0, 0.0
+        else:
+            normalized = _normalized_event_weights(mode_weights, len(correlations))
+            signed = float(signs[mode] * np.sum(normalized * correlations))
+            score = float(max(0.0, signed))
+            effective = float(
+                np.sum(mode_weights) ** 2 / max(np.sum(mode_weights ** 2), 1e-12)
+            )
+        modes[str(mode)] = {
+            "soft_mass": float(np.sum(mode_weights)),
+            "effective_events": effective,
+            "mean_signed_axis_time_spearman": signed,
+            "alignment_score": score,
+        }
+        scores.append(score)
+    return {
+        "score": float(min(scores)),
+        "weakest_mode_protected": True,
+        "modes": modes,
+        "n_evaluable": int(len(correlations)),
+        "bin_mm": float(bin_mm),
+    }

@@ -1,0 +1,167 @@
+{
+  "schema_id": "topic4_rev21_dual_core_zm_transition_v1",
+  "scientific_role": "development_only_frozen_dual_core_zm_transition",
+  "output_root": "results/topic4_sef_hfo/data_driven_dual_core_zm_transition",
+  "candidate_manifest": "results/topic4_sef_hfo/data_driven_dual_core_zm_transition/coarse_candidate_manifest.json",
+  "network_cache": "results/topic4_sef_hfo/data_driven_core_field_rev9/network_cache",
+  "inputs": {
+    "transition_config": {
+      "path": "config/topic4_data_driven_zm_ictal_transition_v1.json",
+      "sha256": "2ce70caf70ca1225ba9a95721692cf7fc9ce0f8fa9b977c85d0370c78941b20f"
+    },
+    "rev20_config": {
+      "path": "config/topic4_rev20_dc_dual_core_mechanism_atlas.json",
+      "sha256": "fed5fbceca3a3bf90a73aa6b6189f74f3e162f998e841b715f476020ab9d0bf0"
+    },
+    "rev20_candidate_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_dual_core_mechanism_atlas/candidate_manifest.json",
+      "sha256": "917f28b4f17721dd7d1cac757cc3f42f9ab9025ca9353a82346d5832f8e1e0a1"
+    },
+    "rev20_selection": {
+      "path": "results/topic4_sef_hfo/data_driven_dual_core_mechanism_atlas/selected_candidates.json",
+      "sha256": "bacae50f80e41de6fba8c54de09dedb86d37f2d0dba1a69c1c51f9551923e554"
+    },
+    "rev20_confirmation": {
+      "path": "results/topic4_sef_hfo/data_driven_dual_core_mechanism_atlas/confirmation/aggregate.json",
+      "sha256": "b631c440c952b893a118c09dc925cd9a5df11fd04e2f90aa6ec1ade33e81047d"
+    },
+    "patient_training_target": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/shaft_aware_patient_training_target.npz",
+      "sha256": "7d11100c0f431479f8decb17b6de97575a91dcb889887ce9e2cedbbdcd54140b"
+    },
+    "patient_support_config": {
+      "path": "config/topic4_rev14_patient_support_acceptance.json",
+      "sha256": "5dec1ff3277294697515d701e82246c242fb627348751571a5a6fe86e008940e"
+    },
+    "patient_heldout_npz": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev14/patient_heldout_endpoint/patient_heldout_endpoint_v1.npz",
+      "sha256": "b9169e7e94acbe0e3781f0a72e5c1c64a8a588e9697f2ef926dcc6f57ffa6c2c"
+    }
+  },
+  "reference": {
+    "rev20_candidate_id": "dc_both_scale_1p25",
+    "base_substrate_candidate_id": "joint_04_control",
+    "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+    "node_gain": 1.0,
+    "signed_depth_shrinkage": 1.0,
+    "g_EE": 0.625,
+    "g_EtoI": 1.25,
+    "ellipse_angle_deg": 45.0,
+    "ellipse_aspect_ratio": 2.0
+  },
+  "zm_reference": {
+    "I_th_EI": 95.19851312666987,
+    "tau_z_ms": 5000.0,
+    "tau_adp_ms": 500.0,
+    "eta_m": 0.007451594355587098,
+    "trace_stride_steps": 10
+  },
+  "coarse_grid": {
+    "I_th_EI_scales": [0.7, 0.8, 0.9, 1.0],
+    "integrated_M_scales": [0.5, 1.0, 1.5, 2.0]
+  },
+  "timescale_grid": {
+    "tau_z_ms": [3000.0, 5000.0, 8000.0],
+    "tau_adp_ms": [250.0, 500.0, 1000.0],
+    "preserve_integrated_M_strength": true
+  },
+  "search": {
+    "canary_network_seeds": [2521, 2526, 2531],
+    "fit_network_seeds": [2541, 2542],
+    "selection_network_seeds": [],
+    "confirmation_network_seeds": [2551, 2552, 2553],
+    "seed_audit_dynamics_seeds": [2621, 2622, 2623, 2624],
+    "fit_dynamics_seeds": [2641, 2642],
+    "confirmation_dynamics_seeds": [2651, 2652, 2653, 2654],
+    "simulation": {
+      "duration_ms": 20000.0,
+      "early_stop_runaway": true,
+      "late_runaway_is_invalid": false,
+      "es_thresh_hz": 120.0,
+      "es_dur_ms": 100.0,
+      "post_runaway_record_ms": 1200.0
+    },
+    "contact_readout": {
+      "source": "lineage_restricted_neuron_activity",
+      "kernel_width_mm": 0.25,
+      "smooth_ms": 5.0,
+      "participation_margin_fraction": 0.1,
+      "timing_fraction": 0.5
+    }
+  },
+  "event_unit": {
+    "name": "edge_supported_causal_family_observation",
+    "minimum_active_neurons": 2,
+    "minimum_dominance": 0.7,
+    "sensitivity_minimum_dominances": [0.6, 0.7, 0.8],
+    "movie_frame_ms": 2.0,
+    "movie_bin_mm": 1.0,
+    "causal_memory_method": "local_ee_psp_tail",
+    "psp_tail_fraction": 0.5,
+    "sensitivity_psp_tail_fractions": [0.8, 0.5, 0.2],
+    "local_ee_delay_quantile": 1.0,
+    "forward_parent_neighborhood_bins": 1,
+    "minimum_parent_support": 0.001,
+    "sensitivity_minimum_parent_supports": [0.0003, 0.001, 0.003],
+    "minimum_parent_dominance": 0.7,
+    "edge_delay_rounding": "nearest",
+    "sensitivity_edge_delay_roundings": ["floor", "nearest", "ceil"],
+    "contact_geometry_used_for_boundary": false
+  },
+  "source_topology": {
+    "bin_mm": 1.0,
+    "event_window_ms": [-20.0, 180.0],
+    "baseline_window_ms": [-120.0, -20.0],
+    "frame_step_ms": 2.0,
+    "frame_width_ms": 3.0,
+    "minimum_active_neurons": 2,
+    "persistence_frames": 2,
+    "full_sheet_movie": {"enabled": true, "frame_ms": 2.0}
+  },
+  "model_ictal_v2": {
+    "t_ictal_offset_from_operational_onset_ms": -100.0,
+    "t_base_ms": [500.0, 1000.0],
+    "w_pre_ms_relative_to_t_ictal": [-500.0, 0.0],
+    "w_early_ms_relative_to_t_ictal": [100.0, 1100.0],
+    "w_freq_ms_relative_to_t_ictal": [500.0, 1000.0],
+    "minimum_ictal_onset_ms": 2000.0,
+    "activity_threshold": 0.5,
+    "duty_threshold": 0.8,
+    "population_rate_ratio_min": 2.0,
+    "contact_centroid_band_hz": [10.0, 250.0],
+    "contact_centroid_shift_min_hz": 5.0,
+    "contact_centroid_ratio_min": 1.25,
+    "sheet_bin_mm": 1.0,
+    "sheet_recruited_bin_fraction": 0.5,
+    "sheet_minimum_bin_occupancy": 20
+  },
+  "complete_distribution": {
+    "primary": "unconditional_fixed_projection_sliced_wasserstein",
+    "minimum_estimable_events": 2,
+    "patient_reference_max_events": 4096,
+    "floor_draws": 256,
+    "floor_seed": 20260902,
+    "patient_training_only_for_selection": true,
+    "heldout_open_after_workpoint_freeze": true
+  },
+  "validation": {
+    "natural_kmeans_seed": 20260902,
+    "minimum_fig4_readable_contacts": 3,
+    "ood_denominator": "all returned pre-transition causal families",
+    "unreadable_counts_as_ood": true,
+    "paired_bootstrap_draws": 4096,
+    "paired_bootstrap_seed": 20260902
+  },
+  "resources": {
+    "numerical_threads_per_worker": 1,
+    "maximum_workers_seed_audit": 10,
+    "maximum_workers_before_rss_measurement": 1,
+    "maximum_workers_after_rss_measurement": 10,
+    "initial_worker_gib": 18.0,
+    "reserved_available_memory_gib": 32,
+    "monitor_interval_seconds": 600,
+    "minimum_free_disk_gib": 30,
+    "long_run_launcher": "systemd-run --user plus nohup"
+  },
+  "claim_boundary": "Development-only E1146 dual-core Z/M cross-state experiment; no blind, patient-generalization, anatomical-core or biological-causal claim"
+}

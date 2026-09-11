@@ -149,3 +149,30 @@ def test_weighted_trace_rejects_degenerate_weights():
     for bad in (np.zeros(8), np.full(8, np.nan), np.ones(7)):
         with pytest.raises(ValueError):
             _weighted(bad, use_z=True, use_m=True, I_th_EI=1.0, eta_m=0.5)
+
+
+def test_named_region_traces_separate_two_cores_and_surround():
+    module = _module(use_z=False, use_m=True, I_th_EI=1.0, eta_m=0.5,
+                     trace_stride_steps=1)
+    module.enable_region_traces({
+        "core_a": np.array([1, 1, 0, 0, 0, 0, 0, 0], bool),
+        "core_b": np.array([0, 0, 1, 1, 0, 0, 0, 0], bool),
+        "surround": np.array([0, 0, 0, 0, 1, 1, 1, 1], bool),
+    })
+    module.z[:8] = np.array([0.2, 0.4, 0.5, 0.7, 0.8, 0.8, 1.0, 1.0])
+    module.m[:8] = np.array([1, 1, 2, 2, 3, 3, 3, 3], float)
+    module.apply_currents(np.zeros(10), np.zeros(10))
+    module.step(np.zeros(10, bool), None, 0.1)
+    trace = module.region_trace_arrays()
+    assert np.isclose(trace["core_a_z_mean"][0], 0.3)
+    assert np.isclose(trace["core_b_z_mean"][0], 0.6)
+    assert np.isclose(trace["surround_z_mean"][0], 0.9)
+    assert trace["time_ms"].shape == trace["core_a_z_mean"].shape == (1,)
+
+
+def test_named_region_trace_masks_are_validated():
+    module = _module(use_z=True)
+    with pytest.raises(ValueError):
+        module.enable_region_traces({"bad": np.ones(7, bool)})
+    with pytest.raises(ValueError):
+        module.enable_region_traces({"empty": np.zeros(8, bool)})

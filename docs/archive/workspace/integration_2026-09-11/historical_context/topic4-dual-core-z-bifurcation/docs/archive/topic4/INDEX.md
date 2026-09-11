@@ -1,0 +1,82 @@
+# Topic 4 Archive Index — Model layer
+
+> **Topic 4 formal entry（2026-06-01 起）**：`docs/topic4_sef_hfo.md` (**SEF-HFO / SEF-ITP framework v0.2**)
+> **上游 SBA framework**：`docs/paper1_framework_sba.md`（v1.1.2 lock 2026-04-30 / PR-7 addendum 2026-05-01）—— SEF-ITP 取代其 BHPN-toy / BHPN-fit toy-mechanism 部分；保留其 P1/P2/P3/P5 红线
+> **硬前置**：`docs/topic0_methodology_audits.md` §3.1 phantom-rank 修复 + §5 broad re-derivation roadmap（已解锁；后续 runner 仍必须使用 masked features）
+> **范围**：Topic 1 / Topic 3 实验数据之上的模型层；当前主路径 = SEF-HFO（间期 HFO 传播的空间易激场模型）
+> **不属于**：Topic 2（事件间 ~2 Hz / refractory + slow modulation；属独立 Paper 2）。
+
+## 当前主路径（2026-06-01 起）
+
+**SEF-HFO**（Spatial Excitability Field model for interictal HFO propagation）：
+
+- 主文档：`docs/topic4_sef_hfo.md`
+- v0.2 plan：`docs/archive/topic4/sef_hfo_topic4_v2_plan_2026-06-01.md`
+- 核心断言：间期群体 HFO = 局部低异质性、各向异性连接、近临界但仍亚阈值的 E-I 易激斑块，在噪声触发下产生的自限性瞬态传播事件；低异质性必须通过 effective gain 实际进入稳定性分析
+- 保留 v1 真实数据验收合同（H1–H6）：endpoint compactness / source-sink reversal / mark independence + stable geometry / rate-geometry decoupling / pre-post-ictal endpoint shift / participation-field segregation
+- v0.2 建模路线：effective gain → linear dispersion map → finite-pulse response map → 2D rate field + geometry controls → LIF E-I SNN → 抽象慢变量 feasibility bridge
+- 文献 framing：具体细胞机制多样，但在中观层收敛到易激性、恢复能力、有限扰动响应和空间招募变化；SEF-HFO 只承接这个抽象动力学层，不把间期 HFO 写成微型发作
+- 转向触发点（2026-06-01）：旧 HR/FHN route 仍能作为 sensitivity，但主线不够 sharp；v0.2 把机制收紧为“低异质性必须 gain-closed、事件必须 pulse-validated、几何证据必须 control-disciplined”
+- 2026-06-02 review amendment：v0.2 重定位为 **two-stage control-disciplined exploratory mechanism screen**（Stage 1 exploratory screen → freeze 最小机制 → Stage 2 held-out consistency validation，筛选/验证目标不重叠）；三条纪律补丁（operating-point family + 不准抢救、recovery 从 rate 层起跨阶段同构、判别指标改为「方向随连接轴转不随电极杆转」带阈值判据）见 v2 plan 顶部 2026-06-02 amendment。
+- 2026-06-03 amendment：「局部」收窄为**时间离散自终止（空间可填满 SOZ 邻域网格）** + 促临界↔稳态回拉拮抗作组织视角 + recovery 并列机制分支硬化（不写成暂不做）+ homogeneous/heterogeneous 不绝对化 + 发作桥接降格为 H5/Phase 3 候选机制（不作 clinical seizure onset 结论）+ coworker1 LIF (`Jlibrary/ei_snn_scaffold/`) = Step 4 前置参考。**Step 0 验收（v2，2026-06-03 晚 user ratify）= 通过 mechanism-scale gate**（换 LIF colored-noise transfer 后，有限脉冲在 LIF-rate field 产生「点着→定向传播→自终止」事件；sigmoid 路线结构性失败）。**口径：过的是 mechanism-scale gate，不是 patient-fitted quantitative match**（尺度一致即可，~70/110ms、cm 级、几十 ms 展布同一量级；定量时长/速度/范围张力降为 Step 1/2 sensitivity）。**Step 1 解锁**，带两候选窗（Brunel-like 短/稳健主线 + 病理高激+recovery envelope-时长 sensitivity）。前一判定（sigmoid 路线 LOCKED）保留作 audit trail。结果链：`step0_results_2026-06-02.md`（sigmoid）+ `lif_transfer_route_2026-06-03.md`（LIF route + 验收 + Step 1 设计）；详见 framework 顶部 Step-0 验收判定 v2。
+- 2026-06-03 晚 **数学路线更新**：主模型 sigmoid rate field（`F_eff`）→ **LIF-derived rate field（`Φ_LIF(μ,σ)`）**；逻辑链不变只换 transfer，`F_eff` 降级、低异质性后置为 LIF 参数分布。关键更正：真 LIF 工作点稳健稳定（非 near-critical / 无 finite-k Hopf），self_limited_propagation 是非线性可激（全或无）→ Step-0a 目标 = 稳定可激、色散是诊断 finite-pulse 是闸门。新 Step-0 工作：0d 各向异性旋转控制（承重判据未做）+ Φ_LIF 收进 canonical src + σ-dynamics sensitivity + 0e heterogeneity 后置层。详见 `docs/archive/topic4/sef_itp_phase4_v2/lif_rate_field_theory_2026-06-03.md`。
+- 2026-06-03 晚 **Step-0 工作 (1)(2)(3) 完成**：0d 承重判据 **PASS**（θ_prop 随连接轴转 <0.1°、isotropic 无轴；commit c183ed6）；`Φ_LIF` 收进 canonical `src/sef_hfo_lif.py`（commit 46f9040 + 4 项工程加固 e95af61：w_ee_mult 贯穿场 / 0d 单轨化 / mean_field 多初值取最低-nuE root + 暴露 wEE×1.4 双稳 / 0d 判据测试）；σ-dynamics sensitivity（commit f86e73a）。(4) 0e heterogeneity = deferred。
+- 2026-06-03 晚 **Step 1 开工（锁定合同冻结）**：`docs/archive/topic4/sef_itp_phase4_v2/step1_noise_contract_2026-06-03.md` —— 用户 6 条方法学加固落数值（锁死事件检测器 + seed×amp 网格报比例 + 触发率曲线找宽区间不调点 + 窗口 B 回低-root + recovery-off 俘获失败对照 + 方向先场后真实 pipeline + 噪声下 isotropic+aligned-shaft 必须过不了）。
+- 2026-06-06 **SNN 噪声自发离散事件扫描（同质底物，初步，判定降级）**：`docs/archive/topic4/sef_itp_phase4_v2/snn_noise_spontaneous_scan_2026-06-06.md` —— 把 Step-1 rate 场 (drive×σ) NULL 搬到放电真值上对照。**站得住**：σ=0 静默 + 同质放电组织 + 慢空间噪声**稳健地**自发出离散自终止事件（机制上与 rate 场"离散几乎不存在"相反）。**撤回（用户审阅 §7，5 条全实）**："复现 NULL / 事件太快"——率门四处不可靠（标定漏 σ_ref、1.5s 分辨不了低频、率比较分母错配=模拟数所有成核 vs 数据数穿出来的群体事件、tau 没到边界）。异质核（Step 3）更硬的动机是模板多样性（本测试未测）。runner = tracked `scripts/sef_hfo_snn_noise_scan_runner.py`。
+- 2026-06-08 → 06-14 **cm-SNN 观测层 = Step 4 spiking 执行线（异质核 + 各向异性连接 + 真实 4mm 虚拟 SEEG，L=20/d100，探索性）**：存在性从 Step-1 同质率场 NULL 移交到这里后的 spiking 验证。
+  - **Stage 2 结构层闭合（站得住）**：`docs/archive/topic4/sef_hfo/snn_cm_spontaneous_bidirectional_2026-06-11.md` —— 单灶分开跑、池化正/反事件成 synthetic subject，过真实 masked pipeline → `stable_k=2` + 两套相反模板可复现 + 端点互换 `strict`。**定位=仪器闭合**（管线能认出稳定可复现端点互换的相反模板），**非机制重现**（单一连接轴 → 模板空间近 1 维 → `stable_k≈2` 半被迫）。
+  - **Stage 3 探索阶段（已收束，timing 主问未被检验）**：`docs/archive/topic4/sef_hfo/stage3_regime_screen_2026-06-14.md`（pilot = `stage3_twoend_equal_pilot_2026-06-13.md`）—— 二端等强病灶放同一张网自发，想测"网络自己的事件序列是否标签-时序独立"。扫遍工作点（核间距/异质宽度/平均门槛/驱动/错相位）都没拿到"两头都干净自发、低碰撞、平衡双向"的可用区（默认 drive 共点火 / 低 drive 静默 / dephase 碰撞 / 唯一低碰撞候选率太低）。改做事件分型（621 事件）揭示 **局部事件=猛点火但传不远（contained/relay-failure），区分局部↔全局靠持续时间+扩散而非成核能量；源层面双端成核存在但 per-cell 不平衡；可读大事件带方向但负端干净、正端读出对半**。**支持**"正反模板来自同轴两端随机成核"（源层面），**不支持**"平衡独立长时序双源列车"。"很多小局部 + 少数模板化大事件"层级更像真实 HFO。**timing 独立性主问从未被检验（没造出测试床），不写主结论**；回落 Stage 2 结构层。"NULL/no-go/pass-fail" 早期措辞已被该文档 reframe 段撤回。runner = `scripts/run_sef_hfo_snn_cm_spontaneous_readout.py` + `run_stage3_regime_screen.sh`；分型 = `scripts/analyze_stage3_event_types.py`；纯 helper = `src/sef_hfo_stage3.py`（含 `pilot_gate` + 块感知 `synthetic_label_sequence`）。
+- 2026-06-16 → 06-28 **M0→M3 机制建模线（异质核 + 慢变量 + 谱相图，机制 screen 未 PASS）**：主文档 `docs/topic4_m3_stage.md`（一个主文档 + A/B 分文档）。
+  - **M0/M1/M2 一致性**：均质衬底"空间自限"难、不靠压死活动（M0 lever-exhausted；M1 E→E STD 给时间不给空间自限、事件铺满；M2 前沿抑制只压率不压 reach、钳制腿缺席、≠ Liou-Abbott 完整机制）→ 转 M3。M1/M2 归档在分支 `topic4-snn-m1-recovery`（`m1_recovery_stage2_NULL_2026-06-18.md` / `m2_shunting_gate_result_2026-06-19.md`）。
+  - **M3A 慢变量（A 线分文档）**：`sef_hfo/m3a_stage_conclusion_2026-06-27.md`（A1/A1b/A1c/A2）。决定性纠正：A2-P **源空间逐细胞 onset 梯度**推翻"同步爆发"判读——高许可度大态 = 沿两核轴的**相干招募波**（onset~位置 R²≈0.87、梯度沿轴 align≈1.0、40k-神经元 SNN）。
+  - **M3B 谱相图（B 线分文档）**：`sef_hfo/m3b_stage_conclusion_2026-06-28.md`。Brunel 式有限-Jacobian = **SPM-PASS frozen map**；§5 非正规瞬态 = 骨架特异自限轴向；**SNN 口径已纠正**（B 线内置 tiny grid 是错仪器假阴，轴向 spiking 验证在 A2-P 为正）。机器 `src/topic4_m3b_spectral_phase.py`（TDD-0..15 绿）+ 设计锁 `sef_hfo/m3b_jacobian_design_LOCKED_2026-06-27.md`。
+  - **方法学锁**：判"慢变量/算子有没有改传播"的正确仪器 = **源空间逐细胞 onset 梯度**，非接触空间方向可读性 / 双核 collision / 放电空间拉伸 / 主导本征模式。
+  - **M3A-v2.2 criticality M1/M2（2026-07-12 有界验收）**：M1 `unresolved_operating_point` 保持；M2 支持 `core_localized` 起燃，但 nonlinear spread 因 epsilon/polarity sensitivity 保持 `undetermined`。结果入口 `results/topic4_criticality{,_m2}/`，主口径见 `docs/topic4_m3_stage.md §6.1`。这是 M4 上游诊断，当前主动设计层为 M4，不用这条历史结果覆盖 M4 恢复/终止设计。
+
+- 2026-08-19 **data-driven Z/M 间期→持续高活动转变（阶段 1 = Fig5 基础版，preliminary）**：`docs/archive/topic4/data_driven_zm_ictal_transition/stage1_fig5_2026-08-19.md`。把按患者摆位的冻结底物（节点场 + E→E + E→I 全开）配上逐细胞两个慢变量（抑制松劲 z + 细胞疲劳 m），不给外部刺激只留背景噪声，看它自己滑进持续高活动。**慢变量开 12/12 进入、同种子关掉 0/3**；图严格复刻旧 qI/gK runaway 三列连续轨迹语法（慢变量空间场｜同时刻二维活动｜一条不断的 15 触点读出），重放与被分析轨迹逐位一致。⚠️ 先前记的"慢电流累积主要在病灶核周边"**已撤回**（量的是瞬时项不是累积；改用 1 秒时间平均后低活动态核内/非核基本相等、发作前差 2.2 倍）。**未做**：阶段 2 状态×扰动、阶段 3 连接性 2×2 因子（12 对种子）、阶段 4 特异性对照 —— 因此**任何数字都不得进 `docs/topic4_sef_hfo.md` 主文档**。⚠️ 五条已撤回说法（2 秒点不是安静基线 / 四臂非严格单调 / 曲目闸门原实现什么都没测到 / 发作前存档点必然漏存 / "等长间期窗"在爬升里）见该文档表格。⚠️ "进入时刻"是操作口径（20ms 平滑群体率 ≥120Hz 持续 100ms），**不是临床发作**。
+- 2026-09-02 **冻结双-core 单因素机制响应图（rev20-DC）**：`docs/archive/topic4/sef_hfo/rev20_dc_dual_core_mechanism_atlas_result_2026-09-02.md`。31×4 screen 只以训练完整事件分布选水平，随后 9×12 新网络独立打开 held-out/KMeans/OOD。`Joint=1.25` 是唯一三项同时改善的平衡候选；单独加强 EE 或各向异性会把事件压入较窄支持区但牺牲第二模板，aspect=4.0 为 4/4 runaway。**完整患者分布仍未进入地板，结论限于单患者 development 机制响应。**
+- 2026-09-04 **冻结双-core spatial-Z 分岔**：`docs/archive/topic4/sef_hfo/dual_core_spatial_z_bifurcation_result_2026-09-04.md`。在同一 `dualcore_s39 + Joint=1.25` realized graph 的 10×10 deterministic reduction 上，pseudo-arclength 折返和 fixed-point Jacobian 实零模共同确认 spatial saddle-node fold chain；mixed cell 使用 `E[Z]`/`E[Z²]` closure。低支 fold 是 deterministic runaway boundary；100 个 rev21 OU-on SNN 转变的中位 Z 位于低/高根共存区，所以噪声可早于 fold 触发。边界：单 topology、2 mm coarse、frozen Z、`eta_m=0`，不是患者抑制场或热力学相变。
+- 2026-09-04 **Fig.5 dual-core transition story v2 候选**：`docs/archive/topic4/sef_hfo/fig5_dual_core_transition_story_v2_2026-09-04.md`。A/B/C 已统一到同一 OU-on dual-core SNN 轨迹，D 明确作为独立临床 cohort 空间桥，E 使用 verified spatial-Z branch atlas，F 使用现有 `tau_z×tau_m` operational-latency 网格。tonic plateau 不冒充 broadband oscillatory-power 增强；锁图前仍需 depletion-strength 专扫、C 多 seed 与 D 更强 null/定位裁决。
+
+## 数据侧（paper-A）：rate vs 传播几何（探索性，与上面的模型侧并行）
+
+- plan：`docs/superpowers/plans/2026-06-06-sef-hfo-soz-localization-rate-vs-geometry.md`（v3/v4/v5 修正块）。
+- **2026-06-07 低事件窗读数稳定性 + de novo 发现能力**（探索性，n=28，无 held-out）：`docs/archive/topic4/sef_hfo/low_rate_template_stability_2026-06-07.md`。三层结论，主参照=全程模板（非 rate）：
+  - **read-back（已学到模板、短窗读回）**：低事件窗里传播源→汇模板比发放计数更抗采样不足，扣对照后 EXCESS +0.131（25/28，p<1e-4）。**这不是 SOZ 定位优势**（静态定位 + SOZ 内部稳定性早前均 NULL，见 `soz_localization_results_2026-06-07.md`），而是读数时间稳定性。
+  - **de novo（短窗从零发现模板）= 负结果**：方向恢复 NULL（ALL +0.022 p=0.10）、端点恢复 NULL（excess −0.064）；一致性臂复现 read-back（epi +0.156）证明非 pipeline 回归。
+  - **学习曲线**：失败既因事件少（方向需 ~100 事件饱和）又因安静时段本身状态变了（真实窗落随机基准下 −0.29，rate 同降）。**统一：传播模板要"多事件学习、短窗读回"，不能"短窗从零发现"。**
+  - 代码 `src/low_rate_template_stability.py` + `scripts/{run_low_rate_denovo,run_denovo_endpoint_stability,run_denovo_learning_curve,plot_*}.py`；tests 22 全绿。
+- **2026-06-08 间期传播几何骨架**（探索性，描述性 model-input，无 held-out，n=30 有几何）：`docs/archive/topic4/sef_hfo/propagation_skeleton_geometry_2026-06-08.md`。纯几何量传播骨架的 3D 尺度喂给 SEF-HFO 模型——起止 core 相当紧凑（Yuquan 半径中位约 3 mm）、传播轴厘米级（中位约 18–22 mm）、多数是跨杆 distributed 采样（21/26）而非单杆一维；**不是 SOZ 定位器、不是假设检验**（起止端≠致痫区已确证 NULL）；几何 vs 发放稳定性对比留下一轮。
+
+## 前一代主路径（2026-05-20 至 2026-06-01）
+
+**SEF-ITP v1**（Spatial Excitable Field model for Interictal Template Propagation）：
+
+- 主文档同上，v1 历史审计链保留在顶部 banner 与各 archive。
+- 核心断言：间期群体 HFO = 空间组织化病理易激场 θ(x) 被扩散物理反复采样的痕迹。
+- 5 phase 路线：Phase 0 phantom-rank 硬前置 → Phase 1 空间几何免费检验 → Phase 2 temporal × geometry 联合 → Phase 3 ictal-adjacent → Phase 4 HR/FHN neural-field toy。
+- v1 的真实数据验收合同继续保留；Phase 4 HR/FHN toy 降级为历史探索 / sensitivity。
+- 转向触发点（2026-05-20）：识别 BHPN-toy 是循环论证（A_ij 矩阵预编码现象 → Kuramoto 必然演化出双稳态 → "复现"是 tautology）。
+
+## 历史归档
+
+### `layered_model_framework.md`
+2026 年 4 月被 `paper1_framework_sba.md` 取代的早期分层模型框架（intra-event Kuramoto 保留 + 不再追求 inter-event 大一统）。SBA 框架的概念前身——保留作为思路演变的历史记录。
+
+### `pr_t4_1_bhpn_toy/` — BHPN-toy plan（**SUPERSEDED 2026-05-20**）
+- `pr_t4_1_bhpn_toy_plan_2026-05-01.md` — plan-of-record v2，**已被 SEF-ITP 取代**
+  - 顶部有 SUPERSEDED banner 指向 `docs/topic4_sef_hfo.md`
+  - 保留为历史归档：v2 修订过程（rotating-frame rank / direction-agnostic mark dependence / TDD unit vs integration 拆分）作为方法学训练范例；其中 "k=2 是对称 Hebbian 数学必然，不是 mechanism discovery" 是触发 SEF-ITP 转向的关键认知
+
+### HR/FHN 节点动力学路线（Phase 4 v1）— **整体 SUPERSEDED 2026-06-01，全部集中在此**
+**一句话**：曾用 Hindmarsh-Rose / FHN 抽象节点搭模型；2026-06-01 起主模型切到 EI / LIF-derived rate field（SEF-HFO v0.2），HR 路线整体降级。要找 HR 的东西，全在下面三处（别处不再散落）：
+- **文档**：`sef_itp_phase4_v1/stage1_results_2026-05-28.md`、`stage1b_results_2026-05-28.md`（HR 单节点 regime + burst-envelope 标定，均已加 SUPERSEDED 头）
+- **spec**：`docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md`（HR/FHN route 设计，已加 SUPERSEDED 头）
+- **结果图**：`results/topic4_sef_itp/phase4_hr_route_SUPERSEDED/`（HR 单节点相图 + regime map + envelope 标定图；含 `_SUPERSEDED_README.md`）
+- 保留为历史 audit trail / sensitivity，**不是当前路线**。当前路线 = SEF-HFO v0.2（`docs/topic4_sef_hfo.md` + `sef_itp_phase4_v2/`，结果 `results/topic4_sef_hfo/`）。
+
+## 跨文档链接
+
+- `docs/topic4_sef_hfo.md` §9.1 — SBA framework 取代 / 保留范围
+- `docs/topic4_sef_hfo.md` §13 — 历史文档索引（含本 INDEX 反向链接）
+- `docs/topic0_methodology_audits.md` §5h — Topic 4 attractor on masked re-run 是 SEF-ITP Phase 0 子步

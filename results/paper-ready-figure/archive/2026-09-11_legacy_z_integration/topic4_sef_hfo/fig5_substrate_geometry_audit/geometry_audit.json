@@ -1,0 +1,225 @@
+{
+  "status": "STRUCTURE_AUDITED_NOT_FINAL_SUBSTRATE_FREEZE",
+  "historical_field": {
+    "candidate_id": "historical_hand_dual_core",
+    "centers_mm": [
+      [
+        4.19921432,
+        9.12890135
+      ],
+      [
+        16.47920304,
+        3.96551153
+      ]
+    ],
+    "target_count": 1129,
+    "field_type": "manual_dual_core_budget_matched",
+    "selected_count": 1129,
+    "distance_cutoff_mm": 1.4971071338839135,
+    "strictly_inside_cutoff_count": 1128,
+    "boundary_tie_count": 1,
+    "selected_per_core": [
+      553,
+      576
+    ],
+    "maximum_selected_distance_per_core_mm": [
+      1.4971071338839135,
+      1.496371372489329
+    ],
+    "h_sha256": "b6c56f0ec134321e7adb82c2961bfe7937d9e1940b27677dba91ee3654171561"
+  },
+  "frozen_field": {
+    "centers_mm": [
+      [
+        1.5377342579886317,
+        1.2264179880730808
+      ],
+      [
+        18.606612137053162,
+        2.417713414411992
+      ]
+    ],
+    "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+    "field_type": "manual_dual_core_budget_matched",
+    "target_count": 1499,
+    "selected_count": 1499,
+    "distance_cutoff_mm": 1.8465707823703492,
+    "strictly_inside_cutoff_count": 1498,
+    "boundary_tie_count": 1,
+    "selected_per_core": [
+      725,
+      774
+    ],
+    "maximum_selected_distance_per_core_mm": [
+      1.843871141787507,
+      1.8465707823703492
+    ],
+    "h_sha256": "3f02088f48d3f39f01ce647d8e50b0e02cf01268699b3b58c423a3bff02618a9"
+  },
+  "disk_fraction_inside_sheet": [
+    0.8492500119506828,
+    0.9297745609498548
+  ],
+  "angles_deg": {
+    "historical_core_line": 157.19461603004353,
+    "frozen_core_line": 3.9923945360846407,
+    "graph_kernel": -22.80538396505847,
+    "rev22_p030_kernel": -31.37538396505847,
+    "fig5_event_axis": 59.51771621303601,
+    "core_vs_graph_gap": 26.797778501143114,
+    "core_vs_p030_kernel_gap": 35.36777850114311,
+    "event_vs_graph_gap": 82.32310017809448,
+    "event_vs_final_graph_gap": 81.6417258737101
+  },
+  "final_fig5_graph": {
+    "core_A": {
+      "n_targets": 725,
+      "n_edges": 580000,
+      "axis_deg": 164.0899403760354,
+      "rms_aspect_ratio": 1.4705668889712067,
+      "mean_source_minus_target_mm": [
+        0.29633062726816345,
+        0.2201661874464452
+      ],
+      "rms_distance_mm": 1.6420254478426162
+    },
+    "core_B": {
+      "n_targets": 774,
+      "n_edges": 619200,
+      "axis_deg": 156.3347406830345,
+      "rms_aspect_ratio": 1.6640394668628888,
+      "mean_source_minus_target_mm": [
+        -0.31129393211365636,
+        0.16028374781041724
+      ],
+      "rms_distance_mm": 1.5798586047061125
+    },
+    "central_patch": {
+      "n_targets": 1023,
+      "n_edges": 818400,
+      "axis_deg": 157.07898441615805,
+      "rms_aspect_ratio": 1.9683056008549142,
+      "mean_source_minus_target_mm": [
+        0.09120389751749516,
+        0.042238486118657124
+      ],
+      "rms_distance_mm": 1.6364484425971155
+    },
+    "upper_patch": {
+      "n_targets": 1020,
+      "n_edges": 816000,
+      "axis_deg": 158.28145544161578,
+      "rms_aspect_ratio": 1.979408796399066,
+      "mean_source_minus_target_mm": [
+        0.1113033953703603,
+        0.02429766478947851
+      ],
+      "rms_distance_mm": 1.6410840833457563
+    },
+    "all_E": {
+      "n_targets": 32000,
+      "n_edges": 25600000,
+      "axis_deg": 157.8759903393259,
+      "rms_aspect_ratio": 1.9066185378260594,
+      "mean_source_minus_target_mm": [
+        0.09514250213953583,
+        0.04643526330232665
+      ],
+      "rms_distance_mm": 1.6736844645364517
+    },
+    "autapses": {
+      "E_to_E_count": 32000,
+      "I_to_I_count": 8000,
+      "E_to_E_edges": 25600000,
+      "E_to_E_edge_fraction": 0.00125,
+      "E_to_E_weight_fraction": 0.0012923117942860991
+    }
+  },
+  "kernel": {
+    "ell_mm": 0.38,
+    "AR": 2.0,
+    "parallel_mm": 0.5374011537017762,
+    "perpendicular_mm": 0.26870057685088805,
+    "meaning": "relative sampling priority, not marginal connection probability with fixed in-degree",
+    "scope": "all E targets, including both cores; no central corridor mask; nonperiodic sheet"
+  },
+  "outside_core_features_for_source_dx_0p38": [
+    [
+      -1.0,
+      1.0,
+      1.0,
+      -1.0,
+      1.0,
+      0.0
+    ]
+  ],
+  "self_exclusion_toy": {
+    "isotropic_indices": [
+      0,
+      2
+    ],
+    "rotated_indices": [
+      0,
+      2
+    ],
+    "self_selected_in_both": true
+  },
+  "slow_parameters": {
+    "I_th_EI": 66.6389591886689,
+    "I_th_EI_scale": 0.7,
+    "eta_m": 0.003725797177793549,
+    "integrated_M_scale": 0.5,
+    "mode": "z_plus_m",
+    "tau_adp": 500.0,
+    "tau_z": 3000.0,
+    "trace_stride_steps": 10,
+    "use_m": true,
+    "use_z": true
+  },
+  "network_cache": {
+    "hit": true,
+    "source_artifact": "results/topic4_sef_hfo/data_driven_core_field_rev9/node_edge_calibration/node_kick_canary.json",
+    "source_commit": "e785eb28534c31b90d486359a7f6f32c4e3b6616",
+    "frozen_cache_key": "4a6a3bc3a5d49061c81fb8fe66696138265aeb95e7928e41bdc84a4b1261a92e",
+    "frozen_cache_path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_core_field_rev9/network_cache/4a6a3bc3a5d49061c81fb8fe66696138265aeb95e7928e41bdc84a4b1261a92e.pkl",
+    "frozen_cache_present": true,
+    "cache_sha256": "225882ef9320e05b0176adab3b8b891ea0ad93e59b9257c244977f6a3db686fe"
+  },
+  "source_hashes": {
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-dual-core-mechanism-scan/config/topic4_rev22_dci_dual_core_interictal_identifiability.json": "7b6e6e643c7e0cc5f73da9c1435d7384d0008ca4e7775605351d0f3b59ddcd6f",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/response_fit/final_execution_candidate_manifest.json": "667b987f5ff5673ec642ea4af4afc55cd6f7b2b0ad030640fb90d742596c3377",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_zm_transition/timescale/workers/rev21_ts_tz3000_ta500_topology_2542_dynamics_2642.json": "6998e40293db440d7136b7c3b13cc29f648ad91b2e4262fe47d3a639c1df7e33",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-dual-core-z-bifurcation/config/topic4_rev21_dual_core_zm_transition.json": "e7bb57aa264a4ee53887dbac349c7c6342bb5972cda6ff2798b63b4270f29498",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-dual-core-z-bifurcation/results/paper-ready-figure/fig5_transition_susceptibility_v3/figures/fig5-transition-susceptibility-v3-metadata.json": "275eda8f96c2a054b3627ffa8f9f35d107533749d8b9e292ea821f242090b2cf",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-dual-core-z-bifurcation/scripts/audit_fig5_substrate_geometry.py": "cc8d6b3189550a5df5f2a2e2c7d918b3349fb44d09ace660579df8f46eb305d7"
+  },
+  "historical_config_git_revision": "26bc4338",
+  "historical_config_blob_sha256": "3a2dcb4b9c63780cbe6bbffdd62ad2094da5c60b314023aaa7aca468b8a7bd25",
+  "claim_boundary": "Geometry and code audit. No simulation changes, no new dynamical or anisotropy-causal claim. rev22 p030 is a train-selected proposal.",
+  "sobol_regeneration": {
+    "exact_centers_and_budget_match": true,
+    "accepted_index": 39,
+    "draw_index": 45,
+    "historical_source_sha256": "39754998e68e04d9419b3fad8f87e2c99eb482027b93c1dcda7641598abc95c2"
+  },
+  "threshold_audit": {
+    "base_mV": 18.0,
+    "core_target_mean_mV": 17.5,
+    "core_target_sd_mV": 1.0,
+    "core_actual_mean_mV": 17.452927970885277,
+    "core_above_base_count": 451,
+    "core_below_base_count": 1048
+  },
+  "original_audit_producer_sha256": "cc8d6b3189550a5df5f2a2e2c7d918b3349fb44d09ace660579df8f46eb305d7",
+  "render_producer_sha256": "d930ae65ce26e700f30698a7541560f5c5d9b1734b9e3279da05287498f9d9d7",
+  "render_changes": "Layout spacing and render-only path added after static graph audit; audited model code unchanged.",
+  "geometry_arrays_sha256": "dbec6d1d0d5cac0f9741e9ffed8e91255beabc44b7cb8c2df9f2f23994cbb6fb",
+  "stage_config_sha256": "470de45715194f357396084a9cdad2f2e6a3bae044206be394d05207f2dd9fae",
+  "figure_outputs": {
+    "results/topic4_sef_hfo/fig5_substrate_geometry_audit/figures/core_geometry_and_connection_axis.pdf": "1986cd937580e21ab3bc763db290e3d509475a18173eb2062e6779db9999b03a",
+    "results/topic4_sef_hfo/fig5_substrate_geometry_audit/figures/core_geometry_and_connection_axis.svg": "f5983413902d6030f2365aed2f72b419b2035c3859de3c66db4440538c755a0c",
+    "results/topic4_sef_hfo/fig5_substrate_geometry_audit/figures/core_geometry_and_connection_axis.png": "7de3d871c7ac1969be51ea457186acf6579b4a9eac2ace9971e6c4045e1f6e73"
+  },
+  "current_reproduction_script_sha256": "82b14379b77a9bc747086aeefee06abeead6202df4babcf47117d938e0ee58f1",
+  "png_pdf_visual_review": true
+}

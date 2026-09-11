@@ -12,6 +12,7 @@ import hashlib
 import json
 import os
 import tempfile
+from collections.abc import Mapping
 
 import numpy as np
 
@@ -21,15 +22,53 @@ REQUIRED_KEYS = (
     "schema", "step", "absolute_time_ms", "V", "ref", "s_E", "I_E", "s_I", "I_I",
     "ring_sE", "ring_sI", "xi", "rng_state", "ras_keep", "es_ema", "es_run",
     "track_rec", "s_E_rec", "I_E_rec", "slow", "external_drive",
+    "node_accessibility",
 )
 
 _SLOW_ARRAYS = ("z", "m", "I_I_last", "acc_D", "acc_A")
 _DRIVE_ARRAYS = ("field_state", "cached")
 
 
+def _controller_kind(controller):
+    protocol_kind = getattr(controller, "KIND", None)
+    if isinstance(protocol_kind, str) and protocol_kind:
+        return protocol_kind
+    cls = type(controller)
+    return f"{cls.__module__}.{cls.__qualname__}"
+
+
+def _copy_node_accessibility_payload(controller):
+    payload = controller.checkpoint_state()
+    if not isinstance(payload, Mapping):
+        raise TypeError("node_accessibility checkpoint_state() must return a mapping")
+    reserved = {"kind", "present"}
+    overlap = reserved.intersection(payload)
+    if overlap:
+        names = ", ".join(sorted(overlap))
+        raise ValueError(
+            f"node_accessibility checkpoint payload uses reserved key(s): {names}")
+    copied = {"kind": _controller_kind(controller)}
+    for key, value in payload.items():
+        if not isinstance(key, str):
+            raise TypeError("node_accessibility checkpoint payload keys must be strings")
+        if isinstance(value, np.ndarray):
+            copied[key] = np.array(value, copy=True)
+        elif isinstance(value, np.generic):
+            copied[key] = value.item()
+        else:
+            try:
+                json.dumps(value, sort_keys=True)
+            except (TypeError, ValueError) as exc:
+                raise TypeError(
+                    "node_accessibility checkpoint payload values must be arrays "
+                    "or JSON-serializable scalars") from exc
+            copied[key] = value
+    return copied
+
+
 def capture(*, step, absolute_time_ms, V, ref, s_E, I_E, s_I, I_I, ring_sE,
             ring_sI, xi, rng, ras_keep, es_ema, es_run, track_rec,
-            s_E_rec, I_E_rec, slow, external_drive):
+            s_E_rec, I_E_rec, slow, external_drive, node_accessibility=None):
     state = {
         "schema": CHECKPOINT_SCHEMA,
         "step": int(step),
@@ -52,6 +91,7 @@ def capture(*, step, absolute_time_ms, V, ref, s_E, I_E, s_I, I_I, ring_sE,
         "I_E_rec": None if I_E_rec is None else np.array(I_E_rec, copy=True),
         "slow": None,
         "external_drive": None,
+        "node_accessibility": None,
     }
     if slow is not None:
         acc_d = getattr(slow, "_acc_D", None)
@@ -75,6 +115,9 @@ def capture(*, step, absolute_time_ms, V, ref, s_E, I_E, s_I, I_I, ring_sE,
             "last_step": int(external_drive._last_step),
             "rng_state": external_drive._rng.bit_generator.state,
         }
+    if node_accessibility is not None:
+        state["node_accessibility"] = _copy_node_accessibility_payload(
+            node_accessibility)
     return state
 
 
@@ -110,10 +153,27 @@ def restore_external_drive(state, drive):
     drive._rng.bit_generator.state = payload["rng_state"]
 
 
+def restore_node_accessibility(state, node_accessibility):
+    payload = state.get("node_accessibility")
+    if payload is None or node_accessibility is None:
+        if (payload is None) != (node_accessibility is None):
+            raise ValueError(
+                "checkpoint node_accessibility payload and live object disagree")
+        return
+    if payload.get("kind") != _controller_kind(node_accessibility):
+        raise ValueError(
+            "checkpoint node_accessibility controller differs from the live object")
+    controller_state = {
+        key: (np.array(value, copy=True) if isinstance(value, np.ndarray) else value)
+        for key, value in payload.items() if key != "kind"
+    }
+    node_accessibility.restore_checkpoint_state(controller_state)
+
+
 def _flatten(state):
     arrays, scalars = {}, {}
     for key, value in state.items():
-        if key in ("slow", "external_drive"):
+        if key in ("slow", "external_drive", "node_accessibility"):
             continue
         if isinstance(value, np.ndarray):
             arrays[key] = value
@@ -121,12 +181,15 @@ def _flatten(state):
             scalars[key] = value
     for prefix, payload, array_names in (("slow", state["slow"], _SLOW_ARRAYS),
                                          ("external_drive", state["external_drive"],
-                                          _DRIVE_ARRAYS)):
+                                          _DRIVE_ARRAYS),
+                                         ("node_accessibility",
+                                          state.get("node_accessibility"), ())):
         scalars[f"{prefix}__present"] = payload is not None
         if payload is None:
             continue
         for key, value in payload.items():
-            if key in array_names and value is not None:
+            is_array = isinstance(value, np.ndarray)
+            if is_array and (prefix == "node_accessibility" or key in array_names):
                 arrays[f"{prefix}__{key}"] = np.asarray(value)
             else:
                 scalars[f"{prefix}__{key}"] = value
@@ -150,12 +213,14 @@ def load(path):
         scalars = json.loads(str(handle["__meta__"]))
         arrays = {key: handle[key] for key in handle.files if key != "__meta__"}
     state = {}
-    slow, drive = {}, {}
+    slow, drive, node_accessibility = {}, {}, {}
     for key, value in scalars.items():
         if key.startswith("slow__"):
             slow[key[len("slow__"):]] = value
         elif key.startswith("external_drive__"):
             drive[key[len("external_drive__"):]] = value
+        elif key.startswith("node_accessibility__"):
+            node_accessibility[key[len("node_accessibility__"):]] = value
         else:
             state[key] = value
     for key, value in arrays.items():
@@ -163,10 +228,13 @@ def load(path):
             slow[key[len("slow__"):]] = value
         elif key.startswith("external_drive__"):
             drive[key[len("external_drive__"):]] = value
+        elif key.startswith("node_accessibility__"):
+            node_accessibility[key[len("node_accessibility__"):]] = value
         else:
             state[key] = value
     for name, payload, array_names in (("slow", slow, _SLOW_ARRAYS),
-                                       ("external_drive", drive, _DRIVE_ARRAYS)):
+                                       ("external_drive", drive, _DRIVE_ARRAYS),
+                                       ("node_accessibility", node_accessibility, ())):
         present = payload.pop("present", False)
         if not present:
             state[name] = None

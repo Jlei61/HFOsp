@@ -1,0 +1,129 @@
+{
+  "design_id": "state_s_native_z_pilot_v1",
+  "parent": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/historical_manual_hard_native_z_v1",
+  "topology_seed": 6101,
+  "state_amplitude": 0.2,
+  "state_warmup_ms": 1000,
+  "state_ramp_ms": 200,
+  "analysis_start_ms": 1500,
+  "max_duration_ms": 20000,
+  "post_detection_ms": 2000,
+  "high_activity_rule": "all-E 10-ms rate >=200 Hz for 200 consecutive ms; confirmation timestamp retained",
+  "M": false,
+  "manual_refill": false,
+  "autonomous_s": false,
+  "source_s": "fixed imposed s; native global/spatial OU and Poisson retained",
+  "statistical_unit": "matched noise run on one fixed topology",
+  "no_trigger": "right-censored at 20s, retained",
+  "max_parallel": 3,
+  "jobs": [
+    {
+      "id": "nativeZ_zero_9108401",
+      "seed": 9108401,
+      "s": 0.0,
+      "Z_dynamic": true
+    },
+    {
+      "id": "nativeZ_zero_9108402",
+      "seed": 9108402,
+      "s": 0.0,
+      "Z_dynamic": true
+    },
+    {
+      "id": "nativeZ_zero_9108403",
+      "seed": 9108403,
+      "s": 0.0,
+      "Z_dynamic": true
+    },
+    {
+      "id": "nativeZ_negative_9108401",
+      "seed": 9108401,
+      "s": -0.5,
+      "Z_dynamic": true
+    },
+    {
+      "id": "nativeZ_negative_9108402",
+      "seed": 9108402,
+      "s": -0.5,
+      "Z_dynamic": true
+    },
+    {
+      "id": "nativeZ_negative_9108403",
+      "seed": 9108403,
+      "s": -0.5,
+      "Z_dynamic": true
+    },
+    {
+      "id": "nativeZ_positive_9108401",
+      "seed": 9108401,
+      "s": 0.5,
+      "Z_dynamic": true
+    },
+    {
+      "id": "nativeZ_positive_9108402",
+      "seed": 9108402,
+      "s": 0.5,
+      "Z_dynamic": true
+    },
+    {
+      "id": "nativeZ_positive_9108403",
+      "seed": 9108403,
+      "s": 0.5,
+      "Z_dynamic": true
+    },
+    {
+      "id": "fixedZ_zero_9108401",
+      "seed": 9108401,
+      "s": 0.0,
+      "Z_dynamic": false
+    },
+    {
+      "id": "fixedZ_zero_9108402",
+      "seed": 9108402,
+      "s": 0.0,
+      "Z_dynamic": false
+    },
+    {
+      "id": "fixedZ_zero_9108403",
+      "seed": 9108403,
+      "s": 0.0,
+      "Z_dynamic": false
+    },
+    {
+      "id": "fixedZ_negative_9108401",
+      "seed": 9108401,
+      "s": -0.5,
+      "Z_dynamic": false
+    },
+    {
+      "id": "fixedZ_negative_9108402",
+      "seed": 9108402,
+      "s": -0.5,
+      "Z_dynamic": false
+    },
+    {
+      "id": "fixedZ_negative_9108403",
+      "seed": 9108403,
+      "s": -0.5,
+      "Z_dynamic": false
+    },
+    {
+      "id": "fixedZ_positive_9108401",
+      "seed": 9108401,
+      "s": 0.5,
+      "Z_dynamic": false
+    },
+    {
+      "id": "fixedZ_positive_9108402",
+      "seed": 9108402,
+      "s": 0.5,
+      "Z_dynamic": false
+    },
+    {
+      "id": "fixedZ_positive_9108403",
+      "seed": 9108403,
+      "s": 0.5,
+      "Z_dynamic": false
+    }
+  ]
+}

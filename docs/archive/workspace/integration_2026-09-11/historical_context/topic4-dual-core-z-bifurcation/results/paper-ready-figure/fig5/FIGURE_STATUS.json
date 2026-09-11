@@ -1,0 +1,49 @@
+{
+  "status": "FIG5_TRANSITION_SUSCEPTIBILITY_V3_CANDIDATE_PENDING_AUTHOR_REVIEW",
+  "author_acceptance": false,
+  "candidate_asset": "results/paper-ready-figure/fig5_transition_susceptibility_v3/figures/fig5-transition-susceptibility-v3.png",
+  "candidate_pdf": "results/paper-ready-figure/fig5_transition_susceptibility_v3/figures/fig5-transition-susceptibility-v3.pdf",
+  "candidate_svg": "results/paper-ready-figure/fig5_transition_susceptibility_v3/figures/fig5-transition-susceptibility-v3.svg",
+  "producer": "scripts/paper_figures/build_fig5_transition_susceptibility.py",
+  "metadata": "results/paper-ready-figure/fig5_transition_susceptibility_v3/figures/fig5-transition-susceptibility-v3-metadata.json",
+  "substrate": "dualcore_s39 + Joint=1.25; rev20 substrate with rev21 Z/M; not the pending rev22 optimum",
+  "current_fig4_asset_lineage": "root Figure4 still uses rev11 continuous Node/NLC source; not yet replaced by rev22 two-core",
+  "scientific_focus": "entry from interictal-like events to tonic runaway; recovery and deep sustained oscillation are not required",
+  "panels": {
+    "A": "same-trajectory raw virtual SEEG, 8 fixed contacts",
+    "B": "same-axis population E rate, pooled-core/surround Z and actual-candidate eta_M*M",
+    "C": "same three state windows, corrected producer y/x order and rate conservation",
+    "D": "same 16 stimulation sites, low vs genuinely pre-onset (2015.4 ms), exact probe/sham replay; all sites retained",
+    "E": "native-delay upper runaway escape; gain1 bracket 0.428<s<=0.429",
+    "F": "80 trajectories at 40 parameter cells; two initial preparations; 21 preparation-dependent and 19 both-runaway cells"
+  },
+  "probe_interpretation": "short-window median rises but mean falls; long-window contrast differs. No uniform pre-onset amplification or anisotropy causality established.",
+  "validation": {
+    "targeted_tests_passed": 41,
+    "scan_arrays_sha256_verified": 80,
+    "probe_sham_exact": true,
+    "png_pdf_visual_review": true
+  },
+  "claim_boundary": "single development substrate; full SNN A-D and deterministic frozen-Z dynamic-M coarse E-F. Operational tonic runaway only. No specific local bifurcation type, clinical seizure reproduction, cohort prediction, or causal anisotropy susceptibility established.",
+  "remaining_for_stronger_claims": [
+    "rev22 final substrate handoff and rerun",
+    "multi-topology and matched future-noise state contrasts",
+    "matched along/off-axis and rotated/isotropic connectivity controls",
+    "attractor continuation only if a specific bifurcation type is claimed"
+  ],
+  "audit": "docs/archive/topic4/sef_hfo/fig5_model_lineage_and_susceptibility_audit_2026-09-05.md",
+  "previous_status_snapshot": "results/paper-ready-figure/fig5_transition_susceptibility_v3/prior_figure_status_20260905.json",
+  "next_revision_contract": {
+    "status": "SUBSTRATE_STRUCTURE_REVIEW_BEFORE_FINAL_FREEZE",
+    "audit": "docs/archive/topic4/sef_hfo/fig5_rev22_core_axis_and_freeze_audit_2026-09-05.md",
+    "B": "time-domain population-rate transition",
+    "E": "Z/M state and parameter conditions at transition; tau varied across runs, not described as changing at onset",
+    "structural_findings": [
+      "whole-sheet core search released the historical axis alignment",
+      "nonperiodic boundary truncates both core disks",
+      "event propagation axis differs from structural EE axis",
+      "self-exclusion sampler selects autapses; existing cached graph contains them"
+    ],
+    "model_mutated_in_this_review": false
+  }
+}

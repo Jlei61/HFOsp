@@ -80,3 +80,11 @@ def test_frozen_mode_classifier_reassigns_and_flags_ood():
         classifier, reference)
     assert assigned["labels"].tolist() == [0, 1, 1]
     assert assigned["ood"].tolist() == [False, False, True]
+
+
+def test_default_reconstruction_keeps_all_background_field_compatible():
+    from src.topic4_core_field_rev9 import reconstruct_node_from_h
+    node = reconstruct_node_from_h(np.zeros(10), n_total=12, quantile_seed=7,
+                                   core_mean=14., core_std=2., v_base=18.)
+    np.testing.assert_array_equal(node["vtheta"], np.full(12, 18.))
+    np.testing.assert_array_equal(node["delta_vtheta"], np.zeros(10))

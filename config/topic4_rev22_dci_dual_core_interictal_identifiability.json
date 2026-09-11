@@ -1,0 +1,241 @@
+{
+  "schema_id": "topic4_rev22_dci_dual_core_interictal_identifiability_v1",
+  "scientific_role": "development_only_frozen_dual_core_interictal_connectivity_identifiability",
+  "spec": "docs/topic4_rev22_dci_interictal_parameter_identifiability_spec.md",
+  "plan": "docs/topic4_rev22_dci_interictal_parameter_identifiability_plan.md",
+  "output_root": "results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability",
+  "network_cache": "results/topic4_sef_hfo/data_driven_core_field_rev9/network_cache",
+  "inputs": {
+    "rev20_config": {
+      "path": "config/topic4_rev20_dc_dual_core_mechanism_atlas.json",
+      "sha256": "fed5fbceca3a3bf90a73aa6b6189f74f3e162f998e841b715f476020ab9d0bf0"
+    },
+    "rev20_output_root": {
+      "path": "results/topic4_sef_hfo/data_driven_dual_core_mechanism_atlas"
+    },
+    "rev20_candidate_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_dual_core_mechanism_atlas/candidate_manifest.json",
+      "sha256": "917f28b4f17721dd7d1cac757cc3f42f9ab9025ca9353a82346d5832f8e1e0a1"
+    },
+    "rev20_selected_candidates": {
+      "path": "results/topic4_sef_hfo/data_driven_dual_core_mechanism_atlas/selected_candidates.json",
+      "sha256": "bacae50f80e41de6fba8c54de09dedb86d37f2d0dba1a69c1c51f9551923e554"
+    },
+    "transition_config": {
+      "path": "config/topic4_data_driven_zm_ictal_transition_v1.json",
+      "sha256": "2ce70caf70ca1225ba9a95721692cf7fc9ce0f8fa9b977c85d0370c78941b20f"
+    },
+    "patient_training_target": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/shaft_aware_patient_training_target.npz",
+      "sha256": "7d11100c0f431479f8decb17b6de97575a91dcb889887ce9e2cedbbdcd54140b"
+    },
+    "contact_contract": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/contact_shaft_contract.json",
+      "sha256": "548643b6e89b61408b8bdf4cbc1566133937204dc36e8d512049cb25762fde91"
+    },
+    "patient_heldout_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev14/patient_heldout_endpoint/patient_heldout_endpoint_manifest_v1.json",
+      "sha256": "97938e0b6f93ef8a836605bf098f1dc85aecec70f71e696dcff9c16ef7ca0216"
+    },
+    "patient_heldout_npz": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev14/patient_heldout_endpoint/patient_heldout_endpoint_v1.npz",
+      "sha256": "b9169e7e94acbe0e3781f0a72e5c1c64a8a588e9697f2ef926dcc6f57ffa6c2c"
+    },
+    "patient_support_config": {
+      "path": "config/topic4_rev14_patient_support_acceptance.json",
+      "sha256": "5dec1ff3277294697515d701e82246c242fb627348751571a5a6fe86e008940e"
+    }
+  },
+  "dual_core_anchor": {
+    "candidate_id": "dualcore_s39",
+    "centers_mm": [
+      [
+        1.5377342579886317,
+        1.2264179880730808
+      ],
+      [
+        18.606612137053162,
+        2.417713414411992
+      ]
+    ],
+    "target_count": 1499,
+    "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+    "source_commit": "26bc4338",
+    "source_path": "results/topic4_sef_hfo/data_driven_dual_core_ood/final_analysis.json",
+    "source_blob_sha256": "9c50b67764aa705f2119f052df34476426017a7d4bc00eb7569a24927f59185b"
+  },
+  "reference": {
+    "base_substrate_candidate_id": "joint_04_control",
+    "node_gain": 1.0,
+    "signed_depth_shrinkage": 1.0,
+    "g_EE": 0.5,
+    "g_EtoI": 1.0,
+    "ellipse_angle_deg": -22.80538396505847,
+    "ellipse_aspect_ratio": 2.0,
+    "Z_M": "off",
+    "ellipse_reference_source": "amendment v5.1 (2026-09-03): absolute reference = registered patient axis (src/sef_hfo_subject_placement.register_to_sheet theta_deg), which is the long axis of the E-to-E kernel used to sample the frozen graph (build_connectivity_rot, AR=2). rev20 used the nominal (45 deg, 2) no-op instead; that reference is 68 deg off the graph axis, so rev20's angle/aspect families acted on a misaligned kernel."
+  },
+  "parameter_semantics": {
+    "learned_ee_pattern_dose": {
+      "legacy_key": "g_EE",
+      "reference": 0.5,
+      "meaning": "dose of the rev11-NLC learned E-to-E redistribution coefficient row; per-target incoming E-to-E budget conserved",
+      "not": "total E-to-E synaptic strength"
+    },
+    "learned_e_to_i_pattern_dose": {
+      "legacy_key": "g_EtoI",
+      "reference": 1.0,
+      "meaning": "dose of the rev11-NLC learned E-to-I redistribution coefficient row; per-target incoming E-to-I budget conserved",
+      "not": "I-to-E inhibition or total E-to-I strength"
+    },
+    "theta_FT": {
+      "legacy_key": "ellipse_angle_deg",
+      "reference": 0.0,
+      "absolute_reference_angle_deg": -22.80538396505847,
+      "meaning": "fixed-topology E-to-E reweighting long-axis angle offset relative to the graph's own kernel axis (registered patient axis); mechanisms.ellipse_angle_deg = absolute reference + theta_FT",
+      "not": "learned anatomical tract direction; nor an angle relative to the sheet's 45 deg diagonal"
+    },
+    "AR_FT": {
+      "legacy_key": "ellipse_aspect_ratio",
+      "reference": 2.0,
+      "meaning": "fixed-topology E-to-E reweighting aspect ratio relative to the graph kernel AR=2, area preserved (ell*sqrt(AR), ell/sqrt(AR)); reference kernel = graph kernel",
+      "not": "rebuilt isotropic/anisotropic topology"
+    },
+    "both_scale": {
+      "derived": true,
+      "meaning": "joint dose arm multiplying (g_EE, g_EtoI); not a parameter"
+    }
+  },
+  "out_of_scope": [
+    "total E-to-E strength (I_EE)",
+    "E-to-E length scale (0.38 mm)",
+    "rebuilt topology (rho_EE)",
+    "Node optimization (section 14 varies Node only as blocking factor / nulls)",
+    "Z/M",
+    "patient ictal data",
+    "Fig.5 metrics"
+  ],
+  "forbidden_inputs": {
+    "Z_M": "off",
+    "patient_ictal": "forbidden",
+    "fig5_metrics": "forbidden"
+  },
+  "structural_nulls": {
+    "status": "frozen_before_rev22_candidate_selection",
+    "confirmation_seed_prefix_count": 6,
+    "random_learned_row_seed": 20260913,
+    "random_two_core_seed": 20260914,
+    "fixed_topology_variants": [
+      "r180",
+      "r90",
+      "matched_norm_row_1",
+      "matched_norm_row_2",
+      "merged_midpoint_core",
+      "random_two_core_centers"
+    ],
+    "expected_new_trajectories": 108,
+    "node_blocking_factors": [
+      {
+        "candidate_id": "exact_dual_anchor",
+        "source_manifest": "results/topic4_sef_hfo/data_driven_node_dualmode_rev17/dual_field_selection/candidate_manifest.json",
+        "source_manifest_sha256": "46a01e6d39891c332f882c29ef53edac1133d54d54d48f6072f297fdec7bfa98",
+        "historical_status": "frozen_reference_not_a_selected_rev17_winner",
+        "purpose": "dual_continuous_mean_dispersion_node_block"
+      },
+      {
+        "candidate_id": "v62_density_t050",
+        "source_manifest": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/observation_invariant_field_v6_2_final/candidate_manifest.json",
+        "source_manifest_sha256": "1c30be6f2121ed54f1c42ab312a8fae334902bd0a4246fcb5bcf4e42bbbb7298",
+        "historical_status": "display_candidate_fresh_network_coexistence_not_confirmed",
+        "purpose": "single_continuous_node_field_block"
+      }
+    ]
+  },
+  "provisional_domain": {
+    "g_LEE": [
+      0.0,
+      1.0
+    ],
+    "g_LEI": [
+      0.0,
+      1.5
+    ],
+    "theta_FT_deg": [
+      -22.5,
+      22.5
+    ],
+    "AR_FT": [
+      1.0,
+      3.0
+    ],
+    "final_geometry_domain": "frozen by Task 3 structure audit",
+    "theta_FT_deg_semantics": "offset (deg) relative to the absolute reference angle reference.ellipse_angle_deg"
+  },
+  "objective": {
+    "components": [
+      "D_support",
+      "D_order",
+      "D_lag",
+      "D_cover"
+    ],
+    "composite_reported_not_fit": "D_cloud_composite",
+    "n_pair_min": 5,
+    "min_eligible_fraction": 0.5,
+    "lag_cap_ms": 180.0,
+    "cover_quantile": 0.9,
+    "tie_tolerance_ms": 1e-09,
+    "patient_onset_unit": "seconds (converted to ms)",
+    "embedding": {
+      "seed": 20260903,
+      "variance_fraction": 0.95,
+      "max_components": 24,
+      "reference_n": 8192,
+      "n_directions": 64
+    },
+    "floors": {
+      "kind": "block_split_count_matched",
+      "draws": 256,
+      "seed": 20260903
+    },
+    "identifiability": {
+      "threshold": 1.0,
+      "formal_set": "rev20 screen (31 candidates x 4 seeds)",
+      "secondary_set": "rev20 confirmation (9 candidates x 12 seeds)"
+    },
+    "proposal_scalar": "minimax over identifiable normalized excesses (acquisition only)",
+    "controls": {
+      "draws": 128,
+      "seed": 20260904,
+      "pass_fraction": 0.9,
+      "invariance_tolerance": 1e-09,
+      "stretch_factor": 2.0,
+      "sample_size": "median returned-family count of the rev20 reference confirmation runs"
+    },
+    "fit_estimability": {
+      "min_returned_families": 12
+    }
+  },
+  "rev20_known_case_descriptive_only": {
+    "collapse": "dc_ellipse_aspect_ratio_3p0",
+    "balanced": "dc_both_scale_1p25",
+    "note": "reported after objective freeze; cannot accept, reject or tune the objective"
+  },
+  "claim_boundary": "Development-only one-patient identifiability of learned-connectivity redistribution parameters on a frozen dual-core substrate; no anatomical-core, biological-synapse, tract-direction, patient-generalization, ictal or patient-causal claim",
+  "graph_kernel": {
+    "theta_EE_deg": -22.80538396505847,
+    "AR": 2.0,
+    "achieved_base_geometry_seed_2511": {
+      "angle_deg": 157.79,
+      "aspect_ratio": 1.93
+    },
+    "source": "register_to_sheet theta_deg (source->sink centroid direction) and stage engine AR"
+  },
+  "amendments": [
+    {
+      "version": "v5.1",
+      "date": "2026-09-03",
+      "kind": "structural (before any rev22 SNN run)",
+      "summary": "ellipse reference bound to the graph kernel axis; theta_FT redefined as an offset; Task 3 re-run required"
+    }
+  ]
+}
