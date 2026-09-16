@@ -1,0 +1,22 @@
+{
+  "schema": "topic4.local_geometry_ee_axis_reference.v1",
+  "status": "REFERENCE_FIXED_FOR_LOCAL_SEARCH",
+  "reference_id": "geometry_ee_axis_reference_v1",
+  "source_candidate_id": "bridge_circle_out125_xminus075",
+  "contract_path": "/data/hfosp/topic4_sef_hfo/local_geometry_ee_axis_reference_20260914/reference_contract.json",
+  "contract_sha256": "fbb74e1c5683e93bdbdd4cade8268bc3789b3ffa0c637bd64eb166c372d2036c",
+  "runtime_path": "/data/hfosp/topic4_sef_hfo/local_geometry_ee_axis_reference_20260914/resolved_runtime.json",
+  "runtime_sha256": "bb9d66efa21dfc1966b53900bb3b51df4586e0a5cc69dd4a49ae21663281310c",
+  "candidate_path": "/data/hfosp/topic4_sef_hfo/local_geometry_ee_axis_reference_20260914/reference_candidate.json",
+  "candidate_sha256": "5bb5027b17c4310b6080a6874a42cab73e88fd78b934a4a2b186ca19fc6831bb",
+  "future_allowed_candidate_paths": [
+    "/centers_mm/0/0",
+    "/centers_mm/0/1",
+    "/centers_mm/1/0",
+    "/centers_mm/1/1",
+    "/parameters/EE_core_to_out_scale",
+    "/parameters/EE_angle_offset_deg"
+  ],
+  "search_dispatch_enabled": false,
+  "note": "Consume contract and resolved runtime together; this pointer is not a legacy worker configuration."
+}

@@ -1,0 +1,121 @@
+"""Assemble the scientific report from completed, validated artifacts."""
+from common import *
+import numpy as np
+
+def main():
+    native=read(OUT/'native_coordinates.json');assert len(native)==20
+    audit=read(OUT/'numerical_validation.json');assert audit['status']=='PASS'
+    h=read(OUT/'homoclinic_audit.json');pd=read(OUT/'flips/surround_2T_flip_N8192.json')
+    fc=read(OUT/'folds/low_global_fold_014_N4096.json');children=read(OUT/'secondary_flip_validation.json')['accepted_children']
+    table=['|编号|J_EE,core|A均值 Hz|B均值 Hz|A IEI-CV|B IEI-CV|A / B操作性标签|','|---:|---:|---:|---:|---:|---:|---|']
+    def number(x):return '不可估计' if x is None else f'{x:.3f}'
+    for r in native:table.append(f"|{r['number']}|{r['g']:g}|{r['means'][0]:.3f}|{r['means'][1]:.3f}|{number(r['cv']['coreAE'])}|{number(r['cv']['coreBE'])}|{r['labels']['coreAE']} / {r['labels']['coreBE']}|")
+    foldrows=[];foldcheck=read(OUT/'new_fold_validation.json')['folds']
+    for p in sorted((OUT/'folds').glob('*_N4096.json')):
+        r=read(p);check=next(x for x in foldcheck if x['name']==r['name']);curvature=check['curvature_checks'][1]['predicted_J_curvature'];foldrows.append(f"|{r['name']}|{r['g']:.13f}|{r['T_ms']:.6f}|{r['fixed_parameter_null_residual']:.2g}|{curvature:.3g}|")
+    regular=sum(r['labels']['coreAE']=='regular_bursts' and r['labels']['coreBE']=='regular_bursts' for r in native if r['number']>4)
+    tail=read(OUT/'long_tail_stability_validation.json') if (OUT/'long_tail_stability_validation.json').exists() else {}
+    tail_note='2200ms轨道的稳定性仍单列为待可靠估计，长周期轨道存在及同宿逼近证据不依赖这个未通过的返回乘子。'
+    if tail.get('status')=='STABLE_BOUND':tail_note='使用同一传递函数的解析增益，并改变积分步长及返回相位，均得到远小于1的横向乘子模，支持2200ms样本稳定。具体小乘子受长时间误差放大限制，不报告多位有效数字；原有限差分增益版本的假失稳数值不作为新PD证据。'
+    text=f'''# Core 起始 burst、周期分支与全网络放电对应 v7
+
+日期：2026-09-16。承接 v2–v6；本轮只讨论 core burst 动力学，不讨论临床发作分岔。
+
+## 本版回答到哪里
+
+本轮完成20个条件的原生SNN波形/raster图库、A/B分别绘制的分岔图与对应编号、关键联合周期轨道及左右临界模态图库。确定性模型中新增确认一个早期周期折点、两个远端周期折点，以及PD0子支的2T→4T分岔；长周期延拓还提供了同宿终止的强数值证据。
+
+原生SNN的结果限制了对机制的外推：新增16个条件中，{regular}个在两核均被同一操作性规则判为regular bursts。原生SNN独立初始条件运行没有重现简化模型中周边招募微区和右侧高背景支的相同突跳。参数附近的真实raster现在已经给出，但不能据此声称简化模型的临界J就是原生SNN临界值。
+
+远端招募周边周期族又延拓120点、达到完整周期1182.632ms；其全部全局连接仍未确立。图中保留实际延拓终点，不把终点、求解失败或均值交点标成分岔。有限周期阶数的分析也不能证明混沌或穷尽所有不稳定支。这一项是剩余的科学问题，不计入已完成证明。
+
+## 1. 新发现的早期共存区
+
+周期轨道折点位于 **J={fc['g']:.13f}，T={fc['T_ms']:.6f}ms**，A/B周期均值分别为{fc['mean_hz'][0]:.6f}/{fc['mean_hz'][1]:.6f}Hz。带相位条件的周期Jacobian存在额外零模；左右模残差、非退化曲率以及2048/4096网格一致性支持这是周期折点，不是自治相位中性方向。
+
+折点一侧的横向乘子约+1.437，另一侧在J=1.1218229776精化到4096网格后约+0.199787。因此一条不稳定周期支和稳定周期支在此相接。此时低率平衡点仍然稳定，出现一个原图漏掉的低率/周期burst共存窗口。这里改变吸引域内状态需要初始条件或扰动，不能把“存在稳定burst”与“从静息必然跳入burst”混为一谈。
+
+这条周期支随后趋近 **J_HC≈{h['fits'][-1]['J_infinite_period']:.10f}**：T从1000增长到2200ms，轨道与同一鞍点的最小六率欧氏距离从0.005589下降到1.94×10^-5Hz；2200ms轨道约79.4%的时间位于距鞍点0.1Hz内。鞍点A/B E率为0.497976/0.303748Hz，领先实特征根为+5.865984和−23.193424 s^-1。参数尾部指数收敛率约5.867–5.892 s^-1，与不稳定特征根一致。
+
+8192/16384网格下2200ms解的J差为{h['grid']['J_difference']:.2g}，均值差为{h['grid']['mean_difference_hz']:.2g}Hz。有限周期端点的周期均值仍约3Hz，不能画一条假想实线直接连到鞍点率；图中用极限位置和单独标记表示。最后3点的3参数拟合没有剩余自由度，证据还包括5点/4点拟合、鞍点逼近和网格复核。
+
+长周期稳定性另作数值检查。原2200ms边值解从最靠近鞍点处开始，起始率速度范数约为burst内最大值的4.3×10^-9，相位条件很差；这两个起点属于同一周期解。原相位返回映射出现约−1.18的数值，但相位中性方向误差约0.30，积分步长减半也未消失，不能据此命名新PD。解析求导同一Siegert积分/数值求积，将轨道链式法则缺陷从约8.9×10^-12降至3.7×10^-15。{tail_note}
+
+以上支持**同宿型终止的数值判断**；尚未直接解无限时间连接轨道边值问题。原来的低率平衡点折点 **J=1.1254164133** 仍然存在，与这段更早的周期折点—同宿共存区不是同一个临界点。旧“所有burst都在低率折点之后才出现”的读法需要据此修正。
+
+对应图：[局部起振区](figures/onset_cycle_fold_homoclinic.png)、[长周期波形](figures/onset_long_period_waveforms.png)。原生SNN编号19/20在J=1.12181/1.12183；确定性编号20a/20b显示同J的低率/周期解。
+
+## 2. 1.176附近新增2T→4T分岔
+
+V6已经确认LP0a、LP0b、LP0c和PD0，且低周边/招募周边周期态在一段参数区共存。V7将PD0产生的2T支继续到第二次flip：
+
+- **J={pd['g']:.15f}**，2T母轨道周期约910.943095ms。
+- 4096/8192网格临界J差8.88×10^-16；临界左右反周期模余弦均大于0.99999999999。
+- 独立返回映射的实临界乘子为−0.999875，支持穿过−1的倍周期判据。
+- 实际4T边值解周期约1821.886190ms。两条精化子支的半周期平移差最大值分别为{children[0]['half_period_max_difference_hz']:.6f}和{children[1]['half_period_max_difference_hz']:.6f}Hz，远大于其约2.2×10^-10Hz的加密网格缺陷；不是复制两遍母轨道。
+- 两个4T子支返回乘子模分别约0.82022、0.30652，位于更大J一侧，因此支持向右的超临界2T→4T分岔。
+
+保留原PD1–PD3编号，新点标作PD0(2T)。新点的右临界率模主要在周边E，普通率轴几乎分辨不出4T破缺；它首先是联合周期响应的微小调制，并不表示宏观core burst已经成为非周期事件。这些临界值间隔极小，精度属于冻结的数值闭合模型；阈值、权重投影和率时间常数的不确定性不具有这一精度，不能把它直接叫原生SNN irregular burst。
+
+对应图：[局部分岔、返回乘子和左右模](figures/secondary_period_doubling.png)、[4T破缺波形](figures/secondary_four_cycle_difference.png)。更大幅度4T尝试有未收敛记录，不作为支终点或新的分岔证据。
+
+## 3. 早期周期族的进一步连接
+
+低周边不稳定支现在已沿实际弧长连到新增周期折点及长周期同宿型极限。招募周边周期族则继续出现折返和更长的多burst周期；以下新折点均检查了左右零模和非零曲率：
+
+|名称|J_EE,core|完整周期 ms|右零模最大残差|预测参数曲率|
+|---|---:|---:|---:|---:|
+{chr(10).join(foldrows)}
+
+曲率依赖弧长归一化，不能当成生理响应大小。远端轨道可以在一个完整周期中包含多次core burst及一次较大的周边burst，A/B的峰数和间隔可不相同。有限多峰周期轨道的IEI-CV可以非零，它仍是确定性周期态，不等于非周期irregular事件。抽查远端轨道有强不稳定方向，但这不排除新增折点附近尚未逐一解析的窄稳定窗；全局诊断图的颜色只区分周期族，不给整条远端曲线统一稳定性标签。
+
+强不稳定支上直接形成巨大单周期演化算子会放大相位误差。本版另用v(t)=exp(αt)q(t)的精确变量替换，所有当前状态减αq、延迟项乘exp(−αd)，计算缩放后的乘子，再恢复增长率。改变α与RK4步长复核领先增长率；不解释未通过精度检查的次主乘子。独立短周期鞍周期候选与长轨道整周期窗口的波形距离没有支持二者连接；另一个短周期种子未收敛，这两种尝试都没有被包装为连接证据。
+
+对应图：[按延拓顺序绘制的周期族](figures/global_periodic_families.png)、[微区延拓放大](figures/recruited_family_resolved.png)、[新增折点波形与模态](figures/global_fold_waveforms_modes.png)。这一远端族仍有未闭合的全局问题。
+
+## 4. 右侧尖角、交叠及A/B关系
+
+V5/V6已确认的主连接保留：stable burst → LP1 → 不稳定连接 → PD1 → A burst/B高背景周期态 → PD2 → 不稳定连接 → PD3 → 两核高背景周期态。LP1、PD1、PD2、PD3的J分别约1.3645475253、1.3493650598、1.3885678463、1.3773792266；应沿弧长看连接，不能按J排序把这些点强行串成单值曲线。
+
+1.176274附近绿色峰值的尖角还包含“两个局部峰同高后交换最大值身份”，那一点的轨道和稳定性并未分岔。1.244–1.248的均值快速升高也已检验为连续稳定波形变化。J=1.3795519528的交点是某不稳定轨道A均值等于另一稳定轨道A谷值，周期和波形不同，不是分支相接。J=1.38的A谷值接近0与约207Hz来自两条共存稳定轨道；不是同一条谷值曲线凭空从0出生。
+
+A/B是同一联合网络的不同投影，共享每条轨道的临界J与Floquet谱。A/B细胞数、阈值分布和基线EE投影不同，不具有精确交换对称性。两核直接跨核E/I边均为0，通过周边群体间接相互作用；临界模的空间分量可以定位变化首先显现在哪里，但未做耦合消融，不能把模态平方范数称为因果贡献。若把A/B分别孤立重算，已经改变了模型。
+
+对应：[A主图](figures/00_core_A_bifurcation.png)、[B主图](figures/00_core_B_bifurcation.png)、[关键联合轨道与左右模PDF](figures/joint_critical_waveforms_modes.pdf)。旧证据原位保留在 ../core_observable_bifurcation_v6_20260915/。
+
+## 5. 20个原生SNN条件与确定性波形逐一对应
+
+1–4沿用原始低活动、不规则、中间、规则示例的编号；这些名称是历史示例身份。本版对A、B及全E群体统一使用2–12秒窗口重新计算标签，不能仅凭历史A标签给B贴同名。主分岔图的1–4黑菱形仍保留原2–20秒均值，下面表格为统一2–12秒结果。
+
+{chr(10).join(table)}
+
+配对设计：5/6跨原低率平衡折点附近，7/8跨周边招募微区附近，9/10跨连续波形快变区，11/12跨PD1附近，12/13跨LP1附近，14/15跨PD3附近，16/17跨PD2附近，18继续右行，19/20跨新周期折点附近。12、15、16、20另有a/b确定性波形页，表示同J的不同吸引子。编号是参数对应，不是已证明的原生SNN分支身份。
+
+每条新运行固定拓扑2511、噪声种子848101、阈值深度1，仅同时改变AA和BB的EE倍率；独立从相同初始条件开始，运行12秒、剔除前2秒。没有原生SNN携带历史的扫参、吸引域扫描或多种子推断。成对运行确认实际AMPA权重哈希改变，而拓扑、阈值和GABA未变，因此相似波形不是把同一权重重复运行造成的。
+
+例如J=1.17623/1.17632，A/B平均率与事件CV十分相近，两个核的2ms计数仍有约5%的bin不同。J=1.355时B平均率约36Hz，未变成闭合模型相应周期支的约300Hz高背景。本协议下未观察到相同跳变，说明闭合模型的这些分岔还不能作为原生SNN状态切换的已验证机制；也不能据此排除其他初始历史下的原生吸引子。
+
+事件检测沿用metrics_v2：10ms参与细胞比例达到10%进入候选burst，3%定义支持区，间隙≤20ms合并。CV为起始时间间隔的样本标准差/均值；还使用局部CV2、记录前后半段间隔、ACF及IEI排列检验，避免把重复短长间隔模式仅凭高CV叫irregular。样本单位是同一有限记录中的群体事件；单种子条件差不是患者统计或总体机制结论。未把此图库当作对细胞ISI irregularity、阈值异质性效应或网络同步性参数扫描的完成证明。
+
+## 6. 波形和raster的来源及显示
+
+[原生SNN完整图库PDF](figures/native_network_AB_atlas.pdf)包含每条件两页：固定4–7秒总览及4–4.3秒放大。每页三列为全网络、Core A、Core B，上方全细胞计数率，下方固定细胞样本raster；全网络率按40000细胞加权，E/I分母32000/8000，A/B E分母720/742，A/B I分母197/200。两核和全网络在同一时间窗对照，图中颜色表示六群体。
+
+率以2ms计数，绘图用σ=3ms高斯平滑；均值与事件指标从未平滑计数/参与率计算。全网络raster取每群体最多20个固定记录细胞，两核各最多30个E及30个I，目的为看清spike，不能把所画样本数当总体参与率。编号1–4源记录只有2ms占据时刻，core页只显示E；编号5–20保存0.1ms积分网格上的实际spike和E/I样本，不从率信号生成点。
+
+[同参数确定性波形PDF](figures/reduced_numbered_waveforms.pdf)以完整周期边值解画两周期波形；平衡解则显示常数线。这些页没有伪造raster。[关键点PDF](figures/joint_critical_waveforms_modes.pdf)给出精确临界联合轨道、A/B相平面投影及左右率模，并标出相邻原生SNN编号。
+
+## 7. 方法、验证与适用范围
+
+模型冻结为v2–v6的六群体延迟率闭合，保留368个物理延迟bin、双指数突触核与经验阈值分布。J_EE,core同时作用AA/BB一阶矩J和二阶矩J²。率响应时间常数E/I=5/2.5ms仍是闭合假设，未完成对原生SNN动态传递函数的标定；原生噪声与有限规模效应也没有由单条确定性轨道精确替代。
+
+周期解使用自由周期傅里叶边值问题、相位条件和转弯处伪弧长延拓。周期折点检查非平凡+1方向对应的Jacobian零模、左右向量及非退化项；PD检查v(t+T)=−v(t)的反周期线性化，另用移除相位方向的延迟返回映射验证−1乘子。依据与[DDE-BIFTOOL周期折点示例](https://ddebiftool.sourceforge.net/demos/neuron/html/demo1_POfold.html)、[倍周期示例](https://ddebiftool.sourceforge.net/demos/Mackey-Glass/html/MackeyGlass_demo.html)一致，实际运行的是本地Python实现。Brunel与Hakim关于单细胞不规则放电和群体节律可共存的分析，支持这里区分单细胞、群体事件序列和联合周期轨道的层次；并不能替代本模型的机制验证。[原始论文](https://arxiv.org/abs/cond-mat/9904278)
+
+numerical_validation.json汇总本轮已交付范围的残差、网格、模态、原生记录器前缀逐位复现、六群体计数守恒与20条件完整性检查；PASS表示这些检查通过，不表示所有全局分支已穷尽。源代码在scripts/topic4_core_network_bifurcation_v7/，图说明见figures/README.md。旧结果未覆盖，图候选已做本地自查，仍待用户目视检查。
+'''
+    (OUT/'scientific_report.md').write_text(text)
+    archive=ROOT/'docs/archive/topic4/core_network_bifurcation_2026-09-16.md'
+    archive.write_text('# Core 网络分岔与20条件原生放电对应 v7\n\n'+f'完整报告：[结果与边界]({OUT}/scientific_report.md)。\n\n'+f'图：[Core A]({OUT}/figures/00_core_A_bifurcation.png)、[Core B]({OUT}/figures/00_core_B_bifurcation.png)、[20条件波形/raster]({OUT}/figures/native_network_AB_atlas.pdf)、[临界轨道与左右模]({OUT}/figures/joint_critical_waveforms_modes.pdf)。\n\n新增周期折点、同宿型极限证据与2T→4T；原生独立初始条件的SNN未验证简化模型的同阈值跳变。远端招募周期族的全部全局连接仍未确立，未把本次数值检查PASS称为全局穷尽。图候选待用户目视检查。\n')
+    print('REPORT',OUT/'scientific_report.md',flush=True)
+
+if __name__=='__main__':main()

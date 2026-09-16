@@ -1,0 +1,272 @@
+{
+  "schema": "topic4.geometry_ee_axis_three_observable_optimization.DESIGN.v1",
+  "status": "DESIGN_READY_NOT_STARTED",
+  "design_date": "2026-09-14",
+  "search_dispatch_enabled": false,
+  "design_document": "docs/archive/topic4/geometry_ee_axis_three_observable_optimization_2026-09-14.md",
+  "reference_pointer": "config/topic4_local_geometry_ee_axis_reference_v1.json",
+  "reference_contract_sha256": "fbb74e1c5683e93bdbdd4cade8268bc3789b3ffa0c637bd64eb166c372d2036c",
+  "physical_executor": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_shape_output_response.py",
+  "variable_groups": [
+    {
+      "id": "core_centers",
+      "label_zh": "两核中心",
+      "variables": [
+        {
+          "path": "/centers_mm/0/0",
+          "initial": 3.4492143200000003,
+          "lower": 1.9492143200000003,
+          "upper": 4.94921432,
+          "unit": "mm",
+          "initial_probe_step": 0.75,
+          "response_step": 0.375
+        },
+        {
+          "path": "/centers_mm/0/1",
+          "initial": 12.12890135,
+          "lower": 10.62890135,
+          "upper": 13.62890135,
+          "unit": "mm",
+          "initial_probe_step": 0.75,
+          "response_step": 0.375
+        },
+        {
+          "path": "/centers_mm/1/0",
+          "initial": 16.47920304,
+          "lower": 14.97920304,
+          "upper": 17.97920304,
+          "unit": "mm",
+          "initial_probe_step": 0.75,
+          "response_step": 0.375
+        },
+        {
+          "path": "/centers_mm/1/1",
+          "initial": 3.96551153,
+          "lower": 2.46551153,
+          "upper": 5.46551153,
+          "unit": "mm",
+          "initial_probe_step": 0.75,
+          "response_step": 0.375
+        }
+      ]
+    },
+    {
+      "id": "ee_output_strength",
+      "label_zh": "核内E向两核外E的权重",
+      "variables": [
+        {
+          "path": "/parameters/EE_core_to_out_scale",
+          "initial": 1.25,
+          "lower": 1,
+          "upper": 1.5,
+          "unit": "baseline_multiplier",
+          "initial_probe_step": 0.125,
+          "response_step": 0.0625
+        }
+      ]
+    },
+    {
+      "id": "ee_direction",
+      "label_zh": "全局EE连接轴方向",
+      "variables": [
+        {
+          "path": "/parameters/EE_angle_offset_deg",
+          "initial": 0,
+          "lower": -20,
+          "upper": 20,
+          "unit": "degree_offset",
+          "initial_probe_step": 10,
+          "response_step": 5
+        }
+      ],
+      "axis_period_degrees": 180,
+      "reference_axis_degrees": -22.80538396505847
+    }
+  ],
+  "fixed_rule": "Every other physical field is inherited unchanged from the verified reference contract; scalar search bounds are engineering bounds, not patient uncertainty intervals.",
+  "observable_groups": [
+    {
+      "id": "rank_pattern",
+      "label_zh": "整体rank传播模式",
+      "weight": 0.3333333333333333,
+      "feature": "masked normalized full-contact ranks",
+      "kernel": "0.5 normalized linear + 0.5 multiband Gaussian",
+      "display": "patient/model TA and TB mean templates with contactwise spread"
+    },
+    {
+      "id": "local_and_interrod_timing",
+      "label_zh": "杆内顺序及两杆时差",
+      "weight": 0.3333333333333333,
+      "subblock_weights": {
+        "SCL_pairs": 0.3333333333333333,
+        "ICL_pairs": 0.3333333333333333,
+        "rod_lag": 0.3333333333333333
+      },
+      "feature": "pair/rod validity, ordering sign, asinh(lag_ms/patient_scale_ms)",
+      "time_scale": "FIT median absolute valid lag per block, floor 2 ms",
+      "display": "pairwise order probabilities and raw millisecond distributions"
+    },
+    {
+      "id": "participation",
+      "label_zh": "触点与两杆参与结构",
+      "weight": 0.3333333333333333,
+      "feature": "15-bit participation, rod-balanced normalization",
+      "kernel": "0.5 normalized linear + 0.5 multiband Gaussian",
+      "display": "contact probabilities, joint rod participation and contact-count distribution"
+    }
+  ],
+  "objective": {
+    "version": "three_observable_off_diagonal_v1_PROPOSED",
+    "statistic": "mean_over_two_training_runs(mean_over_three_groups(D_off_group / fixed_positive_scale_group))",
+    "D_off": "norm(mean(Psi)-patient_target)^2 - mean(norm(Psi-mean(Psi))^2)/(N-1)",
+    "clip_negative": false,
+    "within_group_global_weight": 0.5,
+    "within_group_mode_balanced_total_weight": 0.5,
+    "mode_labels_used_for_training": true,
+    "mode_labels_used_for_neural_drive": false,
+    "mode_label_map": {
+      "TA": 1,
+      "TB": 0
+    },
+    "mode_weighting": "I(label=k)/patient_FIT_proportion(k); constant feature included; no artificial 50:50 event frequency",
+    "minimum_total_events_per_run": 16,
+    "minimum_per_mode_events": null,
+    "retained_diagnostics": [
+      "A_mean_embedding_error",
+      "B_self_pair_subtraction",
+      "D16",
+      "actual_N_and_mode_N",
+      "six_second_segments"
+    ],
+    "numerical_feature_seed": 2026091401,
+    "gaussian_bandwidth_multipliers": [
+      0.5,
+      1,
+      2
+    ],
+    "rff_features_per_bandwidth": 1024,
+    "calibration": {
+      "source": "existing CAL blocks; reused development data",
+      "target": "existing FIT",
+      "n_draws": 256,
+      "events_per_draw": 16,
+      "positive_scale": "median squared embedding-mean difference to FIT target",
+      "scale_floor": 1e-8,
+      "fit_before_model_ranking": true
+    },
+    "normalizers": null,
+    "patient_feature_artifact": null,
+    "old_loss_role": "offline comparison only; never mix old/new values in the optimizer"
+  },
+  "optimizer": {
+    "implementation_status": "NOT_IMPLEMENTED",
+    "type": "bounded_local_batch_noisy_bayesian_optimization",
+    "proposed_library": "BoTorch",
+    "surrogate": "SingleTaskGP with explicit Matern 5/2 ARD, normalized X and standardized Y, float64",
+    "target": "maximize negative mean J",
+    "acquisition": "qLogNoisyExpectedImprovement",
+    "initial_conditions_max": 16,
+    "initial_design": "reference + 12 one-coordinate probes + 3 compatible historical combination points or local space-filling points",
+    "adaptive_batches": 4,
+    "new_conditions_per_batch": 4,
+    "nei_points": 3,
+    "uncertainty_points": 1,
+    "local_pool_points": 4096,
+    "global_pool_points": 4096,
+    "pool_seed": 2026091402,
+    "posterior_sampling_seed": 2026091403,
+    "update": "freeze full batch, evaluate both noise runs per condition, update posterior and box only after batch completion",
+    "trust_box": {
+      "initial_normalized_halfwidth": 0.25,
+      "min": 0.125,
+      "max": 0.5,
+      "success_probability": 0.8,
+      "success_batches_to_expand": 2,
+      "expansion": 1.5,
+      "failure_batches_to_shrink": 2,
+      "contraction": 0.5
+    },
+    "observation_noise": "0.5*(per-condition sample variance of two J values / 2) + 0.5*median of that estimate across conditions; normalized numerical floor 1e-6",
+    "eligibility_model": "GaussianProcessClassifier only when both scorable/unscorable conditions exist; append log(max(p,0.05)) to log acquisition",
+    "invalid_loss": null,
+    "engineering_failure_as_ineligible": false,
+    "minimum_scorable_initial_conditions": 8,
+    "stop_after_two_batches_with_at_least_half_unscorable": true,
+    "surrogate_fit_restarts_max": 3,
+    "automatic_random_fallback": false,
+    "separate_seed_namespace_for_confirmation": true
+  },
+  "training": {
+    "topology_seeds": [
+      2511
+    ],
+    "dynamics_seeds": [
+      847401,
+      847402
+    ],
+    "duration_ms": 60000,
+    "analysis_burnin_ms": 1500,
+    "complete_window_required": true
+  },
+  "confirmation": {
+    "nominate_from_training_only": true,
+    "candidates_max": 3,
+    "includes_reference": true,
+    "rule": "minimum J plus a distinct non-dominated candidate minimizing group 2; do not fill empty nominations",
+    "new_topology_count": 2,
+    "new_dynamics_count": 2,
+    "seed_ids": null,
+    "seed_assignment": "check prior identities, assign previously unused IDs and freeze before first confirmation dispatch",
+    "all_conditions_share_same_four_seed_pairs": true,
+    "results_feed_back_into_this_round": false,
+    "scope": "fresh model randomness; no claim of untouched patient test data"
+  },
+  "conditional_response": {
+    "enabled_after_useful_propagation_improvement": true,
+    "additional_units_max": 40,
+    "first_stage": "12 single-coordinate probes at selected point x two training noise seeds",
+    "second_stage": "up to two responsive coordinates, four probes x two confirmation topologies x two confirmation noises",
+    "strongest_axis_selection": "max absolute mean paired change among normalized three components, same sign across both development noises",
+    "plotting": "real paired single-parameter simulations, not lines through confounded BO samples",
+    "boundary": "use inward h and 2h steps and label one-sided probes",
+    "activation_rule": "specified in design document; not triggered by lower loss alone"
+  },
+  "budget": {
+    "initial_evaluation_slots": 32,
+    "adaptive_evaluation_slots": 32,
+    "confirmation_evaluation_slots_max": 12,
+    "search_plus_confirmation_slots_max": 76,
+    "new_search_plus_confirmation_runs_max": 74,
+    "conditional_response_new_runs_max": 40,
+    "total_new_formal_runs_max": 114,
+    "reused_evaluations_not_new_runs": true
+  },
+  "resources": {
+    "max_workers": 8,
+    "dispatch_by_actual_process_tree_memory": true,
+    "do_not_modify_running_snn_environment": true
+  },
+  "delivery": {
+    "patient_templates_required": true,
+    "fixed_display_order": [
+      "SCL9",
+      "SCL8",
+      "SCL7",
+      "SCL6",
+      "ICL11",
+      "ICL10",
+      "ICL9",
+      "ICL8",
+      "ICL7",
+      "ICL6",
+      "ICL5",
+      "ICL4",
+      "ICL3",
+      "ICL2",
+      "ICL1"
+    ],
+    "native_multievent_GIF_required": true,
+    "raw_millisecond_axis": true,
+    "Fig5_entry": false
+  }
+}

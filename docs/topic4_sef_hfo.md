@@ -1,5 +1,25 @@
 # Topic 4：SEF-HFO Framework —— 间期 HFO 传播的空间易激场 SNN 模型
 
+> **2026-09-14 局部三组参数优化已启动**：固定背景，仅调两核中心、核向外EE及全局EE方向，使用整体rank、杆内/杆间时序、参与结构三组事件分布目标。新目标患者校准和GPU优化器检查已通过；首批8条历史复用、24条新增中8条在跑（17:56快照）。四批BO与新拓扑/新噪声确认已接入自动控制器。实时状态与图件见[执行包](/data/hfosp/topic4_sef_hfo/geometry_ee_axis_three_observable_optimization_20260914/README.md)；当前尚无新优化的科学结论。
+
+> **当前患者传播建模方向（用户确认，2026-09-10）**：core 为非正 E 阈值调制的局部易激区域，随机 OU 输入优先加载 core；全场空间 OU 不再作为本线后续默认。当前六臂短程对照只作实现与副作用检查，重点转向局部 EE/EI/IE 等实际连接设置如何改变患者两类传播观测。允许直接改变权重或删边，不强制总输入守恒。黑底患者—模型完整时序、原生多事件传播和配对参数响应共同承重。统一定义见[共享设计](topic4_patient_geometry_prior_snn.md)，持续更新的协作者 PDF 见[当前报告](snn_model_report_current.md)。以下历史模型结果保留其原阈值、输入和状态身份。
+
+> **历史手放双核 Z 图（2026-09-09）**：恢复原注册端点圆核的位置及 manual_hard 阈值实现，保留当前 C 快速连接与原 OU，重新完成原SNN自主演化/外部补回及5个冻结Z场的2秒延续。10.68秒达到持续高活动判据；补回前平均全E约300.8 Hz，补回后最后1秒约12.5 Hz并恢复间隔。空间持续活动主要为轴向带状招募；尚非原SNN分岔归因，也不是只改变XY的单因素实验。两张图及数值QA已完成，待用户审阅。见[基底定义与结果](archive/topic4/historical_manual_core_native_z_2026-09-09.md)。
+
+> **全 SNN 线共享设计更新（用户确认，2026-09-09）**：Figure 4 采用“患者传播几何先验 → 多事件分布拟合 → 参数作用分析 → 独立重演/留出检验”。患者间期传播轴与端点区域的几何中心提供 core 初值，在此基础上调整范围、中心及有效连接等参数；不再默认从零搜索 source，也不把手放 XY 当作已证最优。统一入口为[患者几何先验下的网络拟合](topic4_patient_geometry_prior_snn.md)。当前范围/中心 pilot 沿用自身冻结合同，EE/EI、长轴等是后续可调维度；以下带日期的旧路线和状态不覆盖这一新设计，也不因新口径升级其结果。拟合目标是患者相容的有效网络配置，临床 SOZ 识别与 Figure 5 动力学机制继续独立验收。
+
+> **按原 Z 全过程绘制相轨迹（2026-09-09）**：沿用户指定的原 SNN 耗竭—手动补回—返回轨迹，交付连续 Z–E / E–I 相投影，以及 8.8、10.5、11.1、12.5 秒的空间 Z 快照与修正 rate 条件 nullcline、方向场。条件零漂移交点不是全网络平衡点；进入段冻结 rate 谱的早期共轭对越界约为 0.391 秒，尚不能解释原 SNN 约 10 秒的高活动跨越。见[完整图、条件定义与数值验证](archive/topic4/prescribed_native_z_cycle_phase_2026-09-09.md)。
+
+> **持续空间招募边界审阅（2026-09-09）**：固定 C 双核的16条原SNN对照完成；相同快速初态和未来输入下，冻结不同原Z场可分别恢复自限事件或维持6秒局部持续活动。原2秒历史差异在延长后消失，不能据此证明多稳态。空间细化及未拟合的快AMPA/慢GABA修正均未修复自主跨越；修正模型在原自限Z场仍持续，说明快速近似也未匹配。原SNN的分岔类型与可解释该边界的nullcline仍未建立。12组诊断图、真实raster、空间场与有界分析已交付，停在审阅点，正式Fig.5及患者工作点未替换。见[完整结果与下一里程碑方案](archive/topic4/sustained_spatial_recruitment_boundary_2026-09-09.md)。
+
+> **原 Z 路径与分岔审阅（2026-09-09）**：固定 C 底物的 10 条原 SNN 延续及配对对照完成；相同状态/未来输入下，补回 Z 返回约 12.24 Hz，不补回则维持约 447.80 Hz。E-only 空间 rate model 支持反复 burst、持续招募与低率 Hopf 型失稳，但沿真实 Z 场检出的低率越界明显早于原 SNN 的持续高率判据，不能据此把 runaway 定性为该 Hopf；平均相同的均匀/异质 Z 场还可有不同的高态稳定性。慢 Z 闭合定量匹配未通过，7 组诊断图与数值 QA 已交付，停在审阅点，未替换正式 Figure 5 或患者工作点。见 [完整审阅与相图](archive/topic4/z_transition_bifurcation_audit_2026-09-08.md)。
+
+> **C 路径的原 Z 复核（2026-09-08）**：C＋原 OU 在同一工作点已复现高活动及外部恢复后的返回。进一步直接使用原逐神经元 Z 方程和历史参数，M 关闭，10.18 s 满足持续高活动判据；10.68 s 开始只补回 Z，最终回到间隔性事件。支持现有 Z 足以产生这一条定性路径，当前不必新增异质性状态；退出仍由外部干预，非自主终止或已验收患者发作。见 [原 Z 与手动恢复报告](archive/topic4/autonomous_z_manual_restore_2026-09-08.md)及真实 raster。
+
+> **Native SNN raster 补充（2026-09-08）**：同一参考双核 SNN 的五条连续轨道确认，固定快 EI 基底已有反复自限事件；全部 I→E/I→I gain 下降及恢复引出强爆发和返回，E/I 两群电流夹持近似等效。仅调制 E 所受抑制则在同一协议中进入约 455 Hz tonic 平台，表明原 E-only Z 的作用范围足以改变高活动形态。此结果来自真实 SNN spike，不能把上一条确定性 rate 的低率固定点或 Hopf 阈值直接代替它。见 [raster 结果与机制对照](archive/topic4/snn_raster_inhibition_transition_2026-09-08.md)；患者传播匹配及活动驱动 Z/M 跨越尚未验收，正式模型未替换。
+
+> **Corrected rate 分岔诊断（2026-09-08，独立能力分支）**：在当前参考双核底物上，含全部传播延迟的修正 rate 映射定位到 q≈0.73805 的 Hopf 型失稳、低/高率支鞍结，并通过完整状态连续携带的对照观察到自限传播转为持续爆发。q=0.75 还支持低率与爆发共存、单次有限刺激触发切换；空间招募随 q 减小逐步扩大，尚未证明其对应独立分岔。此处 q 同时缩放 I→E/I→I jump，Z/M 动态关闭；不替代患者 SNN 工作点验收、旧空间 Z/M 结果或正式 Figure 5。详见[本轮报告](archive/topic4/corrected_rate_bifurcation_2026-09-08.md)，含 nullcline 定义、完整谱校验、三张诊断图和未解决边界。
+
 > **2026-06-28 瘦身 + 重命名**：本文件由 `topic4_sef_itp_framework.md` 重命名为 `topic4_sef_hfo.md`，
 > Topic 4 收敛到 **SNN 模型主线**。以下过时计划与代码已**整条删除**（不再是 archive，避免误导）：
 > HR/FHN 抽象节点模型（`src/topic4_modeling/hr_*`、phase4_v1）、kuramoto/BHPN-toy（`pr_t4_1_bhpn_toy`、
@@ -43,6 +63,76 @@
 > 患者间期活动 / 复现了双模板 repertoire"。结果与全部数字见
 > `docs/archive/topic4/sef_hfo/data_driven_snn_cohort_formal_result_2026-08-16.md`，
 > 冻结与预检见同目录 `..._canary_and_formal_freeze_2026-08-15.md`。
+>
+> **Data-driven 间期 SNN 静态线收口（2026-08-17）**：Node field 支持新的网络中产生自发、可返回、
+> 双簇组织的 event-like activity；连续局部 EE/E→I mapper 的冻结 pathway ablation 进一步支持
+> “Node 控制点火可达性、EE 改变递归传播、E→I 改变模式占比和患者支持范围”这一模型内分解。
+> 但 natural KMeans 对患者模式的对应仍不充分，34 人 same-network K=2 只有 15/34，canonical
+> contact-order layout 的弱 held-out 优势在真实几何下归零。因此当前状态冻结为
+> `DATA_DRIVEN_INTERICTAL_SUBSTRATE_PARTIAL_SUPPORT / STATIC_PATHWAY_EFFECTS_ESTIMATED /
+> REAL_GEOMETRY_GENERALIZATION_UNRESOLVED`。这条静态间期 field/edge 线暂时关闭，不再继续追参；
+> 它不证明完整患者间期活动、解剖 core、临床波形或发作生命周期。完整证据、Figure 4 候选和资源
+> 收口见 `docs/archive/topic4/sef_hfo/data_driven_interictal_snn_closeout_2026-08-17.md`。其中冻结
+> pathway ablation 已从 Fig4 supporting source 整理为 FigS7-A–D；论文入口只改变图号与排版，
+> development-only 的模型内部解释边界不变。
+>
+> **空间 Z/M + 持续平稳 OU 的 tonic runaway（2026-09-03 状态与术语锁）**：在作者明确
+> “近饱和 tonic plateau 与深调制振荡都可作为本轮 runaway”之后，独立 tonic endpoint 在冻结
+> `tonic_b0_v2` 工作点上由全新 seeds 1841/1842/1843 **3/3 确认**。代表 seed 1842 从低态
+> 55.1 Hz 进入 393.9 Hz 平台，active-E 与 recruited-sheet 中位数均为 1.00，15/15 虚拟触点
+> 招募，记录到 1.717 s 转变后高态。允许表述为“持续随机环境中的 synthetic tonic global
+> runaway / nonlinear model-state transition”；这不撤销旧的阴性边界：在同一底物和时标上，
+> **深调制的 30–80 Hz 全局振荡仍为 0 条通过**。该工作点主要由 Z/q 型抑制资源下降放行；
+> M/gK 回写很弱，当前不支持 M/gK 是必要驱动。完整证据见
+> `docs/archive/topic4/data_driven_zm_ictal_transition/spatial_zm_persistent_ou_tonic_runaway_2026-09-02.md`。
+>
+> **为什么此前漏掉 / 判成失败**：旧 frozen-q 网格从 1.0 跳到 0.75，没有采样中间窄区；补扫显示
+> `q=0.825` 时仍是低支（59.8 Hz，active-E=0.257），`q=0.800` 时已升到 135.7 Hz 且调制
+> 深度塌到 0.039，`q=0.775` 时进入 388.0 Hz、active-E=1.00 的近饱和平台。因此现有证据只把
+> **粗网格 operating-regime edge** 定位在 0.825 与 0.800 两个采样点之间，把 0.775 确认为
+> tonic runaway 工作点。此前的 oscillatory endpoint、去趋势频谱读出和 tonic 指标被旧前窗提前
+> 阻断的 instrumentation bug，都会主动排除或漏记这个平台；所以“现在找到”首先是终点与量法纠正，
+> 不是事后声称新造出了一个深振荡态。
+>
+> **Fig. 5B 语义锁（不得当成分岔图）**：B 是 seed 1842 的一条**按时间排序的瞬态轨迹**，横轴
+> `D=1-q_core`，纵轴 `A=<I_M>`；不是不同 q 控制参数下的稳态分支。轨迹约在 275 ms 经过
+> `q=0.825 (D≈0.175)`，308 ms 经过 `q=0.800 (D≈0.200)`，343 ms 到达
+> `q_min=0.775 (D=0.225)`，而按群体率定义的 runaway onset 是 480 ms。因此 B 只间接显示轨迹
+> 经过 locator 区间，并显示到达 q floor 后仍有约 137 ms 的动态/随机滞后；它**不能单独定位**
+> 0.800–0.825 边界。B 的向下回折来自一次低态事件后 M/gK 适应以 `tau_m=12.5 ms` 较快衰减，
+> 同时 q 以 `tau_q=5000 ms` 保留耗竭记忆，故轨迹继续向右而 A 向下；这不是 saddle-node fold。
+>
+> **“相变/分岔”术语边界（2026-09-03 更新）**：有限规模 OU-on SNN 本身仍只有 coarse
+> frozen-q sweep、单条动态轨迹和单-seed 双初值 pilot，因此仍不得写“finite-SNN phase
+> transition / 临界相变”。但现在已经新增参数匹配的 1 mm deterministic bridge：它使用实际患者
+> 邻接、阈值场、q target 与 self-consistent M，并由 pseudo-arclength 折返、同 q 双根、同一
+> fixed-point Jacobian 的 simple isolated real zero mode、transversality 与 quadratic
+> nondegeneracy 共同数值确认 generic saddle-node；`eta_m=0.02` 时
+> `q_fold=0.890825926`、fold E rate
+> 127.399 Hz。因此允许写 **the reduced frozen-q fast subsystem has a saddle-node**。这不等于
+> SNN onset：OU-on SNN 的经验边缘约 `q=0.800–0.825`，与 reduced fold 不重合；coarse-grid
+> convergence、colored-OU closure、delay-aware Hopf、3-seed empirical denominator 与 finite-size
+> scaling 均未完成。完整证据与图见
+> `docs/archive/topic4/data_driven_zm_ictal_transition/spatial_zm_phase_bifurcation_analysis_2026-09-03.md`。
+>
+> **经验相图 pilot（2026-09-03 追加）**：在冻结患者底物、持续 OU、固定实际
+> `q_init=q_min=q_clamp`、low/high checkpoint 与逐位 matched future noise 下，`eta_m=0.02`
+> 的单-seed 双初值结果为：`q=0.860 L/L`，`0.840 L/I`，`0.820 L/I`，`0.805 I/I`，
+> `0.790 I/H`，`0.770 I/H`（L/I/H=low/intermediate/tonic-high）。q-only 的
+> `q=0.825` 为 `L/I`；继续从 high checkpoint 二分，`q=0.8125` 为回落中的 intermediate，
+> `q=0.80625` 为约 186 Hz、active-E≈0.58 的长寿命 intermediate，仍非 near-saturated
+> tonic high。故当前最安全的相图形态是 **low event state → broad intermediate/metastable
+> band → tonic runaway**，尚无严格 `L/H` 同点共存，更无解析不稳定支。pilot 图与聚合位于
+> `/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_zm_phase_diagram/`；未配对的二分单臂不得混入
+> 正式双初值聚合。现有 M3B 只用理想高斯核、统一阈值，且没有把 per-neuron M 自洽加入固定点/
+> Jacobian，不能直接作为这块患者 SNN 的分叉证明。
+>
+> **为什么 deterministic fold 没有直接解释经验边缘**：持续 OU 的低态是噪声支撑态；将 OU
+> 只取零均值后，deterministic low root 约为 0.03 Hz，而 SNN 低态是 30–80 Hz。reduction 中
+> high/low roots 共存，零延迟敏感性还在 `q≈0.844` 给出一个复模变号候选，但 delay 尚未进入，
+> 所以这个 Hopf 只作 locator。`eta_m=0→0.08` 只把 fold 移动约 `2.7×10^-4`，说明当前 M 不是
+> fold 位置的主要杠杆；下一步应优先补 colored-noise closure 与空间网格/分支身份收敛，而不是继续
+> 在 M 强度上做大网格盲扫。
 
 ---
 
