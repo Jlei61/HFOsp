@@ -195,12 +195,19 @@ def _person_period_log_score(
         else torch.as_tensor(np.asarray(weights)[rows], dtype=torch.float64)
     )
     with torch.no_grad():
-        raw = torch.nn.functional.binary_cross_entropy_with_logits(
-            model(xt[ar], bt), yt, reduction="none",
-        )
+        logits = model(xt[ar], bt)
+        raw = torch.nn.functional.binary_cross_entropy_with_logits(logits, yt, reduction="none")
+        probability = torch.sigmoid(logits)
         score = (raw * wt).sum() / wt.sum().clamp_min(1e-8)
+        brier = ((probability - yt).square() * wt).sum() / wt.sum().clamp_min(1e-8)
+        predicted_rate = (probability * wt).sum() / wt.sum().clamp_min(1e-8)
+        observed_rate = (yt * wt).sum() / wt.sum().clamp_min(1e-8)
     return {
         "status": "ESTIMATED", "log_score": float(score),
+        "weighted_person_period_brier": float(brier),
+        "mean_predicted_hazard": float(predicted_rate),
+        "weighted_observed_hazard": float(observed_rate),
+        "calibration_in_the_large": float(predicted_rate - observed_rate),
         "n_person_period_rows": int(rows.size), "n_seizure_transitions": int(np.sum(y[rows])),
         "contract": "all observed at-risk bins through seizure or censoring; no outcome-selected anchor filter",
     }
@@ -439,7 +446,8 @@ def _feature_at_times(times: np.ndarray, segment_bounds: np.ndarray,
     return qout, state, valid
 
 
-def _field_targets(index: dict[str, Any], subject: str) -> dict[int, dict[str, Endpoint]]:
+def _field_targets(index: dict[str, Any], subject: str, *,
+                   exact_root: Path | None = None) -> dict[int, dict[str, Endpoint]]:
     root = DATASET_ROOT / subject
     scalars = dict(np.load(root / "scalars.npz"))
     part = np.load(root / index["arrays"]["participation"]["file"], mmap_mode="r")
@@ -447,7 +455,7 @@ def _field_targets(index: dict[str, Any], subject: str) -> dict[int, dict[str, E
     t = np.asarray(scalars["t_abs"], dtype=np.float64)
     labels = np.asarray([str(c["detector_label"]) for c in index["contacts"]])
     out: dict[int, dict[str, Endpoint]] = {}
-    exact_path = ICTAL_TARGET_ROOT / f"{subject}.npz"
+    exact_path = (ICTAL_TARGET_ROOT if exact_root is None else Path(exact_root)) / f"{subject}.npz"
     exact = np.load(exact_path, allow_pickle=False) if exact_path.exists() else None
     exact_lookup = ({str(v): i for i, v in enumerate(exact["channels"].astype(str))} if exact is not None else {})
     join = np.asarray([exact_lookup.get(v, -1) for v in labels], dtype=np.int64)

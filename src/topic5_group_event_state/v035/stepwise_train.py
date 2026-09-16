@@ -41,6 +41,11 @@ class StepwiseTrainConfig:
     weight_decay: float = 1e-4
     gradient_clip: float = 2.0
     seed: int = 20260903
+    # Shared long-state training must not reuse the legacy short-window pair
+    # split: that would allow the decoder adapter to see the shared producer's
+    # INNER/SELECTION period.  When true, all three pair sets are rebuilt from
+    # the rate trajectory's common chronological phases.
+    use_rate_trajectory_phases: bool = False
 
 
 @dataclass
@@ -72,13 +77,68 @@ def _map_context(data: SpatialData, trajectory_path: Path) -> np.ndarray:
     return out
 
 
+def _combine_pairs(parts: tuple[GrammarPairs, ...]) -> GrammarPairs:
+    anchor_rows = np.unique(np.concatenate([p.anchor_rows for p in parts]))
+    lookup = {int(row): i for i, row in enumerate(anchor_rows)}
+    pair_anchor, pair_event = [], []
+    for pairs in parts:
+        global_anchor = pairs.anchor_rows[pairs.pair_anchor]
+        pair_anchor.extend(lookup[int(row)] for row in global_anchor)
+        pair_event.extend(np.asarray(pairs.pair_event, dtype=np.int64).tolist())
+    pa = np.asarray(pair_anchor, dtype=np.int64)
+    pe = np.asarray(pair_event, dtype=np.int64)
+    key = np.column_stack((pa, pe))
+    _unique, keep = np.unique(key, axis=0, return_index=True)
+    pa, pe = pa[np.sort(keep)], pe[np.sort(keep)]
+    counts = np.bincount(pa, minlength=anchor_rows.size).astype(np.float64)
+    return GrammarPairs(
+        anchor_rows=anchor_rows, pair_anchor=pa, pair_event=pe,
+        pair_weight=1.0 / (anchor_rows.size * counts[pa]),
+    ).validate()
+
+
+def _take_anchor_phase(pairs: GrammarPairs, phase_by_anchor: np.ndarray, wanted: str) -> GrammarPairs:
+    local_keep = np.asarray(phase_by_anchor[pairs.anchor_rows] == wanted, dtype=bool)
+    keep = local_keep[pairs.pair_anchor]
+    old = pairs.pair_anchor[keep]
+    kept, new = np.unique(old, return_inverse=True)
+    if kept.size == 0:
+        raise ValueError(f"shared decoder split has no {wanted} anchors")
+    counts = np.bincount(new, minlength=kept.size).astype(np.float64)
+    return GrammarPairs(
+        anchor_rows=pairs.anchor_rows[kept], pair_anchor=new.astype(np.int64),
+        pair_event=pairs.pair_event[keep],
+        pair_weight=1.0 / (kept.size * counts[new]),
+    ).validate()
+
+
+def _trajectory_phase_at_spatial_anchors(data: SpatialData, trajectory_path: Path) -> np.ndarray:
+    with np.load(trajectory_path, allow_pickle=False) as z:
+        time_ = np.asarray(z["anchor_time"], dtype=np.float64)
+        phase = np.asarray(z["phase"]).astype(str)
+    pos = np.searchsorted(time_, data.anchor_time)
+    ok = (pos < time_.size) & (
+        np.abs(time_[np.minimum(pos, time_.size - 1)] - data.anchor_time) < 1e-3
+    )
+    out = np.full(data.anchor_time.size, "OUTSIDE", dtype="<U12")
+    out[ok] = phase[pos[ok]]
+    return out
+
+
 def prepare_stepwise(data: SpatialData, bundle: FrozenDecoderBundle, trajectory_path: Path, device: torch.device,
                      config: StepwiseTrainConfig) -> PreparedStepwise:
     cache_index = align_events(data.event_time, bundle.event_abs_time)
     keep = cache_index >= 0
     train_pairs = restrict_pairs(data.train_pairs, keep)
     selection_pairs = restrict_pairs(data.selection_pairs, keep)
-    fit, inner = split_pairs_by_time(train_pairs, data.anchor_time, config.inner_val_fraction)
+    if config.use_rate_trajectory_phases:
+        combined = _combine_pairs((train_pairs, selection_pairs))
+        trajectory_phase = _trajectory_phase_at_spatial_anchors(data, trajectory_path)
+        fit = _take_anchor_phase(combined, trajectory_phase, "FIT")
+        inner = _take_anchor_phase(combined, trajectory_phase, "INNER")
+        selection_pairs = _take_anchor_phase(combined, trajectory_phase, "SELECTION")
+    else:
+        fit, inner = split_pairs_by_time(train_pairs, data.anchor_time, config.inner_val_fraction)
     context = torch.as_tensor(_map_context(data, trajectory_path), dtype=torch.float32, device=device)
     return PreparedStepwise(data=data, bundle=bundle, dec_tensors=decoder_tensors(bundle, device),
                             cache_index=cache_index, fit_pairs=fit, inner_pairs=inner,

@@ -128,18 +128,28 @@ def forward_with_h0(model: LBSSModel, x: Tensor, recruited: Tensor, valid: Tenso
 
 
 def per_event_scores(contact_logits: Tensor, stop_logits: Tensor, batch: Mapping[str, Tensor],
-                     stop_weight: float = 1.0) -> dict[str, Tensor]:
+                     stop_weight: float = 1.0, *, observed_prefix_groups: int = 0) -> dict[str, Tensor]:
     """Per-event versions of the v0.5 objective and of ``cardinality_conditioned_nll``."""
 
     available = batch["available"]
     target = batch["target"] * available.float()
-    predict = batch["valid"] & ~batch["is_last"]
+    if observed_prefix_groups < 0:
+        raise ValueError('observed prefix must be nonnegative')
+    score_valid = batch['valid']
+    if observed_prefix_groups:
+        if bool((score_valid.sum(-1) < observed_prefix_groups).any()):
+            raise ValueError('event does not contain the requested observed prefix')
+        # Output at step k follows processing group k. With two known groups,
+        # step 1 predicts the first unknown group (or STOP at the prefix).
+        score_valid = score_valid & (torch.arange(score_valid.shape[1], device=score_valid.device)
+                                      >= observed_prefix_groups - 1)[None]
+    predict = score_valid & ~batch["is_last"]
     masked = contact_logits.masked_fill(~available, NEG_INF)
     per_contact = F.binary_cross_entropy_with_logits(masked, target, reduction="none") * available.float()
     per_step = per_contact.sum(-1) / available.float().sum(-1).clamp_min(1.0)
     next_bce = (per_step * predict.float()).sum(-1) / predict.float().sum(-1).clamp_min(1.0)
     stop_bce = (F.binary_cross_entropy_with_logits(stop_logits, batch["is_last"].float(), reduction="none")
-                * batch["valid"].float()).sum(-1) / batch["valid"].float().sum(-1).clamp_min(1.0)
+                * score_valid.float()).sum(-1) / score_valid.float().sum(-1).clamp_min(1.0)
     log_prob = torch.log_softmax(masked, dim=-1)
     chosen = (log_prob * target).sum(-1)
     contact_step = -chosen / target.sum(-1).clamp_min(1.0)

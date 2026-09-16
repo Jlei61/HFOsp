@@ -34,6 +34,8 @@ def main() -> None:
     ap.add_argument("--rate-root", type=Path, default=OUTPUT_ROOT / "dynamic_rate")
     ap.add_argument("--out-root", type=Path, default=OUTPUT_ROOT / "stepwise_decoder")
     ap.add_argument("--overwrite", action="store_true")
+    ap.add_argument("--use-rate-phases", action="store_true",
+                    help="rebuild FIT/INNER/SELECTION pairs from the rate trajectory")
     args = ap.parse_args()
     fit = FITS[args.subject]
     device = torch.device(args.device)
@@ -41,7 +43,8 @@ def main() -> None:
                                  DECODER_ROOT / "cache" / fit, device=device)
     data = load_human_spatial_data(args.subject, train_config=TrainConfig(max_steps=900, seed=args.state_seed))
     trajectory = args.rate_root / args.subject / f"seed{args.state_seed}" / "trajectory_and_scores.npz"
-    config = StepwiseTrainConfig(seed=args.state_seed)
+    config = StepwiseTrainConfig(seed=args.state_seed,
+                                 use_rate_trajectory_phases=args.use_rate_phases)
     out = args.out_root / args.subject / f"decoder_seed{args.decoder_seed}_state_seed{args.state_seed}"
     card = run_stepwise_subject(data, bundle, trajectory, config, device=device, out_dir=out, overwrite=args.overwrite)
     print(json.dumps({"subject": args.subject, "out": str(out), "selection_means": card["selection_means"],

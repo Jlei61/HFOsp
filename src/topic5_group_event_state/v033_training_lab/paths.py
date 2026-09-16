@@ -7,6 +7,7 @@ import hashlib
 import os
 from pathlib import Path
 import subprocess
+import sys
 from typing import Any, Sequence
 
 from src.topic5_group_event_state.v02.registry import (  # re-use, do not re-invent
@@ -17,15 +18,21 @@ from src.topic5_group_event_state.v02.registry import (  # re-use, do not re-inv
 )
 from src.topic5_group_event_state.v032_model.paths import atomic_write_npz, atomic_write_torch
 
-V033_ROOT = Path("/data/hfosp_group_event_state_v0_3_3")
+V033_ROOT = Path(os.environ.get(
+    "HFOSP_GES_V033_ROOT",
+    "/data/hfosp_group_event_state_v0_3_3",
+))
 AGENT_B_ROOT = V033_ROOT / "agent_b"
 SHARED_ROOT = V033_ROOT / "shared"
 JOB_REQUESTS = SHARED_ROOT / "job_requests"
 JOB_STATUS = SHARED_ROOT / "job_status"
 RESOURCE_LEASES = SHARED_ROOT / "resource_leases"
 RELEASE_FILENAME = "V0_3_3_EXECUTION_RELEASE.json"
-PYTHON = "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python"
-MAIN_TREE = Path("/home/honglab/leijiaxin/HFOsp")
+PYTHON = os.environ.get("HFOSP_PYTHON", sys.executable)
+MAIN_TREE = Path(os.environ.get(
+    "HFOSP_MAIN_TREE",
+    str(Path(__file__).resolve().parents[3]),
+))
 THREAD_ENV = ("OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS", "NUMEXPR_NUM_THREADS")
 
 __all__ = [

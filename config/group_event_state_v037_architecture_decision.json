@@ -1,0 +1,84 @@
+{
+  "version": "0.3.7",
+  "status": "ARCHITECTURE_DECISION_FROZEN_IMPLEMENTATION_PENDING",
+  "supersedes": [
+    "v0.3.5 gated shared producer for multi-hour state claims",
+    "v0.3.6 full-credit gated-RNN draft"
+  ],
+  "result_root": "/data/hfosp_group_event_state_v0_3_7",
+  "state_names": {
+    "observer": "S_obs",
+    "generative_physiological": "Z_phys"
+  },
+  "observer_inputs": {
+    "group_event_primary": true,
+    "non_event_background_auxiliary": true,
+    "background_grid_minutes": 5,
+    "known_context_explicit": true
+  },
+  "observer_models": [
+    "M_old",
+    "B_rate",
+    "B_mark",
+    "S_event",
+    "S_dual",
+    "S_grid"
+  ],
+  "primary_memory_hours": [
+    0.1666666667,
+    0.5,
+    1,
+    2,
+    4,
+    8,
+    16
+  ],
+  "exploratory_memory_hours": [
+    32
+  ],
+  "memory_identifiability_note": "32 h is an architecture sensitivity only unless the held-out span is substantially longer; the primary human bank is capped at 16 h",
+  "primary_horizons_hours": [
+    0.5,
+    2,
+    6,
+    8
+  ],
+  "exploratory_horizons_hours": [
+    12
+  ],
+  "shared_producer_across_horizons": true,
+  "primary_transition": "fixed_or_bounded_diagonal_continuous_time_ssm",
+  "input_dependent_transition_primary": false,
+  "tbptt_for_primary_observer": false,
+  "h1_targets": [
+    "future_burden",
+    "conditional_community_occupancy",
+    "conditional_cross_community_coupling",
+    "conditional_repertoire_mixture",
+    "conditional_spatial_frequency_field",
+    "conditional_stop_extent"
+  ],
+  "h2a_targets": [
+    "continue_stop",
+    "positive_group_size",
+    "contact_subset",
+    "route_order",
+    "same_prefix_continuation",
+    "conditional_band_waveform_expression"
+  ],
+  "h2b_targets": [
+    "discrete_seizure_hazard",
+    "time_to_next_seizure",
+    "early_ictal_spatial_field",
+    "early_ictal_route"
+  ],
+  "h3_models": [
+    "M0_common_drive_no_feedback",
+    "M1_count_feedback",
+    "M2_mark_specific_feedback"
+  ],
+  "observer_update_is_h3_evidence": false,
+  "development_targets_read": false,
+  "sealed_partition_opened": false,
+  "formal_human_training_started": false
+}

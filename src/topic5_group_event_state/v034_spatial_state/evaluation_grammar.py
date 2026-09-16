@@ -11,6 +11,7 @@ from __future__ import annotations
 from dataclasses import asdict
 import json
 import math
+import os
 from pathlib import Path
 import time
 from types import SimpleNamespace
@@ -43,7 +44,10 @@ from src.topic5_rank_distribution import FullHistorySequenceGRU
 from .contracts import EVALUATION_SUBJECTS, SEED_CONTRACT, seed_before_model_construction
 
 
-HUMAN_INPUT_ROOT = Path("/data/hfosp_group_event_state_v0_3_3/agent_c/human_inputs")
+HUMAN_INPUT_ROOT = Path(os.environ.get(
+    "HFOSP_GES_V033_INPUT_ROOT",
+    "/data/hfosp_group_event_state_v0_3_3/agent_c/human_inputs",
+))
 LOO_ROOT = (
     LEGACY_ROOT / "runs/formal_multiseed_20260725_v1/seed_20260725"
 )

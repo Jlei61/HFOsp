@@ -16,6 +16,12 @@ class StepwiseAdapterConfig:
     context_dim: int
     rank: int = 8
     stop_weight: float = 1.0
+    # Zero output maps give exact decoder parity but also give the context /
+    # state producer exactly zero gradient on the first optimiser step, so a
+    # short-patience run can stop before the adapter ever leaves the origin and
+    # report "state has no effect".  Callers that score a state arm must set a
+    # small non-zero value; the default preserves the historical behaviour.
+    output_init_std: float = 0.0
 
 
 class StaticStepAdapter(nn.Module):
@@ -53,10 +59,15 @@ class DynamicStepAdapter(nn.Module):
         self.contact = nn.Linear(rank, n_contacts, bias=False)
         self.stop = nn.Linear(rank, 1, bias=False)
         nn.init.xavier_uniform_(self.down.weight)
-        # Exact decoder parity at construction while retaining a trainable
-        # path.  Once output maps move, gradients reach context/state producer.
+        # Zero-modulation parity is enforced by the ``use_dynamic`` flag, not by
+        # the weights, so a small non-zero start keeps parity available while
+        # letting gradient reach the context on the very first step.
+        std = float(config.output_init_std)
         for module in (self.gamma, self.beta, self.contact, self.stop):
-            nn.init.zeros_(module.weight)
+            if std > 0.0:
+                nn.init.normal_(module.weight, std=std)
+            else:
+                nn.init.zeros_(module.weight)
 
     def forward(self, context: Tensor, t_norm: Tensor) -> tuple[Tensor, Tensor, Tensor, Tensor]:
         x = torch.cat((context, context * t_norm[:, None], t_norm[:, None], t_norm.square()[:, None]), dim=-1)
@@ -147,8 +158,10 @@ class StepwiseConditionedDecoder(nn.Module):
 
     def scores(self, batch: dict[str, Tensor], context: Tensor | None, *, use_static: bool, use_dynamic: bool,
                extra_context: Tensor | None = None,
-               extra_adapter: DynamicStepAdapter | None = None) -> dict[str, Tensor]:
+               extra_adapter: DynamicStepAdapter | None = None,
+               observed_prefix_groups: int = 0) -> dict[str, Tensor]:
         logits, stops = self.forward(batch["x"], batch["recruited"], batch["valid"], context,
                                      use_static=use_static, use_dynamic=use_dynamic,
                                      extra_context=extra_context, extra_adapter=extra_adapter)
-        return per_event_scores(logits, stops, batch, self.stop_weight)
+        return per_event_scores(logits, stops, batch, self.stop_weight,
+                                observed_prefix_groups=observed_prefix_groups)

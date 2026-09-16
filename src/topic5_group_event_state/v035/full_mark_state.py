@@ -24,7 +24,9 @@ from src.topic5_group_event_state.dataset import SubjectSequence
 from src.topic5_group_event_state.model import EncoderConfig, EventEncoder
 from src.topic5_group_event_state.train import _data_shape, _load_geometry
 from src.topic5_group_event_state.v03.pilot import estimate_input_stats_positions
-from src.topic5_group_event_state.v03.state import FixedTimescaleEventState, StateConfig
+from src.topic5_group_event_state.v03.state import (
+    FixedTimescaleEventState, RateNormalizedShotNoiseState, StateConfig,
+)
 from src.topic5_group_event_state.v034_spatial_state.we_decoder import (
     FrozenDecoderBundle, align_events, decoder_tensors,
 )
@@ -61,6 +63,10 @@ class FullMarkTrainConfig:
     patience: int = 4
     chunk_events: int = 256
     chunk_seconds: float = 1800.0
+    # ``detached_chunks`` is the archived v0.3.5 instrument.  The v0.3.6
+    # producer uses checkpointed_episode: microchunks bound activation memory
+    # but may not sever the autograd graph inside a true causal episode.
+    credit_assignment_mode: str = "detached_chunks"
     encoder_lr: float = 3e-5
     state_lr: float = 3e-4
     adapter_lr: float = 1e-3
@@ -79,6 +85,7 @@ class FullMarkTrainConfig:
     state_taus_seconds: tuple[float, ...] = RATE_TAUS_SECONDS
     state_update_hidden: int = 64
     state_update_fraction_cap: float = 0.2
+    state_update_rule: str = "bounded_replacement"
     offset_weights: tuple[float, ...] = (1.0, 0.5, 0.25)
     event_offsets: tuple[int, ...] = OFFSETS
     physical_loss_weight: float = 0.5
@@ -95,10 +102,21 @@ class FullMarkTrainConfig:
     # budget.  They differ only in which part of each already-observed group
     # event is allowed to update the cross-event state.
     input_view: str = "full_mark"
+    event_innovation_mode: str = "q_residual"
 
     def validate(self) -> "FullMarkTrainConfig":
         if self.objective_family not in {"joint", "sn", "sg"}:
             raise ValueError("objective_family must be joint, sn or sg")
+        if self.event_innovation_mode not in {"q_residual", "marked_event_only"}:
+            raise ValueError("event_innovation_mode must be q_residual or marked_event_only")
+        if self.credit_assignment_mode not in {"detached_chunks", "checkpointed_episode"}:
+            raise ValueError(
+                "credit_assignment_mode must be detached_chunks or checkpointed_episode"
+            )
+        if self.state_update_rule not in {"bounded_replacement", "rate_normalized_impulse"}:
+            raise ValueError(
+                "state_update_rule must be bounded_replacement or rate_normalized_impulse"
+            )
         if len(self.offset_weights) != len(self.event_offsets):
             raise ValueError("offset_weights and event_offsets must have equal length")
         return self
@@ -465,7 +483,12 @@ class FullMarkStateModel(nn.Module):
         # token.  Exact inter-event dt and the number of writes remain visible,
         # while participation, delay, waveform and frequency content do not.
         self.timing_token = nn.Parameter(torch.zeros(config.encoder_event_dim))
-        self.state = FixedTimescaleEventState(StateConfig(
+        state_class = (
+            RateNormalizedShotNoiseState
+            if config.state_update_rule == "rate_normalized_impulse"
+            else FixedTimescaleEventState
+        )
+        self.state = state_class(StateConfig(
             event_dim=config.encoder_event_dim,
             taus_seconds=tuple(float(v) for v in config.state_taus_seconds),
             channels_per_tau=config.state_channels_per_tau,
@@ -503,8 +526,13 @@ class FullMarkStateModel(nn.Module):
 
     def event_update(self, state_pre: Tensor, event_batch: dict[str, Tensor], q: Tensor) -> Tensor:
         embedding = self.encode_events(event_batch)
-        innovation = embedding.float() - self.expected_from_q(q.float())
+        innovation = self.innovation(embedding, q)
         return self.state.update(state_pre, innovation)
+
+    def innovation(self, embedding: Tensor, q: Tensor) -> Tensor:
+        if self.config.event_innovation_mode == "marked_event_only":
+            return embedding.float()
+        return embedding.float() - self.expected_from_q(q.float())
 
     def encode_events(self, event_batch: dict[str, Tensor]) -> Tensor:
         if self.input_view == "times_only":
@@ -719,7 +747,9 @@ def run_phase(model: FullMarkStateModel, data: FullMarkData, bundle_tensors: dic
             for local, row in enumerate(chunk):
                 dt = torch.tensor([max(0.0, float(data.event_time[row]) - previous)], device=device)
                 state_pre = model.state.evolve(state, dt)
-                innovation = embeddings[local:local + 1].float() - model.expected_from_q(q_all[local:local + 1])
+                innovation = model.innovation(
+                    embeddings[local:local + 1], q_all[local:local + 1]
+                )
                 state = model.state.update(state_pre, innovation)
                 post_states.append(state)
                 if data.phase[row] == phase:
@@ -804,7 +834,9 @@ def collect_states(model: FullMarkStateModel, data: FullMarkData, phase: str, de
             for local, row in enumerate(chunk):
                 dt = torch.tensor([max(0.0, float(data.event_time[row]) - previous)], device=device)
                 pre = model.state.evolve(state, dt)
-                state = model.state.update(pre, embedding[local:local + 1].float() - model.expected_from_q(q[local:local + 1]))
+                state = model.state.update(
+                    pre, model.innovation(embedding[local:local + 1], q[local:local + 1])
+                )
                 if data.phase[row] == phase: state_out[row] = state.squeeze(0).cpu().numpy()
                 previous = float(data.event_time[row])
     return np.flatnonzero(np.isfinite(state_out).all(1)), state_out
@@ -848,8 +880,9 @@ def collect_all_states(
                 pre = model.state.evolve(state, dt)
                 state = model.state.update(
                     pre,
-                    embedding[local : local + 1].float()
-                    - model.expected_from_q(q[local : local + 1]),
+                    model.innovation(
+                        embedding[local : local + 1], q[local : local + 1]
+                    ),
                 )
                 pre_out[row] = pre.squeeze(0).cpu().numpy()
                 post_out[row] = state.squeeze(0).cpu().numpy()
@@ -1066,6 +1099,12 @@ def evaluate_selection(model: FullMarkStateModel, data: FullMarkData, bundle_ten
         good = (target >= 0) & (data.decoder_index[np.maximum(target, 0)] >= 0)
         if not good.any(): continue
         ar, tg = rows[good], target[good]
+        # The recurrent state belongs strictly to an earlier group event.  The
+        # frozen decoder may observe the target event's first tied group, but
+        # the state must never have been updated with any part of that target.
+        # Keep this as a runtime contract because reversing this inequality
+        # would silently turn the same-prefix assay into target leakage.
+        _assert_strict_future_target_indices(ar, tg, data.event_time)
         cache = torch.as_tensor(data.decoder_index[tg], dtype=torch.long, device=device)
         batch = {key: value[cache] for key, value in bundle_tensors.items()}
         q = torch.as_tensor(data.q_context[ar], dtype=torch.float32, device=device)
@@ -1114,6 +1153,19 @@ def evaluate_selection(model: FullMarkStateModel, data: FullMarkData, bundle_ten
         "n_shift_valid": int(shift_valid[rows].sum()),
         "period_mean_source": "FIT state trajectory only",
         "n_fit_rows_for_period_mean": int(fit_rows.size)}
+
+
+def _assert_strict_future_target_indices(
+    anchor: np.ndarray, target: np.ndarray, event_time: np.ndarray,
+) -> None:
+    """Reject any same-prefix target already incorporated into its state."""
+
+    anchor = np.asarray(anchor, dtype=np.int64)
+    target = np.asarray(target, dtype=np.int64)
+    if anchor.shape != target.shape:
+        raise ValueError("same-prefix anchor/target shape mismatch")
+    if np.any(target <= anchor) or np.any(event_time[target] < event_time[anchor]):
+        raise ValueError("same-prefix target must be strictly after its state anchor")
 
 
 def _fit_period_mean_state(states: np.ndarray, fit_rows: np.ndarray) -> np.ndarray:

@@ -15,9 +15,18 @@ import torch
 
 
 FORMAT_PREFIX = "group_event_state_v0_3_5"
-DATASET_ROOT = Path("/data/hfosp_group_event_state_v0_1/dataset")
-INPUT_ROOT = Path("/data/hfosp_group_event_state_v0_3_3/agent_c/human_inputs")
-DECODER_ROOT = Path("/data/hfosp_group_event_state_v0_3_4/we_decoder")
+DATASET_ROOT = Path(os.environ.get(
+    "HFOSP_GES_V01_DATASET_ROOT",
+    "/data/hfosp_group_event_state_v0_1/dataset",
+))
+INPUT_ROOT = Path(os.environ.get(
+    "HFOSP_GES_V033_INPUT_ROOT",
+    "/data/hfosp_group_event_state_v0_3_3/agent_c/human_inputs",
+))
+DECODER_ROOT = Path(os.environ.get(
+    "HFOSP_GES_V034_DECODER_ROOT",
+    "/data/hfosp_group_event_state_v0_3_4/we_decoder",
+))
 # The causal re-run after the 2026-09-04 review writes to a parallel root so the
 # original (segment_fraction-contaminated) artifacts remain as archive evidence.
 OUTPUT_ROOT = Path(os.environ.get("HFOSP_GES_V035_OUTPUT_ROOT", "/data/hfosp_group_event_state_v0_3_5"))

@@ -1,0 +1,23 @@
+{
+  "version": "v0.4.0",
+  "scope": "first epilepsy-state evidence package; E1125 is development material throughout",
+  "subject": "epilepsiae_1125",
+  "split_seed": 20260906,
+  "protocol": "S-E",
+  "packets_root": "/data/hfosp_group_event_state_rich_event_identification_v0311/packets",
+  "results_root": "/data/hfosp_group_event_state_epilepsy_state_v040",
+  "arms": ["B_stats", "B_marks", "S_stats", "S_marks", "S_marks-short"],
+  "optimizer_seeds": [20260906, 20260907, 20260908],
+  "short_history_candidates": [30, 120],
+  "horizons_minutes": [1, 5, 30, 120],
+  "main_horizon_minutes": 30,
+  "selection": "J_inner = 0.5 * spatial@30 + 0.5 * morphology@30, both window-equal-weight",
+  "optimization_weights": {"horizon": {"1": 0.625, "5": 0.125, "30": 0.125, "120": 0.125},
+                           "view": {"count": 0.3333333333333333, "spatial": 0.3333333333333333,
+                                    "morphology": 0.3333333333333333, "load": 0.25},
+                           "current_packet_reconstruction": 0.0},
+  "measurement": "D-delayed main line; conservative shared block release until field release is verified",
+  "grad_hours": 2.0,
+  "history_hours": null,
+  "notes": "grad_hours bounds gradient credit only and never truncates the forward readable history"
+}

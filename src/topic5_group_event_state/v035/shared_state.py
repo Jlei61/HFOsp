@@ -8,7 +8,8 @@ trajectory.
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
+import fcntl
 import json
 import math
 from pathlib import Path
@@ -265,6 +266,8 @@ def _grid_loss(
     rows: np.ndarray,
     state: Tensor,
     device: torch.device,
+    *,
+    block_grammar_weight: float = 1.0,
 ) -> tuple[Tensor | None, dict[str, float]]:
     physical = _physical_tensors(data, rows, device)
     p_loss, _ = _physical_loss(
@@ -284,7 +287,7 @@ def _grid_loss(
             _grammar_tensors(grammar, rows, device),
         )
         if g_loss is not None:
-            parts["block_grammar"] = g_loss
+            parts["block_grammar"] = float(block_grammar_weight) * g_loss
     if not parts:
         return None, {}
     return torch.stack(list(parts.values())).mean(), {
@@ -328,8 +331,9 @@ def run_shared_phase(
                 pre = model.state.evolve(state, dt)
                 state = model.state.update(
                     pre,
-                    embedding[local:local + 1].float()
-                    - model.expected_from_q(q_all[local:local + 1]),
+                    model.innovation(
+                        embedding[local:local + 1], q_all[local:local + 1]
+                    ),
                 )
                 post.append(state)
                 if data.phase[row] == phase:
@@ -364,6 +368,7 @@ def run_shared_phase(
                 grid_state = model.state.evolve(source_state, dt_grid)
                 grid_loss, pieces = _grid_loss(
                     config.family, model, grammar_head, grammar, data, grid_rows, grid_state, device,
+                    block_grammar_weight=config.block_grammar_weight,
                 )
                 if grid_loss is not None:
                     terms.append(float(config.physical_weight) * grid_loss)
@@ -406,7 +411,24 @@ def train_shared_producer(
         return json.loads(card_path.read_text(encoding="utf-8"))
     started = time.time()
     data = configure_event_input_view(data, config.base)
+    # Primary state learning is interictal-only. A wall-clock target may span
+    # missing support, but not a known seizure and its post-seizure exclusion.
+    data = replace(
+        data,
+        future_valid=data.future_valid & (data.future_seizure_count == 0),
+        provenance={
+            **data.provenance,
+            "shared_primary_future_windows": "known-seizure crossings excluded",
+        },
+    )
     model = FullMarkStateModel(data, bundle, base_adapter, config.base, device).to(device)
+    # The trainable ``expected_from_q`` subtraction used by the earlier joint
+    # diagnostic is not a residualizer: without a separate embedding target it
+    # can inject an arbitrary nonlinear transform of q into the state.  Shared
+    # S_N/S_G therefore receive marked events + dt only; q remains a nested
+    # baseline/readout covariate.
+    for parameter in model.expected_from_q.parameters():
+        parameter.requires_grad_(False)
     physical_q = fit_physical_q_baseline(model, data, config.base, device)
     grammar = build_shared_grammar_data(data, config) if config.family == "S_G" else None
     grammar_head = None
@@ -424,7 +446,6 @@ def train_shared_producer(
         {"params": model.event_encoder.parameters(), "lr": config.base.encoder_lr},
         {"params": [model.timing_token], "lr": config.base.encoder_lr},
         {"params": model.state.parameters(), "lr": config.base.state_lr},
-        {"params": model.expected_from_q.parameters(), "lr": config.base.state_lr},
         {"params": model.physical_head.state_parameters(), "lr": config.base.adapter_lr},
     ]
     if config.family == "S_G":
@@ -436,11 +457,18 @@ def train_shared_producer(
             parameter.requires_grad_(False)
     optimizer = torch.optim.AdamW(groups, weight_decay=config.base.weight_decay)
     tensors = decoder_tensors(bundle, device)
+    if config.base.credit_assignment_mode == "checkpointed_episode":
+        # Lazy import avoids a module cycle: the full-credit implementation
+        # reuses the shared grammar loss helpers defined above.
+        from .full_credit import run_shared_phase_full_credit
+        phase_runner = run_shared_phase_full_credit
+    else:
+        phase_runner = run_shared_phase
     best, best_epoch, best_model, best_grammar = math.inf, -1, None, None
     stale, history = 0, []
     for epoch in range(config.base.max_epochs):
-        fit = run_shared_phase(model, grammar_head, grammar, data, tensors, "FIT", config, device, optimizer)
-        inner = run_shared_phase(model, grammar_head, grammar, data, tensors, "INNER", config, device, None)
+        fit = phase_runner(model, grammar_head, grammar, data, tensors, "FIT", config, device, optimizer)
+        inner = phase_runner(model, grammar_head, grammar, data, tensors, "INNER", config, device, None)
         history.append({"epoch": epoch, "fit": fit, "inner": inner})
         value = inner["mean_loss"]
         if value is not None and np.isfinite(value) and value < best - 1e-5:
@@ -523,6 +551,14 @@ def train_shared_producer(
         "state_trajectory": str(trajectory),
         "grammar_dictionary": None if dictionary_path is None else str(dictionary_path),
         "producer_contract": "one checkpoint and one causal trajectory shared by every horizon",
+        "credit_assignment_mode": config.base.credit_assignment_mode,
+        "credit_assignment_contract": (
+            "no detach inside true episode; microchunks are activation checkpoints only"
+            if config.base.credit_assignment_mode == "checkpointed_episode"
+            else "archived truncated-BPTT chunks"
+        ),
+        "state_update_inputs": "observed marked event embedding plus physical dt; q is excluded from the recurrent update and remains a nested readout baseline",
+        "future_window_seizure_policy": "primary producer excludes blocks crossing a known seizure",
         "selection_targets_read": False,
         "development_targets_read": False,
         "sealed_partition_opened": False,
@@ -535,23 +571,28 @@ def train_shared_producer(
 
 def update_checkpoint_registry(path: Path, card: Mapping[str, Any]) -> dict[str, Any]:
     path = Path(path)
-    registry = (
-        json.loads(path.read_text(encoding="utf-8"))
-        if path.exists()
-        else {
-            "format": f"{FORMAT_PREFIX}_shared_checkpoint_registry_v1",
-            "entries": {},
-            "development_targets_read": False,
-            "sealed_partition_opened": False,
+    path.parent.mkdir(parents=True, exist_ok=True)
+    lock_path = path.with_suffix(path.suffix + ".lock")
+    with lock_path.open("a+", encoding="utf-8") as lock:
+        fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
+        registry = (
+            json.loads(path.read_text(encoding="utf-8"))
+            if path.exists()
+            else {
+                "format": f"{FORMAT_PREFIX}_shared_checkpoint_registry_v1",
+                "entries": {},
+                "development_targets_read": False,
+                "sealed_partition_opened": False,
+            }
+        )
+        key = f"{card['subject']}::{card['family']}::seed{card['seed']}"
+        registry["entries"][key] = {
+            "subject": card["subject"], "family": card["family"], "seed": card["seed"],
+            "checkpoint": card["checkpoint"], "state_trajectory": card["state_trajectory"],
+            "shared_horizons_seconds": card["shared_horizons_seconds"],
+            "selected_epoch": card["selected_epoch"],
+            "selection_targets_read": card["selection_targets_read"],
         }
-    )
-    key = f"{card['subject']}::{card['family']}::seed{card['seed']}"
-    registry["entries"][key] = {
-        "subject": card["subject"], "family": card["family"], "seed": card["seed"],
-        "checkpoint": card["checkpoint"], "state_trajectory": card["state_trajectory"],
-        "shared_horizons_seconds": card["shared_horizons_seconds"],
-        "selected_epoch": card["selected_epoch"],
-        "selection_targets_read": card["selection_targets_read"],
-    }
-    atomic_json(path, registry)
+        atomic_json(path, registry)
+        fcntl.flock(lock.fileno(), fcntl.LOCK_UN)
     return registry

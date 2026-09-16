@@ -1,5 +1,13 @@
 # Topic 5：Seizure-related analysis (per-subject subtype + 下游 pre-ictal / outcome)
 
+> **2026-09-07 Group-Event State 转入 v0.4：癫痫有效病理状态**。用户已确认研究丰富群体 IED 是否形成可持续更新、预测未来病理表达并连接发作的状态，不以完整动力学重建为目标。[v0.4 科学 spec](archive/topic5/group_event_state_v0_4_epilepsy_state_scientific_spec_2026-09-07.md)与[首包合同](archive/topic5/group_event_state_v0_4_0_first_evidence_package_2026-09-07.md)及[Agent prompt](archive/topic5/group_event_state_v0_4_0_agent_execution_prompt_2026-09-07.md)为当前入口：H1/H2a 同步，冻结后尽早接可估 H2b；校准按科学依赖局部进行，不要求所有 INNER 或视图阳性。本轮保持版本号，补齐两小时主短臂、状态/损失/发作接口、窗口评分和主体 25 次拟合合同；实现和训练尚未开始。
+
+> **v0.3 开发阶段归档**：[v0.3.12 窗口收口](archive/topic5/group_event_state_v0_3_12_window_closeout_2026-09-07.md)与[独立审阅](archive/topic5/group_event_state_v0_3_12_independent_scientific_review_2026-09-07.md)支持接收开发工作包，尚未建立丰富前推状态、细触点迁移或发作特异状态，也不足以接收科学阴性。数值修复及时间边界保留；v0.3.13“下一轮只校准”提案及更早队列不再控制新执行。
+
+> **2026-09-06 Group-Event State v0.3.10 独立复审**：运行产物可接收，报告需大修，科学闭环仍开放。事件阶段平台停止不能代表背景/常数充分训练；旧触点适配器不支持“真阴性”；PCA 同侧不能定位统一漂移机制；当前 S-C 是抽样病例/对照判别，不是连续风险。见[独立审阅](archive/topic5/group_event_state_v0_3_10_independent_scientific_review_2026-09-06.md)与[文献依据](archive/topic5/group_event_state_v0_3_10_literature_review_2026-09-06.md)。
+
+> **2026-09-05 Group-Event State模型线复审**：v0.3.8审阅修复包和v0.3.9有限pilot已完成，原始科学闭环未建立。修正输入后的主比较没有稳定事件净贡献；延长合成训练后N-over-L优势翻转，耐心停止仍不等于充分收敛。见[系统训练复核](archive/topic5/group_event_state_v0_3_9_training_review_2026-09-05.md)。下一步按[v0.3.10夜间spec](archive/topic5/group_event_state_v0_3_10_training_and_rare_seizure_spec_2026-09-05.md)和[Agent交接](archive/topic5/group_event_state_v0_3_10_agent_handoff_2026-09-05.md)修训练、比较有限容量、检验同状态迁移，并把稀缺发作分为关联/簇外迁移/前推预测；不把旧3/1/1风险门槛用于阻断所有发作研究，不开development/sealed。
+
 > **🆕 V2 新重点（2026-07-01，design rev2 收紧完，待 writing-plans）：间期 HFO 几何 = 病理【候选】临界模态。**
 > 三层框架 —— trait：间期 HFO timing 几何 = **candidate** 病理临界模态（升级需证据阶梯）；state：发作前临界性沿这条模态升高；
 > expression：发作起始通过 **phenotype 特异的频带**沿这条模态招募（频带=发作机制的 readout，非技术参数）。
@@ -431,3 +439,5 @@ mask / bin 设计变化 / bootstrap stability) 才能 commit。
 - 测试：`tests/test_topic5_v2_criticality.py` + `test_topic5_v2_crit_io.py` + `test_topic5_v2_crit_dynamics.py` + `test_topic5_v2_crit_legs.py` = **22 tests pass**
 - 结果：`results/topic5_ictal_recruitment/v2_criticality/{broad,narrow}/phase2_*_subject.csv` + `figures/phase2_state_layer_alignment.png` + `figures/README.md`
 - 复用边界（→ V3a）：io/surrogate/ATM primitives 直接继承；时间窗（改 eeg-onset 锚定 grid）、几何（改 signed axis + 非轴向）、null（自建 spatial/order/label/rate-preserving）需重写。
+
+- v0.3.12：[实施验收与长跑准入](archive/topic5/group_event_state_v0_3_12_implementation_readiness_2026-09-06.md)。修复真实可读输入、嵌套前推选模、残差过滤和同 checkpoint 消费者；工程准入不代表科学阳性，正式长跑尚未启动。
