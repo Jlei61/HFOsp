@@ -1,0 +1,210 @@
+{
+  "time": "2026-09-14T18:00:55.732779+08:00",
+  "passed": true,
+  "controllers": [
+    {
+      "role": "initial_controller",
+      "pid": 66761,
+      "cmd": [
+        "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+        "-u",
+        "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_three_observable_bo.py",
+        "initial"
+      ],
+      "rss_GiB": 0.11369705200195312
+    },
+    {
+      "role": "optimizer",
+      "pid": 69704,
+      "cmd": [
+        "/data/hfosp/envs/topic4_bo_v1/bin/python",
+        "-u",
+        "scripts/control_topic4_three_observable_bo.py",
+        "controller"
+      ],
+      "rss_GiB": 0.19561004638671875
+    },
+    {
+      "role": "observer",
+      "pid": 69705,
+      "cmd": [
+        "/data/hfosp/envs/topic4_bo_v1/bin/python",
+        "-u",
+        "scripts/analyze_topic4_three_observable_bo.py",
+        "observe"
+      ],
+      "rss_GiB": 0.44504547119140625
+    },
+    {
+      "role": "rotation",
+      "pid": 68834,
+      "cmd": [
+        "/data/hfosp/envs/topic4_bo_v1/bin/python",
+        "-u",
+        "scripts/media_topic4_three_observable_bo.py",
+        "rotation"
+      ],
+      "rss_GiB": 0.6704483032226562
+    },
+    {
+      "role": "media",
+      "pid": 69130,
+      "cmd": [
+        "/data/hfosp/envs/topic4_bo_v1/bin/python",
+        "-u",
+        "scripts/media_topic4_three_observable_bo.py",
+        "media"
+      ],
+      "rss_GiB": 1.5713348388671875
+    },
+    {
+      "role": "diagnostics",
+      "pid": 69706,
+      "cmd": [
+        "/data/hfosp/envs/topic4_bo_v1/bin/python",
+        "-u",
+        "scripts/media_topic4_three_observable_bo.py",
+        "diagnostics"
+      ],
+      "rss_GiB": 0.2872428894042969
+    }
+  ],
+  "physical_status": {
+    "status": "SIMULATING",
+    "stage": "initial",
+    "planned_units": 32,
+    "complete": 8,
+    "active": [
+      {
+        "pid": 66765,
+        "unit": [
+          "g1_axis0_minus",
+          2511,
+          847401
+        ],
+        "rss_GiB": 2.0054893493652344,
+        "created_unix": 1789377843.31
+      },
+      {
+        "pid": 66766,
+        "unit": [
+          "g1_axis0_minus",
+          2511,
+          847402
+        ],
+        "rss_GiB": 2.1235122680664062,
+        "created_unix": 1789377843.31
+      },
+      {
+        "pid": 66767,
+        "unit": [
+          "g1_axis1_minus",
+          2511,
+          847401
+        ],
+        "rss_GiB": 2.0146713256835938,
+        "created_unix": 1789377843.31
+      },
+      {
+        "pid": 66768,
+        "unit": [
+          "g1_axis1_minus",
+          2511,
+          847402
+        ],
+        "rss_GiB": 2.0060462951660156,
+        "created_unix": 1789377843.31
+      },
+      {
+        "pid": 66769,
+        "unit": [
+          "g1_axis1_plus",
+          2511,
+          847401
+        ],
+        "rss_GiB": 2.1169471740722656,
+        "created_unix": 1789377843.31
+      },
+      {
+        "pid": 66770,
+        "unit": [
+          "g1_axis1_plus",
+          2511,
+          847402
+        ],
+        "rss_GiB": 2.0075950622558594,
+        "created_unix": 1789377843.32
+      },
+      {
+        "pid": 66771,
+        "unit": [
+          "g1_axis2_minus",
+          2511,
+          847401
+        ],
+        "rss_GiB": 2.0094642639160156,
+        "created_unix": 1789377843.32
+      },
+      {
+        "pid": 66772,
+        "unit": [
+          "g1_axis2_minus",
+          2511,
+          847402
+        ],
+        "rss_GiB": 2.117351531982422,
+        "created_unix": 1789377843.32
+      }
+    ],
+    "queued": 16,
+    "failures": [],
+    "updated_unix": 1789380050.1620328
+  },
+  "active_worker_samples": [
+    {
+      "pid": 66765,
+      "cpu_percent": 99.7,
+      "rss_GiB": 2.0055198669433594
+    },
+    {
+      "pid": 66766,
+      "cpu_percent": 99.8,
+      "rss_GiB": 2.123645782470703
+    },
+    {
+      "pid": 66767,
+      "cpu_percent": 99.8,
+      "rss_GiB": 2.01470947265625
+    },
+    {
+      "pid": 66768,
+      "cpu_percent": 99.8,
+      "rss_GiB": 2.0061798095703125
+    },
+    {
+      "pid": 66769,
+      "cpu_percent": 99.8,
+      "rss_GiB": 2.116962432861328
+    },
+    {
+      "pid": 66770,
+      "cpu_percent": 99.8,
+      "rss_GiB": 2.0076446533203125
+    },
+    {
+      "pid": 66771,
+      "cpu_percent": 99.8,
+      "rss_GiB": 2.00958251953125
+    },
+    {
+      "pid": 66772,
+      "cpu_percent": 99.8,
+      "rss_GiB": 2.117389678955078
+    }
+  ],
+  "available_GiB": 228.23248672485352,
+  "scored": 8,
+  "rotation_complete": 8,
+  "new_simulation_results": 0,
+  "old_reused": 8
+}

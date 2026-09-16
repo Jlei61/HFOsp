@@ -1,0 +1,48 @@
+{
+  "status": "PASS",
+  "reports": [
+    {
+      "seed": 9108401,
+      "original_observations_bitwise_equal": [
+        "time_ms",
+        "spikes_1ms",
+        "regions_1ms",
+        "field_1ms",
+        "raster",
+        "slow_time_ms",
+        "Z",
+        "M",
+        "currents",
+        "lfp_time_ms",
+        "lfp_raw",
+        "inputs"
+      ],
+      "native_0p1ms_field_bitwise_equal": true,
+      "one_second": true,
+      "independent_samples_added": 0
+    },
+    {
+      "seed": 9108402,
+      "original_observations_bitwise_equal": [
+        "time_ms",
+        "spikes_1ms",
+        "regions_1ms",
+        "field_1ms",
+        "raster",
+        "slow_time_ms",
+        "Z",
+        "M",
+        "currents",
+        "lfp_time_ms",
+        "lfp_raw",
+        "inputs"
+      ],
+      "native_0p1ms_field_bitwise_equal": true,
+      "one_second": true,
+      "independent_samples_added": 0
+    }
+  ],
+  "same_baseline_physics_and_observers_verified": true,
+  "intervention_schedule_parity": "Verified from full original baseline trajectories in prepare",
+  "checkpoint_resume_QA": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/weaker_M_onset_paired_20260914/checkpoint_resume_qa.json"
+}

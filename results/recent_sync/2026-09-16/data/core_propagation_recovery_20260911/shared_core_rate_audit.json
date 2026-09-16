@@ -1,0 +1,38 @@
+{
+  "rows": [
+    {
+      "candidate": "refine_mid_EE075",
+      "seed": 847101,
+      "maximum_AB_rate_difference": 4.440892098500626e-16,
+      "global_OU_std_per_ms": 0.029087567118044045,
+      "core_mean_rate_per_ms": 1.317103171624774,
+      "rate_samples": 60000
+    },
+    {
+      "candidate": "refine_mid_EE075",
+      "seed": 847102,
+      "maximum_AB_rate_difference": 4.440892098500626e-16,
+      "global_OU_std_per_ms": 0.028746133185100123,
+      "core_mean_rate_per_ms": 1.3161998600206897,
+      "rate_samples": 60000
+    },
+    {
+      "candidate": "refine_mid_EE085_mean095",
+      "seed": 847101,
+      "maximum_AB_rate_difference": 4.440892098500626e-16,
+      "global_OU_std_per_ms": 0.028334555473172072,
+      "core_mean_rate_per_ms": 1.2526045028389041,
+      "rate_samples": 60000
+    },
+    {
+      "candidate": "refine_mid_EE085_mean095",
+      "seed": 847102,
+      "maximum_AB_rate_difference": 2.220446049250313e-16,
+      "global_OU_std_per_ms": 0.02715521341557496,
+      "core_mean_rate_per_ms": 1.2516937950711584,
+      "rate_samples": 60000
+    }
+  ],
+  "interpretation": "The OU-modulated conditional afferent rates are equal across both E cores. Individual Poisson arrivals still differ. This does not by itself prove why a mode is rare.",
+  "hypothesis_not_executed": "A future noise correlation contrast can retain the OU marginal law while allowing independent core-wide fluctuations, without any event or route input."
+}

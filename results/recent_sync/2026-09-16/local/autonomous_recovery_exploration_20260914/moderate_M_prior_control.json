@@ -1,0 +1,33 @@
+{
+  "same_substrate_identity": true,
+  "same_frozen_dependency_hashes": true,
+  "rows": [
+    {
+      "noise_seed": 9108401,
+      "source": "results/topic4_sef_hfo/m_parameter_modes_fig5_20260913/runs/e0_t1_s9108401/result.json",
+      "eta_m": 0.005,
+      "tau_M_s": 2.0,
+      "first_entry": {
+        "onset_s": 11.72,
+        "confirmation_s": 11.92
+      },
+      "native_recovery_before_rescue": [],
+      "external_restore_s": 71.93,
+      "valid_native_comparison_until_s": 60.0
+    },
+    {
+      "noise_seed": 9108402,
+      "source": "results/topic4_sef_hfo/m_parameter_modes_fig5_20260913/runs/e0_t1_s9108402/result.json",
+      "eta_m": 0.005,
+      "tau_M_s": 2.0,
+      "first_entry": {
+        "onset_s": 13.21,
+        "confirmation_s": 13.41
+      },
+      "native_recovery_before_rescue": [],
+      "external_restore_s": 73.42,
+      "valid_native_comparison_until_s": 60.0
+    }
+  ],
+  "limit": "Only the prefix before external rescue is evidence about native return. It is an existing paired-noise reference, not a newly independent realization. Actual pre-feedback observed prefix of the new condition should be compared before using this as a precise quantitative counterfactual."
+}

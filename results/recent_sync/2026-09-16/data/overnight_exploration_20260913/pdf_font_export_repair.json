@@ -1,0 +1,28 @@
+{
+ "status": "PASS_CURRENT_FOLLOWUP_REPORT",
+ "reason": "Legacy subplot functions reset pdf.fonttype42; both page drawing and PdfPages.close must use type3",
+ "patch": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_pdf_font_guard.py",
+ "patch_sha256": "ea7db28d84ad8148bbde71ae293bc6c1c1202f75983bf55244e790b5f677291c",
+ "standalone_test": "PASS rasterized Chinese labels after simulated legacy reset42, rcParams restored",
+ "restarts": [
+  {
+   "series": "core_recruitment_tradeoff_followup_20260912",
+   "old_observer": 4159827,
+   "new_observer": 4189430,
+   "physical_workers_restarted": 0,
+   "producer_sha256": "3767efe2237e31884158919d5b50b52aa9b3bce30785dd5ebbbae817a6b417ac"
+  },
+  {
+   "series": "core_multiseed_response_curves_20260913",
+   "old_observer": 4078531,
+   "new_observer": 4189431,
+   "physical_workers_restarted": 0,
+   "producer_sha256": "24db7991b9dd7802d643e10f7bde2cb3246acf8ff23876c2a28821d66aacf9a0"
+  }
+ ],
+ "created_unix": 1789238955.778124,
+ "actual_pdf": "/data/hfosp/topic4_sef_hfo/core_recruitment_tradeoff_followup_20260912/analysis/continuation_report.pdf",
+ "rendered_cover": "/data/hfosp/topic4_sef_hfo/overnight_exploration_20260913/followup_repaired_cover_check.png",
+ "scope": "Current regenerated combined report checked; old individual archived PDFs are not claimed repaired.",
+ "verified_unix": 1789239570.8537474
+}

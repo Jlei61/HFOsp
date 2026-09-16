@@ -1,0 +1,543 @@
+{
+ "status": "PASS",
+ "results": [
+  {
+   "seed": 847101,
+   "topology": 2511,
+   "checks": [
+    {
+     "array": "contact_names",
+     "kind": "static",
+     "identical": true
+    },
+    {
+     "array": "contact_xy_mm",
+     "kind": "static",
+     "identical": true
+    },
+    {
+     "array": "positions_E",
+     "kind": "static",
+     "identical": true
+    },
+    {
+     "array": "positions_I",
+     "kind": "static",
+     "identical": true
+    },
+    {
+     "array": "h",
+     "kind": "static",
+     "identical": true
+    },
+    {
+     "array": "vtheta",
+     "kind": "static",
+     "identical": true
+    },
+    {
+     "array": "core_index_E",
+     "kind": "static",
+     "identical": true
+    },
+    {
+     "array": "core_index_I",
+     "kind": "static",
+     "identical": true
+    },
+    {
+     "array": "input_is_stochastic",
+     "kind": "static",
+     "identical": true
+    },
+    {
+     "array": "sheet_activity_counts",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "rate_E",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "rate_I",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_time_ms",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_xi",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_nu_now",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_E_spikes",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_I_spikes",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_E_mean_V",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_coreAE_mean_V",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_coreAE_spikes",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_coreAE_mean_I_E",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_coreAE_mean_I_I",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_coreBE_mean_V",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_coreBE_spikes",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_coreBE_mean_I_E",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_coreBE_mean_I_I",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_coreAI_mean_V",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_coreAI_spikes",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_coreAI_mean_I_E",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_coreAI_mean_I_I",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_coreBI_mean_V",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_coreBI_spikes",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_coreBI_mean_I_E",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_coreBI_mean_I_I",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_surroundE_mean_V",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_surroundE_spikes",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_surroundE_mean_I_E",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_surroundE_mean_I_I",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_allI_mean_V",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_allI_spikes",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_allI_mean_I_E",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_allI_mean_I_I",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "input_rate_audit_values",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "contact_envelope",
+     "kind": "prefix excluding short-record convolution boundary",
+     "identical": true,
+     "excluded_tail_ms": 16.0,
+     "maximum_absolute_delta": 0.0
+    }
+   ],
+   "identical": true,
+   "short": "/data/hfosp/topic4_sef_hfo/core_connectivity_search_20260910/recovery_wave1_20260911/units/recovery_upper_wide_recurrence/2511_847101/workers/trajectory.json",
+   "long": "/data/hfosp/topic4_sef_hfo/core_connectivity_search_20260910/recovery_long_20260911/units/refine_near_EE075/2511_847101/workers/trajectory.json",
+   "short_arrays_sha256": "d1003276e840f9db079230e2acb82127db13147e388e239940438558fc92d121",
+   "long_arrays_sha256": "720381775e411c5fb8177d997a0de5182dea57f38770bf455dba490f7e32b4a1"
+  },
+  {
+   "seed": 847102,
+   "topology": 2511,
+   "checks": [
+    {
+     "array": "contact_names",
+     "kind": "static",
+     "identical": true
+    },
+    {
+     "array": "contact_xy_mm",
+     "kind": "static",
+     "identical": true
+    },
+    {
+     "array": "positions_E",
+     "kind": "static",
+     "identical": true
+    },
+    {
+     "array": "positions_I",
+     "kind": "static",
+     "identical": true
+    },
+    {
+     "array": "h",
+     "kind": "static",
+     "identical": true
+    },
+    {
+     "array": "vtheta",
+     "kind": "static",
+     "identical": true
+    },
+    {
+     "array": "core_index_E",
+     "kind": "static",
+     "identical": true
+    },
+    {
+     "array": "core_index_I",
+     "kind": "static",
+     "identical": true
+    },
+    {
+     "array": "input_is_stochastic",
+     "kind": "static",
+     "identical": true
+    },
+    {
+     "array": "sheet_activity_counts",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "rate_E",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "rate_I",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_time_ms",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_xi",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_nu_now",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_E_spikes",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_I_spikes",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_E_mean_V",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_coreAE_mean_V",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_coreAE_spikes",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_coreAE_mean_I_E",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_coreAE_mean_I_I",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_coreBE_mean_V",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_coreBE_spikes",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_coreBE_mean_I_E",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_coreBE_mean_I_I",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_coreAI_mean_V",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_coreAI_spikes",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_coreAI_mean_I_E",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_coreAI_mean_I_I",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_coreBI_mean_V",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_coreBI_spikes",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_coreBI_mean_I_E",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_coreBI_mean_I_I",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_surroundE_mean_V",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_surroundE_spikes",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_surroundE_mean_I_E",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_surroundE_mean_I_I",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_allI_mean_V",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_allI_spikes",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_allI_mean_I_E",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "trace_allI_mean_I_I",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "input_rate_audit_values",
+     "kind": "20s dynamic prefix",
+     "identical": true,
+     "maximum_absolute_delta": 0.0
+    },
+    {
+     "array": "contact_envelope",
+     "kind": "prefix excluding short-record convolution boundary",
+     "identical": true,
+     "excluded_tail_ms": 16.0,
+     "maximum_absolute_delta": 0.0
+    }
+   ],
+   "identical": true,
+   "short": "/data/hfosp/topic4_sef_hfo/core_connectivity_search_20260910/recovery_wave1_20260911/units/recovery_upper_wide_recurrence/2511_847102/workers/trajectory.json",
+   "long": "/data/hfosp/topic4_sef_hfo/core_connectivity_search_20260910/recovery_long_20260911/units/refine_near_EE075/2511_847102/workers/trajectory.json",
+   "short_arrays_sha256": "f5c340c6073e46f05661050f4b1dffedc596e9a7f07a359c62e4aa72f3f4ba3b",
+   "long_arrays_sha256": "922d752993c0e9c7c22ad8d2ea5b14d9adfa48f8309ab9e56d171832d3f61c6f"
+  }
+ ],
+ "pending_seeds": [],
+ "interpretation": "Checks only this repeated physical condition and its 20s prefix; does not establish bitwise repeatability of every candidate or historical physics.",
+ "producer": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/audit_topic4_length_prefix_replay.py",
+ "producer_sha256": "39c853e622a7882c9391bd6eae8e714f34525489cf8fd906e51e1054e295a064"
+}

@@ -1,0 +1,80 @@
+{
+  "records": [
+    {
+      "label": "N",
+      "old_controller_pid": 88283,
+      "folder": "core_multiseed_response_curves_20260913",
+      "script": "run_topic4_multiseed_response_curves.py",
+      "workers": [
+        {
+          "pid": 15948,
+          "unit": [
+            "bridge_circle_out125_xminus075",
+            2711,
+            847401
+          ],
+          "stage": "response",
+          "process_created_unix": 1789239537.33,
+          "log": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/logs/response_bridge_circle_out125_xminus075_2711_847401.log"
+        },
+        {
+          "pid": 4078535,
+          "unit": [
+            "bridge_circle_out125",
+            2511,
+            847401
+          ],
+          "stage": "response",
+          "process_created_unix": 1789235775.35,
+          "log": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/logs/response_bridge_circle_out125_2511_847401.log"
+        },
+        {
+          "pid": 4078701,
+          "unit": [
+            "bridge_circle_out125_xminus075",
+            2511,
+            847401
+          ],
+          "stage": "response",
+          "process_created_unix": 1789235780.86,
+          "log": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/logs/response_bridge_circle_out125_xminus075_2511_847401.log"
+        },
+        {
+          "pid": 4151248,
+          "unit": [
+            "bridge_circle_out125",
+            2711,
+            847401
+          ],
+          "stage": "response",
+          "process_created_unix": 1789237873.35,
+          "log": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/logs/response_bridge_circle_out125_2711_847401.log"
+        }
+      ],
+      "new_controller_pid": 258055,
+      "controller_sha256": "0acfb08546c9eadfc1c880ac9c074962047f87b676ef53e85f967ec1eae43225"
+    },
+    {
+      "label": "G",
+      "old_controller_pid": 55657,
+      "folder": "global_axis_residual_probe_20260913",
+      "script": "run_topic4_global_axis_residual_probe.py",
+      "workers": [
+        {
+          "pid": 136040,
+          "unit": [
+            "global_axis_+0",
+            2511,
+            847101
+          ],
+          "stage": "response",
+          "process_created_unix": 1789243031.71,
+          "log": "/data/hfosp/topic4_sef_hfo/global_axis_residual_probe_20260913/logs/response_global_axis_+0_2511_847101.log"
+        }
+      ],
+      "new_controller_pid": 258056,
+      "controller_sha256": "4f1e202c581fa8a891de09cdb5baf9be171573f6b05c725dd0fc5a0849f2a540"
+    }
+  ],
+  "created_unix": 1789246565.724291
+}

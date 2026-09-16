@@ -1,0 +1,26 @@
+{
+  "status": "PASS",
+  "checks": {
+    "duration_ms": true,
+    "static_identity": true,
+    "no_raised_threshold": true,
+    "no_outside_noise": true,
+    "sheet_activity_counts": true,
+    "trace_coreAE_spikes": true,
+    "trace_coreBE_spikes": true,
+    "core_ou_mixture_values": true
+  },
+  "scope": "Only the completed 500ms zero-angle control; other two angle application checks remain pending.",
+  "applied_kernel": {
+    "l_par": 0.5374011537017762,
+    "l_perp": 0.40305086527633205,
+    "theta_deg": -22.80538396505847,
+    "theta_rad": -0.3980290373717898,
+    "reference_theta_deg": -22.80538396505847,
+    "reference_ar": 2.0,
+    "perp_scale": 1.5,
+    "parallel_scale": 1.0,
+    "angle_offset_deg": 0.0,
+    "is_reference": false
+  }
+}

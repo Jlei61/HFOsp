@@ -1,0 +1,425 @@
+{
+  "name": "g0.166667_k0.1_tau1_s9108401_br60s_kx65",
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_interictal_recurrence_k100_matrix_20260916/runs/g0.166667_k0.1_tau1_s9108401_br60s_kx65",
+  "job": {
+    "name": "g0.166667_k0.1_tau1_s9108401_br60s_kx65",
+    "seed": 9108401,
+    "eta_m": 0.0005,
+    "tau_M_s": 1.0,
+    "tau_Z_s": 5.0,
+    "threshold": 95.19851312666987,
+    "mode": "native",
+    "gamma": 0.16666666666666666,
+    "global_gain": 0.029440596381478282,
+    "global_resource": "native_z",
+    "phi_jump": 0.0,
+    "horizon_s": 66.0,
+    "checkpoint_s": 1.0,
+    "device": 1,
+    "qa": false,
+    "feedback_form": "conductance",
+    "C_R": 6.299613071787578,
+    "reference_voltage_mV": 18.0,
+    "reference_gap_mV": 35.66284793826844,
+    "global_reversal_mV": -17.662847938268442,
+    "sahp_gain": 6.5,
+    "sahp_tau_s": 1.0,
+    "stop_after_second_entry": false,
+    "k100": 0.1,
+    "per_spike_increment_gK_over_gL": 0.001,
+    "steady_state_gK_over_gL_at_100Hz": 0.1,
+    "base_sahp_gain": 0.1,
+    "k_increment_scale_applied": 65.0,
+    "branch": {
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_interictal_recurrence_20260915/runs/g0.166667_k0.1_tau1_s9108401",
+      "source_checkpoint": "/data/hfosp/topic4_sef_hfo/fig5_interictal_recurrence_20260915/runs/g0.166667_k0.1_tau1_s9108401/checkpoint.pkl",
+      "source_checkpoint_sha256": "fc744cbb9c71d58430d71ab2753443b61abb1e34e4762eab264c5edc6beffe12",
+      "start_s": 60.0,
+      "modification": {
+        "k_increment_scale": 65
+      },
+      "label": "kx65",
+      "diagnostic_only": true,
+      "note": "Full engine state, synaptic/delay history, slow variables and random streams continue from the stored checkpoint; exactly the declared feedback modification differs. Not an autonomous loop."
+    }
+  },
+  "observed_s": 66.0,
+  "classification": "HIGH_ENDED_NO_INTERICTAL_RETURN",
+  "entries": [
+    {
+      "onset_s": 20.33,
+      "confirmation_s": 20.53
+    }
+  ],
+  "exits": [
+    {
+      "start_s": 61.36,
+      "confirmation_s": 63.36,
+      "mechanism": "AUTONOMOUS",
+      "all_and_core_means_Hz": [
+        [
+          44.65028125,
+          48.59681697612732,
+          49.43256997455471,
+          44.42918581746553
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "quiet_fraction": [
+        [
+          0.88,
+          0.88,
+          0.87,
+          0.88
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      ]
+    }
+  ],
+  "preentry_brief": 67,
+  "interhigh": [],
+  "latest_postexit": {
+    "brief": 0,
+    "span": 0.0,
+    "fraction": 0.0,
+    "finite": 0
+  },
+  "temporal_loop_pass": false,
+  "current_balance": {
+    "baseline": {
+      "window_s": [
+        0.5,
+        5.0
+      ],
+      "I_E": 38.14638503465555,
+      "raw_local_I": 44.106479489060696,
+      "Z_local_I": 41.94113783992448,
+      "Z_mean": 0.9551065226078427,
+      "Z_coreA": 0.9382484129800834,
+      "Z_coreB": 0.9371945296851792,
+      "Z_other": 0.9559860315079258,
+      "fraction_J_above_threshold": 0.10512138888888885,
+      "I_M": 0.0035441464348619825,
+      "global_E_rate_Hz": 8.179435684032699,
+      "g_global": 0.23035290314732426,
+      "I_global": -0.6894467147181236,
+      "g_K": 0.007099266541583235,
+      "I_K": 0.08244636230956535,
+      "total_inhibition_plus_adaptation": 41.33768163395079,
+      "excitation_minus_inhibition": -3.191296599295235,
+      "g_K_needed_to_hold_V_below_threshold": 0.0,
+      "k100_needed_at_this_rate": 0.0
+    },
+    "pre_entry_2s": {
+      "window_s": [
+        18.33,
+        20.33
+      ],
+      "I_E": 328.9923409549146,
+      "raw_local_I": 314.5185014848622,
+      "Z_local_I": 224.59039567587027,
+      "Z_mean": 0.8210953639529922,
+      "Z_coreA": 0.7489488338506436,
+      "Z_coreB": 0.771418063054871,
+      "Z_other": 0.8241631526005002,
+      "fraction_J_above_threshold": 0.6882778125,
+      "I_M": 0.023637948607751435,
+      "global_E_rate_Hz": 100.41783812418961,
+      "g_global": 2.3145265957404035,
+      "I_global": 27.974433654921278,
+      "g_K": 0.04725049123086927,
+      "I_K": 1.8286291501207685,
+      "total_inhibition_plus_adaptation": 254.4170964295201,
+      "excitation_minus_inhibition": 74.57524452539451,
+      "g_K_needed_to_hold_V_below_threshold": 1.2167473682399017,
+      "k100_needed_at_this_rate": 1.2116844885020484
+    },
+    "entry_ramp": {
+      "window_s": [
+        20.33,
+        21.029999999999998
+      ],
+      "I_E": 733.2352972939224,
+      "raw_local_I": 694.4308836801849,
+      "Z_local_I": 418.13550954334204,
+      "Z_mean": 0.6441268333654646,
+      "Z_coreA": 0.5724152867498814,
+      "Z_coreB": 0.5970745874903459,
+      "Z_other": 0.6471161167340131,
+      "fraction_J_above_threshold": 1.0,
+      "I_M": 0.07310806480940878,
+      "global_E_rate_Hz": 229.38931000930694,
+      "g_global": 4.336126581235841,
+      "I_global": 74.33448873636222,
+      "g_K": 0.14617852845661242,
+      "I_K": 6.050259671239745,
+      "total_inhibition_plus_adaptation": 498.5933660157534,
+      "excitation_minus_inhibition": 234.64193127816895,
+      "g_K_needed_to_hold_V_below_threshold": 4.6394206447793485,
+      "k100_needed_at_this_rate": 2.0225095252220404
+    },
+    "post_entry_1_5s": {
+      "window_s": [
+        21.33,
+        25.33
+      ],
+      "I_E": 1427.970545130258,
+      "raw_local_I": 1345.6052454369856,
+      "Z_local_I": 509.30628575644243,
+      "Z_mean": 0.3890081144148063,
+      "Z_coreA": 0.34569929372037383,
+      "Z_coreB": 0.36059180803112795,
+      "Z_other": 0.39081343508523214,
+      "fraction_J_above_threshold": 1.0,
+      "I_M": 0.19348855463293058,
+      "global_E_rate_Hz": 452.76082213532976,
+      "g_global": 5.096071765509177,
+      "I_global": 143.28087769802136,
+      "g_K": 0.3869597249149096,
+      "I_K": 15.972944712665248,
+      "total_inhibition_plus_adaptation": 668.7535967217619,
+      "excitation_minus_inhibition": 759.216948408496,
+      "g_K_needed_to_hold_V_below_threshold": 15.774789440024193,
+      "k100_needed_at_this_rate": 3.4841330496809473
+    },
+    "late": {
+      "window_s": [
+        61.0,
+        66.0
+      ],
+      "I_E": 146.4099381622699,
+      "raw_local_I": 132.45816303941126,
+      "Z_local_I": -13.266048158758238,
+      "Z_mean": 0.30224719836411734,
+      "Z_coreA": 0.301672225300816,
+      "Z_coreB": 0.3014567850407896,
+      "Z_other": 0.30228182720725144,
+      "fraction_J_above_threshold": 0.108,
+      "I_M": 0.06871262052796705,
+      "global_E_rate_Hz": 42.540557939188226,
+      "g_global": 0.00024417727162053096,
+      "I_global": 0.006915455357930421,
+      "g_K": 6.534617299589737,
+      "I_K": 111.04274880084088,
+      "total_inhibition_plus_adaptation": 97.85232871796853,
+      "excitation_minus_inhibition": 48.55760944430136,
+      "regions": {
+        "coreA": {
+          "gK_over_gL": 6.656864892207723,
+          "gG_over_gL": 0.00022108108701190564,
+          "V_mV": -12.623300947624646,
+          "I_K_mV": 114.8042748300649,
+          "I_G_mV": 0.006320613967661007,
+          "I_E_mV": 149.5101869919254,
+          "Z_local_I_mV": 0.21145601641650713,
+          "I_M_mV": 0.06937168992960505,
+          "Z": 0.301672225300816,
+          "M": 138.74337985921022
+        },
+        "coreB": {
+          "gK_over_gL": 6.664799963661737,
+          "gG_over_gL": 0.0002303194364617184,
+          "V_mV": -12.620322250317438,
+          "I_K_mV": 114.94594582448745,
+          "I_G_mV": 0.006602288432170756,
+          "I_E_mV": 150.0088972321481,
+          "Z_local_I_mV": 0.21564431251708438,
+          "I_M_mV": 0.06943202002947985,
+          "Z": 0.3014567850407896,
+          "M": 138.8640400589594
+        },
+        "other": {
+          "gK_over_gL": 6.566708908714268,
+          "gG_over_gL": 0.0002502868704172214,
+          "V_mV": -12.59588872827901,
+          "I_K_mV": 112.18104624925762,
+          "I_G_mV": 0.007060074546323457,
+          "I_E_mV": 146.2403265586426,
+          "Z_local_I_mV": 0.22546262919095536,
+          "I_M_mV": 0.06867774244730308,
+          "Z": 0.30228182720725144,
+          "M": 137.35548489460643
+        }
+      },
+      "g_K_needed_to_hold_V_below_threshold": 2.9500074634404627,
+      "k100_needed_at_this_rate": 6.934576334559367
+    },
+    "post_exit_0_2s": {
+      "window_s": [
+        63.36,
+        65.36
+      ],
+      "I_E": 12.842989478338474,
+      "raw_local_I": 0.6162469827299326,
+      "Z_local_I": 0.2680474439881625,
+      "Z_mean": 0.4276513389298819,
+      "Z_coreA": 0.4270955977683181,
+      "Z_coreB": 0.42688575097701525,
+      "Z_other": 0.4276848511086992,
+      "fraction_J_above_threshold": 0.0,
+      "I_M": 0.015305719903024227,
+      "global_E_rate_Hz": 5.608039434404642e-55,
+      "g_global": 5.101068727640179e-57,
+      "I_global": -1.389006434442058e-56,
+      "g_K": 1.4905053415320453,
+      "I_K": 23.4948060249407,
+      "total_inhibition_plus_adaptation": 23.77815918883189,
+      "excitation_minus_inhibition": -10.935169710493415,
+      "regions": {
+        "coreA": {
+          "gK_over_gL": 1.5292935015008728,
+          "gG_over_gL": 8.886067558438739e-57,
+          "V_mV": -11.371365689750638,
+          "I_K_mV": 23.753944891420474,
+          "I_G_mV": -2.5076502646626766e-56,
+          "I_E_mV": 12.837677936089245,
+          "Z_local_I_mV": 0.2452362495022491,
+          "I_M_mV": 0.0154949128228278,
+          "Z": 0.4270955977683181,
+          "M": 30.989825645655582
+        },
+        "coreB": {
+          "gK_over_gL": 1.532262027601542,
+          "gG_over_gL": 8.878729739212976e-57,
+          "V_mV": -11.412394509176293,
+          "I_K_mV": 23.72838106759783,
+          "I_G_mV": -2.6672492094772276e-56,
+          "I_E_mV": 12.797206196332596,
+          "Z_local_I_mV": 0.2516262168269703,
+          "I_M_mV": 0.01551759974377779,
+          "Z": 0.42688575097701525,
+          "M": 31.0351994875556
+        },
+        "other": {
+          "gK_over_gL": 1.5033879813564508,
+          "gG_over_gL": 8.906672278973416e-57,
+          "V_mV": -11.211824340979524,
+          "I_K_mV": 23.577861582898255,
+          "I_G_mV": -2.46825847398652e-56,
+          "I_E_mV": 12.844302366142568,
+          "Z_local_I_mV": 0.2690358459970619,
+          "I_M_mV": 0.01529556924588817,
+          "Z": 0.4276848511086992,
+          "M": 30.59113849177634
+        }
+      },
+      "g_K_needed_to_hold_V_below_threshold": 0.0,
+      "k100_needed_at_this_rate": 0.0
+    },
+    "post_exit_2_10s": {
+      "window_s": [
+        65.36,
+        66.0
+      ],
+      "I_E": 13.075276193682855,
+      "raw_local_I": 0.7398811319384601,
+      "Z_local_I": 0.4162172102091403,
+      "Z_mean": 0.5630711501554859,
+      "Z_coreA": 0.5626468994093073,
+      "Z_coreB": 0.5624867031453796,
+      "Z_other": 0.563096733228781,
+      "fraction_J_above_threshold": 0.0,
+      "I_M": 0.003538546582303836,
+      "global_E_rate_Hz": 2.176357117521666e-112,
+      "g_global": 3.439352745029712e-114,
+      "I_global": 5.741327547128737e-113,
+      "g_K": 0.34461916011039506,
+      "I_K": 10.820011011481157,
+      "total_inhibition_plus_adaptation": 11.2397667682726,
+      "excitation_minus_inhibition": 1.8355094254102546,
+      "regions": {
+        "coreA": {
+          "gK_over_gL": 0.3535873554856261,
+          "gG_over_gL": 6.0115670420444035e-114,
+          "V_mV": 1.411831305895136,
+          "I_K_mV": 11.007521054754225,
+          "I_G_mV": 9.931802793815174e-113,
+          "I_E_mV": 12.993739757235021,
+          "Z_local_I_mV": 0.4015282358290163,
+          "I_M_mV": 0.0035822863060155402,
+          "Z": 0.5626468994093073,
+          "M": 7.164572612031082
+        },
+        "coreB": {
+          "gK_over_gL": 0.3542737072504088,
+          "gG_over_gL": 6.009658214999618e-114,
+          "V_mV": 1.4851517199513646,
+          "I_K_mV": 11.060071677773388,
+          "I_G_mV": 9.810521630047111e-113,
+          "I_E_mV": 13.159434729279873,
+          "Z_local_I_mV": 0.4347959268780255,
+          "I_M_mV": 0.003587531320761616,
+          "Z": 0.5624867031453796,
+          "M": 7.175062641523233
+        },
+        "other": {
+          "gK_over_gL": 0.3475977502519963,
+          "gG_over_gL": 6.016927060681656e-114,
+          "V_mV": 1.5982788703143782,
+          "I_K_mV": 10.888879891506889,
+          "I_G_mV": 1.00038493557533e-112,
+          "I_E_mV": 13.075122873397309,
+          "Z_local_I_mV": 0.41610140638054127,
+          "I_M_mV": 0.0035361998404749963,
+          "Z": 0.563096733228781,
+          "M": 7.072399680949993
+        }
+      },
+      "g_K_needed_to_hold_V_below_threshold": 0.0,
+      "k100_needed_at_this_rate": 0.0
+    }
+  },
+  "Z_below_0p5_first_s": {
+    "coreA": 21.36,
+    "coreB": 21.58,
+    "other": 21.98,
+    "mean": 21.96
+  },
+  "late_all_E_Hz": 40.987787499999996,
+  "late_state": "LOW",
+  "final_Z": 0.5896182490481422,
+  "final_gK": 0.24614755592068735,
+  "final_I_M": 0.00255156464307934,
+  "regional_records": true,
+  "high_morphology": [
+    {
+      "onset_s": 20.33,
+      "end_s": 63.36,
+      "duration_s": 43.03,
+      "censored": false,
+      "mean_Hz": 462.2140715779688,
+      "fraction_bins_ge_450Hz": 0.9056472228677667,
+      "thirds_mean_Hz": [
+        456.3921232578397,
+        500.0,
+        430.25415141213387
+      ],
+      "thirds_cv": [
+        0.13676598643059837,
+        0.0,
+        0.39078146753131515
+      ],
+      "dominant_frequency_Hz": 1.220703125,
+      "dominant_relative_power": 0.2001036704225337,
+      "spatial_fraction_active_mean": 0.9456337209302326,
+      "time_to_90pct_sheet_s": 1.5450000000000017,
+      "first_200Hz_s": {
+        "allE": 20.335,
+        "coreA": 17.735,
+        "coreB": 17.755,
+        "other": 20.485
+      },
+      "operational_label": "REFRACTORY_LIMITED_PLATEAU"
+    }
+  ]
+}

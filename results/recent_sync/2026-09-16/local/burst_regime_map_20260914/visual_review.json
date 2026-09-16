@@ -1,0 +1,108 @@
+{
+  "status": "PASS_AGENT_VISUAL_REVIEW_HUMAN_PENDING",
+  "reviewed_unix": 1789377744.3575208,
+  "figures": [
+    {
+      "stem": "native_burst_regime_map",
+      "status": "PASS_AGENT_VISUAL_REVIEW",
+      "note": "Reviewed all three panels: 25 cells and two noise triangles per cell, discrete labels, sensitivity crosses and reference box readable; no boundary interpolation.",
+      "png": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/burst_regime_map_20260914/figures/native_burst_regime_map.png",
+        "sha256": "4feb9ed2ae4eff956048df2ff726dd74db03c6192a62b3b0eb1924c336118df4",
+        "bytes": 191884
+      },
+      "pdf": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/burst_regime_map_20260914/figures/native_burst_regime_map.pdf",
+        "sha256": "ea31dda4fc80ad1da3a09808f136755f304e26376e7da5772a50977886c63f95",
+        "bytes": 19497
+      }
+    },
+    {
+      "stem": "native_burst_continuous_observables",
+      "status": "PASS_AGENT_VISUAL_REVIEW",
+      "note": "Reviewed all six heatmaps: run-level averages, unavailable values grey, values and colorbars readable; increased row spacing after first visual inspection.",
+      "png": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/burst_regime_map_20260914/figures/native_burst_continuous_observables.png",
+        "sha256": "45169d0cd259d41eda1309b8b2d886d291c4dc0b3e3c74484f11685e070191c3",
+        "bytes": 289070
+      },
+      "pdf": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/burst_regime_map_20260914/figures/native_burst_continuous_observables.pdf",
+        "sha256": "f40963a8444194bbe5548ee7c9f7cbc714230d00e20d0ed241d1a157f869a15e",
+        "bytes": 40317
+      }
+    },
+    {
+      "stem": "native_burst_examples",
+      "status": "PASS_AGENT_VISUAL_REVIEW",
+      "note": "Reviewed all six actual phenotype examples: native activity returns to low levels, fixed 2–7 s raster, sparse CV explicitly withheld; increased pale-trace contrast and verified visible-window axis limits.",
+      "png": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/burst_regime_map_20260914/figures/native_burst_examples.png",
+        "sha256": "19d1219cc5ed7fb6ef05c1103db530ef911c5343942d2b6372acc0a3ad6dd90a",
+        "bytes": 747015
+      },
+      "pdf": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/burst_regime_map_20260914/figures/native_burst_examples.pdf",
+        "sha256": "f356743484d429bcc4c90ff884dcac90f8ecf610535aa68f24fdcd4626c2572c",
+        "bytes": 145667
+      }
+    },
+    {
+      "stem": "native_burst_controls",
+      "status": "PASS_AGENT_VISUAL_REVIEW",
+      "note": "Reviewed all twelve controls: mean-matched noise removal, second-network anchors, correct labels and burst counts; control scope retained.",
+      "png": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/burst_regime_map_20260914/figures/native_burst_controls.png",
+        "sha256": "0dd16702cd0602a7593f78cd66de71477f042bcf06e936133f571422b2686bc6",
+        "bytes": 133002
+      },
+      "pdf": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/burst_regime_map_20260914/figures/native_burst_controls.pdf",
+        "sha256": "f92c7cb9508b70248997daefa8ba7be908ea7b05c2655b8ac23e62e35147c840",
+        "bytes": 14715
+      }
+    },
+    {
+      "stem": "native_burst_interval_distributions",
+      "status": "PASS_AGENT_VISUAL_REVIEW",
+      "note": "Reviewed both repeated irregular candidates and two anchors: four separate core/noise series, shared interval scales, empirical distributions without fitting; run identity retained.",
+      "png": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/burst_regime_map_20260914/figures/native_burst_interval_distributions.png",
+        "sha256": "3c83482af17822c6fd9302f35935d6d203f7041e3bbfdc8cfbdd91b9db4b977a",
+        "bytes": 408778
+      },
+      "pdf": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/burst_regime_map_20260914/figures/native_burst_interval_distributions.pdf",
+        "sha256": "c030b01ed8e181fe0ce4c284a07b9459e9f1189f298b71f09336b8c801b07293",
+        "bytes": 38281
+      }
+    },
+    {
+      "stem": "native_burst_four_states_waveform_raster",
+      "status": "PASS_AGENT_VISUAL_REVIEW",
+      "note": "Four requested states paired with native population-rate waveforms and matched-cell rasters; same core, network, noise and lowering amplitude; only EE changes. Reviewed point visibility, window alignment, units and annotations.",
+      "png": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/burst_regime_map_20260914/figures/native_burst_four_states_waveform_raster.png",
+        "sha256": "0eaafb1a6aec1c211bae7c2ca6800038c766caecfdde8cbee3b143e4129d0964",
+        "bytes": 720771
+      },
+      "pdf": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/burst_regime_map_20260914/figures/native_burst_four_states_waveform_raster.pdf",
+        "sha256": "e98a715ff4b08af6089b646433e395551afb9fc50e436e136685c3ded6198357",
+        "bytes": 244553
+      },
+      "human_review": "CHANGES_REQUESTED_READABILITY",
+      "preferred_display": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/burst_regime_map_20260914/figures/four_state_detail/four_states_large_rasters.pdf"
+    }
+  ],
+  "human_review": "PENDING",
+  "completed_physical_runs": 62,
+  "active_physical_workers": 0,
+  "additional_wave_started": false,
+  "scientific_boundary": "Two repeated threshold-stable irregular single-core parameter points in one primary network; no candidate-specific noise-off or second-network confirmation, no mathematical phase boundary or within-burst HFO validation.",
+  "separate_state_figures": {
+    "status": "PASS_AGENT_VISUAL_REVIEW_HUMAN_PENDING",
+    "figures_reviewed": 12,
+    "manifest": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/burst_regime_map_20260914/figures/four_state_detail/figure_manifest.json"
+  }
+}

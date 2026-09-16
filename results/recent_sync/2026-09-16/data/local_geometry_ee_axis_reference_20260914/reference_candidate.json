@@ -1,0 +1,57 @@
+{
+  "id": "bridge_circle_out125_xminus075",
+  "layout": "up3",
+  "centers_mm": [
+    [
+      3.4492143200000003,
+      12.12890135
+    ],
+    [
+      16.47920304,
+      3.96551153
+    ]
+  ],
+  "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+  ],
+  "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.25,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 1.0,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+  },
+  "changed_parameter": "core_ou_correlation",
+  "changed_value": 0.0,
+  "adjacency_changes": true,
+  "stage": "response",
+  "parent_id": "refine_mid_EE085_mean095",
+  "changed_parameters": {
+    "core_ou_correlation": 0.0
+  },
+  "display_name": "圆核｜向外EE×1.25，核内EI×1，左核x偏移-0.75mm",
+  "core_mean_rate_scale": 0.95,
+  "geometry_change": null,
+  "core_ou_correlation": 0.0,
+  "shape": {},
+  "outgoing": {},
+  "contrast": "response_curve",
+  "comparison": "bridge_circle_out125",
+  "response_coordinates": {
+    "shape": "circle",
+    "EE_out": 1.25,
+    "EI": 1.0,
+    "degree": 1.0,
+    "dx_mm": -0.75
+  }
+}

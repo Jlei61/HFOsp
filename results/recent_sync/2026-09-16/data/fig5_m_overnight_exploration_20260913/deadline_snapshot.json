@@ -1,0 +1,1290 @@
+{
+  "time": "2026-09-13T09:40:19.142973+08:00",
+  "inherited": {
+    "reset_state_diagnosis_20260911": {
+      "status": {
+        "status": "RUNNING",
+        "phase": "B_RESET_M",
+        "supervisor_pid": 3181230,
+        "running": [
+          "z_m_reset_long"
+        ],
+        "pending": []
+      },
+      "progress": [
+        {
+          "name": "z_m_reset_long",
+          "status": "RUNNING",
+          "time_s": 406.0,
+          "recurrence_onset_s": null,
+          "recovered": true,
+          "wall_s": 63971.967680454254
+        },
+        {
+          "name": "z_only_long",
+          "status": "COMPLETE",
+          "end_s": 1000.0,
+          "recurrence_onset_s": null,
+          "recovered": true,
+          "wall_s": 79506.84244060516
+        }
+      ]
+    },
+    "m_on_z_kinetics_20260912": {
+      "status": {
+        "status": "RUNNING",
+        "pid": 4186101,
+        "total": 147,
+        "completed": 127,
+        "running": {
+          "y3_x5_s9108402": 3813402,
+          "y4_x5_s9108402": 3841640,
+          "y1_x5_s9108403": 3939914,
+          "y3_x5_s9108403": 3944417,
+          "y4_x5_s9108403": 3954201,
+          "y6_x5_s9108401": 3975001,
+          "y1_x6_s9108401": 3988348,
+          "y2_x6_s9108401": 4052293,
+          "y4_x6_s9108401": 4070677,
+          "y6_x5_s9108402": 4070980,
+          "y1_x6_s9108402": 4073647,
+          "y2_x6_s9108402": 4073915,
+          "y4_x6_s9108402": 4101612,
+          "y6_x5_s9108403": 4102444,
+          "y1_x6_s9108403": 4103013,
+          "y2_x6_s9108403": 47312,
+          "y4_x6_s9108403": 76639,
+          "y5_x6_s9108401": 165445,
+          "y5_x6_s9108402": 186777,
+          "y5_x6_s9108403": 193317
+        },
+        "pending": 0,
+        "failed": [],
+        "wall_s_since_controller_adoption": 24751.779342651367,
+        "available_memory_GiB": 111.1908950805664,
+        "max_workers": 32,
+        "adopted_existing_workers": true
+      },
+      "progress": [
+        {
+          "name": "y0_x0_s9108401",
+          "status": "COMPLETE",
+          "time_s": 27.720000000000002,
+          "wall_s": 5023.681886672974
+        },
+        {
+          "name": "y0_x0_s9108402",
+          "status": "COMPLETE",
+          "time_s": 36.24,
+          "wall_s": 5917.191561460495
+        },
+        {
+          "name": "y0_x0_s9108403",
+          "status": "COMPLETE",
+          "time_s": 21.66,
+          "wall_s": 4281.2407376766205
+        },
+        {
+          "name": "y0_x1_s9108401",
+          "status": "COMPLETE",
+          "time_s": 22.080000000000002,
+          "wall_s": 5895.251252174377
+        },
+        {
+          "name": "y0_x1_s9108402",
+          "status": "COMPLETE",
+          "time_s": 40.910000000000004,
+          "wall_s": 7999.174457788467
+        },
+        {
+          "name": "y0_x1_s9108403",
+          "status": "COMPLETE",
+          "time_s": 109.44000000000001,
+          "wall_s": 19826.008888721466
+        },
+        {
+          "name": "y0_x2_s9108401",
+          "status": "COMPLETE",
+          "time_s": 50.470000000000006,
+          "wall_s": 8698.09183549881
+        },
+        {
+          "name": "y0_x2_s9108402",
+          "status": "COMPLETE",
+          "time_s": 43.690000000000005,
+          "wall_s": 7111.6378746032715
+        },
+        {
+          "name": "y0_x2_s9108403",
+          "status": "COMPLETE",
+          "time_s": 147.70000000000002,
+          "wall_s": 26760.732923030853
+        },
+        {
+          "name": "y0_x3_s9108401",
+          "status": "COMPLETE",
+          "time_s": 47.730000000000004,
+          "wall_s": 7837.412949323654
+        },
+        {
+          "name": "y0_x3_s9108402",
+          "status": "COMPLETE",
+          "time_s": 55.81,
+          "wall_s": 9026.633355379105
+        },
+        {
+          "name": "y0_x3_s9108403",
+          "status": "COMPLETE",
+          "time_s": 24.67,
+          "wall_s": 4539.927572488785
+        },
+        {
+          "name": "y0_x4_s9108401",
+          "status": "COMPLETE",
+          "time_s": 53.99,
+          "wall_s": 10813.785552024841
+        },
+        {
+          "name": "y0_x4_s9108402",
+          "status": "COMPLETE",
+          "time_s": 170.98000000000002,
+          "wall_s": 33672.78453850746
+        },
+        {
+          "name": "y0_x4_s9108403",
+          "status": "COMPLETE",
+          "time_s": 51.220000000000006,
+          "wall_s": 10515.184987783432
+        },
+        {
+          "name": "y0_x5_s9108401",
+          "status": "COMPLETE",
+          "time_s": 127.43,
+          "wall_s": 28803.133677959442
+        },
+        {
+          "name": "y0_x5_s9108402",
+          "status": "COMPLETE",
+          "time_s": 55.27,
+          "wall_s": 13052.696049690247
+        },
+        {
+          "name": "y0_x5_s9108403",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 38088.99904704094
+        },
+        {
+          "name": "y0_x6_s9108401",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 29575.02794098854
+        },
+        {
+          "name": "y0_x6_s9108402",
+          "status": "COMPLETE",
+          "time_s": 55.5,
+          "wall_s": 9955.011967658997
+        },
+        {
+          "name": "y0_x6_s9108403",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 29733.493477344513
+        },
+        {
+          "name": "y1_x0_s9108401",
+          "status": "COMPLETE",
+          "time_s": 21.220000000000002,
+          "wall_s": 5279.156160831451
+        },
+        {
+          "name": "y1_x0_s9108402",
+          "status": "COMPLETE",
+          "time_s": 54.04,
+          "wall_s": 11127.040350675583
+        },
+        {
+          "name": "y1_x0_s9108403",
+          "status": "COMPLETE",
+          "time_s": 92.01,
+          "wall_s": 15921.079989671707
+        },
+        {
+          "name": "y1_x1_s9108401",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 27429.5448346138
+        },
+        {
+          "name": "y1_x1_s9108402",
+          "status": "COMPLETE",
+          "time_s": 43.92,
+          "wall_s": 6970.017728090286
+        },
+        {
+          "name": "y1_x1_s9108403",
+          "status": "COMPLETE",
+          "time_s": 27.05,
+          "wall_s": 5410.166578531265
+        },
+        {
+          "name": "y1_x2_s9108401",
+          "status": "COMPLETE",
+          "time_s": 126.35000000000001,
+          "wall_s": 20698.45840072632
+        },
+        {
+          "name": "y1_x2_s9108402",
+          "status": "COMPLETE",
+          "time_s": 44.34,
+          "wall_s": 7265.831454277039
+        },
+        {
+          "name": "y1_x2_s9108403",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 32119.683981895447
+        },
+        {
+          "name": "y1_x3_s9108401",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 32267.81479382515
+        },
+        {
+          "name": "y1_x3_s9108402",
+          "status": "COMPLETE",
+          "time_s": 38.260000000000005,
+          "wall_s": 8510.72036075592
+        },
+        {
+          "name": "y1_x3_s9108403",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 31308.806727409363
+        },
+        {
+          "name": "y1_x4_s9108401",
+          "status": "COMPLETE",
+          "time_s": 123.52000000000001,
+          "wall_s": 22779.627940893173
+        },
+        {
+          "name": "y1_x4_s9108402",
+          "status": "COMPLETE",
+          "time_s": 58.510000000000005,
+          "wall_s": 11536.630375385284
+        },
+        {
+          "name": "y1_x4_s9108403",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 28786.558579683304
+        },
+        {
+          "name": "y1_x5_s9108401",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 39178.55241179466
+        },
+        {
+          "name": "y1_x5_s9108402",
+          "status": "COMPLETE",
+          "time_s": 159.0,
+          "wall_s": 35272.42666006088
+        },
+        {
+          "name": "y1_x5_s9108403",
+          "status": "RUNNING",
+          "time_s": 155.0,
+          "wall_s": 35502.25938677788
+        },
+        {
+          "name": "y1_x6_s9108401",
+          "status": "RUNNING",
+          "time_s": 136.0,
+          "wall_s": 32182.857038974762
+        },
+        {
+          "name": "y1_x6_s9108402",
+          "status": "RUNNING",
+          "time_s": 120.0,
+          "wall_s": 28291.120975017548
+        },
+        {
+          "name": "y1_x6_s9108403",
+          "status": "RUNNING",
+          "time_s": 112.0,
+          "wall_s": 26927.863288879395
+        },
+        {
+          "name": "y2_x0_s9108401",
+          "status": "COMPLETE",
+          "time_s": 106.74000000000001,
+          "wall_s": 17268.39510321617
+        },
+        {
+          "name": "y2_x0_s9108402",
+          "status": "COMPLETE",
+          "time_s": 44.02,
+          "wall_s": 8006.545116662979
+        },
+        {
+          "name": "y2_x0_s9108403",
+          "status": "COMPLETE",
+          "time_s": 17.27,
+          "wall_s": 4745.485925912857
+        },
+        {
+          "name": "y2_x1_s9108401",
+          "status": "COMPLETE",
+          "time_s": 47.24,
+          "wall_s": 9325.75432419777
+        },
+        {
+          "name": "y2_x1_s9108402",
+          "status": "COMPLETE",
+          "time_s": 54.92,
+          "wall_s": 9190.82783317566
+        },
+        {
+          "name": "y2_x1_s9108403",
+          "status": "COMPLETE",
+          "time_s": 107.91000000000001,
+          "wall_s": 17674.522013664246
+        },
+        {
+          "name": "y2_x2_s9108401",
+          "status": "COMPLETE",
+          "time_s": 87.89,
+          "wall_s": 14301.67598104477
+        },
+        {
+          "name": "y2_x2_s9108402",
+          "status": "COMPLETE",
+          "time_s": 151.16,
+          "wall_s": 27784.67768263817
+        },
+        {
+          "name": "y2_x2_s9108403",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 30020.593113422394
+        },
+        {
+          "name": "y2_x3_s9108401",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 31878.13654923439
+        },
+        {
+          "name": "y2_x3_s9108402",
+          "status": "COMPLETE",
+          "time_s": 44.03,
+          "wall_s": 10369.038386821747
+        },
+        {
+          "name": "y2_x3_s9108403",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 32938.16522073746
+        },
+        {
+          "name": "y2_x4_s9108401",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 29890.47367119789
+        },
+        {
+          "name": "y2_x4_s9108402",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 38059.39397764206
+        },
+        {
+          "name": "y2_x4_s9108403",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 36441.853660583496
+        },
+        {
+          "name": "y2_x5_s9108401",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 29717.948042869568
+        },
+        {
+          "name": "y2_x5_s9108402",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 29336.611889839172
+        },
+        {
+          "name": "y2_x5_s9108403",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 28497.79986667633
+        },
+        {
+          "name": "y2_x6_s9108401",
+          "status": "RUNNING",
+          "time_s": 133.0,
+          "wall_s": 30406.72629237175
+        },
+        {
+          "name": "y2_x6_s9108402",
+          "status": "RUNNING",
+          "time_s": 114.0,
+          "wall_s": 28145.022033691406
+        },
+        {
+          "name": "y2_x6_s9108403",
+          "status": "RUNNING",
+          "time_s": 98.0,
+          "wall_s": 23054.292337417603
+        },
+        {
+          "name": "y3_x0_s9108401",
+          "status": "COMPLETE",
+          "time_s": 103.81,
+          "wall_s": 17656.96475458145
+        },
+        {
+          "name": "y3_x0_s9108402",
+          "status": "COMPLETE",
+          "time_s": 44.06,
+          "wall_s": 7159.395596027374
+        },
+        {
+          "name": "y3_x0_s9108403",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 31771.054753541946
+        },
+        {
+          "name": "y3_x1_s9108401",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 28427.649322271347
+        },
+        {
+          "name": "y3_x1_s9108402",
+          "status": "COMPLETE",
+          "time_s": 135.39000000000001,
+          "wall_s": 24255.006274938583
+        },
+        {
+          "name": "y3_x1_s9108403",
+          "status": "COMPLETE",
+          "time_s": 102.85000000000001,
+          "wall_s": 16905.865792751312
+        },
+        {
+          "name": "y3_x2_s9108401",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 29119.88140320778
+        },
+        {
+          "name": "y3_x2_s9108402",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 30861.97830104828
+        },
+        {
+          "name": "y3_x2_s9108403",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 31074.38347530365
+        },
+        {
+          "name": "y3_x3_s9108401",
+          "status": "COMPLETE",
+          "time_s": 74.18,
+          "wall_s": 12954.803644657135
+        },
+        {
+          "name": "y3_x3_s9108402",
+          "status": "COMPLETE",
+          "time_s": 137.3,
+          "wall_s": 22352.601003170013
+        },
+        {
+          "name": "y3_x3_s9108403",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 29630.51408481598
+        },
+        {
+          "name": "y3_x4_s9108401",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 32796.0948073864
+        },
+        {
+          "name": "y3_x4_s9108402",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 32183.585603237152
+        },
+        {
+          "name": "y3_x4_s9108403",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 36816.48258662224
+        },
+        {
+          "name": "y3_x5_s9108401",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 40086.08670139313
+        },
+        {
+          "name": "y3_x5_s9108402",
+          "status": "RUNNING",
+          "time_s": 179.0,
+          "wall_s": 40801.48062849045
+        },
+        {
+          "name": "y3_x5_s9108403",
+          "status": "RUNNING",
+          "time_s": 145.0,
+          "wall_s": 34034.00240254402
+        },
+        {
+          "name": "y3_x6_s9108401",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 28259.222003221512
+        },
+        {
+          "name": "y3_x6_s9108402",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 29097.275543689728
+        },
+        {
+          "name": "y3_x6_s9108403",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 29117.671632289886
+        },
+        {
+          "name": "y4_x0_s9108401",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 28801.449265241623
+        },
+        {
+          "name": "y4_x0_s9108402",
+          "status": "COMPLETE",
+          "time_s": 152.81,
+          "wall_s": 25858.93552184105
+        },
+        {
+          "name": "y4_x0_s9108403",
+          "status": "COMPLETE",
+          "time_s": 103.97,
+          "wall_s": 16198.706511735916
+        },
+        {
+          "name": "y4_x1_s9108401",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 28528.976808786392
+        },
+        {
+          "name": "y4_x1_s9108402",
+          "status": "COMPLETE",
+          "time_s": 62.21,
+          "wall_s": 10630.52808022499
+        },
+        {
+          "name": "y4_x1_s9108403",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 30573.477214813232
+        },
+        {
+          "name": "y4_x2_s9108401",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 31404.733998298645
+        },
+        {
+          "name": "y4_x2_s9108402",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 29673.729919433594
+        },
+        {
+          "name": "y4_x2_s9108403",
+          "status": "COMPLETE",
+          "time_s": 103.78,
+          "wall_s": 20410.002772569656
+        },
+        {
+          "name": "y4_x3_s9108401",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 31194.439959049225
+        },
+        {
+          "name": "y4_x3_s9108402",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 30828.216805934906
+        },
+        {
+          "name": "y4_x3_s9108403",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 30505.241543531418
+        },
+        {
+          "name": "y4_x4_s9108401",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 29336.504143953323
+        },
+        {
+          "name": "y4_x4_s9108402",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 28501.274815797806
+        },
+        {
+          "name": "y4_x4_s9108403",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 26475.263880491257
+        },
+        {
+          "name": "y4_x5_s9108401",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 36272.15687966347
+        },
+        {
+          "name": "y4_x5_s9108402",
+          "status": "RUNNING",
+          "time_s": 172.0,
+          "wall_s": 39631.011687755585
+        },
+        {
+          "name": "y4_x5_s9108403",
+          "status": "RUNNING",
+          "time_s": 152.0,
+          "wall_s": 33100.437265872955
+        },
+        {
+          "name": "y4_x6_s9108401",
+          "status": "RUNNING",
+          "time_s": 124.0,
+          "wall_s": 29355.41827058792
+        },
+        {
+          "name": "y4_x6_s9108402",
+          "status": "RUNNING",
+          "time_s": 114.0,
+          "wall_s": 27180.010429382324
+        },
+        {
+          "name": "y4_x6_s9108403",
+          "status": "RUNNING",
+          "time_s": 93.0,
+          "wall_s": 22200.329770565033
+        },
+        {
+          "name": "y5_x0_s9108401",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 27352.35490989685
+        },
+        {
+          "name": "y5_x0_s9108402",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 28528.821359157562
+        },
+        {
+          "name": "y5_x0_s9108403",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 27269.26183772087
+        },
+        {
+          "name": "y5_x1_s9108401",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 29390.64064860344
+        },
+        {
+          "name": "y5_x1_s9108402",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 28653.340154886246
+        },
+        {
+          "name": "y5_x1_s9108403",
+          "status": "COMPLETE",
+          "time_s": 131.53,
+          "wall_s": 22589.254159212112
+        },
+        {
+          "name": "y5_x2_s9108401",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 30219.503538370132
+        },
+        {
+          "name": "y5_x2_s9108402",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 30231.847182035446
+        },
+        {
+          "name": "y5_x2_s9108403",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 28216.61501979828
+        },
+        {
+          "name": "y5_x3_s9108401",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 29415.646816968918
+        },
+        {
+          "name": "y5_x3_s9108402",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 31595.36017847061
+        },
+        {
+          "name": "y5_x3_s9108403",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 31190.00953578949
+        },
+        {
+          "name": "y5_x4_s9108401",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 30624.112188100815
+        },
+        {
+          "name": "y5_x4_s9108402",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 32586.717147111893
+        },
+        {
+          "name": "y5_x4_s9108403",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 35630.06268167496
+        },
+        {
+          "name": "y5_x5_s9108401",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 27834.438349723816
+        },
+        {
+          "name": "y5_x5_s9108402",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 29692.72510790825
+        },
+        {
+          "name": "y5_x5_s9108403",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 27989.649788856506
+        },
+        {
+          "name": "y5_x6_s9108401",
+          "status": "RUNNING",
+          "time_s": 84.0,
+          "wall_s": 19623.06790447235
+        },
+        {
+          "name": "y5_x6_s9108402",
+          "status": "RUNNING",
+          "time_s": 81.0,
+          "wall_s": 18923.494255542755
+        },
+        {
+          "name": "y5_x6_s9108403",
+          "status": "RUNNING",
+          "time_s": 79.0,
+          "wall_s": 18759.252763986588
+        },
+        {
+          "name": "y6_x0_s9108401",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 29558.67639040947
+        },
+        {
+          "name": "y6_x0_s9108402",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 28322.27715754509
+        },
+        {
+          "name": "y6_x0_s9108403",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 29716.92788028717
+        },
+        {
+          "name": "y6_x1_s9108401",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 28499.825400829315
+        },
+        {
+          "name": "y6_x1_s9108402",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 28330.320620775223
+        },
+        {
+          "name": "y6_x1_s9108403",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 29243.820019960403
+        },
+        {
+          "name": "y6_x2_s9108401",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 31628.036620616913
+        },
+        {
+          "name": "y6_x2_s9108402",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 29681.84561610222
+        },
+        {
+          "name": "y6_x2_s9108403",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 29726.59589457512
+        },
+        {
+          "name": "y6_x3_s9108401",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 27941.36430501938
+        },
+        {
+          "name": "y6_x3_s9108402",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 29964.687807798386
+        },
+        {
+          "name": "y6_x3_s9108403",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 28045.427773714066
+        },
+        {
+          "name": "y6_x4_s9108401",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 33474.8391494751
+        },
+        {
+          "name": "y6_x4_s9108402",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 30927.029539585114
+        },
+        {
+          "name": "y6_x4_s9108403",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 36609.66849255562
+        },
+        {
+          "name": "y6_x5_s9108401",
+          "status": "RUNNING",
+          "time_s": 150.0,
+          "wall_s": 32344.47006034851
+        },
+        {
+          "name": "y6_x5_s9108402",
+          "status": "RUNNING",
+          "time_s": 124.0,
+          "wall_s": 29339.420216560364
+        },
+        {
+          "name": "y6_x5_s9108403",
+          "status": "RUNNING",
+          "time_s": 112.0,
+          "wall_s": 27089.346036195755
+        },
+        {
+          "name": "y6_x6_s9108401",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 26120.875561475754
+        },
+        {
+          "name": "y6_x6_s9108402",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 26528.20559811592
+        },
+        {
+          "name": "y6_x6_s9108403",
+          "status": "COMPLETE",
+          "time_s": 180.0,
+          "wall_s": 28535.632048130035
+        }
+      ]
+    },
+    "m_parameter_modes_fig5_20260913": {
+      "status": {
+        "status": "RUNNING",
+        "pid": 525461,
+        "completed": 0,
+        "total": 40,
+        "running": {
+          "e1_t1_s9108402": 304629,
+          "e2_t2_s9108401": 315491,
+          "e0_t0_s9108401": 337611,
+          "e2_t2_s9108402": 345626,
+          "e3_t1_s9108401": 370527,
+          "e0_t0_s9108402": 421172,
+          "e3_t1_s9108402": 430211,
+          "e2_t1_s9108401": 478247,
+          "e0_t3_s9108402": 478471,
+          "e0_t1_s9108401": 525449,
+          "e0_t1_s9108402": 525450,
+          "e2_t1_s9108402": 4070648,
+          "e1_t2_s9108401": 4070649,
+          "e1_t2_s9108402": 4070650,
+          "e0_t3_s9108401": 4070651,
+          "e3_t0_s9108401": 4070653,
+          "e3_t0_s9108402": 4070654,
+          "e1_t1_s9108401": 4070971,
+          "e0_t2_s9108401": 527702,
+          "e0_t2_s9108402": 539883,
+          "e0_t4_s9108401": 590253,
+          "e0_t4_s9108402": 666466,
+          "e1_t0_s9108401": 708216
+        },
+        "pending": 17,
+        "failed": [],
+        "current_worker_cap": 23,
+        "available_memory_GiB": 111.2635612487793,
+        "cpu_busy_percent": 84.2,
+        "source_worker_unchanged": true,
+        "adopted": true,
+        "scheduling_amendment": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/m_parameter_modes_fig5_20260913/scheduling_amendment_20260913.json"
+      },
+      "progress": [
+        {
+          "name": "e0_t0_s9108401",
+          "status": "RUNNING",
+          "time_s": 81.0,
+          "phase": "RECOVERED",
+          "entries": [
+            {
+              "onset_s": 10.590000000000002,
+              "confirmation_s": 10.790000000000001
+            }
+          ],
+          "recoveries": [
+            {
+              "start_s": 71.44,
+              "confirmation_s": 73.44,
+              "mechanism": "EXTERNAL_Z"
+            }
+          ],
+          "restore_s": 70.8,
+          "wall_s": 15795.742430210114
+        },
+        {
+          "name": "e0_t0_s9108402",
+          "status": "RUNNING",
+          "time_s": 65.0,
+          "phase": "HIGH",
+          "entries": [
+            {
+              "onset_s": 13.740000000000002,
+              "confirmation_s": 13.940000000000001
+            }
+          ],
+          "recoveries": [],
+          "restore_s": null,
+          "wall_s": 13600.765836715698
+        },
+        {
+          "name": "e0_t1_s9108401",
+          "status": "RUNNING",
+          "time_s": 47.0,
+          "phase": "HIGH",
+          "entries": [
+            {
+              "onset_s": 11.72,
+              "confirmation_s": 11.92
+            }
+          ],
+          "recoveries": [],
+          "restore_s": null,
+          "wall_s": 10196.036539554596
+        },
+        {
+          "name": "e0_t1_s9108402",
+          "status": "RUNNING",
+          "time_s": 48.0,
+          "phase": "HIGH",
+          "entries": [
+            {
+              "onset_s": 13.21,
+              "confirmation_s": 13.41
+            }
+          ],
+          "recoveries": [],
+          "restore_s": null,
+          "wall_s": 9396.472754955292
+        },
+        {
+          "name": "e0_t2_s9108401",
+          "status": "RUNNING",
+          "time_s": 16.0,
+          "phase": "PRE_ENTRY",
+          "entries": [],
+          "recoveries": [],
+          "restore_s": null,
+          "wall_s": 4468.571316003799
+        },
+        {
+          "name": "e0_t2_s9108402",
+          "status": "RUNNING",
+          "time_s": 14.0,
+          "phase": "HIGH",
+          "entries": [
+            {
+              "onset_s": 13.350000000000001,
+              "confirmation_s": 13.55
+            }
+          ],
+          "recoveries": [],
+          "restore_s": null,
+          "wall_s": 4962.701298952103
+        },
+        {
+          "name": "e0_t3_s9108401",
+          "status": "RUNNING",
+          "time_s": 125.0,
+          "phase": "PRE_ENTRY",
+          "entries": [],
+          "recoveries": [],
+          "restore_s": null,
+          "wall_s": 29392.423081874847
+        },
+        {
+          "name": "e0_t3_s9108402",
+          "status": "RUNNING",
+          "time_s": 95.0,
+          "phase": "HIGH",
+          "entries": [
+            {
+              "onset_s": 56.56,
+              "confirmation_s": 56.760000000000005
+            }
+          ],
+          "recoveries": [],
+          "restore_s": null,
+          "wall_s": 20865.210121631622
+        },
+        {
+          "name": "e0_t4_s9108401",
+          "status": "RUNNING",
+          "time_s": 19.0,
+          "phase": "PRE_ENTRY",
+          "entries": [],
+          "recoveries": [],
+          "restore_s": null,
+          "wall_s": 3956.422100543976
+        },
+        {
+          "name": "e0_t4_s9108402",
+          "status": "RUNNING",
+          "time_s": 8.0,
+          "phase": "PRE_ENTRY",
+          "entries": [],
+          "recoveries": [],
+          "restore_s": null,
+          "wall_s": 1695.0320978164673
+        },
+        {
+          "name": "e1_t0_s9108401",
+          "status": "RUNNING",
+          "time_s": 1.0,
+          "phase": "PRE_ENTRY",
+          "entries": [],
+          "recoveries": [],
+          "restore_s": null,
+          "wall_s": 374.084899187088
+        },
+        {
+          "name": "e1_t1_s9108401",
+          "status": "RUNNING",
+          "time_s": 22.0,
+          "phase": "HIGH",
+          "entries": [
+            {
+              "onset_s": 16.430000000000003,
+              "confirmation_s": 16.630000000000003
+            }
+          ],
+          "recoveries": [],
+          "restore_s": null,
+          "wall_s": 25274.63236427307
+        },
+        {
+          "name": "e1_t1_s9108402",
+          "status": "RUNNING",
+          "time_s": 22.0,
+          "phase": "HIGH",
+          "entries": [
+            {
+              "onset_s": 19.51,
+              "confirmation_s": 19.71
+            }
+          ],
+          "recoveries": [],
+          "restore_s": null,
+          "wall_s": 11223.666696310043
+        },
+        {
+          "name": "e1_t2_s9108401",
+          "status": "RUNNING",
+          "time_s": 129.0,
+          "phase": "PRE_ENTRY",
+          "entries": [],
+          "recoveries": [],
+          "restore_s": null,
+          "wall_s": 29433.40300655365
+        },
+        {
+          "name": "e1_t2_s9108402",
+          "status": "RUNNING",
+          "time_s": 118.0,
+          "phase": "PRE_ENTRY",
+          "entries": [],
+          "recoveries": [],
+          "restore_s": null,
+          "wall_s": 29597.934200525284
+        },
+        {
+          "name": "e2_t1_s9108401",
+          "status": "RUNNING",
+          "time_s": 114.0,
+          "phase": "HIGH",
+          "entries": [
+            {
+              "onset_s": 73.48,
+              "confirmation_s": 73.68
+            }
+          ],
+          "recoveries": [],
+          "restore_s": null,
+          "wall_s": 23741.796756505966
+        },
+        {
+          "name": "e2_t1_s9108402",
+          "status": "RUNNING",
+          "time_s": 117.0,
+          "phase": "PRE_ENTRY",
+          "entries": [],
+          "recoveries": [],
+          "restore_s": null,
+          "wall_s": 29596.11978316307
+        },
+        {
+          "name": "e2_t2_s9108401",
+          "status": "RUNNING",
+          "time_s": 81.0,
+          "phase": "PRE_ENTRY",
+          "entries": [],
+          "recoveries": [],
+          "restore_s": null,
+          "wall_s": 13471.00648856163
+        },
+        {
+          "name": "e2_t2_s9108402",
+          "status": "RUNNING",
+          "time_s": 74.0,
+          "phase": "PRE_ENTRY",
+          "entries": [],
+          "recoveries": [],
+          "restore_s": null,
+          "wall_s": 12645.608182668686
+        },
+        {
+          "name": "e3_t0_s9108401",
+          "status": "RUNNING",
+          "time_s": 122.0,
+          "phase": "PRE_ENTRY",
+          "entries": [],
+          "recoveries": [],
+          "restore_s": null,
+          "wall_s": 29444.874767541885
+        },
+        {
+          "name": "e3_t0_s9108402",
+          "status": "RUNNING",
+          "time_s": 111.0,
+          "phase": "PRE_ENTRY",
+          "entries": [],
+          "recoveries": [],
+          "restore_s": null,
+          "wall_s": 29446.7836561203
+        },
+        {
+          "name": "e3_t1_s9108401",
+          "status": "RUNNING",
+          "time_s": 70.0,
+          "phase": "PRE_ENTRY",
+          "entries": [],
+          "recoveries": [],
+          "restore_s": null,
+          "wall_s": 11836.252612829208
+        },
+        {
+          "name": "e3_t1_s9108402",
+          "status": "RUNNING",
+          "time_s": 54.0,
+          "phase": "PRE_ENTRY",
+          "entries": [],
+          "recoveries": [],
+          "restore_s": null,
+          "wall_s": 9728.335154056549
+        }
+      ]
+    }
+  },
+  "fast_state_pilot": {
+    "all_fast_90s": {
+      "status": "COMPLETE",
+      "end_s": 166.5,
+      "recurrence_observed": false,
+      "recurrence_onset_s": null,
+      "recovered": true,
+      "interpretation": "RIGHT_CENSORED_WITHOUT_RECURRENT_HIGH"
+    }
+  },
+  "memory_available_GiB": 111.05607604980469,
+  "cpu_busy_percent": 84.6
+}

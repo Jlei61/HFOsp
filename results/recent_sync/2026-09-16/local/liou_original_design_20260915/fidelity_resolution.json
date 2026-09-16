@@ -1,0 +1,18 @@
+{
+  "status": "EQUATION_AND_UPDATE_VALIDATED_WITH_RATE_PHASE_LIMITATION",
+  "original_source_archives_identical_m_files": 51,
+  "full_spiking_50s_common_random_numbers": "All100000000 neuron-time spike bins identical; see octave_full_spiking_qa.json",
+  "rate_independent_initial_execution": "Instantaneous oscillation phase is not pointwise reproduced; retain octave_full_trajectory_qa.json as the original failed phase comparison",
+  "rate_source_checkpoint_to_port_max_error_Hz": 0.0009220893924464235,
+  "rate_port_checkpoint_to_source_max_error_Hz": 0.0005569251514927487,
+  "checkpoint_time_s": 16,
+  "unrounded_checkpoint_max_state_error": 3.521442248910489e-08,
+  "conclusion": "Exchanging the complete numerical state in both directions resolves the large later phase discrepancy without changing equations. Early accumulated state differences are amplified. This is not a Lyapunov or bifurcation analysis, and no claim of identical phase from separate numerical starts is made.",
+  "negative_diagnostics_retained": [
+    "Single-cell voltage perturbation1e-10mV did not cause a1Hz rate difference",
+    "Distributed voltage perturbation1e-9mV did not cause a1Hz rate difference",
+    "Direct convolution alone did not remove long-time phase divergence"
+  ],
+  "scientific_acceptance": "Reference mechanism implementation; not a frozen patient two-core recovery model",
+  "user_visual_acceptance": "PENDING"
+}

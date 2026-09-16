@@ -1,0 +1,1897 @@
+{
+ "schema": "topic4.recruitment_tradeoff_continuation.v1",
+ "physics": {
+  "version": "core_shape_output_v1"
+ },
+ "source_snapshot": {
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_core_connectivity_search.py": "85e39e9af2fff68c60db2c37b6fd1369f38ac53433f8f30a5f88b079d31e7ef4",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_core_connectivity_v2.py": "a9ae8ed188d7f36e4cc1a1890eb26dc278f0d937f1689154fe891f80ec0f2238",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/snn_engine/kick_probe_core_input_v2.py": "bba9dbaba8ee68d8e1b43682b21d6e87a2a6e082513e6fa6453126375b27a37b",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_streaming_spike_readout.py": "a493db8a8516599f2169e9baada36288169e98416d726d27eebf6d04efc00314",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_initial_state_runtime.py": "06c4bf8e037f982c8ec995d8550c230d8528bfeeb29b983df31a0659cbebc03f",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_initial_state.py": "1e9ed1ffe67cb085e6b740ba49ffc99ef03d9ced723988b68910c6d6dee2650d",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_observation_repaired.py": "089a2a414c3c270708d99862cc94ba5aa1864cd881170abf3165a8d77ec9894a",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/snn_engine/connectivity.py": "53d3bf765f7084cda924d3b23a6cb6e5f6a21293d9ae1e0e2d8f8cf89a1d3303",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/snn_engine/connectivity_rot.py": "3fa6c87df4c8756132b3fe6734fd9f73673a731914e9937befbaf073f00e2b9f",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/snn_engine/params.py": "c2036d1e1548c3db89adab27f8a7a57f9cdf584b5fed360963c966004cf88884",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_core_field.py": "4b66406ca93ff558fe204e12a9a9d1bcfe0ead4cd2b4ef3527603347e3699e46",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_core_driven_input.py": "dcabc862504c5b98cd26fd659859e45013d7391cd11a529ccb457c70fd9b69e3",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_core_connectivity.py": "2ed2b10d939d6b5b22f635d3dcd76ec769b3d675b439260f1cdc0252160579e6",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_core_ou_correlation_recovery.py": "cefc84736368236ed421ad60bdf846b0b089a059c26168e3820ca25a55da1616",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_shape_output_response.py": "58907d3b08ea9b6769b16410430ee8edbb5814733d739b332a7cf85638854855",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_core_ou_correlation.py": "3a277975cb7183fdfdccc7b522f5d0dfd1d27a4ae6f46e55dd1ce971b5d06ed5",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_core_shape_output.py": "f8fc2640ea7817db80099192a976cc41be412f628fab21edc933aebd08313f22",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_recruitment_tradeoff_followup.py": "7654bf27098e43e212ce6cfdafd3fe881620fd0bab8b1984906e7c230578e95d"
+ },
+ "parent": "/data/hfosp/topic4_sef_hfo/core_shape_output_response_20260911",
+ "parent_plan_sha256": "4c096a18baee7ee17f914b6e834f3618bf6aadd115a9dcbb1b21ab2da406ad78",
+ "authorization": "2026-09-12 user: after these 140 finish, continue while I sleep",
+ "start_condition": "parent 140 formal runs complete and parent analysis reaches ROUND_COMPLETE_PENDING_SCIENTIFIC_REVIEW; engineering failures block dispatch",
+ "topology_seed": 2511,
+ "seeds": [
+  847101,
+  847102
+ ],
+ "duration_ms": 60000.0,
+ "analysis": {
+  "burnin_ms": 1500.0,
+  "primary_min_events_per_run": 16
+ },
+ "runaway": {
+  "es_thresh_hz": 120.0,
+  "es_dur_ms": 100.0,
+  "post_runaway_record_ms": 500.0
+ },
+ "resources": {
+  "initial_workers": 2,
+  "max_workers": 20,
+  "min_available_GiB": 50,
+  "per_tree_limit_GiB": 18,
+  "launch_reserve_GiB": 9
+ },
+ "candidates": [
+  {
+   "id": "up3__circle",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     4.19921432,
+     12.12890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.0,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 1.0,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "response",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "\u5706\u6838\uff5c\u79bb\u6838EE\u00d71\uff0c\u540c\u6838EI\u00d71",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {},
+   "outgoing": {},
+   "contrast": "factorial",
+   "comparison": "up3__circle",
+   "factorial": {
+    "shape": "circle",
+    "EE_out": 1.0,
+    "EI": 1.0
+   },
+   "origin": "reused_parent_condition"
+  },
+  {
+   "id": "follow_circle_out1_EI0.875",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     4.19921432,
+     12.12890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.0,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 0.875,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "response",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "\u5706\u6838\uff5c\u79bb\u6838EE\u00d71\uff0c\u540c\u6838EI\u00d70.875",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {},
+   "outgoing": {},
+   "contrast": "factorial",
+   "comparison": "up3__circle",
+   "factorial": {
+    "shape": "circle",
+    "EE_out": 1.0,
+    "EI": 0.875
+   },
+   "origin": "new_factorial"
+  },
+  {
+   "id": "up3__circle__EI_same_core_scale_0.75",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     4.19921432,
+     12.12890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.0,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 0.75,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "response",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "\u5706\u6838\uff5c\u79bb\u6838EE\u00d71\uff0c\u540c\u6838EI\u00d70.75",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {},
+   "outgoing": {},
+   "contrast": "factorial",
+   "comparison": "up3__circle",
+   "factorial": {
+    "shape": "circle",
+    "EE_out": 1.0,
+    "EI": 0.75
+   },
+   "origin": "reused_parent_condition"
+  },
+  {
+   "id": "follow_circle_out1.125_EI1",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     4.19921432,
+     12.12890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.125,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 1.0,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "response",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "\u5706\u6838\uff5c\u79bb\u6838EE\u00d71.125\uff0c\u540c\u6838EI\u00d71",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {},
+   "outgoing": {},
+   "contrast": "factorial",
+   "comparison": "up3__circle",
+   "factorial": {
+    "shape": "circle",
+    "EE_out": 1.125,
+    "EI": 1.0
+   },
+   "origin": "new_factorial"
+  },
+  {
+   "id": "follow_circle_out1.125_EI0.875",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     4.19921432,
+     12.12890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.125,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 0.875,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "response",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "\u5706\u6838\uff5c\u79bb\u6838EE\u00d71.125\uff0c\u540c\u6838EI\u00d70.875",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {},
+   "outgoing": {},
+   "contrast": "factorial",
+   "comparison": "follow_circle_out1.125_EI1",
+   "factorial": {
+    "shape": "circle",
+    "EE_out": 1.125,
+    "EI": 0.875
+   },
+   "origin": "new_factorial"
+  },
+  {
+   "id": "follow_circle_out1.125_EI0.75",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     4.19921432,
+     12.12890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.125,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 0.75,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "response",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "\u5706\u6838\uff5c\u79bb\u6838EE\u00d71.125\uff0c\u540c\u6838EI\u00d70.75",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {},
+   "outgoing": {},
+   "contrast": "factorial",
+   "comparison": "follow_circle_out1.125_EI1",
+   "factorial": {
+    "shape": "circle",
+    "EE_out": 1.125,
+    "EI": 0.75
+   },
+   "origin": "new_factorial"
+  },
+  {
+   "id": "up3__circle__EE_core_to_out_scale_1.25",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     4.19921432,
+     12.12890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.25,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 1.0,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "response",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "\u5706\u6838\uff5c\u79bb\u6838EE\u00d71.25\uff0c\u540c\u6838EI\u00d71",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {},
+   "outgoing": {},
+   "contrast": "factorial",
+   "comparison": "up3__circle",
+   "factorial": {
+    "shape": "circle",
+    "EE_out": 1.25,
+    "EI": 1.0
+   },
+   "origin": "reused_parent_condition"
+  },
+  {
+   "id": "follow_circle_out1.25_EI0.875",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     4.19921432,
+     12.12890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.25,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 0.875,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "response",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "\u5706\u6838\uff5c\u79bb\u6838EE\u00d71.25\uff0c\u540c\u6838EI\u00d70.875",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {},
+   "outgoing": {},
+   "contrast": "factorial",
+   "comparison": "up3__circle__EE_core_to_out_scale_1.25",
+   "factorial": {
+    "shape": "circle",
+    "EE_out": 1.25,
+    "EI": 0.875
+   },
+   "origin": "new_factorial"
+  },
+  {
+   "id": "follow_circle_out1.25_EI0.75",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     4.19921432,
+     12.12890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.25,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 0.75,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "response",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "\u5706\u6838\uff5c\u79bb\u6838EE\u00d71.25\uff0c\u540c\u6838EI\u00d70.75",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {},
+   "outgoing": {},
+   "contrast": "factorial",
+   "comparison": "up3__circle__EE_core_to_out_scale_1.25",
+   "factorial": {
+    "shape": "circle",
+    "EE_out": 1.25,
+    "EI": 0.75
+   },
+   "origin": "new_factorial"
+  },
+  {
+   "id": "up3__ellipse4",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     4.19921432,
+     12.12890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.0,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 1.0,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "response",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "\u692d\u57064:1\uff5c\u79bb\u6838EE\u00d71\uff0c\u540c\u6838EI\u00d71",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {
+    "aspect_A": 4.0,
+    "angle_A_deg": 79.45179781732165,
+    "match_dose": true
+   },
+   "outgoing": {},
+   "contrast": "factorial",
+   "comparison": "up3__circle",
+   "factorial": {
+    "shape": "ellipse4",
+    "EE_out": 1.0,
+    "EI": 1.0
+   },
+   "origin": "reused_parent_condition"
+  },
+  {
+   "id": "follow_ellipse4_out1_EI0.875",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     4.19921432,
+     12.12890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.0,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 0.875,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "response",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "\u692d\u57064:1\uff5c\u79bb\u6838EE\u00d71\uff0c\u540c\u6838EI\u00d70.875",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {
+    "aspect_A": 4.0,
+    "angle_A_deg": 79.45179781732165,
+    "match_dose": true
+   },
+   "outgoing": {},
+   "contrast": "factorial",
+   "comparison": "up3__ellipse4",
+   "factorial": {
+    "shape": "ellipse4",
+    "EE_out": 1.0,
+    "EI": 0.875
+   },
+   "origin": "new_factorial"
+  },
+  {
+   "id": "up3__ellipse4__EI_same_core_scale_0.75",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     4.19921432,
+     12.12890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.0,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 0.75,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "response",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "\u692d\u57064:1\uff5c\u79bb\u6838EE\u00d71\uff0c\u540c\u6838EI\u00d70.75",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {
+    "aspect_A": 4.0,
+    "angle_A_deg": 79.45179781732165,
+    "match_dose": true
+   },
+   "outgoing": {},
+   "contrast": "factorial",
+   "comparison": "up3__ellipse4",
+   "factorial": {
+    "shape": "ellipse4",
+    "EE_out": 1.0,
+    "EI": 0.75
+   },
+   "origin": "reused_parent_condition"
+  },
+  {
+   "id": "follow_ellipse4_out1.125_EI1",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     4.19921432,
+     12.12890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.125,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 1.0,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "response",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "\u692d\u57064:1\uff5c\u79bb\u6838EE\u00d71.125\uff0c\u540c\u6838EI\u00d71",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {
+    "aspect_A": 4.0,
+    "angle_A_deg": 79.45179781732165,
+    "match_dose": true
+   },
+   "outgoing": {},
+   "contrast": "factorial",
+   "comparison": "up3__ellipse4",
+   "factorial": {
+    "shape": "ellipse4",
+    "EE_out": 1.125,
+    "EI": 1.0
+   },
+   "origin": "new_factorial"
+  },
+  {
+   "id": "follow_ellipse4_out1.125_EI0.875",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     4.19921432,
+     12.12890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.125,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 0.875,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "response",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "\u692d\u57064:1\uff5c\u79bb\u6838EE\u00d71.125\uff0c\u540c\u6838EI\u00d70.875",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {
+    "aspect_A": 4.0,
+    "angle_A_deg": 79.45179781732165,
+    "match_dose": true
+   },
+   "outgoing": {},
+   "contrast": "factorial",
+   "comparison": "follow_ellipse4_out1.125_EI1",
+   "factorial": {
+    "shape": "ellipse4",
+    "EE_out": 1.125,
+    "EI": 0.875
+   },
+   "origin": "new_factorial"
+  },
+  {
+   "id": "follow_ellipse4_out1.125_EI0.75",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     4.19921432,
+     12.12890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.125,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 0.75,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "response",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "\u692d\u57064:1\uff5c\u79bb\u6838EE\u00d71.125\uff0c\u540c\u6838EI\u00d70.75",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {
+    "aspect_A": 4.0,
+    "angle_A_deg": 79.45179781732165,
+    "match_dose": true
+   },
+   "outgoing": {},
+   "contrast": "factorial",
+   "comparison": "follow_ellipse4_out1.125_EI1",
+   "factorial": {
+    "shape": "ellipse4",
+    "EE_out": 1.125,
+    "EI": 0.75
+   },
+   "origin": "new_factorial"
+  },
+  {
+   "id": "up3__ellipse4__EE_core_to_out_scale_1.25",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     4.19921432,
+     12.12890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.25,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 1.0,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "response",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "\u692d\u57064:1\uff5c\u79bb\u6838EE\u00d71.25\uff0c\u540c\u6838EI\u00d71",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {
+    "aspect_A": 4.0,
+    "angle_A_deg": 79.45179781732165,
+    "match_dose": true
+   },
+   "outgoing": {},
+   "contrast": "factorial",
+   "comparison": "up3__ellipse4",
+   "factorial": {
+    "shape": "ellipse4",
+    "EE_out": 1.25,
+    "EI": 1.0
+   },
+   "origin": "reused_parent_condition"
+  },
+  {
+   "id": "follow_ellipse4_out1.25_EI0.875",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     4.19921432,
+     12.12890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.25,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 0.875,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "response",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "\u692d\u57064:1\uff5c\u79bb\u6838EE\u00d71.25\uff0c\u540c\u6838EI\u00d70.875",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {
+    "aspect_A": 4.0,
+    "angle_A_deg": 79.45179781732165,
+    "match_dose": true
+   },
+   "outgoing": {},
+   "contrast": "factorial",
+   "comparison": "up3__ellipse4__EE_core_to_out_scale_1.25",
+   "factorial": {
+    "shape": "ellipse4",
+    "EE_out": 1.25,
+    "EI": 0.875
+   },
+   "origin": "new_factorial"
+  },
+  {
+   "id": "follow_ellipse4_out1.25_EI0.75",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     4.19921432,
+     12.12890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.25,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 0.75,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "response",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "\u692d\u57064:1\uff5c\u79bb\u6838EE\u00d71.25\uff0c\u540c\u6838EI\u00d70.75",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {
+    "aspect_A": 4.0,
+    "angle_A_deg": 79.45179781732165,
+    "match_dose": true
+   },
+   "outgoing": {},
+   "contrast": "factorial",
+   "comparison": "up3__ellipse4__EE_core_to_out_scale_1.25",
+   "factorial": {
+    "shape": "ellipse4",
+    "EE_out": 1.25,
+    "EI": 0.75
+   },
+   "origin": "new_factorial"
+  },
+  {
+   "id": "up3__circle__EE_core_to_out_scale_1.25__x_minus075",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     3.4492143200000003,
+     12.12890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.25,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 1.0,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "response",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "\u5706\u6838\uff5c\u79bb\u6838EE\u00d71.25\uff0c\u540c\u6838EI\u00d71\uff5cx_minus075",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {},
+   "outgoing": {},
+   "contrast": "geometry",
+   "comparison": "up3__circle__EE_core_to_out_scale_1.25",
+   "origin": "new_geometry",
+   "geometry_probe": {
+    "dx_mm": -0.75,
+    "dy_mm": 0,
+    "radius_A_mm": null,
+    "threshold_dose_matched": false
+   }
+  },
+  {
+   "id": "up3__circle__EE_core_to_out_scale_1.25__x_plus075",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     4.94921432,
+     12.12890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.25,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 1.0,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "response",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "\u5706\u6838\uff5c\u79bb\u6838EE\u00d71.25\uff0c\u540c\u6838EI\u00d71\uff5cx_plus075",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {},
+   "outgoing": {},
+   "contrast": "geometry",
+   "comparison": "up3__circle__EE_core_to_out_scale_1.25",
+   "origin": "new_geometry",
+   "geometry_probe": {
+    "dx_mm": 0.75,
+    "dy_mm": 0,
+    "radius_A_mm": null,
+    "threshold_dose_matched": false
+   }
+  },
+  {
+   "id": "up3__circle__EE_core_to_out_scale_1.25__y_minus10",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     4.19921432,
+     11.12890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.25,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 1.0,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "response",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "\u5706\u6838\uff5c\u79bb\u6838EE\u00d71.25\uff0c\u540c\u6838EI\u00d71\uff5cy_minus10",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {},
+   "outgoing": {},
+   "contrast": "geometry",
+   "comparison": "up3__circle__EE_core_to_out_scale_1.25",
+   "origin": "new_geometry",
+   "geometry_probe": {
+    "dx_mm": 0,
+    "dy_mm": -1.0,
+    "radius_A_mm": null,
+    "threshold_dose_matched": false
+   }
+  },
+  {
+   "id": "up3__circle__EE_core_to_out_scale_1.25__y_plus10",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     4.19921432,
+     13.12890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.25,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 1.0,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "response",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "\u5706\u6838\uff5c\u79bb\u6838EE\u00d71.25\uff0c\u540c\u6838EI\u00d71\uff5cy_plus10",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {},
+   "outgoing": {},
+   "contrast": "geometry",
+   "comparison": "up3__circle__EE_core_to_out_scale_1.25",
+   "origin": "new_geometry",
+   "geometry_probe": {
+    "dx_mm": 0,
+    "dy_mm": 1.0,
+    "radius_A_mm": null,
+    "threshold_dose_matched": false
+   }
+  },
+  {
+   "id": "up3__circle__EE_core_to_out_scale_1.25__radius205",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     4.19921432,
+     12.12890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    2.05,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.25,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 1.0,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 2.05,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "response",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "\u5706\u6838\uff5c\u79bb\u6838EE\u00d71.25\uff0c\u540c\u6838EI\u00d71\uff5cradius205",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {
+    "match_dose": true,
+    "dose_reference_radius_mm": 1.7525782905619196
+   },
+   "outgoing": {},
+   "contrast": "geometry",
+   "comparison": "up3__circle__EE_core_to_out_scale_1.25",
+   "origin": "new_geometry",
+   "geometry_probe": {
+    "dx_mm": 0,
+    "dy_mm": 0,
+    "radius_A_mm": 2.05,
+    "threshold_dose_matched": true
+   }
+  },
+  {
+   "id": "up3__circle__EE_core_to_out_scale_1.25__radius235",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     4.19921432,
+     12.12890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    2.35,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.25,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 1.0,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 2.35,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "response",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "\u5706\u6838\uff5c\u79bb\u6838EE\u00d71.25\uff0c\u540c\u6838EI\u00d71\uff5cradius235",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {
+    "match_dose": true,
+    "dose_reference_radius_mm": 1.7525782905619196
+   },
+   "outgoing": {},
+   "contrast": "geometry",
+   "comparison": "up3__circle__EE_core_to_out_scale_1.25",
+   "origin": "new_geometry",
+   "geometry_probe": {
+    "dx_mm": 0,
+    "dy_mm": 0,
+    "radius_A_mm": 2.35,
+    "threshold_dose_matched": true
+   }
+  },
+  {
+   "id": "up3__ellipse4__EI_same_core_scale_0.75__x_minus075",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     3.4492143200000003,
+     12.12890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.0,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 0.75,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "response",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "\u692d\u57064:1\uff5c\u79bb\u6838EE\u00d71\uff0c\u540c\u6838EI\u00d70.75\uff5cx_minus075",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {
+    "aspect_A": 4.0,
+    "angle_A_deg": 79.45179781732165,
+    "match_dose": true
+   },
+   "outgoing": {},
+   "contrast": "geometry",
+   "comparison": "up3__ellipse4__EI_same_core_scale_0.75",
+   "origin": "new_geometry",
+   "geometry_probe": {
+    "dx_mm": -0.75,
+    "dy_mm": 0,
+    "radius_A_mm": null,
+    "threshold_dose_matched": false
+   }
+  },
+  {
+   "id": "up3__ellipse4__EI_same_core_scale_0.75__x_plus075",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     4.94921432,
+     12.12890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.0,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 0.75,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "response",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "\u692d\u57064:1\uff5c\u79bb\u6838EE\u00d71\uff0c\u540c\u6838EI\u00d70.75\uff5cx_plus075",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {
+    "aspect_A": 4.0,
+    "angle_A_deg": 79.45179781732165,
+    "match_dose": true
+   },
+   "outgoing": {},
+   "contrast": "geometry",
+   "comparison": "up3__ellipse4__EI_same_core_scale_0.75",
+   "origin": "new_geometry",
+   "geometry_probe": {
+    "dx_mm": 0.75,
+    "dy_mm": 0,
+    "radius_A_mm": null,
+    "threshold_dose_matched": false
+   }
+  },
+  {
+   "id": "up3__ellipse4__EI_same_core_scale_0.75__y_minus10",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     4.19921432,
+     11.12890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.0,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 0.75,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "response",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "\u692d\u57064:1\uff5c\u79bb\u6838EE\u00d71\uff0c\u540c\u6838EI\u00d70.75\uff5cy_minus10",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {
+    "aspect_A": 4.0,
+    "angle_A_deg": 79.45179781732165,
+    "match_dose": true
+   },
+   "outgoing": {},
+   "contrast": "geometry",
+   "comparison": "up3__ellipse4__EI_same_core_scale_0.75",
+   "origin": "new_geometry",
+   "geometry_probe": {
+    "dx_mm": 0,
+    "dy_mm": -1.0,
+    "radius_A_mm": null,
+    "threshold_dose_matched": false
+   }
+  },
+  {
+   "id": "up3__ellipse4__EI_same_core_scale_0.75__y_plus10",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     4.19921432,
+     13.12890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.0,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 0.75,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "response",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "\u692d\u57064:1\uff5c\u79bb\u6838EE\u00d71\uff0c\u540c\u6838EI\u00d70.75\uff5cy_plus10",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {
+    "aspect_A": 4.0,
+    "angle_A_deg": 79.45179781732165,
+    "match_dose": true
+   },
+   "outgoing": {},
+   "contrast": "geometry",
+   "comparison": "up3__ellipse4__EI_same_core_scale_0.75",
+   "origin": "new_geometry",
+   "geometry_probe": {
+    "dx_mm": 0,
+    "dy_mm": 1.0,
+    "radius_A_mm": null,
+    "threshold_dose_matched": false
+   }
+  },
+  {
+   "id": "up3__ellipse4__EI_same_core_scale_0.75__radius205",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     4.19921432,
+     12.12890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    2.05,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.0,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 0.75,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 2.05,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "response",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "\u692d\u57064:1\uff5c\u79bb\u6838EE\u00d71\uff0c\u540c\u6838EI\u00d70.75\uff5cradius205",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {
+    "aspect_A": 4.0,
+    "angle_A_deg": 79.45179781732165,
+    "match_dose": true,
+    "dose_reference_radius_mm": 1.7525782905619196
+   },
+   "outgoing": {},
+   "contrast": "geometry",
+   "comparison": "up3__ellipse4__EI_same_core_scale_0.75",
+   "origin": "new_geometry",
+   "geometry_probe": {
+    "dx_mm": 0,
+    "dy_mm": 0,
+    "radius_A_mm": 2.05,
+    "threshold_dose_matched": true
+   }
+  },
+  {
+   "id": "up3__ellipse4__EI_same_core_scale_0.75__radius235",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     4.19921432,
+     12.12890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    2.35,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.0,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 0.75,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 2.35,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "response",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "\u692d\u57064:1\uff5c\u79bb\u6838EE\u00d71\uff0c\u540c\u6838EI\u00d70.75\uff5cradius235",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {
+    "aspect_A": 4.0,
+    "angle_A_deg": 79.45179781732165,
+    "match_dose": true,
+    "dose_reference_radius_mm": 1.7525782905619196
+   },
+   "outgoing": {},
+   "contrast": "geometry",
+   "comparison": "up3__ellipse4__EI_same_core_scale_0.75",
+   "origin": "new_geometry",
+   "geometry_probe": {
+    "dx_mm": 0,
+    "dy_mm": 0,
+    "radius_A_mm": 2.35,
+    "threshold_dose_matched": true
+   }
+  }
+ ],
+ "reuse": [
+  {
+   "candidate": "up3__circle",
+   "source_stage": "shape_range",
+   "source_candidate": "up3__circle"
+  },
+  {
+   "candidate": "up3__circle__EI_same_core_scale_0.75",
+   "source_stage": "response",
+   "source_candidate": "up3__circle__EI_same_core_scale_0.75"
+  },
+  {
+   "candidate": "up3__circle__EE_core_to_out_scale_1.25",
+   "source_stage": "response",
+   "source_candidate": "up3__circle__EE_core_to_out_scale_1.25"
+  },
+  {
+   "candidate": "up3__ellipse4",
+   "source_stage": "shape_range",
+   "source_candidate": "up3__ellipse4"
+  },
+  {
+   "candidate": "up3__ellipse4__EI_same_core_scale_0.75",
+   "source_stage": "response",
+   "source_candidate": "up3__ellipse4__EI_same_core_scale_0.75"
+  },
+  {
+   "candidate": "up3__ellipse4__EE_core_to_out_scale_1.25",
+   "source_stage": "response",
+   "source_candidate": "up3__ellipse4__EE_core_to_out_scale_1.25"
+  }
+ ],
+ "factorial_candidates": [
+  "up3__circle",
+  "follow_circle_out1_EI0.875",
+  "up3__circle__EI_same_core_scale_0.75",
+  "follow_circle_out1.125_EI1",
+  "follow_circle_out1.125_EI0.875",
+  "follow_circle_out1.125_EI0.75",
+  "up3__circle__EE_core_to_out_scale_1.25",
+  "follow_circle_out1.25_EI0.875",
+  "follow_circle_out1.25_EI0.75",
+  "up3__ellipse4",
+  "follow_ellipse4_out1_EI0.875",
+  "up3__ellipse4__EI_same_core_scale_0.75",
+  "follow_ellipse4_out1.125_EI1",
+  "follow_ellipse4_out1.125_EI0.875",
+  "follow_ellipse4_out1.125_EI0.75",
+  "up3__ellipse4__EE_core_to_out_scale_1.25",
+  "follow_ellipse4_out1.25_EI0.875",
+  "follow_ellipse4_out1.25_EI0.75"
+ ],
+ "geometry_anchors": [
+  "up3__circle__EE_core_to_out_scale_1.25",
+  "up3__ellipse4__EI_same_core_scale_0.75"
+ ],
+ "budget": {
+  "new_factorial_runs": 24,
+  "new_geometry_runs": 24,
+  "reused_parent_runs": 12,
+  "replication_max_new": 16,
+  "total_max_new": 64
+ },
+ "confirmation": {
+  "candidates": [
+   "up3__circle__EE_core_to_out_scale_1.25",
+   "up3__ellipse4__EI_same_core_scale_0.75",
+   "up3__circle",
+   "up3__ellipse4"
+  ],
+  "topology_seeds": [
+   2611,
+   2612
+  ],
+  "noise_seeds": [
+   847301,
+   847302
+  ],
+  "selection": "Two best NEW conditions by fixed network-equal L_search over both training replays (N>=16 each), plus each direct parent; at most four unique conditions. If fewer than two scorable NEW conditions, append predeclared circle/out1.25 and ellipse4/EI.75 and their direct baselines, capped at four.",
+  "independence": "2611/2612 are the two already-used confirmation topologies; 847301/847302 are new noise streams. This is not an unseen-topology claim."
+ },
+ "stop": "After <=64 NEW runs and analysis, stop for scientific review. Do not freeze model, enter Fig5, alter objective, or add another round automatically.",
+ "scientific_question": "Does core shape modify the participation-versus-timing response to outgoing EE and local EI, and can bounded geometry shifts reduce the residual? Detailed patient routes remain diagnostic only."
+}

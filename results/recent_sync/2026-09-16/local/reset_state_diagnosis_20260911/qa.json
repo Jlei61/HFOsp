@@ -1,0 +1,29 @@
+{
+  "status": "PASS",
+  "checks": {
+    "qa_extension": {
+      "spikes": true,
+      "raster": true,
+      "regions": true,
+      "field": true,
+      "lfp": true,
+      "Z": true,
+      "M": true
+    },
+    "qa_refill": {
+      "spikes": true,
+      "raster": true,
+      "regions": true,
+      "field": true,
+      "lfp": true,
+      "Z": true,
+      "M": true
+    },
+    "M_reset_only": {
+      "Z_identical": true,
+      "M_all_E_zero": true,
+      "I_unchanged": true,
+      "current_delta_is_removed_M": true
+    }
+  }
+}

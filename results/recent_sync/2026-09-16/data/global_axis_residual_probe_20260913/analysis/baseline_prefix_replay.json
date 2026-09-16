@@ -1,0 +1,28 @@
+{
+ "status": "PASS",
+ "runs": [
+  {
+   "noise": 847102,
+   "checks": {
+    "sheet_activity_counts": true,
+    "trace_coreAE_spikes": true,
+    "trace_coreBE_spikes": true,
+    "core_ou_mixture_values": true
+   },
+   "source": "/data/hfosp/topic4_sef_hfo/core_recruitment_tradeoff_followup_20260912/response/units/up3__circle__EE_core_to_out_scale_1.25__x_minus075/2511_847102/workers/trajectory.npz",
+   "result": "/data/hfosp/topic4_sef_hfo/global_axis_residual_probe_20260913/response/units/global_axis_+0/2511_847102/workers/trajectory.json"
+  },
+  {
+   "noise": 847101,
+   "checks": {
+    "sheet_activity_counts": true,
+    "trace_coreAE_spikes": true,
+    "trace_coreBE_spikes": true,
+    "core_ou_mixture_values": true
+   },
+   "source": "/data/hfosp/topic4_sef_hfo/core_recruitment_tradeoff_followup_20260912/response/units/up3__circle__EE_core_to_out_scale_1.25__x_minus075/2511_847101/workers/trajectory.npz",
+   "result": "/data/hfosp/topic4_sef_hfo/global_axis_residual_probe_20260913/response/units/global_axis_+0/2511_847101/workers/trajectory.json"
+  }
+ ],
+ "interpretation": "Prefix replays are not independent scientific replicates; comparisons within this pilot use all new runs with the same20s duration and unchanged observer"
+}

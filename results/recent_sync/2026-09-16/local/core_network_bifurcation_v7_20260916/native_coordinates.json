@@ -1,0 +1,942 @@
+[
+  {
+    "number": 1,
+    "g": 0.5,
+    "context": "Original resting example",
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/burst_regime_map_20260914/per_run/ee0.5_d1_n1_t2511_s848101/trajectory.npz",
+    "sha256": "99157714f5f2371cf5a09c99cbad3bfdb36985df3ea0099359639d74f384c296",
+    "means": [
+      0.7551388888888889,
+      0.6588948787061994
+    ],
+    "network_mean": 0.027214999999999996,
+    "window_s": [
+      2.0,
+      12.0
+    ],
+    "requested_window_s": [
+      2,
+      12
+    ],
+    "actual_duration_ms": 20000,
+    "exact_spike_raster": false,
+    "labels": {
+      "coreAE": "background",
+      "coreBE": "background",
+      "allE": "background"
+    },
+    "cv": {
+      "coreAE": null,
+      "coreBE": null,
+      "allE": null
+    },
+    "cv2": {
+      "coreAE": null,
+      "coreBE": null,
+      "allE": null
+    },
+    "n_bursts": {
+      "coreAE": 0,
+      "coreBE": 0,
+      "allE": 0
+    },
+    "iei_median_s": {
+      "coreAE": null,
+      "coreBE": null,
+      "allE": null
+    }
+  },
+  {
+    "number": 2,
+    "g": 0.7,
+    "context": "Original irregular example",
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/burst_regime_map_20260914/per_run/ee0.7_d1_n1_t2511_s848101/trajectory.npz",
+    "sha256": "38ac914b05b65ea605f80d40bd97219f7cae35320939ba2bf32185e2c0aba8a8",
+    "means": [
+      0.9347222222222222,
+      0.9839622641509436
+    ],
+    "network_mean": 0.0492125,
+    "window_s": [
+      2.0,
+      12.0
+    ],
+    "requested_window_s": [
+      2,
+      12
+    ],
+    "actual_duration_ms": 20000,
+    "exact_spike_raster": false,
+    "labels": {
+      "coreAE": "irregular_bursts",
+      "coreBE": "irregular_bursts",
+      "allE": "background"
+    },
+    "cv": {
+      "coreAE": 0.7520486497602913,
+      "coreBE": 0.6580405890727016,
+      "allE": null
+    },
+    "cv2": {
+      "coreAE": 0.715600890951251,
+      "coreBE": 0.6960827515576918,
+      "allE": null
+    },
+    "n_bursts": {
+      "coreAE": 16,
+      "coreBE": 16,
+      "allE": 0
+    },
+    "iei_median_s": {
+      "coreAE": 0.5100000000000002,
+      "coreBE": 0.5,
+      "allE": null
+    }
+  },
+  {
+    "number": 3,
+    "g": 0.85,
+    "context": "Original intermediate example",
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/burst_regime_map_20260914/per_run/ee0.85_d1_n1_t2511_s848101/trajectory.npz",
+    "sha256": "e6396054c4c47241a2eda81ea849beaa39d440072a0433570b07da76b383b4e8",
+    "means": [
+      10.65,
+      5.3037735849056595
+    ],
+    "network_mean": 10.2142825,
+    "window_s": [
+      2.0,
+      12.0
+    ],
+    "requested_window_s": [
+      2,
+      12
+    ],
+    "actual_duration_ms": 20000,
+    "exact_spike_raster": false,
+    "labels": {
+      "coreAE": "variable_bursts",
+      "coreBE": "variable_bursts",
+      "allE": "variable_bursts"
+    },
+    "cv": {
+      "coreAE": 0.37573546054905377,
+      "coreBE": 0.269991954781779,
+      "allE": 0.319189854543358
+    },
+    "cv2": {
+      "coreAE": 0.34345475161498884,
+      "coreBE": 0.31181107851973533,
+      "allE": 0.24990105352871558
+    },
+    "n_bursts": {
+      "coreAE": 36,
+      "coreBE": 34,
+      "allE": 30
+    },
+    "iei_median_s": {
+      "coreAE": 0.27,
+      "coreBE": 0.29000000000000004,
+      "allE": 0.2900000000000009
+    }
+  },
+  {
+    "number": 4,
+    "g": 1.0,
+    "context": "Original regular example",
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/burst_regime_map_20260914/per_run/ee1_d1_n1_t2511_s848101/trajectory.npz",
+    "sha256": "ef0c7e12673a8768ae1002e88e13257a2791a1fe38ff8aacd032c5d68724aaa5",
+    "means": [
+      19.05097222222222,
+      18.774528301886793
+    ],
+    "network_mean": 14.759725,
+    "window_s": [
+      2.0,
+      12.0
+    ],
+    "requested_window_s": [
+      2,
+      12
+    ],
+    "actual_duration_ms": 20000,
+    "exact_spike_raster": false,
+    "labels": {
+      "coreAE": "regular_bursts",
+      "coreBE": "regular_bursts",
+      "allE": "regular_bursts"
+    },
+    "cv": {
+      "coreAE": 0.09390701029555998,
+      "coreBE": 0.12025643148252925,
+      "allE": 0.1074269541292102
+    },
+    "cv2": {
+      "coreAE": 0.11862252205430279,
+      "coreBE": 0.11641775604195541,
+      "allE": 0.13155168956097735
+    },
+    "n_bursts": {
+      "coreAE": 35,
+      "coreBE": 34,
+      "allE": 34
+    },
+    "iei_median_s": {
+      "coreAE": 0.2800000000000007,
+      "coreBE": 0.28999999999999915,
+      "allE": 0.28999999999999915
+    }
+  },
+  {
+    "number": 5,
+    "g": 1.1,
+    "context": "Below reduced fold",
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/native/per_run/J1.1_s848101/trajectory.npz",
+    "sha256": "d8af97425bb5f8dc24ab5720c4476f47e6b72f1e56a5f63a649ae3c5b68416b3",
+    "means": [
+      24.095694444444447,
+      24.403234501347708
+    ],
+    "network_mean": 16.365855,
+    "window_s": [
+      2.0,
+      12.0
+    ],
+    "requested_window_s": [
+      2,
+      12
+    ],
+    "actual_duration_ms": 12000,
+    "exact_spike_raster": true,
+    "labels": {
+      "coreAE": "regular_bursts",
+      "coreBE": "regular_bursts",
+      "allE": "regular_bursts"
+    },
+    "cv": {
+      "coreAE": 0.11869817939639034,
+      "coreBE": 0.11701114510239982,
+      "allE": 0.10493705890329144
+    },
+    "cv2": {
+      "coreAE": 0.1555466248180765,
+      "coreBE": 0.1137077552671471,
+      "allE": 0.11511980282859097
+    },
+    "n_bursts": {
+      "coreAE": 35,
+      "coreBE": 35,
+      "allE": 35
+    },
+    "iei_median_s": {
+      "coreAE": 0.28000000000000025,
+      "coreBE": 0.27999999999999936,
+      "allE": 0.2799999999999997
+    }
+  },
+  {
+    "number": 6,
+    "g": 1.14,
+    "context": "Above reduced fold",
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/native/per_run/J1.14_s848101/trajectory.npz",
+    "sha256": "5700987a6e56d25c6291edeb50e1d9013334fe31b08c39f3ed1253b9fb98354a",
+    "means": [
+      26.435,
+      26.72129380053908
+    ],
+    "network_mean": 17.11997,
+    "window_s": [
+      2.0,
+      12.0
+    ],
+    "requested_window_s": [
+      2,
+      12
+    ],
+    "actual_duration_ms": 12000,
+    "exact_spike_raster": true,
+    "labels": {
+      "coreAE": "regular_bursts",
+      "coreBE": "regular_bursts",
+      "allE": "regular_bursts"
+    },
+    "cv": {
+      "coreAE": 0.10819700278953938,
+      "coreBE": 0.12019290927991037,
+      "allE": 0.10931087631476777
+    },
+    "cv2": {
+      "coreAE": 0.12911375596916275,
+      "coreBE": 0.1084787556283563,
+      "allE": 0.10843986321098756
+    },
+    "n_bursts": {
+      "coreAE": 36,
+      "coreBE": 36,
+      "allE": 36
+    },
+    "iei_median_s": {
+      "coreAE": 0.2600000000000007,
+      "coreBE": 0.2699999999999996,
+      "allE": 0.2699999999999996
+    }
+  },
+  {
+    "number": 7,
+    "g": 1.17623,
+    "context": "Below reduced recruitment interval",
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/native/per_run/J1.17623_s848101/trajectory.npz",
+    "sha256": "e5684e830a75de5627ad29bb710e21340c2ed87f496d93ac1622187243e3e070",
+    "means": [
+      27.87236111111111,
+      28.068598382749325
+    ],
+    "network_mean": 17.27414,
+    "window_s": [
+      2.0,
+      12.0
+    ],
+    "requested_window_s": [
+      2,
+      12
+    ],
+    "actual_duration_ms": 12000,
+    "exact_spike_raster": true,
+    "labels": {
+      "coreAE": "regular_bursts",
+      "coreBE": "regular_bursts",
+      "allE": "regular_bursts"
+    },
+    "cv": {
+      "coreAE": 0.12618672284306187,
+      "coreBE": 0.11772659435235126,
+      "allE": 0.1115283504311039
+    },
+    "cv2": {
+      "coreAE": 0.1466635308219951,
+      "coreBE": 0.11092019689122656,
+      "allE": 0.12145000645261274
+    },
+    "n_bursts": {
+      "coreAE": 36,
+      "coreBE": 36,
+      "allE": 36
+    },
+    "iei_median_s": {
+      "coreAE": 0.2600000000000007,
+      "coreBE": 0.2699999999999996,
+      "allE": 0.2699999999999996
+    }
+  },
+  {
+    "number": 8,
+    "g": 1.17632,
+    "context": "Above reduced recruitment interval",
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/native/per_run/J1.17632_s848101/trajectory.npz",
+    "sha256": "341824b8fdd8f7aa9bf98c6c207879830789a7b1dd1a55613de9a88564689366",
+    "means": [
+      27.875277777777775,
+      28.068598382749325
+    ],
+    "network_mean": 17.279407499999998,
+    "window_s": [
+      2.0,
+      12.0
+    ],
+    "requested_window_s": [
+      2,
+      12
+    ],
+    "actual_duration_ms": 12000,
+    "exact_spike_raster": true,
+    "labels": {
+      "coreAE": "regular_bursts",
+      "coreBE": "regular_bursts",
+      "allE": "regular_bursts"
+    },
+    "cv": {
+      "coreAE": 0.12618672284306187,
+      "coreBE": 0.11772659435235126,
+      "allE": 0.1115283504311039
+    },
+    "cv2": {
+      "coreAE": 0.1466635308219951,
+      "coreBE": 0.11092019689122656,
+      "allE": 0.12145000645261274
+    },
+    "n_bursts": {
+      "coreAE": 36,
+      "coreBE": 36,
+      "allE": 36
+    },
+    "iei_median_s": {
+      "coreAE": 0.2600000000000007,
+      "coreBE": 0.2699999999999996,
+      "allE": 0.2699999999999996
+    }
+  },
+  {
+    "number": 9,
+    "g": 1.24,
+    "context": "Below reduced waveform-change region",
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/native/per_run/J1.24_s848101/trajectory.npz",
+    "sha256": "8df16326db695bfba862d2c915e5e3315e22dc23c19f9372640fa25433704a86",
+    "means": [
+      29.823888888888888,
+      31.261320754716984
+    ],
+    "network_mean": 17.584207499999998,
+    "window_s": [
+      2.0,
+      12.0
+    ],
+    "requested_window_s": [
+      2,
+      12
+    ],
+    "actual_duration_ms": 12000,
+    "exact_spike_raster": true,
+    "labels": {
+      "coreAE": "regular_bursts",
+      "coreBE": "regular_bursts",
+      "allE": "regular_bursts"
+    },
+    "cv": {
+      "coreAE": 0.09940988318628444,
+      "coreBE": 0.09920652378792537,
+      "allE": 0.09141804161182236
+    },
+    "cv2": {
+      "coreAE": 0.11856954812654374,
+      "coreBE": 0.08937868846857215,
+      "allE": 0.08838783486619599
+    },
+    "n_bursts": {
+      "coreAE": 36,
+      "coreBE": 36,
+      "allE": 36
+    },
+    "iei_median_s": {
+      "coreAE": 0.2699999999999996,
+      "coreBE": 0.27,
+      "allE": 0.27000000000000046
+    }
+  },
+  {
+    "number": 10,
+    "g": 1.25,
+    "context": "Above reduced waveform-change region",
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/native/per_run/J1.25_s848101/trajectory.npz",
+    "sha256": "492cec6a547399670c3422645f196fde32fcd8ad30adc37dcd8ae961b725e74e",
+    "means": [
+      30.265,
+      31.30309973045822
+    ],
+    "network_mean": 17.6545025,
+    "window_s": [
+      2.0,
+      12.0
+    ],
+    "requested_window_s": [
+      2,
+      12
+    ],
+    "actual_duration_ms": 12000,
+    "exact_spike_raster": true,
+    "labels": {
+      "coreAE": "regular_bursts",
+      "coreBE": "regular_bursts",
+      "allE": "regular_bursts"
+    },
+    "cv": {
+      "coreAE": 0.1177835667698439,
+      "coreBE": 0.1040352047548755,
+      "allE": 0.09224687127413365
+    },
+    "cv2": {
+      "coreAE": 0.11886469758558879,
+      "coreBE": 0.09892213206660268,
+      "allE": 0.09253242137386858
+    },
+    "n_bursts": {
+      "coreAE": 36,
+      "coreBE": 36,
+      "allE": 36
+    },
+    "iei_median_s": {
+      "coreAE": 0.2699999999999996,
+      "coreBE": 0.27000000000000135,
+      "allE": 0.27999999999999936
+    }
+  },
+  {
+    "number": 11,
+    "g": 1.34,
+    "context": "Below reduced PD1",
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/native/per_run/J1.34_s848101/trajectory.npz",
+    "sha256": "419e4b8aaec0bf2aa6f9935c4efa8b8b9a13f743c995f84b21c3a369d299a369",
+    "means": [
+      34.205,
+      35.29757412398922
+    ],
+    "network_mean": 18.701954999999998,
+    "window_s": [
+      2.0,
+      12.0
+    ],
+    "requested_window_s": [
+      2,
+      12
+    ],
+    "actual_duration_ms": 12000,
+    "exact_spike_raster": true,
+    "labels": {
+      "coreAE": "regular_bursts",
+      "coreBE": "regular_bursts",
+      "allE": "regular_bursts"
+    },
+    "cv": {
+      "coreAE": 0.09667837663605024,
+      "coreBE": 0.07081699296051434,
+      "allE": 0.0724483084443637
+    },
+    "cv2": {
+      "coreAE": 0.12273979452819371,
+      "coreBE": 0.07794847115507886,
+      "allE": 0.09086377580533074
+    },
+    "n_bursts": {
+      "coreAE": 37,
+      "coreBE": 37,
+      "allE": 37
+    },
+    "iei_median_s": {
+      "coreAE": 0.27,
+      "coreBE": 0.2699999999999998,
+      "allE": 0.27
+    }
+  },
+  {
+    "number": 12,
+    "g": 1.355,
+    "context": "Above reduced PD1 / below reduced LP1",
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/native/per_run/J1.355_s848101/trajectory.npz",
+    "sha256": "c40b19b67bfdd8a649014ddb1c5b6a8b4c77142c0e2ad2b1077c5e4b743ec8fa",
+    "means": [
+      35.26777777777777,
+      36.03005390835579
+    ],
+    "network_mean": 18.5971025,
+    "window_s": [
+      2.0,
+      12.0
+    ],
+    "requested_window_s": [
+      2,
+      12
+    ],
+    "actual_duration_ms": 12000,
+    "exact_spike_raster": true,
+    "labels": {
+      "coreAE": "regular_bursts",
+      "coreBE": "regular_bursts",
+      "allE": "regular_bursts"
+    },
+    "cv": {
+      "coreAE": 0.0938037255653348,
+      "coreBE": 0.07351574434162464,
+      "allE": 0.07041551342594908
+    },
+    "cv2": {
+      "coreAE": 0.10914869250162855,
+      "coreBE": 0.06262665522289897,
+      "allE": 0.0701481558249767
+    },
+    "n_bursts": {
+      "coreAE": 37,
+      "coreBE": 37,
+      "allE": 37
+    },
+    "iei_median_s": {
+      "coreAE": 0.2699999999999998,
+      "coreBE": 0.2699999999999996,
+      "allE": 0.2699999999999998
+    }
+  },
+  {
+    "number": 13,
+    "g": 1.37,
+    "context": "Above reduced LP1",
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/native/per_run/J1.37_s848101/trajectory.npz",
+    "sha256": "7bfb8ac077f7491bfc1fa367cf9e4781827c46c191356afac6685e90c44e049b",
+    "means": [
+      35.764722222222225,
+      36.63194070080862
+    ],
+    "network_mean": 18.6037125,
+    "window_s": [
+      2.0,
+      12.0
+    ],
+    "requested_window_s": [
+      2,
+      12
+    ],
+    "actual_duration_ms": 12000,
+    "exact_spike_raster": true,
+    "labels": {
+      "coreAE": "regular_bursts",
+      "coreBE": "regular_bursts",
+      "allE": "regular_bursts"
+    },
+    "cv": {
+      "coreAE": 0.09698572899377456,
+      "coreBE": 0.07312362765279189,
+      "allE": 0.0736533027033882
+    },
+    "cv2": {
+      "coreAE": 0.11339362403405429,
+      "coreBE": 0.0601525466309574,
+      "allE": 0.07577484049336097
+    },
+    "n_bursts": {
+      "coreAE": 37,
+      "coreBE": 37,
+      "allE": 37
+    },
+    "iei_median_s": {
+      "coreAE": 0.2699999999999996,
+      "coreBE": 0.2699999999999996,
+      "allE": 0.27
+    }
+  },
+  {
+    "number": 14,
+    "g": 1.375,
+    "context": "Below reduced PD3",
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/native/per_run/J1.375_s848101/trajectory.npz",
+    "sha256": "4f9135a55a2b4e4faf07570ee27943a83bc2931a5aa174d5b0c293427babfbef",
+    "means": [
+      35.94486111111111,
+      36.8900269541779
+    ],
+    "network_mean": 18.619642499999998,
+    "window_s": [
+      2.0,
+      12.0
+    ],
+    "requested_window_s": [
+      2,
+      12
+    ],
+    "actual_duration_ms": 12000,
+    "exact_spike_raster": true,
+    "labels": {
+      "coreAE": "regular_bursts",
+      "coreBE": "regular_bursts",
+      "allE": "regular_bursts"
+    },
+    "cv": {
+      "coreAE": 0.09977438786305344,
+      "coreBE": 0.07417919571638536,
+      "allE": 0.0736533027033882
+    },
+    "cv2": {
+      "coreAE": 0.11934555494111465,
+      "coreBE": 0.0601503862961055,
+      "allE": 0.07577484049336097
+    },
+    "n_bursts": {
+      "coreAE": 37,
+      "coreBE": 37,
+      "allE": 37
+    },
+    "iei_median_s": {
+      "coreAE": 0.2649999999999999,
+      "coreBE": 0.2699999999999998,
+      "allE": 0.27
+    }
+  },
+  {
+    "number": 15,
+    "g": 1.38,
+    "context": "Above reduced PD3",
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/native/per_run/J1.38_s848101/trajectory.npz",
+    "sha256": "1227f49706dd9887b6e66cd92b24adb7af17b44fec0dea04689551eb8e036f5a",
+    "means": [
+      36.04194444444445,
+      37.123180592991915
+    ],
+    "network_mean": 18.7096275,
+    "window_s": [
+      2.0,
+      12.0
+    ],
+    "requested_window_s": [
+      2,
+      12
+    ],
+    "actual_duration_ms": 12000,
+    "exact_spike_raster": true,
+    "labels": {
+      "coreAE": "regular_bursts",
+      "coreBE": "regular_bursts",
+      "allE": "regular_bursts"
+    },
+    "cv": {
+      "coreAE": 0.09738899779761744,
+      "coreBE": 0.07624650411121202,
+      "allE": 0.07776092606971392
+    },
+    "cv2": {
+      "coreAE": 0.11517793118165423,
+      "coreBE": 0.06833405130709393,
+      "allE": 0.08600672982246427
+    },
+    "n_bursts": {
+      "coreAE": 37,
+      "coreBE": 37,
+      "allE": 37
+    },
+    "iei_median_s": {
+      "coreAE": 0.2649999999999999,
+      "coreBE": 0.27,
+      "allE": 0.27
+    }
+  },
+  {
+    "number": 16,
+    "g": 1.385,
+    "context": "Below reduced PD2",
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/native/per_run/J1.385_s848101/trajectory.npz",
+    "sha256": "f9b0b783a42e4a9109bd12a2f3ab61e2452ae942107d4c611cba5ab21e963212",
+    "means": [
+      36.21041666666666,
+      37.30795148247978
+    ],
+    "network_mean": 18.760385,
+    "window_s": [
+      2.0,
+      12.0
+    ],
+    "requested_window_s": [
+      2,
+      12
+    ],
+    "actual_duration_ms": 12000,
+    "exact_spike_raster": true,
+    "labels": {
+      "coreAE": "regular_bursts",
+      "coreBE": "regular_bursts",
+      "allE": "regular_bursts"
+    },
+    "cv": {
+      "coreAE": 0.09738899779761744,
+      "coreBE": 0.07624650411121198,
+      "allE": 0.07624650411121187
+    },
+    "cv2": {
+      "coreAE": 0.11517793118165423,
+      "coreBE": 0.07291036821720862,
+      "allE": 0.08808830576240347
+    },
+    "n_bursts": {
+      "coreAE": 37,
+      "coreBE": 37,
+      "allE": 37
+    },
+    "iei_median_s": {
+      "coreAE": 0.2649999999999999,
+      "coreBE": 0.27,
+      "allE": 0.27
+    }
+  },
+  {
+    "number": 17,
+    "g": 1.395,
+    "context": "Above reduced PD2",
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/native/per_run/J1.395_s848101/trajectory.npz",
+    "sha256": "2c5aea6191a0139d8fec5c19cffddcacf1f95d334f31d9ec35bc7a10915f5763",
+    "means": [
+      36.734027777777776,
+      37.377897574123985
+    ],
+    "network_mean": 18.699145,
+    "window_s": [
+      2.0,
+      12.0
+    ],
+    "requested_window_s": [
+      2,
+      12
+    ],
+    "actual_duration_ms": 12000,
+    "exact_spike_raster": true,
+    "labels": {
+      "coreAE": "regular_bursts",
+      "coreBE": "regular_bursts",
+      "allE": "regular_bursts"
+    },
+    "cv": {
+      "coreAE": 0.11214997311336404,
+      "coreBE": 0.08363385352027307,
+      "allE": 0.0894850374920245
+    },
+    "cv2": {
+      "coreAE": 0.1395092042315554,
+      "coreBE": 0.0804113810139826,
+      "allE": 0.09556529010865605
+    },
+    "n_bursts": {
+      "coreAE": 37,
+      "coreBE": 36,
+      "allE": 36
+    },
+    "iei_median_s": {
+      "coreAE": 0.2699999999999996,
+      "coreBE": 0.27,
+      "allE": 0.27
+    }
+  },
+  {
+    "number": 18,
+    "g": 1.45,
+    "context": "Right continuation",
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/native/per_run/J1.45_s848101/trajectory.npz",
+    "sha256": "d42e225cf23015147b245f3c2778dbf5dd36e109e93a43200d3646d425c5b4fb",
+    "means": [
+      38.13652777777777,
+      38.93611859838275
+    ],
+    "network_mean": 18.8326525,
+    "window_s": [
+      2.0,
+      12.0
+    ],
+    "requested_window_s": [
+      2,
+      12
+    ],
+    "actual_duration_ms": 12000,
+    "exact_spike_raster": true,
+    "labels": {
+      "coreAE": "regular_bursts",
+      "coreBE": "regular_bursts",
+      "allE": "regular_bursts"
+    },
+    "cv": {
+      "coreAE": 0.10936512537342176,
+      "coreBE": 0.08730834173875963,
+      "allE": 0.09870495778167493
+    },
+    "cv2": {
+      "coreAE": 0.1253501036195538,
+      "coreBE": 0.08471154425399255,
+      "allE": 0.09442153421420536
+    },
+    "n_bursts": {
+      "coreAE": 37,
+      "coreBE": 36,
+      "allE": 36
+    },
+    "iei_median_s": {
+      "coreAE": 0.2650000000000001,
+      "coreBE": 0.27,
+      "allE": 0.2699999999999996
+    }
+  },
+  {
+    "number": 19,
+    "g": 1.12181,
+    "context": "Below newly found reduced cycle fold",
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/native/per_run/J1.12181_s848101/trajectory.npz",
+    "sha256": "8937164b824ca9f456dfd8396a306e37cf1c2a4217a13e0764ae2bb7d1c09710",
+    "means": [
+      24.888333333333332,
+      25.31859838274932
+    ],
+    "network_mean": 16.4518075,
+    "window_s": [
+      2.0,
+      12.0
+    ],
+    "requested_window_s": [
+      2,
+      12
+    ],
+    "actual_duration_ms": 12000,
+    "exact_spike_raster": true,
+    "labels": {
+      "coreAE": "regular_bursts",
+      "coreBE": "regular_bursts",
+      "allE": "regular_bursts"
+    },
+    "cv": {
+      "coreAE": 0.11283713394927057,
+      "coreBE": 0.11637698423098303,
+      "allE": 0.10841986020870502
+    },
+    "cv2": {
+      "coreAE": 0.1404104439512258,
+      "coreBE": 0.11262014219946365,
+      "allE": 0.11182799283477436
+    },
+    "n_bursts": {
+      "coreAE": 35,
+      "coreBE": 35,
+      "allE": 35
+    },
+    "iei_median_s": {
+      "coreAE": 0.27999999999999936,
+      "coreBE": 0.2749999999999999,
+      "allE": 0.2799999999999999
+    }
+  },
+  {
+    "number": 20,
+    "g": 1.12183,
+    "context": "Above newly found reduced cycle fold",
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/native/per_run/J1.12183_s848101/trajectory.npz",
+    "sha256": "18c61c382cc5c1d03af1ca251355475ba5841cb46dcf582f21da74db3bdecff6",
+    "means": [
+      24.887638888888887,
+      25.32048517520215
+    ],
+    "network_mean": 16.4526675,
+    "window_s": [
+      2.0,
+      12.0
+    ],
+    "requested_window_s": [
+      2,
+      12
+    ],
+    "actual_duration_ms": 12000,
+    "exact_spike_raster": true,
+    "labels": {
+      "coreAE": "regular_bursts",
+      "coreBE": "regular_bursts",
+      "allE": "regular_bursts"
+    },
+    "cv": {
+      "coreAE": 0.11283713394927057,
+      "coreBE": 0.11637698423098303,
+      "allE": 0.10841986020870502
+    },
+    "cv2": {
+      "coreAE": 0.1404104439512258,
+      "coreBE": 0.11262014219946365,
+      "allE": 0.11182799283477436
+    },
+    "n_bursts": {
+      "coreAE": 35,
+      "coreBE": 35,
+      "allE": 35
+    },
+    "iei_median_s": {
+      "coreAE": 0.27999999999999936,
+      "coreBE": 0.2749999999999999,
+      "allE": 0.2799999999999999
+    }
+  }
+]

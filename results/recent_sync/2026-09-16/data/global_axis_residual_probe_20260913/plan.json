@@ -1,0 +1,273 @@
+{
+  "schema": "topic4.global_axis_residual_probe.v1",
+  "physics": {
+    "version": "core_shape_output_v1"
+  },
+  "source_snapshot": {
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_core_connectivity_search.py": "85e39e9af2fff68c60db2c37b6fd1369f38ac53433f8f30a5f88b079d31e7ef4",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_core_connectivity_v2.py": "a9ae8ed188d7f36e4cc1a1890eb26dc278f0d937f1689154fe891f80ec0f2238",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/snn_engine/kick_probe_core_input_v2.py": "bba9dbaba8ee68d8e1b43682b21d6e87a2a6e082513e6fa6453126375b27a37b",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_streaming_spike_readout.py": "a493db8a8516599f2169e9baada36288169e98416d726d27eebf6d04efc00314",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_initial_state_runtime.py": "06c4bf8e037f982c8ec995d8550c230d8528bfeeb29b983df31a0659cbebc03f",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_initial_state.py": "1e9ed1ffe67cb085e6b740ba49ffc99ef03d9ced723988b68910c6d6dee2650d",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_observation_repaired.py": "089a2a414c3c270708d99862cc94ba5aa1864cd881170abf3165a8d77ec9894a",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/snn_engine/connectivity.py": "53d3bf765f7084cda924d3b23a6cb6e5f6a21293d9ae1e0e2d8f8cf89a1d3303",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/snn_engine/connectivity_rot.py": "3fa6c87df4c8756132b3fe6734fd9f73673a731914e9937befbaf073f00e2b9f",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/snn_engine/params.py": "c2036d1e1548c3db89adab27f8a7a57f9cdf584b5fed360963c966004cf88884",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_core_field.py": "4b66406ca93ff558fe204e12a9a9d1bcfe0ead4cd2b4ef3527603347e3699e46",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_core_driven_input.py": "dcabc862504c5b98cd26fd659859e45013d7391cd11a529ccb457c70fd9b69e3",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_core_connectivity.py": "2ed2b10d939d6b5b22f635d3dcd76ec769b3d675b439260f1cdc0252160579e6",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_core_ou_correlation_recovery.py": "cefc84736368236ed421ad60bdf846b0b089a059c26168e3820ca25a55da1616",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_shape_output_response.py": "58907d3b08ea9b6769b16410430ee8edbb5814733d739b332a7cf85638854855",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_core_ou_correlation.py": "3a277975cb7183fdfdccc7b522f5d0dfd1d27a4ae6f46e55dd1ce971b5d06ed5",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_core_shape_output.py": "f8fc2640ea7817db80099192a976cc41be412f628fab21edc933aebd08313f22",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_core_field_runner.py": "123bfebc82bfe37d71875175f1c2343aa702f5f9b8d9a33ee11d2046eb9258ba",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/rebuild_topic4_autapse_corrected_reference.py": "35a4da8dc4e23f7b5095f0a70884dd09d4e31f0eef7d950bba826ffb75ae004d"
+  },
+  "runaway": {
+    "es_thresh_hz": 120.0,
+    "es_dur_ms": 100.0,
+    "post_runaway_record_ms": 500.0
+  },
+  "analysis": {
+    "burnin_ms": 1500.0,
+    "primary_min_events_per_run": 16
+  },
+  "candidates": [
+    {
+      "id": "global_axis_+0",
+      "layout": "up3",
+      "centers_mm": [
+        [
+          3.4492143200000003,
+          12.12890135
+        ],
+        [
+          16.47920304,
+          3.96551153
+        ]
+      ],
+      "radii_mm": [
+        1.7525782905619196,
+        1.7525782905619196
+      ],
+      "parameters": {
+        "EE_same_core_scale": 0.85,
+        "EE_core_to_out_scale": 1.25,
+        "EE_out_to_out_scale": 1.0,
+        "EI_same_core_scale": 1.0,
+        "IE_same_core_scale": 1.0,
+        "II_same_core_scale": 1.0,
+        "depth_A_scale": 1.0,
+        "depth_B_scale": 1.0,
+        "radius_A_mm": 1.7525782905619196,
+        "radius_B_mm": 1.7525782905619196,
+        "EE_core_to_out_degree_scale": 1.0,
+        "EE_kernel_perp_scale": 1.5,
+        "EE_kernel_parallel_scale": 1.0,
+        "EE_angle_offset_deg": 0.0
+      },
+      "changed_parameter": "core_ou_correlation",
+      "changed_value": 0.0,
+      "adjacency_changes": true,
+      "stage": "response",
+      "parent_id": "refine_mid_EE085_mean095",
+      "changed_parameters": {
+        "core_ou_correlation": 0.0
+      },
+      "display_name": "左移圆核｜全局EE轴偏移+0°",
+      "core_mean_rate_scale": 0.95,
+      "geometry_change": null,
+      "core_ou_correlation": 0.0,
+      "shape": {},
+      "outgoing": {},
+      "contrast": "global_EE_axis",
+      "comparison": "global_axis_+0",
+      "origin": "new_geometry",
+      "geometry_probe": {
+        "dx_mm": -0.75,
+        "dy_mm": 0,
+        "radius_A_mm": null,
+        "threshold_dose_matched": false
+      }
+    },
+    {
+      "id": "global_axis_-15",
+      "layout": "up3",
+      "centers_mm": [
+        [
+          3.4492143200000003,
+          12.12890135
+        ],
+        [
+          16.47920304,
+          3.96551153
+        ]
+      ],
+      "radii_mm": [
+        1.7525782905619196,
+        1.7525782905619196
+      ],
+      "parameters": {
+        "EE_same_core_scale": 0.85,
+        "EE_core_to_out_scale": 1.25,
+        "EE_out_to_out_scale": 1.0,
+        "EI_same_core_scale": 1.0,
+        "IE_same_core_scale": 1.0,
+        "II_same_core_scale": 1.0,
+        "depth_A_scale": 1.0,
+        "depth_B_scale": 1.0,
+        "radius_A_mm": 1.7525782905619196,
+        "radius_B_mm": 1.7525782905619196,
+        "EE_core_to_out_degree_scale": 1.0,
+        "EE_kernel_perp_scale": 1.5,
+        "EE_kernel_parallel_scale": 1.0,
+        "EE_angle_offset_deg": -15.0
+      },
+      "changed_parameter": "core_ou_correlation",
+      "changed_value": 0.0,
+      "adjacency_changes": true,
+      "stage": "response",
+      "parent_id": "refine_mid_EE085_mean095",
+      "changed_parameters": {
+        "core_ou_correlation": 0.0
+      },
+      "display_name": "左移圆核｜全局EE轴偏移-15°",
+      "core_mean_rate_scale": 0.95,
+      "geometry_change": null,
+      "core_ou_correlation": 0.0,
+      "shape": {},
+      "outgoing": {},
+      "contrast": "global_EE_axis",
+      "comparison": "global_axis_+0",
+      "origin": "new_geometry",
+      "geometry_probe": {
+        "dx_mm": -0.75,
+        "dy_mm": 0,
+        "radius_A_mm": null,
+        "threshold_dose_matched": false
+      }
+    },
+    {
+      "id": "global_axis_+15",
+      "layout": "up3",
+      "centers_mm": [
+        [
+          3.4492143200000003,
+          12.12890135
+        ],
+        [
+          16.47920304,
+          3.96551153
+        ]
+      ],
+      "radii_mm": [
+        1.7525782905619196,
+        1.7525782905619196
+      ],
+      "parameters": {
+        "EE_same_core_scale": 0.85,
+        "EE_core_to_out_scale": 1.25,
+        "EE_out_to_out_scale": 1.0,
+        "EI_same_core_scale": 1.0,
+        "IE_same_core_scale": 1.0,
+        "II_same_core_scale": 1.0,
+        "depth_A_scale": 1.0,
+        "depth_B_scale": 1.0,
+        "radius_A_mm": 1.7525782905619196,
+        "radius_B_mm": 1.7525782905619196,
+        "EE_core_to_out_degree_scale": 1.0,
+        "EE_kernel_perp_scale": 1.5,
+        "EE_kernel_parallel_scale": 1.0,
+        "EE_angle_offset_deg": 15.0
+      },
+      "changed_parameter": "core_ou_correlation",
+      "changed_value": 0.0,
+      "adjacency_changes": true,
+      "stage": "response",
+      "parent_id": "refine_mid_EE085_mean095",
+      "changed_parameters": {
+        "core_ou_correlation": 0.0
+      },
+      "display_name": "左移圆核｜全局EE轴偏移+15°",
+      "core_mean_rate_scale": 0.95,
+      "geometry_change": null,
+      "core_ou_correlation": 0.0,
+      "shape": {},
+      "outgoing": {},
+      "contrast": "global_EE_axis",
+      "comparison": "global_axis_+0",
+      "origin": "new_geometry",
+      "geometry_probe": {
+        "dx_mm": -0.75,
+        "dy_mm": 0,
+        "radius_A_mm": null,
+        "threshold_dose_matched": false
+      }
+    }
+  ],
+  "topology_seeds": [
+    2511
+  ],
+  "seeds": [
+    847101,
+    847102
+  ],
+  "duration_ms": 20000.0,
+  "budget": {
+    "formal_units": 6,
+    "canary_units": 3,
+    "canary_duration_ms": 500.0
+  },
+  "dispatch_deadline_unix": 1789263146,
+  "question": "Does global EE connection orientation change fixed-contact TB timing where local-core response has not?",
+  "baseline_source": "/data/hfosp/topic4_sef_hfo/core_recruitment_tradeoff_followup_20260912/candidates/up3__circle__EE_core_to_out_scale_1.25__x_minus075.json",
+  "baseline_source_sha256": "3534fd6a9e85104ebfd316c08e40ad7dbdc294397904bd1260653dc30256264d",
+  "interpretation": "Same neuron positions, lowering-only thresholds, baseline topology seed and noise seed; EE resampling changes actual edges and distance delays. This is not an identical physical graph across angles. Baseline 20s runs replay prefixes of historical 60s runs, not independent replication.",
+  "unchanged": "EE perpendicular multiplier1.5, parallel1, all pathway multipliers, core geometry/thresholds, noise law, Z/M/spatialOU off, GABA18ms, observer/eligibility and frozen loss",
+  "evidence": [
+    "/data/hfosp/topic4_sef_hfo/overnight_exploration_20260913/parent_confirmation_tb_support.csv",
+    "/data/hfosp/topic4_sef_hfo/overnight_exploration_20260913/rod_lag_participation_audit_0206/scientific_note.md",
+    "/data/hfosp/topic4_sef_hfo/overnight_exploration_20260913/historical_global_geometry_response.csv"
+  ],
+  "selector": "No score-based selection or early scientific pass gate; complete all dispatched conditions irrespective of propagation quality. Stop new dispatch at8h deadline; let active trajectories finish.",
+  "resources": {
+    "max_workers": 2,
+    "growth_per_tree_GiB": 9,
+    "host_reserve_GiB": 40,
+    "tree_hard_limit_GiB": 18,
+    "host_hard_floor_GiB": 30
+  },
+  "formal_order": [
+    [
+      "global_axis_+0",
+      2511,
+      847101
+    ],
+    [
+      "global_axis_-15",
+      2511,
+      847101
+    ],
+    [
+      "global_axis_+15",
+      2511,
+      847101
+    ],
+    [
+      "global_axis_+0",
+      2511,
+      847102
+    ],
+    [
+      "global_axis_-15",
+      2511,
+      847102
+    ],
+    [
+      "global_axis_+15",
+      2511,
+      847102
+    ]
+  ]
+}

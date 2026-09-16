@@ -1,0 +1,31 @@
+{
+  "source": "boundary_30s_K_weakened",
+  "rows": [
+    {
+      "name": "k100_0.25_tau1_s9108401_br30s_kx0.4_to_k100_0.1",
+      "modification": {
+        "k_increment_scale": 0.4
+      },
+      "start_s": 30.0,
+      "observed_to_s": 40.0,
+      "late_1s_all_E_Hz": 8.424562499999999,
+      "exit_confirmed_s": null,
+      "final_Z": 0.8931757526771273,
+      "final_gK": 0.008839360995704152,
+      "min_all_E_10ms_after_branch_Hz": 0.0
+    },
+    {
+      "name": "k100_0.25_tau1_s9108401_br30s_kx0.4_to_k100_0.1_br40s_continue",
+      "modification": {},
+      "start_s": 40.0,
+      "observed_to_s": 60.00000000000001,
+      "late_1s_all_E_Hz": 500.0,
+      "exit_confirmed_s": null,
+      "final_Z": 0.025248180175335564,
+      "final_gK": 0.49940592746112683,
+      "min_all_E_10ms_after_branch_Hz": 0.0
+    }
+  ],
+  "diagnostic_only": true,
+  "not_counted_as_autonomous_loop": true
+}

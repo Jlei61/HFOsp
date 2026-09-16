@@ -1,0 +1,745 @@
+{
+  "status": "EIGHT_HOUR_REVIEW_COMPLETE_BOUNDED_QUEUES_CONTINUE",
+  "reviewed_unix": 1789263252.9170527,
+  "authorized_deadline_unix": 1789263146,
+  "elapsed_seconds": 28906.91705274582,
+  "packet": "/data/hfosp/topic4_sef_hfo/overnight_exploration_20260913/review_window_close_0932",
+  "states": {
+    "followup": {
+      "status": "CONFIRMATION_RUNNING",
+      "stage": "confirmation",
+      "total": 16,
+      "complete": 0,
+      "queued": 8,
+      "active": [
+        {
+          "pid": 579940,
+          "unit": [
+            "up3__circle__EE_core_to_out_scale_1.25__x_minus075",
+            2611,
+            847301
+          ],
+          "rss_gib": 1.9865837097167969
+        },
+        {
+          "pid": 579950,
+          "unit": [
+            "up3__circle__EE_core_to_out_scale_1.25__x_minus075",
+            2611,
+            847302
+          ],
+          "rss_gib": 1.9876594543457031
+        },
+        {
+          "pid": 580355,
+          "unit": [
+            "up3__circle__EE_core_to_out_scale_1.25__x_minus075",
+            2612,
+            847301
+          ],
+          "rss_gib": 1.986053466796875
+        },
+        {
+          "pid": 580430,
+          "unit": [
+            "up3__circle__EE_core_to_out_scale_1.25__x_minus075",
+            2612,
+            847302
+          ],
+          "rss_gib": 2.097850799560547
+        },
+        {
+          "pid": 580667,
+          "unit": [
+            "up3__circle__EE_core_to_out_scale_1.25",
+            2611,
+            847301
+          ],
+          "rss_gib": 1.9864311218261719
+        },
+        {
+          "pid": 580757,
+          "unit": [
+            "up3__circle__EE_core_to_out_scale_1.25",
+            2611,
+            847302
+          ],
+          "rss_gib": 1.9861946105957031
+        },
+        {
+          "pid": 580989,
+          "unit": [
+            "up3__circle__EE_core_to_out_scale_1.25",
+            2612,
+            847301
+          ],
+          "rss_gib": 1.9860191345214844
+        },
+        {
+          "pid": 650678,
+          "unit": [
+            "up3__circle__EE_core_to_out_scale_1.25",
+            2612,
+            847302
+          ],
+          "rss_gib": 1.9818878173828125
+        }
+      ],
+      "max_workers": 20,
+      "peak_rss_gib": 0.0,
+      "available_gib": 111.2268295288086,
+      "failures": [],
+      "updated_unix": 1789263251.2703102
+    },
+    "multiseed": {
+      "status": "RESPONSE_RUNNING",
+      "stage": "response",
+      "total": 108,
+      "complete": 4,
+      "queued": 96,
+      "active": [
+        {
+          "pid": 258720,
+          "unit": [
+            "bridge_circle_out125",
+            2712,
+            847401
+          ],
+          "rss_gib": 2.139434814453125
+        },
+        {
+          "pid": 259108,
+          "unit": [
+            "bridge_circle_out125_xminus075",
+            2712,
+            847401
+          ],
+          "rss_gib": 2.139385223388672
+        },
+        {
+          "pid": 368494,
+          "unit": [
+            "bridge_circle_out125",
+            2511,
+            847402
+          ],
+          "rss_gib": 2.0124969482421875
+        },
+        {
+          "pid": 368499,
+          "unit": [
+            "bridge_circle_out125_xminus075",
+            2511,
+            847402
+          ],
+          "rss_gib": 2.0096282958984375
+        },
+        {
+          "pid": 492006,
+          "unit": [
+            "bridge_circle_out125",
+            2711,
+            847402
+          ],
+          "rss_gib": 2.1004409790039062
+        },
+        {
+          "pid": 492078,
+          "unit": [
+            "bridge_circle_out125_xminus075",
+            2711,
+            847402
+          ],
+          "rss_gib": 2.1001853942871094
+        },
+        {
+          "pid": 500919,
+          "unit": [
+            "bridge_circle_out125",
+            2712,
+            847402
+          ],
+          "rss_gib": 2.1124420166015625
+        },
+        {
+          "pid": 510427,
+          "unit": [
+            "bridge_circle_out125_xminus075",
+            2712,
+            847402
+          ],
+          "rss_gib": 1.9995956420898438
+        }
+      ],
+      "max_workers": 10,
+      "previous_running": true,
+      "predecessor_active": 8,
+      "predecessor_growth_gib": 32.00137710571289,
+      "own_growth_gib": 31.386390686035156,
+      "optional_probe_active": 1,
+      "optional_probe_growth_gib": 4.0080718994140625,
+      "optional_probe_priority": false,
+      "available_gib": 111.18999099731445,
+      "required_gib": 116.39583969116211,
+      "peak_rss_gib": 2.933216094970703,
+      "failures": [],
+      "updated_unix": 1789263248.955685
+    },
+    "global_axis": {
+      "status": "WINDOW_ELAPSED_DRAINING",
+      "stage": "response",
+      "total": 6,
+      "complete": 4,
+      "pending": [
+        [
+          "global_axis_+15",
+          2511,
+          847102
+        ]
+      ],
+      "active": [
+        {
+          "pid": 527657,
+          "unit": [
+            "global_axis_-15",
+            2511,
+            847102
+          ],
+          "rss_gib": 1.9919204711914062
+        }
+      ],
+      "shared_active": [
+        {
+          "pid": 579940,
+          "rss_gib": 1.986572265625,
+          "reserve_gib": 6.0
+        },
+        {
+          "pid": 579950,
+          "rss_gib": 1.9876556396484375,
+          "reserve_gib": 6.0
+        },
+        {
+          "pid": 580355,
+          "rss_gib": 1.9860458374023438,
+          "reserve_gib": 6.0
+        },
+        {
+          "pid": 580430,
+          "rss_gib": 2.097759246826172,
+          "reserve_gib": 6.0
+        },
+        {
+          "pid": 580667,
+          "rss_gib": 1.9864158630371094,
+          "reserve_gib": 6.0
+        },
+        {
+          "pid": 580757,
+          "rss_gib": 1.9861907958984375,
+          "reserve_gib": 6.0
+        },
+        {
+          "pid": 580989,
+          "rss_gib": 1.9860038757324219,
+          "reserve_gib": 6.0
+        },
+        {
+          "pid": 650678,
+          "rss_gib": 1.98187255859375,
+          "reserve_gib": 6.0
+        },
+        {
+          "pid": 258720,
+          "rss_gib": 2.1394309997558594,
+          "reserve_gib": 6.0
+        },
+        {
+          "pid": 259108,
+          "rss_gib": 2.1393775939941406,
+          "reserve_gib": 6.0
+        },
+        {
+          "pid": 368494,
+          "rss_gib": 2.0124893188476562,
+          "reserve_gib": 6.0
+        },
+        {
+          "pid": 368499,
+          "rss_gib": 2.0096206665039062,
+          "reserve_gib": 6.0
+        },
+        {
+          "pid": 492006,
+          "rss_gib": 2.100414276123047,
+          "reserve_gib": 6.0
+        },
+        {
+          "pid": 492078,
+          "rss_gib": 2.100177764892578,
+          "reserve_gib": 6.0
+        },
+        {
+          "pid": 500919,
+          "rss_gib": 2.1124305725097656,
+          "reserve_gib": 6.0
+        },
+        {
+          "pid": 510427,
+          "rss_gib": 1.99957275390625,
+          "reserve_gib": 6.0
+        }
+      ],
+      "available_gib": 111.21198272705078,
+      "required_gib": 116.39604949951172,
+      "failures": [],
+      "updated_unix": 1789263244.7788584
+    }
+  },
+  "live_workers": [
+    {
+      "queue": "followup",
+      "unit": [
+        "up3__circle__EE_core_to_out_scale_1.25__x_minus075",
+        2611,
+        847301
+      ],
+      "pid": 579940,
+      "create_time": 1789259199.5,
+      "cmdline": [
+        "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+        "-u",
+        "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_recruitment_tradeoff_followup.py",
+        "worker",
+        "--stage",
+        "confirmation",
+        "--candidate",
+        "up3__circle__EE_core_to_out_scale_1.25__x_minus075",
+        "--topology",
+        "2611",
+        "--seed",
+        "847301",
+        "--duration",
+        "60000.0"
+      ]
+    },
+    {
+      "queue": "followup",
+      "unit": [
+        "up3__circle__EE_core_to_out_scale_1.25__x_minus075",
+        2611,
+        847302
+      ],
+      "pid": 579950,
+      "create_time": 1789259204.56,
+      "cmdline": [
+        "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+        "-u",
+        "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_recruitment_tradeoff_followup.py",
+        "worker",
+        "--stage",
+        "confirmation",
+        "--candidate",
+        "up3__circle__EE_core_to_out_scale_1.25__x_minus075",
+        "--topology",
+        "2611",
+        "--seed",
+        "847302",
+        "--duration",
+        "60000.0"
+      ]
+    },
+    {
+      "queue": "followup",
+      "unit": [
+        "up3__circle__EE_core_to_out_scale_1.25__x_minus075",
+        2612,
+        847301
+      ],
+      "pid": 580355,
+      "create_time": 1789259209.66,
+      "cmdline": [
+        "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+        "-u",
+        "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_recruitment_tradeoff_followup.py",
+        "worker",
+        "--stage",
+        "confirmation",
+        "--candidate",
+        "up3__circle__EE_core_to_out_scale_1.25__x_minus075",
+        "--topology",
+        "2612",
+        "--seed",
+        "847301",
+        "--duration",
+        "60000.0"
+      ]
+    },
+    {
+      "queue": "followup",
+      "unit": [
+        "up3__circle__EE_core_to_out_scale_1.25__x_minus075",
+        2612,
+        847302
+      ],
+      "pid": 580430,
+      "create_time": 1789259214.82,
+      "cmdline": [
+        "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+        "-u",
+        "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_recruitment_tradeoff_followup.py",
+        "worker",
+        "--stage",
+        "confirmation",
+        "--candidate",
+        "up3__circle__EE_core_to_out_scale_1.25__x_minus075",
+        "--topology",
+        "2612",
+        "--seed",
+        "847302",
+        "--duration",
+        "60000.0"
+      ]
+    },
+    {
+      "queue": "followup",
+      "unit": [
+        "up3__circle__EE_core_to_out_scale_1.25",
+        2611,
+        847301
+      ],
+      "pid": 580667,
+      "create_time": 1789259220.04,
+      "cmdline": [
+        "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+        "-u",
+        "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_recruitment_tradeoff_followup.py",
+        "worker",
+        "--stage",
+        "confirmation",
+        "--candidate",
+        "up3__circle__EE_core_to_out_scale_1.25",
+        "--topology",
+        "2611",
+        "--seed",
+        "847301",
+        "--duration",
+        "60000.0"
+      ]
+    },
+    {
+      "queue": "followup",
+      "unit": [
+        "up3__circle__EE_core_to_out_scale_1.25",
+        2611,
+        847302
+      ],
+      "pid": 580757,
+      "create_time": 1789259225.31,
+      "cmdline": [
+        "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+        "-u",
+        "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_recruitment_tradeoff_followup.py",
+        "worker",
+        "--stage",
+        "confirmation",
+        "--candidate",
+        "up3__circle__EE_core_to_out_scale_1.25",
+        "--topology",
+        "2611",
+        "--seed",
+        "847302",
+        "--duration",
+        "60000.0"
+      ]
+    },
+    {
+      "queue": "followup",
+      "unit": [
+        "up3__circle__EE_core_to_out_scale_1.25",
+        2612,
+        847301
+      ],
+      "pid": 580989,
+      "create_time": 1789259230.64,
+      "cmdline": [
+        "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+        "-u",
+        "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_recruitment_tradeoff_followup.py",
+        "worker",
+        "--stage",
+        "confirmation",
+        "--candidate",
+        "up3__circle__EE_core_to_out_scale_1.25",
+        "--topology",
+        "2612",
+        "--seed",
+        "847301",
+        "--duration",
+        "60000.0"
+      ]
+    },
+    {
+      "queue": "followup",
+      "unit": [
+        "up3__circle__EE_core_to_out_scale_1.25",
+        2612,
+        847302
+      ],
+      "pid": 650678,
+      "create_time": 1789261305.09,
+      "cmdline": [
+        "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+        "-u",
+        "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_recruitment_tradeoff_followup.py",
+        "worker",
+        "--stage",
+        "confirmation",
+        "--candidate",
+        "up3__circle__EE_core_to_out_scale_1.25",
+        "--topology",
+        "2612",
+        "--seed",
+        "847302",
+        "--duration",
+        "60000.0"
+      ]
+    },
+    {
+      "queue": "multiseed",
+      "unit": [
+        "bridge_circle_out125",
+        2712,
+        847401
+      ],
+      "pid": 258720,
+      "create_time": 1789246583.57,
+      "cmdline": [
+        "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+        "-u",
+        "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_multiseed_response_curves.py",
+        "worker",
+        "--stage",
+        "response",
+        "--candidate",
+        "bridge_circle_out125",
+        "--topology",
+        "2712",
+        "--seed",
+        "847401",
+        "--duration",
+        "60000.0"
+      ]
+    },
+    {
+      "queue": "multiseed",
+      "unit": [
+        "bridge_circle_out125_xminus075",
+        2712,
+        847401
+      ],
+      "pid": 259108,
+      "create_time": 1789246589.22,
+      "cmdline": [
+        "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+        "-u",
+        "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_multiseed_response_curves.py",
+        "worker",
+        "--stage",
+        "response",
+        "--candidate",
+        "bridge_circle_out125_xminus075",
+        "--topology",
+        "2712",
+        "--seed",
+        "847401",
+        "--duration",
+        "60000.0"
+      ]
+    },
+    {
+      "queue": "multiseed",
+      "unit": [
+        "bridge_circle_out125",
+        2511,
+        847402
+      ],
+      "pid": 368494,
+      "create_time": 1789251607.98,
+      "cmdline": [
+        "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+        "-u",
+        "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_multiseed_response_curves.py",
+        "worker",
+        "--stage",
+        "response",
+        "--candidate",
+        "bridge_circle_out125",
+        "--topology",
+        "2511",
+        "--seed",
+        "847402",
+        "--duration",
+        "60000.0"
+      ]
+    },
+    {
+      "queue": "multiseed",
+      "unit": [
+        "bridge_circle_out125_xminus075",
+        2511,
+        847402
+      ],
+      "pid": 368499,
+      "create_time": 1789251613.72,
+      "cmdline": [
+        "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+        "-u",
+        "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_multiseed_response_curves.py",
+        "worker",
+        "--stage",
+        "response",
+        "--candidate",
+        "bridge_circle_out125_xminus075",
+        "--topology",
+        "2511",
+        "--seed",
+        "847402",
+        "--duration",
+        "60000.0"
+      ]
+    },
+    {
+      "queue": "multiseed",
+      "unit": [
+        "bridge_circle_out125",
+        2711,
+        847402
+      ],
+      "pid": 492006,
+      "create_time": 1789255593.65,
+      "cmdline": [
+        "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+        "-u",
+        "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_multiseed_response_curves.py",
+        "worker",
+        "--stage",
+        "response",
+        "--candidate",
+        "bridge_circle_out125",
+        "--topology",
+        "2711",
+        "--seed",
+        "847402",
+        "--duration",
+        "60000.0"
+      ]
+    },
+    {
+      "queue": "multiseed",
+      "unit": [
+        "bridge_circle_out125_xminus075",
+        2711,
+        847402
+      ],
+      "pid": 492078,
+      "create_time": 1789255599.33,
+      "cmdline": [
+        "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+        "-u",
+        "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_multiseed_response_curves.py",
+        "worker",
+        "--stage",
+        "response",
+        "--candidate",
+        "bridge_circle_out125_xminus075",
+        "--topology",
+        "2711",
+        "--seed",
+        "847402",
+        "--duration",
+        "60000.0"
+      ]
+    },
+    {
+      "queue": "multiseed",
+      "unit": [
+        "bridge_circle_out125",
+        2712,
+        847402
+      ],
+      "pid": 500919,
+      "create_time": 1789255854.18,
+      "cmdline": [
+        "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+        "-u",
+        "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_multiseed_response_curves.py",
+        "worker",
+        "--stage",
+        "response",
+        "--candidate",
+        "bridge_circle_out125",
+        "--topology",
+        "2712",
+        "--seed",
+        "847402",
+        "--duration",
+        "60000.0"
+      ]
+    },
+    {
+      "queue": "multiseed",
+      "unit": [
+        "bridge_circle_out125_xminus075",
+        2712,
+        847402
+      ],
+      "pid": 510427,
+      "create_time": 1789256143.09,
+      "cmdline": [
+        "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+        "-u",
+        "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_multiseed_response_curves.py",
+        "worker",
+        "--stage",
+        "response",
+        "--candidate",
+        "bridge_circle_out125_xminus075",
+        "--topology",
+        "2712",
+        "--seed",
+        "847402",
+        "--duration",
+        "60000.0"
+      ]
+    },
+    {
+      "queue": "global_axis",
+      "unit": [
+        "global_axis_-15",
+        2511,
+        847102
+      ],
+      "pid": 527657,
+      "create_time": 1789257434.26,
+      "cmdline": [
+        "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+        "-u",
+        "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_global_axis_residual_probe.py",
+        "worker",
+        "--stage",
+        "response",
+        "--candidate",
+        "global_axis_-15",
+        "--topology",
+        "2511",
+        "--seed",
+        "847102",
+        "--duration",
+        "20000.0"
+      ]
+    }
+  ],
+  "model_acceptance": "NOT_ACCEPTED_AS_FULL_PATIENT_DUAL_PROPAGATION",
+  "continuation": "Only the already authorized followup16 and multiseed108 budgets continue; G dispatch deadline unchanged; no new search, model freeze or Fig5."
+}

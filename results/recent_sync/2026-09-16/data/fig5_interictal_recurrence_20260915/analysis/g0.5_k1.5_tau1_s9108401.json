@@ -1,0 +1,136 @@
+{
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_interictal_recurrence_20260915/runs/g0.5_k1.5_tau1_s9108401",
+  "run_status": "CENSORED_WALL_DEADLINE",
+  "job": {
+    "name": "g0.5_k1.5_tau1_s9108401",
+    "seed": 9108401,
+    "eta_m": 0.0005,
+    "tau_M_s": 1.0,
+    "tau_Z_s": 5.0,
+    "threshold": 95.19851312666987,
+    "mode": "native",
+    "gamma": 0.5,
+    "global_gain": 0.08832178914443486,
+    "global_resource": "native_z",
+    "phi_jump": 0.0,
+    "horizon_s": 60.0,
+    "checkpoint_s": 2.0,
+    "device": 0,
+    "qa": false,
+    "feedback_form": "conductance",
+    "C_R": 6.299613071787578,
+    "reference_voltage_mV": 18.0,
+    "reference_gap_mV": 35.66284793826844,
+    "global_reversal_mV": -17.662847938268442,
+    "sahp_gain": 1.5,
+    "sahp_tau_s": 1.0,
+    "stop_after_second_entry": false
+  },
+  "rule": {
+    "bin_ms": 10,
+    "quiet_Hz": 5.0,
+    "quiet_duration_ms": 20.0,
+    "peak_Hz": 20.0,
+    "short_duration_ms": [
+      20.0,
+      200.0
+    ],
+    "required_brief_events": 5,
+    "minimum_event_span_s": 2.0,
+    "minimum_brief_fraction": 0.8
+  },
+  "primary": {
+    "observed_s": 56.0,
+    "entries": [
+      {
+        "onset_s": 3.57,
+        "confirmation_s": 3.77
+      }
+    ],
+    "low_activity_exits": [],
+    "preentry": {
+      "window_s": [
+        0.5,
+        3.57
+      ],
+      "finite_events": [],
+      "brief_events": [],
+      "finite_count": 0,
+      "brief_count": 0,
+      "event_span_s": 0.0,
+      "brief_fraction": 0.0,
+      "event_rate_Hz": 0.0
+    },
+    "interhigh_intervals": [],
+    "latest_postexit": null,
+    "events": [],
+    "temporal_loop_pass": false,
+    "preentry_brief_screen": false,
+    "classification": "HIGH_WITHOUT_EXIT",
+    "high_gate": "All E >=200Hz for200ms; unchanged",
+    "event_settings": {
+      "dt_s": 0.01,
+      "quiet_Hz": 5.0,
+      "max_duration_s": 0.2,
+      "minimum_events": 5
+    }
+  },
+  "sensitivity": [
+    {
+      "event_settings": {
+        "dt_s": 0.005,
+        "quiet_Hz": 5.0,
+        "max_duration_s": 0.2,
+        "minimum_events": 5
+      },
+      "classification": "HIGH_WITHOUT_EXIT",
+      "temporal_loop_pass": false
+    },
+    {
+      "event_settings": {
+        "dt_s": 0.01,
+        "quiet_Hz": 1.0,
+        "max_duration_s": 0.2,
+        "minimum_events": 5
+      },
+      "classification": "HIGH_WITHOUT_EXIT",
+      "temporal_loop_pass": false
+    },
+    {
+      "event_settings": {
+        "dt_s": 0.01,
+        "quiet_Hz": 5.0,
+        "max_duration_s": 0.3,
+        "minimum_events": 5
+      },
+      "classification": "HIGH_WITHOUT_EXIT",
+      "temporal_loop_pass": false
+    },
+    {
+      "event_settings": {
+        "dt_s": 0.01,
+        "quiet_Hz": 5.0,
+        "max_duration_s": 0.2,
+        "minimum_events": 3
+      },
+      "classification": "HIGH_WITHOUT_EXIT",
+      "temporal_loop_pass": false
+    }
+  ],
+  "exact_all_E_zero_interval_s": [
+    0.0,
+    0.013000000000000001
+  ],
+  "morphology_and_spatial_acceptance": "PENDING_NATIVE_REVIEW",
+  "full_Fig5_acceptance": "NOT_ESTABLISHED",
+  "human_review": "PENDING",
+  "observation_horizon_reached": false,
+  "finalization_repaired": true,
+  "simulation_data_unchanged": true,
+  "state_summary": {
+    "late_E_Hz": 476.41135,
+    "final_Z": 1.3967999324081427e-05,
+    "final_K": 7.146547612223837,
+    "median_preentry_brief_ms": null
+  }
+}

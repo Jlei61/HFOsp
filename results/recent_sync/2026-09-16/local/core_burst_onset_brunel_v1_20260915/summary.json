@@ -1,0 +1,19 @@
+{
+  "status": "BOUNDED_BATCH_COMPLETE",
+  "baseline_native_runs": 50,
+  "new_native_runs": 16,
+  "topology": 2511,
+  "duration_s": 20,
+  "active_scope": "core burst onset; no seizure/Z/M analysis",
+  "deterministic_all_silent_after_removal_and_late_pulse": true,
+  "constant_input_equilibrium_native_voltage_error_mV": 1.3145040611561853e-13,
+  "poisson_only_strong_n_bursts_range": [
+    38,
+    42
+  ],
+  "deterministic_silent_branch_local_bifurcation": "ABSENT_ALONG_TESTED_EE_AT_DEPTH_1",
+  "noisy_population_bifurcation_type": "NOT_IDENTIFIED",
+  "intermediate_third_attractor": "NOT_ESTABLISHED",
+  "material_model_limitation": "Deep post-burst hyperpolarization and high local I firing in the current-based LIF; recovery may influence the burst rhythm.",
+  "human_visual_acceptance": "PENDING"
+}

@@ -1,0 +1,24 @@
+{
+  "updated_at": 1789417657.6523907,
+  "complete_trajectories": 48,
+  "new_trajectories": 42,
+  "reused_exact_trajectories": 6,
+  "independent_noise_seeds_per_cell": 2,
+  "entered": 26,
+  "right_censored": 22,
+  "observed_confirmation_time_range_s": [
+    10.07,
+    14.780000000000001
+  ],
+  "primary_observable": "First all-E200Hz/200ms confirmation within300s, two fixed-noise trajectories per parameter cell.",
+  "finding": "The tested grid mostly separates entry around10\u201313s from no observed entry within300s; it does not show a broad smooth latency gradient.",
+  "boundaries": [
+    "Not an autonomous recovery or reentry assay.",
+    "Not a Jacobian or continuation bifurcation analysis.",
+    "Changing tauM changes both accumulation/recovery timescale and sustained current etaM*tauM*r; it is not a pure-timescale change.",
+    "The1000s timescale is not fully relaxed within300s. Censored cells are not demonstrated permanent stable states.",
+    "Repeated events and neurons are not independent simulation replicates."
+  ],
+  "agent_visual_review": "PASS",
+  "human_review": "PENDING"
+}

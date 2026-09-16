@@ -1,0 +1,88 @@
+{
+  "status": "MIGRATED_MONITORING",
+  "original_supervisor_pid": 70996,
+  "new_supervisor_pid": 82494,
+  "benchmark": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/autonomous_recovery_exploration_20260914/quiet_backend_benchmark.json",
+  "targets": [
+    "eta1_tau1000_s9108401",
+    "eta1_tau1000_s9108402",
+    "eta1_tau100_s9108401",
+    "eta1_tau100_s9108402",
+    "eta1_tau10_s9108401",
+    "eta1_tau10_s9108402"
+  ],
+  "adopted": {
+    "eta0.01_tau10_s9108402": 72729,
+    "eta0.1_tau1_s9108401": 72739,
+    "eta0.1_tau1_s9108402": 72749,
+    "eta1_tau10_s9108401": 80206,
+    "eta1_tau10_s9108402": 80324,
+    "eta1_tau100_s9108401": 80443,
+    "eta1_tau100_s9108402": 80533,
+    "eta1_tau1000_s9108401": 80615,
+    "eta1_tau1000_s9108402": 80887
+  },
+  "preserved": "Original jobs, parameters, outcomes and saved observations are unchanged. Ordered CPU and GPU continuation have identical full spike matrix and entire checkpoint. Only uncheckpointed replay after a saved boundary is discarded.",
+  "migrations": [
+    {
+      "name": "eta1_tau100_s9108401",
+      "old_pid": 80443,
+      "new_pid": 83053,
+      "checkpoint_step": 400000,
+      "checkpoint_sha256": "21245d984b724328a083b83128b01f4f659fff02fb44f4265566357c14e18fa8",
+      "previously_observed_progress_s": 40.0,
+      "time": 1789405429.3351161,
+      "no_state_reset": true
+    },
+    {
+      "name": "eta1_tau10_s9108401",
+      "old_pid": 80206,
+      "new_pid": 83067,
+      "checkpoint_step": 400000,
+      "checkpoint_sha256": "a404e02bc44c1891a505d2cc64d257a560dc7d8858b560c4153c92de21514214",
+      "previously_observed_progress_s": 40.0,
+      "time": 1789405490.7831106,
+      "no_state_reset": true
+    },
+    {
+      "name": "eta1_tau1000_s9108401",
+      "old_pid": 80615,
+      "new_pid": 83095,
+      "checkpoint_step": 400000,
+      "checkpoint_sha256": "eadf9077a1f6e9dbd183ce317dab4a680891772d3d1406b4a4e022818c25d90a",
+      "previously_observed_progress_s": 40.0,
+      "time": 1789405537.2869084,
+      "no_state_reset": true
+    },
+    {
+      "name": "eta1_tau10_s9108402",
+      "old_pid": 80324,
+      "new_pid": 83150,
+      "checkpoint_step": 400000,
+      "checkpoint_sha256": "3d9a769488703768403f150867bc2bbaef169d3e805e0f39bd6eb051d0ef6a4f",
+      "previously_observed_progress_s": 40.0,
+      "time": 1789405569.221192,
+      "no_state_reset": true
+    },
+    {
+      "name": "eta1_tau100_s9108402",
+      "old_pid": 80533,
+      "new_pid": 83260,
+      "checkpoint_step": 400000,
+      "checkpoint_sha256": "a7c8669d73bc50df1bf37fbed694ce9cebd9fa8ddf8082e6c8e7bb9bf1b03c8e",
+      "previously_observed_progress_s": 40.0,
+      "time": 1789405787.7234619,
+      "no_state_reset": true
+    },
+    {
+      "name": "eta1_tau1000_s9108402",
+      "old_pid": 80887,
+      "new_pid": 83580,
+      "checkpoint_step": 400000,
+      "checkpoint_sha256": "1913024134d5fc39239e5d93a7919fc3e6802ffbb3365d1361da07362df82e0e",
+      "previously_observed_progress_s": 40.0,
+      "time": 1789406329.4814556,
+      "no_state_reset": true
+    }
+  ]
+}

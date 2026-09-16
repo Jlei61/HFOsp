@@ -1,0 +1,78 @@
+{
+  "schema": "topic4.phase_memory_dispatch_amendment.v1",
+  "created_unix": 1789246565.7198877,
+  "physical_changes": false,
+  "physical_workers_restarted": 0,
+  "formal_budget_changed": false,
+  "seeds_and_order_changed": false,
+  "reserve": {
+    "construction_GiB": 9,
+    "verified_integration_after_ms": 1000,
+    "verified_integration_GiB": 6,
+    "per_tree_hard_GiB": 18,
+    "host_dispatch_margin_GiB": 40,
+    "host_hard_floor_GiB": 30
+  },
+  "limits": {
+    "N_while_F_running": 6,
+    "N_after_F_while_G_priority": 16,
+    "N_after_G": 18,
+    "G": 2
+  },
+  "evidence": "140 completed predecessor runs peak whole-worker RSS <=5.894GiB; graph-building G canaries <=5.738GiB; cached G 2.934GiB; live integrated workers about2.0-2.1GiB. Six GiB is a dispatch estimate, not a physical allocation cap.",
+  "checks": "/data/hfosp/topic4_sef_hfo/overnight_exploration_20260913/phase_reserve_checks.json",
+  "handoff": {
+    "label": "N",
+    "old_controller_pid": 88283,
+    "folder": "core_multiseed_response_curves_20260913",
+    "script": "run_topic4_multiseed_response_curves.py",
+    "workers": [
+      {
+        "pid": 15948,
+        "unit": [
+          "bridge_circle_out125_xminus075",
+          2711,
+          847401
+        ],
+        "stage": "response",
+        "process_created_unix": 1789239537.33,
+        "log": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/logs/response_bridge_circle_out125_xminus075_2711_847401.log"
+      },
+      {
+        "pid": 4078535,
+        "unit": [
+          "bridge_circle_out125",
+          2511,
+          847401
+        ],
+        "stage": "response",
+        "process_created_unix": 1789235775.35,
+        "log": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/logs/response_bridge_circle_out125_2511_847401.log"
+      },
+      {
+        "pid": 4078701,
+        "unit": [
+          "bridge_circle_out125_xminus075",
+          2511,
+          847401
+        ],
+        "stage": "response",
+        "process_created_unix": 1789235780.86,
+        "log": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/logs/response_bridge_circle_out125_xminus075_2511_847401.log"
+      },
+      {
+        "pid": 4151248,
+        "unit": [
+          "bridge_circle_out125",
+          2711,
+          847401
+        ],
+        "stage": "response",
+        "process_created_unix": 1789237873.35,
+        "log": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/logs/response_bridge_circle_out125_2711_847401.log"
+      }
+    ],
+    "new_controller_pid": 258055,
+    "controller_sha256": "0acfb08546c9eadfc1c880ac9c074962047f87b676ef53e85f967ec1eae43225"
+  }
+}

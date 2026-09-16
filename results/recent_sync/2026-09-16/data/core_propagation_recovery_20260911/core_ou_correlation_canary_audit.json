@@ -1,0 +1,147 @@
+{
+ "status": "PASS_ENGINEERING_ONLY",
+ "rho1_exact_array_parity": {
+  "contact_envelope": true,
+  "contact_envelope_dt_ms": true,
+  "contact_names": true,
+  "contact_xy_mm": true,
+  "positions_E": true,
+  "positions_I": true,
+  "h": true,
+  "vtheta": true,
+  "core_index_E": true,
+  "core_index_I": true,
+  "sheet_activity_counts": true,
+  "sheet_activity_frame_ms": true,
+  "centroid_ms": true,
+  "recruitment_ms": true,
+  "primary_event_indices": true,
+  "event_mode": true,
+  "event_support": true,
+  "event_distance_modes": true,
+  "event_time_ms": true,
+  "event_phi": true,
+  "rate_E": true,
+  "rate_I": true,
+  "input_expected_per_step": true,
+  "input_is_stochastic": true,
+  "input_rate_audit_columns": true,
+  "input_rate_audit_values": true,
+  "trace_time_ms": true,
+  "trace_xi": true,
+  "trace_nu_now": true,
+  "trace_E_spikes": true,
+  "trace_I_spikes": true,
+  "trace_E_mean_V": true,
+  "trace_coreAE_mean_V": true,
+  "trace_coreAE_spikes": true,
+  "trace_coreAE_mean_I_E": true,
+  "trace_coreAE_mean_I_I": true,
+  "trace_coreBE_mean_V": true,
+  "trace_coreBE_spikes": true,
+  "trace_coreBE_mean_I_E": true,
+  "trace_coreBE_mean_I_I": true,
+  "trace_coreAI_mean_V": true,
+  "trace_coreAI_spikes": true,
+  "trace_coreAI_mean_I_E": true,
+  "trace_coreAI_mean_I_I": true,
+  "trace_coreBI_mean_V": true,
+  "trace_coreBI_spikes": true,
+  "trace_coreBI_mean_I_E": true,
+  "trace_coreBI_mean_I_I": true,
+  "trace_surroundE_mean_V": true,
+  "trace_surroundE_spikes": true,
+  "trace_surroundE_mean_I_E": true,
+  "trace_surroundE_mean_I_I": true,
+  "trace_allI_mean_V": true,
+  "trace_allI_spikes": true,
+  "trace_allI_mean_I_E": true,
+  "trace_allI_mean_I_I": true,
+  "group_coreAE": true,
+  "group_coreBE": true,
+  "group_coreAI": true,
+  "group_coreBI": true,
+  "group_surroundE": true,
+  "group_allI": true
+ },
+ "checks": [
+  {
+   "candidate": "coreOU_canary_rho1p0",
+   "rho": 1.0,
+   "arrays_sha256": "60f44d257311f4efa92e0d8c488e3fa322d5e980886842ce9a14348234ba3e51",
+   "actual_input_audit": {
+    "rho": 1.0,
+    "maximum_core_rate_error": {
+     "coreAE": 0.0,
+     "coreBE": 0.0
+    },
+    "maximum_I_rate_error": 0.0,
+    "intermediate_global_clip_steps": 0,
+    "final_negative_core_steps": 0,
+    "empirical_rate_std_per_ms": [
+     0.014033167614641368,
+     0.014033167614641368
+    ],
+    "empirical_between_core_rate_correlation": 0.9999999999999999,
+    "note": "Finite empirical moments are not exact theoretical targets. No physiological mode or pathway is supplied to the drive."
+   }
+  },
+  {
+   "candidate": "coreOU_canary_rho0p5",
+   "rho": 0.5,
+   "arrays_sha256": "3a939f5e9ac40292575eca1c8beba77171bbb53988e821408ffffb7ee62abc42",
+   "actual_input_audit": {
+    "rho": 0.5,
+    "maximum_core_rate_error": {
+     "coreAE": 0.0,
+     "coreBE": 0.0
+    },
+    "maximum_I_rate_error": 0.0,
+    "intermediate_global_clip_steps": 0,
+    "final_negative_core_steps": 0,
+    "empirical_rate_std_per_ms": [
+     0.011554228260536092,
+     0.015143597126864897
+    ],
+    "empirical_between_core_rate_correlation": 0.14041909817135062,
+    "note": "Finite empirical moments are not exact theoretical targets. No physiological mode or pathway is supplied to the drive."
+   }
+  },
+  {
+   "candidate": "coreOU_canary_rho0p0",
+   "rho": 0.0,
+   "arrays_sha256": "0b3c8db74874894c55f1ee86065e42853b2cd0d136cab162643a318dc8107df8",
+   "actual_input_audit": {
+    "rho": 0.0,
+    "maximum_core_rate_error": {
+     "coreAE": 0.0,
+     "coreBE": 0.0
+    },
+    "maximum_I_rate_error": 0.0,
+    "intermediate_global_clip_steps": 0,
+    "final_negative_core_steps": 0,
+    "empirical_rate_std_per_ms": [
+     0.02275431906993086,
+     0.01650728696995549
+    ],
+    "empirical_between_core_rate_correlation": 0.2168062310972531,
+    "note": "Finite empirical moments are not exact theoretical targets. No physiological mode or pathway is supplied to the drive."
+   }
+  }
+ ],
+ "resources": [
+  {
+   "candidate": "coreOU_canary_rho1p0",
+   "peak_tree_rss_gib": 2.6486053466796875
+  },
+  {
+   "candidate": "coreOU_canary_rho0p5",
+   "peak_tree_rss_gib": 2.586376190185547
+  },
+  {
+   "candidate": "coreOU_canary_rho0p0",
+   "peak_tree_rss_gib": 2.6144065856933594
+  }
+ ],
+ "no_science_claim": "500ms canaries validate implementation only. No formal correlation experiment dispatched or patient propagation conclusion."
+}

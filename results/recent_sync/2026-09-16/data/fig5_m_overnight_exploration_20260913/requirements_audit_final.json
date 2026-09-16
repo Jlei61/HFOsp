@@ -1,0 +1,73 @@
+{
+  "time": "2026-09-13T09:45:59.502142+08:00",
+  "status": "WINDOW_COMPLETE_PENDING_USER_REVIEW",
+  "window_start": "2026-09-13T01:40:00+08:00",
+  "deadline": "2026-09-13T09:40:00+08:00",
+  "bounded_exploration_complete": true,
+  "M_and_Z_parameter_grids_complete": false,
+  "model_scientific_acceptance": false,
+  "requirements": [
+    {
+      "item": "Fixed manual substrate, native Z/M and continuous state",
+      "status": "VERIFIED",
+      "evidence": "Nine physics sources unchanged; real full-state numerical QA and replay observation parity."
+    },
+    {
+      "item": "One complete finite→high→Z refill→return→second high trajectory",
+      "status": "OBSERVED_EXTERNAL_RETURN",
+      "evidence": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_m_overnight_exploration_20260913/early_energy_high_resolution_replay/candidate/fig5_metadata.json"
+    },
+    {
+      "item": "Autonomous termination from M at fixed parameters",
+      "status": "NOT_ESTABLISHED",
+      "evidence": "Completed recurrence example used external Z refill; external M-gain step is a separate intervention."
+    },
+    {
+      "item": "Native sustained low-frequency burst in the high state",
+      "status": "NOT_ESTABLISHED",
+      "evidence": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_m_overnight_exploration_20260913/recurrent_high_native_rhythm/analysis.json"
+    },
+    {
+      "item": "Patient-compatible early energy increase",
+      "status": "NOT_REPRODUCED_IN_COMPLETE_EXAMPLE",
+      "evidence": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_m_overnight_exploration_20260913/early_energy_high_resolution_replay/energy_comparison.json"
+    },
+    {
+      "item": "Full M grid followups and corresponding F surface",
+      "status": "RUNNING",
+      "completed": 0,
+      "total": 40,
+      "first_endpoints": 8,
+      "complete_paired_F_cells": 3,
+      "total_F_cells": 20
+    },
+    {
+      "item": "Fixed-M Z kinetics grid",
+      "status": "RUNNING",
+      "completed": 128,
+      "total": 147,
+      "distinct_M_setting": ".02 / 2s"
+    },
+    {
+      "item": "Reset causal diagnosis",
+      "status": "PARTIAL_LONG_FOLLOWUP_RUNNING",
+      "evidence": "Z-only1000s and full-fast90s finished; M-clear1000s is tracked independently."
+    },
+    {
+      "item": "Figure layout and observation QA",
+      "status": "AGENT_REVIEWED",
+      "evidence": "Full and zoom figures viewed; raw0.1ms E2 observer verified without changing the trajectory."
+    },
+    {
+      "item": "Human visual and scientific acceptance",
+      "status": "PENDING",
+      "model_frozen": false
+    }
+  ],
+  "physics_unchanged": true,
+  "inventory": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_m_overnight_exploration_20260913/comprehensive_inventory/inventory_at_deadline.json",
+  "preferred_complete_figure": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_m_overnight_exploration_20260913/early_energy_high_resolution_replay/candidate/figures/fig5.png",
+  "existing_authorized_batches_continue": true,
+  "new_exploration_dispatch_closed": true,
+  "no_simulations_dispatched_or_stopped_by_report": true
+}

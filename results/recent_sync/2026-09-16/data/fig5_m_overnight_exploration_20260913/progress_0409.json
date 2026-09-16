@@ -1,0 +1,36 @@
+{
+  "time": "2026-09-13T04:09:07.776745+08:00",
+  "classification": "PROGRESS",
+  "status": {
+    "m_parameter_modes_fig5_20260913": {
+      "status": "RUNNING",
+      "pid": 134670,
+      "completed": 0,
+      "total": 40,
+      "pending": 28,
+      "failed": [],
+      "running": 12,
+      "controller_verified_live": true
+    },
+    "m_on_z_kinetics_20260912": {
+      "status": "RUNNING",
+      "pid": 4186101,
+      "completed": 112,
+      "total": 147,
+      "pending": 3,
+      "failed": [],
+      "running": 32,
+      "controller_verified_live": true
+    }
+  },
+  "new_evidence": [
+    "Z_seed_sensitivity/analysis.json:112completed,36completecells; paired seeds show nonmonotonic finite-window latency responses",
+    "figure_phase_order_qa.json:events after second high cannot fill first postreturn interval; all3chronological cases PASS",
+    "scatter_lookup_qa/ordered_gather_benchmark.json:alternative gather is slower at all tested activity fractions; rejected without physical adoption"
+  ],
+  "preview_watcher_pid": 157068,
+  "preview_watcher_verified_live": true,
+  "started_lookup_workers": 0,
+  "original_physics_hashes_unchanged": true,
+  "stopping_conditions": "Goal deadline09:40; inherited fixed batches remain unchanged; no further performance variants planned after negative gather benchmark"
+}

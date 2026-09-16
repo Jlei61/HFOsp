@@ -1,0 +1,939 @@
+{
+  "updated_at": 1789447042.6769345,
+  "final": true,
+  "rows": [
+    {
+      "name": "liou_g0_s9108401",
+      "job": {
+        "name": "liou_g0_s9108401",
+        "mode": "native",
+        "gamma": 0.0,
+        "spatial_gamma": 0.0,
+        "current_per_Hz": 6.5338848042521835,
+        "synapse_ms": 15.0,
+        "eta_m": 0.005,
+        "tau_M_s": 2.0,
+        "tau_Z_s": 5.0,
+        "threshold": 95.19851312666987,
+        "seed": 9108401,
+        "horizon_s": 60.0,
+        "device": 0,
+        "checkpoint_s": 10.0
+      },
+      "complete": true,
+      "observed_s": 60.0,
+      "mode": "HIGH_WITHOUT_VERIFIED_RECOVERY",
+      "termination_status": "COMPLETE",
+      "stop_reason": "FULL_PRESPECIFIED_HORIZON",
+      "planned_horizon_s": 60.0,
+      "reached_planned_horizon": true,
+      "entries": [
+        {
+          "onset_s": 11.72,
+          "confirmation_s": 11.92
+        }
+      ],
+      "recoveries": [],
+      "no_intervention": true,
+      "tail10s_mean_Hz": [
+        500.0,
+        500.0,
+        500.0,
+        500.0
+      ],
+      "tail10s_quiet_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "early_mean_Hz": [
+        15.949895833333324,
+        23.601827291482454,
+        29.7791914051456,
+        15.403625884584507
+      ],
+      "Z_final": [
+        5.1613303289085586e-05,
+        1.038375166722429e-05,
+        4.263885528680589e-05,
+        4.815363344440597e-05,
+        6.64021535179453e-05,
+        4.4209021815814e-05,
+        4.140065189894282e-05,
+        5.206011787291682e-05,
+        1.0
+      ],
+      "M_feedback_final": [
+        4.999999456895356,
+        5.000110412682316,
+        5.000003817969774,
+        4.999996597786102
+      ],
+      "tail_modulation_p95_minus_p05_over_mean": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "tail_envelope_spectrum": [
+        {
+          "envelope_band_Hz": [
+            0.5,
+            40
+          ],
+          "envelope_power": 0.0,
+          "peak_frequency_Hz": null,
+          "interpretation": "Descriptive population envelope spectrum; noise-driven bursts or spatial cancellation can produce peaks, so not a limit-cycle test."
+        },
+        {
+          "envelope_band_Hz": [
+            0.5,
+            40
+          ],
+          "envelope_power": 0.0,
+          "peak_frequency_Hz": null,
+          "interpretation": "Descriptive population envelope spectrum; noise-driven bursts or spatial cancellation can produce peaks, so not a limit-cycle test."
+        },
+        {
+          "envelope_band_Hz": [
+            0.5,
+            40
+          ],
+          "envelope_power": 0.0,
+          "peak_frequency_Hz": null,
+          "interpretation": "Descriptive population envelope spectrum; noise-driven bursts or spatial cancellation can produce peaks, so not a limit-cycle test."
+        },
+        {
+          "envelope_band_Hz": [
+            0.5,
+            40
+          ],
+          "envelope_power": 0.0,
+          "peak_frequency_Hz": null,
+          "interpretation": "Descriptive population envelope spectrum; noise-driven bursts or spatial cancellation can produce peaks, so not a limit-cycle test."
+        }
+      ],
+      "broad_sustained_intervals": [
+        {
+          "start_s": 11.62,
+          "end_s": 60.0,
+          "duration_s": 48.38
+        }
+      ],
+      "broad_definition": "20ms bins: at least50%native1mm cells>=20Hz AND allE>=50Hz continuously1s. Independent diagnostic; not a replacement for the primary high-state criterion.",
+      "final_regional_currents": [
+        [
+          1579.8174155081686,
+          1774.7079276154634,
+          1774.7079276154634,
+          0.0784580904567547,
+          5.000110412682316
+        ],
+        [
+          1578.7542470342257,
+          1774.3800166161545,
+          1774.3800166161545,
+          0.07346045431597673,
+          5.000003817969774
+        ],
+        [
+          1579.2925917683774,
+          1774.610347161161,
+          1774.610347161161,
+          0.09238607317981706,
+          4.999996597786102
+        ]
+      ],
+      "counts_and_endpoint_audit": "PASS",
+      "limit": "Operational high/return detection, pending raster/native-field review; no claim of a bifurcation or patient seizure reproduction.",
+      "quiet_after_first_high": {
+        "actual_s": 0.0,
+        "sampled_slow_points": 0,
+        "mean_fraction_E_with_recovery_drive": null,
+        "fraction_slow_points_with_positive_mean_Z_derivative": null,
+        "note": "Actual simultaneous allE/CoreA/CoreB<5Hz bins. PositiveZ derivative means b_fraction>meanZ under the unchanged native equation; not merely a low rate."
+      },
+      "feedback_current_equation_QA": "PASS",
+      "actual_feedback_ms": 15.0
+    },
+    {
+      "name": "liou_g0_s9108402",
+      "job": {
+        "name": "liou_g0_s9108402",
+        "mode": "native",
+        "gamma": 0.0,
+        "spatial_gamma": 0.0,
+        "current_per_Hz": 6.5338848042521835,
+        "synapse_ms": 15.0,
+        "eta_m": 0.005,
+        "tau_M_s": 2.0,
+        "tau_Z_s": 5.0,
+        "threshold": 95.19851312666987,
+        "seed": 9108402,
+        "horizon_s": 60.0,
+        "device": 1,
+        "checkpoint_s": 10.0
+      },
+      "complete": true,
+      "observed_s": 60.0,
+      "mode": "HIGH_WITHOUT_VERIFIED_RECOVERY",
+      "termination_status": "COMPLETE",
+      "stop_reason": "FULL_PRESPECIFIED_HORIZON",
+      "planned_horizon_s": 60.0,
+      "reached_planned_horizon": true,
+      "entries": [
+        {
+          "onset_s": 13.21,
+          "confirmation_s": 13.41
+        }
+      ],
+      "recoveries": [],
+      "no_intervention": true,
+      "tail10s_mean_Hz": [
+        500.0,
+        500.0,
+        500.0,
+        500.0
+      ],
+      "tail10s_quiet_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "early_mean_Hz": [
+        15.621187499999996,
+        24.90480400825225,
+        22.25219112242011,
+        15.220274312395125
+      ],
+      "Z_final": [
+        6.851601570023577e-05,
+        1.1942257696222446e-05,
+        5.842798636456821e-05,
+        6.416617806436823e-05,
+        8.558356341387214e-05,
+        5.802672655047677e-05,
+        5.9278295791604755e-05,
+        6.901403841419186e-05,
+        1.0
+      ],
+      "M_feedback_final": [
+        5.000001124177383,
+        5.000002982739543,
+        4.999969774554576,
+        5.000001887127076
+      ],
+      "tail_modulation_p95_minus_p05_over_mean": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "tail_envelope_spectrum": [
+        {
+          "envelope_band_Hz": [
+            0.5,
+            40
+          ],
+          "envelope_power": 0.0,
+          "peak_frequency_Hz": null,
+          "interpretation": "Descriptive population envelope spectrum; noise-driven bursts or spatial cancellation can produce peaks, so not a limit-cycle test."
+        },
+        {
+          "envelope_band_Hz": [
+            0.5,
+            40
+          ],
+          "envelope_power": 0.0,
+          "peak_frequency_Hz": null,
+          "interpretation": "Descriptive population envelope spectrum; noise-driven bursts or spatial cancellation can produce peaks, so not a limit-cycle test."
+        },
+        {
+          "envelope_band_Hz": [
+            0.5,
+            40
+          ],
+          "envelope_power": 0.0,
+          "peak_frequency_Hz": null,
+          "interpretation": "Descriptive population envelope spectrum; noise-driven bursts or spatial cancellation can produce peaks, so not a limit-cycle test."
+        },
+        {
+          "envelope_band_Hz": [
+            0.5,
+            40
+          ],
+          "envelope_power": 0.0,
+          "peak_frequency_Hz": null,
+          "interpretation": "Descriptive population envelope spectrum; noise-driven bursts or spatial cancellation can produce peaks, so not a limit-cycle test."
+        }
+      ],
+      "broad_sustained_intervals": [
+        {
+          "start_s": 13.12,
+          "end_s": 60.0,
+          "duration_s": 46.88
+        }
+      ],
+      "broad_definition": "20ms bins: at least50%native1mm cells>=20Hz AND allE>=50Hz continuously1s. Independent diagnostic; not a replacement for the primary high-state criterion.",
+      "final_regional_currents": [
+        [
+          1579.1853297441576,
+          1775.178413756065,
+          1775.178413756065,
+          0.10300796607588043,
+          5.000002982739543
+        ],
+        [
+          1579.361766620358,
+          1775.333455887628,
+          1775.333455887628,
+          0.10523881560054654,
+          4.999969774554576
+        ],
+        [
+          1579.9487739618594,
+          1775.1890417773823,
+          1775.1890417773823,
+          0.1225127182992778,
+          5.000001887127076
+        ]
+      ],
+      "counts_and_endpoint_audit": "PASS",
+      "limit": "Operational high/return detection, pending raster/native-field review; no claim of a bifurcation or patient seizure reproduction.",
+      "quiet_after_first_high": {
+        "actual_s": 0.0,
+        "sampled_slow_points": 0,
+        "mean_fraction_E_with_recovery_drive": null,
+        "fraction_slow_points_with_positive_mean_Z_derivative": null,
+        "note": "Actual simultaneous allE/CoreA/CoreB<5Hz bins. PositiveZ derivative means b_fraction>meanZ under the unchanged native equation; not merely a low rate."
+      },
+      "feedback_current_equation_QA": "PASS",
+      "actual_feedback_ms": 15.0
+    },
+    {
+      "name": "liou_g1of6_s9108401",
+      "job": {
+        "name": "liou_g1of6_s9108401",
+        "mode": "native",
+        "gamma": 0.0,
+        "spatial_gamma": 0.16666666666666666,
+        "current_per_Hz": 6.5338848042521835,
+        "synapse_ms": 15.0,
+        "eta_m": 0.005,
+        "tau_M_s": 2.0,
+        "tau_Z_s": 5.0,
+        "threshold": 95.19851312666987,
+        "seed": 9108401,
+        "horizon_s": 60.0,
+        "device": 0,
+        "checkpoint_s": 10.0
+      },
+      "complete": true,
+      "observed_s": 60.0,
+      "mode": "HIGH_WITHOUT_VERIFIED_RECOVERY",
+      "termination_status": "COMPLETE",
+      "stop_reason": "FULL_PRESPECIFIED_HORIZON",
+      "planned_horizon_s": 60.0,
+      "reached_planned_horizon": true,
+      "entries": [
+        {
+          "onset_s": 10.72,
+          "confirmation_s": 10.92
+        }
+      ],
+      "recoveries": [],
+      "no_intervention": true,
+      "tail10s_mean_Hz": [
+        500.0,
+        500.0,
+        500.0,
+        500.0
+      ],
+      "tail10s_quiet_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "early_mean_Hz": [
+        7.7567916666666665,
+        16.880341880341877,
+        19.353124116482885,
+        7.231713722915297
+      ],
+      "Z_final": [
+        3.448323344995632e-05,
+        3.19348842066345e-06,
+        2.9841988310624516e-05,
+        3.644428907183479e-05,
+        3.758718314084394e-05,
+        2.9848919264786667e-05,
+        3.061123552387343e-05,
+        3.469786454862734e-05,
+        1.0
+      ],
+      "M_feedback_final": [
+        5.000000692592747,
+        4.9999870648553735,
+        5.00000731631136,
+        5.000000859010054
+      ],
+      "tail_modulation_p95_minus_p05_over_mean": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "tail_envelope_spectrum": [
+        {
+          "envelope_band_Hz": [
+            0.5,
+            40
+          ],
+          "envelope_power": 0.0,
+          "peak_frequency_Hz": null,
+          "interpretation": "Descriptive population envelope spectrum; noise-driven bursts or spatial cancellation can produce peaks, so not a limit-cycle test."
+        },
+        {
+          "envelope_band_Hz": [
+            0.5,
+            40
+          ],
+          "envelope_power": 0.0,
+          "peak_frequency_Hz": null,
+          "interpretation": "Descriptive population envelope spectrum; noise-driven bursts or spatial cancellation can produce peaks, so not a limit-cycle test."
+        },
+        {
+          "envelope_band_Hz": [
+            0.5,
+            40
+          ],
+          "envelope_power": 0.0,
+          "peak_frequency_Hz": null,
+          "interpretation": "Descriptive population envelope spectrum; noise-driven bursts or spatial cancellation can produce peaks, so not a limit-cycle test."
+        },
+        {
+          "envelope_band_Hz": [
+            0.5,
+            40
+          ],
+          "envelope_power": 0.0,
+          "peak_frequency_Hz": null,
+          "interpretation": "Descriptive population envelope spectrum; noise-driven bursts or spatial cancellation can produce peaks, so not a limit-cycle test."
+        }
+      ],
+      "broad_sustained_intervals": [
+        {
+          "start_s": 10.7,
+          "end_s": 60.0,
+          "duration_s": 49.3
+        }
+      ],
+      "broad_definition": "20ms bins: at least50%native1mm cells>=20Hz AND allE>=50Hz continuously1s. Independent diagnostic; not a replacement for the primary high-state criterion.",
+      "final_regional_currents": [
+        [
+          1580.261858019443,
+          1774.6065525283002,
+          2025.155013800728,
+          0.06044870666151946,
+          4.9999870648553735
+        ],
+        [
+          1578.6202231916225,
+          1774.3331543568033,
+          2024.927181991147,
+          0.06198553809041975,
+          5.00000731631136
+        ],
+        [
+          1579.309789935831,
+          1774.6752992920212,
+          2025.2123027704954,
+          0.070270791787895,
+          5.000000859010054
+        ]
+      ],
+      "counts_and_endpoint_audit": "PASS",
+      "limit": "Operational high/return detection, pending raster/native-field review; no claim of a bifurcation or patient seizure reproduction.",
+      "quiet_after_first_high": {
+        "actual_s": 0.0,
+        "sampled_slow_points": 0,
+        "mean_fraction_E_with_recovery_drive": null,
+        "fraction_slow_points_with_positive_mean_Z_derivative": null,
+        "note": "Actual simultaneous allE/CoreA/CoreB<5Hz bins. PositiveZ derivative means b_fraction>meanZ under the unchanged native equation; not merely a low rate."
+      },
+      "feedback_current_equation_QA": "PASS",
+      "actual_feedback_ms": 15.0
+    },
+    {
+      "name": "liou_g1of6_s9108402",
+      "job": {
+        "name": "liou_g1of6_s9108402",
+        "mode": "native",
+        "gamma": 0.0,
+        "spatial_gamma": 0.16666666666666666,
+        "current_per_Hz": 6.5338848042521835,
+        "synapse_ms": 15.0,
+        "eta_m": 0.005,
+        "tau_M_s": 2.0,
+        "tau_Z_s": 5.0,
+        "threshold": 95.19851312666987,
+        "seed": 9108402,
+        "horizon_s": 60.0,
+        "device": 1,
+        "checkpoint_s": 10.0
+      },
+      "complete": true,
+      "observed_s": 60.0,
+      "mode": "HIGH_WITHOUT_VERIFIED_RECOVERY",
+      "termination_status": "COMPLETE",
+      "stop_reason": "FULL_PRESPECIFIED_HORIZON",
+      "planned_horizon_s": 60.0,
+      "reached_planned_horizon": true,
+      "entries": [
+        {
+          "onset_s": 10.13,
+          "confirmation_s": 10.33
+        }
+      ],
+      "recoveries": [],
+      "no_intervention": true,
+      "tail10s_mean_Hz": [
+        500.0,
+        500.0,
+        500.0,
+        500.0
+      ],
+      "tail10s_quiet_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "early_mean_Hz": [
+        8.039951388888888,
+        14.385794282345994,
+        20.310715295448112,
+        7.5662289341212485
+      ],
+      "Z_final": [
+        3.1262825915971045e-05,
+        2.975092410159192e-06,
+        2.711296455527983e-05,
+        3.277028170775521e-05,
+        3.4433701161349285e-05,
+        2.8638219017702523e-05,
+        2.6716812520846134e-05,
+        3.144510169173804e-05,
+        1.0
+      ],
+      "M_feedback_final": [
+        5.000006465275398,
+        4.9999953561547406,
+        5.000018763036783,
+        5.00000642293254
+      ],
+      "tail_modulation_p95_minus_p05_over_mean": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "tail_envelope_spectrum": [
+        {
+          "envelope_band_Hz": [
+            0.5,
+            40
+          ],
+          "envelope_power": 0.0,
+          "peak_frequency_Hz": null,
+          "interpretation": "Descriptive population envelope spectrum; noise-driven bursts or spatial cancellation can produce peaks, so not a limit-cycle test."
+        },
+        {
+          "envelope_band_Hz": [
+            0.5,
+            40
+          ],
+          "envelope_power": 0.0,
+          "peak_frequency_Hz": null,
+          "interpretation": "Descriptive population envelope spectrum; noise-driven bursts or spatial cancellation can produce peaks, so not a limit-cycle test."
+        },
+        {
+          "envelope_band_Hz": [
+            0.5,
+            40
+          ],
+          "envelope_power": 0.0,
+          "peak_frequency_Hz": null,
+          "interpretation": "Descriptive population envelope spectrum; noise-driven bursts or spatial cancellation can produce peaks, so not a limit-cycle test."
+        },
+        {
+          "envelope_band_Hz": [
+            0.5,
+            40
+          ],
+          "envelope_power": 0.0,
+          "peak_frequency_Hz": null,
+          "interpretation": "Descriptive population envelope spectrum; noise-driven bursts or spatial cancellation can produce peaks, so not a limit-cycle test."
+        }
+      ],
+      "broad_sustained_intervals": [
+        {
+          "start_s": 10.04,
+          "end_s": 60.0,
+          "duration_s": 49.96
+        }
+      ],
+      "broad_definition": "20ms bins: at least50%native1mm cells>=20Hz AND allE>=50Hz continuously1s. Independent diagnostic; not a replacement for the primary high-state criterion.",
+      "final_regional_currents": [
+        [
+          1579.5730294230198,
+          1775.126012458624,
+          2025.6693453467408,
+          0.058011539039984676,
+          4.9999953561547406
+        ],
+        [
+          1579.219049806748,
+          1774.8928509302489,
+          2025.4750440730945,
+          0.05411424534416027,
+          5.000018763036783
+        ],
+        [
+          1579.9558932834918,
+          1775.1285218943387,
+          2025.6714365431699,
+          0.06369741233431594,
+          5.00000642293254
+        ]
+      ],
+      "counts_and_endpoint_audit": "PASS",
+      "limit": "Operational high/return detection, pending raster/native-field review; no claim of a bifurcation or patient seizure reproduction.",
+      "quiet_after_first_high": {
+        "actual_s": 0.0,
+        "sampled_slow_points": 0,
+        "mean_fraction_E_with_recovery_drive": null,
+        "fraction_slow_points_with_positive_mean_Z_derivative": null,
+        "note": "Actual simultaneous allE/CoreA/CoreB<5Hz bins. PositiveZ derivative means b_fraction>meanZ under the unchanged native equation; not merely a low rate."
+      },
+      "feedback_current_equation_QA": "PASS",
+      "actual_feedback_ms": 15.0
+    },
+    {
+      "name": "liou_g1of2_s9108401",
+      "job": {
+        "name": "liou_g1of2_s9108401",
+        "mode": "native",
+        "gamma": 0.0,
+        "spatial_gamma": 0.5,
+        "current_per_Hz": 6.5338848042521835,
+        "synapse_ms": 15.0,
+        "eta_m": 0.005,
+        "tau_M_s": 2.0,
+        "tau_Z_s": 5.0,
+        "threshold": 95.19851312666987,
+        "seed": 9108401,
+        "horizon_s": 60.0,
+        "device": 0,
+        "checkpoint_s": 10.0
+      },
+      "complete": true,
+      "observed_s": 60.0,
+      "mode": "HIGH_WITHOUT_VERIFIED_RECOVERY",
+      "termination_status": "COMPLETE",
+      "stop_reason": "FULL_PRESPECIFIED_HORIZON",
+      "planned_horizon_s": 60.0,
+      "reached_planned_horizon": true,
+      "entries": [
+        {
+          "onset_s": 3.11,
+          "confirmation_s": 3.31
+        }
+      ],
+      "recoveries": [],
+      "no_intervention": true,
+      "tail10s_mean_Hz": [
+        500.0,
+        500.0,
+        500.0,
+        500.0
+      ],
+      "tail10s_quiet_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "early_mean_Hz": [
+        191.4146597222221,
+        459.62953138815226,
+        160.52021487135957,
+        185.5725395783177
+      ],
+      "Z_final": [
+        6.2730735317531435e-06,
+        4.75086277728466e-09,
+        6.265326818608026e-06,
+        6.275233958632739e-06,
+        6.275233958632739e-06,
+        6.2561846286722876e-06,
+        6.27518398031588e-06,
+        6.273437137148832e-06,
+        1.0
+      ],
+      "M_feedback_final": [
+        4.999992507701583,
+        4.9999827471497,
+        5.000009856940756,
+        4.999992301626539
+      ],
+      "tail_modulation_p95_minus_p05_over_mean": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "tail_envelope_spectrum": [
+        {
+          "envelope_band_Hz": [
+            0.5,
+            40
+          ],
+          "envelope_power": 0.0,
+          "peak_frequency_Hz": null,
+          "interpretation": "Descriptive population envelope spectrum; noise-driven bursts or spatial cancellation can produce peaks, so not a limit-cycle test."
+        },
+        {
+          "envelope_band_Hz": [
+            0.5,
+            40
+          ],
+          "envelope_power": 0.0,
+          "peak_frequency_Hz": null,
+          "interpretation": "Descriptive population envelope spectrum; noise-driven bursts or spatial cancellation can produce peaks, so not a limit-cycle test."
+        },
+        {
+          "envelope_band_Hz": [
+            0.5,
+            40
+          ],
+          "envelope_power": 0.0,
+          "peak_frequency_Hz": null,
+          "interpretation": "Descriptive population envelope spectrum; noise-driven bursts or spatial cancellation can produce peaks, so not a limit-cycle test."
+        },
+        {
+          "envelope_band_Hz": [
+            0.5,
+            40
+          ],
+          "envelope_power": 0.0,
+          "peak_frequency_Hz": null,
+          "interpretation": "Descriptive population envelope spectrum; noise-driven bursts or spatial cancellation can produce peaks, so not a limit-cycle test."
+        }
+      ],
+      "broad_sustained_intervals": [
+        {
+          "start_s": 3.14,
+          "end_s": 60.0,
+          "duration_s": 56.86
+        }
+      ],
+      "broad_definition": "20ms bins: at least50%native1mm cells>=20Hz AND allE>=50Hz continuously1s. Independent diagnostic; not a replacement for the primary high-state criterion.",
+      "final_regional_currents": [
+        [
+          1580.1861295037559,
+          1774.7215894664018,
+          2525.956369532745,
+          0.015802849406623524,
+          4.9999827471497
+        ],
+        [
+          1578.816014637513,
+          1774.273211286754,
+          2525.7321804429216,
+          0.015849434120082752,
+          5.000009856940756
+        ],
+        [
+          1579.299825404662,
+          1774.6112167955846,
+          2525.901183197337,
+          0.01584608221802394,
+          4.999992301626539
+        ]
+      ],
+      "counts_and_endpoint_audit": "PASS",
+      "limit": "Operational high/return detection, pending raster/native-field review; no claim of a bifurcation or patient seizure reproduction.",
+      "quiet_after_first_high": {
+        "actual_s": 0.0,
+        "sampled_slow_points": 0,
+        "mean_fraction_E_with_recovery_drive": null,
+        "fraction_slow_points_with_positive_mean_Z_derivative": null,
+        "note": "Actual simultaneous allE/CoreA/CoreB<5Hz bins. PositiveZ derivative means b_fraction>meanZ under the unchanged native equation; not merely a low rate."
+      },
+      "feedback_current_equation_QA": "PASS",
+      "actual_feedback_ms": 15.0
+    },
+    {
+      "name": "liou_g1of2_s9108402",
+      "job": {
+        "name": "liou_g1of2_s9108402",
+        "mode": "native",
+        "gamma": 0.0,
+        "spatial_gamma": 0.5,
+        "current_per_Hz": 6.5338848042521835,
+        "synapse_ms": 15.0,
+        "eta_m": 0.005,
+        "tau_M_s": 2.0,
+        "tau_Z_s": 5.0,
+        "threshold": 95.19851312666987,
+        "seed": 9108402,
+        "horizon_s": 60.0,
+        "device": 1,
+        "checkpoint_s": 10.0
+      },
+      "complete": true,
+      "observed_s": 60.0,
+      "mode": "HIGH_WITHOUT_VERIFIED_RECOVERY",
+      "termination_status": "COMPLETE",
+      "stop_reason": "FULL_PRESPECIFIED_HORIZON",
+      "planned_horizon_s": 60.0,
+      "reached_planned_horizon": true,
+      "entries": [
+        {
+          "onset_s": 2.94,
+          "confirmation_s": 3.14
+        }
+      ],
+      "recoveries": [],
+      "no_intervention": true,
+      "tail10s_mean_Hz": [
+        500.0,
+        500.0,
+        500.0,
+        500.0
+      ],
+      "tail10s_quiet_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "early_mean_Hz": [
+        192.25439583333338,
+        286.26053639846725,
+        459.1391009329953,
+        183.04060698912969
+      ],
+      "Z_final": [
+        6.2764540700329085e-06,
+        5.03836026733245e-09,
+        6.267958834876817e-06,
+        6.27862353396924e-06,
+        6.278749108951419e-06,
+        6.278544260115132e-06,
+        6.259216198343397e-06,
+        6.276847141727785e-06,
+        1.0
+      ],
+      "M_feedback_final": [
+        4.9999982183473035,
+        4.999918106077688,
+        5.000008278278056,
+        4.999999941838628
+      ],
+      "tail_modulation_p95_minus_p05_over_mean": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "tail_envelope_spectrum": [
+        {
+          "envelope_band_Hz": [
+            0.5,
+            40
+          ],
+          "envelope_power": 0.0,
+          "peak_frequency_Hz": null,
+          "interpretation": "Descriptive population envelope spectrum; noise-driven bursts or spatial cancellation can produce peaks, so not a limit-cycle test."
+        },
+        {
+          "envelope_band_Hz": [
+            0.5,
+            40
+          ],
+          "envelope_power": 0.0,
+          "peak_frequency_Hz": null,
+          "interpretation": "Descriptive population envelope spectrum; noise-driven bursts or spatial cancellation can produce peaks, so not a limit-cycle test."
+        },
+        {
+          "envelope_band_Hz": [
+            0.5,
+            40
+          ],
+          "envelope_power": 0.0,
+          "peak_frequency_Hz": null,
+          "interpretation": "Descriptive population envelope spectrum; noise-driven bursts or spatial cancellation can produce peaks, so not a limit-cycle test."
+        },
+        {
+          "envelope_band_Hz": [
+            0.5,
+            40
+          ],
+          "envelope_power": 0.0,
+          "peak_frequency_Hz": null,
+          "interpretation": "Descriptive population envelope spectrum; noise-driven bursts or spatial cancellation can produce peaks, so not a limit-cycle test."
+        }
+      ],
+      "broad_sustained_intervals": [
+        {
+          "start_s": 2.98,
+          "end_s": 60.0,
+          "duration_s": 57.02
+        }
+      ],
+      "broad_definition": "20ms bins: at least50%native1mm cells>=20Hz AND allE>=50Hz continuously1s. Independent diagnostic; not a replacement for the primary high-state criterion.",
+      "final_regional_currents": [
+        [
+          1579.8601867396162,
+          1775.2838273393518,
+          2526.4844656360697,
+          0.015862644538340957,
+          4.999918106077688
+        ],
+        [
+          1579.4697724119385,
+          1775.35435964615,
+          2526.519731789469,
+          0.0158140331718685,
+          5.000008278278056
+        ],
+        [
+          1579.9381462470867,
+          1775.1882439358085,
+          2526.436673934298,
+          0.015858056699564076,
+          4.999999941838628
+        ]
+      ],
+      "counts_and_endpoint_audit": "PASS",
+      "limit": "Operational high/return detection, pending raster/native-field review; no claim of a bifurcation or patient seizure reproduction.",
+      "quiet_after_first_high": {
+        "actual_s": 0.0,
+        "sampled_slow_points": 0,
+        "mean_fraction_E_with_recovery_drive": null,
+        "fraction_slow_points_with_positive_mean_Z_derivative": null,
+        "note": "Actual simultaneous allE/CoreA/CoreB<5Hz bins. PositiveZ derivative means b_fraction>meanZ under the unchanged native equation; not merely a low rate."
+      },
+      "feedback_current_equation_QA": "PASS",
+      "actual_feedback_ms": 15.0
+    }
+  ],
+  "statistical_unit": "One parameter/noise trajectory on the same topology; noise conditions are paired counterfactuals.",
+  "interpretation": "Original uniform E-output spatial projection and15ms synapse on currentLIF. No10s memory or50Hz threshold. Full LAS biophysics is not reproduced.",
+  "human_review": "PENDING"
+}

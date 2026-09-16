@@ -1,0 +1,54 @@
+{
+  "updated_unix": 1789263159.9395454,
+  "elapsed_s": 8418,
+  "queues": {
+    "F": {
+      "complete": 0,
+      "total": 16,
+      "queued": 8,
+      "live_worker_pids": [
+        579940,
+        579950,
+        580355,
+        580430,
+        580667,
+        580757,
+        580989,
+        650678
+      ],
+      "stale_status_pids": [],
+      "status": "CONFIRMATION_RUNNING",
+      "failures": []
+    },
+    "N": {
+      "complete": 4,
+      "total": 108,
+      "queued": 96,
+      "live_worker_pids": [
+        258720,
+        259108,
+        368494,
+        368499,
+        492006,
+        492078,
+        500919,
+        510427
+      ],
+      "stale_status_pids": [],
+      "status": "RESPONSE_RUNNING",
+      "failures": []
+    },
+    "G": {
+      "complete": 4,
+      "total": 6,
+      "queued": 1,
+      "live_worker_pids": [
+        527657
+      ],
+      "stale_status_pids": [],
+      "status": "WINDOW_ELAPSED_DRAINING",
+      "failures": []
+    }
+  },
+  "available_gib": 112.07334518432617
+}

@@ -1,0 +1,52 @@
+{
+  "updated_unix": 1789254668.3225567,
+  "queues": {
+    "F": {
+      "status": "RESPONSE_RUNNING",
+      "complete": 56,
+      "total": 60,
+      "active": [
+        4070465,
+        4125167,
+        4151252,
+        4168996
+      ],
+      "queued": 0,
+      "failures": []
+    },
+    "N": {
+      "status": "RESPONSE_RUNNING",
+      "complete": 0,
+      "total": 108,
+      "active": [
+        15948,
+        258720,
+        259108,
+        4078535,
+        4078701,
+        4151248,
+        368494,
+        368499
+      ],
+      "queued": 100,
+      "failures": []
+    },
+    "G": {
+      "status": "RESPONSE_RUNNING",
+      "complete": 2,
+      "total": 6,
+      "active": [
+        312963,
+        435424
+      ],
+      "queued": 2,
+      "failures": []
+    }
+  },
+  "available_gib": 114.62129974365234,
+  "science": [
+    "ellipse_yplus1_two_noise/scientific_note.md",
+    "geometry_confirmation_effects/core_contact_timing/scientific_note.md",
+    "../global_axis_residual_probe_20260913/analysis/first_angle_review/scientific_note.md"
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "rows": [
+    {
+      "seed": 9108401,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/autonomous_recovery_exploration_20260914/paired_recurrence_confirmation_round8/runs/resource_rho0_k200_tau10_s9108401/chunks/0000000000_0000100000.npz",
+      "window_s": [
+        0.5,
+        8.0
+      ],
+      "E_mean_Hz": 17.216070833333333,
+      "raw_local_II_mean": 112.3913789448184,
+      "current_per_Hz": 6.528282790705587
+    },
+    {
+      "seed": 9108402,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/autonomous_recovery_exploration_20260914/native_global_confirmation_round9/runs/resource_rho0_k200_tau10_s9108402/chunks/0000000000_0000100000.npz",
+      "window_s": [
+        0.5,
+        8.0
+      ],
+      "E_mean_Hz": 17.385795833333336,
+      "raw_local_II_mean": 113.69418266902433,
+      "current_per_Hz": 6.539486817798781
+    }
+  ],
+  "current_per_Hz": 6.5338848042521835,
+  "method": "Fixed preentry mean raw localII / meanE rate, averaged across both existing development noises. Never recalibrated per candidate or fitted to recovery.",
+  "limitation": "Maps normalized local/global strengths to this current-LIF carrier. It is not a physical nS-to-mV conversion or an assertion that instantaneous component currents remain5:1."
+}

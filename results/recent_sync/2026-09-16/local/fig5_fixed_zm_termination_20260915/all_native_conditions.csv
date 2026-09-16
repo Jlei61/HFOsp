@@ -1,0 +1,29 @@
+batch,name,observed_s,complete,same_trajectory_extension,gamma,K_gain,seed,first_entry_s,return_confirmation_s,second_entry_s,max_E_10ms_Hz,late_mean_E_Hz,mean_Z_end,finite_events_before_first_entry,category
+fig5_fixed_zm_termination_20260915,native_s9108401,20.0,True,False,0.0,0,9108401,9.87,,,477.115625,476.5264875000002,0.10301102496061824,45,High without confirmed return
+fig5_fixed_zm_termination_20260915,fast_phi_s9108401,20.0,True,False,0.0,0,9108401,,,,93.815625,10.640362500000009,0.8200803389970143,87,No confirmed global high
+fig5_fixed_zm_termination_20260915,global_shunt_s9108401,20.0,True,False,0.0,0,9108401,12.79,,,460.453125,417.3600812499997,0.22774529955957712,55,High without confirmed return
+fig5_fixed_zm_termination_20260915,global_shunt_phi_s9108401,20.0,True,False,0.0,0,9108401,,,,56.190625,7.298649999999998,0.8670649630602977,79,No confirmed global high
+matched_spatial_round2,current_g0.166667_phi0_s9108401,30.0,True,False,0.16666666666666666,0,9108401,9.04,,,500.0,500.0,0.010096151216669584,30,High without confirmed return
+matched_spatial_round2,current_g0.5_phi0_s9108401,30.0,True,False,0.5,0,9108401,2.99,,,500.0,500.0,0.0025309973429287662,0,High without confirmed return
+matched_spatial_round2,conductance_g0.166667_phi0_s9108401,30.0,True,False,0.16666666666666666,0,9108401,5.44,,,500.0,500.0,0.005374875178427089,18,High without confirmed return
+matched_spatial_round2,conductance_g0.5_phi0_s9108401,30.0,True,False,0.5,0,9108401,2.31,,,500.0,500.0,0.002528845732192855,0,High without confirmed return
+matched_spatial_round2,conductance_g0.166667_phi2.5_s9108401,30.0,True,False,0.16666666666666666,0,9108401,,,,70.740625,9.80885,0.8492193982945649,143,No confirmed global high
+matched_spatial_round2,conductance_g0.5_phi2.5_s9108401,30.0,True,False,0.5,0,9108401,22.82,,,255.9625,246.55064374999992,0.012893934376920045,18,High without confirmed return
+hyperpolar_spatial_round3,hyperpolar_g0.5_phi1.25_s9108401,20.0,True,False,0.5,0,9108401,7.52,,,345.325,336.67281875000003,0.020800156050043768,0,High without confirmed return
+hyperpolar_spatial_round3,hyperpolar_g0.5_phi2.5_s9108401,20.0,True,False,0.5,0,9108401,13.08,,,252.025,242.1731374999999,0.03880647322317701,5,High without confirmed return
+hyperpolar_spatial_round3,hyperpolar_g0.166667_phi1.25_s9108401,20.0,True,False,0.16666666666666666,0,9108401,,,,83.046875,9.266056250000005,0.8670261237820076,89,No confirmed global high
+hyperpolar_spatial_round3,hyperpolar_g0.166667_phi2.5_s9108401,20.0,True,False,0.16666666666666666,0,9108401,,,,47.409375,6.199712500000001,0.8929277973730327,83,No confirmed global high
+hyperpolar_spatial_round3,hyperpolar_g0.5_phi0_s9108401,20.0,True,False,0.5,0,9108401,2.77,,,500.0,499.95729375,0.01869821681574202,0,High without confirmed return
+hyperpolar_spatial_round3,hyperpolar_g0.166667_phi0_s9108401,20.0,True,False,0.16666666666666666,0,9108401,6.65,,,500.0,483.3828500000002,0.04803563475762603,20,High without confirmed return
+source_sahp_round4,sahp2_g0.5_s9108401,40.0,True,False,0.5,2.0,9108401,,,,130.178125,0.1386125,0.8768600994677999,6,No confirmed global high
+source_sahp_round4,sahp4_g0.5_s9108401,40.0,True,False,0.5,4.0,9108401,,,,88.509375,0.00014375000000000005,0.9855509527288903,4,No confirmed global high
+source_sahp_round4,sahp1_g0.5_s9108401,40.0,True,False,0.5,1.0,9108401,5.28,,,458.35,434.92261875,0.0003424620589854806,0,High without confirmed return
+source_sahp_round4,sahp2_g0_s9108401,40.0,True,False,0.0,2.0,9108401,,,,55.421875,0.4525999999999999,0.9917396254073012,15,No confirmed global high
+sahp_bracket_round5,sahp1.5_g0.5_s9108401,30.0,True,False,0.5,1.5,9108401,6.33,9.12,,214.56875,0.0004374999999999998,0.9916256167977713,2,High then return
+sahp_bracket_round5,sahp1.25_g0.5_s9108401,30.0,True,False,0.5,1.25,9108401,5.22,9.34,,240.528125,0.00014375000000000005,0.9905454201997818,1,High then return
+sahp_bracket_round5,sahp1.75_g0.5_s9108401,30.0,True,False,0.5,1.75,9108401,10.85,20.79,,249.028125,0.0,0.8789963620124213,1,High then return
+sahp_bracket_round5,sahp1_g0.166667_s9108401,30.0,True,False,0.16666666666666666,1.0,9108401,,,,44.8125,0.8987687500000004,0.9889430057174855,18,No confirmed global high
+positive_candidate_confirmation,sahp1.5_g0.5_s9108402,20.0,True,False,0.5,1.5,9108402,,,,142.46875,8.75e-05,0.9777399445323954,2,No confirmed global high
+low_fraction_round6,sahp0.25_g0.166667_s9108401,20.0,True,False,0.16666666666666666,0.25,9108401,,,,62.790625,2.119049999999999,0.972334571850715,29,No confirmed global high
+low_fraction_round6,sahp0.5_g0.166667_s9108401,20.0,True,False,0.16666666666666666,0.5,9108401,,,,44.49375,1.7004437499999983,0.9808073669427736,19,No confirmed global high
+autonomous_recurrence_continuation,sahp1.5_g0.5_s9108401_to50s,46.0,True,True,0.5,1.5,9108401,6.33,9.12,41.89,234.10625,179.8055812500001,0.1297906539664577,2,High / return / high

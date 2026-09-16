@@ -1,0 +1,18 @@
+{
+  "schema": "topic4.burst_measurement_amendment.v2",
+  "created_unix": 1789376313.215427,
+  "reason": "Two phase-offset periodic sources can produce high CV and CV2; V1 would misclassify their combined train.",
+  "physical_runs_changed": false,
+  "new_physical_runs": 0,
+  "preserved_v1_files": "plan.json and per_run/*/metrics.json",
+  "new_metric_files": "per_run/*/metrics_v2.json",
+  "scope": "Apply identically to all 62 runs, every observed group and all three detection thresholds.",
+  "test": "199 ISI permutations; spectrum standardized per frequency symmetrically over the observed+surrogate ensemble; max standardized excess over 0.5-15Hz and at least 8 cycles per window; plus-one p; same full search in every surrogate.",
+  "decision": "V1 irregular with p<=.05 becomes patterned_bursts. V1 irregular with p>.05 retains descriptive irregular_bursts; non-rejection is not proof of aperiodicity.",
+  "sources": {
+    "/home/honglab/leijiaxin/HFOsp/scripts/topic4_burst_regime/metrics_v2.py": "4203c797c903c0aa7276b7c86a2abf7d112644aa65aae09d9feb4a55bda6058c",
+    "/home/honglab/leijiaxin/HFOsp/tests/test_topic4_burst_regime.py": "8e1505826488c3813f1780244d1bd3d1d0567dd231a2a410e8afc7a0e448a232"
+  },
+  "synthetic_tests": "6 passed",
+  "measurement_version": "native_burst_metrics_v2_frequency_standardized_ordering"
+}

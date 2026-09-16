@@ -1,0 +1,238 @@
+{
+ "status": "FROZEN_BEFORE_DISPATCH",
+ "stage": "recovery_final_refinement_20260911",
+ "phase": "final_A",
+ "candidates": [
+  {
+   "id": "refine_midpoint_EE075",
+   "layout": "midpoint_near_and_up3",
+   "centers_mm": [
+    [
+     4.955699618225285,
+     12.851474272471794
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.75,
+    "EE_core_to_out_scale": 1.0,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 1.0,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_center",
+   "changed_value": null,
+   "adjacency_changes": true,
+   "stage": "recovery_final_refinement_20260911",
+   "parent_id": "refine_mid_EE075",
+   "changed_parameters": {},
+   "display_name": "\u4e24\u5df2\u6d4b\u4f4d\u7f6e\u7684\u4e2d\u70b9\uff1b\u6838\u5185EE\u00d70.75",
+   "core_mean_rate_scale": 1.0,
+   "geometry_change": {
+    "from_centers_mm": [
+     [
+      4.19921432,
+      12.12890135
+     ],
+     [
+      16.47920304,
+      3.96551153
+     ]
+    ],
+    "to_centers_mm": [
+     [
+      4.955699618225285,
+      12.851474272471794
+     ],
+     [
+      16.47920304,
+      3.96551153
+     ]
+    ]
+   }
+  },
+  {
+   "id": "refine_midpoint_EE075_A115",
+   "layout": "midpoint_near_and_up3",
+   "centers_mm": [
+    [
+     4.955699618225285,
+     12.851474272471794
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.75,
+    "EE_core_to_out_scale": 1.0,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 1.0,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.15,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "depth_A_scale",
+   "changed_value": 1.15,
+   "adjacency_changes": true,
+   "stage": "recovery_final_refinement_20260911",
+   "parent_id": "refine_midpoint_EE075",
+   "changed_parameters": {
+    "depth_A_scale": 1.15
+   },
+   "display_name": "\u4e24\u5df2\u6d4b\u4f4d\u7f6e\u7684\u4e2d\u70b9\uff1b\u6838\u5185EE\u00d70.75\u3001\u5de6\u6838\u964d\u5e45\u00d71.15",
+   "core_mean_rate_scale": 1.0,
+   "geometry_change": null
+  },
+  {
+   "id": "refine_midpoint_EE085_mean095",
+   "layout": "midpoint_near_and_up3",
+   "centers_mm": [
+    [
+     4.955699618225285,
+     12.851474272471794
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.0,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 1.0,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_center",
+   "changed_value": null,
+   "adjacency_changes": true,
+   "stage": "recovery_final_refinement_20260911",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {},
+   "display_name": "\u4e24\u5df2\u6d4b\u4f4d\u7f6e\u7684\u4e2d\u70b9\uff1bEE\u00d70.85\u3001\u8f93\u5165\u5747\u503c\u00d70.95",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": {
+    "from_centers_mm": [
+     [
+      4.19921432,
+      12.12890135
+     ],
+     [
+      16.47920304,
+      3.96551153
+     ]
+    ],
+    "to_centers_mm": [
+     [
+      4.955699618225285,
+      12.851474272471794
+     ],
+     [
+      16.47920304,
+      3.96551153
+     ]
+    ]
+   }
+  },
+  {
+   "id": "refine_midpoint_EE085_A115_mean095",
+   "layout": "midpoint_near_and_up3",
+   "centers_mm": [
+    [
+     4.955699618225285,
+     12.851474272471794
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.0,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 1.0,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.15,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "depth_A_scale",
+   "changed_value": 1.15,
+   "adjacency_changes": true,
+   "stage": "recovery_final_refinement_20260911",
+   "parent_id": "refine_midpoint_EE085_mean095",
+   "changed_parameters": {
+    "depth_A_scale": 1.15
+   },
+   "display_name": "\u4e24\u5df2\u6d4b\u4f4d\u7f6e\u7684\u4e2d\u70b9\uff1bEE\u00d70.85\u3001\u8f93\u5165\u5747\u503c\u00d70.95\u3001\u5de6\u6838\u964d\u5e45\u00d71.15",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null
+  }
+ ],
+ "topology_seed": 2511,
+ "seeds": [
+  847101,
+  847102
+ ],
+ "duration_ms": 60000.0,
+ "worker_script": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_core_tonic_recovery.py",
+ "reason": "\u5b8c\u6574\u7b2c\u4e8c\u627916\u6761\u4ecd\u672a\u6062\u590d\u60a3\u8005\u4e24\u7c7b\u4f20\u64ad\uff1a\u8fd1SCL\u7684\u589e\u5f3a\u5de6\u6838\u6761\u4ef6TA\u5360\u4e3b\u5bfc\u4f46ICL\u7f3a\u6bb5\uff1b\u4e2d\u95f4\u4f4d\u7f6eEE0.75\u8865\u56deTA\u53c2\u4e0e\uff0c\u5374\u6709SCL\u7cfb\u7edf\u6027\u504f\u665a\u3002\u4e2d\u95f4\u4f4d\u7f6eEE0.85\u548c\u5de6\u6838\u964d\u5e451.15\u4ecd\u4e3b\u8981\u4e3aTB\uff1b\u5747\u503c0.95\u589e\u52a0\u5408\u683c\u4e8b\u4ef6\u91cf\u800cTA\u7a00\u5c11\u3002\u56e0\u6b64\u672b16\u6761\u5148\u52068\u6761\u5728\u4e24\u4e2a\u5df2\u6d4b\u4f4d\u7f6e\u7684\u51e0\u4f55\u4e2d\u70b9\u505a\u5c40\u90e8\u7cbe\u8c03\uff0c\u4fdd\u7559EE0.75\u4e0eEE0.85\u52a0\u5747\u503c0.95\u4e24\u79cd\u6709\u4e8b\u4ef6\u652f\u6301\u7684\u53c2\u6570\u7ec4\u5408\uff0c\u5404\u6bd4\u8f83\u5de6\u6838\u964d\u5e451\u548c1.15\u3002\u4e24\u5957\u7ec4\u5408\u7684\u5dee\u5f02\u4e0d\u80fd\u5f52\u56e0\u4e8e\u5355\u4e00EE\u56e0\u7d20\u3002",
+ "geometry_rule": "Arithmetic midpoint of the two already tested A locations; B unchanged. No event-specific source, route or stimulus.",
+ "interpretation": "Four fixed prospective conditions, each replayed with two noises. Vth contrasts within the same midpoint geometry are paired; movement changes the input-cell support.",
+ "remaining_eight": "After this complete eight-unit batch, review full propagation, distributions and actual support. Use the final <=8 units for new-graph replay if propagation improves materially, otherwise another bounded targeted refinement. Freeze before dispatch.",
+ "budget": "Final A 8 plus Final B <=8 replaces the former final16 confirmation allocation. Total remains <=48 new / <=168 formal; same 8-worker and 08:12/10:12 limits.",
+ "unchanged": "Original observer, patient target, classifier, primary rule and loss; nonpositive core-E threshold offsets; external randomness only in E-core; GABA18ms; no kick, spatial OU, external slow I, Z/M."
+}

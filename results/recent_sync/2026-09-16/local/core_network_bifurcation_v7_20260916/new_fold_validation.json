@@ -1,0 +1,92 @@
+{
+  "status": "PASS",
+  "folds": [
+    {
+      "name": "low_global_fold_014",
+      "g": 1.121817220417432,
+      "N": 4096,
+      "J_grid_difference": 2.220446049250313e-15,
+      "period_grid_difference_ms": 7.083497507665015e-06,
+      "right_mode_cosine": 0.999999999999989,
+      "left_mode_cosine": 0.9999999999999992,
+      "offgrid_hz": 6.106226635438361e-13,
+      "curvature_checks": [
+        {
+          "step": 0.03,
+          "left_Fvv": -9.793700925242455e-07,
+          "predicted_J_curvature": 4.188283411798802e-07
+        },
+        {
+          "step": 0.01,
+          "left_Fvv": -8.316224912291014e-07,
+          "predicted_J_curvature": 3.5564397069919846e-07
+        },
+        {
+          "step": 0.003,
+          "left_Fvv": -8.20310677500987e-07,
+          "predicted_J_curvature": 3.508064652294624e-07
+        }
+      ],
+      "measured_J_curvature": 3.573276785573398e-07,
+      "null_residual": 3.961941885677334e-12
+    },
+    {
+      "name": "recruited_global_fold_011",
+      "g": 1.176273009994528,
+      "N": 4096,
+      "J_grid_difference": 5.329070518200751e-15,
+      "period_grid_difference_ms": 3.1315660180553095e-06,
+      "right_mode_cosine": 0.9999999999983091,
+      "left_mode_cosine": 0.9999999999999962,
+      "offgrid_hz": 1.1210754546908674e-09,
+      "curvature_checks": [
+        {
+          "step": 0.03,
+          "left_Fvv": 3.073596577034222e-07,
+          "predicted_J_curvature": -7.528972655404536e-08
+        },
+        {
+          "step": 0.01,
+          "left_Fvv": 3.0750985939771193e-07,
+          "predicted_J_curvature": -7.53265194258735e-08
+        },
+        {
+          "step": 0.003,
+          "left_Fvv": 3.075965092850634e-07,
+          "predicted_J_curvature": -7.534774487352457e-08
+        }
+      ],
+      "measured_J_curvature": -7.928235845611197e-08,
+      "null_residual": 1.3587363005551634e-11
+    },
+    {
+      "name": "recruited_global_fold_022",
+      "g": 1.1762479453310737,
+      "N": 4096,
+      "J_grid_difference": 1.5543122344752192e-15,
+      "period_grid_difference_ms": 2.5236126589334162e-05,
+      "right_mode_cosine": 0.9999999999861323,
+      "left_mode_cosine": 0.9999999999999643,
+      "offgrid_hz": 3.8711533978386115e-09,
+      "curvature_checks": [
+        {
+          "step": 0.03,
+          "left_Fvv": -2.192754790851059e-07,
+          "predicted_J_curvature": 5.6806780677428334e-08
+        },
+        {
+          "step": 0.01,
+          "left_Fvv": -2.194084421652408e-07,
+          "predicted_J_curvature": 5.68412268661355e-08
+        },
+        {
+          "step": 0.003,
+          "left_Fvv": -2.1532765698994337e-07,
+          "predicted_J_curvature": 5.5784034929252996e-08
+        }
+      ],
+      "measured_J_curvature": 5.954490234216791e-08,
+      "null_residual": 6.180268102840003e-12
+    }
+  ]
+}

@@ -1,0 +1,323 @@
+{
+  "source": "results/topic4_sef_hfo/fig5_manual_core_release_v1/m_runaway_return_v1/runs/weak_fast.npz",
+  "window_definition": "Fixed one-second examples, with two activity-defined entry anchors and last available1s high-state window; no selection on spectrum.",
+  "rates": [
+    {
+      "label": "interictal_example",
+      "window_s": [
+        20,
+        21
+      ],
+      "population": "All E",
+      "mean_Hz": 15.46025,
+      "RMS_over_mean": {
+        "1_150": 1.493169814074447,
+        "150_1000": 0.05954683511184869
+      },
+      "peak_frequency_1_1000_Hz": 3.0,
+      "bin_ms": 0.1
+    },
+    {
+      "label": "interictal_example",
+      "window_s": [
+        20,
+        21
+      ],
+      "population": "All I",
+      "mean_Hz": 33.9985,
+      "RMS_over_mean": {
+        "1_150": 1.500057210401314,
+        "150_1000": 0.07757285454151058
+      },
+      "peak_frequency_1_1000_Hz": 3.0,
+      "bin_ms": 0.1
+    },
+    {
+      "label": "local_escalation",
+      "window_s": [
+        72.26,
+        73.26
+      ],
+      "population": "All E",
+      "mean_Hz": 77.92025,
+      "RMS_over_mean": {
+        "1_150": 0.29150397095839586,
+        "150_1000": 0.023059884299416696
+      },
+      "peak_frequency_1_1000_Hz": 1.0,
+      "bin_ms": 0.1
+    },
+    {
+      "label": "local_escalation",
+      "window_s": [
+        72.26,
+        73.26
+      ],
+      "population": "All I",
+      "mean_Hz": 115.947125,
+      "RMS_over_mean": {
+        "1_150": 0.2928073724249627,
+        "150_1000": 0.03737093887408895
+      },
+      "peak_frequency_1_1000_Hz": 1.0,
+      "bin_ms": 0.1
+    },
+    {
+      "label": "global_entry",
+      "window_s": [
+        73.48,
+        74.48
+      ],
+      "population": "All E",
+      "mean_Hz": 266.508375,
+      "RMS_over_mean": {
+        "1_150": 0.07128689817125518,
+        "150_1000": 0.011935779141481202
+      },
+      "peak_frequency_1_1000_Hz": 1.0,
+      "bin_ms": 0.1
+    },
+    {
+      "label": "global_entry",
+      "window_s": [
+        73.48,
+        74.48
+      ],
+      "population": "All I",
+      "mean_Hz": 344.9755,
+      "RMS_over_mean": {
+        "1_150": 0.08311213697747463,
+        "150_1000": 0.019729489678869654
+      },
+      "peak_frequency_1_1000_Hz": 1.0,
+      "bin_ms": 0.1
+    },
+    {
+      "label": "late_high",
+      "window_s": [
+        89,
+        90
+      ],
+      "population": "All E",
+      "mean_Hz": 499.77865625,
+      "RMS_over_mean": {
+        "1_150": 0.0003803750017257614,
+        "150_1000": 0.008972571558111776
+      },
+      "peak_frequency_1_1000_Hz": 1000.0,
+      "bin_ms": 0.1
+    },
+    {
+      "label": "late_high",
+      "window_s": [
+        89,
+        90
+      ],
+      "population": "All I",
+      "mean_Hz": 626.695375,
+      "RMS_over_mean": {
+        "1_150": 0.00039687009500215167,
+        "150_1000": 0.012411662227060303
+      },
+      "peak_frequency_1_1000_Hz": 625.0,
+      "bin_ms": 0.1
+    }
+  ],
+  "single_cell_regularity": [
+    {
+      "label": "interictal_example",
+      "window_s": [
+        20,
+        21
+      ],
+      "population": "Core A E region",
+      "sampled_cells": 60,
+      "eligible_cells": 60,
+      "median_ISI_CV": 3.629322611150485,
+      "median_inverse_median_ISI_Hz": 400.0
+    },
+    {
+      "label": "interictal_example",
+      "window_s": [
+        20,
+        21
+      ],
+      "population": "Core B E region",
+      "sampled_cells": 60,
+      "eligible_cells": 60,
+      "median_ISI_CV": 3.3747066532003176,
+      "median_inverse_median_ISI_Hz": 434.78260869565213
+    },
+    {
+      "label": "interictal_example",
+      "window_s": [
+        20,
+        21
+      ],
+      "population": "Other E",
+      "sampled_cells": 120,
+      "eligible_cells": 96,
+      "median_ISI_CV": 2.389955603898208,
+      "median_inverse_median_ISI_Hz": 416.66666666666663
+    },
+    {
+      "label": "interictal_example",
+      "window_s": [
+        20,
+        21
+      ],
+      "population": "I",
+      "sampled_cells": 60,
+      "eligible_cells": 60,
+      "median_ISI_CV": 3.2986772609992348,
+      "median_inverse_median_ISI_Hz": 833.3333333333333
+    },
+    {
+      "label": "local_escalation",
+      "window_s": [
+        72.26,
+        73.26
+      ],
+      "population": "Core A E region",
+      "sampled_cells": 60,
+      "eligible_cells": 60,
+      "median_ISI_CV": 3.551569207543616,
+      "median_inverse_median_ISI_Hz": 400.0
+    },
+    {
+      "label": "local_escalation",
+      "window_s": [
+        72.26,
+        73.26
+      ],
+      "population": "Core B E region",
+      "sampled_cells": 60,
+      "eligible_cells": 60,
+      "median_ISI_CV": 1.39313379396164,
+      "median_inverse_median_ISI_Hz": 434.78260869565213
+    },
+    {
+      "label": "local_escalation",
+      "window_s": [
+        72.26,
+        73.26
+      ],
+      "population": "Other E",
+      "sampled_cells": 120,
+      "eligible_cells": 88,
+      "median_ISI_CV": 2.5043344711570406,
+      "median_inverse_median_ISI_Hz": 400.0
+    },
+    {
+      "label": "local_escalation",
+      "window_s": [
+        72.26,
+        73.26
+      ],
+      "population": "I",
+      "sampled_cells": 60,
+      "eligible_cells": 53,
+      "median_ISI_CV": 3.246281010305305,
+      "median_inverse_median_ISI_Hz": 740.7407407407406
+    },
+    {
+      "label": "global_entry",
+      "window_s": [
+        73.48,
+        74.48
+      ],
+      "population": "Core A E region",
+      "sampled_cells": 60,
+      "eligible_cells": 60,
+      "median_ISI_CV": 0.032110242163387655,
+      "median_inverse_median_ISI_Hz": 434.78260869565213
+    },
+    {
+      "label": "global_entry",
+      "window_s": [
+        73.48,
+        74.48
+      ],
+      "population": "Core B E region",
+      "sampled_cells": 60,
+      "eligible_cells": 60,
+      "median_ISI_CV": 0.002573020642512022,
+      "median_inverse_median_ISI_Hz": 454.5454545454545
+    },
+    {
+      "label": "global_entry",
+      "window_s": [
+        73.48,
+        74.48
+      ],
+      "population": "Other E",
+      "sampled_cells": 120,
+      "eligible_cells": 104,
+      "median_ISI_CV": 0.058622982531924814,
+      "median_inverse_median_ISI_Hz": 416.66666666666663
+    },
+    {
+      "label": "global_entry",
+      "window_s": [
+        73.48,
+        74.48
+      ],
+      "population": "I",
+      "sampled_cells": 60,
+      "eligible_cells": 52,
+      "median_ISI_CV": 0.1431603647931482,
+      "median_inverse_median_ISI_Hz": 555.5555555555555
+    },
+    {
+      "label": "late_high",
+      "window_s": [
+        89,
+        90
+      ],
+      "population": "Core A E region",
+      "sampled_cells": 60,
+      "eligible_cells": 60,
+      "median_ISI_CV": 0.0,
+      "median_inverse_median_ISI_Hz": 500.0
+    },
+    {
+      "label": "late_high",
+      "window_s": [
+        89,
+        90
+      ],
+      "population": "Core B E region",
+      "sampled_cells": 60,
+      "eligible_cells": 60,
+      "median_ISI_CV": 0.0,
+      "median_inverse_median_ISI_Hz": 500.0
+    },
+    {
+      "label": "late_high",
+      "window_s": [
+        89,
+        90
+      ],
+      "population": "Other E",
+      "sampled_cells": 120,
+      "eligible_cells": 120,
+      "median_ISI_CV": 0.0,
+      "median_inverse_median_ISI_Hz": 500.0
+    },
+    {
+      "label": "late_high",
+      "window_s": [
+        89,
+        90
+      ],
+      "population": "I",
+      "sampled_cells": 60,
+      "eligible_cells": 60,
+      "median_ISI_CV": 0.014671858526760746,
+      "median_inverse_median_ISI_Hz": 625.0
+    }
+  ],
+  "scope": "Single-cell ISI regularity is not population synchrony. Mean-removed population PSD contains stochastic and transient changes, not proof of an autonomous limit cycle. The raw0.1ms rate resolves above150Hz without the1ms field Nyquist boundary.",
+  "region_definition_mm": 1.75,
+  "full_scientific_acceptance": false
+}

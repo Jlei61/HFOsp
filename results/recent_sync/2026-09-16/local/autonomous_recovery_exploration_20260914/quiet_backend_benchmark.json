@@ -1,0 +1,32 @@
+{
+  "status": "PASS",
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_kinetics_20260914/runs/eta1_tau100_s9108401/checkpoint.pkl",
+  "source_step": 200000,
+  "duration_ms": 200,
+  "full_spike_matrix_bitwise": true,
+  "fast_state_arrays_bitwise": [
+    "V",
+    "ref",
+    "s_E",
+    "I_E",
+    "s_I",
+    "I_I",
+    "ring_sE",
+    "ring_sI"
+  ],
+  "Z_M_RNG_bitwise": true,
+  "entire_checkpoint_recursive_bitwise": true,
+  "including_external_spatial_OU_and_delay_history": true,
+  "timings": {
+    "cpu": {
+      "total_wall_s": 13.475509433999832,
+      "middle160ms_wall_s": 6.5873882089945255
+    },
+    "gpu": {
+      "total_wall_s": 37.37502771399886,
+      "middle160ms_wall_s": 15.892019298997184
+    }
+  },
+  "speed_ratio_gpu_over_cpu": 2.412491687873802,
+  "meaning": "One paired 200ms continuation at an actual quiet high-M checkpoint. Backend timing only, not new biological evidence; timing excludes first20ms GPU initialization in middle metric."
+}

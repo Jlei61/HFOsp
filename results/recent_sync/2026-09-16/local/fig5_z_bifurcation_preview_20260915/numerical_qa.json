@@ -1,0 +1,63 @@
+{
+  "equilibrium_embedding": [
+    {
+      "index": 0,
+      "s": 0.309,
+      "stationary_residual_hz": 1.3959888356396277e-08,
+      "max_native_step_state_changes": {
+        "r_u": 2.4798739450826446e-14,
+        "r_i": 6.033559069029693e-13,
+        "m_u": 5.684341886080802e-14,
+        "gAE": 6.821210263296962e-13,
+        "cAE": 0.0,
+        "gGE": 1.3642420526593924e-12,
+        "cGE": 0.0,
+        "gAI": 1.1368683772161603e-12,
+        "cAI": 0.0,
+        "gGI": 6.821210263296962e-13,
+        "cGI": 0.0
+      }
+    },
+    {
+      "index": 65,
+      "s": 0.29148426616037654,
+      "stationary_residual_hz": 3.2238745006907266e-10,
+      "max_native_step_state_changes": {
+        "r_u": 5.551115123125783e-17,
+        "r_i": 1.2878587085651816e-14,
+        "m_u": 1.1754943508222875e-38,
+        "gAE": 6.821210263296962e-13,
+        "cAE": 0.0,
+        "gGE": 9.094947017729282e-13,
+        "cGE": 0.0,
+        "gAI": 1.1368683772161603e-12,
+        "cAI": 0.0,
+        "gGI": 7.958078640513122e-13,
+        "cGI": 0.0
+      }
+    },
+    {
+      "index": 129,
+      "s": 0.27678790966412425,
+      "stationary_residual_hz": 3.695011088211686e-07,
+      "max_native_step_state_changes": {
+        "r_u": 2.581268532253489e-15,
+        "r_i": 1.4786644131348226e-11,
+        "m_u": 8.881784197001252e-16,
+        "gAE": 9.094947017729282e-13,
+        "cAE": 0.0,
+        "gGE": 1.5916157281026244e-12,
+        "cGE": 0.0,
+        "gAI": 1.1368683772161603e-12,
+        "cAI": 0.0,
+        "gGI": 6.821210263296962e-13,
+        "cGI": 0.0
+      }
+    }
+  ],
+  "native_trajectory_count": 24,
+  "native_mean_rate_max_abs_error_hz": 0.0,
+  "equilibrium_max_residual_hz": 1.916064377383009e-06,
+  "note": "Equilibria inserted into original v1 synapse/delay/rate/M update; steady filtered-variance limit equals stationary variance. This does not test stability or native correspondence.",
+  "status": "PASS"
+}

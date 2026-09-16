@@ -1,0 +1,34 @@
+{
+ "status": "PASS",
+ "other_blocks_preserved": true,
+ "no_duplicate_edges": true,
+ "source_counts_and_weights_preserved": true,
+ "audit": {
+  "enabled": true,
+  "scope": "E_A -> E_out only; B, within-core and E->I edges preserved",
+  "kernel": {
+   "l_par": 2.0,
+   "l_perp": 2.0,
+   "theta_deg": 30.0,
+   "theta_rad": 0.5235987755982988
+  },
+  "resampling_key_namespace": [
+   2511,
+   20260911,
+   73
+  ],
+  "source_count_preserved": true,
+  "source_weight_preserved": true,
+  "n_edges": 6,
+  "mean_distance_mm": 6.099432302610876,
+  "distance_quantiles_mm": [
+   2.862471378587263,
+   6.444456291110813,
+   8.875015923922454
+  ],
+  "actual_weighted_axis_deg": -171.83101003634093,
+  "actual_weighted_axis_ratio": 1.5961034646356524,
+  "mean_delay_ms": 7.1000000000000005,
+  "changed_target_input_expected": true
+ }
+}

@@ -1,0 +1,89 @@
+{
+  "time": "2026-09-13T08:58:41.677097+08:00",
+  "rows": [
+    {
+      "run": "e0_t0_s9108401",
+      "source": "/data/hfosp/topic4_sef_hfo/m_parameter_modes_fig5_20260913/runs/e0_t0_s9108401/chunks/0000500000_0000600000.npz",
+      "committed_end_s": 60.0,
+      "window_s": [
+        59.0,
+        60.0
+      ],
+      "mean_all_E_rate_Hz": 500.0,
+      "mean_Z": 4.452695000020244e-05,
+      "fraction_E_above_depletion_threshold": 1.0,
+      "mean_M": 500.0005875724652,
+      "adaptation_current": 2.500002937862326,
+      "raw_IE": 1579.2829849577433,
+      "raw_II": 1774.6290021853974,
+      "applied_II": 0.07901842576132674,
+      "eta_M": 0.005,
+      "tau_M_s": 1,
+      "constant_rate_M_prediction": 500.0
+    },
+    {
+      "run": "e0_t0_s9108402",
+      "source": "/data/hfosp/topic4_sef_hfo/m_parameter_modes_fig5_20260913/runs/e0_t0_s9108402/chunks/0000400000_0000500000.npz",
+      "committed_end_s": 50.0,
+      "window_s": [
+        49.0,
+        50.0
+      ],
+      "mean_all_E_rate_Hz": 500.0,
+      "mean_Z": 0.0006039910040882318,
+      "fraction_E_above_depletion_threshold": 1.0,
+      "mean_M": 500.00071251190764,
+      "adaptation_current": 2.500003562559538,
+      "raw_IE": 1579.5743949435262,
+      "raw_II": 1774.9473221305188,
+      "applied_II": 1.0720459151172776,
+      "eta_M": 0.005,
+      "tau_M_s": 1,
+      "constant_rate_M_prediction": 500.0
+    },
+    {
+      "run": "e0_t1_s9108401",
+      "source": "/data/hfosp/topic4_sef_hfo/m_parameter_modes_fig5_20260913/runs/e0_t1_s9108401/chunks/0000200000_0000300000.npz",
+      "committed_end_s": 30.0,
+      "window_s": [
+        29.0,
+        30.0
+      ],
+      "mean_all_E_rate_Hz": 500.0,
+      "mean_Z": 0.022971429425683927,
+      "fraction_E_above_depletion_threshold": 1.0,
+      "mean_M": 996.6584035517823,
+      "adaptation_current": 4.983292017758911,
+      "raw_IE": 1579.486150182817,
+      "raw_II": 1774.8232168134173,
+      "applied_II": 40.770197413443036,
+      "eta_M": 0.005,
+      "tau_M_s": 2,
+      "constant_rate_M_prediction": 1000.0
+    },
+    {
+      "run": "e0_t1_s9108402",
+      "source": "/data/hfosp/topic4_sef_hfo/m_parameter_modes_fig5_20260913/runs/e0_t1_s9108402/chunks/0000200000_0000300000.npz",
+      "committed_end_s": 30.0,
+      "window_s": [
+        29.0,
+        30.0
+      ],
+      "mean_all_E_rate_Hz": 500.0,
+      "mean_Z": 0.030494285753646856,
+      "fraction_E_above_depletion_threshold": 1.0,
+      "mean_M": 993.1761154593923,
+      "adaptation_current": 4.965880577296962,
+      "raw_IE": 1579.6632317981732,
+      "raw_II": 1775.02717675419,
+      "applied_II": 54.128019448904666,
+      "eta_M": 0.005,
+      "tau_M_s": 2,
+      "constant_rate_M_prediction": 1000.0
+    }
+  ],
+  "statistical_unit": "Four declared grid trajectories at their current committed tails. Different simulation times; not matched time contrasts.",
+  "purpose": "Check actual high-state Z gate and M-current balance using the final one second of each committed prefix.",
+  "new_simulations": 0,
+  "stability_or_bifurcation_proof": false
+}

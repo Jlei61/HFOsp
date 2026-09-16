@@ -1,0 +1,65 @@
+{
+  "status": "PASS_FULL_20S_RAW_PREFIX",
+  "noise": 847101,
+  "created_unix": 1789250074.9960086,
+  "checks": {
+    "new_array_file_hash": true,
+    "old_array_file_hash": true,
+    "static_identity": true,
+    "sheet_activity_counts": true,
+    "trace_coreAE_spikes": true,
+    "trace_coreBE_spikes": true,
+    "core_ou_mixture_values": true
+  },
+  "details": [
+    {
+      "key": "sheet_activity_counts",
+      "new_shape": [
+        10000,
+        20,
+        20
+      ],
+      "old_shape": [
+        30000,
+        20,
+        20
+      ],
+      "equal": true
+    },
+    {
+      "key": "trace_coreAE_spikes",
+      "new_shape": [
+        20000
+      ],
+      "old_shape": [
+        60000
+      ],
+      "equal": true
+    },
+    {
+      "key": "trace_coreBE_spikes",
+      "new_shape": [
+        20000
+      ],
+      "old_shape": [
+        60000
+      ],
+      "equal": true
+    },
+    {
+      "key": "core_ou_mixture_values",
+      "new_shape": [
+        20000,
+        6
+      ],
+      "old_shape": [
+        60000,
+        6
+      ],
+      "equal": true
+    }
+  ],
+  "new": "/data/hfosp/topic4_sef_hfo/global_axis_residual_probe_20260913/response/units/global_axis_+0/2511_847101/workers/trajectory.json",
+  "old": "/data/hfosp/topic4_sef_hfo/core_recruitment_tradeoff_followup_20260912/response/units/up3__circle__EE_core_to_out_scale_1.25__x_minus075/2511_847101/workers/trajectory.json",
+  "scope": "Unperturbed20s run exactly reproduces the raw physical prefix of the existing60s trajectory; it is not an independent replicate. Contact smoothing near record end and completed-event eligibility are not asserted by this raw-prefix comparison."
+}

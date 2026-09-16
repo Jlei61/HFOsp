@@ -1,0 +1,12 @@
+[
+  {
+    "pid": 374538,
+    "command": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python scripts/track_topic4_fig5_z_equilibrium_instability.py --direction 1 ",
+    "stdout": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_z_branch_extension_20260915/track_complex_forward.log"
+  },
+  {
+    "pid": 376175,
+    "command": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python scripts/fit_topic4_fig5_z_physical_cycle.py --N 1024 --gpu 1 --iterations 5 --s 0 --orbit results/topic4_sef_hfo/fig5_z_branch_extension_20260915/periodic_physical/s0_N512.npz ",
+    "stdout": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_z_branch_extension_20260915/physical_cycle_s0_N1024_host_basis.log"
+  }
+]

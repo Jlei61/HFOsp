@@ -1,0 +1,159 @@
+{
+  "status": "COMPLETE_PENDING_USER_REVIEW",
+  "model_scientific_acceptance": false,
+  "user_visual_acceptance": false,
+  "pages": [
+    {
+      "title": "夜间实验完成：参数响应已明确，双模式尚未恢复",
+      "paragraphs": [
+        "本夜先审阅120条既有轨迹，再完成48条新增正式实验，全部完整，无工程失败或物理runaway。核心科学目标仍未达到：尚不能把任何候选称为已恢复患者TA/TB传播的基底。",
+        "本包先展示患者真实Fig2C频谱与模型时序，再展示配对参数响应。最低分候选、参数响应与患者传播恢复是三个不同结论。详细版本、全部条件和历史状态实验保留在完整v8报告。"
+      ],
+      "table": [
+        [
+          "实际比较",
+          "本夜结果"
+        ],
+        [
+          "当前物理",
+          "双核E仅降阈值；随机输入仅E-core；核外确定均值；GABA18ms不变，无空间OU、慢I、Z/M或路线刺激。"
+        ],
+        [
+          "样本与单位",
+          "患者FIT：TA13,165、TB6,605。新增48条只用一个拓扑身份、两条噪声；每条运行是比较单位，事件不是独立网络。"
+        ],
+        [
+          "最低训练分数",
+          "中点位置、EE0.85、输入均值0.95、左核降幅1.15：6.563/7.287；仍缺左端ICL及上部SCL。"
+        ],
+        [
+          "末批输入实验",
+          "改变两核OU共同程度后，某背景TA增加到22/127、22/127，但TA上部SCL仍晚91–93ms，TB左端顺序仍不相容。"
+        ],
+        [
+          "验收状态",
+          "不冻结模型，不进入Fig5；未作新拓扑确认。Agent已看关键图，用户人工审阅待完成。"
+        ]
+      ],
+      "widths": [
+        104,
+        407
+      ],
+      "table_size": 10.5
+    },
+    {
+      "title": "最低分候选：真实频谱对照仍有参与与时序缺口",
+      "landscape": true,
+      "figure": "/data/hfosp/topic4_sef_hfo/core_propagation_recovery_20260911/main_review_final_A_primary/figures/refine_midpoint_EE085_A115_mean095@2511_patient_spectra_model_envelopes.png",
+      "maxheight": 365,
+      "paragraphs": [
+        "左列是真实患者Fig2C STFT；右列是两条噪声中最接近各自模式均值的模型事件，没有按患者相似度挑选。这个候选分数最低，却不能保留完整的左端ICL和上部SCL。",
+        "模型是发放密度包络，不是HFO频谱。参与触点按共同几何顺序排列；只平移时间零点，不拉伸毫秒尺度。较短的局部持续时间仍未解决。"
+      ],
+      "boundaries": []
+    },
+    {
+      "title": "增加TA之后：两种常见模型事件仍与患者不同",
+      "landscape": true,
+      "figure": "/data/hfosp/topic4_sef_hfo/core_propagation_recovery_20260911/main_review_final_B_primary/figures/coreOU_mid_EE085_mean095_rho000@2511_patient_spectra_model_envelopes.png",
+      "maxheight": 365,
+      "paragraphs": [
+        "末批独立核心输入，两次都有22个合格TA及105个TB。常见TA中SCL9/8明显过晚；TB虽大体由右向左，左端ICL11/9顺序和两杆关系仍有系统残差。",
+        "单个患者例提供直觉；验收同时使用完整患者与模型条件分布，不能要求每次事件都等于这个示例。模型各列省略本次不参与触点，其全触点QC和完整原生场另存。"
+      ],
+      "boundaries": []
+    },
+    {
+      "title": "同一网络：双核、两类事件与完整60秒读出",
+      "landscape": true,
+      "figure": "/data/hfosp/topic4_sef_hfo/core_propagation_recovery_20260911/main_review_final_B_primary/figures/coreOU_mid_EE085_mean095_rho000@2511_847101_same_network.png",
+      "maxheight": 300,
+      "paragraphs": [
+        "四列按既定主图布局：实际阈值降低场、TA原生场、TB原生场、完整连续电极包络。白/灰无活动区与原始空间网格保留，不通过接触读出遮去核外活动。",
+        "两张时间场是窗口内10%累计活动时间，不是因果起源定位。连续六秒GIF不按事件挑选，另有按每类最早三个事件组织的GIF，两者不可混称自然模式切换。"
+      ],
+      "boundaries": []
+    },
+    {
+      "title": "参数 → 观测：保留原合格事件规则",
+      "landscape": true,
+      "figure": "/data/hfosp/topic4_sef_hfo/core_propagation_recovery_20260911/parameter_response_summary/figures/primary_parameter_response_summary.png",
+      "maxheight": 375,
+      "paragraphs": [
+        "三列分别改变核内EE、左核阈值降幅、核内输入均值；颜色标参数，圆/方标两条噪声。EE列同时保留两个布局，其他两列固定近SCL位置；每条线都是其直接对照。",
+        "事件少时如实标N；没有TA时其条件参与量留空。底行来自未经事件筛选的完整右核发放，显示局部参数可影响远侧核心；它仍只是此拓扑中的作用。"
+      ],
+      "boundaries": []
+    },
+    {
+      "title": "相同参数：全检测诊断显示招募与模式组成的取舍",
+      "landscape": true,
+      "figure": "/data/hfosp/topic4_sef_hfo/core_propagation_recovery_20260911/parameter_response_summary/figures/all_detected_parameter_response_summary.png",
+      "maxheight": 375,
+      "paragraphs": [
+        "此页包含重叠窗检测，不替代上一页的正式集合。近SCL条件增加左核阈值降低幅度后，TA标签显著增多但ICL参与下降；右核整体率也增加。",
+        "EE作用在两个布局中出现反向，是全检测的描述性交互。原合格集合在部分条件事件不足，不能把这一趋势自动升级为稳健的患者分布恢复。"
+      ],
+      "boundaries": []
+    },
+    {
+      "title": "只改两核输入相关性：出现机会改善，路径未修好",
+      "landscape": true,
+      "figure": "/data/hfosp/topic4_sef_hfo/core_propagation_recovery_20260911/core_ou_propagation_response/figures/core_input_correlation_to_propagation.png",
+      "maxheight": 365,
+      "paragraphs": [
+        "左列为TA比例，中列为TA参与SCL相对ICL的质心差，右列为TB中ICL11早于ICL9的概率。每点一条60秒重演；中列竖线和患者灰带为事件5–95%范围，不是置信区间。",
+        "下排背景的TA由约4–5%增至17.3%，但上部SCL仍过晚；TB顺序概率仅9.6%/14.6%，患者69.4%。输入共同程度不能独自补好这些空间时序残差。"
+      ],
+      "boundaries": []
+    },
+    {
+      "title": "整个事件分布：参与、顺序、毫秒时差分别看",
+      "landscape": true,
+      "figure": "/data/hfosp/topic4_sef_hfo/core_propagation_recovery_20260911/distribution_review_final_B/figures/coreOU_mid_EE085_mean095_rho000@2511_primary_contact_distributions.png",
+      "maxheight": 365,
+      "paragraphs": [
+        "三列是不分模式、TA、TB；三行是参与概率、归一化顺序、相对最早参与质心的毫秒时差。黑色患者参考与两条噪声分别保留，中位数和5–95%范围不是恢复率或置信区间。",
+        "模型中部分触点过度参与，同时TA的SCL时差和TB的左端顺序仍偏移。更多单个点落入患者范围，不代表参与—时差联合分布已经恢复。"
+      ],
+      "boundaries": []
+    },
+    {
+      "title": "同一个观察窗：晚到的SCL会被计入参与集合",
+      "landscape": true,
+      "figure": "/data/hfosp/topic4_sef_hfo/core_propagation_recovery_20260911/core_window_alias_final_B/coreOU_mid_EE085_mean095_rho000/figures/core_window_847101.png",
+      "maxheight": 365,
+      "paragraphs": [
+        "左例是模型自身TA均值附近事件；右例是事后患者特征距离最小TA，仅作能力诊断。上方为完整核心率，下方为全部触点包络，白框是原群体合格段；没有改窗、删触点或重算损失。",
+        "左例上部SCL主要在白框之后。该运行22个TA中，SCL9记入21次，但只有5次对合格段有直接局部检测贡献；另一噪声为22次中2次。晚活动可能是返回传播，不能只凭峰数断言独立源。"
+      ],
+      "boundaries": []
+    },
+    {
+      "title": "空间先验：相同小圆对两组端点的近似程度不同",
+      "landscape": true,
+      "figure": "/data/hfosp/topic4_sef_hfo/core_propagation_recovery_20260911/core_prior_extent_audit/figures/endpoint_cloud_and_core_extent.png",
+      "maxheight": 365,
+      "paragraphs": [
+        "左侧端点摘要跨约11mm，右侧约3mm。用同半径圆表示两个几何中心，没有保留同样程度的空间范围；把左核上移会靠近SCL，同时远离ICL左端。",
+        "这不要求电极位于core内，也不证明患者存在拉长的神经元灶。下一版要区分局部易激范围与向外连接范围，不能将粗端点摘要直接硬编码成患者细路线。"
+      ],
+      "boundaries": []
+    },
+    {
+      "title": "本夜可以接受的结论与下一步边界",
+      "paragraphs": [
+        "第一，核心定义和实际输入已经对齐：没有升阈值E尾部，随机输入严格限核。工程通过没有替代传播判断。",
+        "第二，参数与观测之间已有具体对应关系：左核易激性可改变远侧核心活动，核内EE作用依赖布局，均值和相关性可改变孤立事件及模式组成。两条噪声一致只能支持当前拓扑中的可重复响应。",
+        "第三，尚未得到足够频繁、同时保留正确参与与时序的TA/TB。最低分、两标签俱全、稀少相容个例均不能替代这个目标。患者局部宽度也未恢复，本轮没有用GABA或显示时间拉伸掩盖它。",
+        "更有辨别力的下一步是分别检验core空间范围/形状与core向外连接的扩散范围，并保留粗端点先验及原对照。若只增加标签或招募而条件路径仍不变，就不继续相同小圆、相同全局连接族的加密搜索。",
+        "完整科学审阅、全部参数图、逐事件结果、原生GIF/MP4及来源均由稳定入口 docs/snn_model_report_current.md 汇总；完整v8保留历史模型和状态实验身份。"
+      ],
+      "boundaries": [
+        "本轮停止在科学审阅点：不冻结工作点，不进入Fig5，不把当前结果写成患者双模式传播机制已恢复。"
+      ]
+    }
+  ],
+  "scientific_review": "/data/hfosp/topic4_sef_hfo/core_propagation_recovery_20260911/scientific_review.md",
+  "selection_rule": "Conditions selected to display principal responses and residuals; event exemplars use unchanged own-mode-mean rule except explicitly labelled posthoc distance-minimum capability example."
+}

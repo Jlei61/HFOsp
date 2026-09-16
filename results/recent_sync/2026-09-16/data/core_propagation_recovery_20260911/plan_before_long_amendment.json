@@ -1,0 +1,443 @@
+{
+ "version": "propagation_recovery_night_v1",
+ "authorization": "2026-09-11 user approved autonomous 8-10 hour continuation and scientific review first",
+ "started_unix": 1789056745.0,
+ "stop_new_dispatch_unix": 1789085545.0,
+ "hard_stop_unix": 1789092745.0,
+ "inherited_physics": {
+  "version": "core_connectivity_v2",
+  "E_threshold_delta_max_mV": 0,
+  "core_threshold_floor_mV": 11,
+  "noise_support": "E in the union of both geometric cores",
+  "outside_external_input": "deterministic expected arrivals through unchanged synaptic filter",
+  "shared_core_OU": true,
+  "spatial_OU": false,
+  "slow_I_state": false,
+  "ZM": false,
+  "kick": false,
+  "GABA_decay_ms": 18,
+  "reference_EE_angle_deg": -22.80538396505847,
+  "reference_EE_kernel_parallel_mm": 0.5374011537017762,
+  "reference_EE_kernel_perp_mm": 0.26870057685088805,
+  "engine": "src/snn_engine/kick_probe_core_input_v2.py",
+  "module": "src/topic4_core_connectivity_v2.py",
+  "threshold": "Vth=18-a_k*max(18-Vraw_i,0) inside core k, latent Vraw_i per neuron identity (quantile_seed), floor 11 mV recorded, overlap=min, outside/I=18",
+  "external_input": "shared OU + independent Poisson only on E in the union of both cores; outside E and all I receive exact expected arrivals nu_signal*dt into the unchanged AMPA filter",
+  "weights": "six blocks scaled on explicit pre/post type and A/B/O membership; edges and delays preserved",
+  "degree": "EE core->out block only; per outside E target round(baseline*factor) with fixed topology random keys; distance delays; zero-baseline targets recorded",
+  "kernel": "all E->E in-edges resampled per E target under (l_par*s_par, l_perp*s_perp, theta+offset) keeping baseline in-degree; distance delays; other pathways preserved",
+  "composition": "kernel baseline -> core->out degree -> block weights, each from the immutable cached graph"
+ },
+ "source_snapshot": {
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_core_connectivity_search.py": "85e39e9af2fff68c60db2c37b6fd1369f38ac53433f8f30a5f88b079d31e7ef4",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_core_connectivity_v2.py": "a9ae8ed188d7f36e4cc1a1890eb26dc278f0d937f1689154fe891f80ec0f2238",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/snn_engine/kick_probe_core_input_v2.py": "bba9dbaba8ee68d8e1b43682b21d6e87a2a6e082513e6fa6453126375b27a37b",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_streaming_spike_readout.py": "a493db8a8516599f2169e9baada36288169e98416d726d27eebf6d04efc00314",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_initial_state_runtime.py": "06c4bf8e037f982c8ec995d8550c230d8528bfeeb29b983df31a0659cbebc03f",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_initial_state.py": "1e9ed1ffe67cb085e6b740ba49ffc99ef03d9ced723988b68910c6d6dee2650d",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_observation_repaired.py": "089a2a414c3c270708d99862cc94ba5aa1864cd881170abf3165a8d77ec9894a",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/snn_engine/connectivity.py": "53d3bf765f7084cda924d3b23a6cb6e5f6a21293d9ae1e0e2d8f8cf89a1d3303",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/snn_engine/connectivity_rot.py": "3fa6c87df4c8756132b3fe6734fd9f73673a731914e9937befbaf073f00e2b9f",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/snn_engine/params.py": "c2036d1e1548c3db89adab27f8a7a57f9cdf584b5fed360963c966004cf88884",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_core_field.py": "4b66406ca93ff558fe204e12a9a9d1bcfe0ead4cd2b4ef3527603347e3699e46",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_core_driven_input.py": "dcabc862504c5b98cd26fd659859e45013d7391cd11a529ccb457c70fd9b69e3",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_core_connectivity.py": "2ed2b10d939d6b5b22f635d3dcd76ec769b3d675b439260f1cdc0252160579e6"
+ },
+ "original_screen_root": "/data/hfosp/topic4_sef_hfo/core_connectivity_search_20260910",
+ "screen_completed_runs": 120,
+ "review": {
+  "primary_events": 485,
+  "all_detected_events": 7735,
+  "excluded_only_window_overlap": 7250,
+  "completed_full_trajectories": 120,
+  "runaway": 0,
+  "primary_scorable_runs": 1,
+  "decision": "patient propagation not accepted; retain isolated-window training contract; all-detection diagnostic cannot replace formal patient-matched target"
+ },
+ "remaining_budget": {
+  "new_combination_runs": 16,
+  "long_support_runs": 16,
+  "confirmation_runs": 16,
+  "total_new_max": 48,
+  "including_old_screen_max": 168
+ },
+ "wave1": {
+  "stage": "recovery_wave1_20260911",
+  "candidates": [
+   {
+    "id": "recovery_up_out_transverse",
+    "layout": "up4p5",
+    "centers_mm": [
+     [
+      4.19921432,
+      13.62890135
+     ],
+     [
+      16.47920304,
+      3.96551153
+     ]
+    ],
+    "radii_mm": [
+     1.7525782905619196,
+     1.7525782905619196
+    ],
+    "parameters": {
+     "EE_same_core_scale": 1.0,
+     "EE_core_to_out_scale": 1.25,
+     "EE_out_to_out_scale": 1.0,
+     "EI_same_core_scale": 1.0,
+     "IE_same_core_scale": 1.0,
+     "II_same_core_scale": 1.0,
+     "depth_A_scale": 1.0,
+     "depth_B_scale": 1.0,
+     "radius_A_mm": 1.7525782905619196,
+     "radius_B_mm": 1.7525782905619196,
+     "EE_core_to_out_degree_scale": 1.0,
+     "EE_kernel_perp_scale": 1.25,
+     "EE_kernel_parallel_scale": 1.0,
+     "EE_angle_offset_deg": 0.0
+    },
+    "changed_parameter": "declared_combination",
+    "changed_value": null,
+    "adjacency_changes": true,
+    "stage": "recovery_wave1_20260911",
+    "parent_id": "up4p5__EE_core_to_out_scale_1.25",
+    "changed_parameters": {
+     "EE_kernel_perp_scale": 1.25
+    }
+   },
+   {
+    "id": "recovery_up_out_extent_depth",
+    "layout": "up4p5",
+    "centers_mm": [
+     [
+      4.19921432,
+      13.62890135
+     ],
+     [
+      16.47920304,
+      3.96551153
+     ]
+    ],
+    "radii_mm": [
+     2.5,
+     1.7525782905619196
+    ],
+    "parameters": {
+     "EE_same_core_scale": 1.0,
+     "EE_core_to_out_scale": 1.25,
+     "EE_out_to_out_scale": 1.0,
+     "EI_same_core_scale": 1.0,
+     "IE_same_core_scale": 1.0,
+     "II_same_core_scale": 1.0,
+     "depth_A_scale": 0.5,
+     "depth_B_scale": 1.0,
+     "radius_A_mm": 2.5,
+     "radius_B_mm": 1.7525782905619196,
+     "EE_core_to_out_degree_scale": 1.0,
+     "EE_kernel_perp_scale": 1.0,
+     "EE_kernel_parallel_scale": 1.0,
+     "EE_angle_offset_deg": 0.0
+    },
+    "changed_parameter": "declared_combination",
+    "changed_value": null,
+    "adjacency_changes": false,
+    "stage": "recovery_wave1_20260911",
+    "parent_id": "up4p5__EE_core_to_out_scale_1.25",
+    "changed_parameters": {
+     "radius_A_mm": 2.5,
+     "depth_A_scale": 0.5
+    }
+   },
+   {
+    "id": "recovery_up_out_EI",
+    "layout": "up4p5",
+    "centers_mm": [
+     [
+      4.19921432,
+      13.62890135
+     ],
+     [
+      16.47920304,
+      3.96551153
+     ]
+    ],
+    "radii_mm": [
+     1.7525782905619196,
+     1.7525782905619196
+    ],
+    "parameters": {
+     "EE_same_core_scale": 1.0,
+     "EE_core_to_out_scale": 1.25,
+     "EE_out_to_out_scale": 1.0,
+     "EI_same_core_scale": 0.85,
+     "IE_same_core_scale": 1.0,
+     "II_same_core_scale": 1.0,
+     "depth_A_scale": 1.0,
+     "depth_B_scale": 1.0,
+     "radius_A_mm": 1.7525782905619196,
+     "radius_B_mm": 1.7525782905619196,
+     "EE_core_to_out_degree_scale": 1.0,
+     "EE_kernel_perp_scale": 1.0,
+     "EE_kernel_parallel_scale": 1.0,
+     "EE_angle_offset_deg": 0.0
+    },
+    "changed_parameter": "declared_combination",
+    "changed_value": null,
+    "adjacency_changes": false,
+    "stage": "recovery_wave1_20260911",
+    "parent_id": "up4p5__EE_core_to_out_scale_1.25",
+    "changed_parameters": {
+     "EI_same_core_scale": 0.85
+    }
+   },
+   {
+    "id": "recovery_up_out_IE",
+    "layout": "up4p5",
+    "centers_mm": [
+     [
+      4.19921432,
+      13.62890135
+     ],
+     [
+      16.47920304,
+      3.96551153
+     ]
+    ],
+    "radii_mm": [
+     1.7525782905619196,
+     1.7525782905619196
+    ],
+    "parameters": {
+     "EE_same_core_scale": 1.0,
+     "EE_core_to_out_scale": 1.25,
+     "EE_out_to_out_scale": 1.0,
+     "EI_same_core_scale": 1.0,
+     "IE_same_core_scale": 1.2,
+     "II_same_core_scale": 1.0,
+     "depth_A_scale": 1.0,
+     "depth_B_scale": 1.0,
+     "radius_A_mm": 1.7525782905619196,
+     "radius_B_mm": 1.7525782905619196,
+     "EE_core_to_out_degree_scale": 1.0,
+     "EE_kernel_perp_scale": 1.0,
+     "EE_kernel_parallel_scale": 1.0,
+     "EE_angle_offset_deg": 0.0
+    },
+    "changed_parameter": "declared_combination",
+    "changed_value": null,
+    "adjacency_changes": false,
+    "stage": "recovery_wave1_20260911",
+    "parent_id": "up4p5__EE_core_to_out_scale_1.25",
+    "changed_parameters": {
+     "IE_same_core_scale": 1.2
+    }
+   },
+   {
+    "id": "recovery_upper_wide_bias_B",
+    "layout": "near_upper",
+    "centers_mm": [
+     [
+      5.712184916450571,
+      13.574047194943589
+     ],
+     [
+      16.47920304,
+      3.96551153
+     ]
+    ],
+    "radii_mm": [
+     1.7525782905619196,
+     1.7525782905619196
+    ],
+    "parameters": {
+     "EE_same_core_scale": 1.0,
+     "EE_core_to_out_scale": 1.0,
+     "EE_out_to_out_scale": 1.0,
+     "EI_same_core_scale": 1.0,
+     "IE_same_core_scale": 1.0,
+     "II_same_core_scale": 1.0,
+     "depth_A_scale": 0.75,
+     "depth_B_scale": 1.25,
+     "radius_A_mm": 1.7525782905619196,
+     "radius_B_mm": 1.7525782905619196,
+     "EE_core_to_out_degree_scale": 1.0,
+     "EE_kernel_perp_scale": 1.5,
+     "EE_kernel_parallel_scale": 1.0,
+     "EE_angle_offset_deg": 0.0
+    },
+    "changed_parameter": "declared_combination",
+    "changed_value": null,
+    "adjacency_changes": true,
+    "stage": "recovery_wave1_20260911",
+    "parent_id": "near_upper__EE_kernel_perp_scale_1.5",
+    "changed_parameters": {
+     "depth_A_scale": 0.75,
+     "depth_B_scale": 1.25
+    }
+   },
+   {
+    "id": "recovery_upper_wide_bias_A",
+    "layout": "near_upper",
+    "centers_mm": [
+     [
+      5.712184916450571,
+      13.574047194943589
+     ],
+     [
+      16.47920304,
+      3.96551153
+     ]
+    ],
+    "radii_mm": [
+     1.7525782905619196,
+     1.7525782905619196
+    ],
+    "parameters": {
+     "EE_same_core_scale": 1.0,
+     "EE_core_to_out_scale": 1.0,
+     "EE_out_to_out_scale": 1.0,
+     "EI_same_core_scale": 1.0,
+     "IE_same_core_scale": 1.0,
+     "II_same_core_scale": 1.0,
+     "depth_A_scale": 1.25,
+     "depth_B_scale": 0.75,
+     "radius_A_mm": 1.7525782905619196,
+     "radius_B_mm": 1.7525782905619196,
+     "EE_core_to_out_degree_scale": 1.0,
+     "EE_kernel_perp_scale": 1.5,
+     "EE_kernel_parallel_scale": 1.0,
+     "EE_angle_offset_deg": 0.0
+    },
+    "changed_parameter": "declared_combination",
+    "changed_value": null,
+    "adjacency_changes": true,
+    "stage": "recovery_wave1_20260911",
+    "parent_id": "near_upper__EE_kernel_perp_scale_1.5",
+    "changed_parameters": {
+     "depth_A_scale": 1.25,
+     "depth_B_scale": 0.75
+    }
+   },
+   {
+    "id": "recovery_upper_wide_recurrence",
+    "layout": "near_upper",
+    "centers_mm": [
+     [
+      5.712184916450571,
+      13.574047194943589
+     ],
+     [
+      16.47920304,
+      3.96551153
+     ]
+    ],
+    "radii_mm": [
+     1.7525782905619196,
+     1.7525782905619196
+    ],
+    "parameters": {
+     "EE_same_core_scale": 0.75,
+     "EE_core_to_out_scale": 1.0,
+     "EE_out_to_out_scale": 1.0,
+     "EI_same_core_scale": 1.0,
+     "IE_same_core_scale": 1.0,
+     "II_same_core_scale": 1.0,
+     "depth_A_scale": 1.0,
+     "depth_B_scale": 1.0,
+     "radius_A_mm": 1.7525782905619196,
+     "radius_B_mm": 1.7525782905619196,
+     "EE_core_to_out_degree_scale": 1.0,
+     "EE_kernel_perp_scale": 1.5,
+     "EE_kernel_parallel_scale": 1.0,
+     "EE_angle_offset_deg": 0.0
+    },
+    "changed_parameter": "declared_combination",
+    "changed_value": null,
+    "adjacency_changes": true,
+    "stage": "recovery_wave1_20260911",
+    "parent_id": "near_upper__EE_kernel_perp_scale_1.5",
+    "changed_parameters": {
+     "EE_same_core_scale": 0.75
+    }
+   },
+   {
+    "id": "recovery_upper_output_transverse",
+    "layout": "near_upper",
+    "centers_mm": [
+     [
+      5.712184916450571,
+      13.574047194943589
+     ],
+     [
+      16.47920304,
+      3.96551153
+     ]
+    ],
+    "radii_mm": [
+     1.7525782905619196,
+     1.7525782905619196
+    ],
+    "parameters": {
+     "EE_same_core_scale": 1.0,
+     "EE_core_to_out_scale": 1.25,
+     "EE_out_to_out_scale": 1.0,
+     "EI_same_core_scale": 1.0,
+     "IE_same_core_scale": 1.0,
+     "II_same_core_scale": 1.0,
+     "depth_A_scale": 1.0,
+     "depth_B_scale": 1.0,
+     "radius_A_mm": 1.7525782905619196,
+     "radius_B_mm": 1.7525782905619196,
+     "EE_core_to_out_degree_scale": 1.0,
+     "EE_kernel_perp_scale": 1.25,
+     "EE_kernel_parallel_scale": 1.0,
+     "EE_angle_offset_deg": 0.0
+    },
+    "changed_parameter": "declared_combination",
+    "changed_value": null,
+    "adjacency_changes": true,
+    "stage": "recovery_wave1_20260911",
+    "parent_id": "near_upper__EE_kernel_perp_scale_1.5",
+    "changed_parameters": {
+     "EE_core_to_out_scale": 1.25,
+     "EE_kernel_perp_scale": 1.25
+    }
+   }
+  ],
+  "seeds": [
+   847101,
+   847102
+  ],
+  "topology_seed": 2511,
+  "duration_ms": 20000
+ },
+ "long_support": {
+  "max_conditions": 8,
+  "seeds": [
+   847101,
+   847102
+  ],
+  "topology_seed": 2511,
+  "duration_ms": 60000,
+  "selection": "after wave1 readout/field review; preserve baseline and direct parents"
+ },
+ "confirmation": {
+  "max_conditions": 4,
+  "new_topologies": 2,
+  "new_dynamics_per_topology": 2,
+  "duration_ms": 60000,
+  "selection": "after longer-run review; include reference; explicit unused seed identities"
+ },
+ "resources": {
+  "max_workers": 8,
+  "reserve_per_worker_gib": 9.0,
+  "min_available_gib": 40.0,
+  "kill_tree_rss_gib": 18.0,
+  "measured_prior_peak_gib": 5.897281646728516,
+  "initial_workers": 8,
+  "reason": "prior 120 completed units already supply empirical canary memory measurements"
+ },
+ "observation": "frozen primary selection, centroids, classifier, kernels, masks and positive scales unchanged; all-detection developmental population separately labelled",
+ "stop": "no automatic Fig5/model freeze; no primary relaxation to manufacture scorable output; finite negative scientific results retained"
+}

@@ -1,0 +1,747 @@
+{
+  "updated_at": 1789429430.7364585,
+  "goal_deadline_epoch": 1789433430,
+  "scientific_parameter_noise_conditions": 46,
+  "extra_same_state_continuations": 2,
+  "conservative_budget_used": 48,
+  "remaining_budget": 0,
+  "approved_jobs_in_snapshot": 48,
+  "total_completed": 48,
+  "operational_return_trajectories_including_continuation": 7,
+  "experiment_failure_files": 0,
+  "available_RAM_GiB": 180.91604614257812,
+  "batches": {
+    "round1": {
+      "status": "RUNNING",
+      "supervisor_pid": 81113,
+      "completed": 12,
+      "running": {},
+      "pending": [],
+      "failed": [],
+      "runs": {
+        "native_weak_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 60.0,
+          "entries": [
+            9.87
+          ],
+          "recoveries": [],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "SIMULATION_HORIZON"
+        },
+        "native_longM_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 120.0,
+          "entries": [
+            10.87
+          ],
+          "recoveries": [],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "SIMULATION_HORIZON"
+        },
+        "native_midM_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 120.0,
+          "entries": [],
+          "recoveries": [],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "SIMULATION_HORIZON"
+        },
+        "native_fastZ_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 120.0,
+          "entries": [],
+          "recoveries": [],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "SIMULATION_HORIZON"
+        },
+        "mix_g0.25_eta0.005_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 60.0,
+          "entries": [
+            3.66
+          ],
+          "recoveries": [],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "SIMULATION_HORIZON"
+        },
+        "mix_g0.5_eta0.005_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 60.0,
+          "entries": [
+            1.39
+          ],
+          "recoveries": [],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "SIMULATION_HORIZON"
+        },
+        "mix_g0.75_eta0.005_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 60.0,
+          "entries": [
+            1.19
+          ],
+          "recoveries": [],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "SIMULATION_HORIZON"
+        },
+        "mix_g0.25_eta0.02_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 60.0,
+          "entries": [
+            5.82
+          ],
+          "recoveries": [],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "SIMULATION_HORIZON"
+        },
+        "mix_g0.5_eta0.02_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 60.0,
+          "entries": [
+            1.41
+          ],
+          "recoveries": [],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "SIMULATION_HORIZON"
+        },
+        "mix_g0.75_eta0.02_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 60.0,
+          "entries": [
+            1.19
+          ],
+          "recoveries": [],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "SIMULATION_HORIZON"
+        },
+        "add_g0.25_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 60.0,
+          "entries": [],
+          "recoveries": [],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "SIMULATION_HORIZON"
+        },
+        "add_g0.5_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 60.0,
+          "entries": [],
+          "recoveries": [],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "SIMULATION_HORIZON"
+        }
+      }
+    },
+    "fast_threshold_round2": {
+      "status": "COMPLETE",
+      "supervisor_pid": 82292,
+      "completed": 8,
+      "running": {},
+      "pending": [],
+      "failed": [],
+      "runs": {
+        "phi0.25_g0_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 60.0,
+          "entries": [
+            23.28
+          ],
+          "recoveries": [],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "SIMULATION_HORIZON"
+        },
+        "phi1_g0_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 60.0,
+          "entries": [],
+          "recoveries": [],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "SIMULATION_HORIZON"
+        },
+        "phi2.5_g0_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 60.0,
+          "entries": [],
+          "recoveries": [],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "SIMULATION_HORIZON"
+        },
+        "phi0.25_g0.25_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 60.0,
+          "entries": [
+            7.22
+          ],
+          "recoveries": [],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "SIMULATION_HORIZON"
+        },
+        "phi1_g0.25_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 60.0,
+          "entries": [
+            28.42
+          ],
+          "recoveries": [],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "SIMULATION_HORIZON"
+        },
+        "phi2.5_g0.25_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 60.0,
+          "entries": [],
+          "recoveries": [],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "SIMULATION_HORIZON"
+        },
+        "phi1_g0.5_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 60.0,
+          "entries": [
+            3.4
+          ],
+          "recoveries": [],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "SIMULATION_HORIZON"
+        },
+        "phi2.5_g0.5_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 60.0,
+          "entries": [
+            9.13
+          ],
+          "recoveries": [],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "SIMULATION_HORIZON"
+        }
+      }
+    },
+    "activity_global_pool_round3": {
+      "status": "REVIEW_MILESTONE",
+      "supervisor_pid": 86884,
+      "completed": 8,
+      "running": {},
+      "pending": [],
+      "failed": [],
+      "runs": {
+        "pool_k10_r50_tau2_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 60.0,
+          "entries": [
+            13.12
+          ],
+          "recoveries": [],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "SIMULATION_HORIZON"
+        },
+        "pool_k10_r0_tau2_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 60.0,
+          "entries": [],
+          "recoveries": [],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "SIMULATION_HORIZON"
+        },
+        "pool_k10_r50_tau0.5_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 60.0,
+          "entries": [
+            14.75
+          ],
+          "recoveries": [],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "SIMULATION_HORIZON"
+        },
+        "pool_k10_r0_tau0.5_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 60.0,
+          "entries": [],
+          "recoveries": [],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "SIMULATION_HORIZON"
+        },
+        "pool_k50_r50_tau2_mmoderate_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 60.0,
+          "entries": [
+            21.03
+          ],
+          "recoveries": [],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "SIMULATION_HORIZON"
+        },
+        "pool_k50_r50_tau2_mweak_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 60.0,
+          "entries": [
+            19.58
+          ],
+          "recoveries": [],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "SIMULATION_HORIZON"
+        },
+        "pool_k10_r50_tau2_mmoderate_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 60.0,
+          "entries": [
+            15.29
+          ],
+          "recoveries": [],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "SIMULATION_HORIZON"
+        },
+        "pool_k50_r50_tau0.5_mmoderate_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 60.0,
+          "entries": [
+            22.89
+          ],
+          "recoveries": [],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "SIMULATION_HORIZON"
+        }
+      }
+    },
+    "stronger_M_redistribution_round4": {
+      "status": "REVIEW_MILESTONE",
+      "supervisor_pid": 87182,
+      "completed": 2,
+      "running": {},
+      "pending": [],
+      "failed": [],
+      "runs": {
+        "mix_g0.25_eta0.05_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 60.0,
+          "entries": [
+            4.52
+          ],
+          "recoveries": [],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "SIMULATION_HORIZON"
+        },
+        "mix_g0.25_eta0.1_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 60.0,
+          "entries": [
+            12.87
+          ],
+          "recoveries": [],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "SIMULATION_HORIZON"
+        }
+      }
+    },
+    "continuous_resource_recovery_round5": {
+      "status": "REVIEW_MILESTONE",
+      "supervisor_pid": 90968,
+      "completed": 3,
+      "running": {},
+      "pending": [],
+      "failed": [],
+      "runs": {
+        "resource_rho1_k50_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 60.0,
+          "entries": [],
+          "recoveries": [],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "SIMULATION_HORIZON"
+        },
+        "resource_rho0.25_k50_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 60.0,
+          "entries": [],
+          "recoveries": [],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "SIMULATION_HORIZON"
+        },
+        "resource_rho1_k0_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 60.0,
+          "entries": [],
+          "recoveries": [],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "SIMULATION_HORIZON"
+        }
+      }
+    },
+    "adaptation_capacity_round6": {
+      "status": "REVIEW_MILESTONE",
+      "supervisor_pid": 91262,
+      "completed": 3,
+      "running": {},
+      "pending": [],
+      "failed": [],
+      "runs": {
+        "mix_g0.25_eta1_tau2_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 60.0,
+          "entries": [],
+          "recoveries": [],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "SIMULATION_HORIZON"
+        },
+        "mix_g0.25_eta2_tau2_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 60.0,
+          "entries": [],
+          "recoveries": [],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "SIMULATION_HORIZON"
+        },
+        "mix_g0.25_eta0.4_tau10_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 60.0,
+          "entries": [],
+          "recoveries": [],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "SIMULATION_HORIZON"
+        }
+      }
+    },
+    "preserved_global_gain_round7": {
+      "status": "REVIEW_MILESTONE",
+      "supervisor_pid": 92014,
+      "completed": 3,
+      "running": {},
+      "pending": [],
+      "failed": [],
+      "runs": {
+        "resource_rho0.25_k200_tau2_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 60.0,
+          "entries": [],
+          "recoveries": [],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "SIMULATION_HORIZON"
+        },
+        "resource_rho0.25_k50_tau10_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 30.0,
+          "entries": [
+            13.66,
+            19.14,
+            23.43,
+            29.64
+          ],
+          "recoveries": [
+            18.79,
+            21.75,
+            26.28
+          ],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "RECURRENCE_OBSERVED"
+        },
+        "resource_rho0.25_k200_tau10_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 30.0,
+          "entries": [
+            13.66,
+            25.29
+          ],
+          "recoveries": [
+            22.16
+          ],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "RECURRENCE_OBSERVED"
+        }
+      }
+    },
+    "paired_recurrence_confirmation_round8": {
+      "status": "RUNNING",
+      "supervisor_pid": 94019,
+      "completed": 6,
+      "running": {},
+      "pending": [],
+      "failed": [],
+      "runs": {
+        "resource_rho0.25_k50_tau10_s9108402": {
+          "status": "COMPLETE",
+          "time_s": 60.0,
+          "entries": [
+            13.86
+          ],
+          "recoveries": [],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "SIMULATION_HORIZON"
+        },
+        "resource_rho0.25_k200_tau10_s9108402": {
+          "status": "COMPLETE",
+          "time_s": 30.0,
+          "entries": [
+            13.86,
+            23.89
+          ],
+          "recoveries": [
+            22.33
+          ],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "RECURRENCE_OBSERVED"
+        },
+        "resource_rho0_k50_tau10_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 60.0,
+          "entries": [
+            11.72
+          ],
+          "recoveries": [],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "SIMULATION_HORIZON"
+        },
+        "resource_rho0_k200_tau10_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 30.0,
+          "entries": [
+            11.72,
+            22.71,
+            26.45
+          ],
+          "recoveries": [
+            22.41,
+            25.16,
+            29.37
+          ],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "RECURRENCE_OBSERVED"
+        },
+        "resource_rho0.25_k0_tau10_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 60.0,
+          "entries": [
+            13.66
+          ],
+          "recoveries": [],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "SIMULATION_HORIZON"
+        },
+        "resource_rho0.25_k0_tau10_s9108402": {
+          "status": "COMPLETE",
+          "time_s": 60.0,
+          "entries": [
+            13.86
+          ],
+          "recoveries": [],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "SIMULATION_HORIZON"
+        }
+      }
+    },
+    "native_global_confirmation_round9": {
+      "status": "REVIEW_MILESTONE",
+      "supervisor_pid": 95850,
+      "completed": 1,
+      "running": {},
+      "pending": [],
+      "failed": [],
+      "runs": {
+        "resource_rho0_k200_tau10_s9108402": {
+          "status": "COMPLETE",
+          "time_s": 30.0,
+          "entries": [
+            13.21,
+            23.32,
+            26.6
+          ],
+          "recoveries": [
+            23.25,
+            25.69,
+            29.27
+          ],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "RECURRENCE_OBSERVED"
+        }
+      }
+    },
+    "nativeZ_continuation_to60": {
+      "status": "REVIEW_MILESTONE",
+      "supervisor_pid": 96088,
+      "completed": 1,
+      "running": {},
+      "pending": [],
+      "failed": [],
+      "runs": {
+        "nativeZ_k200_tau10_continuation60_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 60.0,
+          "entries": [
+            11.72,
+            22.71,
+            26.45,
+            33.02
+          ],
+          "recoveries": [
+            22.41,
+            25.16,
+            29.37
+          ],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "PREDEFINED_CONTINUATION_HORIZON"
+        }
+      }
+    },
+    "revisedZ_continuation_to60": {
+      "status": "REVIEW_MILESTONE",
+      "supervisor_pid": 97182,
+      "completed": 1,
+      "running": {},
+      "pending": [],
+      "failed": [],
+      "runs": {
+        "revisedZ_k200_tau10_continuation60_s9108401": {
+          "status": "COMPLETE",
+          "time_s": 60.0,
+          "entries": [
+            13.66,
+            25.29,
+            31.18,
+            33.5,
+            36.01,
+            38.69,
+            41.48,
+            44.21,
+            46.98,
+            49.82,
+            52.65,
+            55.48,
+            58.31
+          ],
+          "recoveries": [
+            22.16,
+            31.16,
+            33.38,
+            35.71,
+            38.25,
+            40.93,
+            43.73,
+            46.45,
+            49.23,
+            52.09,
+            54.91,
+            57.74
+          ],
+          "complete": true,
+          "failure_file": false,
+          "producer_pid": null,
+          "stop_reason": "PREDEFINED_CONTINUATION_HORIZON"
+        }
+      }
+    }
+  },
+  "dense_replays": {
+    "resource_rho0.25_k50_tau10_s9108401": {
+      "status": "VERIFIED_READY_FOR_FULL_FIGURE",
+      "source_end_s": 30.0,
+      "updated_at": 1789425068.2626119,
+      "next": "Render full measured Fig5 from1ms state and actual source spikes; inspect native-band energy and optional native movies. No automatic model freeze."
+    },
+    "resource_rho0.25_k200_tau10_s9108401": {
+      "status": "VERIFIED_READY_FOR_FULL_FIGURE",
+      "source_end_s": 30.0,
+      "updated_at": 1789426144.1632402,
+      "next": "Render full measured Fig5 from1ms state and actual source spikes; inspect native-band energy and optional native movies. No automatic model freeze."
+    },
+    "resource_rho0_k200_tau10_s9108401": {
+      "status": "VERIFIED_READY_FOR_FULL_FIGURE",
+      "source_end_s": 30.0,
+      "updated_at": 1789427223.6432528,
+      "next": "Render full measured Fig5 from1ms state and actual source spikes; inspect native-band energy and optional native movies. No automatic model freeze."
+    }
+  },
+  "caution": "Operational returns are not accepted interictal-repertoire recovery. A same-state continuation is not an independent replicate. Actual completed duration and stop reason must accompany each result."
+}

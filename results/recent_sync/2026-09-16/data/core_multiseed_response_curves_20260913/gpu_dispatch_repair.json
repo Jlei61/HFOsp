@@ -1,0 +1,8 @@
+{
+ "reason": "GPU consumers inherited CPU worker CUDA_VISIBLE_DEVICES empty; both exited before any scientific analysis",
+ "change": "Enable both GPUs for rotation roles only; detect zombie processes as terminated",
+ "physical_workers_restarted": 0,
+ "simulation_physics_unchanged": true,
+ "controller_source_sha256": "4ff8bdc5cdcfcc3ee5ed5fb03951fc96b023a9f8fea69ac60138777723fdf922",
+ "created_unix": 1789236185.1511464
+}

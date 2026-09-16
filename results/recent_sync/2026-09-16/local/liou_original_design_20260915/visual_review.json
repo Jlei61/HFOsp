@@ -1,0 +1,23 @@
+{
+  "agent_review": "COMPLETE",
+  "user_visual_acceptance": "PENDING",
+  "reviewed": [
+    "original_rate_exp2a",
+    "original_spiking_s20260915",
+    "original_spiking_s20260916",
+    "original_spiking_recovery_extended",
+    "original_global_spatial_ablation",
+    "original_2d_spatial_recovery",
+    "original_2d_overview",
+    "original_2d_wave_detail",
+    "liou_spatial_feedback_s9108401",
+    "liou_spatial_feedback_s9108402"
+  ],
+  "fixed_visual_issues": [
+    "Native recovery fraction label overlap",
+    "Consistent native global-current y ranges",
+    "2D static colorbar bounds",
+    "Animation caption overlap"
+  ],
+  "biological_acceptance": "Reference recovery reproduced; current fixed dualcore recovery absent; no model freeze"
+}

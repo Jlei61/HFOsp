@@ -1,0 +1,97 @@
+{
+  "time": "2026-09-13T07:23:00+08:00",
+  "complete_F_cells": 1,
+  "established_first_endpoints": 3,
+  "restricted_mean_first_entry_s": [
+    [
+      12.365,
+      null,
+      null,
+      null,
+      null
+    ],
+    [
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    [
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    [
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  ],
+  "first_endpoint_records": [
+    {
+      "name": "e0_t0_s9108401",
+      "eta_M": 0.005,
+      "tau_M_s": 1.0,
+      "seed": 9108401,
+      "full_trajectory_complete": false,
+      "status": "ESTABLISHED",
+      "observed": true,
+      "onset_s": 10.59,
+      "confirmation_s": 10.790000000000001,
+      "restricted_time_s": 10.790000000000001,
+      "closed_prefix_end_s": 20.0,
+      "source_chunks": [
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/m_parameter_modes_fig5_20260913/runs/e0_t0_s9108401/chunks/0000000000_0000100000.npz",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/m_parameter_modes_fig5_20260913/runs/e0_t0_s9108401/chunks/0000100000_0000200000.npz"
+      ],
+      "endpoint_verified_from_saved_spikes": true,
+      "statistical_unit": "one original parameter condition and noise seed"
+    },
+    {
+      "name": "e0_t0_s9108402",
+      "eta_M": 0.005,
+      "tau_M_s": 1.0,
+      "seed": 9108402,
+      "full_trajectory_complete": false,
+      "status": "ESTABLISHED",
+      "observed": true,
+      "onset_s": 13.74,
+      "confirmation_s": 13.94,
+      "restricted_time_s": 13.94,
+      "closed_prefix_end_s": 20.0,
+      "source_chunks": [
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/m_parameter_modes_fig5_20260913/runs/e0_t0_s9108402/chunks/0000000000_0000100000.npz",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/m_parameter_modes_fig5_20260913/runs/e0_t0_s9108402/chunks/0000100000_0000200000.npz"
+      ],
+      "endpoint_verified_from_saved_spikes": true,
+      "statistical_unit": "one original parameter condition and noise seed"
+    },
+    {
+      "name": "e1_t1_s9108401",
+      "eta_M": 0.01,
+      "tau_M_s": 2.0,
+      "seed": 9108401,
+      "full_trajectory_complete": false,
+      "status": "ESTABLISHED",
+      "observed": true,
+      "onset_s": 16.43,
+      "confirmation_s": 16.63,
+      "restricted_time_s": 16.63,
+      "closed_prefix_end_s": 20.0,
+      "source_chunks": [
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/m_parameter_modes_fig5_20260913/runs/e1_t1_s9108401/chunks/0000000000_0000100000.npz",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/m_parameter_modes_fig5_20260913/runs/e1_t1_s9108401/chunks/0000100000_0000200000.npz"
+      ],
+      "endpoint_verified_from_saved_spikes": true,
+      "statistical_unit": "one original parameter condition and noise seed"
+    }
+  ],
+  "figure": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/m_parameter_modes_fig5_20260913/figures/M_entry_time_and_fraction.png",
+  "agent_visual_review": "PASS",
+  "human_review": "PENDING"
+}

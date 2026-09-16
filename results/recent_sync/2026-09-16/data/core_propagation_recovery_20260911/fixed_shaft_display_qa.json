@@ -1,0 +1,80 @@
+{
+  "status": "PASS",
+  "comparisons": 14,
+  "patient_STFT_values_preserved": true,
+  "patient_axes_verified": true,
+  "model_examples_windows_centroid_zero_participation_unchanged": true,
+  "gif_frames_decoded": 375,
+  "records": [
+    {
+      "file": "refine_midpoint_EE085_A115_mean095@2511_patient_spectra_model_envelopes",
+      "stage": "main_review_final_A_primary_shaft_fixed",
+      "same_examples_windows_zero_masks": true
+    },
+    {
+      "file": "coreOU_mid_EE075_rho050@2511_patient_spectra_model_envelopes",
+      "stage": "main_review_final_B_primary_shaft_fixed",
+      "same_examples_windows_zero_masks": true
+    },
+    {
+      "file": "coreOU_mid_EE075_rho000@2511_patient_spectra_model_envelopes",
+      "stage": "main_review_final_B_primary_shaft_fixed",
+      "same_examples_windows_zero_masks": true
+    },
+    {
+      "file": "coreOU_mid_EE085_mean095_rho050@2511_patient_spectra_model_envelopes",
+      "stage": "main_review_final_B_primary_shaft_fixed",
+      "same_examples_windows_zero_masks": true
+    },
+    {
+      "file": "coreOU_mid_EE085_mean095_rho000@2511_patient_spectra_model_envelopes",
+      "stage": "main_review_final_B_primary_shaft_fixed",
+      "same_examples_windows_zero_masks": true
+    },
+    {
+      "file": "endpoint__baseline@2511_patient_spectra_model_envelopes",
+      "stage": "main_review_final_B_primary_shaft_fixed",
+      "same_examples_windows_zero_masks": true
+    },
+    {
+      "file": "up4p5__baseline@2511_patient_spectra_model_envelopes",
+      "stage": "main_review_final_B_primary_shaft_fixed",
+      "same_examples_windows_zero_masks": true
+    },
+    {
+      "file": "near_upper__baseline@2511_patient_spectra_model_envelopes",
+      "stage": "main_review_final_B_primary_shaft_fixed",
+      "same_examples_windows_zero_masks": true
+    },
+    {
+      "file": "refine_mid_EE075@2511_patient_spectra_model_envelopes",
+      "stage": "main_review_final_B_primary_shaft_fixed",
+      "same_examples_windows_zero_masks": true
+    },
+    {
+      "file": "refine_mid_EE085_mean095@2511_patient_spectra_model_envelopes",
+      "stage": "main_review_final_B_primary_shaft_fixed",
+      "same_examples_windows_zero_masks": true
+    },
+    {
+      "file": "refine_mid_EE075@2511_patient_spectra_model_envelopes",
+      "stage": "main_review_long_primary_shaft_fixed",
+      "same_examples_windows_zero_masks": true
+    },
+    {
+      "file": "refine_near_EE085_A115@2511_patient_spectra_model_envelopes",
+      "stage": "main_review_long_shaft_fixed",
+      "same_examples_windows_zero_masks": true
+    },
+    {
+      "file": "recovery_up_out_transverse@2511_patient_spectra_model_envelopes",
+      "stage": "main_review_wave1_shaft_fixed",
+      "same_examples_windows_zero_masks": true
+    },
+    {
+      "file": "recovery_upper_wide_recurrence@2511_patient_spectra_model_envelopes",
+      "stage": "main_review_wave1_shaft_fixed",
+      "same_examples_windows_zero_masks": true
+    }
+  ]
+}

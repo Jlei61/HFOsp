@@ -1,0 +1,130 @@
+{
+ "candidates": [
+  "up3__circle__EE_core_to_out_scale_1.25__x_minus075",
+  "up3__circle__EE_core_to_out_scale_1.25",
+  "follow_circle_out1.125_EI0.875",
+  "follow_circle_out1.125_EI1"
+ ],
+ "pairs": [
+  {
+   "candidate": "up3__circle__EE_core_to_out_scale_1.25__x_minus075",
+   "parent": "up3__circle__EE_core_to_out_scale_1.25",
+   "mean_L_search": 2.629909340544196,
+   "selection": "frozen training score only"
+  },
+  {
+   "candidate": "follow_circle_out1.125_EI0.875",
+   "parent": "follow_circle_out1.125_EI1",
+   "mean_L_search": 3.542057637965004,
+   "selection": "frozen training score only"
+  }
+ ],
+ "ranked_new_conditions": [
+  [
+   2.629909340544196,
+   "up3__circle__EE_core_to_out_scale_1.25__x_minus075"
+  ],
+  [
+   3.542057637965004,
+   "follow_circle_out1.125_EI0.875"
+  ],
+  [
+   3.8676248442259116,
+   "up3__circle__EE_core_to_out_scale_1.25__x_plus075"
+  ],
+  [
+   3.8780452175831197,
+   "up3__circle__EE_core_to_out_scale_1.25__y_plus10"
+  ],
+  [
+   3.8960549589547724,
+   "follow_circle_out1.25_EI0.75"
+  ],
+  [
+   4.030965459843261,
+   "follow_circle_out1.25_EI0.875"
+  ],
+  [
+   4.132256938431416,
+   "follow_circle_out1.125_EI0.75"
+  ],
+  [
+   4.232100407553011,
+   "follow_circle_out1_EI0.875"
+  ],
+  [
+   4.89893922203467,
+   "follow_circle_out1.125_EI1"
+  ],
+  [
+   5.789520448458683,
+   "up3__circle__EE_core_to_out_scale_1.25__y_minus10"
+  ],
+  [
+   6.1867616850884755,
+   "up3__ellipse4__EI_same_core_scale_0.75__y_minus10"
+  ],
+  [
+   6.37674120824426,
+   "up3__ellipse4__EI_same_core_scale_0.75__x_minus075"
+  ],
+  [
+   6.750121194476945,
+   "follow_ellipse4_out1_EI0.875"
+  ],
+  [
+   7.028205453667679,
+   "up3__ellipse4__EI_same_core_scale_0.75__y_plus10"
+  ],
+  [
+   7.0999884915668625,
+   "follow_ellipse4_out1.125_EI1"
+  ],
+  [
+   7.809637095024888,
+   "up3__circle__EE_core_to_out_scale_1.25__radius205"
+  ],
+  [
+   8.184259120493596,
+   "follow_ellipse4_out1.125_EI0.875"
+  ],
+  [
+   8.448469507459539,
+   "follow_ellipse4_out1.125_EI0.75"
+  ],
+  [
+   8.510703806905664,
+   "follow_ellipse4_out1.25_EI0.75"
+  ],
+  [
+   8.675418021992211,
+   "follow_ellipse4_out1.25_EI0.875"
+  ],
+  [
+   9.178217027596535,
+   "up3__ellipse4__EI_same_core_scale_0.75__x_plus075"
+  ],
+  [
+   11.119339092656112,
+   "up3__circle__EE_core_to_out_scale_1.25__radius235"
+  ],
+  [
+   11.262152968378565,
+   "up3__ellipse4__EI_same_core_scale_0.75__radius205"
+  ],
+  [
+   12.939432357872647,
+   "up3__ellipse4__EI_same_core_scale_0.75__radius235"
+  ]
+ ],
+ "training_score_csv_sha256": "b7355798b214f2cc519e65479d6ce42f8c70f957ee56f449af282f54c762b6d7",
+ "topology_seeds": [
+  2611,
+  2612
+ ],
+ "noise_seeds": [
+  847301,
+  847302
+ ],
+ "unchanged_loss": true
+}

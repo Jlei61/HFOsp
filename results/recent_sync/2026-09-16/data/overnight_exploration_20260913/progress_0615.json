@@ -1,0 +1,183 @@
+{
+  "status": "ACTIVE",
+  "updated_unix": 1789251246.6305616,
+  "updated_local": "2026-09-13T06:14:06.630562+08:00",
+  "queues": {
+    "F": {
+      "status": "RESPONSE_RUNNING",
+      "complete": 55,
+      "total": 60,
+      "active": [
+        {
+          "pid": 4063749,
+          "unit": [
+            "up3__ellipse4__EI_same_core_scale_0.75__y_plus10",
+            2511,
+            847102
+          ],
+          "simulated_ms": 53000.0,
+          "cpu_s": 17708.11,
+          "rss_gib": 2.032329559326172
+        },
+        {
+          "pid": 4070465,
+          "unit": [
+            "up3__ellipse4__EI_same_core_scale_0.75__radius205",
+            2511,
+            847101
+          ],
+          "simulated_ms": 48000.0,
+          "cpu_s": 17335.989999999998,
+          "rss_gib": 2.0262222290039062
+        },
+        {
+          "pid": 4125167,
+          "unit": [
+            "up3__ellipse4__EI_same_core_scale_0.75__radius205",
+            2511,
+            847102
+          ],
+          "simulated_ms": 43000.0,
+          "cpu_s": 14131.5,
+          "rss_gib": 2.0224075317382812
+        },
+        {
+          "pid": 4151252,
+          "unit": [
+            "up3__ellipse4__EI_same_core_scale_0.75__radius235",
+            2511,
+            847101
+          ],
+          "simulated_ms": 38000.0,
+          "cpu_s": 13365.93,
+          "rss_gib": 2.0161705017089844
+        },
+        {
+          "pid": 4168996,
+          "unit": [
+            "up3__ellipse4__EI_same_core_scale_0.75__radius235",
+            2511,
+            847102
+          ],
+          "simulated_ms": 38000.0,
+          "cpu_s": 12861.289999999999,
+          "rss_gib": 2.0179405212402344
+        }
+      ],
+      "failures": []
+    },
+    "N": {
+      "status": "RESPONSE_RUNNING",
+      "complete": 0,
+      "total": 108,
+      "active": [
+        {
+          "pid": 15948,
+          "unit": [
+            "bridge_circle_out125_xminus075",
+            2711,
+            847401
+          ],
+          "simulated_ms": 30000.0,
+          "cpu_s": 11706.53,
+          "rss_gib": 2.0081100463867188
+        },
+        {
+          "pid": 4078535,
+          "unit": [
+            "bridge_circle_out125",
+            2511,
+            847401
+          ],
+          "simulated_ms": 46000.0,
+          "cpu_s": 15466.880000000001,
+          "rss_gib": 2.024707794189453
+        },
+        {
+          "pid": 4078701,
+          "unit": [
+            "bridge_circle_out125_xminus075",
+            2511,
+            847401
+          ],
+          "simulated_ms": 46000.0,
+          "cpu_s": 15461.69,
+          "rss_gib": 2.0259552001953125
+        },
+        {
+          "pid": 4151248,
+          "unit": [
+            "bridge_circle_out125",
+            2711,
+            847401
+          ],
+          "simulated_ms": 39000.0,
+          "cpu_s": 13369.019999999999,
+          "rss_gib": 2.1196365356445312
+        },
+        {
+          "pid": 258720,
+          "unit": [
+            "bridge_circle_out125",
+            2712,
+            847401
+          ],
+          "simulated_ms": 12000.000000000002,
+          "cpu_s": 4658.650000000001,
+          "rss_gib": 2.1058197021484375
+        },
+        {
+          "pid": 259108,
+          "unit": [
+            "bridge_circle_out125_xminus075",
+            2712,
+            847401
+          ],
+          "simulated_ms": 13000.000000000002,
+          "cpu_s": 4656.03,
+          "rss_gib": 2.1072425842285156
+        }
+      ],
+      "failures": []
+    },
+    "G": {
+      "status": "RESPONSE_RUNNING",
+      "complete": 1,
+      "total": 6,
+      "active": [
+        {
+          "pid": 258320,
+          "unit": [
+            "global_axis_-15",
+            2511,
+            847101
+          ],
+          "simulated_ms": 12000.000000000002,
+          "cpu_s": 4675.75,
+          "rss_gib": 1.9906272888183594
+        },
+        {
+          "pid": 312963,
+          "unit": [
+            "global_axis_+15",
+            2511,
+            847101
+          ],
+          "simulated_ms": 2000.0,
+          "cpu_s": 1263.5600000000002,
+          "rss_gib": 1.9825592041015625
+        }
+      ],
+      "failures": []
+    }
+  },
+  "new_complete_science": "ellipse_yplus1_first_noise/scientific_note.md",
+  "prefix_verification": "/data/hfosp/topic4_sef_hfo/global_axis_residual_probe_20260913/analysis/baseline_prefix_replay_847101.json",
+  "latest_review": "review_060735/scientific_review.md",
+  "review_qa": "review_060735/artifact_qa.json",
+  "previous_wait_handle": {
+    "exec_session_id": 21713,
+    "status": "COMPLETED_ON_NEW_G_BASELINE"
+  },
+  "available_gib": 118.50860595703125
+}

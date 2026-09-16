@@ -1,0 +1,95 @@
+{
+  "status": "VALID_SILENT_EQUILIBRIUM",
+  "depth": 1.0,
+  "topology": 2511,
+  "ee_values": [
+    0.5,
+    0.7,
+    0.85,
+    1.0,
+    1.2
+  ],
+  "dt_ms": 0.1,
+  "region_summaries": {
+    "coreAE": {
+      "n": 720,
+      "voltage_min_mV": 12.222368214536816,
+      "voltage_max_mV": 12.222368214536816,
+      "margin_min_mV": 2.069018159352934,
+      "margin_median_mV": 5.182730071025627,
+      "above_or_at_threshold": 0
+    },
+    "coreBE": {
+      "n": 742,
+      "voltage_min_mV": 12.222368214536816,
+      "voltage_max_mV": 12.222368214536816,
+      "margin_min_mV": 2.42908546500181,
+      "margin_median_mV": 5.228560499316615,
+      "above_or_at_threshold": 0
+    },
+    "surroundE": {
+      "n": 30538,
+      "voltage_min_mV": 12.865650752144019,
+      "voltage_max_mV": 12.865650752144019,
+      "margin_min_mV": 5.134349247855981,
+      "margin_median_mV": 5.134349247855981,
+      "above_or_at_threshold": 0
+    },
+    "allI": {
+      "n": 8000,
+      "voltage_min_mV": 12.017366087167487,
+      "voltage_max_mV": 12.017366087167487,
+      "margin_min_mV": 5.9826339128325134,
+      "margin_median_mV": 5.9826339128325134,
+      "above_or_at_threshold": 0
+    }
+  },
+  "equilibrium_update_residual_mV": 0.0,
+  "subthreshold_map_eigenvalues": {
+    "E_membrane": 0.9950124791926824,
+    "I_membrane": 0.9900498337491681,
+    "AMPA_rise": 0.8668778997501816,
+    "AMPA_decay": 0.9718328750329812,
+    "GABA_rise": 0.9048374180359595,
+    "GABA_decay": 0.9944598480048968
+  },
+  "delay_shift_eigenvalue": 0.0,
+  "finite_difference_checks": [
+    {
+      "cell_type": "E",
+      "matrix_max_error": 5.060396546241464e-13,
+      "eigenvalue_max_error": 5.060396546241464e-13
+    },
+    {
+      "cell_type": "I",
+      "matrix_max_error": 4.772848782863548e-13,
+      "eigenvalue_max_error": 4.772848782863548e-13
+    }
+  ],
+  "neuronal_spectral_radius": 0.9950124791926824,
+  "leading_growth_per_s": -49.99999999999881,
+  "explanation": "In the all-silent, below-threshold neighborhood, the spike map has zero derivative; recurrent EE weights do not enter the Jacobian. Delay-ring shifts are nilpotent. The remaining map is triangular with membrane/gating/current decay eigenvalues.",
+  "scope": "Constant external expected input; all-silent native neuronal subsystem only. This does not exclude Hopf of a nonzero-rate, fluctuation-driven population state or other attractors. Core EE is the only varied physical parameter.",
+  "parameters": {
+    "dt": 0.1,
+    "tau_m_E": 20.0,
+    "tau_m_I": 10.0,
+    "tau_r_AMPA": 0.7,
+    "tau_d_AMPA": 3.5,
+    "tau_r_GABA": 1.0,
+    "tau_d_GABA": 18.0,
+    "J_ext_E": 0.455,
+    "J_ext_I": 0.85
+  },
+  "identity": {
+    "positions_E_sha256": "a00b2c75b5e9a2784065c3b7bdbc66eef02eef1e077f8d7d10d3e9c45f39010e",
+    "vtheta_sha256": "d2c86636dad3df7f4a8fccdce5486b48a887bb0b50e3a5affa639c773f48d9ec",
+    "vtheta_float64_sha256": "b57daf70cef0b98fcb2a064e602246241fd9917d3d365cfe6951ce4aee29e7b4",
+    "h_sha256": "e43875ecb2910507f7fd23d002fdcc21d725e1c38be3bd0d28e1668f29b268f2",
+    "core_index_sha256": "286aea6945995345cd1a8d059b08b91222d7970c1aa4219151b497b12c0b4c45",
+    "ampa_topology_sha256": "6f26d29b3a812945fe4fa89d4332f59cbea6b99426ca1d9cf06e222a5549eb46",
+    "ampa_values_sha256": "c87fcb112e87a772b1978f86866dc9d8a5098fc6a42e66280bd825f2206c97a0",
+    "gaba_topology_sha256": "e8a90e54178aa8de7d0ea30e5995d1d4c920b738e4320cc48c5e81db0da4f38d",
+    "gaba_values_sha256": "d5dc8cebeb752e4e464a3945fb595c5996521635eb40c0a6fd42c844d6bf3a6a"
+  }
+}

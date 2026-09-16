@@ -1,0 +1,37 @@
+{
+  "status": "COMPLETE_PASS_AGENT_VISUAL_REVIEW_HUMAN_PENDING",
+  "completed_runs": 62,
+  "source_files": {
+    "/home/honglab/leijiaxin/HFOsp/scripts/topic4_burst_regime/metrics.py": "5fb1f188d472b8b6e60d8c4708098ac436213fc3848d00b01a24c10a9acb1fb0",
+    "/home/honglab/leijiaxin/HFOsp/scripts/topic4_burst_regime/metrics_v2.py": "4203c797c903c0aa7276b7c86a2abf7d112644aa65aae09d9feb4a55bda6058c",
+    "/home/honglab/leijiaxin/HFOsp/scripts/topic4_burst_regime/plot.py": "d983610c43009387ea234b21ef650bb744bebb367f343977bdda47e547f1da4a",
+    "/home/honglab/leijiaxin/HFOsp/scripts/topic4_burst_regime/run.py": "d4e60a0fcf9dbb72dca64f6c09ec2cd66f91483776d3125487c63406982d984c",
+    "/home/honglab/leijiaxin/HFOsp/scripts/topic4_burst_regime/runtime.py": "afbd452b1415b0199293a22870fad6df6988bdc0f5dad363ce208538a07083c9",
+    "/home/honglab/leijiaxin/HFOsp/scripts/topic4_burst_regime/verify.py": "99837dfbd28d68caf0fe57139f9a8bd6441aebb0c36c734deefd1fe368327ef2",
+    "/home/honglab/leijiaxin/HFOsp/scripts/topic4_burst_regime/plot_four_states.py": "a038b536ff60b4c37287149d3bc51a79e437f5dc6df1a9f0cde336430e48cd68",
+    "/home/honglab/leijiaxin/HFOsp/scripts/topic4_burst_regime/plot_state_details.py": "9e5a711ee2bed6ae1c776bd6858e026888f6e1543e77c9a8cd9745d0345a0452"
+  },
+  "analysis_files": {
+    "run_metrics.csv": "e9bad088ea13402cfbcbe9def7095aa86b12c64ceb1bbc5df959fbbbd82de118",
+    "controls.csv": "f4ad4a65f28a556d2cbc047e688f206c3e618d426a4890e4c2cb84342d3a9f22",
+    "scientific_report.md": "777c11f833d006d9c5eb7486699d2d615e1ea9d1ec3786232b9f9dae06acdcd5",
+    "summary.json": "c704c5fbf8ca5efb4688e5c3dd329d7eb356f41b827b1df35855490f41cc564b",
+    "measurement_amendment_v2.json": "ea17e74086dc9918b0418580903120ac428c17be8a76b6de41f00da4165af9e3"
+  },
+  "tests": "Six scientific detector/ordering-control tests passed; see measurement_amendment_v2.json",
+  "visual_review": "visual_review.json",
+  "four_state_companion": {
+    "native_burst_four_states_waveform_raster.pdf": "e98a715ff4b08af6089b646433e395551afb9fc50e436e136685c3ded6198357",
+    "native_burst_four_states_waveform_raster.png": "0eaafb1a6aec1c211bae7c2ca6800038c766caecfdde8cbee3b143e4129d0964",
+    "native_burst_four_states_waveform_raster.json": "5728dd31496d85e43e7006d31c15f19a80cfb7101ffaa4310cc2ad9bc1b62c31"
+  },
+  "separate_state_figures": {
+    "manifest": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/burst_regime_map_20260914/figures/four_state_detail/figure_manifest.json",
+    "manifest_sha256": "d9704ef01533ee6f30318092ecc36ec599963b8209cea6dc82a23bedf1e1fbf4",
+    "booklet": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/burst_regime_map_20260914/figures/four_state_detail/four_states_large_rasters.pdf",
+      "pages": 12,
+      "sha256": "6e1b3561ebefbf141159a7c931df25c1f286e2be9064b1ddcf93fb9066df2b0e"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "native_Z_M_unit_parity": true,
+  "global_15ms_synapse": true,
+  "phi_100ms_spike_increment": true,
+  "resource_gating": true,
+  "reversal_shunt_formula": true,
+  "source_scale_note": "wG/(1000*fmax*gL)=50/(1000*.2*4)=.0625 per Hz; native shunt reversal retained at11mV, so this is an explicit mapping, not identical source biophysics"
+}

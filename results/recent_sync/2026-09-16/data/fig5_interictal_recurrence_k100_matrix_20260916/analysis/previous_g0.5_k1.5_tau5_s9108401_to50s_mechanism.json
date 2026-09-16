@@ -1,0 +1,274 @@
+{
+  "name": "previous_g0.5_k1.5_tau5_s9108401_to50s",
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_fixed_zm_termination_20260915/autonomous_recurrence_continuation/runs/sahp1.5_g0.5_s9108401_to50s",
+  "job": {
+    "name": "sahp1.5_g0.5_s9108401_to50s",
+    "seed": 9108401,
+    "eta_m": 0.0005,
+    "tau_M_s": 1.0,
+    "tau_Z_s": 5.0,
+    "threshold": 95.19851312666987,
+    "mode": "native",
+    "gamma": 0.5,
+    "global_gain": 0.08832178914443486,
+    "global_resource": "native_z",
+    "phi_jump": 0.0,
+    "horizon_s": 50.0,
+    "checkpoint_s": 1.0,
+    "device": 0,
+    "qa": false,
+    "feedback_form": "conductance",
+    "C_R": 6.299613071787578,
+    "reference_voltage_mV": 18.0,
+    "reference_gap_mV": 35.66284793826844,
+    "global_reversal_mV": -17.662847938268442,
+    "sahp_gain": 1.5,
+    "sahp_tau_s": 5.0,
+    "k100": 7.5
+  },
+  "observed_s": 46.0,
+  "classification": "HIGH_LOW_HIGH_WITHOUT_INTERICTAL_RETURN",
+  "entries": [
+    {
+      "onset_s": 6.33,
+      "confirmation_s": 6.53
+    },
+    {
+      "onset_s": 41.89,
+      "confirmation_s": 42.09
+    }
+  ],
+  "exits": [
+    {
+      "start_s": 7.12,
+      "confirmation_s": 9.12,
+      "mechanism": "AUTONOMOUS",
+      "all_and_core_means_Hz": [
+        [
+          46.71906249999997,
+          48.89124668435011,
+          0.0,
+          47.870847012475366
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "quiet_fraction": [
+        [
+          0.26,
+          0.72,
+          1.0,
+          0.26
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      ]
+    }
+  ],
+  "preentry_brief": 0,
+  "interhigh": [
+    {
+      "brief": 0,
+      "span": 0.0,
+      "fraction": 0.0,
+      "temporal_pass": false
+    }
+  ],
+  "latest_postexit": {
+    "brief": 0,
+    "span": 0.0,
+    "fraction": 0.0,
+    "finite": 1
+  },
+  "temporal_loop_pass": false,
+  "current_balance": {
+    "baseline": {
+      "window_s": [
+        0.5,
+        5.0
+      ],
+      "I_E": 256.6971978672985,
+      "raw_local_I": 141.5594761627537,
+      "Z_local_I": 86.19487711493346,
+      "Z_mean": 0.6875028867514963,
+      "Z_coreA": 0.6904903934009884,
+      "Z_coreB": 0.6913594490779338,
+      "Z_other": 0.6873294186621233,
+      "fraction_J_above_threshold": 0.7810230555555555,
+      "I_M": 0.029143060123403036,
+      "global_E_rate_Hz": 78.26834266178624,
+      "g_global": 4.545527246728682,
+      "I_global": 43.78789951639349,
+      "g_K": 1.9179771190101758,
+      "I_K": 38.97824024025529,
+      "total_inhibition_plus_adaptation": 168.99015993170562,
+      "excitation_minus_inhibition": 87.70703793559287,
+      "g_K_needed_to_hold_V_below_threshold": 2.2642766286635028,
+      "k100_needed_at_this_rate": 2.8929661107657694
+    },
+    "pre_entry_2s": {
+      "window_s": [
+        4.33,
+        6.33
+      ],
+      "I_E": 442.95758497644294,
+      "raw_local_I": 249.35627602322162,
+      "Z_local_I": 120.32160733732604,
+      "Z_mean": 0.47268881006176683,
+      "Z_coreA": 0.4775790526366587,
+      "Z_coreB": 0.4782336351422206,
+      "Z_other": 0.4724246775793403,
+      "fraction_J_above_threshold": 1.0,
+      "I_M": 0.0572575517463303,
+      "global_E_rate_Hz": 137.60224068895903,
+      "g_global": 5.789822116927044,
+      "I_global": 57.60254452053174,
+      "g_K": 4.314504002927497,
+      "I_K": 96.68406290089212,
+      "total_inhibition_plus_adaptation": 274.6654723104962,
+      "excitation_minus_inhibition": 168.29211266594672,
+      "g_K_needed_to_hold_V_below_threshold": 5.145336990975809,
+      "k100_needed_at_this_rate": 3.7392828526728072
+    },
+    "entry_ramp": {
+      "window_s": [
+        6.33,
+        7.03
+      ],
+      "I_E": 589.6553945162259,
+      "raw_local_I": 332.2765964445782,
+      "Z_local_I": 121.35738436538034,
+      "Z_mean": 0.3587383101068337,
+      "Z_coreA": 0.36244966802347256,
+      "Z_coreB": 0.36294645114351304,
+      "Z_other": 0.35853785171143077,
+      "fraction_J_above_threshold": 1.0,
+      "I_M": 0.07290360216025862,
+      "global_E_rate_Hz": 185.05525828311764,
+      "g_global": 5.893567009839704,
+      "I_global": 67.71731964426628,
+      "g_K": 5.992028505478752,
+      "I_K": 132.4117326734997,
+      "total_inhibition_plus_adaptation": 321.5593402853065,
+      "excitation_minus_inhibition": 268.0960542309194,
+      "g_K_needed_to_hold_V_below_threshold": 7.968912227175397,
+      "k100_needed_at_this_rate": 4.306233879063133
+    },
+    "post_entry_1_5s": {
+      "window_s": [
+        7.33,
+        11.33
+      ],
+      "I_E": 33.67235365144912,
+      "raw_local_I": 12.455639027013229,
+      "Z_local_I": 0.14466851114402246,
+      "Z_mean": 0.47024416545506964,
+      "Z_coreA": 0.4738389638292879,
+      "Z_coreB": 0.4742014443925912,
+      "Z_other": 0.47005306567768845,
+      "fraction_J_above_threshold": 0.10803296875000001,
+      "I_M": 0.02037870601501649,
+      "global_E_rate_Hz": 6.82413644740378,
+      "g_global": 0.1825372190885462,
+      "I_global": 0.03430004762178394,
+      "g_K": 4.76023302374817,
+      "I_K": 41.57771688400492,
+      "total_inhibition_plus_adaptation": 41.77706414878575,
+      "excitation_minus_inhibition": -8.104710497336626,
+      "g_K_needed_to_hold_V_below_threshold": 0.32235429972225615,
+      "k100_needed_at_this_rate": 4.723737607047626
+    },
+    "late": {
+      "window_s": [
+        41.0,
+        46.0
+      ],
+      "I_E": 575.8934722502215,
+      "raw_local_I": 324.36806906647826,
+      "Z_local_I": 70.20099860596771,
+      "Z_mean": 0.2225724766056724,
+      "Z_coreA": 0.22399943100865877,
+      "Z_coreB": 0.2234432598464739,
+      "Z_other": 0.22251468411561556,
+      "fraction_J_above_threshold": 1.0,
+      "I_M": 0.08524145225438373,
+      "global_E_rate_Hz": 180.28863144500977,
+      "g_global": 3.5014935949324077,
+      "I_global": 35.83107161815965,
+      "g_K": 8.74366181675103,
+      "I_K": 195.43817476380184,
+      "total_inhibition_plus_adaptation": 301.55548644018353,
+      "excitation_minus_inhibition": 274.337985810038,
+      "g_K_needed_to_hold_V_below_threshold": 9.41200334528833,
+      "k100_needed_at_this_rate": 5.220519602290677
+    },
+    "post_exit_0_2s": {
+      "window_s": [
+        9.12,
+        11.12
+      ],
+      "I_E": 12.932647047179737,
+      "raw_local_I": 0.41116502343173134,
+      "Z_local_I": 0.22463227415856368,
+      "Z_mean": 0.5515153594618412,
+      "Z_coreA": 0.5547552661088552,
+      "Z_coreB": 0.5550683072293429,
+      "Z_other": 0.5513434780909577,
+      "fraction_J_above_threshold": 0.0,
+      "I_M": 0.006277962673567333,
+      "global_E_rate_Hz": 3.079318978892296e-38,
+      "g_global": 1.2470171508523524e-39,
+      "I_global": -5.632503696222466e-39,
+      "g_K": 4.001400812051607,
+      "I_K": 33.58037332672253,
+      "total_inhibition_plus_adaptation": 33.81128356355466,
+      "excitation_minus_inhibition": -20.878636516374925,
+      "g_K_needed_to_hold_V_below_threshold": 0.0,
+      "k100_needed_at_this_rate": 0.0
+    },
+    "post_exit_2_10s": {
+      "window_s": [
+        11.12,
+        19.119999999999997
+      ],
+      "I_E": 12.913488325359454,
+      "raw_local_I": 0.40177929662665257,
+      "Z_local_I": 0.32966290057715286,
+      "Z_mean": 0.8180580088555609,
+      "Z_coreA": 0.8193723795456532,
+      "Z_coreB": 0.8194993745854451,
+      "Z_other": 0.8179882797365841,
+      "fraction_J_above_threshold": 0.0,
+      "I_M": 0.00024554220459614305,
+      "global_E_rate_Hz": 9.560129318232173e-97,
+      "g_global": 5.3788808997756896e-98,
+      "I_global": -9.287291963440076e-98,
+      "g_K": 1.6233080284129715,
+      "I_K": 24.556884876347898,
+      "total_inhibition_plus_adaptation": 24.886793319129644,
+      "excitation_minus_inhibition": -11.97330499377019,
+      "g_K_needed_to_hold_V_below_threshold": 0.0,
+      "k100_needed_at_this_rate": 0.0
+    }
+  },
+  "Z_below_0p5_first_s": {
+    "coreA": 5.08,
+    "coreB": 5.08,
+    "other": 5.02,
+    "mean": 5.02
+  },
+  "late_all_E_Hz": 179.80558125,
+  "late_state": "LOW",
+  "final_Z": 0.1297906539664577,
+  "final_gK": 10.881123401488763,
+  "final_I_M": 0.09521211588082944,
+  "regional_records": false
+}

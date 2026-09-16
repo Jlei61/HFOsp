@@ -1,0 +1,202 @@
+{
+  "status": "RUNNING",
+  "user_authorized": true,
+  "authorization": "User requested stopping shortly after the second onset; 2026-09-13 current task.",
+  "time": "2026-09-13T22:44:02.595879+08:00",
+  "post_second_confirmation_s": 2,
+  "previous_post_second_confirmation_s": 10,
+  "checkpoint_quantization_s": 0.5,
+  "first_entry_recovery_and_censor_rules_unchanged": true,
+  "adopted_jobs": {
+    "e1_t1_s9108402": {
+      "previous_pid": 304629,
+      "previous_create_time": 1789249735.95,
+      "resume_step": 700000,
+      "checkpoint_sha256": "6fa9e02a674efa463acd4a2b33146dae7e32b6141824d07bee2bbd05ebfe3c08",
+      "archive": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/m_parameter_modes_fig5_20260913/before_short_second_tail_20260913/e1_t1_s9108402",
+      "device": 0,
+      "job": {
+        "name": "e1_t1_s9108402",
+        "eta_m": 0.01,
+        "tau_M_s": 2.0,
+        "seed": 9108402,
+        "eta_index": 1,
+        "tau_index": 1,
+        "tau_z_ms": 5000.0,
+        "threshold": 95.19851312666987,
+        "horizon_s": 430.0
+      },
+      "new_pid": 1745526
+    },
+    "e2_t1_s9108402": {
+      "previous_pid": 4070648,
+      "previous_create_time": 1789234010.11,
+      "resume_step": 1700000,
+      "checkpoint_sha256": "54da2fa8ebc67c1bff21f829cb1c3474540ce7a398e838ecfaef342b7f205a5f",
+      "archive": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/m_parameter_modes_fig5_20260913/before_short_second_tail_20260913/e2_t1_s9108402",
+      "device": 1,
+      "job": {
+        "name": "e2_t1_s9108402",
+        "eta_m": 0.02,
+        "tau_M_s": 2.0,
+        "seed": 9108402,
+        "eta_index": 2,
+        "tau_index": 1,
+        "tau_z_ms": 5000.0,
+        "threshold": 95.19851312666987,
+        "horizon_s": 430.0
+      },
+      "new_pid": 1745527
+    },
+    "e1_t1_s9108401": {
+      "previous_pid": 4070971,
+      "previous_create_time": 1789234251.5,
+      "resume_step": 600000,
+      "checkpoint_sha256": "cc0a313e1d9258dac3112f12ba768b3f5c21efc35ecaa8b4e923f5f2a167b7cb",
+      "archive": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/m_parameter_modes_fig5_20260913/before_short_second_tail_20260913/e1_t1_s9108401",
+      "device": 0,
+      "job": {
+        "name": "e1_t1_s9108401",
+        "eta_m": 0.01,
+        "tau_M_s": 2.0,
+        "seed": 9108401,
+        "eta_index": 1,
+        "tau_index": 1,
+        "tau_z_ms": 5000.0,
+        "threshold": 95.19851312666987,
+        "horizon_s": 430.0
+      },
+      "new_pid": 1745528
+    },
+    "e0_t2_s9108401": {
+      "previous_pid": 527702,
+      "previous_create_time": 1789257487.01,
+      "resume_step": 600000,
+      "checkpoint_sha256": "ec54c8994ec8013dc45f0e21f7769e774e9832523eb99005d04c468fc923b1d0",
+      "archive": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/m_parameter_modes_fig5_20260913/before_short_second_tail_20260913/e0_t2_s9108401",
+      "device": 1,
+      "job": {
+        "name": "e0_t2_s9108401",
+        "eta_m": 0.005,
+        "tau_M_s": 4.0,
+        "seed": 9108401,
+        "eta_index": 0,
+        "tau_index": 2,
+        "tau_z_ms": 5000.0,
+        "threshold": 95.19851312666987,
+        "horizon_s": 430.0
+      },
+      "new_pid": 1745529
+    },
+    "e0_t2_s9108402": {
+      "previous_pid": 539883,
+      "previous_create_time": 1789257994.16,
+      "resume_step": 600000,
+      "checkpoint_sha256": "18d6b55076dc9749c5e00dc7f2e68e23437e036e95351ae7f5876ba5506bc214",
+      "archive": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/m_parameter_modes_fig5_20260913/before_short_second_tail_20260913/e0_t2_s9108402",
+      "device": 0,
+      "job": {
+        "name": "e0_t2_s9108402",
+        "eta_m": 0.005,
+        "tau_M_s": 4.0,
+        "seed": 9108402,
+        "eta_index": 0,
+        "tau_index": 2,
+        "tau_z_ms": 5000.0,
+        "threshold": 95.19851312666987,
+        "horizon_s": 430.0
+      },
+      "new_pid": 1745530
+    },
+    "e1_t0_s9108401": {
+      "previous_pid": 708216,
+      "previous_create_time": 1789263046.53,
+      "resume_step": 500000,
+      "checkpoint_sha256": "718d4a66e98671160739dcbd64c2d0ee98c568a185cf4a3a3d36ffb59b3a8a0f",
+      "archive": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/m_parameter_modes_fig5_20260913/before_short_second_tail_20260913/e1_t0_s9108401",
+      "device": 1,
+      "job": {
+        "name": "e1_t0_s9108401",
+        "eta_m": 0.01,
+        "tau_M_s": 1.0,
+        "seed": 9108401,
+        "eta_index": 1,
+        "tau_index": 0,
+        "tau_z_ms": 5000.0,
+        "threshold": 95.19851312666987,
+        "horizon_s": 430.0
+      },
+      "new_pid": 1745531
+    },
+    "e1_t0_s9108402": {
+      "previous_pid": 730643,
+      "previous_create_time": 1789263723.05,
+      "resume_step": 600000,
+      "checkpoint_sha256": "e5c93e01b53da5ab17fe415f60aa911b2917c4f449e0785dca48c78fada0ae47",
+      "archive": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/m_parameter_modes_fig5_20260913/before_short_second_tail_20260913/e1_t0_s9108402",
+      "device": 0,
+      "job": {
+        "name": "e1_t0_s9108402",
+        "eta_m": 0.01,
+        "tau_M_s": 1.0,
+        "seed": 9108402,
+        "eta_index": 1,
+        "tau_index": 0,
+        "tau_z_ms": 5000.0,
+        "threshold": 95.19851312666987,
+        "horizon_s": 430.0
+      },
+      "new_pid": 1745532
+    },
+    "e2_t0_s9108401": {
+      "previous_pid": 924748,
+      "previous_create_time": 1789269731.72,
+      "resume_step": 500000,
+      "checkpoint_sha256": "2184ec1c3a130442150b357f2bcdfcb8cea032d65745016dd56fe03911dd2fa9",
+      "archive": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/m_parameter_modes_fig5_20260913/before_short_second_tail_20260913/e2_t0_s9108401",
+      "device": 1,
+      "job": {
+        "name": "e2_t0_s9108401",
+        "eta_m": 0.02,
+        "tau_M_s": 1.0,
+        "seed": 9108401,
+        "eta_index": 2,
+        "tau_index": 0,
+        "tau_z_ms": 5000.0,
+        "threshold": 95.19851312666987,
+        "horizon_s": 430.0
+      },
+      "new_pid": 1745533
+    },
+    "e2_t0_s9108402": {
+      "previous_pid": 945480,
+      "previous_create_time": 1789270366.09,
+      "resume_step": 600000,
+      "checkpoint_sha256": "7a58c20fa34c7eecfcaa7687e3b06c54036db7212eb022adf0ba9dae1afdc774",
+      "archive": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/m_parameter_modes_fig5_20260913/before_short_second_tail_20260913/e2_t0_s9108402",
+      "device": 0,
+      "job": {
+        "name": "e2_t0_s9108402",
+        "eta_m": 0.02,
+        "tau_M_s": 1.0,
+        "seed": 9108402,
+        "eta_index": 2,
+        "tau_index": 0,
+        "tau_z_ms": 5000.0,
+        "threshold": 95.19851312666987,
+        "horizon_s": 430.0
+      },
+      "new_pid": 1745534
+    }
+  },
+  "completed_original_runs_preserved": 31,
+  "qa": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/m_parameter_modes_fig5_20260913/observation_tail_amendment_qa.json",
+  "controller_pid": 1745535,
+  "resume_history": [
+    {
+      "reason": "Resume pre-existing followups after paired weaker-M pilot",
+      "time": 1789366202.577182,
+      "queue": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/weaker_M_onset_paired_20260914/previous_followup_queue.json"
+    }
+  ]
+}

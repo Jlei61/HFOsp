@@ -1,0 +1,131 @@
+{
+  "updated_epoch": 1789484725.7700927,
+  "rows": [
+    {
+      "name": "g0.5_k1.5_tau1_s9108401",
+      "status": "WALL_TIME_CENSORED",
+      "runtime_status": "CENSORED_WALL_DEADLINE",
+      "observed_s": 56.0,
+      "classification": "HIGH_WITHOUT_EXIT",
+      "preentry_brief": 0,
+      "temporal_pass": false,
+      "gamma": 0.5,
+      "K": 1.5,
+      "tau_K_s": 1.0,
+      "entries": [
+        {
+          "onset_s": 3.57,
+          "confirmation_s": 3.77
+        }
+      ],
+      "exits": [],
+      "late_E_Hz": 476.41135,
+      "final_Z": 1.3967999324081427e-05,
+      "final_K": 7.146547612223837,
+      "median_preentry_brief_ms": null
+    },
+    {
+      "name": "g0.5_k1.5_tau2_s9108401",
+      "status": "WALL_TIME_CENSORED",
+      "runtime_status": "CENSORED_WALL_DEADLINE",
+      "observed_s": 56.0,
+      "classification": "HIGH_WITHOUT_EXIT",
+      "preentry_brief": 0,
+      "temporal_pass": false,
+      "gamma": 0.5,
+      "K": 1.5,
+      "tau_K_s": 2.0,
+      "entries": [
+        {
+          "onset_s": 4.52,
+          "confirmation_s": 4.72
+        }
+      ],
+      "exits": [],
+      "late_E_Hz": 476.20606875000004,
+      "final_Z": 1.396799913961625e-05,
+      "final_K": 14.286494473405792,
+      "median_preentry_brief_ms": null
+    },
+    {
+      "name": "g0.166667_k0.1_tau1_s9108401",
+      "status": "OBSERVATION_HORIZON_REACHED",
+      "runtime_status": "CENSORED_WALL_DEADLINE",
+      "observed_s": 60.0,
+      "classification": "HIGH_WITHOUT_EXIT",
+      "preentry_brief": 67,
+      "temporal_pass": false,
+      "gamma": 0.16666666666666666,
+      "K": 0.1,
+      "tau_K_s": 1.0,
+      "entries": [
+        {
+          "onset_s": 20.33,
+          "confirmation_s": 20.53
+        }
+      ],
+      "exits": [],
+      "late_E_Hz": 500.0,
+      "final_Z": 0.00024832948871303465,
+      "final_K": 0.5000283413296625,
+      "median_preentry_brief_ms": 90.0
+    },
+    {
+      "name": "g0.166667_k0.1_tau5_s9108401",
+      "status": "OBSERVATION_HORIZON_REACHED",
+      "runtime_status": "COMPLETE",
+      "observed_s": 60.0,
+      "classification": "NO_HIGH_OBSERVED",
+      "preentry_brief": 112,
+      "temporal_pass": false,
+      "gamma": 0.16666666666666666,
+      "K": 0.1,
+      "tau_K_s": 5.0,
+      "entries": [],
+      "exits": [],
+      "late_E_Hz": 3.2295625,
+      "final_Z": 0.9569468581945122,
+      "final_K": 0.016328218662478813,
+      "median_preentry_brief_ms": 80.0
+    },
+    {
+      "name": "g0_k0.1_tau1_s9108401",
+      "status": "OBSERVATION_HORIZON_REACHED",
+      "runtime_status": "COMPLETE",
+      "observed_s": 60.0,
+      "classification": "NO_HIGH_OBSERVED",
+      "preentry_brief": 222,
+      "temporal_pass": false,
+      "gamma": 0.0,
+      "K": 0.1,
+      "tau_K_s": 1.0,
+      "entries": [],
+      "exits": [],
+      "late_E_Hz": 12.149068750000001,
+      "final_Z": 0.8509545994112436,
+      "final_K": 0.012014913469766948,
+      "median_preentry_brief_ms": 90.0
+    },
+    {
+      "name": "g0_k0.1_tau5_s9108401",
+      "status": "OBSERVATION_HORIZON_REACHED",
+      "runtime_status": "COMPLETE",
+      "observed_s": 60.0,
+      "classification": "NO_HIGH_OBSERVED",
+      "preentry_brief": 107,
+      "temporal_pass": false,
+      "gamma": 0.0,
+      "K": 0.1,
+      "tau_K_s": 5.0,
+      "entries": [],
+      "exits": [],
+      "late_E_Hz": 3.2182375,
+      "final_Z": 0.9470607893396213,
+      "final_K": 0.018004065513855985,
+      "median_preentry_brief_ms": 80.0
+    }
+  ],
+  "scope": "Six conditions, one fixed topology and noise. Four60s records, two56s wall-time-censored records.",
+  "full_Fig5_acceptance": "NOT_ESTABLISHED",
+  "finalization_repaired": true
+}

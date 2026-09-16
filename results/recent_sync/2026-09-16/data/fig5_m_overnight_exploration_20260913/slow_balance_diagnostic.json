@@ -1,0 +1,83 @@
+{
+  "rows": [
+    {
+      "name": "weak_fast",
+      "window_s": [
+        80,
+        90
+      ],
+      "eta_M": 0.02,
+      "tau_M_s": 2.0,
+      "mean_E_rate_Hz": 485.04229375,
+      "mean_Z": 0.0984023205647554,
+      "mean_duty": 1.0,
+      "expected_Z_drift_per_s": -0.01968046411295108,
+      "mean_M_current": 18.98147330772794,
+      "stationary_M_current_if_rate_constant": 19.40169175,
+      "mean_IE": 1532.6959091459028,
+      "mean_applied_GABA": 168.41387782542134,
+      "mean_fast_net_before_M": 1364.2820313204813,
+      "source": "results/topic4_sef_hfo/fig5_manual_core_release_v1/m_runaway_return_v1/runs/weak_fast.npz"
+    },
+    {
+      "name": "weak_20s",
+      "window_s": [
+        80,
+        90
+      ],
+      "eta_M": 0.02,
+      "tau_M_s": 20.0,
+      "mean_E_rate_Hz": 1.73789375,
+      "mean_Z": 0.9715976633138532,
+      "mean_duty": 0.025530625,
+      "expected_Z_drift_per_s": 0.0005743423372293442,
+      "mean_M_current": 0.8657853986892444,
+      "stationary_M_current_if_rate_constant": 0.6951575000000001,
+      "mean_IE": 18.235523254614762,
+      "mean_applied_GABA": 12.434870041207645,
+      "mean_fast_net_before_M": 5.800653213407117,
+      "source": "results/topic4_sef_hfo/fig5_manual_core_release_v1/m_runaway_return_v1/runs/weak_20s.npz"
+    },
+    {
+      "name": "matched_gain_80s",
+      "window_s": [
+        80,
+        90
+      ],
+      "eta_M": 0.005,
+      "tau_M_s": 80.0,
+      "mean_E_rate_Hz": 2.668365625,
+      "mean_Z": 0.9623536341126726,
+      "mean_duty": 0.038657734374999995,
+      "expected_Z_drift_per_s": -0.00020227369753450367,
+      "mean_M_current": 0.832707009932831,
+      "stationary_M_current_if_rate_constant": 1.06734625,
+      "mean_IE": 21.152803020034,
+      "mean_applied_GABA": 18.425239832166,
+      "mean_fast_net_before_M": 2.727563187867998,
+      "source": "results/topic4_sef_hfo/fig5_manual_core_release_v1/m_runaway_return_v1/runs/matched_gain_80s.npz"
+    },
+    {
+      "name": "Z_only_post_reset_late",
+      "window_s": [
+        970,
+        1000
+      ],
+      "eta_M": 0.02,
+      "tau_M_s": 2,
+      "mean_E_rate_Hz": 13.797301041666667,
+      "mean_Z": 0.8381923709710638,
+      "mean_duty": 0.16172309375000002,
+      "expected_Z_drift_per_s": 1.6907055787267505e-05,
+      "mean_M_current": 0.5535723118550743,
+      "stationary_M_current_if_rate_constant": 0.5518920416666667,
+      "mean_IE": 55.78864153724867,
+      "mean_applied_GABA": 71.92459532308828,
+      "mean_fast_net_before_M": -16.13595378583962,
+      "source": "results/topic4_sef_hfo/reset_state_diagnosis_20260911/runs/z_only_long"
+    }
+  ],
+  "M_equation": "dM/dt=-M/tauM + spikes; etaM times tauM seconds times rate Hz is the stationary mean-current prediction.",
+  "Z_equation": "d meanZ/dt=(1-duty-meanZ)/tauZ; duty is fraction of E cells with raw GABA above threshold.",
+  "scope": "Readout-level window balance, not proof of fixed point, attractor basin or global impossibility. Duty sampled every5ms, not each native0.1ms step."
+}

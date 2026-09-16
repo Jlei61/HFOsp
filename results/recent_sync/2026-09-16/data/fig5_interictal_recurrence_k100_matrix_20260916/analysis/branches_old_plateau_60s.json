@@ -1,0 +1,57 @@
+{
+  "source": "old_plateau_60s",
+  "rows": [
+    {
+      "name": "g0.166667_k0.1_tau1_s9108401_br60s_zgate_off",
+      "modification": {
+        "z_gate_off": true
+      },
+      "start_s": 60.0,
+      "observed_to_s": 66.0,
+      "late_1s_all_E_Hz": 7.312125,
+      "exit_confirmed_s": 61.91,
+      "final_Z": 0.6558388080340207,
+      "final_gK": 0.007843047810065734,
+      "min_all_E_10ms_after_branch_Hz": 0.0
+    },
+    {
+      "name": "g0.166667_k0.1_tau1_s9108401_br60s_kx65",
+      "modification": {
+        "k_increment_scale": 65
+      },
+      "start_s": 60.0,
+      "observed_to_s": 66.0,
+      "late_1s_all_E_Hz": 0.0,
+      "exit_confirmed_s": 63.36,
+      "final_Z": 0.5896182490481422,
+      "final_gK": 0.24614755592068735,
+      "min_all_E_10ms_after_branch_Hz": 0.0
+    },
+    {
+      "name": "g0.166667_k0.1_tau1_s9108401_br60s_kx20",
+      "modification": {
+        "k_increment_scale": 20
+      },
+      "start_s": 60.0,
+      "observed_to_s": 66.0,
+      "late_1s_all_E_Hz": 476.30753124999995,
+      "exit_confirmed_s": null,
+      "final_Z": 7.479450709604474e-05,
+      "final_gK": 9.50484574371047,
+      "min_all_E_10ms_after_branch_Hz": 475.73749999999995
+    },
+    {
+      "name": "g0.166667_k0.1_tau1_s9108401_br60s_kx65_br66s_continue",
+      "modification": {},
+      "start_s": 66.0,
+      "observed_to_s": 76.0,
+      "late_1s_all_E_Hz": 3.486062499999999,
+      "exit_confirmed_s": null,
+      "final_Z": 0.916829674415625,
+      "final_gK": 0.18022840598699708,
+      "min_all_E_10ms_after_branch_Hz": 0.0
+    }
+  ],
+  "diagnostic_only": true,
+  "not_counted_as_autonomous_loop": true
+}

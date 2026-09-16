@@ -1,0 +1,893 @@
+{
+ "status": "PASS",
+ "scope": "Current frozen F scorer and completed analysis units, not a new fit or label-free claim",
+ "objective_source": {
+  "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multievent_distribution_search_v2_1/training_objective_v2_1.pkl",
+  "sha256": "02c99998a10daa66702c48897a3ca02b82955ec0e278a47052c8a225e84c9337"
+ },
+ "objective_class": "MultieventDistributionObjectiveV21",
+ "normalizers": {
+  "global": 0.0425770294722167,
+  "balanced_modes": 0.21306191302831015
+ },
+ "mask_normalizer": 0.06512623309349094,
+ "patient_proportions_TB_TA": [
+  0.3340920586747597,
+  0.6659079413252402
+ ],
+ "design_coefficients_global_modes_mask": [
+  0.25,
+  0.25,
+  0.5
+ ],
+ "labels_used_in_objective": true,
+ "labels_used_to_drive_neurons": false,
+ "checked_runs": 54,
+ "rows": [
+  {
+   "candidate": "up3__ellipse4__EI_same_core_scale_0.75__y_minus10",
+   "topology": 2511,
+   "noise": 847102,
+   "mode_counts_TB_TA": [
+    123,
+    39
+   ],
+   "L_search": 6.744471326481514,
+   "scaled_contributions_global_modes_mask": [
+    2.3506662349693106,
+    3.1630580166295106,
+    1.2307470748826923
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "follow_circle_out1_EI0.875",
+   "topology": 2511,
+   "noise": 847101,
+   "mode_counts_TB_TA": [
+    88,
+    68
+   ],
+   "L_search": 4.05230565526715,
+   "scaled_contributions_global_modes_mask": [
+    1.1983499425163615,
+    1.202997192573229,
+    1.65095852017756
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "follow_circle_out1.125_EI0.75",
+   "topology": 2511,
+   "noise": 847102,
+   "mode_counts_TB_TA": [
+    96,
+    73
+   ],
+   "L_search": 4.512551400336651,
+   "scaled_contributions_global_modes_mask": [
+    0.9587467366421222,
+    1.152122354567458,
+    2.4016823091270716
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "up3__circle__EE_core_to_out_scale_1.25__x_minus075",
+   "topology": 2511,
+   "noise": 847101,
+   "mode_counts_TB_TA": [
+    72,
+    68
+   ],
+   "L_search": 2.870836478856572,
+   "scaled_contributions_global_modes_mask": [
+    0.7452796252988192,
+    0.8199122390990318,
+    1.3056446144587206
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "follow_ellipse4_out1.25_EI0.875",
+   "topology": 2511,
+   "noise": 847102,
+   "mode_counts_TB_TA": [
+    130,
+    30
+   ],
+   "L_search": 9.340413683555107,
+   "scaled_contributions_global_modes_mask": [
+    2.9189544007070762,
+    4.019776973720961,
+    2.40168230912707
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "follow_ellipse4_out1.125_EI0.75",
+   "topology": 2511,
+   "noise": 847101,
+   "mode_counts_TB_TA": [
+    120,
+    36
+   ],
+   "L_search": 7.922978294926866,
+   "scaled_contributions_global_modes_mask": [
+    2.3609033363708485,
+    3.3158723924404354,
+    2.2462025661155818
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "up3__ellipse4__EI_same_core_scale_0.75",
+   "topology": 2511,
+   "noise": 847102,
+   "mode_counts_TB_TA": [
+    126,
+    31
+   ],
+   "L_search": 8.827480501916533,
+   "scaled_contributions_global_modes_mask": [
+    2.914914702030587,
+    3.889901047753491,
+    2.0226647521324552
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "up3__circle__EE_core_to_out_scale_1.25__y_minus10",
+   "topology": 2511,
+   "noise": 847101,
+   "mode_counts_TB_TA": [
+    84,
+    59
+   ],
+   "L_search": 5.48519942806025,
+   "scaled_contributions_global_modes_mask": [
+    2.717181356901315,
+    1.577268850670536,
+    1.1907492204883996
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "up3__circle__EE_core_to_out_scale_1.25__x_minus075",
+   "topology": 2511,
+   "noise": 847102,
+   "mode_counts_TB_TA": [
+    66,
+    76
+   ],
+   "L_search": 2.3889822022318197,
+   "scaled_contributions_global_modes_mask": [
+    0.5468341396930458,
+    0.5351912693793085,
+    1.3069567931594652
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "up3__ellipse4__EE_core_to_out_scale_1.25",
+   "topology": 2511,
+   "noise": 847102,
+   "mode_counts_TB_TA": [
+    116,
+    33
+   ],
+   "L_search": 8.44661354573699,
+   "scaled_contributions_global_modes_mask": [
+    2.920292932708339,
+    3.642439516245936,
+    1.8838810967827164
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "follow_ellipse4_out1.125_EI0.875",
+   "topology": 2511,
+   "noise": 847102,
+   "mode_counts_TB_TA": [
+    127,
+    32
+   ],
+   "L_search": 8.830104011799445,
+   "scaled_contributions_global_modes_mask": [
+    2.9314680394950825,
+    3.8875928910906157,
+    2.0110430812137468
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "follow_circle_out1.25_EI0.875",
+   "topology": 2511,
+   "noise": 847102,
+   "mode_counts_TB_TA": [
+    93,
+    69
+   ],
+   "L_search": 4.379256602724957,
+   "scaled_contributions_global_modes_mask": [
+    0.9864661850681435,
+    1.2207851548385653,
+    2.172005262818248
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "follow_ellipse4_out1.125_EI0.75",
+   "topology": 2511,
+   "noise": 847102,
+   "mode_counts_TB_TA": [
+    132,
+    31
+   ],
+   "L_search": 8.973960719992213,
+   "scaled_contributions_global_modes_mask": [
+    2.7649340779482237,
+    3.9037819391695456,
+    2.305244702874445
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "follow_circle_out1.25_EI0.875",
+   "topology": 2511,
+   "noise": 847101,
+   "mode_counts_TB_TA": [
+    83,
+    86
+   ],
+   "L_search": 3.682674316961566,
+   "scaled_contributions_global_modes_mask": [
+    0.749946799898103,
+    0.7448529896559634,
+    2.1878745274074993
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "up3__circle__EE_core_to_out_scale_1.25__y_minus10",
+   "topology": 2511,
+   "noise": 847102,
+   "mode_counts_TB_TA": [
+    101,
+    53
+   ],
+   "L_search": 6.093841468857116,
+   "scaled_contributions_global_modes_mask": [
+    2.9493557293145924,
+    2.0965502992903167,
+    1.0479354402522068
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "up3__ellipse4__EI_same_core_scale_0.75__x_plus075",
+   "topology": 2511,
+   "noise": 847102,
+   "mode_counts_TB_TA": [
+    134,
+    27
+   ],
+   "L_search": 9.639959078006736,
+   "scaled_contributions_global_modes_mask": [
+    3.094982049988604,
+    4.231343375181923,
+    2.31363365283621
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "up3__circle__EE_core_to_out_scale_1.25__x_plus075",
+   "topology": 2511,
+   "noise": 847102,
+   "mode_counts_TB_TA": [
+    90,
+    49
+   ],
+   "L_search": 4.275790957355522,
+   "scaled_contributions_global_modes_mask": [
+    1.5072981700319703,
+    1.749301180675074,
+    1.0191916066484776
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "follow_ellipse4_out1.125_EI0.875",
+   "topology": 2511,
+   "noise": 847101,
+   "mode_counts_TB_TA": [
+    115,
+    39
+   ],
+   "L_search": 7.538414229187747,
+   "scaled_contributions_global_modes_mask": [
+    2.3696697417823325,
+    3.116739949791813,
+    2.0520045376136022
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "follow_circle_out1.125_EI1",
+   "topology": 2511,
+   "noise": 847101,
+   "mode_counts_TB_TA": [
+    86,
+    51
+   ],
+   "L_search": 4.891391425485845,
+   "scaled_contributions_global_modes_mask": [
+    1.977353154172847,
+    1.6867038337965738,
+    1.2273344375164243
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "follow_circle_out1.25_EI0.75",
+   "topology": 2511,
+   "noise": 847102,
+   "mode_counts_TB_TA": [
+    95,
+    74
+   ],
+   "L_search": 4.226808274477858,
+   "scaled_contributions_global_modes_mask": [
+    0.8712901747597637,
+    1.0815567455515585,
+    2.273961354166536
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "follow_circle_out1.125_EI0.875",
+   "topology": 2511,
+   "noise": 847101,
+   "mode_counts_TB_TA": [
+    85,
+    79
+   ],
+   "L_search": 3.21250542176292,
+   "scaled_contributions_global_modes_mask": [
+    0.875926363162493,
+    0.905093597171722,
+    1.4314854614287047
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "follow_circle_out1.125_EI0.75",
+   "topology": 2511,
+   "noise": 847101,
+   "mode_counts_TB_TA": [
+    79,
+    90
+   ],
+   "L_search": 3.751962476526181,
+   "scaled_contributions_global_modes_mask": [
+    0.7433041571014178,
+    0.6640263163739324,
+    2.344632003050831
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "follow_ellipse4_out1.25_EI0.75",
+   "topology": 2511,
+   "noise": 847101,
+   "mode_counts_TB_TA": [
+    119,
+    37
+   ],
+   "L_search": 7.901767909290754,
+   "scaled_contributions_global_modes_mask": [
+    2.2751997010518874,
+    3.2248858991117966,
+    2.40168230912707
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "follow_circle_out1.125_EI0.875",
+   "topology": 2511,
+   "noise": 847102,
+   "mode_counts_TB_TA": [
+    96,
+    66
+   ],
+   "L_search": 3.8716098541670885,
+   "scaled_contributions_global_modes_mask": [
+    1.1136785039159538,
+    1.3596678747600837,
+    1.398263475491051
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "up3__circle__EE_core_to_out_scale_1.25",
+   "topology": 2511,
+   "noise": 847102,
+   "mode_counts_TB_TA": [
+    77,
+    53
+   ],
+   "L_search": 3.963162962521818,
+   "scaled_contributions_global_modes_mask": [
+    1.2969808731499923,
+    1.419169578626342,
+    1.2470125107454835
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "up3__ellipse4",
+   "topology": 2511,
+   "noise": 847102,
+   "mode_counts_TB_TA": [
+    92,
+    20
+   ],
+   "L_search": 9.55911390834177,
+   "scaled_contributions_global_modes_mask": [
+    4.057877184405413,
+    4.186147090260764,
+    1.3150896336755922
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "follow_ellipse4_out1.125_EI1",
+   "topology": 2511,
+   "noise": 847101,
+   "mode_counts_TB_TA": [
+    94,
+    39
+   ],
+   "L_search": 5.85772922909611,
+   "scaled_contributions_global_modes_mask": [
+    2.149058657859281,
+    2.510699102847389,
+    1.1979714683894398
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "up3__ellipse4__EI_same_core_scale_0.75__x_minus075",
+   "topology": 2511,
+   "noise": 847101,
+   "mode_counts_TB_TA": [
+    116,
+    51
+   ],
+   "L_search": 6.197950844749806,
+   "scaled_contributions_global_modes_mask": [
+    1.8141474406704263,
+    2.421208553057596,
+    1.962594851021783
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "up3__ellipse4__EI_same_core_scale_0.75__x_plus075",
+   "topology": 2511,
+   "noise": 847101,
+   "mode_counts_TB_TA": [
+    128,
+    29
+   ],
+   "L_search": 8.716474977186335,
+   "scaled_contributions_global_modes_mask": [
+    2.6924970039093656,
+    3.8106849095554503,
+    2.2132930637215193
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "up3__circle__EE_core_to_out_scale_1.25__radius205",
+   "topology": 2511,
+   "noise": 847101,
+   "mode_counts_TB_TA": [
+    113,
+    29
+   ],
+   "L_search": 7.624713895516115,
+   "scaled_contributions_global_modes_mask": [
+    2.6896029331240485,
+    3.5439322371302615,
+    1.3911787252618055
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "up3__ellipse4",
+   "topology": 2511,
+   "noise": 847101,
+   "mode_counts_TB_TA": [
+    95,
+    16
+   ],
+   "L_search": 8.69557672775652,
+   "scaled_contributions_global_modes_mask": [
+    3.515852379741946,
+    4.1209898577020985,
+    1.0587344903124754
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "up3__circle__EE_core_to_out_scale_1.25__radius235",
+   "topology": 2511,
+   "noise": 847101,
+   "mode_counts_TB_TA": [
+    120,
+    15
+   ],
+   "L_search": 11.165630484925359,
+   "scaled_contributions_global_modes_mask": [
+    4.109332197310598,
+    5.259587908402968,
+    1.7967103792117924
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "follow_ellipse4_out1_EI0.875",
+   "topology": 2511,
+   "noise": 847101,
+   "mode_counts_TB_TA": [
+    107,
+    39
+   ],
+   "L_search": 6.409577530772578,
+   "scaled_contributions_global_modes_mask": [
+    2.2264085261578157,
+    2.8170347044763266,
+    1.3661343001384352
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "up3__ellipse4__EE_core_to_out_scale_1.25",
+   "topology": 2511,
+   "noise": 847101,
+   "mode_counts_TB_TA": [
+    98,
+    35
+   ],
+   "L_search": 7.000298498677386,
+   "scaled_contributions_global_modes_mask": [
+    2.2817545360036404,
+    2.930620820162062,
+    1.787923142511684
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "up3__ellipse4__EI_same_core_scale_0.75__y_minus10",
+   "topology": 2511,
+   "noise": 847101,
+   "mode_counts_TB_TA": [
+    117,
+    45
+   ],
+   "L_search": 5.629052043695438,
+   "scaled_contributions_global_modes_mask": [
+    1.8883328505029537,
+    2.5911120527597165,
+    1.1496071404327681
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "follow_circle_out1_EI0.875",
+   "topology": 2511,
+   "noise": 847102,
+   "mode_counts_TB_TA": [
+    89,
+    57
+   ],
+   "L_search": 4.411895159838871,
+   "scaled_contributions_global_modes_mask": [
+    1.388980464031353,
+    1.509865710876911,
+    1.5130489849306077
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "follow_ellipse4_out1.125_EI1",
+   "topology": 2511,
+   "noise": 847102,
+   "mode_counts_TB_TA": [
+    109,
+    28
+   ],
+   "L_search": 8.342247754037615,
+   "scaled_contributions_global_modes_mask": [
+    3.168407038227646,
+    3.7577868920921382,
+    1.4160538237178306
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "follow_ellipse4_out1.25_EI0.875",
+   "topology": 2511,
+   "noise": 847101,
+   "mode_counts_TB_TA": [
+    118,
+    39
+   ],
+   "L_search": 8.010422360429317,
+   "scaled_contributions_global_modes_mask": [
+    2.3993514415889217,
+    3.2093886097133244,
+    2.40168230912707
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "up3__circle__EE_core_to_out_scale_1.25__x_plus075",
+   "topology": 2511,
+   "noise": 847101,
+   "mode_counts_TB_TA": [
+    91,
+    65
+   ],
+   "L_search": 3.459458731096301,
+   "scaled_contributions_global_modes_mask": [
+    1.182844162229236,
+    1.2460382802667946,
+    1.0305762886002703
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "up3__ellipse4__EI_same_core_scale_0.75__x_minus075",
+   "topology": 2511,
+   "noise": 847102,
+   "mode_counts_TB_TA": [
+    123,
+    45
+   ],
+   "L_search": 6.555531571738714,
+   "scaled_contributions_global_modes_mask": [
+    1.9009016524649605,
+    2.716634383622294,
+    1.93799553565146
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "follow_ellipse4_out1.25_EI0.75",
+   "topology": 2511,
+   "noise": 847102,
+   "mode_counts_TB_TA": [
+    130,
+    30
+   ],
+   "L_search": 9.119639704520573,
+   "scaled_contributions_global_modes_mask": [
+    2.769531408511596,
+    3.9484259868819076,
+    2.40168230912707
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "follow_circle_out1.125_EI1",
+   "topology": 2511,
+   "noise": 847102,
+   "mode_counts_TB_TA": [
+    81,
+    49
+   ],
+   "L_search": 4.906487018583496,
+   "scaled_contributions_global_modes_mask": [
+    2.040687993615884,
+    1.668342047736001,
+    1.197456977231611
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "up3__ellipse4__EI_same_core_scale_0.75",
+   "topology": 2511,
+   "noise": 847101,
+   "mode_counts_TB_TA": [
+    117,
+    39
+   ],
+   "L_search": 7.487907180538135,
+   "scaled_contributions_global_modes_mask": [
+    2.3664328801764665,
+    3.11532482587241,
+    2.006149474489259
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "up3__circle__EE_core_to_out_scale_1.25__y_plus10",
+   "topology": 2511,
+   "noise": 847101,
+   "mode_counts_TB_TA": [
+    77,
+    69
+   ],
+   "L_search": 3.4944314604717497,
+   "scaled_contributions_global_modes_mask": [
+    1.2195539520400205,
+    0.8603565422153172,
+    1.4145209662164118
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "up3__circle",
+   "topology": 2511,
+   "noise": 847101,
+   "mode_counts_TB_TA": [
+    105,
+    22
+   ],
+   "L_search": 7.561348383147497,
+   "scaled_contributions_global_modes_mask": [
+    3.213012328962171,
+    3.3871527189446526,
+    0.9611833352406722
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "up3__circle__EE_core_to_out_scale_1.25__radius235",
+   "topology": 2511,
+   "noise": 847102,
+   "mode_counts_TB_TA": [
+    121,
+    15
+   ],
+   "L_search": 11.073047700386866,
+   "scaled_contributions_global_modes_mask": [
+    4.0212663677846106,
+    5.225402950778022,
+    1.826378381824233
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "up3__circle__EE_core_to_out_scale_1.25",
+   "topology": 2511,
+   "noise": 847101,
+   "mode_counts_TB_TA": [
+    75,
+    71
+   ],
+   "L_search": 2.9977063545384164,
+   "scaled_contributions_global_modes_mask": [
+    0.8461818546637463,
+    0.8419089704788175,
+    1.3096155293958522
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "up3__circle__EI_same_core_scale_0.75",
+   "topology": 2511,
+   "noise": 847102,
+   "mode_counts_TB_TA": [
+    95,
+    69
+   ],
+   "L_search": 3.8527920319701416,
+   "scaled_contributions_global_modes_mask": [
+    0.9413230591990075,
+    1.1286207788734497,
+    1.7828481938976846
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "follow_ellipse4_out1_EI0.875",
+   "topology": 2511,
+   "noise": 847102,
+   "mode_counts_TB_TA": [
+    113,
+    38
+   ],
+   "L_search": 7.090664858181311,
+   "scaled_contributions_global_modes_mask": [
+    2.56351812773407,
+    3.1704135888765084,
+    1.3567331415707322
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "up3__circle__EI_same_core_scale_0.75",
+   "topology": 2511,
+   "noise": 847101,
+   "mode_counts_TB_TA": [
+    87,
+    82
+   ],
+   "L_search": 3.4198349241110595,
+   "scaled_contributions_global_modes_mask": [
+    0.8294735720130462,
+    0.799756351253829,
+    1.790605000844184
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "up3__circle__EE_core_to_out_scale_1.25__radius205",
+   "topology": 2511,
+   "noise": 847102,
+   "mode_counts_TB_TA": [
+    107,
+    33
+   ],
+   "L_search": 7.99456029453366,
+   "scaled_contributions_global_modes_mask": [
+    2.8571929808441165,
+    3.48046911878254,
+    1.6568981949070027
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "follow_circle_out1.25_EI0.75",
+   "topology": 2511,
+   "noise": 847101,
+   "mode_counts_TB_TA": [
+    80,
+    89
+   ],
+   "L_search": 3.5653016434316864,
+   "scaled_contributions_global_modes_mask": [
+    0.7168531639357781,
+    0.6833205896958171,
+    2.1651278898000914
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "up3__circle__EE_core_to_out_scale_1.25__y_plus10",
+   "topology": 2511,
+   "noise": 847102,
+   "mode_counts_TB_TA": [
+    93,
+    64
+   ],
+   "L_search": 4.261658974694489,
+   "scaled_contributions_global_modes_mask": [
+    1.5129176315662445,
+    1.3850768500695871,
+    1.3636644930586574
+   ],
+   "reconstruction_error": 0.0
+  },
+  {
+   "candidate": "up3__circle",
+   "topology": 2511,
+   "noise": 847102,
+   "mode_counts_TB_TA": [
+    105,
+    22
+   ],
+   "L_search": 7.743788990787312,
+   "scaled_contributions_global_modes_mask": [
+    3.339005469547837,
+    3.4602425077362917,
+    0.9445410135031836
+   ],
+   "reconstruction_error": 0.0
+  }
+ ],
+ "verified_unix": 1789245187.1241467
+}

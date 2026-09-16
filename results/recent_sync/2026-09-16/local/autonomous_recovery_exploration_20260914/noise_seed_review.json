@@ -1,0 +1,14 @@
+{
+  "reviewed_at": 1789415961.470899,
+  "topology_seed": 6101,
+  "dynamics_seeds": [
+    9108401,
+    9108402
+  ],
+  "runtime_stream": "run_topic4_autonomous_recovery.py explicitly resets net[rng] to dynamics seed; simulate_kick consumes it for native scalar OU and Poisson. Spatial OU receives the dynamics seed plus fixed offset.",
+  "actual_QA_prefix_s": 1.0,
+  "between_seed_input_arrays_equal": false,
+  "between_seed_population_counts_equal": false,
+  "between_seed_fixed_raster_equal": false,
+  "interpretation": "Identical rounded high-entry times in the weak-M pair do not imply reused identical noise. These are distinct noise realizations on one fixed topology; not independent patients or topology repeats."
+}

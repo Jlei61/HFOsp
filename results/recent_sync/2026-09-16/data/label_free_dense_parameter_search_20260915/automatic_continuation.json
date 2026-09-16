@@ -1,0 +1,30 @@
+{
+  "authorization": "2026-09-15 用户：完成后自动接上",
+  "status": "AUTOCONTINUATION_CONFIRMED_ON_RUNNING_CONTROLLER",
+  "controller_pid": 140096,
+  "controller_script": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_label_free_dense_search.py",
+  "flow": [
+    "score each completed physical trajectory with frozen label-free loss",
+    "wait for all 8 outcomes of the current BO batch, update model, propose and dispatch the next batch",
+    "continue dense single-parameter response simulations concurrently",
+    "refresh three parameter figures and current best multievent GIF / patient-model snapshots",
+    "finish all 102 authorized new runs, write final ranking and key results"
+  ],
+  "polling_seconds": 2,
+  "incremental_analysis_seconds": 180,
+  "budget": {
+    "reused_runs": 32,
+    "dense_new_runs": 70,
+    "adaptive_new_runs": 32,
+    "max_new_runs": 102,
+    "additional_seed_runs": 0
+  },
+  "keep_single_topology": 2511,
+  "keep_single_noise": 847401,
+  "simulation_restarted": false,
+  "physics_changed": false,
+  "loss_changed": false,
+  "post_round_status": "COMPLETE_PENDING_SCIENTIFIC_REVIEW",
+  "propagation_recovery_not_automatically_accepted": true,
+  "time": 1789471324.1297982
+}

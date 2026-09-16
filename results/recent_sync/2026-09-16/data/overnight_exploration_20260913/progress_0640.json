@@ -1,0 +1,53 @@
+{
+  "state": {
+    "updated_unix": 1789252733.1977313,
+    "elapsed_s": 1395,
+    "queues": {
+      "F": {
+        "complete": 55,
+        "total": 60,
+        "live_worker_pids": [
+          4063749,
+          4070465,
+          4125167,
+          4151252,
+          4168996
+        ],
+        "stale_status_pids": [],
+        "status": "RESPONSE_RUNNING",
+        "failures": []
+      },
+      "N": {
+        "complete": 0,
+        "total": 108,
+        "live_worker_pids": [
+          15948,
+          258720,
+          259108,
+          4078535,
+          4078701,
+          4151248,
+          368494,
+          368499
+        ],
+        "stale_status_pids": [],
+        "status": "RESPONSE_RUNNING",
+        "failures": []
+      },
+      "G": {
+        "complete": 1,
+        "total": 6,
+        "live_worker_pids": [
+          258320,
+          312963
+        ],
+        "stale_status_pids": [],
+        "status": "RESPONSE_RUNNING",
+        "failures": []
+      }
+    },
+    "available_gib": 114.6392822265625
+  },
+  "latest_evidence": "geometry_confirmation_effects/ou_input_interpretation.md",
+  "resource_amendment": "core_multiseed_response_curves_20260913/early_eight_resource_amendment.json"
+}

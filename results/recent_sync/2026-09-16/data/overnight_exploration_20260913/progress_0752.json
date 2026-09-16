@@ -1,0 +1,270 @@
+{
+  "created_unix": 1789257059.8229697,
+  "queues": {
+    "F": {
+      "status": "RESPONSE_RUNNING",
+      "stage": "response",
+      "total": 60,
+      "complete": 57,
+      "queued": 0,
+      "active": [
+        {
+          "pid": 4125167,
+          "unit": [
+            "up3__ellipse4__EI_same_core_scale_0.75__radius205",
+            2511,
+            847102
+          ],
+          "rss_gib": 2.0384597778320312
+        },
+        {
+          "pid": 4151252,
+          "unit": [
+            "up3__ellipse4__EI_same_core_scale_0.75__radius235",
+            2511,
+            847101
+          ],
+          "rss_gib": 2.032970428466797
+        },
+        {
+          "pid": 4168996,
+          "unit": [
+            "up3__ellipse4__EI_same_core_scale_0.75__radius235",
+            2511,
+            847102
+          ],
+          "rss_gib": 2.033954620361328
+        }
+      ],
+      "max_workers": 20,
+      "peak_rss_gib": 2.9343299865722656,
+      "available_gib": 111.21376037597656,
+      "failures": [],
+      "updated_unix": 1789257057.097908
+    },
+    "N": {
+      "status": "RESPONSE_RUNNING",
+      "stage": "response",
+      "total": 108,
+      "complete": 2,
+      "queued": 96,
+      "active": [
+        {
+          "pid": 15948,
+          "unit": [
+            "bridge_circle_out125_xminus075",
+            2711,
+            847401
+          ],
+          "rss_gib": 2.023601531982422
+        },
+        {
+          "pid": 258720,
+          "unit": [
+            "bridge_circle_out125",
+            2712,
+            847401
+          ],
+          "rss_gib": 2.12310791015625
+        },
+        {
+          "pid": 259108,
+          "unit": [
+            "bridge_circle_out125_xminus075",
+            2712,
+            847401
+          ],
+          "rss_gib": 2.1233749389648438
+        },
+        {
+          "pid": 4151248,
+          "unit": [
+            "bridge_circle_out125",
+            2711,
+            847401
+          ],
+          "rss_gib": 2.135059356689453
+        },
+        {
+          "pid": 368494,
+          "unit": [
+            "bridge_circle_out125",
+            2511,
+            847402
+          ],
+          "rss_gib": 1.9956550598144531
+        },
+        {
+          "pid": 368499,
+          "unit": [
+            "bridge_circle_out125_xminus075",
+            2511,
+            847402
+          ],
+          "rss_gib": 1.9948463439941406
+        },
+        {
+          "pid": 492006,
+          "unit": [
+            "bridge_circle_out125",
+            2711,
+            847402
+          ],
+          "rss_gib": 2.0843582153320312
+        },
+        {
+          "pid": 492078,
+          "unit": [
+            "bridge_circle_out125_xminus075",
+            2711,
+            847402
+          ],
+          "rss_gib": 2.084064483642578
+        },
+        {
+          "pid": 500919,
+          "unit": [
+            "bridge_circle_out125",
+            2712,
+            847402
+          ],
+          "rss_gib": 2.0969276428222656
+        },
+        {
+          "pid": 510427,
+          "unit": [
+            "bridge_circle_out125_xminus075",
+            2712,
+            847402
+          ],
+          "rss_gib": 1.9831390380859375
+        }
+      ],
+      "max_workers": 10,
+      "previous_running": true,
+      "predecessor_active": 3,
+      "predecessor_growth_gib": 11.894657135009766,
+      "own_growth_gib": 39.355865478515625,
+      "optional_probe_active": 2,
+      "optional_probe_growth_gib": 8.01375961303711,
+      "optional_probe_priority": true,
+      "available_gib": 111.12112426757812,
+      "required_gib": 108.2642822265625,
+      "peak_rss_gib": 2.933216094970703,
+      "failures": [],
+      "updated_unix": 1789257054.3605268
+    },
+    "G": {
+      "status": "RESPONSE_RUNNING",
+      "stage": "response",
+      "total": 6,
+      "complete": 2,
+      "pending": [
+        [
+          "global_axis_-15",
+          2511,
+          847102
+        ],
+        [
+          "global_axis_+15",
+          2511,
+          847102
+        ]
+      ],
+      "active": [
+        {
+          "pid": 312963,
+          "unit": [
+            "global_axis_+15",
+            2511,
+            847101
+          ],
+          "rss_gib": 1.9987220764160156
+        },
+        {
+          "pid": 435424,
+          "unit": [
+            "global_axis_+0",
+            2511,
+            847102
+          ],
+          "rss_gib": 1.9875068664550781
+        }
+      ],
+      "shared_active": [
+        {
+          "pid": 4125167,
+          "rss_gib": 2.0384445190429688,
+          "reserve_gib": 6.0
+        },
+        {
+          "pid": 4151252,
+          "rss_gib": 2.032947540283203,
+          "reserve_gib": 6.0
+        },
+        {
+          "pid": 4168996,
+          "rss_gib": 2.0338897705078125,
+          "reserve_gib": 6.0
+        },
+        {
+          "pid": 15948,
+          "rss_gib": 2.0235977172851562,
+          "reserve_gib": 6.0
+        },
+        {
+          "pid": 258720,
+          "rss_gib": 2.1231002807617188,
+          "reserve_gib": 6.0
+        },
+        {
+          "pid": 259108,
+          "rss_gib": 2.123363494873047,
+          "reserve_gib": 6.0
+        },
+        {
+          "pid": 4151248,
+          "rss_gib": 2.1350440979003906,
+          "reserve_gib": 6.0
+        },
+        {
+          "pid": 368494,
+          "rss_gib": 1.9956474304199219,
+          "reserve_gib": 6.0
+        },
+        {
+          "pid": 368499,
+          "rss_gib": 1.994842529296875,
+          "reserve_gib": 6.0
+        },
+        {
+          "pid": 492006,
+          "rss_gib": 2.0843467712402344,
+          "reserve_gib": 6.0
+        },
+        {
+          "pid": 492078,
+          "rss_gib": 2.084056854248047,
+          "reserve_gib": 6.0
+        },
+        {
+          "pid": 500919,
+          "rss_gib": 2.0969085693359375,
+          "reserve_gib": 6.0
+        },
+        {
+          "pid": 510427,
+          "rss_gib": 1.9831314086914062,
+          "reserve_gib": 6.0
+        }
+      ],
+      "available_gib": 111.36632537841797,
+      "required_gib": 108.26445007324219,
+      "failures": [],
+      "updated_unix": 1789257049.2318494
+    }
+  },
+  "memory_available_gib": 110.98074340820312,
+  "latest_review": "review_0750",
+  "physical_changes": 0
+}

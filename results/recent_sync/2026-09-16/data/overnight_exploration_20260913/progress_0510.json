@@ -1,0 +1,56 @@
+{
+  "updated_unix": 1789247475.0588343,
+  "elapsed_s": 450,
+  "queues": {
+    "F": {
+      "complete": 54,
+      "total": 60,
+      "live_worker_pids": [
+        3965604,
+        4063749,
+        4070465,
+        4125167,
+        4151252,
+        4168996
+      ],
+      "stale_status_pids": [],
+      "status": "RESPONSE_RUNNING",
+      "failures": []
+    },
+    "N": {
+      "complete": 0,
+      "total": 108,
+      "live_worker_pids": [
+        15948,
+        4078535,
+        4078701,
+        4151248,
+        258720,
+        259108
+      ],
+      "stale_status_pids": [],
+      "status": "RESPONSE_RUNNING",
+      "failures": []
+    },
+    "G": {
+      "complete": 0,
+      "total": 6,
+      "live_worker_pids": [
+        136040,
+        258320
+      ],
+      "stale_status_pids": [],
+      "status": "RESPONSE_RUNNING",
+      "failures": []
+    }
+  },
+  "available_gib": 116.63370895385742,
+  "status": "ACTIVE_WAITING_FOR_NEW_COMPLETE_TRAJECTORIES",
+  "wait_handle": {
+    "exec_session_id": 21713,
+    "monitor_pid": 260820
+  },
+  "new_worker_application_check": "new_workers_applied_configuration.json",
+  "new_G_media_contract": "/data/hfosp/topic4_sef_hfo/global_axis_residual_probe_20260913/progressive_media_amendment.json",
+  "scientific_results_changed": false
+}

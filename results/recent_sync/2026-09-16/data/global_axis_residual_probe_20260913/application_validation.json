@@ -1,0 +1,10 @@
+{
+ "status": "PASS",
+ "checks": {
+  "sheet_activity_counts": true,
+  "trace_coreAE_spikes": true,
+  "trace_coreBE_spikes": true,
+  "core_ou_mixture_values": true
+ },
+ "scope": "500ms static and raw-dynamic baseline prefix plus actual global-axis application; not a propagation gate"
+}

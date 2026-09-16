@@ -1,0 +1,233 @@
+{
+  "unix": 1789240263.825213,
+  "goal": "ACTIVE",
+  "queues": {
+    "followup": {
+      "status": "RESPONSE_RUNNING",
+      "stage": "response",
+      "total": 60,
+      "complete": 52,
+      "queued": 0,
+      "active": [
+        {
+          "pid": 3831568,
+          "unit": [
+            "up3__ellipse4__EI_same_core_scale_0.75__y_minus10",
+            2511,
+            847101
+          ],
+          "rss_gib": 2.033527374267578
+        },
+        {
+          "pid": 3890554,
+          "unit": [
+            "up3__ellipse4__EI_same_core_scale_0.75__y_minus10",
+            2511,
+            847102
+          ],
+          "rss_gib": 2.0346717834472656
+        },
+        {
+          "pid": 3965604,
+          "unit": [
+            "up3__ellipse4__EI_same_core_scale_0.75__y_plus10",
+            2511,
+            847101
+          ],
+          "rss_gib": 2.008777618408203
+        },
+        {
+          "pid": 4063749,
+          "unit": [
+            "up3__ellipse4__EI_same_core_scale_0.75__y_plus10",
+            2511,
+            847102
+          ],
+          "rss_gib": 1.9986991882324219
+        },
+        {
+          "pid": 4070465,
+          "unit": [
+            "up3__ellipse4__EI_same_core_scale_0.75__radius205",
+            2511,
+            847101
+          ],
+          "rss_gib": 1.9953804016113281
+        },
+        {
+          "pid": 4125167,
+          "unit": [
+            "up3__ellipse4__EI_same_core_scale_0.75__radius205",
+            2511,
+            847102
+          ],
+          "rss_gib": 1.9889640808105469
+        },
+        {
+          "pid": 4151252,
+          "unit": [
+            "up3__ellipse4__EI_same_core_scale_0.75__radius235",
+            2511,
+            847101
+          ],
+          "rss_gib": 1.98419189453125
+        },
+        {
+          "pid": 4168996,
+          "unit": [
+            "up3__ellipse4__EI_same_core_scale_0.75__radius235",
+            2511,
+            847102
+          ],
+          "rss_gib": 1.9846611022949219
+        }
+      ],
+      "max_workers": 20,
+      "peak_rss_gib": 2.9343299865722656,
+      "available_gib": 122.9325942993164,
+      "failures": [],
+      "updated_unix": 1789240259.0413568
+    },
+    "multiseed": {
+      "status": "RESPONSE_RUNNING",
+      "stage": "response",
+      "total": 108,
+      "complete": 0,
+      "queued": 104,
+      "active": [
+        {
+          "pid": 4078535,
+          "unit": [
+            "bridge_circle_out125",
+            2511,
+            847401
+          ],
+          "rss_gib": 1.9901390075683594
+        },
+        {
+          "pid": 4078701,
+          "unit": [
+            "bridge_circle_out125_xminus075",
+            2511,
+            847401
+          ],
+          "rss_gib": 1.9914894104003906
+        },
+        {
+          "pid": 4151248,
+          "unit": [
+            "bridge_circle_out125",
+            2711,
+            847401
+          ],
+          "rss_gib": 2.086223602294922
+        },
+        {
+          "pid": 15948,
+          "unit": [
+            "bridge_circle_out125_xminus075",
+            2711,
+            847401
+          ],
+          "rss_gib": 1.9787559509277344
+        }
+      ],
+      "max_workers": 6,
+      "previous_running": true,
+      "predecessor_active": 8,
+      "predecessor_growth_gib": 55.97103500366211,
+      "own_growth_gib": 27.953392028808594,
+      "available_gib": 122.86319351196289,
+      "required_gib": 132.9244270324707,
+      "peak_rss_gib": 0.0,
+      "failures": [],
+      "updated_unix": 1789240262.7515132
+    },
+    "axis_probe": {
+      "status": "WAITING_FOR_SHARED_RESOURCES",
+      "stage": "canary",
+      "total": 3,
+      "complete": 0,
+      "pending": [
+        [
+          "global_axis_+0",
+          2511,
+          847101
+        ],
+        [
+          "global_axis_-15",
+          2511,
+          847101
+        ],
+        [
+          "global_axis_+15",
+          2511,
+          847101
+        ]
+      ],
+      "active": [],
+      "shared_active": [
+        {
+          "pid": 3831568,
+          "rss_gib": 2.0335311889648438
+        },
+        {
+          "pid": 3890554,
+          "rss_gib": 2.0347137451171875
+        },
+        {
+          "pid": 3965604,
+          "rss_gib": 2.0087814331054688
+        },
+        {
+          "pid": 4063749,
+          "rss_gib": 1.9987030029296875
+        },
+        {
+          "pid": 4070465,
+          "rss_gib": 1.9953842163085938
+        },
+        {
+          "pid": 4125167,
+          "rss_gib": 1.9889678955078125
+        },
+        {
+          "pid": 4151252,
+          "rss_gib": 1.9841995239257812
+        },
+        {
+          "pid": 4168996,
+          "rss_gib": 1.9846649169921875
+        },
+        {
+          "pid": 4078535,
+          "rss_gib": 1.9901390075683594
+        },
+        {
+          "pid": 4078701,
+          "rss_gib": 1.9914894104003906
+        },
+        {
+          "pid": 4151248,
+          "rss_gib": 2.086223602294922
+        },
+        {
+          "pid": 15948,
+          "rss_gib": 1.9787559509277344
+        }
+      ],
+      "available_gib": 122.93905258178711,
+      "required_gib": 132.92444610595703,
+      "failures": [],
+      "updated_unix": 1789240261.938442
+    }
+  },
+  "artifacts": [
+    "completed_parameter_effects/parameter_effect_atlas.pdf",
+    "completed_parameter_effects/scientific_note.md",
+    "core_timing_route_audit_0212",
+    "rod_lag_participation_audit_0206"
+  ],
+  "observer_pid": 17198,
+  "physical_workers_restarted": 0
+}

@@ -1,0 +1,145 @@
+{
+  "status": "PASS",
+  "checks": [
+    {
+      "check": "converted parameters reproduce old K update bitwise",
+      "old_gain": 0.1,
+      "old_tau_s": 1.0,
+      "k100": 0.1,
+      "derived": {
+        "k100": 0.1,
+        "sahp_tau_s": 1.0,
+        "sahp_gain": 0.1,
+        "per_spike_increment_gK_over_gL": 0.001,
+        "steady_state_gK_over_gL_at_100Hz": 0.1
+      }
+    },
+    {
+      "check": "converted parameters reproduce old K update bitwise",
+      "old_gain": 0.1,
+      "old_tau_s": 5.0,
+      "k100": 0.5,
+      "derived": {
+        "k100": 0.5,
+        "sahp_tau_s": 5.0,
+        "sahp_gain": 0.1,
+        "per_spike_increment_gK_over_gL": 0.001,
+        "steady_state_gK_over_gL_at_100Hz": 0.5
+      }
+    },
+    {
+      "check": "same k100 gives the same 100 Hz stationary time-average gK/gL for every tau_K; 63% rise time equals tau_K",
+      "results": [
+        {
+          "k100": 0.1,
+          "rows": [
+            {
+              "tau_K_s": 1.0,
+              "K_gain": 0.1,
+              "per_spike": 0.001,
+              "stationary_time_average": 0.10000500008344243,
+              "relative_error_vs_k100": 5.000083442424641e-05,
+              "time_to_63pct_s": 0.99
+            },
+            {
+              "tau_K_s": 2.5,
+              "K_gain": 0.04,
+              "per_spike": 0.0004,
+              "stationary_time_average": 0.10000198875967672,
+              "relative_error_vs_k100": 1.9887596767187432e-05,
+              "time_to_63pct_s": 2.49
+            },
+            {
+              "tau_K_s": 5.0,
+              "K_gain": 0.02,
+              "per_spike": 0.0002,
+              "stationary_time_average": 0.09996745340562363,
+              "relative_error_vs_k100": 0.0003254659437637586,
+              "time_to_63pct_s": 4.99
+            }
+          ]
+        },
+        {
+          "k100": 0.25,
+          "rows": [
+            {
+              "tau_K_s": 1.0,
+              "K_gain": 0.25,
+              "per_spike": 0.0025,
+              "stationary_time_average": 0.2500125002086036,
+              "relative_error_vs_k100": 5.0000834414420936e-05,
+              "time_to_63pct_s": 0.99
+            },
+            {
+              "tau_K_s": 2.5,
+              "K_gain": 0.1,
+              "per_spike": 0.001,
+              "stationary_time_average": 0.2500049718991899,
+              "relative_error_vs_k100": 1.9887596759637916e-05,
+              "time_to_63pct_s": 2.49
+            },
+            {
+              "tau_K_s": 5.0,
+              "K_gain": 0.05,
+              "per_spike": 0.0005,
+              "stationary_time_average": 0.24991863351404758,
+              "relative_error_vs_k100": 0.0003254659438096663,
+              "time_to_63pct_s": 4.99
+            }
+          ]
+        },
+        {
+          "k100": 0.5,
+          "rows": [
+            {
+              "tau_K_s": 1.0,
+              "K_gain": 0.5,
+              "per_spike": 0.005,
+              "stationary_time_average": 0.5000250004172072,
+              "relative_error_vs_k100": 5.0000834414420936e-05,
+              "time_to_63pct_s": 0.99
+            },
+            {
+              "tau_K_s": 2.5,
+              "K_gain": 0.2,
+              "per_spike": 0.002,
+              "stationary_time_average": 0.5000099437983798,
+              "relative_error_vs_k100": 1.9887596759637916e-05,
+              "time_to_63pct_s": 2.49
+            },
+            {
+              "tau_K_s": 5.0,
+              "K_gain": 0.1,
+              "per_spike": 0.001,
+              "stationary_time_average": 0.49983726702809517,
+              "relative_error_vs_k100": 0.0003254659438096663,
+              "time_to_63pct_s": 4.99
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "check": "dt=0.1 ms with tau_K in ms: 10000 steps give exp(-1); per-spike increment equals 0.01*k100/tau_K_s",
+      "passed": true
+    },
+    {
+      "check": "Liou 2020 sAHP normalisation",
+      "per_spike_increment_gK_over_gL": {
+        "tau_1s": 0.049999999999999996,
+        "tau_2p5s": 0.02,
+        "tau_5s": 0.01
+      },
+      "k100_at_gain1": [
+        4.999999999999999,
+        5.0,
+        5.0
+      ],
+      "statement": "Source increment is gK_max/tau_K per spike, so the source steady state gK_max*rate is tau_K independent; k100 of the source at gain 1 is 5.0 for every tau_K. This batch spans k100 0.1-0.5, i.e. 10-50 times weaker than the source scale."
+    },
+    {
+      "check": "K100Slow default == MatchedSlow bitwise; z_gate_off applies Z=1 to delivery only while Z keeps evolving; k_freeze holds gK",
+      "passed": true
+    }
+  ]
+}

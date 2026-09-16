@@ -1,0 +1,28 @@
+{
+  "pdf_pages": 7,
+  "out_of_page_text": [],
+  "agent_visual_review": "PASS",
+  "human_visual_review": "PENDING",
+  "reviewed_figures": [
+    "01_square_bifurcation_four_states_inset.png",
+    "02_square_fold_eigenvalues_vectors.png",
+    "03_core_a_b_relationship.png",
+    "04_state_1_large_raster.png",
+    "04_state_2_large_raster.png",
+    "04_state_3_large_raster.png",
+    "04_state_4_large_raster.png"
+  ],
+  "checks": [
+    "Numbered native markers use actual J and full-window mean rate",
+    "Four fixed-cell rasters are readable in the square composite and standalone large figures",
+    "Waveforms and rasters use the same time windows",
+    "All displayed periodic points passed orbit and Floquet checks",
+    "Eigenvalue annotation moved away from the branch",
+    "Core A/B routes verified from actual projected graph",
+    "Both inset panels remain inside the main bifurcation axes",
+    "Insets do not overlap native markers or equilibrium branches",
+    "Grey explanatory small text removed; definitions retained in report and figure captions"
+  ],
+  "scientific_acceptance": "Candidate reduced-system figure; native critical-point correspondence not validated",
+  "layout_revision": "Two rate insets inside main axes; grey explanatory small text removed"
+}

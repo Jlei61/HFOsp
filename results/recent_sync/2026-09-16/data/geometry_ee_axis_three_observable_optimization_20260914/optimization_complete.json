@@ -1,0 +1,104 @@
+{
+ "status": "ROUND_COMPLETE_PARTIAL_RECOVERY_G4_NOT_STARTED",
+ "time": 1789444609.4092,
+ "counts": {
+  "total": 72,
+  "training": 64,
+  "confirmation": 8,
+  "new_physical": 64,
+  "reused": 8,
+  "G4": 0
+ },
+ "events": {
+  "training": 9586,
+  "confirmation": 1261,
+  "total": 10847
+ },
+ "numerical_decision": {
+  "patient_TB_lag_median_ms": 1.19000244140625,
+  "candidates": [
+   {
+    "candidate": "g2_b01_p01",
+    "estimable": true,
+    "numerical_trigger": true,
+    "criteria": {
+     "J_better_at_least_3": true,
+     "timing_mean_better": true,
+     "TB_lag_error_better_at_least_3": true,
+     "topology_3711_rank_and_participation_not_worse": true,
+     "topology_3712_rank_and_participation_not_worse": true
+    },
+    "pairs": [
+     {
+      "topology": 3711,
+      "noise": 849401,
+      "delta_J": -4.649868623740283,
+      "delta_components": [
+       -4.787271426068047,
+       -4.817467942906161,
+       -4.344866502246641
+      ],
+      "delta_TB_lag_error": -0.19505926389319939,
+      "J": 1.1346392765887419,
+      "TB_N": 66
+     },
+     {
+      "topology": 3711,
+      "noise": 849402,
+      "delta_J": -5.727388863851474,
+      "delta_components": [
+       -5.8601703176685245,
+       -6.020522007056011,
+       -5.301474266829887
+      ],
+      "delta_TB_lag_error": -0.06094733468580671,
+      "J": 1.574218162400338,
+      "TB_N": 72
+     },
+     {
+      "topology": 3712,
+      "noise": 849401,
+      "delta_J": 0.08864107483083306,
+      "delta_components": [
+       0.10387079185735759,
+       0.07346711066396017,
+       0.0885853219711823
+      ],
+      "delta_TB_lag_error": 0.22619521984597668,
+      "J": 3.2927548779482625,
+      "TB_N": 90
+     },
+     {
+      "topology": 3712,
+      "noise": 849402,
+      "delta_J": -1.7937307500506283,
+      "delta_components": [
+       -1.7364553447983853,
+       -2.0752802605021174,
+       -1.569456644851381
+      ],
+      "delta_TB_lag_error": -0.24424894501862582,
+      "J": 2.7115605672135765,
+      "TB_N": 86
+     }
+    ]
+   }
+  ],
+  "native_review_required": true,
+  "interpretation": "Budget allocation rule; not a significance test or full recovery acceptance",
+  "time": 1789441871.6436355
+ },
+ "scientific_review": "/data/hfosp/topic4_sef_hfo/geometry_ee_axis_three_observable_optimization_20260914/analysis/g3_agent_native_review.json",
+ "G4_dispatched": 0,
+ "G4_not_started_reasons": [
+  "AUTONOMOUS_DISPATCH_WINDOW_CLOSED",
+  "TA_LOCAL_RECRUITMENT_AND_ORDER_TRADEOFF_NOT_ACCEPTED_AS_DUAL_MODE_PROPAGATION_IMPROVEMENT"
+ ],
+ "window_end": "2026-09-15T09:51:34+08:00",
+ "complete_report": "/data/hfosp/topic4_sef_hfo/geometry_ee_axis_three_observable_optimization_20260914/overnight_20260914/final_optimization_report.pdf",
+ "scientific_report": "/data/hfosp/topic4_sef_hfo/geometry_ee_axis_three_observable_optimization_20260914/analysis/confirmation_review/scientific_review.md",
+ "full_patient_dual_mode_recovery": false,
+ "model_frozen": false,
+ "Fig5_started": false,
+ "human_review": "PENDING_USER_VISUAL_REVIEW"
+}

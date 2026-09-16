@@ -1,0 +1,363 @@
+{
+  "status": "PASS",
+  "connection_checks": [
+    {
+      "name": "doublet_continuity",
+      "source_a": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/periodic/join_doublet_up/g1.24620000_N2048.npz",
+      "source_b": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/periodic/join_doublet_down/g1.24620000_N2048.npz",
+      "J_a": 1.2462,
+      "J_b": 1.2462,
+      "J_difference": 0.0,
+      "period_difference_ms": 2.22655671677785e-10,
+      "phase_shift": 0.0006623144560491039,
+      "max_waveform_difference_hz": 2.8069435664690445e-08,
+      "rms_waveform_difference_hz": 7.302635375686205e-10,
+      "mean_difference_hz": [
+        -2.2398749521812533e-11,
+        -1.3808398868775384e-11,
+        -6.810524366684945e-12,
+        -2.203098814490545e-11,
+        -1.851643838257644e-11,
+        -1.2472661792273243e-11
+      ]
+    },
+    {
+      "name": "burst_mixed_connection",
+      "source_a": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/means/burst_to_B200/mean200.000000.npz",
+      "source_b": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/means/mixed_to_B200/mean200.000000.npz",
+      "J_a": 1.3486392292983655,
+      "J_b": 1.3486392292983638,
+      "J_difference": 1.7763568394002505e-15,
+      "period_difference_ms": 1.4495071809506044e-12,
+      "phase_shift": 0.045206347613331706,
+      "max_waveform_difference_hz": 8.553907582253828e-08,
+      "rms_waveform_difference_hz": 1.0767390718647566e-08,
+      "mean_difference_hz": [
+        2.914335439641036e-13,
+        1.942890293094024e-13,
+        1.6306400674181987e-13,
+        7.077671781985373e-13,
+        -2.7755575615628914e-14,
+        1.8735013540549517e-13
+      ]
+    },
+    {
+      "name": "mixed_tonic_connection",
+      "source_a": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/means/connection_mixed_high_continued_N1024/mean210.000000.npz",
+      "source_b": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/means/connection_tonic_low_continued_N1024/mean210.000000.npz",
+      "J_a": 1.3496462076434677,
+      "J_b": 1.3496462076434665,
+      "J_difference": 1.1102230246251565e-15,
+      "period_difference_ms": -2.8421709430404007e-13,
+      "phase_shift": 0.8424705277809634,
+      "max_waveform_difference_hz": 2.1728999155534723e-07,
+      "rms_waveform_difference_hz": 3.0288446115691594e-08,
+      "mean_difference_hz": [
+        8.326672684688674e-13,
+        2.7755575615628914e-14,
+        4.614364446098307e-13,
+        7.771561172376096e-13,
+        -1.6653345369377348e-13,
+        6.869504964868156e-13
+      ]
+    },
+    {
+      "name": "mixed_tonic_N2048",
+      "source_a": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/periodic/verified_mixed_high_continued_N1024/g1.34964621_N2048.npz",
+      "source_b": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/periodic/verified_tonic_low_continued_N1024/g1.34964621_N2048.npz",
+      "J_a": 1.349646207643467,
+      "J_b": 1.349646207643467,
+      "J_difference": 0.0,
+      "period_difference_ms": -2.8421709430404007e-13,
+      "phase_shift": 0.8424705277809634,
+      "max_waveform_difference_hz": 2.1728985277746915e-07,
+      "rms_waveform_difference_hz": 3.0288443118735065e-08,
+      "mean_difference_hz": [
+        8.326672684688674e-13,
+        5.551115123125783e-14,
+        4.579669976578771e-13,
+        7.494005416219807e-13,
+        -1.6653345369377348e-13,
+        6.938893903907228e-13
+      ]
+    }
+  ],
+  "critical_resolution": [
+    {
+      "name": "burst_end_fold",
+      "J": 1.364547525263163,
+      "J_resolution_difference": 9.525713551283843e-13,
+      "period_resolution_difference_ms": 3.6544633985613473e-10
+    },
+    {
+      "name": "mixed_lower_flip",
+      "J": 1.3493650597619067,
+      "J_resolution_difference": 2.0650148258027912e-14,
+      "period_resolution_difference_ms": 2.1657342585967854e-11
+    },
+    {
+      "name": "mixed_flip",
+      "J": 1.3885678462993354,
+      "J_resolution_difference": 1.1102230246251565e-15,
+      "period_resolution_difference_ms": 1.1368683772161603e-12
+    },
+    {
+      "name": "tonic_lower_flip",
+      "J": 1.3773792265782256,
+      "J_resolution_difference": 2.1094237467877974e-14,
+      "period_resolution_difference_ms": 1.2391865311656147e-11
+    }
+  ],
+  "offgrid_checks": [
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/periodic/join_doublet_up/g1.24620000_N2048.npz",
+      "N": 2048,
+      "offgrid_defect_hz": 2.6731339364260975e-08
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/periodic/join_doublet_down/g1.24620000_N2048.npz",
+      "N": 2048,
+      "offgrid_defect_hz": 1.7256918116714814e-08
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/means/burst_to_B200/mean200.000000.npz",
+      "N": 2048,
+      "offgrid_defect_hz": 5.33739719088544e-11
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/means/mixed_to_B200/mean200.000000.npz",
+      "N": 2048,
+      "offgrid_defect_hz": 1.7208456881689926e-12
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/means/connection_mixed_high_continued_N1024/mean210.000000.npz",
+      "N": 1024,
+      "offgrid_defect_hz": 1.3461454173580023e-11
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/means/connection_tonic_low_continued_N1024/mean210.000000.npz",
+      "N": 1024,
+      "offgrid_defect_hz": 8.951173136040325e-12
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/periodic/verified_mixed_high_continued_N1024/g1.34964621_N2048.npz",
+      "N": 2048,
+      "offgrid_defect_hz": 1.3405943022348765e-11
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/periodic/verified_tonic_low_continued_N1024/g1.34964621_N2048.npz",
+      "N": 2048,
+      "offgrid_defect_hz": 8.867906409193438e-12
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/arcs/mixed_high_continued_N1024/point000_g1.3537733135.npz",
+      "N": 1024,
+      "offgrid_defect_hz": 3.864963904476326e-11
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/arcs/mixed_high_continued_N1024/point005_g1.3516916122.npz",
+      "N": 1024,
+      "offgrid_defect_hz": 3.276545701424993e-11
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/arcs/mixed_high_continued_N1024/point010_g1.3512562092.npz",
+      "N": 1024,
+      "offgrid_defect_hz": 2.763761441926249e-09
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/arcs/mixed_high_continued_N1024/point015_g1.3559898156.npz",
+      "N": 1024,
+      "offgrid_defect_hz": 1.2376211167008933e-10
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/arcs/mixed_high_continued_N1024/point020_g1.3517354518.npz",
+      "N": 1024,
+      "offgrid_defect_hz": 7.892853037816394e-10
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/arcs/mixed_high_continued_N1024/point025_g1.3494914830.npz",
+      "N": 1024,
+      "offgrid_defect_hz": 1.0341727474383333e-10
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/arcs/mixed_high_continued_N1024/point030_g1.3565376345.npz",
+      "N": 1024,
+      "offgrid_defect_hz": 1.9012569296705806e-12
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/arcs/mixed_high_continued_N1024/point035_g1.3497218296.npz",
+      "N": 1024,
+      "offgrid_defect_hz": 6.494804694057166e-12
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/arcs/mixed_high_continued_N1024/point040_g1.3538354791.npz",
+      "N": 1024,
+      "offgrid_defect_hz": 2.4615587346232815e-09
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/arcs/tonic_low_continued_N1024/point000_g1.3831792236.npz",
+      "N": 1024,
+      "offgrid_defect_hz": 1.0758061108617767e-10
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/arcs/tonic_low_continued_N1024/point005_g1.3812241476.npz",
+      "N": 1024,
+      "offgrid_defect_hz": 1.7069679003611782e-12
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/arcs/tonic_low_continued_N1024/point010_g1.3616341308.npz",
+      "N": 1024,
+      "offgrid_defect_hz": 3.191891195797325e-12
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/arcs/tonic_low_continued_N1024/point015_g1.3529907266.npz",
+      "N": 1024,
+      "offgrid_defect_hz": 1.7206791547152989e-09
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/arcs/tonic_low_continued_N1024/point020_g1.3539174305.npz",
+      "N": 1024,
+      "offgrid_defect_hz": 4.773959005888173e-12
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/arcs/tonic_low_continued_N1024/point025_g1.3508300986.npz",
+      "N": 1024,
+      "offgrid_defect_hz": 3.064076770087354e-09
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/arcs/tonic_low_continued_N1024/point030_g1.3528169764.npz",
+      "N": 1024,
+      "offgrid_defect_hz": 2.1105409087063265e-09
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/arcs/tonic_low_continued_N1024/point035_g1.3557096618.npz",
+      "N": 1024,
+      "offgrid_defect_hz": 4.3328673982045984e-09
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/arcs/tonic_low_continued_N1024/point040_g1.3494895792.npz",
+      "N": 1024,
+      "offgrid_defect_hz": 1.1574075031717257e-11
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/arcs/tonic_low_continued_N1024/point045_g1.3485363956.npz",
+      "N": 1024,
+      "offgrid_defect_hz": 1.6736612096224235e-11
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/arcs/tonic_low_continued_N1024/point050_g1.3557510449.npz",
+      "N": 1024,
+      "offgrid_defect_hz": 6.061817714453355e-11
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/arcs/tonic_low_continued_N1024/point055_g1.3527236651.npz",
+      "N": 1024,
+      "offgrid_defect_hz": 2.7672308888782027e-11
+    }
+  ],
+  "period_doubled_children": [
+    {
+      "name": "mixed_lower_period2",
+      "J": 1.349365040754781,
+      "period_ms": 375.07395952612654,
+      "stable": true,
+      "max_transverse": 0.9994704208133719,
+      "half_period_difference": 0.00421304287003456
+    },
+    {
+      "name": "mixed_period2",
+      "J": 1.3885678442858485,
+      "period_ms": 365.6324473030523,
+      "stable": false,
+      "max_transverse": 1.0931405794835278,
+      "half_period_difference": 0.004528754089625278
+    },
+    {
+      "name": "tonic_lower_period2",
+      "J": 1.3773791848207333,
+      "period_ms": 303.2858786154707,
+      "stable": true,
+      "max_transverse": 0.999294929494399,
+      "half_period_difference": 0.004438362799556717
+    }
+  ],
+  "all_period_doubled_points": [
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/periodic/mixed_lower_period2/amp0.12_N4096.npz",
+      "amplitude": 0.12,
+      "max_transverse": 0.9978816728941508,
+      "orbit_tangent_defect": 5.93435785083154e-09
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/periodic/mixed_lower_period2/amp0.06_N4096.npz",
+      "amplitude": 0.06,
+      "max_transverse": 0.9994704208133719,
+      "orbit_tangent_defect": 5.810245085290893e-09
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/periodic/mixed_lower_period2/amp0.03_N4096.npz",
+      "amplitude": 0.03,
+      "max_transverse": 0.9998676219702011,
+      "orbit_tangent_defect": 5.943752898398764e-09
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/periodic/mixed_period2/amp0.12_N4096.npz",
+      "amplitude": 0.12,
+      "max_transverse": 1.4709311711254667,
+      "orbit_tangent_defect": 5.959560086128929e-09
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/periodic/mixed_period2/amp0.06_N4096.npz",
+      "amplitude": 0.06,
+      "max_transverse": 1.0931405794835278,
+      "orbit_tangent_defect": 6.662224849849041e-09
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/periodic/mixed_period2/amp0.24_N4096.npz",
+      "amplitude": 0.24,
+      "max_transverse": 8.822241033790268,
+      "orbit_tangent_defect": 4.5327168615766995e-07
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/periodic/mixed_period2/amp0.03_N4096.npz",
+      "amplitude": 0.03,
+      "max_transverse": 1.0220751311061096,
+      "orbit_tangent_defect": 1.6088019564372015e-08
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/periodic/tonic_lower_period2/amp0.12_N4096.npz",
+      "amplitude": 0.12,
+      "max_transverse": 0.997179605706464,
+      "orbit_tangent_defect": 1.1670430296467776e-08
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/periodic/tonic_lower_period2/amp0.06_N4096.npz",
+      "amplitude": 0.06,
+      "max_transverse": 0.999294929494399,
+      "orbit_tangent_defect": 1.2074488299582752e-08
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/periodic/tonic_lower_period2/amp0.03_N4096.npz",
+      "amplitude": 0.03,
+      "max_transverse": 0.9998237329637372,
+      "orbit_tangent_defect": 1.1582539915910656e-08
+    }
+  ],
+  "step_refinement": [
+    {
+      "name": "after_burst_fold",
+      "max_mean_resolution_difference_hz": 0.0022336927981427834,
+      "period_resolution_difference_ms": 6.71781002949956e-05
+    },
+    {
+      "name": "after_mixed_flip",
+      "max_mean_resolution_difference_hz": 0.0011039973257425117,
+      "period_resolution_difference_ms": 8.605855913401683e-05
+    }
+  ],
+  "limits": [
+    "Critical parameter precision describes this frozen deterministic closure, not biological parameter accuracy.",
+    "Poincare spectra on strongly expanding unstable arcs can be ill-conditioned; no fine subdominant Floquet claims are inferred there.",
+    "The full global inventory of secondary bifurcations and remote attractors is not exhausted."
+  ]
+}

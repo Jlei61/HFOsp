@@ -1,0 +1,243 @@
+{
+  "status": "WINDOW_COMPLETE_PENDING_USER_REVIEW",
+  "start": "2026-09-13T01:40:00+08:00",
+  "deadline": "2026-09-13T09:40:00+08:00",
+  "timezone": "Asia/Shanghai",
+  "scope": "Historical manual dual-core native Z/M SNN Fig5",
+  "goal_thread": "01a079ba-3f34-77e0-96ed-6af238cf0cb0",
+  "inherited_batches": [
+    "reset_state_diagnosis_20260911",
+    "m_on_z_kinetics_20260912",
+    "m_parameter_modes_fig5_20260913"
+  ],
+  "stop_policy": "At deadline no additional exploration dispatch; retain checkpoints and let already authorized inherited jobs finish. New launched finite diagnostic jobs also retain their full finite endpoints.",
+  "new_state_pilot_max_jobs": 3,
+  "new_state_pilot_horizon_after_release_s": 90,
+  "agent_review_required": true,
+  "human_review_required": true,
+  "additional_parameter_sensitivity": {
+    "path": "results/topic4_sef_hfo/fig5_m_overnight_exploration_20260913/high_state_M_gain_probe",
+    "max_new_runs": 2,
+    "duration_each_s": 5,
+    "scope": "eta_M parameter step at common high state; not constant-parameter native-cycle proof",
+    "supervisor_pid": 304004,
+    "backend": "CUDA_ordered_incoming_device0",
+    "resume_s": 78.0,
+    "completed": true,
+    "live_pid": null,
+    "result": "/data/hfosp/topic4_sef_hfo/fig5_m_overnight_exploration_20260913/high_state_M_gain_probe/analysis.json"
+  },
+  "early_Z_refill_branches": {
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_m_overnight_exploration_20260913/early_z_refill_branches",
+    "max_branches": 2,
+    "supervisor_pid": 469136,
+    "parameters": {
+      "eta_M": 0.005,
+      "tau_M_s": 1.0
+    },
+    "scope": "External early Z refill from same continuous source; shared prefixes not extra F samples",
+    "max_post_release_s": 60,
+    "trigger": "2s after first confirmed high if not recovered; next10ms boundary",
+    "parents": "Exact cached10s source checkpoints; before any high"
+  },
+  "Z_scan_controller_after_exact_source_repair": 4186101,
+  "ongoing_Fig5_previews": {
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_m_overnight_exploration_20260913/ongoing_fig5_prefixes",
+    "watcher_pid": 211022,
+    "scope": "Read-only figures from exact committed prefixes; long simulations continue; no fake completion and no extra F samples",
+    "plotter_change_detection": "Reload plotter and re-render committed stage on source change"
+  },
+  "scatter_lookup_verification": {
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_m_overnight_exploration_20260913/scatter_lookup_qa",
+    "pid": 101711,
+    "scope": "Numerical/performance QA only; original physical workers unchanged;200ms shared high-state full-state equality required"
+  },
+  "M_scan_lookup_controller": {
+    "pid": 525461,
+    "validation": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_m_overnight_exploration_20260913/scatter_lookup_qa/full_network_qa.json",
+    "adoption": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_m_overnight_exploration_20260913/scatter_lookup_qa/adoption.json",
+    "scope": "Lookup only for future unstarted M jobs; original40 params/seeds/endpoints unchanged",
+    "CUDA_existing_job_adoption": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_m_overnight_exploration_20260913/cuda_ordered_scatter_qa/M_grid_adoption.json"
+  },
+  "dense_lookup_early_Z_replica": {
+    "pid": 276790,
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_m_overnight_exploration_20260913/early_Z_lookup_dense",
+    "source": "early_z_refill_s9108401",
+    "max_replicas": 1,
+    "new_biological_conditions": 0,
+    "new_F_samples": 0,
+    "source_branch_continues": true,
+    "observation_interval_s": 0.5,
+    "backend": "CUDA_ordered_incoming",
+    "device": 1,
+    "resume_s": 11.5,
+    "completed": true,
+    "live_pid": null,
+    "end_s": 37.5
+  },
+  "additional_preview_sources": [
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_m_overnight_exploration_20260913/early_Z_lookup_dense_figures"
+  ],
+  "cuda_ordered_scatter_numerical_QA": {
+    "pid": 264838,
+    "path": "/data/hfosp/topic4_sef_hfo/fig5_m_overnight_exploration_20260913/cuda_ordered_scatter_qa",
+    "device": 1,
+    "scope": "Newly verified idle GPU; bounded numeric acceleration only, no biological parameter changes; synthetic then full SNN200ms bitwise equality required.",
+    "synthetic_status": "PASS",
+    "full_SNN_status": "PASS",
+    "physical_workers_modified": false,
+    "max_full_SNN_verifications": 1,
+    "retry_reason": "Prior foreground process receivedSIGTERM before any observations; same numerical condition restarted as dedicated background process.",
+    "completed": true,
+    "live_pid": null
+  },
+  "M_grid_existing_CUDA_job": {
+    "name": "e0_t0_s9108401",
+    "pid": 337611,
+    "device": 0,
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/m_parameter_modes_fig5_20260913/runs/e0_t0_s9108401",
+    "resume_s": 10,
+    "new_samples": 0
+  },
+  "first_observed_1_to_5": {
+    "source": "early_z_refill_s9108401",
+    "eta_M": 0.005,
+    "tau_M_s": 1.0,
+    "first_onset_s": 10.59,
+    "Z_refill_s": [
+      12.8,
+      13.8
+    ],
+    "recovery_confirmation_s": 15.2,
+    "second_onset_s": 26.89,
+    "second_confirmation_s": 27.09,
+    "M_reset": false,
+    "scientific_full_acceptance": false
+  },
+  "high_resolution_readout_replay": {
+    "pid": 417978,
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_m_overnight_exploration_20260913/early_energy_high_resolution_replay",
+    "device": 1,
+    "horizon_s": 12,
+    "max_measurement_replays": 1,
+    "new_biological_conditions": 0,
+    "new_F_samples": 0,
+    "purpose": "Resolve demonstrated1ms spike-count aliasing for the actual fixed E2 window; entire original followup remains intact.",
+    "analysis_waiter_pid": 434716,
+    "completed": true,
+    "live_pid": null,
+    "analysis_waiter_completed": true,
+    "result": "/data/hfosp/topic4_sef_hfo/fig5_m_overnight_exploration_20260913/early_energy_high_resolution_replay/energy_comparison.json"
+  },
+  "M_grid_existing_CUDA_job_seed2": {
+    "name": "e0_t0_s9108402",
+    "pid": 421172,
+    "device": 1,
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/m_parameter_modes_fig5_20260913/runs/e0_t0_s9108402",
+    "resume_s": 10.0,
+    "new_samples": 0,
+    "adoption": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_m_overnight_exploration_20260913/cuda_ordered_scatter_qa/M_grid_seed2_adoption.json"
+  },
+  "early_refill_seed2_CUDA": {
+    "pid": 469133,
+    "controller_pid": 469136,
+    "device": 0,
+    "resume_s": 20,
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_m_overnight_exploration_20260913/early_z_refill_branches/runs/early_z_refill_s9108402",
+    "new_samples": 0,
+    "adoption": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_m_overnight_exploration_20260913/cuda_ordered_scatter_qa/early_refill_seed2_adoption.json",
+    "completed": true,
+    "live_pid": null,
+    "end_s": 39.0
+  },
+  "M_grid_additional_CUDA_jobs": {
+    "adoption": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_m_overnight_exploration_20260913/cuda_ordered_scatter_qa/M_grid_second_pair_adoption.json",
+    "jobs": [
+      {
+        "name": "e2_t1_s9108401",
+        "pid": 478247,
+        "device": 0,
+        "resume_s": 70.0
+      },
+      {
+        "name": "e0_t3_s9108402",
+        "pid": 478471,
+        "device": 1,
+        "resume_s": 50.0
+      }
+    ],
+    "new_samples": 0
+  },
+  "full_fast90_completed": {
+    "end_s": 166.5,
+    "recurrence": false,
+    "conditional_short_subarms_dispatched": false,
+    "analysis": "/data/hfosp/topic4_sef_hfo/fig5_m_overnight_exploration_20260913/reset_matched_90s/analysis.json"
+  },
+  "M_grid_weak_tau2_CUDA_jobs": {
+    "adoption": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_m_overnight_exploration_20260913/cuda_ordered_scatter_qa/M_grid_weak_tau2_adoption.json",
+    "jobs": [
+      {
+        "name": "e0_t1_s9108401",
+        "pid": 525449,
+        "device": 0,
+        "resume_s": 10.0
+      },
+      {
+        "name": "e0_t1_s9108402",
+        "pid": 525450,
+        "device": 1,
+        "resume_s": 10.0
+      }
+    ],
+    "new_samples": 0
+  },
+  "high_resolution_readout_replay_seed2": {
+    "pid": 526133,
+    "analysis_waiter_pid": 571756,
+    "path": "/data/hfosp/topic4_sef_hfo/fig5_m_overnight_exploration_20260913/early_energy_high_resolution_replay_seed9108402",
+    "device": 1,
+    "horizon_s": 15,
+    "max_measurement_replays_this_seed": 1,
+    "new_biological_conditions": 0,
+    "new_F_samples": 0,
+    "reason": "Second planned noise seed has actual five-state recurrence and different contact concordance. Apply the same native temporal-resolution audit to both complete figures; do not select only the favorable spatial correlation.",
+    "analysis_reload": "Reload latest figure producer after waiting; raw replay PID unchanged.",
+    "completed": true,
+    "live_pid": null,
+    "analysis_waiter_completed": true,
+    "result": "results/topic4_sef_hfo/fig5_m_overnight_exploration_20260913/early_energy_high_resolution_replay_seed9108402/energy_comparison.json"
+  },
+  "second_observed_1_to_5": {
+    "seed": 9108402,
+    "first_onset_s": 13.74,
+    "Z_refill_s": [
+      15.95,
+      16.95
+    ],
+    "recovery_confirmation_s": 18.35,
+    "second_onset_s": 28.47,
+    "end_s": 39.0,
+    "M_reset": false,
+    "full_scientific_acceptance": false
+  },
+  "late_Z_refill_postprocessing": {
+    "pid": 705920,
+    "started": "2026-09-13T09:28:07.791801+08:00",
+    "path": "/data/hfosp/topic4_sef_hfo/fig5_m_overnight_exploration_20260913/late_Z_refill_fig5",
+    "scope": "One read-only figure from next committed return prefix of original M-grid seed1; no added simulation or F sample.",
+    "may_finish_after_window": true,
+    "replaced_pid": 702872,
+    "restart_reason": "Fixed source process identity check to use actual --job filename, and reread checkpoint only when it changes. Original SNN PID337611 remained live and untouched.",
+    "completed": true,
+    "live_pid": null,
+    "result": "/data/hfosp/topic4_sef_hfo/fig5_m_overnight_exploration_20260913/late_Z_refill_fig5/latest.json"
+  },
+  "closed_at": "2026-09-13T09:40:56.474615+08:00",
+  "new_exploration_dispatch_closed": true,
+  "retained_execution": "Original M40, Z147 and already-started finite controls retain their original endpoints. No further exploration conditions.",
+  "delivery_check": "Final visual review of the saved80s late-refill figure and its zooms; no new simulation.",
+  "delivery_completed_at": "2026-09-13T09:45:58.954068+08:00",
+  "model_frozen": false,
+  "scientific_acceptance": false
+}

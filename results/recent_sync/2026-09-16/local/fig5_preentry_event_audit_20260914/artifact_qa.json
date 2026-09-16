@@ -1,0 +1,84 @@
+{
+  "status": "PASS",
+  "runs": [
+    {
+      "name": "eta0.0005_s9108401",
+      "status": "PASS",
+      "first_onset_s": 9.870000000000001,
+      "confirmation_s": 10.07,
+      "duration_s": 12.5,
+      "continuous_chunks": 25,
+      "raw_to_1ms_spatial_and_population_conservation": true,
+      "same_physical_topology": true,
+      "M_on": true,
+      "no_reset": true,
+      "first_second_spikes_sha256": "3112278eb9e09fa21be9c4cb69a097811547efea13ff48fa2cc43d7c2c394182"
+    },
+    {
+      "name": "eta0.0005_s9108402",
+      "status": "PASS",
+      "first_onset_s": 9.870000000000001,
+      "confirmation_s": 10.07,
+      "duration_s": 12.5,
+      "continuous_chunks": 25,
+      "raw_to_1ms_spatial_and_population_conservation": true,
+      "same_physical_topology": true,
+      "M_on": true,
+      "no_reset": true,
+      "first_second_spikes_sha256": "f4bfe4a612c505830455dcab2152e94722daca9185ce58409727fdf419ebbdf1"
+    }
+  ],
+  "figures": [
+    {
+      "name": "eta0.0005_s9108401",
+      "status": "PASS_DATA_CHECKS",
+      "snapshot_identity": true,
+      "early_power_semantics_unchanged": true,
+      "localization": true,
+      "both_cores_active_in_snapshot": false,
+      "png_sha256": "7ff9a8052c3f86e95bf36dc6f73785ea46733c9fb9d7cea9af313e0ea0c91ea8",
+      "pdf_sha256": "828fe5b28134f73a87dc76f321613be094824425f9a6de8114ca54e072fbb368"
+    },
+    {
+      "name": "eta0.0005_s9108402",
+      "status": "PASS_DATA_CHECKS",
+      "snapshot_identity": true,
+      "early_power_semantics_unchanged": true,
+      "localization": true,
+      "both_cores_active_in_snapshot": false,
+      "png_sha256": "316f01b49286f7c55ec7de44a52503e6bf1f31e8f78942b1a51351db136206f8",
+      "pdf_sha256": "661fe206444195214282c5023f4f7279463a4ec7eb83e4b802f4162950047df1"
+    },
+    {
+      "name": "eta0.001_s9108401",
+      "status": "PASS_DATA_CHECKS",
+      "snapshot_identity": true,
+      "early_power_semantics_unchanged": true,
+      "localization": true,
+      "both_cores_active_in_snapshot": true,
+      "png_sha256": "3875de2acf4dbd16b8bf840dd74a6c101072ccd170287c2a43a9c6779868187c",
+      "pdf_sha256": "858f1b7e3cf051b20a92235495f292b5293234a8530b46b39c7afe51f758d292"
+    },
+    {
+      "name": "eta0.001_s9108402",
+      "status": "PASS_DATA_CHECKS",
+      "snapshot_identity": true,
+      "early_power_semantics_unchanged": true,
+      "localization": false,
+      "both_cores_active_in_snapshot": false,
+      "png_sha256": "e221130c767df7abca3263e423cc9294779310929486cb9d33c12369db97ad74",
+      "pdf_sha256": "c5638b60968b8f946be5ea63c85d2010b05cfcb5949294f7d4f07af1ddc58fd2"
+    }
+  ],
+  "original_physical_sources_unchanged": true,
+  "distinct_noise_realizations": true,
+  "new_runs_completed": 2,
+  "new_runs_failed": 0,
+  "tests": "Native observation conservation, continuous coverage, exact high-state endpoint, source and snapshot identities.",
+  "human_review": "PENDING",
+  "agent_visual_review": "PASS_LAYOUT_REVIEW",
+  "diagnostic_figures": {
+    "preentry_event_audit.png": "de5ebc8043ec8014218aca08aa463ed17133df6bef4ee834c2d5c0195371eb6e",
+    "core_persistence_audit.png": "e15e0ce27efd5e9ae2f420eb8c791e35cc75048b4774f36283de8b39fabe926e"
+  }
+}

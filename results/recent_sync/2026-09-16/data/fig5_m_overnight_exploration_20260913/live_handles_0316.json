@@ -1,0 +1,105 @@
+{
+  "time": "2026-09-13T03:17:24.248757+08:00",
+  "handles": {
+    "4073736": {
+      "status": "sleeping",
+      "create_time": 1789235131.11,
+      "cpu_seconds": 1.29,
+      "rss_GiB": 0.014759063720703125,
+      "command": [
+        "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+        "-u",
+        "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_fig5_overnight_exploration.py",
+        "supervise"
+      ]
+    },
+    "4073743": {
+      "status": "running",
+      "create_time": 1789235132.29,
+      "cpu_seconds": 5507.530000000001,
+      "rss_GiB": 2.3154258728027344,
+      "command": [
+        "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+        "-u",
+        "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_fig5_overnight_exploration.py",
+        "worker",
+        "--name",
+        "all_fast_90s"
+      ]
+    },
+    "4084835": {
+      "status": "sleeping",
+      "create_time": 1789235959.55,
+      "cpu_seconds": 28.349999999999998,
+      "rss_GiB": 0.02001190185546875,
+      "command": [
+        "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+        "-u",
+        "/home/honglab/leijiaxin/HFOsp/scripts/supervise_topic4_m_modes_overnight.py"
+      ]
+    },
+    "4186101": {
+      "status": "sleeping",
+      "create_time": 1789238863.5,
+      "cpu_seconds": 4.5600000000000005,
+      "rss_GiB": 0.11523056030273438,
+      "command": [
+        "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+        "-u",
+        "/home/honglab/leijiaxin/HFOsp/scripts/supervise_topic4_z_kinetics_resume.py"
+      ]
+    },
+    "28233": {
+      "status": "sleeping",
+      "create_time": 1789239876.83,
+      "cpu_seconds": 10.75,
+      "rss_GiB": 0.12655258178710938,
+      "command": [
+        "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+        "-u",
+        "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_early_z_refill_branches.py",
+        "supervise"
+      ]
+    },
+    "30171": {
+      "status": "running",
+      "create_time": 1789239929.6,
+      "cpu_seconds": 713.43,
+      "rss_GiB": 2.290607452392578,
+      "command": [
+        "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+        "-u",
+        "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_early_z_refill_branches.py",
+        "worker",
+        "--name",
+        "early_z_refill_s9108401"
+      ]
+    },
+    "31978": {
+      "status": "running",
+      "create_time": 1789239979.53,
+      "cpu_seconds": 663.1800000000001,
+      "rss_GiB": 2.291950225830078,
+      "command": [
+        "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+        "-u",
+        "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_early_z_refill_branches.py",
+        "worker",
+        "--name",
+        "early_z_refill_s9108402"
+      ]
+    },
+    "4123227": {
+      "status": "running",
+      "create_time": 1789237051.99,
+      "cpu_seconds": 3582.58,
+      "rss_GiB": 2.5686378479003906,
+      "command": [
+        "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+        "-u",
+        "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_high_state_M_gain_probe.py",
+        "supervise"
+      ]
+    }
+  }
+}

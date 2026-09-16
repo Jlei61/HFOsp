@@ -1,0 +1,700 @@
+{
+  "schema": "topic4.local_geometry_ee_axis_reference.v1",
+  "status": "REFERENCE_FIXED_FOR_LOCAL_SEARCH",
+  "reference_id": "geometry_ee_axis_reference_v1",
+  "source_candidate_id": "bridge_circle_out125_xminus075",
+  "authorization": "2026-09-14 user: fix other parameters at the previously best available patient-pattern working point",
+  "scope": "Freeze a search reference, not acceptance of complete patient TA/TB recovery. No new simulation is dispatched.",
+  "physical_candidate": {
+    "centers_mm": [
+      [
+        3.4492143200000003,
+        12.12890135
+      ],
+      [
+        16.47920304,
+        3.96551153
+      ]
+    ],
+    "radii_mm": [
+      1.7525782905619196,
+      1.7525782905619196
+    ],
+    "parameters": {
+      "EE_same_core_scale": 0.85,
+      "EE_core_to_out_scale": 1.25,
+      "EE_out_to_out_scale": 1.0,
+      "EI_same_core_scale": 1.0,
+      "IE_same_core_scale": 1.0,
+      "II_same_core_scale": 1.0,
+      "depth_A_scale": 1.0,
+      "depth_B_scale": 1.0,
+      "radius_A_mm": 1.7525782905619196,
+      "radius_B_mm": 1.7525782905619196,
+      "EE_core_to_out_degree_scale": 1.0,
+      "EE_kernel_perp_scale": 1.5,
+      "EE_kernel_parallel_scale": 1.0,
+      "EE_angle_offset_deg": 0.0
+    },
+    "shape": {},
+    "outgoing": {},
+    "core_mean_rate_scale": 0.95,
+    "core_ou_correlation": 0.0
+  },
+  "future_allowed_candidate_paths": [
+    "/centers_mm/0/0",
+    "/centers_mm/0/1",
+    "/centers_mm/1/0",
+    "/centers_mm/1/1",
+    "/parameters/EE_core_to_out_scale",
+    "/parameters/EE_angle_offset_deg"
+  ],
+  "future_ee_strength_scope": "E in either core -> E outside both cores; same-core EE remains 0.85; not a global EE multiplier",
+  "freeze_rule": "All other physical fields, resolved engine parameters, threshold latent law, input law and readout remain fixed. Metadata do not define physics.",
+  "search_bounds": null,
+  "search_dispatch_enabled": false,
+  "next_search_objective_status": "not implemented by this reference freeze",
+  "resolved_runtime": "/data/hfosp/topic4_sef_hfo/local_geometry_ee_axis_reference_20260914/resolved_runtime.json",
+  "override_precedence": [
+    "resolved engine parameters",
+    "physical_candidate threshold/geometry and pathway/kernel operations",
+    "input_reference",
+    "execution_settings"
+  ],
+  "legacy_fields_not_active": {
+    "engine_core_r": "1.5 mm is inherited metadata; actual two radii are physical_candidate.parameters.radius_A_mm and radius_B_mm",
+    "engine_AR": "2 is the reference kernel ratio; actual ratio is 4/3 after fixed transverse scaling 1.5",
+    "parent_state": "Inherited parent slow-I configuration is disabled by current executor; never enable it when consuming this freeze",
+    "params_rho_EE": "Actual global EE graph uses the recorded kernel and corrected cache, not Params.rho_EE alone"
+  },
+  "threshold": {
+    "formula": "Vth = max(11, 18 - depth_k * max(18 - Vraw_i, 0)); overlap uses minimum",
+    "latent_mean_mV": 17.5,
+    "latent_std_mV": 1.0,
+    "quantile_seed": 20260806,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "raised_E_allowed": false,
+    "note": "Freeze latent per-neuron law; changing centers changes membership and realized total lowering. Equal-to-background core cells are allowed."
+  },
+  "actual_EE_kernel": {
+    "l_par": 0.5374011537017762,
+    "l_perp": 0.40305086527633205,
+    "theta_deg": -22.80538396505847,
+    "theta_rad": -0.3980290373717898,
+    "reference_theta_deg": -22.80538396505847,
+    "reference_ar": 2.0,
+    "perp_scale": 1.5,
+    "parallel_scale": 1.0,
+    "angle_offset_deg": 0.0,
+    "is_reference": false
+  },
+  "input_reference": {
+    "mode": "core_poisson_outside_expected",
+    "n_stochastic": 1484,
+    "n_deterministic": 38516,
+    "outside": "exact expected arrivals nu_signal*dt",
+    "spatial_ou": "off",
+    "slow_I_state": "off",
+    "ZM": "off",
+    "kick": "off",
+    "core_ou_correlation": 0.0,
+    "ou_loading": "sqrt(rho) on core E; zero elsewhere",
+    "core_OU_mixture": {
+      "rho": 0.0,
+      "common_loading": 0.0,
+      "independent_loading": 1.0,
+      "stationary_std_per_ms": 0.028578838324886478,
+      "discrete_a": 0.9993335555061812,
+      "discrete_b": 0.0010432038739186596,
+      "independent_seed_namespace": [
+        847401,
+        20260911,
+        201
+      ],
+      "initial_state": [
+        0.0,
+        0.0
+      ],
+      "mean_scale": 0.95,
+      "law": "Same marginal OU law, different between-core correlation, before nonnegative-rate clipping.",
+      "no_input": "No patient labels, detections, core activation times or routes are consumed."
+    },
+    "conditional_rate": "max(scale*nu_signal + sqrt(rho)*xi_global + sqrt(1-rho)*xi_core[k],0); intermediate clipping audited",
+    "core_mean_rate_scale": 0.95,
+    "baseline_signal_per_ms": 1.3174634224662056,
+    "core_mean_signal_per_ms": 1.2515902513428954,
+    "core_constant_offset_per_ms": -0.06587317112331034,
+    "outside_mean_signal_per_ms": 1.3174634224662056,
+    "OU_sigma_n": 3.3,
+    "OU_tau_ms": 150.0,
+    "hook": "external_e_rate_drive: constant core offset and optional independent core OU",
+    "poisson": "conditional count variance equals conditional mean; this variance is not held fixed when mean changes"
+  },
+  "execution_settings": {
+    "duration_ms": 60000.0,
+    "analysis_burnin_ms": 1500.0,
+    "minimum_events_for_existing_score": 16,
+    "runaway": {
+      "es_thresh_hz": 120.0,
+      "es_dur_ms": 100.0,
+      "post_runaway_record_ms": 500.0
+    },
+    "slow": null,
+    "KICK_BOOST": 0.0,
+    "t_kick_ms": 1000000000.0,
+    "Z": false,
+    "M": false,
+    "spatial_OU": false,
+    "slow_I_state": false
+  },
+  "randomness": {
+    "reference_topology_seed": 2511,
+    "reference_dynamics_seed": 847401,
+    "existing_topology_seeds": [
+      2511,
+      2711,
+      2712
+    ],
+    "existing_dynamics_seeds": [
+      847401,
+      847402
+    ],
+    "role": "replicate identities, not fitted parameters",
+    "note": "Same topology and condition keep static arrays fixed across noise. Moving cores or changing direction changes physical arrays. Shared seed does not prove identical random innovations across conditions."
+  },
+  "observation": {
+    "contract": {
+      "version": "fixed_reference_unique_contact_observer_v2",
+      "contact_names": [
+        "SCL9",
+        "ICL11",
+        "SCL8",
+        "ICL10",
+        "SCL7",
+        "ICL9",
+        "ICL8",
+        "SCL6",
+        "ICL7",
+        "ICL6",
+        "ICL5",
+        "ICL4",
+        "ICL3",
+        "ICL2",
+        "ICL1"
+      ],
+      "dt_ms": 2.0,
+      "baseline": [
+        1.830322467864778e-24,
+        3.916838809075497e-29,
+        1.0896173620643711e-18,
+        5.918470156321451e-27,
+        3.5222520446766313e-15,
+        9.092780146080532e-33,
+        1.1556900798856777e-39,
+        7.244672797866031e-18,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "threshold": [
+        0.06383456295728693,
+        0.05756779652833954,
+        0.0630299171209337,
+        0.05205175742506989,
+        0.062342106431725886,
+        0.05372808566689509,
+        0.04400833407044413,
+        0.062223956614732776,
+        0.04583957780897634,
+        0.05813617169857025,
+        0.06584100073575974,
+        0.06809289544820787,
+        0.06932647794485093,
+        0.07098095443844797,
+        0.07194970604777337
+      ],
+      "reference_high_q995": [
+        0.6383456295728692,
+        0.5756779652833954,
+        0.630299171209337,
+        0.5205175742506989,
+        0.6234210643172271,
+        0.5372808566689509,
+        0.4400833407044413,
+        0.6222395661473277,
+        0.45839577808976334,
+        0.5813617169857025,
+        0.6584100073575974,
+        0.6809289544820787,
+        0.6932647794485093,
+        0.7098095443844797,
+        0.7194970604777337
+      ],
+      "noise_sigma_MAD": [
+        2.7136360908563196e-24,
+        5.807105218335332e-29,
+        1.6154667009966366e-18,
+        8.774723853762183e-27,
+        5.222090881437573e-15,
+        1.3480955844578996e-32,
+        1.7134261124385056e-39,
+        1.0740951890116177e-17,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "calibration_window_ms": [
+        500.0,
+        6000.0
+      ],
+      "threshold_rule": "baseline + max(6 quiet MAD sigma, 0.1 * (reference q99.5 - baseline))",
+      "minimum_detection_ms": 4.0,
+      "extension_ms": 30.0,
+      "window_ms": 250.0,
+      "channel_fraction": 0.5,
+      "burnin_ms": 500.0,
+      "maximum_centroid_mass_outside_local_detection": "reported, not filtered",
+      "reference": {
+        "worker_path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/vth_dual_core_xy_research/selection/workers/control_historical_matched_seed_2515.json",
+        "worker_sha256": "144fbc564e3556162ac823d655664b74e1596905aaa9e78b82067740c750ce99",
+        "arrays_path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/vth_dual_core_xy_research/selection/workers/control_historical_matched_seed_2515.npz",
+        "arrays_sha256": "921faf95f245ab1de2743a0d09d271278dca0733bd14d2438f506d823784cbe2",
+        "seed": 2515,
+        "reference_role": "historical matched baseline on a topology/dynamics seed outside this four-seed parameter round; not untouched patient validation"
+      }
+    },
+    "internal_contact_order": [
+      "SCL9",
+      "ICL11",
+      "SCL8",
+      "ICL10",
+      "SCL7",
+      "ICL9",
+      "ICL8",
+      "SCL6",
+      "ICL7",
+      "ICL6",
+      "ICL5",
+      "ICL4",
+      "ICL3",
+      "ICL2",
+      "ICL1"
+    ],
+    "contact_xy_mm": [
+      [
+        5.497640679895003,
+        16.197026825498998
+      ],
+      [
+        2.0,
+        5.822438458919169
+      ],
+      [
+        7.378345406714329,
+        15.215952799938329
+      ],
+      [
+        3.4623886106762756,
+        5.790023065790164
+      ],
+      [
+        8.656304623418542,
+        14.658497902855213
+      ],
+      [
+        5.1000022680145864,
+        5.367238776530522
+      ],
+      [
+        6.989911342143938,
+        5.301573151054602
+      ],
+      [
+        10.537009350237868,
+        13.677423877294546
+      ],
+      [
+        8.447697779165201,
+        4.8114535578832225
+      ],
+      [
+        10.089913610158524,
+        4.846373468665954
+      ],
+      [
+        11.5523022208348,
+        4.813958075536949
+      ],
+      [
+        13.010088657856063,
+        4.323838482365569
+      ],
+      [
+        14.899997731985414,
+        4.25817285688965
+      ],
+      [
+        16.537611389323725,
+        3.835388567630007
+      ],
+      [
+        18.0,
+        3.802973174501002
+      ]
+    ],
+    "display_order": [
+      "SCL9",
+      "SCL8",
+      "SCL7",
+      "SCL6",
+      "ICL11",
+      "ICL10",
+      "ICL9",
+      "ICL8",
+      "ICL7",
+      "ICL6",
+      "ICL5",
+      "ICL4",
+      "ICL3",
+      "ICL2",
+      "ICL1"
+    ],
+    "display_indices": [
+      0,
+      2,
+      4,
+      7,
+      1,
+      3,
+      5,
+      6,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14
+    ],
+    "primary_rule": "worker primary_eligible AND complete event window within [1500,60000] ms",
+    "future_report_groups": [
+      "patient TA/TB average rank templates",
+      "within-rod pairwise order and millisecond lag, plus SCL-minus-ICL lag",
+      "contact and joint SCL/ICL participation"
+    ],
+    "plotting": "Always show both patient templates; fixed grouped contact rows, actual millisecond axis, missing contacts retained. Model rate envelope is not patient HFO STFT.",
+    "loss": "Existing score retained only as historical selection evidence. The revised three-group search objective has not been activated."
+  },
+  "scientific_status": {
+    "complete_dual_mode_recovery": false,
+    "Fig5_ready": false,
+    "selection": "Lowest equal-run mean existing score among fully observed six-replay conditions; not a proof of globally optimal propagation",
+    "residual": "TB rod-lag medians remain approximately +35 ms versus patient +1.19 ms; local contact order and native paths remain incomplete"
+  },
+  "evidence_units": [
+    {
+      "topology_seed": 2511,
+      "dynamics_seed": 847401,
+      "trajectory_path": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/response/units/bridge_circle_out125_xminus075/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "2801963aac88eab7cfc71f017d76088745566d8804a6e0ae1e449b8bc22b9986",
+      "arrays_path": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/response/units/bridge_circle_out125_xminus075/2511_847401/workers/trajectory.npz",
+      "recorded_arrays_sha256": "18b0bd2dea3db33a96eb56438ee02c4d8b37ede84c92754639b967d27be37acd",
+      "worker_primary_before_full_window_filter": 141,
+      "analysis_primary": 139,
+      "static_identity": {
+        "positions_E_sha256": "a00b2c75b5e9a2784065c3b7bdbc66eef02eef1e077f8d7d10d3e9c45f39010e",
+        "vtheta_sha256": "862bb4d5abb0dac3146cc89d2a1be4c6a4e9a5460a6938b14a4b76e4c87f7045",
+        "vtheta_float64_sha256": "1d7ce8a7c6016b92fda40b72e0c376fc287c25dc5a5ae247835f75ff1436bc85",
+        "h_sha256": "4ca77e656eb1efd0d7321518667ea4d6aa3d32fb30809d8956f2fcf4b3868e1a",
+        "core_index_sha256": "31eb06d63438d18a22b640613a37baa78b2a8158c21b5675bdead2c921197861",
+        "ampa_topology_sha256": "6f26d29b3a812945fe4fa89d4332f59cbea6b99426ca1d9cf06e222a5549eb46",
+        "ampa_values_sha256": "14a337b2dd9ace72af407bc984fb29fc5267e949c338761e18faef0854c3fd67",
+        "gaba_topology_sha256": "e8a90e54178aa8de7d0ea30e5995d1d4c920b738e4320cc48c5e81db0da4f38d",
+        "gaba_values_sha256": "d5dc8cebeb752e4e464a3945fb595c5996521635eb40c0a6fd42c844d6bf3a6a"
+      },
+      "network_cache": {
+        "hit": true,
+        "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/substrate_autapse_correction/network_cache/f39d1409a4cfdab1ce9fecbdcfaf832c12e00523ee730bb92c1a404b7d1b5649.pkl",
+        "sha256": "5d5b14221d9ad8fb82346699fbaa8ef2ee64b508f2dc6da403dc1da5595b2a2c",
+        "sampler": "positive_weight_no_autapse_v2"
+      },
+      "actual_duration_ms": 60000
+    },
+    {
+      "topology_seed": 2511,
+      "dynamics_seed": 847402,
+      "trajectory_path": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/response/units/bridge_circle_out125_xminus075/2511_847402/workers/trajectory.json",
+      "trajectory_sha256": "9e4468732668f564bbd4ad5ce41914be9fcf07b5ce297060619376752fdf9207",
+      "arrays_path": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/response/units/bridge_circle_out125_xminus075/2511_847402/workers/trajectory.npz",
+      "recorded_arrays_sha256": "4705eed9f73dc45cd7e0b41eff764fbbc26812484e86899aa03ee6df259f9d52",
+      "worker_primary_before_full_window_filter": 147,
+      "analysis_primary": 144,
+      "static_identity": {
+        "positions_E_sha256": "a00b2c75b5e9a2784065c3b7bdbc66eef02eef1e077f8d7d10d3e9c45f39010e",
+        "vtheta_sha256": "862bb4d5abb0dac3146cc89d2a1be4c6a4e9a5460a6938b14a4b76e4c87f7045",
+        "vtheta_float64_sha256": "1d7ce8a7c6016b92fda40b72e0c376fc287c25dc5a5ae247835f75ff1436bc85",
+        "h_sha256": "4ca77e656eb1efd0d7321518667ea4d6aa3d32fb30809d8956f2fcf4b3868e1a",
+        "core_index_sha256": "31eb06d63438d18a22b640613a37baa78b2a8158c21b5675bdead2c921197861",
+        "ampa_topology_sha256": "6f26d29b3a812945fe4fa89d4332f59cbea6b99426ca1d9cf06e222a5549eb46",
+        "ampa_values_sha256": "14a337b2dd9ace72af407bc984fb29fc5267e949c338761e18faef0854c3fd67",
+        "gaba_topology_sha256": "e8a90e54178aa8de7d0ea30e5995d1d4c920b738e4320cc48c5e81db0da4f38d",
+        "gaba_values_sha256": "d5dc8cebeb752e4e464a3945fb595c5996521635eb40c0a6fd42c844d6bf3a6a"
+      },
+      "network_cache": {
+        "hit": true,
+        "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/substrate_autapse_correction/network_cache/f39d1409a4cfdab1ce9fecbdcfaf832c12e00523ee730bb92c1a404b7d1b5649.pkl",
+        "sha256": "5d5b14221d9ad8fb82346699fbaa8ef2ee64b508f2dc6da403dc1da5595b2a2c",
+        "sampler": "positive_weight_no_autapse_v2"
+      },
+      "actual_duration_ms": 60000
+    },
+    {
+      "topology_seed": 2711,
+      "dynamics_seed": 847401,
+      "trajectory_path": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/response/units/bridge_circle_out125_xminus075/2711_847401/workers/trajectory.json",
+      "trajectory_sha256": "e586fa73cbbb5b899952203af1d0c1b9eba86968e7659d360bad981d027170eb",
+      "arrays_path": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/response/units/bridge_circle_out125_xminus075/2711_847401/workers/trajectory.npz",
+      "recorded_arrays_sha256": "9d59ac9e3b8d30cfe47d0f0208f6e18a3521be9af5cb96d673fe3b6654cf3115",
+      "worker_primary_before_full_window_filter": 144,
+      "analysis_primary": 144,
+      "static_identity": {
+        "positions_E_sha256": "fcee1857047d91554ece5b5ce5013da0258c0ba3be6709516bfda0c3f2c18005",
+        "vtheta_sha256": "ed1002485ad5f74bda48b11de4068c633a0c136e2d8569a61483646f0f32ece3",
+        "vtheta_float64_sha256": "45f2c0b7d16104c707938af705c7cfb51b41fa6ca936491b23f73f933762e343",
+        "h_sha256": "6ad613743c3062af78fca9acd7ad118921f6d2704833c17a19c45c0e0d7e17e5",
+        "core_index_sha256": "0dc7ca9dddeb0fe85995969b264a0beedd84114185151b465a4f8a6376bec644",
+        "ampa_topology_sha256": "647517c03b0c2c4d24172a4f8a62be0fdb68bb5e84706613ea2f9494f5d46919",
+        "ampa_values_sha256": "5dddd9b651f33c3d9232e23da1fd7365a6160aef94ecfb743486d60442bbf166",
+        "gaba_topology_sha256": "283406799a2566b49e0f5e3271a3519b63d90ad2f763a1e4fe4f91713334e64c",
+        "gaba_values_sha256": "fc00c9f7488ee2e37fa05c0bd3fad44f6ffbf1fa2a323aefee454e4dc61b03f7"
+      },
+      "network_cache": {
+        "hit": true,
+        "path": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/confirmation/network_cache/608f95ec79775bc49c8eb3ff7c8fcf9cffb1caf0c77b52c28ccec3ce111dac1f.pkl",
+        "sha256": "6d80bc9f3c88e8745c0e6c6e599e9e8ab538dc7afd211643236a4f36f164dfbb",
+        "sampler": "positive_weight_no_autapse_v2"
+      },
+      "actual_duration_ms": 60000
+    },
+    {
+      "topology_seed": 2711,
+      "dynamics_seed": 847402,
+      "trajectory_path": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/response/units/bridge_circle_out125_xminus075/2711_847402/workers/trajectory.json",
+      "trajectory_sha256": "eca9f6d45c64cb5fc08f7ff668d82b00cb32577798e674ed293e3f1576eb6c38",
+      "arrays_path": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/response/units/bridge_circle_out125_xminus075/2711_847402/workers/trajectory.npz",
+      "recorded_arrays_sha256": "6731d503f7db9679a6c96958c1d4aa259156ad03ee63873f35adb07561d861e2",
+      "worker_primary_before_full_window_filter": 161,
+      "analysis_primary": 158,
+      "static_identity": {
+        "positions_E_sha256": "fcee1857047d91554ece5b5ce5013da0258c0ba3be6709516bfda0c3f2c18005",
+        "vtheta_sha256": "ed1002485ad5f74bda48b11de4068c633a0c136e2d8569a61483646f0f32ece3",
+        "vtheta_float64_sha256": "45f2c0b7d16104c707938af705c7cfb51b41fa6ca936491b23f73f933762e343",
+        "h_sha256": "6ad613743c3062af78fca9acd7ad118921f6d2704833c17a19c45c0e0d7e17e5",
+        "core_index_sha256": "0dc7ca9dddeb0fe85995969b264a0beedd84114185151b465a4f8a6376bec644",
+        "ampa_topology_sha256": "647517c03b0c2c4d24172a4f8a62be0fdb68bb5e84706613ea2f9494f5d46919",
+        "ampa_values_sha256": "5dddd9b651f33c3d9232e23da1fd7365a6160aef94ecfb743486d60442bbf166",
+        "gaba_topology_sha256": "283406799a2566b49e0f5e3271a3519b63d90ad2f763a1e4fe4f91713334e64c",
+        "gaba_values_sha256": "fc00c9f7488ee2e37fa05c0bd3fad44f6ffbf1fa2a323aefee454e4dc61b03f7"
+      },
+      "network_cache": {
+        "hit": true,
+        "path": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/confirmation/network_cache/608f95ec79775bc49c8eb3ff7c8fcf9cffb1caf0c77b52c28ccec3ce111dac1f.pkl",
+        "sha256": "6d80bc9f3c88e8745c0e6c6e599e9e8ab538dc7afd211643236a4f36f164dfbb",
+        "sampler": "positive_weight_no_autapse_v2"
+      },
+      "actual_duration_ms": 60000
+    },
+    {
+      "topology_seed": 2712,
+      "dynamics_seed": 847401,
+      "trajectory_path": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/response/units/bridge_circle_out125_xminus075/2712_847401/workers/trajectory.json",
+      "trajectory_sha256": "e956297dcd68e6158582ae2728e965272a2c09feda7b8c23aa39bed20b51180d",
+      "arrays_path": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/response/units/bridge_circle_out125_xminus075/2712_847401/workers/trajectory.npz",
+      "recorded_arrays_sha256": "261a4aed3ce7010daf0d16bd04ea6ac4e276f1af0693a0b72cb9f36b809d7790",
+      "worker_primary_before_full_window_filter": 167,
+      "analysis_primary": 165,
+      "static_identity": {
+        "positions_E_sha256": "4d84f81f1e6701346ddd56cb0b551232128eca2d41f85a674373f3640c3393f8",
+        "vtheta_sha256": "b55c5aed44a318c26f959dc1977e269a6406b0e91b14c8ae93994d88b273edd0",
+        "vtheta_float64_sha256": "402dc13741cd4296408e1086b7ff81b249fa0729ce0dff37688cfd3e94fe0400",
+        "h_sha256": "e8d584d78898b99418781fa049fe6c8f9caef25544d875c75a8625384fd533cd",
+        "core_index_sha256": "93a2bcb8659ccc3d093272994b6c2083d74ea05499cc65c8183bcd58eacad76b",
+        "ampa_topology_sha256": "f1df23766085e2462c7d9d58e0aa75d2363fecd0fceb8a8bffcb629a39970733",
+        "ampa_values_sha256": "a2eddaee1f425e1f4dc670c115e26baa5979e8cdb5c7eecbd41d3482699bad79",
+        "gaba_topology_sha256": "1614be395f63e0fd7f3fef53f0d2ef32792ae8af92cf85bba786b33e5aaec2f1",
+        "gaba_values_sha256": "7b8e8273d3a24c12d45a0dace843224f8fa261dc334126d62b73d42ca7dcf8b5"
+      },
+      "network_cache": {
+        "hit": true,
+        "path": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/confirmation/network_cache/eaa7d5497b3baba1fecd970ef047bb455d8fbbdd6464f3e4948e5029f909934d.pkl",
+        "sha256": "5d9352bfad0ac60335a6af56f5d4387de168469f3b3e4fc58f6f23f97de4a346",
+        "sampler": "positive_weight_no_autapse_v2"
+      },
+      "actual_duration_ms": 60000
+    },
+    {
+      "topology_seed": 2712,
+      "dynamics_seed": 847402,
+      "trajectory_path": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/response/units/bridge_circle_out125_xminus075/2712_847402/workers/trajectory.json",
+      "trajectory_sha256": "8bf12d4c5b5b149cdcaaa0b8ae25d67aa66b288a1730c14f4894cb463e8111e0",
+      "arrays_path": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/response/units/bridge_circle_out125_xminus075/2712_847402/workers/trajectory.npz",
+      "recorded_arrays_sha256": "cfdcc8e323aaf7a942b3579776543fa8219eb30702b19bed94564e5807567ae2",
+      "worker_primary_before_full_window_filter": 177,
+      "analysis_primary": 174,
+      "static_identity": {
+        "positions_E_sha256": "4d84f81f1e6701346ddd56cb0b551232128eca2d41f85a674373f3640c3393f8",
+        "vtheta_sha256": "b55c5aed44a318c26f959dc1977e269a6406b0e91b14c8ae93994d88b273edd0",
+        "vtheta_float64_sha256": "402dc13741cd4296408e1086b7ff81b249fa0729ce0dff37688cfd3e94fe0400",
+        "h_sha256": "e8d584d78898b99418781fa049fe6c8f9caef25544d875c75a8625384fd533cd",
+        "core_index_sha256": "93a2bcb8659ccc3d093272994b6c2083d74ea05499cc65c8183bcd58eacad76b",
+        "ampa_topology_sha256": "f1df23766085e2462c7d9d58e0aa75d2363fecd0fceb8a8bffcb629a39970733",
+        "ampa_values_sha256": "a2eddaee1f425e1f4dc670c115e26baa5979e8cdb5c7eecbd41d3482699bad79",
+        "gaba_topology_sha256": "1614be395f63e0fd7f3fef53f0d2ef32792ae8af92cf85bba786b33e5aaec2f1",
+        "gaba_values_sha256": "7b8e8273d3a24c12d45a0dace843224f8fa261dc334126d62b73d42ca7dcf8b5"
+      },
+      "network_cache": {
+        "hit": true,
+        "path": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/confirmation/network_cache/eaa7d5497b3baba1fecd970ef047bb455d8fbbdd6464f3e4948e5029f909934d.pkl",
+        "sha256": "5d9352bfad0ac60335a6af56f5d4387de168469f3b3e4fc58f6f23f97de4a346",
+        "sampler": "positive_weight_no_autapse_v2"
+      },
+      "actual_duration_ms": 60000
+    }
+  ],
+  "source_snapshot": [
+    {
+      "original_path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_core_connectivity_search.py",
+      "snapshot": "/data/hfosp/topic4_sef_hfo/local_geometry_ee_axis_reference_20260914/source_snapshot/00_run_topic4_core_connectivity_search.py",
+      "sha256": "85e39e9af2fff68c60db2c37b6fd1369f38ac53433f8f30a5f88b079d31e7ef4"
+    },
+    {
+      "original_path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_core_connectivity_v2.py",
+      "snapshot": "/data/hfosp/topic4_sef_hfo/local_geometry_ee_axis_reference_20260914/source_snapshot/01_topic4_core_connectivity_v2.py",
+      "sha256": "a9ae8ed188d7f36e4cc1a1890eb26dc278f0d937f1689154fe891f80ec0f2238"
+    },
+    {
+      "original_path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/snn_engine/kick_probe_core_input_v2.py",
+      "snapshot": "/data/hfosp/topic4_sef_hfo/local_geometry_ee_axis_reference_20260914/source_snapshot/02_kick_probe_core_input_v2.py",
+      "sha256": "bba9dbaba8ee68d8e1b43682b21d6e87a2a6e082513e6fa6453126375b27a37b"
+    },
+    {
+      "original_path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_streaming_spike_readout.py",
+      "snapshot": "/data/hfosp/topic4_sef_hfo/local_geometry_ee_axis_reference_20260914/source_snapshot/03_topic4_streaming_spike_readout.py",
+      "sha256": "a493db8a8516599f2169e9baada36288169e98416d726d27eebf6d04efc00314"
+    },
+    {
+      "original_path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_initial_state_runtime.py",
+      "snapshot": "/data/hfosp/topic4_sef_hfo/local_geometry_ee_axis_reference_20260914/source_snapshot/04_topic4_initial_state_runtime.py",
+      "sha256": "06c4bf8e037f982c8ec995d8550c230d8528bfeeb29b983df31a0659cbebc03f"
+    },
+    {
+      "original_path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_initial_state.py",
+      "snapshot": "/data/hfosp/topic4_sef_hfo/local_geometry_ee_axis_reference_20260914/source_snapshot/05_topic4_initial_state.py",
+      "sha256": "1e9ed1ffe67cb085e6b740ba49ffc99ef03d9ced723988b68910c6d6dee2650d"
+    },
+    {
+      "original_path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_observation_repaired.py",
+      "snapshot": "/data/hfosp/topic4_sef_hfo/local_geometry_ee_axis_reference_20260914/source_snapshot/06_topic4_observation_repaired.py",
+      "sha256": "089a2a414c3c270708d99862cc94ba5aa1864cd881170abf3165a8d77ec9894a"
+    },
+    {
+      "original_path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/snn_engine/connectivity.py",
+      "snapshot": "/data/hfosp/topic4_sef_hfo/local_geometry_ee_axis_reference_20260914/source_snapshot/07_connectivity.py",
+      "sha256": "53d3bf765f7084cda924d3b23a6cb6e5f6a21293d9ae1e0e2d8f8cf89a1d3303"
+    },
+    {
+      "original_path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/snn_engine/connectivity_rot.py",
+      "snapshot": "/data/hfosp/topic4_sef_hfo/local_geometry_ee_axis_reference_20260914/source_snapshot/08_connectivity_rot.py",
+      "sha256": "3fa6c87df4c8756132b3fe6734fd9f73673a731914e9937befbaf073f00e2b9f"
+    },
+    {
+      "original_path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/snn_engine/params.py",
+      "snapshot": "/data/hfosp/topic4_sef_hfo/local_geometry_ee_axis_reference_20260914/source_snapshot/09_params.py",
+      "sha256": "c2036d1e1548c3db89adab27f8a7a57f9cdf584b5fed360963c966004cf88884"
+    },
+    {
+      "original_path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_core_field.py",
+      "snapshot": "/data/hfosp/topic4_sef_hfo/local_geometry_ee_axis_reference_20260914/source_snapshot/10_topic4_core_field.py",
+      "sha256": "4b66406ca93ff558fe204e12a9a9d1bcfe0ead4cd2b4ef3527603347e3699e46"
+    },
+    {
+      "original_path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_core_driven_input.py",
+      "snapshot": "/data/hfosp/topic4_sef_hfo/local_geometry_ee_axis_reference_20260914/source_snapshot/11_topic4_core_driven_input.py",
+      "sha256": "dcabc862504c5b98cd26fd659859e45013d7391cd11a529ccb457c70fd9b69e3"
+    },
+    {
+      "original_path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_core_connectivity.py",
+      "snapshot": "/data/hfosp/topic4_sef_hfo/local_geometry_ee_axis_reference_20260914/source_snapshot/12_topic4_core_connectivity.py",
+      "sha256": "2ed2b10d939d6b5b22f635d3dcd76ec769b3d675b439260f1cdc0252160579e6"
+    },
+    {
+      "original_path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_core_ou_correlation_recovery.py",
+      "snapshot": "/data/hfosp/topic4_sef_hfo/local_geometry_ee_axis_reference_20260914/source_snapshot/13_run_topic4_core_ou_correlation_recovery.py",
+      "sha256": "cefc84736368236ed421ad60bdf846b0b089a059c26168e3820ca25a55da1616"
+    },
+    {
+      "original_path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_shape_output_response.py",
+      "snapshot": "/data/hfosp/topic4_sef_hfo/local_geometry_ee_axis_reference_20260914/source_snapshot/14_run_topic4_shape_output_response.py",
+      "sha256": "58907d3b08ea9b6769b16410430ee8edbb5814733d739b332a7cf85638854855"
+    },
+    {
+      "original_path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_core_ou_correlation.py",
+      "snapshot": "/data/hfosp/topic4_sef_hfo/local_geometry_ee_axis_reference_20260914/source_snapshot/15_topic4_core_ou_correlation.py",
+      "sha256": "3a277975cb7183fdfdccc7b522f5d0dfd1d27a4ae6f46e55dd1ce971b5d06ed5"
+    },
+    {
+      "original_path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_core_shape_output.py",
+      "snapshot": "/data/hfosp/topic4_sef_hfo/local_geometry_ee_axis_reference_20260914/source_snapshot/16_topic4_core_shape_output.py",
+      "sha256": "f8fc2640ea7817db80099192a976cc41be412f628fab21edc933aebd08313f22"
+    },
+    {
+      "original_path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_core_field_runner.py",
+      "snapshot": "/data/hfosp/topic4_sef_hfo/local_geometry_ee_axis_reference_20260914/source_snapshot/17_topic4_core_field_runner.py",
+      "sha256": "123bfebc82bfe37d71875175f1c2343aa702f5f9b8d9a33ee11d2046eb9258ba"
+    },
+    {
+      "original_path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/rebuild_topic4_autapse_corrected_reference.py",
+      "snapshot": "/data/hfosp/topic4_sef_hfo/local_geometry_ee_axis_reference_20260914/source_snapshot/18_rebuild_topic4_autapse_corrected_reference.py",
+      "sha256": "35a4da8dc4e23f7b5095f0a70884dd09d4e31f0eef7d950bba826ffb75ae004d"
+    }
+  ],
+  "parent_sources": {
+    "evaluator": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multidimensional_interictal_observation_repair_v2/evaluator.pkl",
+      "sha256": "cf0207113956420eadfe70ddca126cd050f7ea9e514ea15b044c869a210ad2d5"
+    },
+    "evaluator_qualification": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multidimensional_interictal_observation_repair_v2/qualification.json",
+      "sha256": "065df1e086d5225edcfe0e2d681eed27c63a6d97e7af04adadb7a8b1a8931186"
+    },
+    "candidate_manifest": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multievent_distribution_search_v2_1/execution/training_24s/candidate_manifest.json",
+      "sha256": "69c0a3f95048c500e8bfb2a8d86c3bf349ab8ea36c230d55cd8d66a2de470a0e"
+    },
+    "execution_config": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multievent_distribution_search_v2_1/execution/training_24s/execution_config.json",
+      "sha256": "05b1bd94b7342434ca5e4f79278356ba1e629d36b8a0e9c06549e31aa59aac94"
+    },
+    "objective": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multievent_distribution_search_v2_1/training_objective_v2_1.pkl",
+      "sha256": "02c99998a10daa66702c48897a3ca02b82955ec0e278a47052c8a225e84c9337"
+    },
+    "observation_contract": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multidimensional_interictal_observation_repair_v2/observation_contract.json",
+      "sha256": "eca7e125bcf535a5ce6a41536818c8ea1de51c34f2569c4b195a49458436854c"
+    },
+    "baseline_worker_arrays": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multievent_distribution_search_v2_1/execution/training_24s/workers/v2_anchor_historical__baseline_topo_2511_dyn_2511.npz",
+      "sha256": "2e39e913a8276c88fc9c94bdbc5be8c3228d8b2724e966d36f78ab909f23b1b6"
+    }
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "time": 1789355069.2181401,
+  "boot_time": 1789352244.0,
+  "reason": "Host reboot; resume preserved full checkpoints with approved 2s second-confirmation tail",
+  "jobs": {
+    "e1_t1_s9108402": {
+      "pid": 6846,
+      "create_time": 1789355069.17,
+      "resume_step": 500000,
+      "device": 0,
+      "checkpoint_sha256": "5ab129ee2560d1b94e8aba59d39bc4be184dbb9a71698eb90641ecaf77c4242b"
+    },
+    "e2_t1_s9108402": {
+      "pid": 6847,
+      "create_time": 1789355069.42,
+      "resume_step": 1500000,
+      "device": 1,
+      "checkpoint_sha256": "19c91c7c2e6ab55641106136a5f561e2d49b9b221c9e915ca629995a18f88eb4"
+    },
+    "e1_t1_s9108401": {
+      "pid": 6848,
+      "create_time": 1789355069.67,
+      "resume_step": 400000,
+      "device": 0,
+      "checkpoint_sha256": "d2c6e5425b21068aac0cd846b6c352a5c874ad025d9c103145a2bb436a93a75d"
+    },
+    "e0_t2_s9108401": {
+      "pid": 6849,
+      "create_time": 1789355069.92,
+      "resume_step": 400000,
+      "device": 1,
+      "checkpoint_sha256": "5c8bd5e0619b65f68859b8a370a1d74c017589f62f69d27357487e7977a8e9ee"
+    },
+    "e0_t2_s9108402": {
+      "pid": 6850,
+      "create_time": 1789355070.17,
+      "resume_step": 400000,
+      "device": 0,
+      "checkpoint_sha256": "87e4eae18262b887eda9bf15a24a987950b8e1754e63d968117147e6693e1ee0"
+    },
+    "e1_t0_s9108401": {
+      "pid": 6851,
+      "create_time": 1789355070.42,
+      "resume_step": 300000,
+      "device": 1,
+      "checkpoint_sha256": "b5017176d06e5d3da0c8d9c2eb10fb24d7d4e6668ddd883dfbee611bcea2fe18"
+    },
+    "e1_t0_s9108402": {
+      "pid": 6852,
+      "create_time": 1789355070.68,
+      "resume_step": 400000,
+      "device": 0,
+      "checkpoint_sha256": "4603613215fd0be3a12b47d4751bdd7805ff987bee8ef27cbebf83a7bbf167fa"
+    },
+    "e2_t0_s9108401": {
+      "pid": 6853,
+      "create_time": 1789355070.93,
+      "resume_step": 300000,
+      "device": 1,
+      "checkpoint_sha256": "f70de9014642ef0724125bf1ecfc6125853fb60f9327e0a5d8220ac84609f2b0"
+    },
+    "e2_t0_s9108402": {
+      "pid": 6856,
+      "create_time": 1789355071.18,
+      "resume_step": 400000,
+      "device": 0,
+      "checkpoint_sha256": "e8b3610fc2965c50a91749cc8ad27d70279e5d6dfabae01167b5b698f7d91464"
+    }
+  },
+  "controller_pid": 6858
+}

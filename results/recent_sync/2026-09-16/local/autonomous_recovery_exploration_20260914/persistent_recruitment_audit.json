@@ -1,0 +1,161 @@
+{
+  "definition": "Native 1mm field cells, 20ms spike-count bins, at least100Hz in every bin for200ms; onset is the first bin start. Regional criterion uses actual neuron counts. Independent diagnostic, not a training loss or replacement high-state endpoint.",
+  "records": [
+    {
+      "name": "add_g0.25_s9108401",
+      "observed_s": 10.0,
+      "first_persistent_cell_s": null,
+      "core_A_B_surround_first_persistent_s": [
+        null,
+        null,
+        null
+      ],
+      "first100ms_persistent_cells": 0,
+      "first100ms_fraction_outside_analysis_core_neighborhoods": null,
+      "interpretation": "First sustained firing is distinct from event initiation. A finite core burst may launch propagation before a remote region first latches. This diagnostic alone cannot label an origin ectopic or reject a propagation mechanism."
+    },
+    {
+      "name": "add_g0.5_s9108401",
+      "observed_s": 10.0,
+      "first_persistent_cell_s": null,
+      "core_A_B_surround_first_persistent_s": [
+        null,
+        null,
+        null
+      ],
+      "first100ms_persistent_cells": 0,
+      "first100ms_fraction_outside_analysis_core_neighborhoods": null,
+      "interpretation": "First sustained firing is distinct from event initiation. A finite core burst may launch propagation before a remote region first latches. This diagnostic alone cannot label an origin ectopic or reject a propagation mechanism."
+    },
+    {
+      "name": "mix_g0.25_eta0.005_s9108401",
+      "observed_s": 10.0,
+      "first_persistent_cell_s": 2.16,
+      "core_A_B_surround_first_persistent_s": [
+        2.32,
+        2.24,
+        2.82
+      ],
+      "first100ms_persistent_cells": 31,
+      "first100ms_fraction_outside_analysis_core_neighborhoods": 0.9032258064516129,
+      "interpretation": "First sustained firing is distinct from event initiation. A finite core burst may launch propagation before a remote region first latches. This diagnostic alone cannot label an origin ectopic or reject a propagation mechanism."
+    },
+    {
+      "name": "mix_g0.25_eta0.02_s9108401",
+      "observed_s": 10.0,
+      "first_persistent_cell_s": 3.68,
+      "core_A_B_surround_first_persistent_s": [
+        6.44,
+        6.04,
+        4.5200000000000005
+      ],
+      "first100ms_persistent_cells": 28,
+      "first100ms_fraction_outside_analysis_core_neighborhoods": 1.0,
+      "interpretation": "First sustained firing is distinct from event initiation. A finite core burst may launch propagation before a remote region first latches. This diagnostic alone cannot label an origin ectopic or reject a propagation mechanism."
+    },
+    {
+      "name": "mix_g0.5_eta0.005_s9108401",
+      "observed_s": 10.0,
+      "first_persistent_cell_s": 0.06,
+      "core_A_B_surround_first_persistent_s": [
+        0.06,
+        0.54,
+        0.18
+      ],
+      "first100ms_persistent_cells": 104,
+      "first100ms_fraction_outside_analysis_core_neighborhoods": 0.9038461538461539,
+      "interpretation": "First sustained firing is distinct from event initiation. A finite core burst may launch propagation before a remote region first latches. This diagnostic alone cannot label an origin ectopic or reject a propagation mechanism."
+    },
+    {
+      "name": "mix_g0.5_eta0.02_s9108401",
+      "observed_s": 10.0,
+      "first_persistent_cell_s": 0.06,
+      "core_A_B_surround_first_persistent_s": [
+        0.06,
+        0.54,
+        0.18
+      ],
+      "first100ms_persistent_cells": 104,
+      "first100ms_fraction_outside_analysis_core_neighborhoods": 0.9038461538461539,
+      "interpretation": "First sustained firing is distinct from event initiation. A finite core burst may launch propagation before a remote region first latches. This diagnostic alone cannot label an origin ectopic or reject a propagation mechanism."
+    },
+    {
+      "name": "mix_g0.75_eta0.005_s9108401",
+      "observed_s": 10.0,
+      "first_persistent_cell_s": 0.06,
+      "core_A_B_surround_first_persistent_s": [
+        0.06,
+        1.7,
+        0.1
+      ],
+      "first100ms_persistent_cells": 126,
+      "first100ms_fraction_outside_analysis_core_neighborhoods": 0.9206349206349206,
+      "interpretation": "First sustained firing is distinct from event initiation. A finite core burst may launch propagation before a remote region first latches. This diagnostic alone cannot label an origin ectopic or reject a propagation mechanism."
+    },
+    {
+      "name": "mix_g0.75_eta0.02_s9108401",
+      "observed_s": 10.0,
+      "first_persistent_cell_s": 0.06,
+      "core_A_B_surround_first_persistent_s": [
+        0.06,
+        1.7,
+        0.1
+      ],
+      "first100ms_persistent_cells": 127,
+      "first100ms_fraction_outside_analysis_core_neighborhoods": 0.9212598425196851,
+      "interpretation": "First sustained firing is distinct from event initiation. A finite core burst may launch propagation before a remote region first latches. This diagnostic alone cannot label an origin ectopic or reject a propagation mechanism."
+    },
+    {
+      "name": "native_fastZ_s9108401",
+      "observed_s": 20.0,
+      "first_persistent_cell_s": null,
+      "core_A_B_surround_first_persistent_s": [
+        null,
+        null,
+        null
+      ],
+      "first100ms_persistent_cells": 0,
+      "first100ms_fraction_outside_analysis_core_neighborhoods": null,
+      "interpretation": "First sustained firing is distinct from event initiation. A finite core burst may launch propagation before a remote region first latches. This diagnostic alone cannot label an origin ectopic or reject a propagation mechanism."
+    },
+    {
+      "name": "native_longM_s9108401",
+      "observed_s": 10.0,
+      "first_persistent_cell_s": null,
+      "core_A_B_surround_first_persistent_s": [
+        null,
+        null,
+        null
+      ],
+      "first100ms_persistent_cells": 0,
+      "first100ms_fraction_outside_analysis_core_neighborhoods": null,
+      "interpretation": "First sustained firing is distinct from event initiation. A finite core burst may launch propagation before a remote region first latches. This diagnostic alone cannot label an origin ectopic or reject a propagation mechanism."
+    },
+    {
+      "name": "native_midM_s9108401",
+      "observed_s": 20.0,
+      "first_persistent_cell_s": null,
+      "core_A_B_surround_first_persistent_s": [
+        null,
+        null,
+        null
+      ],
+      "first100ms_persistent_cells": 0,
+      "first100ms_fraction_outside_analysis_core_neighborhoods": null,
+      "interpretation": "First sustained firing is distinct from event initiation. A finite core burst may launch propagation before a remote region first latches. This diagnostic alone cannot label an origin ectopic or reject a propagation mechanism."
+    },
+    {
+      "name": "native_weak_s9108401",
+      "observed_s": 10.0,
+      "first_persistent_cell_s": 9.4,
+      "core_A_B_surround_first_persistent_s": [
+        9.42,
+        9.58,
+        9.6
+      ],
+      "first100ms_persistent_cells": 44,
+      "first100ms_fraction_outside_analysis_core_neighborhoods": 0.7727272727272727,
+      "interpretation": "First sustained firing is distinct from event initiation. A finite core burst may launch propagation before a remote region first latches. This diagnostic alone cannot label an origin ectopic or reject a propagation mechanism."
+    }
+  ]
+}

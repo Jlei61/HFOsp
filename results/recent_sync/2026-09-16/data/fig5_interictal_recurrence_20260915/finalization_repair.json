@@ -1,0 +1,67 @@
+{
+  "repaired_epoch": 1789484725.7690578,
+  "status": "PASS",
+  "rows": [
+    {
+      "name": "g0.5_k1.5_tau1_s9108401",
+      "continuous_chunks": true,
+      "spike_count_conservation": true,
+      "finite_slow_states": true,
+      "checkpoint_matches_recorded_end": true,
+      "observation_horizon_reached": false,
+      "observed_s": 56.0
+    },
+    {
+      "name": "g0.5_k1.5_tau2_s9108401",
+      "continuous_chunks": true,
+      "spike_count_conservation": true,
+      "finite_slow_states": true,
+      "checkpoint_matches_recorded_end": true,
+      "observation_horizon_reached": false,
+      "observed_s": 56.0
+    },
+    {
+      "name": "g0.166667_k0.1_tau1_s9108401",
+      "continuous_chunks": true,
+      "spike_count_conservation": true,
+      "finite_slow_states": true,
+      "checkpoint_matches_recorded_end": true,
+      "observation_horizon_reached": true,
+      "observed_s": 60.0
+    },
+    {
+      "name": "g0.166667_k0.1_tau5_s9108401",
+      "continuous_chunks": true,
+      "spike_count_conservation": true,
+      "finite_slow_states": true,
+      "checkpoint_matches_recorded_end": true,
+      "observation_horizon_reached": true,
+      "observed_s": 60.0
+    },
+    {
+      "name": "g0_k0.1_tau1_s9108401",
+      "continuous_chunks": true,
+      "spike_count_conservation": true,
+      "finite_slow_states": true,
+      "checkpoint_matches_recorded_end": true,
+      "observation_horizon_reached": true,
+      "observed_s": 60.0
+    },
+    {
+      "name": "g0_k0.1_tau5_s9108401",
+      "continuous_chunks": true,
+      "spike_count_conservation": true,
+      "finite_slow_states": true,
+      "checkpoint_matches_recorded_end": true,
+      "observation_horizon_reached": true,
+      "observed_s": 60.0
+    }
+  ],
+  "failure_location": "Final analysis JSON write after trajectory/checkpoint/result had already been saved.",
+  "fix": "Use existing NumPy-safe analysis writer; recompute all final analyses from committed data.",
+  "original_logs_and_results_preserved": true,
+  "no_simulation_rerun": true,
+  "no_criterion_change": true,
+  "n_horizon_reached": 4,
+  "n_short_wall_censored": 2
+}

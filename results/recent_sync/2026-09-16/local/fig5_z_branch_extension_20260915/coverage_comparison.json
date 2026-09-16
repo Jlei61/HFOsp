@@ -1,0 +1,78 @@
+{
+  "extended_resting_equilibria": {
+    "points": 31,
+    "s_range": [
+      -0.3,
+      -0.05
+    ]
+  },
+  "extended_low_equilibria": {
+    "points": 90,
+    "s_range": [
+      -0.05,
+      0.024672905498952902
+    ]
+  },
+  "low_to_recruited_equilibria": {
+    "points": 100,
+    "s_range": [
+      0.005067058780196284,
+      0.049746662877916036
+    ]
+  },
+  "recruited_equilibria": {
+    "points": 130,
+    "s_range": [
+      0.26846194636235426,
+      0.309
+    ]
+  },
+  "new_branches": [
+    {
+      "name": "extended_low_equilibria",
+      "points": 90,
+      "minimum_s": -0.05,
+      "maximum_s": 0.024672905498952902
+    },
+    {
+      "name": "equilibrium_trusted_forward",
+      "points": 240,
+      "minimum_s": 0.020310384780962087,
+      "maximum_s": 0.11553519005076103
+    },
+    {
+      "name": "equilibrium_low_trusted_continued",
+      "points": 312,
+      "minimum_s": 0.05287030258709465,
+      "maximum_s": 0.14791985632110438
+    },
+    {
+      "name": "equilibrium_high_trusted",
+      "points": 240,
+      "minimum_s": 0.2684633283274834,
+      "maximum_s": 0.309
+    },
+    {
+      "name": "equilibrium_high_trusted_continued",
+      "points": 284,
+      "minimum_s": 0.2707453933704093,
+      "maximum_s": 0.27971418810591114
+    }
+  ],
+  "displayed_cycles": 31,
+  "period_range_ms": [
+    173.81159757725484,
+    459.7860455350504
+  ],
+  "cycle_s_range": [
+    -0.10717205098667515,
+    0.0
+  ],
+  "low_cycle_s_range": [
+    -0.10717205098667515,
+    -0.02968929056949126
+  ],
+  "physical_waveform_coordinates": [
+    0.0
+  ]
+}

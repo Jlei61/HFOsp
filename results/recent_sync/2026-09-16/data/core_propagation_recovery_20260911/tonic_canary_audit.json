@@ -1,0 +1,65 @@
+{
+ "status": "PASS",
+ "units": [
+  {
+   "candidate": "tonic_canary_1p0",
+   "core_mean_rate_scale": 1.0,
+   "checks": {
+    "full_500ms": true,
+    "same_static_arrays": true,
+    "zero_raised_threshold": true,
+    "exact_outside_rates": true,
+    "applied_core_equation": true,
+    "outside_expected_arrivals": true
+   },
+   "peak_rss_gib": 2.812652587890625,
+   "arrays_sha256": "60f44d257311f4efa92e0d8c488e3fa322d5e980886842ce9a14348234ba3e51"
+  },
+  {
+   "candidate": "tonic_canary_0p95",
+   "core_mean_rate_scale": 0.95,
+   "checks": {
+    "full_500ms": true,
+    "same_static_arrays": true,
+    "zero_raised_threshold": true,
+    "exact_outside_rates": true,
+    "applied_core_equation": true,
+    "outside_expected_arrivals": true
+   },
+   "peak_rss_gib": 2.846759796142578,
+   "arrays_sha256": "180b13f30aeb3cc243f22883455f3d510a56cc6804787e609d601e9599ca44c3"
+  },
+  {
+   "candidate": "tonic_canary_0p9",
+   "core_mean_rate_scale": 0.9,
+   "checks": {
+    "full_500ms": true,
+    "same_static_arrays": true,
+    "zero_raised_threshold": true,
+    "exact_outside_rates": true,
+    "applied_core_equation": true,
+    "outside_expected_arrivals": true
+   },
+   "peak_rss_gib": 2.842090606689453,
+   "arrays_sha256": "ea14a292d4fe98a1998550d20b59207fc4d7832419160e5179345c00b87dbce8"
+  }
+ ],
+ "noop_full_arrays": 62,
+ "scientific_status": "Application and unchanged-scale parity only, not a propagation result",
+ "source_snapshot": {
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_core_connectivity_search.py": "85e39e9af2fff68c60db2c37b6fd1369f38ac53433f8f30a5f88b079d31e7ef4",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_core_connectivity_v2.py": "a9ae8ed188d7f36e4cc1a1890eb26dc278f0d937f1689154fe891f80ec0f2238",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/snn_engine/kick_probe_core_input_v2.py": "bba9dbaba8ee68d8e1b43682b21d6e87a2a6e082513e6fa6453126375b27a37b",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_streaming_spike_readout.py": "a493db8a8516599f2169e9baada36288169e98416d726d27eebf6d04efc00314",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_initial_state_runtime.py": "06c4bf8e037f982c8ec995d8550c230d8528bfeeb29b983df31a0659cbebc03f",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_initial_state.py": "1e9ed1ffe67cb085e6b740ba49ffc99ef03d9ced723988b68910c6d6dee2650d",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_observation_repaired.py": "089a2a414c3c270708d99862cc94ba5aa1864cd881170abf3165a8d77ec9894a",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/snn_engine/connectivity.py": "53d3bf765f7084cda924d3b23a6cb6e5f6a21293d9ae1e0e2d8f8cf89a1d3303",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/snn_engine/connectivity_rot.py": "3fa6c87df4c8756132b3fe6734fd9f73673a731914e9937befbaf073f00e2b9f",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/snn_engine/params.py": "c2036d1e1548c3db89adab27f8a7a57f9cdf584b5fed360963c966004cf88884",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_core_field.py": "4b66406ca93ff558fe204e12a9a9d1bcfe0ead4cd2b4ef3527603347e3699e46",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_core_driven_input.py": "dcabc862504c5b98cd26fd659859e45013d7391cd11a529ccb457c70fd9b69e3",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_core_connectivity.py": "2ed2b10d939d6b5b22f635d3dcd76ec769b3d675b439260f1cdc0252160579e6",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_core_tonic_recovery.py": "6fd429ca96d149cd53f494565c0987e83d276ffac7999c2f62ef66508316b2fe"
+ }
+}

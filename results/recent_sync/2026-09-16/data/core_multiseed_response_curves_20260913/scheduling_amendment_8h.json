@@ -1,0 +1,41 @@
+{
+ "status": "ACTIVE",
+ "authorization": "2026-09-13 user: autonomous 8-hour exploration and resource-aware advancement",
+ "original_controller_sha256": "754fa79ef28889c7d9d53f0ad19bbde559e159d049dd7b2d41cac28f2792a3a6",
+ "effective_controller_sha256": "211e933d173a389ff15bcf5601f001cb63b144bbc5a1811db9a2dd987ee70a25",
+ "change": "After application checks, allow at most two early formal simulations; all existing physical parameters, 18 conditions, seeds and 108-unit budget unchanged. Freeze control-treatment paired order before dispatch.",
+ "resource_rule": "MemAvailable > 40 GiB + remaining growth to 9 GiB for live predecessor workers + own remaining growth to 9 GiB + max(9 GiB, 1.4 * observed completed peak). Hard guard: 18 GiB per process tree or host available <30 GiB. Maximum 2 workers before prior simulation_complete, 18 after.",
+ "test": {
+  "unique_units": 108,
+  "first_four_units": [
+   [
+    "bridge_circle_out125",
+    2511,
+    847401
+   ],
+   [
+    "bridge_circle_out125_xminus075",
+    2511,
+    847401
+   ],
+   [
+    "bridge_circle_out125",
+    2511,
+    847402
+   ],
+   [
+    "bridge_circle_out125_xminus075",
+    2511,
+    847402
+   ]
+  ],
+  "live_predecessor_workers": 14,
+  "predecessor_growth_gib": 97.6136474609375,
+  "physical_source_hashes_unchanged": true
+ },
+ "new_formal_units_before_change": 0,
+ "updated_unix": 1789235752.8714275,
+ "new_controller_pid": 4077753,
+ "old_controller_pid": 4052694,
+ "physical_workers_restarted": 0
+}

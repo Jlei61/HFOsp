@@ -1,0 +1,59 @@
+{
+  "updated_unix": 1789260188.6091156,
+  "elapsed_s": 5447,
+  "queues": {
+    "F": {
+      "complete": 0,
+      "total": 16,
+      "queued": 9,
+      "live_worker_pids": [
+        579940,
+        579950,
+        580355,
+        580430,
+        580667,
+        580757,
+        580989
+      ],
+      "stale_status_pids": [],
+      "status": "CONFIRMATION_RUNNING",
+      "failures": []
+    },
+    "N": {
+      "complete": 3,
+      "total": 108,
+      "queued": 96,
+      "live_worker_pids": [
+        15948,
+        258720,
+        259108,
+        368494,
+        368499,
+        492006,
+        492078,
+        500919,
+        510427
+      ],
+      "stale_status_pids": [],
+      "status": "RESPONSE_RUNNING",
+      "failures": []
+    },
+    "G": {
+      "complete": 3,
+      "total": 6,
+      "queued": 1,
+      "live_worker_pids": [
+        435424,
+        527657
+      ],
+      "stale_status_pids": [],
+      "status": "RESPONSE_RUNNING",
+      "failures": []
+    }
+  },
+  "available_gib": 107.2212905883789,
+  "created_unix": 1789260194.2991579,
+  "followup_response_complete": 60,
+  "followup_confirmation_total": 16,
+  "new_network_baseline": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/analysis/first_noise_review/bridge_circle_out125_topology2711/scientific_note.md"
+}

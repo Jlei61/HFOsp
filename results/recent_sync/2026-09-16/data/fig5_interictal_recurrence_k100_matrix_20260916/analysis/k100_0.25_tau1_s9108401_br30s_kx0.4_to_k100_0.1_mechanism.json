@@ -1,0 +1,193 @@
+{
+  "name": "k100_0.25_tau1_s9108401_br30s_kx0.4_to_k100_0.1",
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_interictal_recurrence_k100_matrix_20260916/runs/k100_0.25_tau1_s9108401_br30s_kx0.4_to_k100_0.1",
+  "job": {
+    "name": "k100_0.25_tau1_s9108401_br30s_kx0.4_to_k100_0.1",
+    "seed": 9108401,
+    "eta_m": 0.0005,
+    "tau_M_s": 1.0,
+    "tau_Z_s": 5.0,
+    "threshold": 95.19851312666987,
+    "mode": "native",
+    "gamma": 0.16666666666666666,
+    "global_gain": 0.029440596381478282,
+    "global_resource": "native_z",
+    "phi_jump": 0.0,
+    "horizon_s": 40.0,
+    "checkpoint_s": 1.0,
+    "device": 0,
+    "qa": false,
+    "feedback_form": "conductance",
+    "C_R": 6.299613071787578,
+    "reference_voltage_mV": 18.0,
+    "reference_gap_mV": 35.66284793826844,
+    "global_reversal_mV": -17.662847938268442,
+    "sahp_gain": 0.1,
+    "sahp_tau_s": 1.0,
+    "stop_after_second_entry": false,
+    "k100": 0.25,
+    "per_spike_increment_gK_over_gL": 0.0025,
+    "steady_state_gK_over_gL_at_100Hz": 0.25,
+    "base_sahp_gain": 0.25,
+    "k_increment_scale_applied": 0.4,
+    "branch": {
+      "source": "k100_0.25_tau1_s9108401",
+      "source_checkpoint": "/data/hfosp/topic4_sef_hfo/fig5_interictal_recurrence_k100_matrix_20260916/runs/k100_0.25_tau1_s9108401/checkpoints/step_0000300000.pkl",
+      "source_checkpoint_sha256": "8563b4afdeb396699fc75d1839104b6ac27db554e39ff904f68d8bbe9c2ae244",
+      "start_s": 30.0,
+      "modification": {
+        "k_increment_scale": 0.4
+      },
+      "label": "kx0.4_to_k100_0.1",
+      "diagnostic_only": true,
+      "note": "Full engine state, synaptic/delay history, slow variables and random streams continue from the stored checkpoint; exactly the declared feedback modification differs. Not an autonomous loop."
+    }
+  },
+  "observed_s": 40.0,
+  "classification": "NO_HIGH_OBSERVED",
+  "entries": [],
+  "exits": [],
+  "preentry_brief": 129,
+  "interhigh": [],
+  "latest_postexit": null,
+  "temporal_loop_pass": false,
+  "current_balance": {
+    "baseline": {
+      "window_s": [
+        0.5,
+        5.0
+      ],
+      "I_E": 32.514620490153156,
+      "raw_local_I": 35.00074010610656,
+      "Z_local_I": 33.59067426644062,
+      "Z_mean": 0.9634770239681707,
+      "Z_coreA": 0.9493260894700595,
+      "Z_coreB": 0.9487953076135374,
+      "Z_other": 0.9642061649289825,
+      "fraction_J_above_threshold": 0.08394666666666666,
+      "I_M": 0.002802198197719924,
+      "global_E_rate_Hz": 6.431825033663128,
+      "g_global": 0.18258964986008863,
+      "I_global": -0.4423943694916895,
+      "g_K": 0.014032507145807487,
+      "I_K": 0.21578304419873975,
+      "total_inhibition_plus_adaptation": 33.36686513934539,
+      "excitation_minus_inhibition": -0.8522446491922366,
+      "regions": {
+        "coreA": {
+          "gK_over_gL": 0.020837928565367984,
+          "gG_over_gL": 0.1784282518885,
+          "V_mV": -9.984721871878776,
+          "I_K_mV": 0.26105962989074466,
+          "I_G_mV": -1.8644597413115185,
+          "I_E_mV": 43.611461960976385,
+          "Z_local_I_mV": 49.12340383967826,
+          "I_M_mV": 0.004167419246170672,
+          "Z": 0.9493260894700595,
+          "M": 8.334838492341346
+        },
+        "coreB": {
+          "gK_over_gL": 0.022133401865393653,
+          "gG_over_gL": 0.17804204893402314,
+          "V_mV": -9.040345038246496,
+          "I_K_mV": 0.31327351214405813,
+          "I_G_mV": -2.990812723106738,
+          "I_E_mV": 43.64249572092469,
+          "Z_local_I_mV": 49.72602881705531,
+          "I_M_mV": 0.004426498946011185,
+          "Z": 0.9487953076135374,
+          "M": 8.852997892022369
+        },
+        "other": {
+          "gK_over_gL": 0.013632995522779775,
+          "gG_over_gL": 0.1810571302024271,
+          "V_mV": -4.8644965416961545,
+          "I_K_mV": 0.21154733128548858,
+          "I_G_mV": -0.37677073386296334,
+          "I_E_mV": 31.952784364073477,
+          "Z_local_I_mV": 32.84675777184377,
+          "I_M_mV": 0.002726489824158241,
+          "Z": 0.9642061649289825,
+          "M": 5.452979648316486
+        }
+      },
+      "g_K_needed_to_hold_V_below_threshold": 0.0,
+      "k100_needed_at_this_rate": 0.0
+    },
+    "late": {
+      "window_s": [
+        35.0,
+        40.0
+      ],
+      "I_E": 43.21844322492584,
+      "raw_local_I": 49.25003827412264,
+      "Z_local_I": 43.851911648518254,
+      "Z_mean": 0.8976920418400643,
+      "Z_coreA": 0.8653533785250154,
+      "Z_coreB": 0.8575497150605532,
+      "Z_other": 0.8995283918396783,
+      "fraction_J_above_threshold": 0.11571399999999996,
+      "I_M": 0.004771977703386081,
+      "global_E_rate_Hz": 9.815341067694261,
+      "g_global": 0.2596011172200604,
+      "I_global": -0.1497020814223533,
+      "g_K": 0.009557201254858311,
+      "I_K": 0.15070737848576918,
+      "total_inhibition_plus_adaptation": 43.85768892328505,
+      "excitation_minus_inhibition": -0.6392456983592112,
+      "regions": {
+        "coreA": {
+          "gK_over_gL": 0.017178560210662823,
+          "gG_over_gL": 0.25060090443249233,
+          "V_mV": -5.258999961083228,
+          "I_K_mV": 0.38643414908620377,
+          "I_G_mV": 0.08187424095778197,
+          "I_E_mV": 62.25469225111976,
+          "Z_local_I_mV": 56.94062719748501,
+          "I_M_mV": 0.008580897428207153,
+          "Z": 0.8653533785250154,
+          "M": 17.1617948564143
+        },
+        "coreB": {
+          "gK_over_gL": 0.017983138621017948,
+          "gG_over_gL": 0.2487260339996701,
+          "V_mV": -12.11573370023884,
+          "I_K_mV": 0.24974737735676605,
+          "I_G_mV": 0.5914095130595384,
+          "I_E_mV": 65.81721717963727,
+          "Z_local_I_mV": 64.90660708670964,
+          "I_M_mV": 0.008984312170862192,
+          "Z": 0.8575497150605532,
+          "M": 17.96862434172438
+        },
+        "other": {
+          "gK_over_gL": 0.009148992206935132,
+          "gG_over_gL": 0.26045661175527574,
+          "V_mV": -7.220810816158637,
+          "I_K_mV": 0.1420769184174925,
+          "I_G_mV": -0.18385202298589387,
+          "I_E_mV": 42.16407789025237,
+          "Z_local_I_mV": 42.964733289831166,
+          "I_M_mV": 0.004568996076204489,
+          "Z": 0.8995283918396783,
+          "M": 9.137992152408975
+        }
+      },
+      "g_K_needed_to_hold_V_below_threshold": 0.0,
+      "k100_needed_at_this_rate": 0.0
+    }
+  },
+  "Z_below_0p5_first_s": {
+    "coreA": null,
+    "coreB": null,
+    "other": null,
+    "mean": null
+  },
+  "late_all_E_Hz": 9.78249375,
+  "late_state": "LOW",
+  "final_Z": 0.8931757526771273,
+  "final_gK": 0.008839360995704152,
+  "final_I_M": 0.004503564193343722,
+  "regional_records": true,
+  "high_morphology": []
+}

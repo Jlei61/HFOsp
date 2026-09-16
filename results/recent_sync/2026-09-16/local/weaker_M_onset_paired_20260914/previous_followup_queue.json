@@ -1,0 +1,264 @@
+{
+  "status": "STARTED_EXISTING_FOLLOWUPS",
+  "jobs": [
+    "e0_t2_s9108401",
+    "e0_t2_s9108402",
+    "e1_t0_s9108401",
+    "e1_t0_s9108402",
+    "e1_t1_s9108401",
+    "e1_t1_s9108402",
+    "e2_t0_s9108401",
+    "e2_t0_s9108402",
+    "e2_t1_s9108402"
+  ],
+  "new_conditions": 0,
+  "pid": 10808,
+  "reason": "Previously authorized followups interrupted by host restart; current six-condition pilot has priority.",
+  "old_status_at_queue": {
+    "status": "RUNNING",
+    "pid": 6858,
+    "completed": 31,
+    "total": 40,
+    "running": {
+      "e1_t1_s9108402": 6846,
+      "e2_t1_s9108402": 6847,
+      "e1_t1_s9108401": 6848,
+      "e0_t2_s9108401": 6849,
+      "e0_t2_s9108402": 6850,
+      "e1_t0_s9108401": 6851,
+      "e1_t0_s9108402": 6852,
+      "e2_t0_s9108401": 6853,
+      "e2_t0_s9108402": 6856
+    },
+    "pending": 0,
+    "failed": [],
+    "current_worker_cap": 32,
+    "available_memory_GiB": 226.03710174560547,
+    "cpu_busy_percent": 11.3,
+    "source_worker_unchanged": true,
+    "adopted": true,
+    "scheduling_amendment": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/m_parameter_modes_fig5_20260913/scheduling_amendment_20260913.json"
+  },
+  "prior_adopted_records": {
+    "e0_t2_s9108401": {
+      "previous_pid": 527702,
+      "previous_create_time": 1789257487.01,
+      "resume_step": 400000,
+      "checkpoint_sha256": "5c8bd5e0619b65f68859b8a370a1d74c017589f62f69d27357487e7977a8e9ee",
+      "archive": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/m_parameter_modes_fig5_20260913/before_short_second_tail_20260913/e0_t2_s9108401",
+      "device": 1,
+      "job": {
+        "name": "e0_t2_s9108401",
+        "eta_m": 0.005,
+        "tau_M_s": 4.0,
+        "seed": 9108401,
+        "eta_index": 0,
+        "tau_index": 2,
+        "tau_z_ms": 5000.0,
+        "threshold": 95.19851312666987,
+        "horizon_s": 430.0
+      },
+      "new_pid": 1745529
+    },
+    "e0_t2_s9108402": {
+      "previous_pid": 539883,
+      "previous_create_time": 1789257994.16,
+      "resume_step": 400000,
+      "checkpoint_sha256": "87e4eae18262b887eda9bf15a24a987950b8e1754e63d968117147e6693e1ee0",
+      "archive": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/m_parameter_modes_fig5_20260913/before_short_second_tail_20260913/e0_t2_s9108402",
+      "device": 0,
+      "job": {
+        "name": "e0_t2_s9108402",
+        "eta_m": 0.005,
+        "tau_M_s": 4.0,
+        "seed": 9108402,
+        "eta_index": 0,
+        "tau_index": 2,
+        "tau_z_ms": 5000.0,
+        "threshold": 95.19851312666987,
+        "horizon_s": 430.0
+      },
+      "new_pid": 1745530
+    },
+    "e1_t0_s9108401": {
+      "previous_pid": 708216,
+      "previous_create_time": 1789263046.53,
+      "resume_step": 300000,
+      "checkpoint_sha256": "b5017176d06e5d3da0c8d9c2eb10fb24d7d4e6668ddd883dfbee611bcea2fe18",
+      "archive": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/m_parameter_modes_fig5_20260913/before_short_second_tail_20260913/e1_t0_s9108401",
+      "device": 1,
+      "job": {
+        "name": "e1_t0_s9108401",
+        "eta_m": 0.01,
+        "tau_M_s": 1.0,
+        "seed": 9108401,
+        "eta_index": 1,
+        "tau_index": 0,
+        "tau_z_ms": 5000.0,
+        "threshold": 95.19851312666987,
+        "horizon_s": 430.0
+      },
+      "new_pid": 1745531
+    },
+    "e1_t0_s9108402": {
+      "previous_pid": 730643,
+      "previous_create_time": 1789263723.05,
+      "resume_step": 400000,
+      "checkpoint_sha256": "4603613215fd0be3a12b47d4751bdd7805ff987bee8ef27cbebf83a7bbf167fa",
+      "archive": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/m_parameter_modes_fig5_20260913/before_short_second_tail_20260913/e1_t0_s9108402",
+      "device": 0,
+      "job": {
+        "name": "e1_t0_s9108402",
+        "eta_m": 0.01,
+        "tau_M_s": 1.0,
+        "seed": 9108402,
+        "eta_index": 1,
+        "tau_index": 0,
+        "tau_z_ms": 5000.0,
+        "threshold": 95.19851312666987,
+        "horizon_s": 430.0
+      },
+      "new_pid": 1745532
+    },
+    "e1_t1_s9108401": {
+      "previous_pid": 4070971,
+      "previous_create_time": 1789234251.5,
+      "resume_step": 400000,
+      "checkpoint_sha256": "d2c6e5425b21068aac0cd846b6c352a5c874ad025d9c103145a2bb436a93a75d",
+      "archive": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/m_parameter_modes_fig5_20260913/before_short_second_tail_20260913/e1_t1_s9108401",
+      "device": 0,
+      "job": {
+        "name": "e1_t1_s9108401",
+        "eta_m": 0.01,
+        "tau_M_s": 2.0,
+        "seed": 9108401,
+        "eta_index": 1,
+        "tau_index": 1,
+        "tau_z_ms": 5000.0,
+        "threshold": 95.19851312666987,
+        "horizon_s": 430.0
+      },
+      "new_pid": 1745528
+    },
+    "e1_t1_s9108402": {
+      "previous_pid": 304629,
+      "previous_create_time": 1789249735.95,
+      "resume_step": 500000,
+      "checkpoint_sha256": "5ab129ee2560d1b94e8aba59d39bc4be184dbb9a71698eb90641ecaf77c4242b",
+      "archive": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/m_parameter_modes_fig5_20260913/before_short_second_tail_20260913/e1_t1_s9108402",
+      "device": 0,
+      "job": {
+        "name": "e1_t1_s9108402",
+        "eta_m": 0.01,
+        "tau_M_s": 2.0,
+        "seed": 9108402,
+        "eta_index": 1,
+        "tau_index": 1,
+        "tau_z_ms": 5000.0,
+        "threshold": 95.19851312666987,
+        "horizon_s": 430.0
+      },
+      "new_pid": 1745526
+    },
+    "e2_t0_s9108401": {
+      "previous_pid": 924748,
+      "previous_create_time": 1789269731.72,
+      "resume_step": 300000,
+      "checkpoint_sha256": "f70de9014642ef0724125bf1ecfc6125853fb60f9327e0a5d8220ac84609f2b0",
+      "archive": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/m_parameter_modes_fig5_20260913/before_short_second_tail_20260913/e2_t0_s9108401",
+      "device": 1,
+      "job": {
+        "name": "e2_t0_s9108401",
+        "eta_m": 0.02,
+        "tau_M_s": 1.0,
+        "seed": 9108401,
+        "eta_index": 2,
+        "tau_index": 0,
+        "tau_z_ms": 5000.0,
+        "threshold": 95.19851312666987,
+        "horizon_s": 430.0
+      },
+      "new_pid": 1745533
+    },
+    "e2_t0_s9108402": {
+      "previous_pid": 945480,
+      "previous_create_time": 1789270366.09,
+      "resume_step": 400000,
+      "checkpoint_sha256": "e8b3610fc2965c50a91749cc8ad27d70279e5d6dfabae01167b5b698f7d91464",
+      "archive": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/m_parameter_modes_fig5_20260913/before_short_second_tail_20260913/e2_t0_s9108402",
+      "device": 0,
+      "job": {
+        "name": "e2_t0_s9108402",
+        "eta_m": 0.02,
+        "tau_M_s": 1.0,
+        "seed": 9108402,
+        "eta_index": 2,
+        "tau_index": 0,
+        "tau_z_ms": 5000.0,
+        "threshold": 95.19851312666987,
+        "horizon_s": 430.0
+      },
+      "new_pid": 1745534
+    },
+    "e2_t1_s9108402": {
+      "previous_pid": 4070648,
+      "previous_create_time": 1789234010.11,
+      "resume_step": 1500000,
+      "checkpoint_sha256": "19c91c7c2e6ab55641106136a5f561e2d49b9b221c9e915ca629995a18f88eb4",
+      "archive": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/m_parameter_modes_fig5_20260913/before_short_second_tail_20260913/e2_t1_s9108402",
+      "device": 1,
+      "job": {
+        "name": "e2_t1_s9108402",
+        "eta_m": 0.02,
+        "tau_M_s": 2.0,
+        "seed": 9108402,
+        "eta_index": 2,
+        "tau_index": 1,
+        "tau_z_ms": 5000.0,
+        "threshold": 95.19851312666987,
+        "horizon_s": 430.0
+      },
+      "new_pid": 1745527
+    }
+  },
+  "started": {
+    "e0_t2_s9108401": {
+      "pid": 11529,
+      "create_time": 1789366202.53
+    },
+    "e0_t2_s9108402": {
+      "pid": 11530,
+      "create_time": 1789366202.78
+    },
+    "e1_t0_s9108401": {
+      "pid": 11531,
+      "create_time": 1789366203.03
+    },
+    "e1_t0_s9108402": {
+      "pid": 11532,
+      "create_time": 1789366203.28
+    },
+    "e1_t1_s9108401": {
+      "pid": 11533,
+      "create_time": 1789366203.53
+    },
+    "e1_t1_s9108402": {
+      "pid": 11534,
+      "create_time": 1789366203.78
+    },
+    "e2_t0_s9108401": {
+      "pid": 11535,
+      "create_time": 1789366204.04
+    },
+    "e2_t0_s9108402": {
+      "pid": 11537,
+      "create_time": 1789366204.29
+    },
+    "e2_t1_s9108402": {
+      "pid": 11539,
+      "create_time": 1789366204.54
+    }
+  },
+  "controller_pid": 11541,
+  "updated_at": 1789366204.8445687
+}

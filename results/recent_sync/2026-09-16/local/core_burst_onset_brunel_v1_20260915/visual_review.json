@@ -1,0 +1,147 @@
+{
+  "status": "PASS_AGENT_VISUAL_REVIEW_HUMAN_PENDING",
+  "date": "2026-09-15",
+  "reviewed_count": 26,
+  "method": "Inspected every PNG across staged generation; rechecked completed noise/control, cell-CV and strong-coupling continuation figures. PDF pages exported from the same Matplotlib figures; PDF page count validated separately.",
+  "checks": [
+    "Axes, units, protocol timing and full-core rate denominator are stated.",
+    "Four states use fixed cell samples and matched windows; separate 30-cell closeups keep spike ticks visible.",
+    "Native activity regions, deterministic silent-branch stability and independent literature benchmark are distinct.",
+    "No spurious interpolated bifurcation boundary; missing low-event CV values retained.",
+    "Post-burst deep hyperpolarization remains visible and documented as a material model limitation.",
+    "No visible title, legend or axis clipping in the delivered PNGs."
+  ],
+  "figures": [
+    {
+      "stem": "01_native_core_regime_map",
+      "png_sha256": "195b023ee9677fd4593fbe437ef2873f188d171a601363b59dbe425c84a3b728",
+      "agent_visual_check": "PASS"
+    },
+    {
+      "stem": "02_native_burst_onset_curves",
+      "png_sha256": "66dd1ad48ad5142e99334d25383fe6281f22c9dae83440ddafefb4fcedf2178a",
+      "agent_visual_check": "PASS"
+    },
+    {
+      "stem": "11_unthresholded_population_response",
+      "png_sha256": "9c7365f59b297f9ba9c80155b9fe605aadf6d31f54e9963ba3edaf3d9c810b0d",
+      "agent_visual_check": "PASS"
+    },
+    {
+      "stem": "03_timing_recruitment_and_rhythm",
+      "png_sha256": "f60ff8132529a39c0e5d0dc2dfe68d40359823a08ffac8e6c1cb4fecae2cf9c5",
+      "agent_visual_check": "PASS"
+    },
+    {
+      "stem": "04_intermediate_recruitment",
+      "png_sha256": "7f10f0eb14c690dd19e2b75380385a9c07ba0219a9b4e25267293a70c801331e",
+      "agent_visual_check": "PASS"
+    },
+    {
+      "stem": "05_waveform_raster_ee0.5",
+      "png_sha256": "66001ee30aa65119d4615cc3dd1b37b1a89ce8a96b6d2cbd915dc1f5b20e6fe5",
+      "agent_visual_check": "PASS"
+    },
+    {
+      "stem": "05_waveform_raster_ee0.7",
+      "png_sha256": "3be180d083dec6966aa8477e63cad5738771ca477b9b98f3bf2da1929c9a4a27",
+      "agent_visual_check": "PASS"
+    },
+    {
+      "stem": "05_waveform_raster_ee0.85",
+      "png_sha256": "41f2454bf6bcc1698893e13ee39beba5b41db8778b99c1125ce11273c663eb89",
+      "agent_visual_check": "PASS"
+    },
+    {
+      "stem": "05_waveform_raster_ee1",
+      "png_sha256": "5057b2f58108c664620a88138ca19210fa4113a2f4056fa346d53ef8473ec642",
+      "agent_visual_check": "PASS"
+    },
+    {
+      "stem": "05_waveform_raster_ee0.5_closeup",
+      "png_sha256": "6ff226953d6fe812a436d7a4d762bb5d37136a05c797e5010902c5b3a86b405c",
+      "agent_visual_check": "PASS"
+    },
+    {
+      "stem": "05_waveform_raster_ee0.7_closeup",
+      "png_sha256": "802f0d196805441308402e66677a006e756655393f016130f855c8de9c7b9326",
+      "agent_visual_check": "PASS"
+    },
+    {
+      "stem": "05_waveform_raster_ee0.85_closeup",
+      "png_sha256": "1d1f96a085065872732d3019a74ede144e22c0de1b2b8ed288e9cbea2adfa927",
+      "agent_visual_check": "PASS"
+    },
+    {
+      "stem": "05_waveform_raster_ee1_closeup",
+      "png_sha256": "66b6cf76f2eaa09edab517538e3732b53f653d390f4d4829c114cdd0eda2266c",
+      "agent_visual_check": "PASS"
+    },
+    {
+      "stem": "06_private_poisson_control",
+      "png_sha256": "074ae9638e19f0acae0e13a77f7c1dc9c8ede0614912ff5d6114f7b83321e6c8",
+      "agent_visual_check": "PASS"
+    },
+    {
+      "stem": "07_continuation_ee0.85_ou_off",
+      "png_sha256": "14b9e1ca41f08236a0e47f184ca5a262c622ddd95e93dc9394a161afd8f7abc0",
+      "agent_visual_check": "PASS"
+    },
+    {
+      "stem": "07_continuation_ee0.85_all_off_probe",
+      "png_sha256": "34b77f7452c8aa3f226b1849e253cf6814377917e136300bf9bfb2cc523e8dc8",
+      "agent_visual_check": "PASS"
+    },
+    {
+      "stem": "07_continuation_ee1.2_ou_off",
+      "png_sha256": "3962f337894251ea849de1692c44e196698eb31ba8dd4bafcc728f708dc8f60a",
+      "agent_visual_check": "PASS"
+    },
+    {
+      "stem": "07_continuation_ee1.2_all_off_probe",
+      "png_sha256": "777cca6d9e372e8fa045d6f382a0d585d7b78ffc1fabb9ce0e23b2899d15ed81",
+      "agent_visual_check": "PASS"
+    },
+    {
+      "stem": "08_deterministic_persistence",
+      "png_sha256": "78bc8d9ca8708d629df288f61d619b63e86959472c6589645825ff694889ea3d",
+      "agent_visual_check": "PASS"
+    },
+    {
+      "stem": "13_finite_pulse_response_ee0.85",
+      "png_sha256": "9bdc0f3ab693d93a761a020b0e94b995e80bf29dd1c1b53a02c53ff21caf741c",
+      "agent_visual_check": "PASS"
+    },
+    {
+      "stem": "13_finite_pulse_response_ee1.2",
+      "png_sha256": "48f36493aa85199b156422ee9b8ddf5457a63d5c2ae2cdca26e6a82b4a45e242",
+      "agent_visual_check": "PASS"
+    },
+    {
+      "stem": "14_native_recovery_ee0.85",
+      "png_sha256": "61ac2c80372edfef167b9e9052d72f085cfb2dc644296ae2e8bab012e77e52d9",
+      "agent_visual_check": "PASS"
+    },
+    {
+      "stem": "14_native_recovery_ee1.2",
+      "png_sha256": "d3d2f222d486ce48975ac7c2d18dca7986a83a0019042d459777866ef3353f80",
+      "agent_visual_check": "PASS"
+    },
+    {
+      "stem": "10_cell_isi_vs_population_iei",
+      "png_sha256": "5a4990a0de21e63346ff9401fc22886d0519a41c912f421a141162107fa7a178",
+      "agent_visual_check": "PASS"
+    },
+    {
+      "stem": "12_native_quiescent_branch_stability",
+      "png_sha256": "f2e8da4fa2879cb3561b30d1bfccf6df253bb25df3d23541ebbe8501ff330998",
+      "agent_visual_check": "PASS"
+    },
+    {
+      "stem": "09_literature_hopf_benchmark",
+      "png_sha256": "897e9bfcc5ebdd16c92e88ae2d60da44386ac99df825c69e29257279ac19bf88",
+      "agent_visual_check": "PASS"
+    }
+  ],
+  "human_acceptance": "PENDING"
+}

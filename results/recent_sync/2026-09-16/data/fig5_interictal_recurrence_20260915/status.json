@@ -1,0 +1,40 @@
+{
+  "updated_epoch": 1789484725.7715557,
+  "running": {},
+  "queued": [],
+  "finished": 6,
+  "completed_observation_horizon": 4,
+  "wall_time_censored": 2,
+  "completed": 4,
+  "failures": [],
+  "historical_postprocessing_failures": [
+    {
+      "name": "g0.166667_k0.1_tau5_s9108401",
+      "exit_code": 1
+    },
+    {
+      "name": "g0_k0.1_tau5_s9108401",
+      "exit_code": 1
+    },
+    {
+      "name": "g0_k0.1_tau1_s9108401",
+      "exit_code": 1
+    },
+    {
+      "name": "g0.5_k1.5_tau1_s9108401",
+      "exit_code": 1
+    },
+    {
+      "name": "g0.5_k1.5_tau2_s9108401",
+      "exit_code": 1
+    },
+    {
+      "name": "g0.166667_k0.1_tau1_s9108401",
+      "exit_code": 1
+    }
+  ],
+  "finalization_repaired": true,
+  "temporal_loop_passes": 0,
+  "no_new_rounds": true,
+  "deadline_epoch": 1789482891.8453493
+}

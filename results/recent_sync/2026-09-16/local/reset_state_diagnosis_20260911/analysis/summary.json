@@ -1,0 +1,22 @@
+{
+  "runs": [
+    {
+      "job": {
+        "name": "z_only_long",
+        "parent": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/reset_state_diagnosis_20260911/parents/extension_parent.pkl",
+        "horizon_ms": 1000000.0,
+        "already_recovered": true
+      },
+      "end_s": 1000.0,
+      "recurrence_observed": false,
+      "interpretation": "RIGHT_CENSORED_WITHOUT_RECURRENT_HIGH",
+      "recovery_s": null,
+      "recurrence_onset_s": null,
+      "recurrence_confirmation_s": null,
+      "reset_audit": null
+    }
+  ],
+  "statistical_unit": "one initial state x one future-noise realization",
+  "repeated_original_prefix_not_independent": true,
+  "permanent_nonrecurrence_not_inferred": true
+}

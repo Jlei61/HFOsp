@@ -1,0 +1,30 @@
+{
+  "reference_runs": [
+    {
+      "experiment": "exp2a",
+      "seed": 20260915
+    },
+    {
+      "experiment": "exp4a",
+      "seed": 20260915
+    },
+    {
+      "experiment": "exp4a",
+      "seed": 20260916
+    },
+    {
+      "experiment": "exp4b",
+      "seed": 20260915
+    },
+    {
+      "experiment": "exp4b",
+      "seed": 20260916
+    }
+  ],
+  "limit": 12,
+  "first_batch": 5,
+  "max_concurrent_reference_workers": 2,
+  "physics": "Original source equations, parameters, Gaussian sampling/normalization, zero exterior, uniform E global feedback, 15 ms synapses, native chloride plus threshold adaptation plus slow potassium. No manual resets.",
+  "software_boundary": "Source-equation port validated against independent direct-convolution NumPy. MATLAB is unavailable; numerical stream identity not claimed.",
+  "goal_boundary": "Provoked baseline source experiments verify spatial inhibition and self termination. They do not by themselves demonstrate spontaneous recurrence in the present dual-core LIF."
+}

@@ -1,0 +1,136 @@
+{
+  "status": "DEFINED_BEFORE_NEW_RUNS",
+  "jobs": [
+    {
+      "name": "eta0.0005_s9108401",
+      "eta_m": 0.0005,
+      "tau_M_s": 1.0,
+      "seed": 9108401,
+      "eta_index": -1,
+      "tau_index": 0,
+      "tau_z_ms": 5000.0,
+      "threshold": 95.19851312666987,
+      "horizon_s": 40.0,
+      "device": 0,
+      "first_entry_horizon_s": 40.0,
+      "post_first_confirmation_s": 2.0
+    },
+    {
+      "name": "eta0.0005_s9108402",
+      "eta_m": 0.0005,
+      "tau_M_s": 1.0,
+      "seed": 9108402,
+      "eta_index": -1,
+      "tau_index": 0,
+      "tau_z_ms": 5000.0,
+      "threshold": 95.19851312666987,
+      "horizon_s": 40.0,
+      "device": 1,
+      "first_entry_horizon_s": 40.0,
+      "post_first_confirmation_s": 2.0
+    }
+  ],
+  "total": 2,
+  "eta_M": [
+    0.0005
+  ],
+  "tau_M_s": [
+    1.0
+  ],
+  "seeds": [
+    9108401,
+    9108402
+  ],
+  "tau_Z_s": 5.0,
+  "I_th": 95.19851312666987,
+  "topology_seed": 6101,
+  "identity": {
+    "positions_E_sha256": "efe3931e74bd04adb9b5b00435d227c5a7fe3905dee7b74fdbbc2262172f85f6",
+    "h_sha256": "774ddac3cbf22b89f6c170577f629a7cc28f3c737c588ba30c3af55fa1ab8799",
+    "delta_vtheta_sha256": "a7b1d3645439c4b467aed4a8de764acd36ef33d776c80a10556aa443d999c0c3",
+    "vtheta_sha256": "685a0fcdbfebe0409209aacd5006ef4feb182a3aea88601bd5d180c9e176b77b",
+    "ampa_topology_sha256": "1deba253dcfefa2a565b535dd03d07a4ffa41835be922203bed5cbaa4919a17e",
+    "ampa_values_sha256": "e1f834a7d35368fb2c96b4a1c36b8f7c326b89946fa273ca951b7bce6cef6baf",
+    "gaba_topology_sha256": "e64a0388d7d388b700fe88c93aa40f2511a5b76670bab58623dcc59ffe1a6c4c",
+    "gaba_values_sha256": "fa81f16c9c823598d32598913ba141d245878b449d850d3987e956c8e78e0166"
+  },
+  "source_hashes": {
+    "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_m_parameter_modes.py": "d9c591dee748fb9850855fe5ce2b456ffced707ac2db16c3d245679a41403acc",
+    "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_weak_fast_recurrence.py": "01544f3ed63061dc2590696fafc1c424389b627d5ea7a13e1d01f8bee1ef5fda",
+    "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_reset_state_diagnosis.py": "75804a78fd08daa88a3b1422931c490245666f377784ed4d1ad7d70d27e030cd",
+    "/home/honglab/leijiaxin/HFOsp/scripts/topic4_historical_manual_z_common.py": "7d0e2a4d22c2207ac09964175e97fa3d9cd30e2153dab2e861f99f44068b8969",
+    "/home/honglab/leijiaxin/HFOsp/scripts/validate_topic4_fixed_rate_base.py": "137eca228f6f377528161aa9cd7d91b076f3fdd574cd5526869c3f634cf02d77",
+    "/home/honglab/leijiaxin/HFOsp/src/topic4_raster_protocol_engine.py": "66d464112c5ec8e13342aa1bb5786b3fb3fbd61db1be0452f3cb8640aa66bee6",
+    "/home/honglab/leijiaxin/HFOsp/src/snn_engine/mz_slow_vars.py": "cc80980ff7539ea5c9c72f3724d810b838d7e230550e905d08a437d642dd11d3",
+    "/home/honglab/leijiaxin/HFOsp/config/topic4_rate_model_dynamics_validation_v1.json": "2160f7c58a06bd11f537dd8a0fd1de149f00fcb88672240fba72a2fc6910527d",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_core_field/config/stage_config.json": "470de45715194f357396084a9cdad2f2e6a3bae044206be394d05207f2dd9fae"
+  },
+  "max_workers": 2,
+  "combined_scan_workers": 40,
+  "minimum_available_memory_GiB": 60,
+  "worker_memory_budget_GiB": 4,
+  "first_entry_horizon_s": 40,
+  "native_return_observation_s": 2,
+  "recurrence_observation_s": 60,
+  "maximum_trajectory_s": 40,
+  "post_second_entry_s": 2,
+  "intervention": "No reset, refill, or stimulation; stop 2 s after first high confirmation, or at 40 s.",
+  "M": "E-only spike increment 1; current eta_M*M; tau_M decay. eta_M*tau_M_seconds is steady adaptation current per Hz.",
+  "endpoint": "All E 10-ms rate >=200Hz continuously for 200ms. Recovery: two 1-s means<50Hz and each quiet(<5Hz) fraction>=.2. High-rate entry is not proof of sustained oscillation.",
+  "display": "All completed conditions get a full Fig5 layout; observed mode gallery chosen by distance to original M parameters, then fixed seed order, never patient match.",
+  "F": "This batch M-strength by M-timescale first-entry surface, horizon180s, paired noise n=2; old Z scan is only applicable to original M setting.",
+  "E2": "Reuse canonical Fig3C E1146/SZ3. Model first-onset readout and native field are separately measured; no substitute seizure or assumption of agreement.",
+  "stop": "Exactly two paired-noise half-M runs; no automatic further parameter search.",
+  "prelaunch_fixes": [
+    "Canary caught NumPy vector integer casting in observation counter; use scalar unsigned counters, native equations unchanged. No formal jobs launched before repair.",
+    "After canary PASS: round scheduled external restoration to exact 10-ms boundaries and integer-ms executor times; source-change detection drains dispatched workers instead of losing supervision."
+  ],
+  "total_conditions_including_reused": 8,
+  "references": [
+    {
+      "seed": 9108401,
+      "eta_m": 0.005,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_m_overnight_exploration_20260913/early_Z_lookup_dense_figures/runs/early_z_refill_s9108401",
+      "result_sha256": "442b74a28cea2a6daebd48bfd1e6a824d4107118512f05492a8116ae52d51c06",
+      "original_end_s": 37.5,
+      "display_end_s": 29.09,
+      "same_endpoint_and_refill_schedule_verified": true,
+      "additional_independent_samples": 0
+    },
+    {
+      "seed": 9108402,
+      "eta_m": 0.005,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_m_overnight_exploration_20260913/early_z_refill_branches/runs/early_z_refill_s9108402",
+      "result_sha256": "cba31473b7b0d7cf9a8c6bba63e937a1315aea1f6a8cfb05e75a11986acc384b",
+      "original_end_s": 39.0,
+      "display_end_s": 30.67,
+      "same_endpoint_and_refill_schedule_verified": true,
+      "additional_independent_samples": 0
+    }
+  ],
+  "source_protocol": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/m_parameter_modes_fig5_20260913/protocol.json",
+  "cuda_QA": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_m_overnight_exploration_20260913/cuda_ordered_scatter_qa/full_network_qa.json",
+  "approval": "2026-09-14 user requests weaker adaptation and pre-entry event-frequency test.",
+  "effective_M_zero_control": "use_m remains true to observe spike-driven M; eta_m=0 removes its current feedback exactly.",
+  "new_run_initialization": "Each new eta starts at t=0 with original seed, not a checkpoint evolved under eta=.005.",
+  "sampling": "0.1-ms native 20x20 E counts and population counts plus existing virtual contacts, raster and Z/M; committed every0.5s.",
+  "statistical_unit": "One fixed topology, two paired noise realizations; descriptive comparison.",
+  "endpoints": [
+    "First onset and confirmation",
+    "Release-Z to second onset",
+    "Recovery confirmation delay",
+    "Finite event count and durations before first entry and between recovery and second entry",
+    "Recovery quiet fraction",
+    "Actual M feedback and Z at entry"
+  ],
+  "acceptance": "Timing improvement must be present in both paired seeds, with >=2 finite events before first entry and after recovery, established recovery, and second entry. No claim of autonomous return or oscillatory seizure from high rate alone.",
+  "rendering": "Continuous ABC overview, synchronized event and transition magnifications; preserve original scaling and all 15 contacts. Original Fig3C remains unchanged.",
+  "producer": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_weaker_M_onset_pilot.py",
+  "producer_sha256": "6406c36301e59e324d5344b1a8d56490833d9d98efc9c570a4aeb879426b3f07",
+  "wrapper": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_fig5_half_m_first_entry.py",
+  "wrapper_sha256": "b19b2924a1b8f85cc8d7038cddf2f2dbedd16be6ac905cbdbe66759462ae2710",
+  "question": "Does halving eta M shorten finite events, quiet intervals or first-entry latency? Test separately.",
+  "event_observables": "Finite event count per second, duration, onset interval, postevent quiet gap, duty fraction; whole E and each core.",
+  "event_windows": "Early 0.5-3.5 s; late onset-3.5 to onset-0.5 s; exclude ongoing transition from finite events.",
+  "comparisons": "Current eta .001, new .0005, existing zero-feedback .0; exact same seeds and physical network."
+}

@@ -1,0 +1,86 @@
+{
+  "status": "PASS_AGENT_VISUAL_REVIEW_HUMAN_PENDING",
+  "created_unix": 1789250426.9303598,
+  "scope": "First complete20s zero-angle replay and one-noise progressive renderer; no parameter-effect acceptance",
+  "media_state": {
+    "source_signature": [
+      [
+        847101,
+        "/data/hfosp/topic4_sef_hfo/global_axis_residual_probe_20260913/response/units/global_axis_+0/2511_847101/workers/trajectory.json",
+        "a764265c051e4923b55b08ae2a66bd8d7180d5e72fa2d6164fb1a04ea00ea032"
+      ]
+    ],
+    "available_noises": [
+      847101
+    ],
+    "pending_noises": [
+      847102
+    ],
+    "gif_noise": 847101,
+    "updated_unix": 1789250137.2435102,
+    "scope": "Complete physical runs only; one-noise media do not establish replay consistency"
+  },
+  "artifacts": [
+    {
+      "file": "/data/hfosp/topic4_sef_hfo/global_axis_residual_probe_20260913/analysis/figures/global_axis_+0/global_axis_+0_847101_continuous_field_readout.gif",
+      "sha256": "64b24f43d2a6595b700277644701a28b008829cf17d105a688b29b5dc70393d9",
+      "frames": 150,
+      "size": [
+        1420,
+        580
+      ],
+      "frame_preview": "/data/hfosp/topic4_sef_hfo/global_axis_residual_probe_20260913/analysis/qa_global_axis_+0_847101_continuous_field_readout_six_frames.png"
+    },
+    {
+      "file": "/data/hfosp/topic4_sef_hfo/global_axis_residual_probe_20260913/analysis/figures/global_axis_+0/global_axis_+0_847101_multievent_field_readout.gif",
+      "sha256": "3910a7c261d03b6998bcfc0ed256169c64a6964ec2b4111f76627d85afd0fe48",
+      "frames": 378,
+      "size": [
+        1420,
+        580
+      ],
+      "frame_preview": "/data/hfosp/topic4_sef_hfo/global_axis_residual_probe_20260913/analysis/qa_global_axis_+0_847101_multievent_field_readout_six_frames.png"
+    },
+    {
+      "file": "/data/hfosp/topic4_sef_hfo/global_axis_residual_probe_20260913/analysis/figures/global_axis_+0/global_axis_+0_847101_multievent_field_readout_preview.png",
+      "sha256": "e26f3f846f602910ead15b5d6eba5ae4b6ab76a7efce0f1865f4d9670aa22a30",
+      "frames": 1,
+      "size": [
+        1420,
+        580
+      ]
+    },
+    {
+      "file": "/data/hfosp/topic4_sef_hfo/global_axis_residual_probe_20260913/analysis/figures/global_axis_+0/global_axis_+0_847101_same_network.pdf",
+      "sha256": "521fb330e13886dc50cac4cf3cf046d9c0646f9a47a1b6c854648ec897fb8e59"
+    },
+    {
+      "file": "/data/hfosp/topic4_sef_hfo/global_axis_residual_probe_20260913/analysis/figures/global_axis_+0/global_axis_+0_847101_same_network.png",
+      "sha256": "3e077447ca1e796eee50e3aa1791821d41bc6b48f40dbc5b4432c03f71c5f2ab",
+      "frames": 1,
+      "size": [
+        3117,
+        760
+      ]
+    },
+    {
+      "file": "/data/hfosp/topic4_sef_hfo/global_axis_residual_probe_20260913/analysis/figures/global_axis_+0/global_axis_+0_patient_spectra_model_envelopes.pdf",
+      "sha256": "8f535abf884ec2f7c8f6c5a486eb8f02859493912cc763df532ff5eb10c5a097"
+    },
+    {
+      "file": "/data/hfosp/topic4_sef_hfo/global_axis_residual_probe_20260913/analysis/figures/global_axis_+0/global_axis_+0_patient_spectra_model_envelopes.png",
+      "sha256": "e198423e82c533ecb48897652290b026b9bd4cf2a40a2ea88af4bc3472bbf6ce",
+      "frames": 1,
+      "size": [
+        2360,
+        1460
+      ]
+    }
+  ],
+  "visual_checks": [
+    "Patient and model fixed15-row grouping and explicit pending second noise",
+    "Actual20s continuous readout and lowering-only core panel",
+    "Six uniformly sampled multievent native/readout frames"
+  ],
+  "updated_unix": 1789250754.1172152
+}

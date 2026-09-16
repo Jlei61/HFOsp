@@ -1,0 +1,57 @@
+{
+  "status": "EIGHT_HOUR_REVIEW_COMPLETE_BOUNDED_QUEUES_CONTINUE",
+  "started_unix": 1789234346,
+  "review_due_unix": 1789263146,
+  "started_local": "2026-09-13T01:32:26+08:00",
+  "review_due_local": "2026-09-13T09:32:26+08:00",
+  "authorization": "2026-09-13 user: set goal, autonomous exploration for 8 hours",
+  "scope": [
+    "Finish current bounded followup and its paired confirmation",
+    "Validate and advance 108-run multi-network parameter-response continuation",
+    "Analyse TB residuals jointly with contact distributions and native movies",
+    "Update shared SNN report, plots, and completed-versus-running status"
+  ],
+  "constraints": [
+    "No threshold-raising E core",
+    "Random input remains restricted to E cores",
+    "Z/M, spatial OU and slow I remain off; GABA18ms",
+    "Fixed fitting objective and event eligibility; no route-conditioned input or new route loss",
+    "Memory-aware dispatch and preserve other running tasks",
+    "No model freeze or Fig5 acceptance"
+  ],
+  "queues": [
+    "/data/hfosp/topic4_sef_hfo/core_recruitment_tradeoff_followup_20260912",
+    "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913",
+    "/data/hfosp/topic4_sef_hfo/global_axis_residual_probe_20260913"
+  ],
+  "at_review": "Stop discretionary expansion; report actual completed and running work. Already authorized bounded runs may finish; do not kill trajectories or misreport 108 as complete.",
+  "followup_decision": "If time and bounded responses justify another physical probe, record explicit parameter contrast, direct control, seed identity, scientific question and count before dispatch; do not widen search just because TB remains poor.",
+  "bounded_additional_probe": {
+    "path": "/data/hfosp/topic4_sef_hfo/global_axis_residual_probe_20260913",
+    "formal_budget": 6,
+    "duration_ms": 20000,
+    "canaries": 3,
+    "one_parameter": "EE_angle_offset_deg",
+    "dispatch_deadline_unix": 1789263146
+  },
+  "latest_progress": "progress_0843.json",
+  "latest_scientific_finding": "position_new_noise_replay/scientific_note.md",
+  "latest_native_review": "tb_core_timing_native_review/scientific_note.md",
+  "latest_review": "review_window_close_0932/interpretation_addendum.md",
+  "latest_review_pdf": "review_window_close_0932/overnight_review.pdf",
+  "first_noise_media_process": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/analysis/first_noise_review/process.json",
+  "resource_amendment": "../core_multiseed_response_curves_20260913/early_ten_resource_amendment.json",
+  "geometry_confirmation_addendum": "geometry_confirmation_effects/scientific_note.md",
+  "active_wait_handle": {
+    "exec_session_id": 33599,
+    "monitor_pid": 463460,
+    "mode": "continuous read-only completion watcher until09:32"
+  },
+  "latest_input_audit": "geometry_confirmation_effects/ou_input_interpretation.md",
+  "latest_core_contact_audit": "geometry_confirmation_effects/core_contact_timing/scientific_note.md",
+  "latest_axis_response": "../global_axis_residual_probe_20260913/analysis/three_angle_first_noise/scientific_note.md",
+  "reviewed_unix": 1789263252.9170527,
+  "final_status": "window_closeout.json",
+  "shared_report": "/home/honglab/leijiaxin/HFOsp/docs/snn_model_report_current.md",
+  "previous_shared_report_sha256": "82d898fd1ad70ce0ad4481be6bdcc2cd7c5e9704892bd053c0cfb1fec84bd2ae"
+}

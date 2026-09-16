@@ -1,0 +1,25 @@
+{
+ "scope": "launch/reference artifacts only; does not authorize G4 or accept dual-mode recovery",
+ "review_type": "ACTUAL_AGENT_SAMPLED_FIGURE_REVIEW",
+ "inspected_files": [
+  {
+   "path": "/data/hfosp/topic4_sef_hfo/geometry_ee_axis_three_observable_optimization_20260914/analysis/figures/patient_model_raw_observables.png",
+   "sha256": "3be94637f80062f38492f96383d67e1aa3933a055df2bcafcb17c59958e4b38f"
+  },
+  {
+   "path": "/data/hfosp/topic4_sef_hfo/geometry_ee_axis_three_observable_optimization_20260914/analysis/native_review/bridge_circle_out125_xminus075/2511_847401/patient_mean_native_multievent_preview.png",
+   "sha256": "d1a43751b16450bcadd3f2c0abfe19945911186bec3ed4efeeb252ec8eade0b4"
+  },
+  {
+   "path": "/data/hfosp/topic4_sef_hfo/geometry_ee_axis_three_observable_optimization_20260914/analysis/native_review/bridge_circle_out125_xminus075/2511_847401/agent_sampled_frames.png",
+   "sha256": "88fefd8c8213883329f292f370996031513c8cd03a935945374e3bf89e20d318"
+  }
+ ],
+ "observations": [
+  "SCL9-6 then ICL11-1 fixed in patient/model panels; no lines join shafts",
+  "Mean patient centroids and 5-95 percent intervals are distinct from model firing envelopes",
+  "Sampled TA/TB native frames show all E activity, including activity outside cores after recruitment",
+  "TB rod lag and SCL order discrepancies remain visible in reference; no recovery claim"
+ ],
+ "human_visual_review": "PENDING"
+}

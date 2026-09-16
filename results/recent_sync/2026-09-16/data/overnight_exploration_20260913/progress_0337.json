@@ -1,0 +1,229 @@
+{
+  "updated_unix": 1789241878.9443974,
+  "goal": "ACTIVE",
+  "review_due": "2026-09-13 09:32:26 Asia/Shanghai",
+  "controllers": {
+    "F": 3191741,
+    "N": 88283,
+    "G": 55657
+  },
+  "observers": {
+    "F": 4189430,
+    "N": 17198
+  },
+  "queues": {
+    "F": {
+      "status": "RESPONSE_RUNNING",
+      "stage": "response",
+      "total": 60,
+      "complete": 54,
+      "queued": 0,
+      "active": [
+        {
+          "pid": 3965604,
+          "unit": [
+            "up3__ellipse4__EI_same_core_scale_0.75__y_plus10",
+            2511,
+            847101
+          ],
+          "rss_gib": 2.014251708984375
+        },
+        {
+          "pid": 4063749,
+          "unit": [
+            "up3__ellipse4__EI_same_core_scale_0.75__y_plus10",
+            2511,
+            847102
+          ],
+          "rss_gib": 2.0040321350097656
+        },
+        {
+          "pid": 4070465,
+          "unit": [
+            "up3__ellipse4__EI_same_core_scale_0.75__radius205",
+            2511,
+            847101
+          ],
+          "rss_gib": 1.9997329711914062
+        },
+        {
+          "pid": 4125167,
+          "unit": [
+            "up3__ellipse4__EI_same_core_scale_0.75__radius205",
+            2511,
+            847102
+          ],
+          "rss_gib": 1.9942741394042969
+        },
+        {
+          "pid": 4151252,
+          "unit": [
+            "up3__ellipse4__EI_same_core_scale_0.75__radius235",
+            2511,
+            847101
+          ],
+          "rss_gib": 1.9885940551757812
+        },
+        {
+          "pid": 4168996,
+          "unit": [
+            "up3__ellipse4__EI_same_core_scale_0.75__radius235",
+            2511,
+            847102
+          ],
+          "rss_gib": 1.9901542663574219
+        }
+      ],
+      "max_workers": 20,
+      "peak_rss_gib": 2.9343299865722656,
+      "available_gib": 123.8844223022461,
+      "failures": [],
+      "updated_unix": 1789241878.3204021
+    },
+    "N": {
+      "status": "RESPONSE_RUNNING",
+      "stage": "response",
+      "total": 108,
+      "complete": 0,
+      "queued": 104,
+      "active": [
+        {
+          "pid": 4078535,
+          "unit": [
+            "bridge_circle_out125",
+            2511,
+            847401
+          ],
+          "rss_gib": 1.995086669921875
+        },
+        {
+          "pid": 4078701,
+          "unit": [
+            "bridge_circle_out125_xminus075",
+            2511,
+            847401
+          ],
+          "rss_gib": 1.9970359802246094
+        },
+        {
+          "pid": 4151248,
+          "unit": [
+            "bridge_circle_out125",
+            2711,
+            847401
+          ],
+          "rss_gib": 2.0906982421875
+        },
+        {
+          "pid": 15948,
+          "unit": [
+            "bridge_circle_out125_xminus075",
+            2711,
+            847401
+          ],
+          "rss_gib": 1.9827156066894531
+        }
+      ],
+      "max_workers": 4,
+      "previous_running": true,
+      "predecessor_active": 6,
+      "predecessor_growth_gib": 42.009037017822266,
+      "own_growth_gib": 27.934463500976562,
+      "optional_probe_active": 1,
+      "optional_probe_growth_gib": 7.020191192626953,
+      "optional_probe_priority": true,
+      "available_gib": 123.73522186279297,
+      "required_gib": 125.96369171142578,
+      "peak_rss_gib": 0.0,
+      "failures": [],
+      "updated_unix": 1789241873.8396854
+    },
+    "G": {
+      "status": "CANARY_RUNNING",
+      "stage": "canary",
+      "total": 3,
+      "complete": 0,
+      "pending": [
+        [
+          "global_axis_-15",
+          2511,
+          847101
+        ],
+        [
+          "global_axis_+15",
+          2511,
+          847101
+        ]
+      ],
+      "active": [
+        {
+          "pid": 88712,
+          "unit": [
+            "global_axis_+0",
+            2511,
+            847101
+          ],
+          "rss_gib": 1.9798088073730469
+        }
+      ],
+      "shared_active": [
+        {
+          "pid": 3965604,
+          "rss_gib": 2.0142478942871094
+        },
+        {
+          "pid": 4063749,
+          "rss_gib": 2.0040283203125
+        },
+        {
+          "pid": 4070465,
+          "rss_gib": 1.9997291564941406
+        },
+        {
+          "pid": 4125167,
+          "rss_gib": 1.9942245483398438
+        },
+        {
+          "pid": 4151252,
+          "rss_gib": 1.98858642578125
+        },
+        {
+          "pid": 4168996,
+          "rss_gib": 1.9901504516601562
+        },
+        {
+          "pid": 4078535,
+          "rss_gib": 1.995086669921875
+        },
+        {
+          "pid": 4078701,
+          "rss_gib": 1.9970932006835938
+        },
+        {
+          "pid": 4151248,
+          "rss_gib": 2.0906982421875
+        },
+        {
+          "pid": 15948,
+          "rss_gib": 1.9827194213867188
+        }
+      ],
+      "available_gib": 123.82638931274414,
+      "required_gib": 125.96362686157227,
+      "failures": [],
+      "updated_unix": 1789241874.369759
+    }
+  },
+  "physical_workers_restarted": 0,
+  "new_scientific_artifacts": [
+    "completed_parameter_effects",
+    "workpoint_tradeoffs",
+    "core_phase_tb_fold"
+  ],
+  "next_actions": [
+    "Validate actual G canary outputs and baseline prefix before formal six20s probes.",
+    "Inspect newly complete F y-minus geometry pairs without altering nomination.",
+    "Analyze new N response pairs as outputs appear; the whole108 is not expected within8h.",
+    "When G outputs arrive, separate within-core-timing-group path changes from changes in group proportions; do not modify loss."
+  ]
+}

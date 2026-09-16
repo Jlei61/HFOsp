@@ -1,0 +1,74 @@
+{
+ "time": "2026-09-15T11:58:13.862663+08:00",
+ "unix": 1789444693.8626547,
+ "stages": {
+  "adaptive": {
+   "complete": 32,
+   "runaway": 0,
+   "scored": 32,
+   "eligible_events": 4956
+  },
+  "confirmation": {
+   "complete": 8,
+   "runaway": 0,
+   "scored": 8,
+   "eligible_events": 1261
+  },
+  "initial": {
+   "complete": 32,
+   "runaway": 0,
+   "scored": 32,
+   "eligible_events": 4630
+  }
+ },
+ "physical_complete": 72,
+ "new_physical_complete": 64,
+ "active": [],
+ "processes": [
+  {
+   "role": "initial_controller_process",
+   "pid": 66761,
+   "alive": false
+  },
+  {
+   "role": "optimizer_process",
+   "pid": 69704,
+   "alive": false
+  },
+  {
+   "role": "media_process",
+   "pid": 81882,
+   "alive": false
+  },
+  {
+   "role": "diagnostics_process",
+   "pid": 69706,
+   "alive": false
+  },
+  {
+   "role": "observer_process",
+   "pid": 91643,
+   "alive": false
+  },
+  {
+   "role": "rotation_process",
+   "pid": 68834,
+   "alive": false
+  },
+  {
+   "role": "graph_builder_process",
+   "pid": 68614,
+   "alive": false
+  }
+ ],
+ "failures": [],
+ "available_GiB": 193.7064094543457,
+ "optimizer": {
+  "status": "ROUND_COMPLETE_PARTIAL_RECOVERY_G4_NOT_STARTED",
+  "updated_unix": 1789444609.40982,
+  "completion": "/data/hfosp/topic4_sef_hfo/geometry_ee_axis_three_observable_optimization_20260914/optimization_complete.json"
+ },
+ "native_review_pending": false,
+ "window_end_reached": true,
+ "remaining_hours": 0
+}

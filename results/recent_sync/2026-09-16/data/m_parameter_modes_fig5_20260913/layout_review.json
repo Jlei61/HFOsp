@@ -1,0 +1,20 @@
+{
+  "status": "LAYOUT_AND_DATA_LINKS_CHECKED_PENDING_USER_REVIEW",
+  "checked_figures": [
+    "layout_qa/figures/existing_trajectory_full_layout.png",
+    "layout_qa/figures/existing_trajectory_transition_zoom.png",
+    "layout_qa_no_entry/figures/canary_layout_only.png"
+  ],
+  "source": "Existing240s actual trajectory plus1s native canary; not new40-run results",
+  "checks": [
+    "A/B/C aligned time axes and markers",
+    "One fixed amplitude scale per contact and full trace; no clipping",
+    "Separate C legend and D header, legible E2 spacing",
+    "Missing stages explicitly absent",
+    "Canonical Fig3C reused unchanged",
+    "Right-side continuous time colorbar, focused actual3D trajectory"
+  ],
+  "scientific_acceptance": false,
+  "model_energy_note": "Old240s example has positive spatial rank association but0/15 model contacts above baseline in the declared1-150Hz early window; not accepted as early energy enhancement.",
+  "pending": "Human figure review and all new40-trial results. Final4-tick locator adjustment is routine; visual review screenshots predate that tick-only adjustment."
+}

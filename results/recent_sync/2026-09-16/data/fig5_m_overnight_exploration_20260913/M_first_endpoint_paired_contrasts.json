@@ -1,0 +1,43 @@
+{
+  "status": "DESCRIPTIVE_COMPLETE_FIRST_ENDPOINT_PAIRS",
+  "contrasts": [
+    {
+      "contrast": "tau_M1_to2_at_eta005",
+      "paired_noise_trajectories": [
+        {
+          "seed": 9108401,
+          "from_s": 10.790000000000001,
+          "to_s": 11.92,
+          "difference_s": 1.129999999999999
+        },
+        {
+          "seed": 9108402,
+          "from_s": 13.94,
+          "to_s": 13.41,
+          "difference_s": -0.5299999999999994
+        }
+      ]
+    },
+    {
+      "contrast": "eta005_to010_at_tau2",
+      "paired_noise_trajectories": [
+        {
+          "seed": 9108401,
+          "from_s": 11.92,
+          "to_s": 16.63,
+          "difference_s": 4.709999999999999
+        },
+        {
+          "seed": 9108402,
+          "from_s": 13.41,
+          "to_s": 19.71,
+          "difference_s": 6.300000000000001
+        }
+      ]
+    }
+  ],
+  "independent_noise_seeds": 2,
+  "original_full_followups_complete": false,
+  "new_metrics_or_hypothesis_tests": false,
+  "source": "m_parameter_modes_fig5_20260913/analysis_summary.json"
+}

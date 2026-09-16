@@ -1,0 +1,907 @@
+{
+  "status": "COMPLETE_PASS_AGENT_VISUAL_REVIEW_HUMAN_PENDING",
+  "measurement_version": "native_burst_metrics_v2_frequency_standardized_ordering",
+  "budget": {
+    "grid": 50,
+    "noise_off": 6,
+    "new_network": 6,
+    "total": 62
+  },
+  "completed_runs": 62,
+  "grid_counts": {
+    "coreAE": {
+      "variable_bursts": 10,
+      "background": 17,
+      "regular_bursts": 10,
+      "sparse_bursts": 6,
+      "irregular_bursts": 6,
+      "patterned_bursts": 1
+    },
+    "coreBE": {
+      "variable_bursts": 10,
+      "background": 14,
+      "regular_bursts": 10,
+      "sparse_bursts": 9,
+      "irregular_bursts": 7
+    },
+    "coreUnionE": {
+      "patterned_bursts": 8,
+      "irregular_bursts": 14,
+      "background": 18,
+      "variable_bursts": 3,
+      "regular_bursts": 1,
+      "sparse_bursts": 6
+    }
+  },
+  "actual_duration_ms_counts": {
+    "20000.0": 62
+  },
+  "runaway_runs": 0,
+  "threshold_stable_runs": {
+    "coreAE": 43,
+    "coreBE": 42,
+    "coreUnionE": 43
+  },
+  "cell_consensus": {
+    "coreAE": [
+      {
+        "ee": 0.5,
+        "depth": 0.0,
+        "labels": [
+          "background",
+          "background"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 0.7,
+        "depth": 0.0,
+        "labels": [
+          "background",
+          "background"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 0.85,
+        "depth": 0.0,
+        "labels": [
+          "background",
+          "background"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 1.0,
+        "depth": 0.0,
+        "labels": [
+          "sparse_bursts",
+          "background"
+        ],
+        "agreement": false,
+        "robust_irregular": false
+      },
+      {
+        "ee": 1.2,
+        "depth": 0.0,
+        "labels": [
+          "sparse_bursts",
+          "sparse_bursts"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 0.5,
+        "depth": 0.4,
+        "labels": [
+          "background",
+          "background"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 0.7,
+        "depth": 0.4,
+        "labels": [
+          "background",
+          "background"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 0.85,
+        "depth": 0.4,
+        "labels": [
+          "sparse_bursts",
+          "irregular_bursts"
+        ],
+        "agreement": false,
+        "robust_irregular": false
+      },
+      {
+        "ee": 1.0,
+        "depth": 0.4,
+        "labels": [
+          "irregular_bursts",
+          "irregular_bursts"
+        ],
+        "agreement": true,
+        "robust_irregular": true
+      },
+      {
+        "ee": 1.2,
+        "depth": 0.4,
+        "labels": [
+          "variable_bursts",
+          "patterned_bursts"
+        ],
+        "agreement": false,
+        "robust_irregular": false
+      },
+      {
+        "ee": 0.5,
+        "depth": 0.7,
+        "labels": [
+          "background",
+          "background"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 0.7,
+        "depth": 0.7,
+        "labels": [
+          "sparse_bursts",
+          "sparse_bursts"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 0.85,
+        "depth": 0.7,
+        "labels": [
+          "variable_bursts",
+          "irregular_bursts"
+        ],
+        "agreement": false,
+        "robust_irregular": false
+      },
+      {
+        "ee": 1.0,
+        "depth": 0.7,
+        "labels": [
+          "variable_bursts",
+          "variable_bursts"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 1.2,
+        "depth": 0.7,
+        "labels": [
+          "variable_bursts",
+          "variable_bursts"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 0.5,
+        "depth": 1.0,
+        "labels": [
+          "background",
+          "background"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 0.7,
+        "depth": 1.0,
+        "labels": [
+          "irregular_bursts",
+          "irregular_bursts"
+        ],
+        "agreement": true,
+        "robust_irregular": true
+      },
+      {
+        "ee": 0.85,
+        "depth": 1.0,
+        "labels": [
+          "variable_bursts",
+          "variable_bursts"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 1.0,
+        "depth": 1.0,
+        "labels": [
+          "regular_bursts",
+          "regular_bursts"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 1.2,
+        "depth": 1.0,
+        "labels": [
+          "regular_bursts",
+          "regular_bursts"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 0.5,
+        "depth": 1.3,
+        "labels": [
+          "background",
+          "background"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 0.7,
+        "depth": 1.3,
+        "labels": [
+          "variable_bursts",
+          "variable_bursts"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 0.85,
+        "depth": 1.3,
+        "labels": [
+          "regular_bursts",
+          "regular_bursts"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 1.0,
+        "depth": 1.3,
+        "labels": [
+          "regular_bursts",
+          "regular_bursts"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 1.2,
+        "depth": 1.3,
+        "labels": [
+          "regular_bursts",
+          "regular_bursts"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      }
+    ],
+    "coreBE": [
+      {
+        "ee": 0.5,
+        "depth": 0.0,
+        "labels": [
+          "background",
+          "background"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 0.7,
+        "depth": 0.0,
+        "labels": [
+          "background",
+          "background"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 0.85,
+        "depth": 0.0,
+        "labels": [
+          "background",
+          "background"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 1.0,
+        "depth": 0.0,
+        "labels": [
+          "sparse_bursts",
+          "background"
+        ],
+        "agreement": false,
+        "robust_irregular": false
+      },
+      {
+        "ee": 1.2,
+        "depth": 0.0,
+        "labels": [
+          "sparse_bursts",
+          "sparse_bursts"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 0.5,
+        "depth": 0.4,
+        "labels": [
+          "background",
+          "background"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 0.7,
+        "depth": 0.4,
+        "labels": [
+          "sparse_bursts",
+          "background"
+        ],
+        "agreement": false,
+        "robust_irregular": false
+      },
+      {
+        "ee": 0.85,
+        "depth": 0.4,
+        "labels": [
+          "sparse_bursts",
+          "irregular_bursts"
+        ],
+        "agreement": false,
+        "robust_irregular": false
+      },
+      {
+        "ee": 1.0,
+        "depth": 0.4,
+        "labels": [
+          "irregular_bursts",
+          "irregular_bursts"
+        ],
+        "agreement": true,
+        "robust_irregular": true
+      },
+      {
+        "ee": 1.2,
+        "depth": 0.4,
+        "labels": [
+          "variable_bursts",
+          "irregular_bursts"
+        ],
+        "agreement": false,
+        "robust_irregular": false
+      },
+      {
+        "ee": 0.5,
+        "depth": 0.7,
+        "labels": [
+          "background",
+          "background"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 0.7,
+        "depth": 0.7,
+        "labels": [
+          "sparse_bursts",
+          "sparse_bursts"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 0.85,
+        "depth": 0.7,
+        "labels": [
+          "irregular_bursts",
+          "variable_bursts"
+        ],
+        "agreement": false,
+        "robust_irregular": false
+      },
+      {
+        "ee": 1.0,
+        "depth": 0.7,
+        "labels": [
+          "variable_bursts",
+          "variable_bursts"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 1.2,
+        "depth": 0.7,
+        "labels": [
+          "variable_bursts",
+          "variable_bursts"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 0.5,
+        "depth": 1.0,
+        "labels": [
+          "background",
+          "background"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 0.7,
+        "depth": 1.0,
+        "labels": [
+          "irregular_bursts",
+          "irregular_bursts"
+        ],
+        "agreement": true,
+        "robust_irregular": true
+      },
+      {
+        "ee": 0.85,
+        "depth": 1.0,
+        "labels": [
+          "variable_bursts",
+          "variable_bursts"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 1.0,
+        "depth": 1.0,
+        "labels": [
+          "regular_bursts",
+          "regular_bursts"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 1.2,
+        "depth": 1.0,
+        "labels": [
+          "regular_bursts",
+          "regular_bursts"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 0.5,
+        "depth": 1.3,
+        "labels": [
+          "sparse_bursts",
+          "sparse_bursts"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 0.7,
+        "depth": 1.3,
+        "labels": [
+          "variable_bursts",
+          "variable_bursts"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 0.85,
+        "depth": 1.3,
+        "labels": [
+          "regular_bursts",
+          "regular_bursts"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 1.0,
+        "depth": 1.3,
+        "labels": [
+          "regular_bursts",
+          "regular_bursts"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 1.2,
+        "depth": 1.3,
+        "labels": [
+          "regular_bursts",
+          "regular_bursts"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      }
+    ],
+    "coreUnionE": [
+      {
+        "ee": 0.5,
+        "depth": 0.0,
+        "labels": [
+          "background",
+          "background"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 0.7,
+        "depth": 0.0,
+        "labels": [
+          "background",
+          "background"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 0.85,
+        "depth": 0.0,
+        "labels": [
+          "background",
+          "background"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 1.0,
+        "depth": 0.0,
+        "labels": [
+          "sparse_bursts",
+          "background"
+        ],
+        "agreement": false,
+        "robust_irregular": false
+      },
+      {
+        "ee": 1.2,
+        "depth": 0.0,
+        "labels": [
+          "sparse_bursts",
+          "sparse_bursts"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 0.5,
+        "depth": 0.4,
+        "labels": [
+          "background",
+          "background"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 0.7,
+        "depth": 0.4,
+        "labels": [
+          "background",
+          "background"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 0.85,
+        "depth": 0.4,
+        "labels": [
+          "sparse_bursts",
+          "irregular_bursts"
+        ],
+        "agreement": false,
+        "robust_irregular": false
+      },
+      {
+        "ee": 1.0,
+        "depth": 0.4,
+        "labels": [
+          "irregular_bursts",
+          "patterned_bursts"
+        ],
+        "agreement": false,
+        "robust_irregular": false
+      },
+      {
+        "ee": 1.2,
+        "depth": 0.4,
+        "labels": [
+          "irregular_bursts",
+          "irregular_bursts"
+        ],
+        "agreement": true,
+        "robust_irregular": true
+      },
+      {
+        "ee": 0.5,
+        "depth": 0.7,
+        "labels": [
+          "background",
+          "background"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 0.7,
+        "depth": 0.7,
+        "labels": [
+          "sparse_bursts",
+          "background"
+        ],
+        "agreement": false,
+        "robust_irregular": false
+      },
+      {
+        "ee": 0.85,
+        "depth": 0.7,
+        "labels": [
+          "irregular_bursts",
+          "irregular_bursts"
+        ],
+        "agreement": true,
+        "robust_irregular": true
+      },
+      {
+        "ee": 1.0,
+        "depth": 0.7,
+        "labels": [
+          "patterned_bursts",
+          "patterned_bursts"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 1.2,
+        "depth": 0.7,
+        "labels": [
+          "irregular_bursts",
+          "irregular_bursts"
+        ],
+        "agreement": true,
+        "robust_irregular": true
+      },
+      {
+        "ee": 0.5,
+        "depth": 1.0,
+        "labels": [
+          "background",
+          "background"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 0.7,
+        "depth": 1.0,
+        "labels": [
+          "irregular_bursts",
+          "sparse_bursts"
+        ],
+        "agreement": false,
+        "robust_irregular": false
+      },
+      {
+        "ee": 0.85,
+        "depth": 1.0,
+        "labels": [
+          "patterned_bursts",
+          "irregular_bursts"
+        ],
+        "agreement": false,
+        "robust_irregular": false
+      },
+      {
+        "ee": 1.0,
+        "depth": 1.0,
+        "labels": [
+          "irregular_bursts",
+          "irregular_bursts"
+        ],
+        "agreement": true,
+        "robust_irregular": true
+      },
+      {
+        "ee": 1.2,
+        "depth": 1.0,
+        "labels": [
+          "variable_bursts",
+          "variable_bursts"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 0.5,
+        "depth": 1.3,
+        "labels": [
+          "background",
+          "background"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 0.7,
+        "depth": 1.3,
+        "labels": [
+          "irregular_bursts",
+          "irregular_bursts"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 0.85,
+        "depth": 1.3,
+        "labels": [
+          "patterned_bursts",
+          "patterned_bursts"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 1.0,
+        "depth": 1.3,
+        "labels": [
+          "patterned_bursts",
+          "patterned_bursts"
+        ],
+        "agreement": true,
+        "robust_irregular": false
+      },
+      {
+        "ee": 1.2,
+        "depth": 1.3,
+        "labels": [
+          "variable_bursts",
+          "regular_bursts"
+        ],
+        "agreement": false,
+        "robust_irregular": false
+      }
+    ]
+  },
+  "combined_only_irregular_runs": [
+    "ee0.85_d1_n1_t2511_s848102",
+    "ee1.2_d0.4_n1_t2511_s848101",
+    "ee1.2_d0.7_n1_t2511_s848101",
+    "ee1_d1_n1_t2511_s848101",
+    "ee0.7_d1.3_n1_t2511_s848101",
+    "ee1.2_d0.7_n1_t2511_s848102",
+    "ee1_d1_n1_t2511_s848102",
+    "ee0.7_d1.3_n1_t2511_s848102"
+  ],
+  "both_cores_repeated_threshold_stable_irregular_cells": [
+    [
+      1.0,
+      0.4
+    ],
+    [
+      0.7,
+      1.0
+    ]
+  ],
+  "noise_off_zero_burst_runs": 6,
+  "examples": [
+    {
+      "name": "ee0.85_d0_n1_t2511_s848101",
+      "group": "coreAE",
+      "label": "background",
+      "selection": "same-core paired label and threshold agreement preferred; median firing rate in retained class pool; threshold-stable first",
+      "paired_label_threshold_agreement": true,
+      "raster_window_s": [
+        2,
+        7
+      ]
+    },
+    {
+      "name": "ee0.7_d1_n1_t2511_s848102",
+      "group": "coreAE",
+      "label": "irregular_bursts",
+      "selection": "same-core paired label and threshold agreement preferred; median firing rate in retained class pool; threshold-stable first",
+      "paired_label_threshold_agreement": true,
+      "raster_window_s": [
+        2,
+        7
+      ]
+    },
+    {
+      "name": "ee1_d1.3_n1_t2511_s848101",
+      "group": "coreAE",
+      "label": "regular_bursts",
+      "selection": "same-core paired label and threshold agreement preferred; median firing rate in retained class pool; threshold-stable first",
+      "paired_label_threshold_agreement": true,
+      "raster_window_s": [
+        2,
+        7
+      ]
+    },
+    {
+      "name": "ee1.2_d0.4_n1_t2511_s848102",
+      "group": "coreAE",
+      "label": "patterned_bursts",
+      "selection": "same-core paired label and threshold agreement preferred; median firing rate in retained class pool; threshold-stable first",
+      "paired_label_threshold_agreement": false,
+      "raster_window_s": [
+        2,
+        7
+      ]
+    },
+    {
+      "name": "ee1_d0.7_n1_t2511_s848101",
+      "group": "coreAE",
+      "label": "variable_bursts",
+      "selection": "same-core paired label and threshold agreement preferred; median firing rate in retained class pool; threshold-stable first",
+      "paired_label_threshold_agreement": true,
+      "raster_window_s": [
+        2,
+        7
+      ]
+    },
+    {
+      "name": "ee1.2_d0_n1_t2511_s848101",
+      "group": "coreBE",
+      "label": "sparse_bursts",
+      "selection": "same-core paired label and threshold agreement preferred; median firing rate in retained class pool; threshold-stable first",
+      "paired_label_threshold_agreement": true,
+      "raster_window_s": [
+        2,
+        7
+      ]
+    }
+  ],
+  "figure_human_review": "PENDING",
+  "patient_mechanism_accepted": false,
+  "model_frozen": false,
+  "active_physical_workers": 0,
+  "four_state_waveform_raster_companion": {
+    "figure": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/burst_regime_map_20260914/figures/native_burst_four_states_waveform_raster.png",
+    "metadata": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/burst_regime_map_20260914/figures/native_burst_four_states_waveform_raster.json",
+    "status": "COMPACT_VIEW_CHANGES_REQUESTED_READABILITY"
+  },
+  "large_state_waveform_raster_figures": {
+    "status": "PASS_AGENT_VISUAL_REVIEW_HUMAN_PENDING",
+    "n_figures": 12,
+    "booklet": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/burst_regime_map_20260914/figures/four_state_detail/four_states_large_rasters.pdf",
+    "manifest": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/burst_regime_map_20260914/figures/four_state_detail/figure_manifest.json"
+  }
+}

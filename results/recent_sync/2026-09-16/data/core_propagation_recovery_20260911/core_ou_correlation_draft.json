@@ -1,0 +1,26 @@
+{
+  "status": "DRAFT_NOT_ENABLED_NO_SNN_RUN",
+  "driver_metadata": {
+    "rho": 0.5,
+    "common_loading": 0.7071067811865476,
+    "independent_loading": 0.7071067811865476,
+    "stationary_std_per_ms": 0.028578838324886478,
+    "discrete_a": 0.9993335555061812,
+    "discrete_b": 0.0010432038739186596,
+    "independent_seed_namespace": [
+      847101,
+      20260911,
+      201
+    ],
+    "initial_state": [
+      0.0,
+      0.0
+    ],
+    "mean_scale": 0.95,
+    "law": "Same marginal OU law, different between-core correlation, before nonnegative-rate clipping.",
+    "no_input": "No patient labels, detections, core activation times or routes are consumed."
+  },
+  "offline_steps": 10000,
+  "tested": "Identical drive replay, same rate within each core, exact zero outside, squared mixture loadings sum to one.",
+  "boundary": "No simulation identity canary yet. Do not use this in current final_A. A separate frozen decision and executor application check are required before physical use."
+}

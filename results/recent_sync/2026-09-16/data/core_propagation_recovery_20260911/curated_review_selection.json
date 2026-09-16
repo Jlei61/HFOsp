@@ -1,0 +1,42 @@
+{
+  "status": "DESCRIPTIVE_REVIEW_SELECTION_NOT_MODEL_FREEZE",
+  "rule": "Choose conditions to expose the principal observed tradeoffs; each model event is selected by the unchanged own-run-mode mean rule. Conditions are not independent held-out tests after developmental selection.",
+  "items": [
+    {
+      "phase": "long",
+      "population": "primary",
+      "candidate": "refine_mid_EE075",
+      "topology": 2511,
+      "seed": 847101,
+      "title": "参与补齐，但TA的SCL仍过晚",
+      "interpretation": "两条60秒重演各有12/15个合格TA；上部SCL参与概率均为1，ICL平均参与约0.99/0.93。然而TA的SCL相对ICL质心时差中位仍约+109/+107ms，患者为−9ms。TB末端顺序也偏向患者分布的一侧。它是本阶段可评分条件中联合分数最低者，仍不接受双模式恢复。"
+    },
+    {
+      "phase": "long",
+      "population": "all",
+      "candidate": "refine_near_EE085_A115",
+      "topology": 2511,
+      "seed": 847102,
+      "title": "增强左核易激性：TA标签多，ICL缺口仍在",
+      "interpretation": "近SCL位置只将左核阈值降幅乘1.15后，两条重演的全检测TA占比约93%/85%；此页为全检测开发层，不替代原合格集合。示例显示ICL缺段，核心完整活动又有周期关系变化；更多TA标签不是恢复患者完整TA传播。"
+    },
+    {
+      "phase": "final_A",
+      "population": "primary",
+      "candidate": "refine_midpoint_EE085_A115_mean095",
+      "topology": 2511,
+      "seed": 847101,
+      "title": "较低分数与较早SCL，仍伴随左端参与缺失",
+      "interpretation": "中点EE0.85、均值0.95、左核降幅1.15，两噪声TA为9/8个，典型例缺失ICL左端及SCL8/9；TA杆间时差中位转负，却同时改变了参与触点集合。它的训练分数相对更低，不代表完整患者传播改善。"
+    },
+    {
+      "phase": "final_B",
+      "population": "primary",
+      "candidate": "coreOU_mid_EE085_mean095_rho000",
+      "topology": 2511,
+      "seed": 847101,
+      "title": "独立核心输入增加TA，条件路径仍未恢复",
+      "interpretation": "两条60秒重演各有22个合格TA，但常见TA的上部SCL仍晚约91–93ms；TB的ICL11早于ICL9概率9.6%/14.6%，患者69.4%。此条件用来展示输入访问与实际传播的区别，不是最低分提名或传播验收。"
+    }
+  ]
+}

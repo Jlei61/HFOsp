@@ -1,0 +1,37 @@
+{
+  "grids": [
+    {
+      "N": 256,
+      "period_ms": 274.3561874484585,
+      "residual_hz": 6.7584826624056404e-12,
+      "global_mean_hz": 5.495524030320148,
+      "global_minimum_hz": 0.021816168801526717,
+      "global_maximum_hz": 22.532814207688567,
+      "unit_minimum_hz": -0.32441696682586907
+    },
+    {
+      "N": 512,
+      "period_ms": 274.3564301351661,
+      "residual_hz": 9.931472033652966e-07,
+      "global_mean_hz": 5.495666296213985,
+      "global_minimum_hz": 0.02204831516280088,
+      "global_maximum_hz": 22.53253230901884,
+      "unit_minimum_hz": -0.014423131266486783
+    },
+    {
+      "N": 1024,
+      "period_ms": 274.3564248982273,
+      "residual_hz": 3.1405134048867467e-07,
+      "global_mean_hz": 5.49566628855484,
+      "global_minimum_hz": 0.02204932106930514,
+      "global_maximum_hz": 22.53251552319502,
+      "unit_minimum_hz": -2.0313405388328043e-05
+    }
+  ],
+  "comparison_512_to_1024": {
+    "global_waveform_maximum_difference_hz": 0.0001453504081423418,
+    "global_waveform_rms_difference_hz": 1.22573647486135e-05
+  },
+  "fine_grid_display_acceptance": "PASS_NUMERICAL_WAVEFORM",
+  "cycle_stability": "NOT_CLASSIFIED"
+}

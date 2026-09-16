@@ -1,0 +1,53 @@
+{
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/reset_state_diagnosis_20260911/parents/high_parent.pkl",
+  "time_s": 75.5,
+  "dt_ms": 0.1,
+  "tau_m_E_ms": 20.0,
+  "reset_mV": 11.0,
+  "background_Vth_mV": 18.0,
+  "background_one_step_current_threshold": 1414.5029166654845,
+  "records": [
+    {
+      "eta": 0.0005,
+      "M_current_mean": 0.228641402385525,
+      "first_free_step_crossing_fraction": 0.0003125,
+      "held_current_above_threshold_fraction": 0.87203125
+    },
+    {
+      "eta": 0.005,
+      "M_current_mean": 2.28641402385525,
+      "first_free_step_crossing_fraction": 0.00028125,
+      "held_current_above_threshold_fraction": 0.87203125
+    },
+    {
+      "eta": 0.02,
+      "M_current_mean": 9.145656095421,
+      "first_free_step_crossing_fraction": 0.00028125,
+      "held_current_above_threshold_fraction": 0.87196875
+    },
+    {
+      "eta": 0.2,
+      "M_current_mean": 91.45656095420999,
+      "first_free_step_crossing_fraction": 6.25e-05,
+      "held_current_above_threshold_fraction": 0.8701875
+    },
+    {
+      "eta": 2.0,
+      "M_current_mean": 914.5656095420998,
+      "first_free_step_crossing_fraction": 0.0,
+      "held_current_above_threshold_fraction": 0.02125
+    }
+  ],
+  "eta_break_quantiles": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "eta_stop_quantiles": [
+    0.0,
+    1.0961307644039318,
+    1.4422263937650013
+  ],
+  "meaning": "The exact first free LIF update under frozen actual synaptic currents and Z/M; not the whole-network Jacobian or a sufficiency proof of termination.",
+  "caveat": "Preventing one immediate spike is weaker than stopping all future firing. Recurrent drive changes after spike suppression. Cells are components of one realization, not independent repetitions."
+}

@@ -1,0 +1,26 @@
+{
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/long_period_tail/T2200_N16384.npz",
+  "analytic_chain_rule_error": 3.673710641249883e-15,
+  "finite_difference": [
+    {
+      "step": 0.0001,
+      "max_gain_difference": 2.3467450738744178e-09,
+      "chain_rule_error": 8.856517210147768e-10
+    },
+    {
+      "step": 1e-05,
+      "max_gain_difference": 2.345878938152246e-11,
+      "chain_rule_error": 8.875407353503562e-12
+    },
+    {
+      "step": 1e-06,
+      "max_gain_difference": 4.7959182435661826e-12,
+      "chain_rule_error": 1.793957343787511e-11
+    },
+    {
+      "step": 1e-07,
+      "max_gain_difference": 3.7363618058880443e-11,
+      "chain_rule_error": 1.52322958066331e-10
+    }
+  ]
+}

@@ -1,0 +1,115 @@
+{
+  "status": "COMPLETE_BOUND_SEARCH_AND_REVIEW",
+  "time": "2026-09-15T11:56:49.353105+08:00",
+  "slot_counts": {
+    "total": 72,
+    "training": 64,
+    "confirmation": 8,
+    "new_physical": 64,
+    "reused": 8,
+    "G4": 0
+  },
+  "events": {
+    "training": 9586,
+    "confirmation": 1261,
+    "total": 10847
+  },
+  "engineering_failures": 0,
+  "runaway": 0,
+  "proposals": [
+    {
+      "batch": 1,
+      "training_conditions": 16,
+      "proposal_sha256": "27b57bd7a5b0eab716027e6aa8f2ee2c7bc68076abac57332b64632cfef6e519",
+      "feedback_sha256": "83d3c6e15d6c1d96234f62d482e8ffa9072010064e12ba5d89a4a3b36baacf7a"
+    },
+    {
+      "batch": 2,
+      "training_conditions": 20,
+      "proposal_sha256": "c39c2583c31a7fcffbb1e46a63de5875c4e342305084ebed7d9f3b4d5a888ac2",
+      "feedback_sha256": "148bbdfd24a2a6b1f36616acde7d26e020304f460f6277bc49facb339fb296f3"
+    },
+    {
+      "batch": 3,
+      "training_conditions": 24,
+      "proposal_sha256": "164876fe12a68ae428744d7642503663e06049f067852d0ef21c8ff7d39fdc99",
+      "feedback_sha256": "5b878220d5acdf49ff08d0af7549143488e3fe6d08b96e591a50e51bd58b776c"
+    },
+    {
+      "batch": 4,
+      "training_conditions": 28,
+      "proposal_sha256": "bce0137bce37085fd2524c8f18f43b9d31fab21b23c03f0d71a11c4a00e2d1aa",
+      "feedback_sha256": "0d19866528c02f580cc42690693f4086bf65b2332d70943d1a25eb57354aabc7"
+    }
+  ],
+  "objective_and_reference_unchanged": true,
+  "reference_pointer_match": true,
+  "reference_contract_sha256": "fbb74e1c5683e93bdbdd4cade8268bc3789b3ffa0c637bd64eb166c372d2036c",
+  "execution_audit": "/data/hfosp/topic4_sef_hfo/geometry_ee_axis_three_observable_optimization_20260914/analysis/confirmation_review/execution_audit.json",
+  "visual_review": "/data/hfosp/topic4_sef_hfo/geometry_ee_axis_three_observable_optimization_20260914/analysis/g3_agent_native_review.json",
+  "decoded_GIFs": [
+    {
+      "path": "/data/hfosp/topic4_sef_hfo/geometry_ee_axis_three_observable_optimization_20260914/analysis/native_review/bridge_circle_out125_xminus075/3711_849401/patient_mean_native_multievent.gif",
+      "sha256": "602c85a065950b43411eb497fe137f5910f3ab4c47b6b485ddbb46de60f8f868",
+      "frames": 378
+    },
+    {
+      "path": "/data/hfosp/topic4_sef_hfo/geometry_ee_axis_three_observable_optimization_20260914/analysis/native_review/bridge_circle_out125_xminus075/3711_849402/patient_mean_native_multievent.gif",
+      "sha256": "a9faa6c2cdba3c94e2a39611bd942ee7364c5cb011621bd8195a2b7270400ba9",
+      "frames": 378
+    },
+    {
+      "path": "/data/hfosp/topic4_sef_hfo/geometry_ee_axis_three_observable_optimization_20260914/analysis/native_review/bridge_circle_out125_xminus075/3712_849401/patient_mean_native_multievent.gif",
+      "sha256": "48746d69db088cb6a4276c3bbb3c0b4852c8b8aa4f9e19849c135b02ccadda8d",
+      "frames": 378
+    },
+    {
+      "path": "/data/hfosp/topic4_sef_hfo/geometry_ee_axis_three_observable_optimization_20260914/analysis/native_review/bridge_circle_out125_xminus075/3712_849402/patient_mean_native_multievent.gif",
+      "sha256": "84eee0871f108561de7a245d77f6ae3a88db0a1e89bcd7b5784e5416943151c4",
+      "frames": 378
+    },
+    {
+      "path": "/data/hfosp/topic4_sef_hfo/geometry_ee_axis_three_observable_optimization_20260914/analysis/native_review/g2_b01_p01/3711_849401/patient_mean_native_multievent.gif",
+      "sha256": "1fc6cb9a2911def669dda6d9c7eff0f04cab1f31fe99046b53e01211e4a850e3",
+      "frames": 378
+    },
+    {
+      "path": "/data/hfosp/topic4_sef_hfo/geometry_ee_axis_three_observable_optimization_20260914/analysis/native_review/g2_b01_p01/3711_849402/patient_mean_native_multievent.gif",
+      "sha256": "ff0a5fa1ef3c5d560f074a70afac61b1bc0eb05cf1fd26866e962d80e36b066e",
+      "frames": 378
+    },
+    {
+      "path": "/data/hfosp/topic4_sef_hfo/geometry_ee_axis_three_observable_optimization_20260914/analysis/native_review/g2_b01_p01/3712_849401/patient_mean_native_multievent.gif",
+      "sha256": "37788ba2d7e18ab79fe7a35c6255abf2832d4c8d771510a7a4634cd85fd3423e",
+      "frames": 378
+    },
+    {
+      "path": "/data/hfosp/topic4_sef_hfo/geometry_ee_axis_three_observable_optimization_20260914/analysis/native_review/g2_b01_p01/3712_849402/patient_mean_native_multievent.gif",
+      "sha256": "88f8f9d71675c453249be517d4f20ce2304a726d713120b0636432d28fb0f994",
+      "frames": 378
+    }
+  ],
+  "PNG_decodes": 27,
+  "reports": {
+    "/data/hfosp/topic4_sef_hfo/geometry_ee_axis_three_observable_optimization_20260914/overnight_20260914/final_optimization_report.pdf": {
+      "pages": 30,
+      "sha256": "9528b5120ecb2885bd6706e7ccc17e3d8ce31557ecfcf254df1211ca2cfc0228",
+      "bytes": 6534229
+    },
+    "/data/hfosp/topic4_sef_hfo/geometry_ee_axis_three_observable_optimization_20260914/analysis/confirmation_review/native_review_appendix.pdf": {
+      "pages": 16,
+      "sha256": "83d9097fa6b62a0fa3200d7d64b3d941594cce342494882fea7bbb922f0df44d",
+      "bytes": 4245455
+    }
+  },
+  "link_errors": [],
+  "full_bitwise_replay": "NOT_PERFORMED",
+  "user_visual_acceptance": "PENDING",
+  "final_process_check": {
+    "queue_active": [],
+    "observer_alive": [],
+    "worker_command_matches": [],
+    "scan_excludes_inspector_and_ancestor_shells": true
+  },
+  "shared_report_updated": true
+}

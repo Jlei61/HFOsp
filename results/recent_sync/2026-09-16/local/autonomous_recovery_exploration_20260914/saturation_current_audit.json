@@ -1,0 +1,86 @@
+{
+  "rows": [
+    {
+      "name": "e0_t0_s9108401",
+      "window_s": [
+        59.790000000000006,
+        69.79
+      ],
+      "eta_m": 0.005,
+      "tau_M_s": 1.0,
+      "all_E_rate_Hz": 500.0,
+      "Z": [
+        1.8123399616326818e-05,
+        1.540057828964712e-05,
+        1.5191640640679319e-05
+      ],
+      "M_feedback": [
+        2.500002936964749,
+        2.499997336870202,
+        2.5000082505193926,
+        2.5000029384754754
+      ],
+      "mean_IE_rawII_effectiveII": [
+        1579.5746507621307,
+        1774.9148030098406,
+        0.03216698330719009
+      ],
+      "native_before_any_refill": true
+    },
+    {
+      "name": "e2_t1_s9108401",
+      "window_s": [
+        122.68,
+        132.68
+      ],
+      "eta_m": 0.02,
+      "tau_M_s": 2.0,
+      "all_E_rate_Hz": 500.0,
+      "Z": [
+        1.9312147548957726e-05,
+        1.626929499322328e-05,
+        1.3042421428970627e-05
+      ],
+      "M_feedback": [
+        19.999994808155755,
+        19.999977446380353,
+        20.0000445360138,
+        19.999993954731046
+      ],
+      "mean_IE_rawII_effectiveII": [
+        1579.6176711495407,
+        1774.90965804103,
+        0.034277536076853035
+      ],
+      "native_before_any_refill": true
+    },
+    {
+      "name": "e3_t0_s9108401",
+      "window_s": [
+        170,
+        180
+      ],
+      "eta_m": 0.04,
+      "tau_M_s": 1.0,
+      "all_E_rate_Hz": 13.5204375,
+      "Z": [
+        0.8374151811496089,
+        0.8113771186084301,
+        0.7803727178904777
+      ],
+      "M_feedback": [
+        0.5507372256982243,
+        0.7589820741814848,
+        0.8579764027805098,
+        0.537654277275931
+      ],
+      "mean_IE_rawII_effectiveII": [
+        54.81127992151572,
+        85.35885260052248,
+        70.6445428294009
+      ],
+      "native_before_any_refill": true
+    }
+  ],
+  "note": "Actual10s average before external refill, not stationary Jacobian. Same topology, different M parameters/noise histories. Native equations drive Z toward0 under continuous above-threshold raw GABA."
+}

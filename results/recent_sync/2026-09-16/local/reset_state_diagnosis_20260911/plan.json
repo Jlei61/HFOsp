@@ -1,0 +1,41 @@
+{
+  "status": "PREPARED",
+  "substrate": "historical manual dual core on fixed C fast carrier",
+  "eta_M": 0.02,
+  "tau_M_s": 2.0,
+  "tau_Z_s": 5.0,
+  "topology_seed": 6101,
+  "original_noise_seed": 9108401,
+  "original_trajectory_horizon_s": 1000.0,
+  "parents": {
+    "high_parent": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/reset_state_diagnosis_20260911/parents/high_parent.pkl",
+      "time_s": 75.5
+    },
+    "extension_parent": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/reset_state_diagnosis_20260911/parents/extension_parent.pkl",
+      "time_s": 238.0
+    }
+  },
+  "M_reset": "At 76.5 s, set all E-cell M to zero once, with Z=1; resume native M immediately",
+  "fast_state": "Preserve V, refractory, AMPA/GABA states and delay rings unless an explicitly named reset arm",
+  "noise": "No replay or reseeding in original continuation; paired new-future arms share both RNG states and OU field states",
+  "recurrence": "After >=2 s recovered activity (each 1 s mean E<50 Hz and quiet-bin fraction>=0.2), E>=200 Hz in 10-ms bins for >=200 ms",
+  "stopping": "Stop 5 s after confirmed recurrence; otherwise right-censor at horizon. Never infer permanent inability from censoring.",
+  "stages": [
+    "A: Continue original Z-only trajectory to absolute 1000 s.",
+    "B: If A censored, start at the original release state and reset M once; same future noise, absolute 1000 s.",
+    "C: If B recurs, run three paired new-future-noise Z-only versus Z+M comparisons, 500 s after release each.",
+    "D: If A and B censored, test full fast-state clearing with Z/M reset, plus original full-initialization replay.",
+    "E: If fast-state clearing permits entry, separate voltage/refractory clearing from synaptic/delay clearing; same horizon."
+  ],
+  "max_workers": 3,
+  "parameter_search": false,
+  "patient_fit_acceptance": false,
+  "source_hashes": {
+    "/home/honglab/leijiaxin/HFOsp/src/topic4_raster_protocol_engine.py": "66d464112c5ec8e13342aa1bb5786b3fb3fbd61db1be0452f3cb8640aa66bee6",
+    "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_weak_fast_recurrence.py": "01544f3ed63061dc2590696fafc1c424389b627d5ea7a13e1d01f8bee1ef5fda",
+    "/home/honglab/leijiaxin/HFOsp/src/snn_engine/mz_slow_vars.py": "cc80980ff7539ea5c9c72f3724d810b838d7e230550e905d08a437d642dd11d3",
+    "/home/honglab/leijiaxin/HFOsp/scripts/topic4_historical_manual_z_common.py": "7d0e2a4d22c2207ac09964175e97fa3d9cd30e2153dab2e861f99f44068b8969"
+  }
+}

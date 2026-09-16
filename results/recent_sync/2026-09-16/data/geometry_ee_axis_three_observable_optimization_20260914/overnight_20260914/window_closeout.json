@@ -1,0 +1,349 @@
+{
+ "time": "2026-09-15T09:52:30.796665+08:00",
+ "status": "WINDOW_CLOSED_CONFIRMATION_DRAINING",
+ "goal_complete": false,
+ "window": {
+  "user_authorization": "2026-09-14 23:51 user: \u4eca\u665a\u7ee7\u7eed\u8bbe\u7f6e8-10h\u7684\u81ea\u4e3b\u63a2\u7d22\uff0c\u5b8c\u6210\u8fd9\u90e8\u5206\u4f18\u5316\u63a2\u7d22",
+  "start_unix": 1789401094,
+  "earliest_review_unix": 1789429894,
+  "latest_review_unix": 1789437094,
+  "start_beijing": "2026-09-14T23:51:34+08:00",
+  "latest_review_beijing": "2026-09-15T09:51:34+08:00",
+  "goal": "Complete fixed six-scalar/three-observable BO, fresh-identity confirmation, actual native review and conditional paired responses",
+  "new_run_cap_unchanged": 114,
+  "physics_and_objective_unchanged": true,
+  "deadline_rule": "No expansion beyond window; already dispatched physical runs finish intact; prior authorized search/confirmation finish within original contract",
+  "G4": "Requires numerical trigger plus actual agent native visual review; no human reapproval required",
+  "stop_rule": "Negative scientifically informative result is acceptable; do not force positive or enter Fig5"
+ },
+ "physical_complete": 64,
+ "new_physical_complete": 56,
+ "stages": {
+  "adaptive": {
+   "complete": 32,
+   "runaway": 0,
+   "scored": 32,
+   "eligible_events": 4956
+  },
+  "initial": {
+   "complete": 32,
+   "runaway": 0,
+   "scored": 32,
+   "eligible_events": 4630
+  }
+ },
+ "active": [
+  {
+   "pid": 109527,
+   "unit": [
+    "bridge_circle_out125_xminus075",
+    3711,
+    849401
+   ],
+   "rss_GiB": 2.0129776000976562,
+   "created_unix": 1789432796.79,
+   "progress": {
+    "status": "SIMULATING",
+    "job": {
+     "candidate": "bridge_circle_out125_xminus075",
+     "stage": "confirmation",
+     "topology_seed": 3711,
+     "dynamics_seed": 849401,
+     "duration_ms": 60000.0
+    },
+    "simulated_ms": 34000.0,
+    "updated_unix": 1789437048.5974562
+   },
+   "live_command": [
+    "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+    "-u",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_three_observable_bo.py",
+    "worker",
+    "--stage",
+    "confirmation",
+    "--candidate",
+    "bridge_circle_out125_xminus075",
+    "--topology",
+    "3711",
+    "--noise",
+    "849401"
+   ]
+  },
+  {
+   "pid": 109528,
+   "unit": [
+    "bridge_circle_out125_xminus075",
+    3711,
+    849402
+   ],
+   "rss_GiB": 2.1227264404296875,
+   "created_unix": 1789432796.79,
+   "progress": {
+    "status": "SIMULATING",
+    "job": {
+     "candidate": "bridge_circle_out125_xminus075",
+     "stage": "confirmation",
+     "topology_seed": 3711,
+     "dynamics_seed": 849402,
+     "duration_ms": 60000.0
+    },
+    "simulated_ms": 32000.0,
+    "updated_unix": 1789437090.3462894
+   },
+   "live_command": [
+    "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+    "-u",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_three_observable_bo.py",
+    "worker",
+    "--stage",
+    "confirmation",
+    "--candidate",
+    "bridge_circle_out125_xminus075",
+    "--topology",
+    "3711",
+    "--noise",
+    "849402"
+   ]
+  },
+  {
+   "pid": 109529,
+   "unit": [
+    "bridge_circle_out125_xminus075",
+    3712,
+    849401
+   ],
+   "rss_GiB": 2.1213150024414062,
+   "created_unix": 1789432796.79,
+   "progress": {
+    "status": "SIMULATING",
+    "job": {
+     "candidate": "bridge_circle_out125_xminus075",
+     "stage": "confirmation",
+     "topology_seed": 3712,
+     "dynamics_seed": 849401,
+     "duration_ms": 60000.0
+    },
+    "simulated_ms": 33000.0,
+    "updated_unix": 1789437065.0866182
+   },
+   "live_command": [
+    "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+    "-u",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_three_observable_bo.py",
+    "worker",
+    "--stage",
+    "confirmation",
+    "--candidate",
+    "bridge_circle_out125_xminus075",
+    "--topology",
+    "3712",
+    "--noise",
+    "849401"
+   ]
+  },
+  {
+   "pid": 109530,
+   "unit": [
+    "bridge_circle_out125_xminus075",
+    3712,
+    849402
+   ],
+   "rss_GiB": 2.1291732788085938,
+   "created_unix": 1789432796.79,
+   "progress": {
+    "status": "SIMULATING",
+    "job": {
+     "candidate": "bridge_circle_out125_xminus075",
+     "stage": "confirmation",
+     "topology_seed": 3712,
+     "dynamics_seed": 849402,
+     "duration_ms": 60000.0
+    },
+    "simulated_ms": 34000.0,
+    "updated_unix": 1789437082.3989341
+   },
+   "live_command": [
+    "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+    "-u",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_three_observable_bo.py",
+    "worker",
+    "--stage",
+    "confirmation",
+    "--candidate",
+    "bridge_circle_out125_xminus075",
+    "--topology",
+    "3712",
+    "--noise",
+    "849402"
+   ]
+  },
+  {
+   "pid": 109531,
+   "unit": [
+    "g2_b01_p01",
+    3711,
+    849401
+   ],
+   "rss_GiB": 2.1177597045898438,
+   "created_unix": 1789432796.79,
+   "progress": {
+    "status": "SIMULATING",
+    "job": {
+     "candidate": "g2_b01_p01",
+     "stage": "confirmation",
+     "topology_seed": 3711,
+     "dynamics_seed": 849401,
+     "duration_ms": 60000.0
+    },
+    "simulated_ms": 33000.0,
+    "updated_unix": 1789437048.9870136
+   },
+   "live_command": [
+    "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+    "-u",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_three_observable_bo.py",
+    "worker",
+    "--stage",
+    "confirmation",
+    "--candidate",
+    "g2_b01_p01",
+    "--topology",
+    "3711",
+    "--noise",
+    "849401"
+   ]
+  },
+  {
+   "pid": 109532,
+   "unit": [
+    "g2_b01_p01",
+    3711,
+    849402
+   ],
+   "rss_GiB": 2.011425018310547,
+   "created_unix": 1789432796.79,
+   "progress": {
+    "status": "SIMULATING",
+    "job": {
+     "candidate": "g2_b01_p01",
+     "stage": "confirmation",
+     "topology_seed": 3711,
+     "dynamics_seed": 849402,
+     "duration_ms": 60000.0
+    },
+    "simulated_ms": 34000.0,
+    "updated_unix": 1789437147.8507028
+   },
+   "live_command": [
+    "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+    "-u",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_three_observable_bo.py",
+    "worker",
+    "--stage",
+    "confirmation",
+    "--candidate",
+    "g2_b01_p01",
+    "--topology",
+    "3711",
+    "--noise",
+    "849402"
+   ]
+  },
+  {
+   "pid": 109533,
+   "unit": [
+    "g2_b01_p01",
+    3712,
+    849401
+   ],
+   "rss_GiB": 2.128509521484375,
+   "created_unix": 1789432796.79,
+   "progress": {
+    "status": "SIMULATING",
+    "job": {
+     "candidate": "g2_b01_p01",
+     "stage": "confirmation",
+     "topology_seed": 3712,
+     "dynamics_seed": 849401,
+     "duration_ms": 60000.0
+    },
+    "simulated_ms": 33000.0,
+    "updated_unix": 1789437061.810853
+   },
+   "live_command": [
+    "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+    "-u",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_three_observable_bo.py",
+    "worker",
+    "--stage",
+    "confirmation",
+    "--candidate",
+    "g2_b01_p01",
+    "--topology",
+    "3712",
+    "--noise",
+    "849401"
+   ]
+  },
+  {
+   "pid": 109534,
+   "unit": [
+    "g2_b01_p01",
+    3712,
+    849402
+   ],
+   "rss_GiB": 2.2395477294921875,
+   "created_unix": 1789432796.79,
+   "progress": {
+    "status": "SIMULATING",
+    "job": {
+     "candidate": "g2_b01_p01",
+     "stage": "confirmation",
+     "topology_seed": 3712,
+     "dynamics_seed": 849402,
+     "duration_ms": 60000.0
+    },
+    "simulated_ms": 33000.0,
+    "updated_unix": 1789436994.286533
+   },
+   "live_command": [
+    "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+    "-u",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_three_observable_bo.py",
+    "worker",
+    "--stage",
+    "confirmation",
+    "--candidate",
+    "g2_b01_p01",
+    "--topology",
+    "3712",
+    "--noise",
+    "849402"
+   ]
+  }
+ ],
+ "failures": [],
+ "nomination": [
+  "bridge_circle_out125_xminus075",
+  "g2_b01_p01"
+ ],
+ "G4": {
+  "dispatched": 0,
+  "new_dispatch_allowed": false,
+  "reason": "Confirmation and actual native review were not complete before the fixed window ended; no scientific pass is inferred."
+ },
+ "completed": [
+  "Frozen six-scalar/three-observable objective and background",
+  "Four outcome-dependent BO batches, all 32 conditions with two training noises",
+  "Actual training patient-template/native reviews and 20-page parameter-observable report",
+  "Same-condition static array identity and distinct dynamics namespace in all fresh replay pairs"
+ ],
+ "incomplete": [
+  "Eight already-dispatched fresh-topology/noise trajectories",
+  "Fresh-network score/raw-distribution and actual patient/native visual review",
+  "Final scientific interpretation and conditional-response decision record"
+ ],
+ "continuation": "Only drain the eight already dispatched confirmation units and complete their existing analysis/review. No new parameter-response physical runs after window.",
+ "report": "/data/hfosp/topic4_sef_hfo/geometry_ee_axis_three_observable_optimization_20260914/overnight_20260914/figures/night_progress_report.pdf",
+ "static_audit": "/data/hfosp/topic4_sef_hfo/geometry_ee_axis_three_observable_optimization_20260914/analysis/confirmation_static_audit.json"
+}

@@ -1,0 +1,139 @@
+{
+  "selection": "up to two cells with all four core/noise labels threshold-stable irregular, otherwise the best one; then greatest minimum burst count, deterministic parameter tie-break",
+  "conditions": [
+    [
+      0.7,
+      1.0,
+      "Irregular candidate (4/4 stable labels)"
+    ],
+    [
+      1.0,
+      0.4,
+      "Irregular candidate (4/4 stable labels)"
+    ],
+    [
+      0.85,
+      1.0,
+      "Current reference"
+    ],
+    [
+      1.2,
+      1.3,
+      "Strong-coupling anchor"
+    ]
+  ],
+  "series": [
+    {
+      "name": "ee0.7_d1_n1_t2511_s848101",
+      "group": "coreAE",
+      "label": "irregular_bursts",
+      "n_intervals": 28,
+      "cv": 0.6991239234940879
+    },
+    {
+      "name": "ee0.7_d1_n1_t2511_s848101",
+      "group": "coreBE",
+      "label": "irregular_bursts",
+      "n_intervals": 30,
+      "cv": 0.7060582402667616
+    },
+    {
+      "name": "ee0.7_d1_n1_t2511_s848102",
+      "group": "coreAE",
+      "label": "irregular_bursts",
+      "n_intervals": 29,
+      "cv": 0.7968694949226303
+    },
+    {
+      "name": "ee0.7_d1_n1_t2511_s848102",
+      "group": "coreBE",
+      "label": "irregular_bursts",
+      "n_intervals": 22,
+      "cv": 0.9346538195703842
+    },
+    {
+      "name": "ee1_d0.4_n1_t2511_s848101",
+      "group": "coreAE",
+      "label": "irregular_bursts",
+      "n_intervals": 15,
+      "cv": 0.4887106688899571
+    },
+    {
+      "name": "ee1_d0.4_n1_t2511_s848101",
+      "group": "coreBE",
+      "label": "irregular_bursts",
+      "n_intervals": 15,
+      "cv": 0.5002585185767715
+    },
+    {
+      "name": "ee1_d0.4_n1_t2511_s848102",
+      "group": "coreAE",
+      "label": "irregular_bursts",
+      "n_intervals": 11,
+      "cv": 0.6880633422450053
+    },
+    {
+      "name": "ee1_d0.4_n1_t2511_s848102",
+      "group": "coreBE",
+      "label": "irregular_bursts",
+      "n_intervals": 11,
+      "cv": 0.6860514828688801
+    },
+    {
+      "name": "ee0.85_d1_n1_t2511_s848101",
+      "group": "coreAE",
+      "label": "variable_bursts",
+      "n_intervals": 62,
+      "cv": 0.3450657538131633
+    },
+    {
+      "name": "ee0.85_d1_n1_t2511_s848101",
+      "group": "coreBE",
+      "label": "variable_bursts",
+      "n_intervals": 60,
+      "cv": 0.27777735022481653
+    },
+    {
+      "name": "ee0.85_d1_n1_t2511_s848102",
+      "group": "coreAE",
+      "label": "variable_bursts",
+      "n_intervals": 60,
+      "cv": 0.34969392886263945
+    },
+    {
+      "name": "ee0.85_d1_n1_t2511_s848102",
+      "group": "coreBE",
+      "label": "variable_bursts",
+      "n_intervals": 54,
+      "cv": 0.3102532235156654
+    },
+    {
+      "name": "ee1.2_d1.3_n1_t2511_s848101",
+      "group": "coreAE",
+      "label": "regular_bursts",
+      "n_intervals": 71,
+      "cv": 0.07532999974772663
+    },
+    {
+      "name": "ee1.2_d1.3_n1_t2511_s848101",
+      "group": "coreBE",
+      "label": "regular_bursts",
+      "n_intervals": 71,
+      "cv": 0.08306869583507259
+    },
+    {
+      "name": "ee1.2_d1.3_n1_t2511_s848102",
+      "group": "coreAE",
+      "label": "regular_bursts",
+      "n_intervals": 71,
+      "cv": 0.07149481947960837
+    },
+    {
+      "name": "ee1.2_d1.3_n1_t2511_s848102",
+      "group": "coreBE",
+      "label": "regular_bursts",
+      "n_intervals": 72,
+      "cv": 0.06539892575708021
+    }
+  ]
+}

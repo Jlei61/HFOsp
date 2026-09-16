@@ -1,0 +1,79 @@
+{
+ "status": "ACTIVE",
+ "authorization": "User-authorized autonomous 8h exploration",
+ "reason": "Each 60s run takes hours; pair-first ordering across three topologies produces earlier cross-network response evidence",
+ "previous_status": {
+  "status": "RESPONSE_RUNNING",
+  "stage": "response",
+  "total": 108,
+  "complete": 0,
+  "queued": 106,
+  "active": [
+   {
+    "pid": 4078535,
+    "unit": [
+     "bridge_circle_out125",
+     2511,
+     847401
+    ],
+    "rss_gib": 1.9835052490234375
+   },
+   {
+    "pid": 4078701,
+    "unit": [
+     "bridge_circle_out125_xminus075",
+     2511,
+     847401
+    ],
+    "rss_gib": 1.9836349487304688
+   }
+  ],
+  "max_workers": 2,
+  "previous_running": true,
+  "predecessor_active": 10,
+  "predecessor_growth_gib": 69.84537124633789,
+  "own_growth_gib": 14.032859802246094,
+  "available_gib": 125.06253814697266,
+  "required_gib": 132.87823104858398,
+  "peak_rss_gib": 0.0,
+  "failures": [],
+  "updated_unix": 1789237661.5196192
+ },
+ "old_order_file": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/formal_units_initial_network_major.json",
+ "new_order_file": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/formal_units.json",
+ "old_controller": 4077753,
+ "early_worker_limit": 6,
+ "post_predecessor_limit": 18,
+ "resource_rule": "Unchanged: 40GiB + live predecessor growth to9 + own growth to9 + next9GiB; max18GiB per tree, host floor30GiB",
+ "budget": 108,
+ "new_conditions_added": 0,
+ "physical_workers_restarted": 0,
+ "physics_and_loss_unchanged": true,
+ "controller_sha256": "b484e0c1c8c2e5bb01d9efcb8ba563b7110831ec8c1fc706ec349e4aad6b1b60",
+ "created_unix": 1789237666.984189,
+ "new_controller": 4144219,
+ "actual_adoption": {
+  "adopted": [
+   {
+    "pid": 4078535,
+    "unit": [
+     "bridge_circle_out125",
+     2511,
+     847401
+    ]
+   },
+   {
+    "pid": 4078701,
+    "unit": [
+     "bridge_circle_out125_xminus075",
+     2511,
+     847401
+    ]
+   }
+  ],
+  "physical_workers_restarted": 0,
+  "created_unix": 1789237689.2896235,
+  "exit_code_semantics": "Adopted worker OS exit codes unavailable; completion artifacts remain mandatory"
+ },
+ "verified_unix": 1789237724.5206966
+}

@@ -1,0 +1,1342 @@
+{
+ "schema": "topic4.three_observable_bo.RUN.v1",
+ "authorization": "2026-09-14 user: \u5f00\u59cb\uff0c\u4e0d\u8981\u8ba9CPU\u548cGPU\u7a7a\u7f6e",
+ "design_path": "/home/honglab/leijiaxin/HFOsp/config/topic4_geometry_ee_axis_optimization_v1_design.json",
+ "design_sha256": "10838b45764d22bf7dcf4ea6b540c44e0c4cf18fb25a1693279a8295e0faf289",
+ "reference_id": "bridge_circle_out125_xminus075",
+ "reference_pointer": {
+  "schema": "topic4.local_geometry_ee_axis_reference.v1",
+  "status": "REFERENCE_FIXED_FOR_LOCAL_SEARCH",
+  "reference_id": "geometry_ee_axis_reference_v1",
+  "source_candidate_id": "bridge_circle_out125_xminus075",
+  "contract_path": "/data/hfosp/topic4_sef_hfo/local_geometry_ee_axis_reference_20260914/reference_contract.json",
+  "contract_sha256": "fbb74e1c5683e93bdbdd4cade8268bc3789b3ffa0c637bd64eb166c372d2036c",
+  "runtime_path": "/data/hfosp/topic4_sef_hfo/local_geometry_ee_axis_reference_20260914/resolved_runtime.json",
+  "runtime_sha256": "bb9d66efa21dfc1966b53900bb3b51df4586e0a5cc69dd4a49ae21663281310c",
+  "candidate_path": "/data/hfosp/topic4_sef_hfo/local_geometry_ee_axis_reference_20260914/reference_candidate.json",
+  "candidate_sha256": "5bb5027b17c4310b6080a6874a42cab73e88fd78b934a4a2b186ca19fc6831bb",
+  "future_allowed_candidate_paths": [
+   "/centers_mm/0/0",
+   "/centers_mm/0/1",
+   "/centers_mm/1/0",
+   "/centers_mm/1/1",
+   "/parameters/EE_core_to_out_scale",
+   "/parameters/EE_angle_offset_deg"
+  ],
+  "search_dispatch_enabled": false,
+  "note": "Consume contract and resolved runtime together; this pointer is not a legacy worker configuration."
+ },
+ "physics": {
+  "version": "core_shape_output_v1"
+ },
+ "source_snapshot": {
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_core_connectivity_search.py": "85e39e9af2fff68c60db2c37b6fd1369f38ac53433f8f30a5f88b079d31e7ef4",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_core_connectivity_v2.py": "a9ae8ed188d7f36e4cc1a1890eb26dc278f0d937f1689154fe891f80ec0f2238",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/snn_engine/kick_probe_core_input_v2.py": "bba9dbaba8ee68d8e1b43682b21d6e87a2a6e082513e6fa6453126375b27a37b",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_streaming_spike_readout.py": "a493db8a8516599f2169e9baada36288169e98416d726d27eebf6d04efc00314",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_initial_state_runtime.py": "06c4bf8e037f982c8ec995d8550c230d8528bfeeb29b983df31a0659cbebc03f",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_initial_state.py": "1e9ed1ffe67cb085e6b740ba49ffc99ef03d9ced723988b68910c6d6dee2650d",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_observation_repaired.py": "089a2a414c3c270708d99862cc94ba5aa1864cd881170abf3165a8d77ec9894a",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/snn_engine/connectivity.py": "53d3bf765f7084cda924d3b23a6cb6e5f6a21293d9ae1e0e2d8f8cf89a1d3303",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/snn_engine/connectivity_rot.py": "3fa6c87df4c8756132b3fe6734fd9f73673a731914e9937befbaf073f00e2b9f",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/snn_engine/params.py": "c2036d1e1548c3db89adab27f8a7a57f9cdf584b5fed360963c966004cf88884",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_core_field.py": "4b66406ca93ff558fe204e12a9a9d1bcfe0ead4cd2b4ef3527603347e3699e46",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_core_driven_input.py": "dcabc862504c5b98cd26fd659859e45013d7391cd11a529ccb457c70fd9b69e3",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_core_connectivity.py": "2ed2b10d939d6b5b22f635d3dcd76ec769b3d675b439260f1cdc0252160579e6",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_core_ou_correlation_recovery.py": "cefc84736368236ed421ad60bdf846b0b089a059c26168e3820ca25a55da1616",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_shape_output_response.py": "58907d3b08ea9b6769b16410430ee8edbb5814733d739b332a7cf85638854855",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_core_ou_correlation.py": "3a277975cb7183fdfdccc7b522f5d0dfd1d27a4ae6f46e55dd1ce971b5d06ed5",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_core_shape_output.py": "f8fc2640ea7817db80099192a976cc41be412f628fab21edc933aebd08313f22",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_core_field_runner.py": "123bfebc82bfe37d71875175f1c2343aa702f5f9b8d9a33ee11d2046eb9258ba",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/rebuild_topic4_autapse_corrected_reference.py": "35a4da8dc4e23f7b5095f0a70884dd09d4e31f0eef7d950bba826ffb75ae004d"
+ },
+ "analysis": {
+  "burnin_ms": 1500.0,
+  "primary_min_events_per_run": 16
+ },
+ "runaway": {
+  "es_thresh_hz": 120.0,
+  "es_dur_ms": 100.0,
+  "post_runaway_record_ms": 500.0
+ },
+ "topology_seed": 2511,
+ "topology_seeds": [
+  2511
+ ],
+ "seeds": [
+  847401,
+  847402
+ ],
+ "duration_ms": 60000.0,
+ "confirmation_seeds": {
+  "topology": [
+   3711,
+   3712
+  ],
+  "dynamics": [
+   849401,
+   849402
+  ]
+ },
+ "candidates": [
+  {
+   "id": "bridge_circle_out125_xminus075",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     3.4492143200000003,
+     12.12890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.25,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 1.0,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "response",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "\u5706\u6838\uff5c\u5411\u5916EE\u00d71.25\uff0c\u6838\u5185EI\u00d71\uff0c\u5de6\u6838x\u504f\u79fb-0.75mm",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {},
+   "outgoing": {},
+   "contrast": "response_curve",
+   "comparison": "bridge_circle_out125",
+   "response_coordinates": {
+    "shape": "circle",
+    "EE_out": 1.25,
+    "EI": 1.0,
+    "degree": 1.0,
+    "dx_mm": -0.75
+   }
+  },
+  {
+   "id": "g1_axis0_minus",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     2.6992143200000003,
+     12.12890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.25,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 1.0,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "initial",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "g1_axis0_minus",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {},
+   "outgoing": {},
+   "contrast": "single_axis",
+   "comparison": "bridge_circle_out125_xminus075",
+   "response_coordinates": {
+    "shape": "circle",
+    "EE_out": 1.25,
+    "EI": 1.0,
+    "degree": 1.0,
+    "dx_mm": -0.75
+   },
+   "optimization_axis": 0
+  },
+  {
+   "id": "bridge_circle_out125",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     4.19921432,
+     12.12890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.25,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 1.0,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "response",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "\u5706\u6838\uff5c\u5411\u5916EE\u00d71.25\uff0c\u6838\u5185EI\u00d71",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {},
+   "outgoing": {},
+   "contrast": "response_curve",
+   "comparison": "curve_circle_out1_EI1",
+   "response_coordinates": {
+    "shape": "circle",
+    "EE_out": 1.25,
+    "EI": 1.0,
+    "degree": 1.0,
+    "dx_mm": 0.0
+   }
+  },
+  {
+   "id": "g1_axis1_minus",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     3.4492143200000003,
+     11.37890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.25,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 1.0,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "initial",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "g1_axis1_minus",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {},
+   "outgoing": {},
+   "contrast": "single_axis",
+   "comparison": "bridge_circle_out125_xminus075",
+   "response_coordinates": {
+    "shape": "circle",
+    "EE_out": 1.25,
+    "EI": 1.0,
+    "degree": 1.0,
+    "dx_mm": -0.75
+   },
+   "optimization_axis": 1
+  },
+  {
+   "id": "g1_axis1_plus",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     3.4492143200000003,
+     12.87890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.25,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 1.0,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "initial",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "g1_axis1_plus",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {},
+   "outgoing": {},
+   "contrast": "single_axis",
+   "comparison": "bridge_circle_out125_xminus075",
+   "response_coordinates": {
+    "shape": "circle",
+    "EE_out": 1.25,
+    "EI": 1.0,
+    "degree": 1.0,
+    "dx_mm": -0.75
+   },
+   "optimization_axis": 1
+  },
+  {
+   "id": "g1_axis2_minus",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     3.4492143200000003,
+     12.12890135
+    ],
+    [
+     15.729203040000002,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.25,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 1.0,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "initial",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "g1_axis2_minus",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {},
+   "outgoing": {},
+   "contrast": "single_axis",
+   "comparison": "bridge_circle_out125_xminus075",
+   "response_coordinates": {
+    "shape": "circle",
+    "EE_out": 1.25,
+    "EI": 1.0,
+    "degree": 1.0,
+    "dx_mm": -0.75
+   },
+   "optimization_axis": 2
+  },
+  {
+   "id": "g1_axis2_plus",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     3.4492143200000003,
+     12.12890135
+    ],
+    [
+     17.22920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.25,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 1.0,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "initial",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "g1_axis2_plus",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {},
+   "outgoing": {},
+   "contrast": "single_axis",
+   "comparison": "bridge_circle_out125_xminus075",
+   "response_coordinates": {
+    "shape": "circle",
+    "EE_out": 1.25,
+    "EI": 1.0,
+    "degree": 1.0,
+    "dx_mm": -0.75
+   },
+   "optimization_axis": 2
+  },
+  {
+   "id": "g1_axis3_minus",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     3.4492143200000003,
+     12.12890135
+    ],
+    [
+     16.47920304,
+     3.21551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.25,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 1.0,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "initial",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "g1_axis3_minus",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {},
+   "outgoing": {},
+   "contrast": "single_axis",
+   "comparison": "bridge_circle_out125_xminus075",
+   "response_coordinates": {
+    "shape": "circle",
+    "EE_out": 1.25,
+    "EI": 1.0,
+    "degree": 1.0,
+    "dx_mm": -0.75
+   },
+   "optimization_axis": 3
+  },
+  {
+   "id": "g1_axis3_plus",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     3.4492143200000003,
+     12.12890135
+    ],
+    [
+     16.47920304,
+     4.715511530000001
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.25,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 1.0,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "initial",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "g1_axis3_plus",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {},
+   "outgoing": {},
+   "contrast": "single_axis",
+   "comparison": "bridge_circle_out125_xminus075",
+   "response_coordinates": {
+    "shape": "circle",
+    "EE_out": 1.25,
+    "EI": 1.0,
+    "degree": 1.0,
+    "dx_mm": -0.75
+   },
+   "optimization_axis": 3
+  },
+  {
+   "id": "g1_axis4_minus",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     3.4492143200000003,
+     12.12890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.125,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 1.0,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "initial",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "g1_axis4_minus",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {},
+   "outgoing": {},
+   "contrast": "single_axis",
+   "comparison": "bridge_circle_out125_xminus075",
+   "response_coordinates": {
+    "shape": "circle",
+    "EE_out": 1.25,
+    "EI": 1.0,
+    "degree": 1.0,
+    "dx_mm": -0.75
+   },
+   "optimization_axis": 4
+  },
+  {
+   "id": "g1_axis4_plus",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     3.4492143200000003,
+     12.12890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.375,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 1.0,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "initial",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "g1_axis4_plus",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {},
+   "outgoing": {},
+   "contrast": "single_axis",
+   "comparison": "bridge_circle_out125_xminus075",
+   "response_coordinates": {
+    "shape": "circle",
+    "EE_out": 1.25,
+    "EI": 1.0,
+    "degree": 1.0,
+    "dx_mm": -0.75
+   },
+   "optimization_axis": 4
+  },
+  {
+   "id": "g1_axis5_minus",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     3.4492143200000003,
+     12.12890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.25,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 1.0,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": -10.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "initial",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "g1_axis5_minus",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {},
+   "outgoing": {},
+   "contrast": "single_axis",
+   "comparison": "bridge_circle_out125_xminus075",
+   "response_coordinates": {
+    "shape": "circle",
+    "EE_out": 1.25,
+    "EI": 1.0,
+    "degree": 1.0,
+    "dx_mm": -0.75
+   },
+   "optimization_axis": 5
+  },
+  {
+   "id": "g1_axis5_plus",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     3.4492143200000003,
+     12.12890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.25,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 1.0,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 10.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "initial",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "g1_axis5_plus",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {},
+   "outgoing": {},
+   "contrast": "single_axis",
+   "comparison": "bridge_circle_out125_xminus075",
+   "response_coordinates": {
+    "shape": "circle",
+    "EE_out": 1.25,
+    "EI": 1.0,
+    "degree": 1.0,
+    "dx_mm": -0.75
+   },
+   "optimization_axis": 5
+  },
+  {
+   "id": "bridge_circle_weight150",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     4.19921432,
+     12.12890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.5,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 1.0,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "response",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "\u5706\u6838\uff5c\u5411\u5916EE\u00d71.5\uff0c\u6838\u5185EI\u00d71",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {},
+   "outgoing": {},
+   "contrast": "response_curve",
+   "comparison": "curve_circle_out1_EI1",
+   "response_coordinates": {
+    "shape": "circle",
+    "EE_out": 1.5,
+    "EI": 1.0,
+    "degree": 1.0,
+    "dx_mm": 0.0
+   }
+  },
+  {
+   "id": "curve_circle_out1_EI1",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     4.19921432,
+     12.12890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.0,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 1.0,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "response",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "\u5706\u6838\uff5c\u5411\u5916EE\u00d71\uff0c\u6838\u5185EI\u00d71",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {},
+   "outgoing": {},
+   "contrast": "response_curve",
+   "comparison": "curve_circle_out1_EI1",
+   "response_coordinates": {
+    "shape": "circle",
+    "EE_out": 1.0,
+    "EI": 1.0,
+    "degree": 1.0,
+    "dx_mm": 0.0
+   }
+  },
+  {
+   "id": "g1_combination_000",
+   "layout": "up3",
+   "centers_mm": [
+    [
+     3.074656700085588,
+     11.448484497298544
+    ],
+    [
+     16.529331903193096,
+     4.366116172461985
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.3570601881947368,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 1.0,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 1.878670584410429
+   },
+   "changed_parameter": "core_ou_correlation",
+   "changed_value": 0.0,
+   "adjacency_changes": true,
+   "stage": "initial",
+   "parent_id": "refine_mid_EE085_mean095",
+   "changed_parameters": {
+    "core_ou_correlation": 0.0
+   },
+   "display_name": "g1_combination_000",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null,
+   "core_ou_correlation": 0.0,
+   "shape": {},
+   "outgoing": {},
+   "contrast": "space_filling",
+   "comparison": "bridge_circle_out125_xminus075",
+   "response_coordinates": {
+    "shape": "circle",
+    "EE_out": 1.25,
+    "EI": 1.0,
+    "degree": 1.0,
+    "dx_mm": -0.75
+   },
+   "optimization_axis": null
+  }
+ ],
+ "initial_ids": [
+  "bridge_circle_out125_xminus075",
+  "g1_axis0_minus",
+  "bridge_circle_out125",
+  "g1_axis1_minus",
+  "g1_axis1_plus",
+  "g1_axis2_minus",
+  "g1_axis2_plus",
+  "g1_axis3_minus",
+  "g1_axis3_plus",
+  "g1_axis4_minus",
+  "g1_axis4_plus",
+  "g1_axis5_minus",
+  "g1_axis5_plus",
+  "bridge_circle_weight150",
+  "curve_circle_out1_EI1",
+  "g1_combination_000"
+ ],
+ "initial_meta": [
+  {
+   "candidate": "bridge_circle_out125_xminus075",
+   "kind": "reference",
+   "axis": null,
+   "vector": [
+    3.4492143200000003,
+    12.12890135,
+    16.47920304,
+    3.96551153,
+    1.25,
+    0.0
+   ]
+  },
+  {
+   "candidate": "g1_axis0_minus",
+   "kind": "single_axis",
+   "axis": 0,
+   "vector": [
+    2.6992143200000003,
+    12.12890135,
+    16.47920304,
+    3.96551153,
+    1.25,
+    0.0
+   ]
+  },
+  {
+   "candidate": "bridge_circle_out125",
+   "kind": "single_axis",
+   "axis": 0,
+   "vector": [
+    4.19921432,
+    12.12890135,
+    16.47920304,
+    3.96551153,
+    1.25,
+    0.0
+   ]
+  },
+  {
+   "candidate": "g1_axis1_minus",
+   "kind": "single_axis",
+   "axis": 1,
+   "vector": [
+    3.4492143200000003,
+    11.37890135,
+    16.47920304,
+    3.96551153,
+    1.25,
+    0.0
+   ]
+  },
+  {
+   "candidate": "g1_axis1_plus",
+   "kind": "single_axis",
+   "axis": 1,
+   "vector": [
+    3.4492143200000003,
+    12.87890135,
+    16.47920304,
+    3.96551153,
+    1.25,
+    0.0
+   ]
+  },
+  {
+   "candidate": "g1_axis2_minus",
+   "kind": "single_axis",
+   "axis": 2,
+   "vector": [
+    3.4492143200000003,
+    12.12890135,
+    15.729203040000002,
+    3.96551153,
+    1.25,
+    0.0
+   ]
+  },
+  {
+   "candidate": "g1_axis2_plus",
+   "kind": "single_axis",
+   "axis": 2,
+   "vector": [
+    3.4492143200000003,
+    12.12890135,
+    17.22920304,
+    3.96551153,
+    1.25,
+    0.0
+   ]
+  },
+  {
+   "candidate": "g1_axis3_minus",
+   "kind": "single_axis",
+   "axis": 3,
+   "vector": [
+    3.4492143200000003,
+    12.12890135,
+    16.47920304,
+    3.21551153,
+    1.25,
+    0.0
+   ]
+  },
+  {
+   "candidate": "g1_axis3_plus",
+   "kind": "single_axis",
+   "axis": 3,
+   "vector": [
+    3.4492143200000003,
+    12.12890135,
+    16.47920304,
+    4.715511530000001,
+    1.25,
+    0.0
+   ]
+  },
+  {
+   "candidate": "g1_axis4_minus",
+   "kind": "single_axis",
+   "axis": 4,
+   "vector": [
+    3.4492143200000003,
+    12.12890135,
+    16.47920304,
+    3.96551153,
+    1.125,
+    0.0
+   ]
+  },
+  {
+   "candidate": "g1_axis4_plus",
+   "kind": "single_axis",
+   "axis": 4,
+   "vector": [
+    3.4492143200000003,
+    12.12890135,
+    16.47920304,
+    3.96551153,
+    1.375,
+    0.0
+   ]
+  },
+  {
+   "candidate": "g1_axis5_minus",
+   "kind": "single_axis",
+   "axis": 5,
+   "vector": [
+    3.4492143200000003,
+    12.12890135,
+    16.47920304,
+    3.96551153,
+    1.25,
+    -10.0
+   ]
+  },
+  {
+   "candidate": "g1_axis5_plus",
+   "kind": "single_axis",
+   "axis": 5,
+   "vector": [
+    3.4492143200000003,
+    12.12890135,
+    16.47920304,
+    3.96551153,
+    1.25,
+    10.0
+   ]
+  },
+  {
+   "candidate": "bridge_circle_weight150",
+   "kind": "historical_combination",
+   "axis": null,
+   "vector": [
+    4.19921432,
+    12.12890135,
+    16.47920304,
+    3.96551153,
+    1.5,
+    0.0
+   ]
+  },
+  {
+   "candidate": "curve_circle_out1_EI1",
+   "kind": "historical_combination",
+   "axis": null,
+   "vector": [
+    4.19921432,
+    12.12890135,
+    16.47920304,
+    3.96551153,
+    1.0,
+    0.0
+   ]
+  },
+  {
+   "candidate": "g1_combination_000",
+   "kind": "space_filling",
+   "axis": null,
+   "vector": [
+    3.074656700085588,
+    11.448484497298544,
+    16.529331903193096,
+    4.366116172461985,
+    1.3570601881947368,
+    1.878670584410429
+   ]
+  }
+ ],
+ "reused_units": [
+  {
+   "candidate": "bridge_circle_out125_xminus075",
+   "unit": "2511_847401",
+   "source": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/response/units/bridge_circle_out125_xminus075/2511_847401",
+   "trajectory_sha256": "2801963aac88eab7cfc71f017d76088745566d8804a6e0ae1e449b8bc22b9986"
+  },
+  {
+   "candidate": "bridge_circle_out125_xminus075",
+   "unit": "2511_847402",
+   "source": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/response/units/bridge_circle_out125_xminus075/2511_847402",
+   "trajectory_sha256": "9e4468732668f564bbd4ad5ce41914be9fcf07b5ce297060619376752fdf9207"
+  },
+  {
+   "candidate": "bridge_circle_out125",
+   "unit": "2511_847401",
+   "source": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/response/units/bridge_circle_out125/2511_847401",
+   "trajectory_sha256": "fd53f9f0a3db12728b6deac4d830d37e790c5d42bc5d3a484d876658c2364fc7"
+  },
+  {
+   "candidate": "bridge_circle_out125",
+   "unit": "2511_847402",
+   "source": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/response/units/bridge_circle_out125/2511_847402",
+   "trajectory_sha256": "cd3b67fecb96f1d048c2f1a0c17665f75815342914b722e0392d8e68d22de1d1"
+  },
+  {
+   "candidate": "bridge_circle_weight150",
+   "unit": "2511_847401",
+   "source": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/response/units/bridge_circle_weight150/2511_847401",
+   "trajectory_sha256": "ccf4f7da69763607469374b7d6f5a1ff03f8e00d70422920711f18f11b4f3ff8"
+  },
+  {
+   "candidate": "bridge_circle_weight150",
+   "unit": "2511_847402",
+   "source": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/response/units/bridge_circle_weight150/2511_847402",
+   "trajectory_sha256": "e31287560e15796b69de53cfd7b8dc3314e03c307a58db1b53112951f40038ac"
+  },
+  {
+   "candidate": "curve_circle_out1_EI1",
+   "unit": "2511_847401",
+   "source": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/response/units/curve_circle_out1_EI1/2511_847401",
+   "trajectory_sha256": "9b61ed9225f192e22315cc0f7a02bbc6f567e0a1a7e8cb12636b9a8c0faa05a9"
+  },
+  {
+   "candidate": "curve_circle_out1_EI1",
+   "unit": "2511_847402",
+   "source": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/response/units/curve_circle_out1_EI1/2511_847402",
+   "trajectory_sha256": "c26c5cde3ee6d9617f1d43f0df5c8cb3e2b20d717dd4273c58605be126353959"
+  }
+ ],
+ "optimizer": {
+  "implementation_status": "NOT_IMPLEMENTED",
+  "type": "bounded_local_batch_noisy_bayesian_optimization",
+  "proposed_library": "BoTorch",
+  "surrogate": "SingleTaskGP with explicit Matern 5/2 ARD, normalized X and standardized Y, float64",
+  "target": "maximize negative mean J",
+  "acquisition": "qLogNoisyExpectedImprovement",
+  "initial_conditions_max": 16,
+  "initial_design": "reference + 12 one-coordinate probes + 3 compatible historical combination points or local space-filling points",
+  "adaptive_batches": 4,
+  "new_conditions_per_batch": 4,
+  "nei_points": 3,
+  "uncertainty_points": 1,
+  "local_pool_points": 4096,
+  "global_pool_points": 4096,
+  "pool_seed": 2026091402,
+  "posterior_sampling_seed": 2026091403,
+  "update": "freeze full batch, evaluate both noise runs per condition, update posterior and box only after batch completion",
+  "trust_box": {
+   "initial_normalized_halfwidth": 0.25,
+   "min": 0.125,
+   "max": 0.5,
+   "success_probability": 0.8,
+   "success_batches_to_expand": 2,
+   "expansion": 1.5,
+   "failure_batches_to_shrink": 2,
+   "contraction": 0.5
+  },
+  "observation_noise": "0.5*(per-condition sample variance of two J values / 2) + 0.5*median of that estimate across conditions; normalized numerical floor 1e-6",
+  "eligibility_model": "GaussianProcessClassifier only when both scorable/unscorable conditions exist; append log(max(p,0.05)) to log acquisition",
+  "invalid_loss": null,
+  "engineering_failure_as_ineligible": false,
+  "minimum_scorable_initial_conditions": 8,
+  "stop_after_two_batches_with_at_least_half_unscorable": true,
+  "surrogate_fit_restarts_max": 3,
+  "automatic_random_fallback": false,
+  "separate_seed_namespace_for_confirmation": true
+ },
+ "budget": {
+  "initial_evaluation_slots": 32,
+  "adaptive_evaluation_slots": 32,
+  "confirmation_evaluation_slots_max": 12,
+  "search_plus_confirmation_slots_max": 76,
+  "new_search_plus_confirmation_runs_max": 74,
+  "conditional_response_new_runs_max": 40,
+  "total_new_formal_runs_max": 114,
+  "reused_evaluations_not_new_runs": true
+ },
+ "resources": {
+  "max_workers": 8,
+  "per_tree_limit_GiB": 18,
+  "min_available_GiB": 40,
+  "launch_reserve_GiB": 18
+ },
+ "operational_note": "Initial proposals are outcome-independent and execute alongside G0. Adaptive proposals require frozen objective and passing diagnostics.",
+ "controller_source": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_three_observable_bo.py",
+ "created_unix": 1789377842.5513575
+}

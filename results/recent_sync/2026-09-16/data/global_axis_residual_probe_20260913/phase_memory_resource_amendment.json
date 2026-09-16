@@ -1,0 +1,45 @@
+{
+  "schema": "topic4.phase_memory_dispatch_amendment.v1",
+  "created_unix": 1789246565.7237372,
+  "physical_changes": false,
+  "physical_workers_restarted": 0,
+  "formal_budget_changed": false,
+  "seeds_and_order_changed": false,
+  "reserve": {
+    "construction_GiB": 9,
+    "verified_integration_after_ms": 1000,
+    "verified_integration_GiB": 6,
+    "per_tree_hard_GiB": 18,
+    "host_dispatch_margin_GiB": 40,
+    "host_hard_floor_GiB": 30
+  },
+  "limits": {
+    "N_while_F_running": 6,
+    "N_after_F_while_G_priority": 16,
+    "N_after_G": 18,
+    "G": 2
+  },
+  "evidence": "140 completed predecessor runs peak whole-worker RSS <=5.894GiB; graph-building G canaries <=5.738GiB; cached G 2.934GiB; live integrated workers about2.0-2.1GiB. Six GiB is a dispatch estimate, not a physical allocation cap.",
+  "checks": "/data/hfosp/topic4_sef_hfo/overnight_exploration_20260913/phase_reserve_checks.json",
+  "handoff": {
+    "label": "G",
+    "old_controller_pid": 55657,
+    "folder": "global_axis_residual_probe_20260913",
+    "script": "run_topic4_global_axis_residual_probe.py",
+    "workers": [
+      {
+        "pid": 136040,
+        "unit": [
+          "global_axis_+0",
+          2511,
+          847101
+        ],
+        "stage": "response",
+        "process_created_unix": 1789243031.71,
+        "log": "/data/hfosp/topic4_sef_hfo/global_axis_residual_probe_20260913/logs/response_global_axis_+0_2511_847101.log"
+      }
+    ],
+    "new_controller_pid": 258056,
+    "controller_sha256": "4f1e202c581fa8a891de09cdb5baf9be171573f6b05c725dd0fc5a0849f2a540"
+  }
+}

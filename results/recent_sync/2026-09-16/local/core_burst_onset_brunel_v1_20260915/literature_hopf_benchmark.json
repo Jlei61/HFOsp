@@ -1,0 +1,26 @@
+{
+  "source": "https://www.phys.ens.psl.eu/~hakim/08chaosnbvh.pdf",
+  "source_figure": 2,
+  "equation": "10 dr/dt = -r + 1+tanh(I_ext - J r(t-2)); time in ms",
+  "r0": 1.7615941559557649,
+  "J": "K / sech(1)^2",
+  "I_ext": "1 + J*r0",
+  "critical_K": 8.50242498844502,
+  "critical_frequency_hz": 134.38109871030443,
+  "characteristic_residual": 2.220446049250313e-16,
+  "dt_checks": [
+    {
+      "K": 8.4,
+      "amplitude_dt001": 6.874500968478969e-13,
+      "amplitude_dt0005": 7.006617508409363e-13,
+      "difference": 1.3211653993039363e-14
+    },
+    {
+      "K": 8.8,
+      "amplitude_dt001": 0.01537235260012193,
+      "amplitude_dt0005": 0.015373540111192519,
+      "difference": 1.187511070588343e-06
+    }
+  ],
+  "scope": "Literal literature delay-rate example. Coupling and external mean co-vary to hold r0 fixed. Not calibrated to spatial SNN; no K-to-EE conversion."
+}

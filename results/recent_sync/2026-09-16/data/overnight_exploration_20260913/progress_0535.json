@@ -1,0 +1,192 @@
+{
+  "status": "ACTIVE",
+  "updated_unix": 1789248978.0534344,
+  "updated_local": "2026-09-13T05:36:18.053434+08:00",
+  "queues": {
+    "F": {
+      "status": "RESPONSE_RUNNING",
+      "complete": 54,
+      "total": 60,
+      "active": [
+        {
+          "pid": 3965604,
+          "unit": [
+            "up3__ellipse4__EI_same_core_scale_0.75__y_plus10",
+            2511,
+            847101
+          ],
+          "simulated_ms": 57000.0,
+          "cpu_s": 18254.79,
+          "rss_gib": 2.0361328125
+        },
+        {
+          "pid": 4063749,
+          "unit": [
+            "up3__ellipse4__EI_same_core_scale_0.75__y_plus10",
+            2511,
+            847102
+          ],
+          "simulated_ms": 47000.0,
+          "cpu_s": 15439.900000000001,
+          "rss_gib": 2.026123046875
+        },
+        {
+          "pid": 4070465,
+          "unit": [
+            "up3__ellipse4__EI_same_core_scale_0.75__radius205",
+            2511,
+            847101
+          ],
+          "simulated_ms": 42000.0,
+          "cpu_s": 15067.800000000001,
+          "rss_gib": 2.020008087158203
+        },
+        {
+          "pid": 4125167,
+          "unit": [
+            "up3__ellipse4__EI_same_core_scale_0.75__radius205",
+            2511,
+            847102
+          ],
+          "simulated_ms": 36000.0,
+          "cpu_s": 11863.27,
+          "rss_gib": 2.0153541564941406
+        },
+        {
+          "pid": 4151252,
+          "unit": [
+            "up3__ellipse4__EI_same_core_scale_0.75__radius235",
+            2511,
+            847101
+          ],
+          "simulated_ms": 31000.0,
+          "cpu_s": 11097.949999999999,
+          "rss_gib": 2.009654998779297
+        },
+        {
+          "pid": 4168996,
+          "unit": [
+            "up3__ellipse4__EI_same_core_scale_0.75__radius235",
+            2511,
+            847102
+          ],
+          "simulated_ms": 32000.0,
+          "cpu_s": 10593.08,
+          "rss_gib": 2.0114822387695312
+        }
+      ],
+      "failures": []
+    },
+    "N": {
+      "status": "RESPONSE_RUNNING",
+      "complete": 0,
+      "total": 108,
+      "active": [
+        {
+          "pid": 15948,
+          "unit": [
+            "bridge_circle_out125_xminus075",
+            2711,
+            847401
+          ],
+          "simulated_ms": 24000.0,
+          "cpu_s": 9438.33,
+          "rss_gib": 2.0025177001953125
+        },
+        {
+          "pid": 4078535,
+          "unit": [
+            "bridge_circle_out125",
+            2511,
+            847401
+          ],
+          "simulated_ms": 40000.0,
+          "cpu_s": 13198.74,
+          "rss_gib": 2.0181655883789062
+        },
+        {
+          "pid": 4078701,
+          "unit": [
+            "bridge_circle_out125_xminus075",
+            2511,
+            847401
+          ],
+          "simulated_ms": 39000.0,
+          "cpu_s": 13193.4,
+          "rss_gib": 2.0190887451171875
+        },
+        {
+          "pid": 4151248,
+          "unit": [
+            "bridge_circle_out125",
+            2711,
+            847401
+          ],
+          "simulated_ms": 32000.0,
+          "cpu_s": 11100.76,
+          "rss_gib": 2.1132965087890625
+        },
+        {
+          "pid": 258720,
+          "unit": [
+            "bridge_circle_out125",
+            2712,
+            847401
+          ],
+          "simulated_ms": 5000.000000000001,
+          "cpu_s": 2390.43,
+          "rss_gib": 2.099254608154297
+        },
+        {
+          "pid": 259108,
+          "unit": [
+            "bridge_circle_out125_xminus075",
+            2712,
+            847401
+          ],
+          "simulated_ms": 6000.000000000001,
+          "cpu_s": 2387.71,
+          "rss_gib": 2.100391387939453
+        }
+      ],
+      "failures": []
+    },
+    "G": {
+      "status": "RESPONSE_RUNNING",
+      "complete": 0,
+      "total": 6,
+      "active": [
+        {
+          "pid": 136040,
+          "unit": [
+            "global_axis_+0",
+            2511,
+            847101
+          ],
+          "simulated_ms": 17000.0,
+          "cpu_s": 5944.330000000001,
+          "rss_gib": 2.1059951782226562
+        },
+        {
+          "pid": 258320,
+          "unit": [
+            "global_axis_-15",
+            2511,
+            847101
+          ],
+          "simulated_ms": 6000.000000000001,
+          "cpu_s": 2407.57,
+          "rss_gib": 1.9838523864746094
+        }
+      ],
+      "failures": []
+    }
+  },
+  "new_scientific_artifact": "geometry_confirmation_effects/scientific_note.md",
+  "artifact_verification": "geometry_confirmation_effects/artifact_qa.json",
+  "interpretation": "Existing32 geometry confirmation trajectories show topology-dependent TA response; not new physical simulations or confirmation of local EE/EI candidates",
+  "active_wait_handle": {
+    "exec_session_id": 21713,
+    "pid": 260820
+  }
+}

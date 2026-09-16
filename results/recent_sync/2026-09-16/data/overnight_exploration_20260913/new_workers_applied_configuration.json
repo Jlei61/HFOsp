@@ -1,0 +1,246 @@
+{
+  "status": "APPLIED_CONFIGURATION_PASS_NOT_PROPAGATION_ACCEPTANCE",
+  "updated_unix": 1789247374.4456432,
+  "units": [
+    {
+      "candidate": "bridge_circle_out125",
+      "topology": 2712,
+      "noise": 847401,
+      "checks": {
+        "candidate_parameters": true,
+        "centers": true,
+        "topology": true,
+        "dynamics": true,
+        "no_raised_core_E": true,
+        "ZM_off": true,
+        "spatial_ou_off": true,
+        "kick_off": true,
+        "slow_I_off": true
+      },
+      "threshold": {
+        "physics": "core_shape_output_v1",
+        "centers_mm": [
+          [
+            4.19921432,
+            12.12890135
+          ],
+          [
+            16.47920304,
+            3.96551153
+          ]
+        ],
+        "radii_mm": [
+          1.7525782905619196,
+          1.7525782905619196
+        ],
+        "depth_scales": [
+          1.0,
+          1.0
+        ],
+        "floor_mV": 11.0,
+        "v_base_mV": 18.0,
+        "members": [
+          792,
+          776
+        ],
+        "n_members": 1568,
+        "overlap_members": 0,
+        "total_lowering_mV": 1086.6939960612367,
+        "total_lowering_per_core_mV": [
+          543.3412419431727,
+          543.3527541180639
+        ],
+        "mean_lowering_per_member_mV": [
+          0.6860369216454201,
+          0.7001968480902885
+        ],
+        "floor_clipped_count": 0,
+        "floor_clipped_total_mV": 0.0,
+        "n_raised": 0,
+        "n_lowered": 1109,
+        "latent_identity_sha256": "535b5bd9b136fbd76abf5a04c7bbc170b035846232778d0157cb4532bd9f1a27",
+        "quantile_seed": 20260806,
+        "boundary_clipped": [
+          false,
+          false
+        ],
+        "disks_overlap": false,
+        "min_vtheta_mV": 14.11093708404382,
+        "max_vtheta_mV": 18.0,
+        "applied_A_depth_scale": 1.0,
+        "shape_requested": {},
+        "ellipse_A_semiaxes_mm": [
+          1.7525782905619196,
+          1.7525782905619196
+        ],
+        "ellipse_A_angle_deg": 0.0,
+        "ellipse_metric_cutoff": 1.0,
+        "matched_E_count": true,
+        "dose_target_mV": null,
+        "dose_error_mV": null
+      },
+      "simulated_ms": 1000.0000000000001,
+      "source": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/response/units/bridge_circle_out125/2712_847401/applied_physics.json"
+    },
+    {
+      "candidate": "bridge_circle_out125_xminus075",
+      "topology": 2712,
+      "noise": 847401,
+      "checks": {
+        "candidate_parameters": true,
+        "centers": true,
+        "topology": true,
+        "dynamics": true,
+        "no_raised_core_E": true,
+        "ZM_off": true,
+        "spatial_ou_off": true,
+        "kick_off": true,
+        "slow_I_off": true
+      },
+      "threshold": {
+        "physics": "core_shape_output_v1",
+        "centers_mm": [
+          [
+            3.4492143200000003,
+            12.12890135
+          ],
+          [
+            16.47920304,
+            3.96551153
+          ]
+        ],
+        "radii_mm": [
+          1.7525782905619196,
+          1.7525782905619196
+        ],
+        "depth_scales": [
+          1.0,
+          1.0
+        ],
+        "floor_mV": 11.0,
+        "v_base_mV": 18.0,
+        "members": [
+          781,
+          776
+        ],
+        "n_members": 1557,
+        "overlap_members": 0,
+        "total_lowering_mV": 1089.0321021097434,
+        "total_lowering_per_core_mV": [
+          545.6793479916795,
+          543.3527541180639
+        ],
+        "mean_lowering_per_member_mV": [
+          0.6986931472364655,
+          0.7001968480902885
+        ],
+        "floor_clipped_count": 0,
+        "floor_clipped_total_mV": 0.0,
+        "n_raised": 0,
+        "n_lowered": 1109,
+        "latent_identity_sha256": "535b5bd9b136fbd76abf5a04c7bbc170b035846232778d0157cb4532bd9f1a27",
+        "quantile_seed": 20260806,
+        "boundary_clipped": [
+          false,
+          false
+        ],
+        "disks_overlap": false,
+        "min_vtheta_mV": 14.11093708404382,
+        "max_vtheta_mV": 18.0,
+        "applied_A_depth_scale": 1.0,
+        "shape_requested": {},
+        "ellipse_A_semiaxes_mm": [
+          1.7525782905619196,
+          1.7525782905619196
+        ],
+        "ellipse_A_angle_deg": 0.0,
+        "ellipse_metric_cutoff": 1.0,
+        "matched_E_count": true,
+        "dose_target_mV": null,
+        "dose_error_mV": null
+      },
+      "simulated_ms": 1000.0000000000001,
+      "source": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/response/units/bridge_circle_out125_xminus075/2712_847401/applied_physics.json"
+    },
+    {
+      "candidate": "global_axis_-15",
+      "topology": 2511,
+      "noise": 847101,
+      "checks": {
+        "candidate_parameters": true,
+        "centers": true,
+        "topology": true,
+        "dynamics": true,
+        "no_raised_core_E": true,
+        "ZM_off": true,
+        "spatial_ou_off": true,
+        "kick_off": true,
+        "slow_I_off": true
+      },
+      "threshold": {
+        "physics": "core_shape_output_v1",
+        "centers_mm": [
+          [
+            3.4492143200000003,
+            12.12890135
+          ],
+          [
+            16.47920304,
+            3.96551153
+          ]
+        ],
+        "radii_mm": [
+          1.7525782905619196,
+          1.7525782905619196
+        ],
+        "depth_scales": [
+          1.0,
+          1.0
+        ],
+        "floor_mV": 11.0,
+        "v_base_mV": 18.0,
+        "members": [
+          742,
+          742
+        ],
+        "n_members": 1484,
+        "overlap_members": 0,
+        "total_lowering_mV": 1091.0551031310029,
+        "total_lowering_per_core_mV": [
+          560.3922347370849,
+          530.6628683939177
+        ],
+        "mean_lowering_per_member_mV": [
+          0.7552455993761252,
+          0.7151790679163311
+        ],
+        "floor_clipped_count": 0,
+        "floor_clipped_total_mV": 0.0,
+        "n_raised": 0,
+        "n_lowered": 1056,
+        "latent_identity_sha256": "535b5bd9b136fbd76abf5a04c7bbc170b035846232778d0157cb4532bd9f1a27",
+        "quantile_seed": 20260806,
+        "boundary_clipped": [
+          false,
+          false
+        ],
+        "disks_overlap": false,
+        "min_vtheta_mV": 14.29138637388975,
+        "max_vtheta_mV": 18.0,
+        "applied_A_depth_scale": 1.0,
+        "shape_requested": {},
+        "ellipse_A_semiaxes_mm": [
+          1.7525782905619196,
+          1.7525782905619196
+        ],
+        "ellipse_A_angle_deg": 0.0,
+        "ellipse_metric_cutoff": 1.0,
+        "matched_E_count": true,
+        "dose_target_mV": null,
+        "dose_error_mV": null
+      },
+      "simulated_ms": 1000.0000000000001,
+      "source": "/data/hfosp/topic4_sef_hfo/global_axis_residual_probe_20260913/response/units/global_axis_-15/2511_847101/applied_physics.json"
+    }
+  ]
+}

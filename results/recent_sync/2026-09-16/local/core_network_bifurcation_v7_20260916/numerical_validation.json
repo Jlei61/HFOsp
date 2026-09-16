@@ -1,0 +1,684 @@
+{
+  "status": "PASS",
+  "scope": "Declared 20-condition native atlas, accepted local critical points and finite continuations; not global branch completeness or native bifurcation equivalence",
+  "native_conditions": 20,
+  "new_native_runs": [
+    {
+      "number": 5,
+      "J": 1.1,
+      "duration_ms": 12000.0,
+      "six_group_count_conservation": true,
+      "recorded_cells": 600,
+      "threshold_raised": 0
+    },
+    {
+      "number": 6,
+      "J": 1.14,
+      "duration_ms": 12000.0,
+      "six_group_count_conservation": true,
+      "recorded_cells": 600,
+      "threshold_raised": 0
+    },
+    {
+      "number": 7,
+      "J": 1.17623,
+      "duration_ms": 12000.0,
+      "six_group_count_conservation": true,
+      "recorded_cells": 600,
+      "threshold_raised": 0
+    },
+    {
+      "number": 8,
+      "J": 1.17632,
+      "duration_ms": 12000.0,
+      "six_group_count_conservation": true,
+      "recorded_cells": 600,
+      "threshold_raised": 0
+    },
+    {
+      "number": 9,
+      "J": 1.24,
+      "duration_ms": 12000.0,
+      "six_group_count_conservation": true,
+      "recorded_cells": 600,
+      "threshold_raised": 0
+    },
+    {
+      "number": 10,
+      "J": 1.25,
+      "duration_ms": 12000.0,
+      "six_group_count_conservation": true,
+      "recorded_cells": 600,
+      "threshold_raised": 0
+    },
+    {
+      "number": 11,
+      "J": 1.34,
+      "duration_ms": 12000.0,
+      "six_group_count_conservation": true,
+      "recorded_cells": 600,
+      "threshold_raised": 0
+    },
+    {
+      "number": 12,
+      "J": 1.355,
+      "duration_ms": 12000.0,
+      "six_group_count_conservation": true,
+      "recorded_cells": 600,
+      "threshold_raised": 0
+    },
+    {
+      "number": 13,
+      "J": 1.37,
+      "duration_ms": 12000.0,
+      "six_group_count_conservation": true,
+      "recorded_cells": 600,
+      "threshold_raised": 0
+    },
+    {
+      "number": 14,
+      "J": 1.375,
+      "duration_ms": 12000.0,
+      "six_group_count_conservation": true,
+      "recorded_cells": 600,
+      "threshold_raised": 0
+    },
+    {
+      "number": 15,
+      "J": 1.38,
+      "duration_ms": 12000.0,
+      "six_group_count_conservation": true,
+      "recorded_cells": 600,
+      "threshold_raised": 0
+    },
+    {
+      "number": 16,
+      "J": 1.385,
+      "duration_ms": 12000.0,
+      "six_group_count_conservation": true,
+      "recorded_cells": 600,
+      "threshold_raised": 0
+    },
+    {
+      "number": 17,
+      "J": 1.395,
+      "duration_ms": 12000.0,
+      "six_group_count_conservation": true,
+      "recorded_cells": 600,
+      "threshold_raised": 0
+    },
+    {
+      "number": 18,
+      "J": 1.45,
+      "duration_ms": 12000.0,
+      "six_group_count_conservation": true,
+      "recorded_cells": 600,
+      "threshold_raised": 0
+    },
+    {
+      "number": 19,
+      "J": 1.12181,
+      "duration_ms": 12000.0,
+      "six_group_count_conservation": true,
+      "recorded_cells": 600,
+      "threshold_raised": 0
+    },
+    {
+      "number": 20,
+      "J": 1.12183,
+      "duration_ms": 12000.0,
+      "six_group_count_conservation": true,
+      "recorded_cells": 600,
+      "threshold_raised": 0
+    }
+  ],
+  "native_pair_count": 6,
+  "native_figure_count": 40,
+  "reduced_waveform_count": 24,
+  "critical_orbit_count": 12,
+  "prefix": {
+    "status": "PASS",
+    "full_applied_identity_equal": true,
+    "bitwise_spike_counts_2ms": true,
+    "bitwise_active_counts_2ms": true,
+    "bitwise_active_counts_10ms": true,
+    "comparison_duration_ms": 100,
+    "threshold_raised": 0
+  },
+  "cycle_folds": {
+    "status": "PASS",
+    "folds": [
+      {
+        "name": "low_global_fold_014",
+        "g": 1.121817220417432,
+        "N": 4096,
+        "J_grid_difference": 2.220446049250313e-15,
+        "period_grid_difference_ms": 7.083497507665015e-06,
+        "right_mode_cosine": 0.999999999999989,
+        "left_mode_cosine": 0.9999999999999992,
+        "offgrid_hz": 6.106226635438361e-13,
+        "curvature_checks": [
+          {
+            "step": 0.03,
+            "left_Fvv": -9.793700925242455e-07,
+            "predicted_J_curvature": 4.188283411798802e-07
+          },
+          {
+            "step": 0.01,
+            "left_Fvv": -8.316224912291014e-07,
+            "predicted_J_curvature": 3.5564397069919846e-07
+          },
+          {
+            "step": 0.003,
+            "left_Fvv": -8.20310677500987e-07,
+            "predicted_J_curvature": 3.508064652294624e-07
+          }
+        ],
+        "measured_J_curvature": 3.573276785573398e-07,
+        "null_residual": 3.961941885677334e-12
+      },
+      {
+        "name": "recruited_global_fold_011",
+        "g": 1.176273009994528,
+        "N": 4096,
+        "J_grid_difference": 5.329070518200751e-15,
+        "period_grid_difference_ms": 3.1315660180553095e-06,
+        "right_mode_cosine": 0.9999999999983091,
+        "left_mode_cosine": 0.9999999999999962,
+        "offgrid_hz": 1.1210754546908674e-09,
+        "curvature_checks": [
+          {
+            "step": 0.03,
+            "left_Fvv": 3.073596577034222e-07,
+            "predicted_J_curvature": -7.528972655404536e-08
+          },
+          {
+            "step": 0.01,
+            "left_Fvv": 3.0750985939771193e-07,
+            "predicted_J_curvature": -7.53265194258735e-08
+          },
+          {
+            "step": 0.003,
+            "left_Fvv": 3.075965092850634e-07,
+            "predicted_J_curvature": -7.534774487352457e-08
+          }
+        ],
+        "measured_J_curvature": -7.928235845611197e-08,
+        "null_residual": 1.3587363005551634e-11
+      },
+      {
+        "name": "recruited_global_fold_022",
+        "g": 1.1762479453310737,
+        "N": 4096,
+        "J_grid_difference": 1.5543122344752192e-15,
+        "period_grid_difference_ms": 2.5236126589334162e-05,
+        "right_mode_cosine": 0.9999999999861323,
+        "left_mode_cosine": 0.9999999999999643,
+        "offgrid_hz": 3.8711533978386115e-09,
+        "curvature_checks": [
+          {
+            "step": 0.03,
+            "left_Fvv": -2.192754790851059e-07,
+            "predicted_J_curvature": 5.6806780677428334e-08
+          },
+          {
+            "step": 0.01,
+            "left_Fvv": -2.194084421652408e-07,
+            "predicted_J_curvature": 5.68412268661355e-08
+          },
+          {
+            "step": 0.003,
+            "left_Fvv": -2.1532765698994337e-07,
+            "predicted_J_curvature": 5.5784034929252996e-08
+          }
+        ],
+        "measured_J_curvature": 5.954490234216791e-08,
+        "null_residual": 6.180268102840003e-12
+      }
+    ]
+  },
+  "secondary_flip": {
+    "status": "PASS",
+    "critical": {
+      "J_grid_difference": 8.881784197001252e-16,
+      "period_grid_difference_ms": 1.576040631334763e-09,
+      "waveform_difference_hz": 8.255867411152001e-07,
+      "mode_cosine": 0.9999999999975043,
+      "left_mode_cosine": 0.9999999999940822
+    },
+    "accepted_children": [
+      {
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/surround_period4_refined/amp2e-05_N8192.npz",
+        "J": 1.1763002486474254,
+        "T_ms": 1821.886190123124,
+        "amplitude": 2e-05,
+        "offgrid_hz": 2.1505019986989282e-10,
+        "half_period_max_difference_hz": 0.004477343702136106,
+        "residual": 6.106226635438361e-14
+      },
+      {
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/surround_period4_refined/amp4e-05_N8192.npz",
+        "J": 1.1763002486475436,
+        "T_ms": 1821.8861899266033,
+        "amplitude": 4e-05,
+        "offgrid_hz": 2.1571633368466792e-10,
+        "half_period_max_difference_hz": 0.008958757747799502,
+        "residual": 3.090843553321676e-13
+      }
+    ]
+  },
+  "critical_flip_return": {
+    "g": 1.1763002486473648,
+    "T_ms": 910.9430950151789,
+    "N": 4096,
+    "dt_ms": 0.012499905250222005,
+    "history_dimension": 17706,
+    "method": "rk4",
+    "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/flips/surround_2T_flip_N4096.npz",
+    "section": "orthogonal",
+    "requested_multipliers": 2,
+    "multipliers": [
+      [
+        -0.9998747440888256,
+        0.0
+      ],
+      [
+        -3.993317495373021e-07,
+        0.0
+      ]
+    ],
+    "residuals": [
+      3.2161548583191753e-10,
+      1.2969666493559963e-09
+    ],
+    "orbit_tangent_defect": 6.72324600186737e-05,
+    "section_tangent_defect": 1.203378903819843e-09,
+    "max_transverse": 0.9998747440888256
+  },
+  "stable_four_cycle_return": [
+    {
+      "g": 1.1763002486474254,
+      "T_ms": 1821.886190123124,
+      "N": 8192,
+      "dt_ms": 0.024999810501716943,
+      "history_dimension": 8874,
+      "method": "rk4",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/surround_period4_refined/amp2e-05_N8192.npz",
+      "section": "orthogonal",
+      "requested_multipliers": 1,
+      "multipliers": [
+        [
+          0.8202218898099622,
+          0.0
+        ]
+      ],
+      "residuals": [
+        7.055481067685145e-10
+      ],
+      "orbit_tangent_defect": 0.00012708754922948585,
+      "section_tangent_defect": 1.2582400355038073e-10,
+      "max_transverse": 0.8202218898099622
+    },
+    {
+      "g": 1.1763002486475436,
+      "T_ms": 1821.8861899266033,
+      "N": 8192,
+      "dt_ms": 0.024999810499020298,
+      "history_dimension": 8874,
+      "method": "rk4",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/surround_period4/amp4e-05_N8192.npz",
+      "section": "orthogonal",
+      "requested_multipliers": 1,
+      "multipliers": [
+        [
+          0.3065240275846027,
+          0.0
+        ]
+      ],
+      "residuals": [
+        6.182912144067732e-10
+      ],
+      "orbit_tangent_defect": 0.0001578165892605377,
+      "section_tangent_defect": 2.1394214841428458e-10,
+      "max_transverse": 0.3065240275846027
+    }
+  ],
+  "stable_low_cycle_return": {
+    "g": 1.1218229776179574,
+    "T_ms": 715.9787849487511,
+    "N": 4096,
+    "dt_ms": 0.012499847849102658,
+    "history_dimension": 17706,
+    "method": "rk4",
+    "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/low_stable_grid/g1.12182298_N4096.npz",
+    "section": "orthogonal",
+    "requested_multipliers": 1,
+    "multipliers": [
+      [
+        0.1997871349819892,
+        0.0
+      ]
+    ],
+    "residuals": [
+      1.736831523001484e-08
+    ],
+    "orbit_tangent_defect": 1.617058696092782e-05,
+    "section_tangent_defect": 3.589396888520075e-11,
+    "max_transverse": 0.1997871349819892
+  },
+  "shifted_leading_spectrum": [
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/arcs/recruited_fast/point040_g1.1762705912.npz",
+      "growth_per_s": 66.1739331861133,
+      "angle_rad": 0.0,
+      "step_difference_per_s": 8.816799379474105e-08,
+      "shift_difference_per_s": 4.434849643075722e-08,
+      "scope": "Leading growth of this discretized orbit only; secondary multipliers not accepted"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/arcs/recruited_fast/point055_g1.1762481170.npz",
+      "growth_per_s": 65.70992182028375,
+      "angle_rad": 3.141592653589793,
+      "step_difference_per_s": 8.025874222994389e-07,
+      "shift_difference_per_s": 2.091160240524914e-07,
+      "scope": "Leading growth of this discretized orbit only; secondary multipliers not accepted"
+    }
+  ],
+  "homoclinic_grid": {
+    "J_difference": 1.1546319456101628e-14,
+    "mean_difference_hz": 2.654126918244515e-13
+  },
+  "analytic_critical_modes": [
+    {
+      "label": "Cycle fold",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/folds/low_global_fold_014_N4096.npz",
+      "analytic_right_null_max": 8.455792507161553e-10
+    },
+    {
+      "label": "LP0a",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_observable_bifurcation_v6_20260915/folds/surround_first_fold_N4096.npz",
+      "analytic_right_null_max": 1.205176495832922e-07
+    },
+    {
+      "label": "LP0b",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_observable_bifurcation_v6_20260915/folds/surround_second_fold_N4096.npz",
+      "analytic_right_null_max": 1.5960370935701076e-07
+    },
+    {
+      "label": "LP0c",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/folds/surround_recruited_fold_N4096.npz",
+      "analytic_right_null_max": 3.318123659949018e-10
+    },
+    {
+      "label": "PD0",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_observable_bifurcation_v6_20260915/flips/surround_micro_flip_N4096.npz",
+      "analytic_right_null_max": 1.4513814150518556e-07,
+      "analytic_left_null_max": 5.722064211344247e-10
+    },
+    {
+      "label": "LP1",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/folds/burst_end_fold_N4096.npz",
+      "analytic_right_null_max": 1.1483933551824886e-09
+    },
+    {
+      "label": "PD1",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/flips/mixed_lower_flip_N2048.npz",
+      "analytic_right_null_max": 1.3401590948092235e-10,
+      "analytic_left_null_max": 1.3163405782057325e-10
+    },
+    {
+      "label": "PD2",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/flips/mixed_flip_N4096.npz",
+      "analytic_right_null_max": 1.2737220167480245e-09,
+      "analytic_left_null_max": 6.921109865776209e-11
+    },
+    {
+      "label": "PD3",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/flips/tonic_lower_flip_N2048.npz",
+      "analytic_right_null_max": 1.5943157904985128e-10,
+      "analytic_left_null_max": 5.219335554029758e-11
+    },
+    {
+      "label": "PD0 (2T \u2192 4T)",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/flips/surround_2T_flip_N8192.npz",
+      "analytic_right_null_max": 2.1132047045568925e-07,
+      "analytic_left_null_max": 2.0847369663901105e-10
+    },
+    {
+      "label": "Additional cycle fold",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/folds/recruited_global_fold_011_N4096.npz",
+      "analytic_right_null_max": 5.642526521975472e-10
+    },
+    {
+      "label": "Additional cycle fold",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/folds/recruited_global_fold_022_N4096.npz",
+      "analytic_right_null_max": 3.1038075928857545e-10
+    }
+  ],
+  "analytic_gain_check": {
+    "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/long_period_tail/T2200_N16384.npz",
+    "analytic_chain_rule_error": 3.673710641249883e-15,
+    "finite_difference": [
+      {
+        "step": 0.0001,
+        "max_gain_difference": 2.3467450738744178e-09,
+        "chain_rule_error": 8.856517210147768e-10
+      },
+      {
+        "step": 1e-05,
+        "max_gain_difference": 2.345878938152246e-11,
+        "chain_rule_error": 8.875407353503562e-12
+      },
+      {
+        "step": 1e-06,
+        "max_gain_difference": 4.7959182435661826e-12,
+        "chain_rule_error": 1.793957343787511e-11
+      },
+      {
+        "step": 1e-07,
+        "max_gain_difference": 3.7363618058880443e-11,
+        "chain_rule_error": 1.52322958066331e-10
+      }
+    ]
+  },
+  "long_tail_stability": {
+    "status": "STABLE_BOUND",
+    "scope": "Stable 2200ms finite-period sample. Exact small multiplier not precision accepted; no infinite-time homoclinic BVP.",
+    "accepted_analytic_returns": [
+      {
+        "g": 1.1218371447051094,
+        "T_ms": 2199.999999999931,
+        "N": 16384,
+        "dt_ms": 0.024999999999999214,
+        "history_dimension": 8874,
+        "method": "rk4",
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/long_period_tail/T2200_N16384.npz",
+        "gain_derivative": "analytic frozen transfer quadrature",
+        "section": "orthogonal",
+        "requested_multipliers": 1,
+        "multipliers": [
+          [
+            -0.004133802216875482,
+            0.0
+          ]
+        ],
+        "residuals": [
+          5.166624107388135e-06
+        ],
+        "orbit_tangent_defect": 0.001046600296155494,
+        "section_tangent_defect": 0.0010163478392686525,
+        "max_transverse": 0.004133802216875482
+      },
+      {
+        "g": 1.1218371447051094,
+        "T_ms": 2199.999999999931,
+        "N": 16384,
+        "dt_ms": 0.012499999999999607,
+        "history_dimension": 17706,
+        "method": "rk4",
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/long_period_tail/T2200_N16384.npz",
+        "gain_derivative": "analytic frozen transfer quadrature",
+        "section": "orthogonal",
+        "requested_multipliers": 1,
+        "multipliers": [
+          [
+            -4.238829782914727e-06,
+            0.0
+          ]
+        ],
+        "residuals": [
+          5.316181071701801e-06
+        ],
+        "orbit_tangent_defect": 1.7151065456619353e-06,
+        "section_tangent_defect": 1.6747230000316649e-06,
+        "max_transverse": 4.238829782914727e-06
+      },
+      {
+        "g": 1.1218371447051094,
+        "T_ms": 2199.999999999931,
+        "N": 16384,
+        "dt_ms": 0.024999999999999214,
+        "history_dimension": 8874,
+        "method": "rk4",
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/long_period_tail_phase/T2200_N16384.npz",
+        "gain_derivative": "analytic frozen transfer quadrature",
+        "section": "orthogonal",
+        "requested_multipliers": 1,
+        "multipliers": [
+          [
+            -0.004340720008131545,
+            0.0
+          ]
+        ],
+        "residuals": [
+          6.748222474042524e-08
+        ],
+        "orbit_tangent_defect": 4.3836463321456625e-05,
+        "section_tangent_defect": 8.147490268725056e-11,
+        "max_transverse": 0.004340720008131545
+      }
+    ],
+    "rejected_finite_difference_gain_returns": [
+      {
+        "g": 1.1218371447051094,
+        "T_ms": 2199.999999999931,
+        "N": 16384,
+        "dt_ms": 0.024999999999999214,
+        "history_dimension": 8874,
+        "method": "rk4",
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/long_period_tail/T2200_N16384.npz",
+        "section": "orthogonal",
+        "requested_multipliers": 2,
+        "multipliers": [
+          [
+            -1.1835134871851944,
+            0.0
+          ],
+          [
+            1.2488326467148005e-14,
+            0.0
+          ]
+        ],
+        "residuals": [
+          1.4115805986197622e-06,
+          2.394459591002177e-07
+        ],
+        "orbit_tangent_defect": 0.29962129359245737,
+        "section_tangent_defect": 0.2909579184275447,
+        "max_transverse": 1.1835134871851944
+      },
+      {
+        "g": 1.1218371447051094,
+        "T_ms": 2199.999999999931,
+        "N": 16384,
+        "dt_ms": 0.012499999999999607,
+        "history_dimension": 17706,
+        "method": "rk4",
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/long_period_tail/T2200_N16384.npz",
+        "section": "orthogonal",
+        "requested_multipliers": 1,
+        "multipliers": [
+          [
+            -1.1799738121879604,
+            0.0
+          ]
+        ],
+        "residuals": [
+          3.96876774480315e-06
+        ],
+        "orbit_tangent_defect": 0.298906353551683,
+        "section_tangent_defect": 0.2902540276378049,
+        "max_transverse": 1.1799738121879604
+      },
+      {
+        "g": 1.1218371447051094,
+        "T_ms": 2199.999999999931,
+        "N": 16384,
+        "dt_ms": 0.024999999999999214,
+        "history_dimension": 8874,
+        "method": "rk4",
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/long_period_tail_phase/T2200_N16384.npz",
+        "section": "orthogonal",
+        "requested_multipliers": 1,
+        "multipliers": [
+          [
+            -1.2548034482647088,
+            0.0
+          ]
+        ],
+        "residuals": [
+          2.725570128603447e-06
+        ],
+        "orbit_tangent_defect": 0.0019021488125515933,
+        "section_tangent_defect": 5.829321569086006e-10,
+        "max_transverse": 1.2548034482647088
+      }
+    ],
+    "gain_validation": {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/long_period_tail/T2200_N16384.npz",
+      "analytic_chain_rule_error": 3.673710641249883e-15,
+      "finite_difference": [
+        {
+          "step": 0.0001,
+          "max_gain_difference": 2.3467450738744178e-09,
+          "chain_rule_error": 8.856517210147768e-10
+        },
+        {
+          "step": 1e-05,
+          "max_gain_difference": 2.345878938152246e-11,
+          "chain_rule_error": 8.875407353503562e-12
+        },
+        {
+          "step": 1e-06,
+          "max_gain_difference": 4.7959182435661826e-12,
+          "chain_rule_error": 1.793957343787511e-11
+        },
+        {
+          "step": 1e-07,
+          "max_gain_difference": 3.7363618058880443e-11,
+          "chain_rule_error": 1.52322958066331e-10
+        }
+      ]
+    },
+    "phase_origin": {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/long_period_tail/T2200_N16384.npz",
+      "rolled_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/long_period_tail_phase/T2200_N16384.npz",
+      "phase_shift_index": 12103,
+      "phase_shift_ms": 1625.1586914061988,
+      "initial_rate_velocity_norm": 2.2573363974016353e-10,
+      "new_rate_velocity_norm": 0.052587330686162864,
+      "mean_difference_hz": 8.239936510889834e-15
+    },
+    "interpretation": "Analytic differentiation of the same transfer removes the apparent multiplier below -1. Independent starting phases and step sizes have transverse modulus far below one. Finite-difference gain bias is strongly amplified near the saddle; reducing only integration dt did not cure it."
+  },
+  "condition_orbit_max_offgrid_hz": 7.260508166906376e-07,
+  "distant_continuation_max_offgrid_hz": 0.008761717817690196,
+  "scientific_limits": [
+    "Homoclinic limit is finite-period numerical evidence, not an infinite-time connection BVP.",
+    "Recruited family global endpoint remains undetermined after 120 further arc points.",
+    "Distant N2048 continuation is a diagnostic at <0.009 Hz off-grid defect; do not assign microcritical precision to all its points.",
+    "Strongly unstable secondary multipliers are not precision accepted.",
+    "Native cold-start single-seed parameter atlas is not a native bifurcation proof."
+  ],
+  "human_visual_acceptance": "PENDING"
+}

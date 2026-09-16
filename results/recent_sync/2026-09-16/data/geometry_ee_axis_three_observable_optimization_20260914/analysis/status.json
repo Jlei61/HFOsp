@@ -1,0 +1,72 @@
+{
+ "scored_units": 72,
+ "scorable_units": 72,
+ "patient_reference": {
+  "names": [
+   "SCL9",
+   "ICL11",
+   "SCL8",
+   "ICL10",
+   "SCL7",
+   "ICL9",
+   "ICL8",
+   "SCL6",
+   "ICL7",
+   "ICL6",
+   "ICL5",
+   "ICL4",
+   "ICL3",
+   "ICL2",
+   "ICL1"
+  ],
+  "fit_N": 19770,
+  "cal_N": 4981,
+  "proportions": {
+   "TA": 0.6659079413252402,
+   "TB": 0.3340920586747597
+  },
+  "time_scales_ms": {
+   "scl_pairs": 7.1158447265625,
+   "icl_pairs": 11.662109375,
+   "rod_lag": 9.0244140625
+  },
+  "normalizers": {
+   "rank_pattern": 0.14879229470412586,
+   "local_and_interrod_timing": 0.14089234078896828,
+   "participation": 0.15126292993352003
+  },
+  "maps": {
+   "rank": {
+    "bandwidth": 0.47886238037503925,
+    "linear_scale": 0.732783973633172,
+    "degenerate": false
+   },
+   "mask": {
+    "bandwidth": 0.5222329678670935,
+    "linear_scale": 0.905481320897928,
+    "degenerate": false
+   },
+   "scl_pairs": {
+    "bandwidth": 1.035725118952909,
+    "linear_scale": 0.9026683348661891,
+    "degenerate": false
+   },
+   "icl_pairs": {
+    "bandwidth": 0.985305492494378,
+    "linear_scale": 0.8810916616765779,
+    "degenerate": false
+   },
+   "rod_lag": {
+    "bandwidth": 0.8292869807451014,
+    "linear_scale": 1.0569251138407345,
+    "degenerate": false
+   }
+  },
+  "source": {
+   "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multidimensional_interictal_observation_repair_v2/evaluator.pkl",
+   "sha256": "cf0207113956420eadfe70ddca126cd050f7ea9e514ea15b044c869a210ad2d5"
+  },
+  "mode_labels_used_for_training": true
+ },
+ "updated_unix": 1789444624.5344043
+}

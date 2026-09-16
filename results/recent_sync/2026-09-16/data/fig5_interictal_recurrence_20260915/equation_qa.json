@@ -1,0 +1,45 @@
+{
+  "status": "PASS",
+  "reversals_tested_mV": [
+    -17.662847938268442,
+    11.0
+  ],
+  "checks": [
+    [
+      0.0,
+      -17.662847938268442
+    ],
+    [
+      0.16666666666666666,
+      -17.662847938268442
+    ],
+    [
+      0.5,
+      -17.662847938268442
+    ],
+    [
+      0.0,
+      11.0
+    ],
+    [
+      0.16666666666666666,
+      11.0
+    ],
+    [
+      0.5,
+      11.0
+    ]
+  ],
+  "same_membrane_rhs_at_reference": true,
+  "same_resource_input_J": true,
+  "same_Z_M_update_given_same_spikes": true,
+  "zero_fraction_native_parity": true,
+  "no_I_cell_modification": true,
+  "all_job_gains_matched": true,
+  "sahp_gains_tested": [
+    0.1,
+    1.5
+  ],
+  "two_reversal_numerator_verified": true,
+  "sahp_source_update_verified": true
+}

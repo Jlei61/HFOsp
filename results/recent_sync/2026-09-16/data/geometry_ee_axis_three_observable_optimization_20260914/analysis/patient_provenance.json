@@ -1,0 +1,19 @@
+{
+ "evaluator": {
+  "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multidimensional_interictal_observation_repair_v2/evaluator.pkl",
+  "sha256": "cf0207113956420eadfe70ddca126cd050f7ea9e514ea15b044c869a210ad2d5"
+ },
+ "target": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/shaft_aware_patient_training_target.npz",
+ "target_sha256": "7d11100c0f431479f8decb17b6de97575a91dcb889887ce9e2cedbbdcd54140b",
+ "clock": "/home/honglab/leijiaxin/HFOsp/results/topic5_preseizure_template_share/epilepsiae_1146/event_index.npz",
+ "clock_sha256": "6d905df2ec707254ffe36c73b7d4b86338d443cf099ab2837ed0d525e8403bd7",
+ "event_identity_matches": true,
+ "upstream_time_unit": "seconds",
+ "frozen_training_time_unit": "milliseconds",
+ "unit_factor": 1000,
+ "canonical_contract": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/objective_qualification/patient_training_contract_v1.npz",
+ "canonical_contract_sha256": "0f6e944f13978209b379c5ecee85f092051f55975493c1e95499171a93a685c3",
+ "cal_order": "chronological within original block",
+ "clinical_cohort": "original frozen FIT/CAL retained, not a new clinical cohort",
+ "labels": "SNN frozen classifier TA=1 TB=0; no current patient-state label bank consumed"
+}

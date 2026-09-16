@@ -1,0 +1,22 @@
+{
+  "reason": "Three source spiking trajectories still propagating at source 50-second endpoint. Observe until150seconds, changing duration only, no stimulus/reset/parameter change; verify exact spike prefix against completed source run.",
+  "jobs": [
+    {
+      "experiment": "exp4a",
+      "seed": 20260915,
+      "duration_s": 150
+    },
+    {
+      "experiment": "exp4a",
+      "seed": 20260916,
+      "duration_s": 150
+    },
+    {
+      "experiment": "exp4b",
+      "seed": 20260915,
+      "duration_s": 150
+    }
+  ],
+  "cumulative_new_reference_runs": 8,
+  "budget": 12
+}

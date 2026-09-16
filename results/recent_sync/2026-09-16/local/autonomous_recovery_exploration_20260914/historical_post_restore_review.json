@@ -1,0 +1,33 @@
+{
+  "reviewed_at": 1789415706.4169633,
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/reset_state_diagnosis_20260911/analysis/state_comparison.json",
+  "condition": "etaM.02 tauM2s tauZ5s; external Z refill/release at76.5s",
+  "observed_to_s": 1000.0,
+  "post_release_observation_s": 923.5,
+  "recurrent_high_observed": false,
+  "late_window": {
+    "window": "late",
+    "time_s": [
+      970.0,
+      1000.0
+    ],
+    "mean_Z": 0.8381923709710638,
+    "mean_Z_core_AB": [
+      0.8316017782171778,
+      0.7701379513961901
+    ],
+    "mean_adaptation_current_E_AB": [
+      0.5535723118550742,
+      0.6495954506311645,
+      1.0074806232991218
+    ],
+    "mean_E_hz": 13.797301041666666,
+    "regional_E_hz": [
+      16.296905393456825,
+      25.21963528413926,
+      13.440680674108098
+    ]
+  },
+  "limits": "External recovery is not autonomous termination. Finite no-reentry observation does not establish a permanently inaccessible attractor or parameter change. M-reset counterfactual in that package remains incomplete; do not attribute causality to it.",
+  "relevance": "If a new branch terminates, separately require recovered finite events and later reentry; do not count a stable low state alone as recurrent switching."
+}

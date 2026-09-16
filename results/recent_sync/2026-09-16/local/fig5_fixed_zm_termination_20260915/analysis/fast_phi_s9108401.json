@@ -1,0 +1,973 @@
+{
+  "name": "fast_phi_s9108401",
+  "job": {
+    "seed": 9108401,
+    "eta_m": 0.0005,
+    "tau_M_s": 1.0,
+    "tau_Z_s": 5.0,
+    "threshold": 95.19851312666987,
+    "mode": "native",
+    "gamma": 0.0,
+    "global_resource": "native_z",
+    "horizon_s": 20.0,
+    "checkpoint_s": 1.0,
+    "qa": false,
+    "name": "fast_phi_s9108401",
+    "global_gain": 0.0,
+    "phi_jump": 2.5,
+    "device": 1
+  },
+  "complete": true,
+  "observed_s": 20.0,
+  "entries": [],
+  "recoveries": [],
+  "category": 0,
+  "category_label": "No confirmed global high",
+  "late_window_s": [
+    15.0,
+    20.0
+  ],
+  "late_mean_Hz": [
+    10.640362500000009,
+    11.381697612732086,
+    16.807633587786256,
+    10.462869336835187
+  ],
+  "late_quiet_fraction": [
+    0.608,
+    0.892,
+    0.882,
+    0.608
+  ],
+  "population_order": [
+    "All E",
+    "Core A E",
+    "Core B E",
+    "Other E"
+  ],
+  "finite_events": [
+    {
+      "start_s": 0.07,
+      "end_s": 0.22,
+      "duration_s": 0.15,
+      "quiet_gap_s": 0.07,
+      "peak_s": 0.115,
+      "peak_Hz": 30.9125,
+      "onset_interval_s": null,
+      "interevent_gap_s": null
+    },
+    {
+      "start_s": 0.51,
+      "end_s": 0.6,
+      "duration_s": 0.09,
+      "quiet_gap_s": 0.29,
+      "peak_s": 0.5750000000000001,
+      "peak_Hz": 32.75,
+      "onset_interval_s": 0.44,
+      "interevent_gap_s": 0.29000000000000004
+    },
+    {
+      "start_s": 0.7000000000000001,
+      "end_s": 0.76,
+      "duration_s": 0.06,
+      "quiet_gap_s": 0.1,
+      "peak_s": 0.725,
+      "peak_Hz": 25.696875,
+      "onset_interval_s": 0.19000000000000006,
+      "interevent_gap_s": 0.10000000000000009
+    },
+    {
+      "start_s": 0.9400000000000001,
+      "end_s": 1.01,
+      "duration_s": 0.07,
+      "quiet_gap_s": 0.18,
+      "peak_s": 0.985,
+      "peak_Hz": 37.303125,
+      "onset_interval_s": 0.24,
+      "interevent_gap_s": 0.18000000000000005
+    },
+    {
+      "start_s": 1.32,
+      "end_s": 1.4000000000000001,
+      "duration_s": 0.08,
+      "quiet_gap_s": 0.03,
+      "peak_s": 1.375,
+      "peak_Hz": 28.734375,
+      "onset_interval_s": 0.38,
+      "interevent_gap_s": 0.31000000000000005
+    },
+    {
+      "start_s": 1.57,
+      "end_s": 1.72,
+      "duration_s": 0.15,
+      "quiet_gap_s": 0.17,
+      "peak_s": 1.695,
+      "peak_Hz": 25.95625,
+      "onset_interval_s": 0.25,
+      "interevent_gap_s": 0.16999999999999993
+    },
+    {
+      "start_s": 1.84,
+      "end_s": 1.96,
+      "duration_s": 0.12,
+      "quiet_gap_s": 0.12,
+      "peak_s": 1.885,
+      "peak_Hz": 41.028125,
+      "onset_interval_s": 0.27,
+      "interevent_gap_s": 0.1200000000000001
+    },
+    {
+      "start_s": 2.17,
+      "end_s": 2.2600000000000002,
+      "duration_s": 0.09,
+      "quiet_gap_s": 0.21,
+      "peak_s": 2.235,
+      "peak_Hz": 32.96875,
+      "onset_interval_s": 0.32999999999999985,
+      "interevent_gap_s": 0.20999999999999996
+    },
+    {
+      "start_s": 2.34,
+      "end_s": 2.39,
+      "duration_s": 0.05,
+      "quiet_gap_s": 0.08,
+      "peak_s": 2.365,
+      "peak_Hz": 22.29375,
+      "onset_interval_s": 0.16999999999999993,
+      "interevent_gap_s": 0.07999999999999963
+    },
+    {
+      "start_s": 2.74,
+      "end_s": 2.81,
+      "duration_s": 0.07,
+      "quiet_gap_s": 0.06,
+      "peak_s": 2.785,
+      "peak_Hz": 29.915625,
+      "onset_interval_s": 0.40000000000000036,
+      "interevent_gap_s": 0.3500000000000001
+    },
+    {
+      "start_s": 3.0,
+      "end_s": 3.0500000000000003,
+      "duration_s": 0.05,
+      "quiet_gap_s": 0.04,
+      "peak_s": 3.035,
+      "peak_Hz": 45.35,
+      "onset_interval_s": 0.2599999999999998,
+      "interevent_gap_s": 0.18999999999999995
+    },
+    {
+      "start_s": 3.2,
+      "end_s": 3.2800000000000002,
+      "duration_s": 0.08,
+      "quiet_gap_s": 0.15,
+      "peak_s": 3.255,
+      "peak_Hz": 27.178125,
+      "onset_interval_s": 0.20000000000000018,
+      "interevent_gap_s": 0.1499999999999999
+    },
+    {
+      "start_s": 3.44,
+      "end_s": 3.5100000000000002,
+      "duration_s": 0.07,
+      "quiet_gap_s": 0.16,
+      "peak_s": 3.455,
+      "peak_Hz": 30.425,
+      "onset_interval_s": 0.23999999999999977,
+      "interevent_gap_s": 0.1599999999999997
+    },
+    {
+      "start_s": 3.79,
+      "end_s": 3.9,
+      "duration_s": 0.11,
+      "quiet_gap_s": 0.15,
+      "peak_s": 3.845,
+      "peak_Hz": 42.440625,
+      "onset_interval_s": 0.3500000000000001,
+      "interevent_gap_s": 0.2799999999999998
+    },
+    {
+      "start_s": 4.24,
+      "end_s": 4.32,
+      "duration_s": 0.08,
+      "quiet_gap_s": 0.07,
+      "peak_s": 4.265,
+      "peak_Hz": 25.996875,
+      "onset_interval_s": 0.4500000000000002,
+      "interevent_gap_s": 0.3400000000000003
+    },
+    {
+      "start_s": 4.43,
+      "end_s": 4.48,
+      "duration_s": 0.05,
+      "quiet_gap_s": 0.11,
+      "peak_s": 4.465,
+      "peak_Hz": 30.521875,
+      "onset_interval_s": 0.1899999999999995,
+      "interevent_gap_s": 0.10999999999999943
+    },
+    {
+      "start_s": 4.63,
+      "end_s": 4.7,
+      "duration_s": 0.07,
+      "quiet_gap_s": 0.15,
+      "peak_s": 4.6450000000000005,
+      "peak_Hz": 23.175,
+      "onset_interval_s": 0.20000000000000018,
+      "interevent_gap_s": 0.14999999999999947
+    },
+    {
+      "start_s": 4.73,
+      "end_s": 4.78,
+      "duration_s": 0.05,
+      "quiet_gap_s": 0.03,
+      "peak_s": 4.755,
+      "peak_Hz": 21.240625,
+      "onset_interval_s": 0.10000000000000053,
+      "interevent_gap_s": 0.03000000000000025
+    },
+    {
+      "start_s": 4.86,
+      "end_s": 5.01,
+      "duration_s": 0.15,
+      "quiet_gap_s": 0.08,
+      "peak_s": 4.8950000000000005,
+      "peak_Hz": 28.7125,
+      "onset_interval_s": 0.1299999999999999,
+      "interevent_gap_s": 0.08000000000000007
+    },
+    {
+      "start_s": 5.2,
+      "end_s": 5.3100000000000005,
+      "duration_s": 0.11,
+      "quiet_gap_s": 0.06,
+      "peak_s": 5.235,
+      "peak_Hz": 34.053125,
+      "onset_interval_s": 0.33999999999999986,
+      "interevent_gap_s": 0.1900000000000004
+    },
+    {
+      "start_s": 5.4,
+      "end_s": 5.49,
+      "duration_s": 0.09,
+      "quiet_gap_s": 0.09,
+      "peak_s": 5.445,
+      "peak_Hz": 21.55,
+      "onset_interval_s": 0.20000000000000018,
+      "interevent_gap_s": 0.08999999999999986
+    },
+    {
+      "start_s": 5.5600000000000005,
+      "end_s": 5.66,
+      "duration_s": 0.1,
+      "quiet_gap_s": 0.07,
+      "peak_s": 5.625,
+      "peak_Hz": 32.078125,
+      "onset_interval_s": 0.16000000000000014,
+      "interevent_gap_s": 0.07000000000000028
+    },
+    {
+      "start_s": 5.82,
+      "end_s": 5.88,
+      "duration_s": 0.06,
+      "quiet_gap_s": 0.16,
+      "peak_s": 5.835,
+      "peak_Hz": 20.33125,
+      "onset_interval_s": 0.2599999999999998,
+      "interevent_gap_s": 0.16000000000000014
+    },
+    {
+      "start_s": 5.95,
+      "end_s": 6.04,
+      "duration_s": 0.09,
+      "quiet_gap_s": 0.07,
+      "peak_s": 5.995,
+      "peak_Hz": 40.25,
+      "onset_interval_s": 0.1299999999999999,
+      "interevent_gap_s": 0.07000000000000028
+    },
+    {
+      "start_s": 6.2,
+      "end_s": 6.23,
+      "duration_s": 0.03,
+      "quiet_gap_s": 0.16,
+      "peak_s": 6.215,
+      "peak_Hz": 23.70625,
+      "onset_interval_s": 0.25,
+      "interevent_gap_s": 0.16000000000000014
+    },
+    {
+      "start_s": 6.29,
+      "end_s": 6.38,
+      "duration_s": 0.09,
+      "quiet_gap_s": 0.06,
+      "peak_s": 6.335,
+      "peak_Hz": 49.05625,
+      "onset_interval_s": 0.08999999999999986,
+      "interevent_gap_s": 0.05999999999999961
+    },
+    {
+      "start_s": 6.53,
+      "end_s": 6.6000000000000005,
+      "duration_s": 0.07,
+      "quiet_gap_s": 0.15,
+      "peak_s": 6.555,
+      "peak_Hz": 33.79375,
+      "onset_interval_s": 0.2400000000000002,
+      "interevent_gap_s": 0.15000000000000036
+    },
+    {
+      "start_s": 6.74,
+      "end_s": 6.8100000000000005,
+      "duration_s": 0.07,
+      "quiet_gap_s": 0.14,
+      "peak_s": 6.775,
+      "peak_Hz": 25.95625,
+      "onset_interval_s": 0.20999999999999996,
+      "interevent_gap_s": 0.13999999999999968
+    },
+    {
+      "start_s": 6.84,
+      "end_s": 6.890000000000001,
+      "duration_s": 0.05,
+      "quiet_gap_s": 0.03,
+      "peak_s": 6.855,
+      "peak_Hz": 21.31875,
+      "onset_interval_s": 0.09999999999999964,
+      "interevent_gap_s": 0.02999999999999936
+    },
+    {
+      "start_s": 7.0200000000000005,
+      "end_s": 7.1000000000000005,
+      "duration_s": 0.08,
+      "quiet_gap_s": 0.13,
+      "peak_s": 7.055,
+      "peak_Hz": 43.25,
+      "onset_interval_s": 0.1800000000000006,
+      "interevent_gap_s": 0.1299999999999999
+    },
+    {
+      "start_s": 7.2700000000000005,
+      "end_s": 7.33,
+      "duration_s": 0.06,
+      "quiet_gap_s": 0.11,
+      "peak_s": 7.305,
+      "peak_Hz": 25.434375,
+      "onset_interval_s": 0.25,
+      "interevent_gap_s": 0.16999999999999993
+    },
+    {
+      "start_s": 7.41,
+      "end_s": 7.49,
+      "duration_s": 0.08,
+      "quiet_gap_s": 0.08,
+      "peak_s": 7.465,
+      "peak_Hz": 37.071875,
+      "onset_interval_s": 0.13999999999999968,
+      "interevent_gap_s": 0.08000000000000007
+    },
+    {
+      "start_s": 7.63,
+      "end_s": 7.72,
+      "duration_s": 0.09,
+      "quiet_gap_s": 0.05,
+      "peak_s": 7.665,
+      "peak_Hz": 29.6625,
+      "onset_interval_s": 0.21999999999999975,
+      "interevent_gap_s": 0.13999999999999968
+    },
+    {
+      "start_s": 8.0,
+      "end_s": 8.16,
+      "duration_s": 0.16,
+      "quiet_gap_s": 0.28,
+      "peak_s": 8.105,
+      "peak_Hz": 45.4125,
+      "onset_interval_s": 0.3700000000000001,
+      "interevent_gap_s": 0.28000000000000025
+    },
+    {
+      "start_s": 8.27,
+      "end_s": 8.36,
+      "duration_s": 0.09,
+      "quiet_gap_s": 0.11,
+      "peak_s": 8.345,
+      "peak_Hz": 34.4875,
+      "onset_interval_s": 0.2699999999999996,
+      "interevent_gap_s": 0.10999999999999943
+    },
+    {
+      "start_s": 8.38,
+      "end_s": 8.44,
+      "duration_s": 0.06,
+      "quiet_gap_s": 0.02,
+      "peak_s": 8.415000000000001,
+      "peak_Hz": 26.06875,
+      "onset_interval_s": 0.11000000000000121,
+      "interevent_gap_s": 0.02000000000000135
+    },
+    {
+      "start_s": 8.55,
+      "end_s": 8.63,
+      "duration_s": 0.08,
+      "quiet_gap_s": 0.11,
+      "peak_s": 8.605,
+      "peak_Hz": 34.51875,
+      "onset_interval_s": 0.16999999999999993,
+      "interevent_gap_s": 0.11000000000000121
+    },
+    {
+      "start_s": 8.73,
+      "end_s": 8.77,
+      "duration_s": 0.04,
+      "quiet_gap_s": 0.1,
+      "peak_s": 8.745000000000001,
+      "peak_Hz": 26.034375,
+      "onset_interval_s": 0.17999999999999972,
+      "interevent_gap_s": 0.09999999999999964
+    },
+    {
+      "start_s": 8.84,
+      "end_s": 8.96,
+      "duration_s": 0.12,
+      "quiet_gap_s": 0.07,
+      "peak_s": 8.865,
+      "peak_Hz": 52.621875,
+      "onset_interval_s": 0.10999999999999943,
+      "interevent_gap_s": 0.07000000000000028
+    },
+    {
+      "start_s": 9.08,
+      "end_s": 9.14,
+      "duration_s": 0.06,
+      "quiet_gap_s": 0.12,
+      "peak_s": 9.105,
+      "peak_Hz": 27.434375,
+      "onset_interval_s": 0.2400000000000002,
+      "interevent_gap_s": 0.11999999999999922
+    },
+    {
+      "start_s": 9.26,
+      "end_s": 9.35,
+      "duration_s": 0.09,
+      "quiet_gap_s": 0.12,
+      "peak_s": 9.285,
+      "peak_Hz": 47.76875,
+      "onset_interval_s": 0.17999999999999972,
+      "interevent_gap_s": 0.11999999999999922
+    },
+    {
+      "start_s": 9.59,
+      "end_s": 9.69,
+      "duration_s": 0.1,
+      "quiet_gap_s": 0.02,
+      "peak_s": 9.655,
+      "peak_Hz": 36.934375,
+      "onset_interval_s": 0.33000000000000007,
+      "interevent_gap_s": 0.2400000000000002
+    },
+    {
+      "start_s": 9.83,
+      "end_s": 9.91,
+      "duration_s": 0.08,
+      "quiet_gap_s": 0.14,
+      "peak_s": 9.855,
+      "peak_Hz": 29.040625,
+      "onset_interval_s": 0.2400000000000002,
+      "interevent_gap_s": 0.14000000000000057
+    },
+    {
+      "start_s": 10.03,
+      "end_s": 10.08,
+      "duration_s": 0.05,
+      "quiet_gap_s": 0.12,
+      "peak_s": 10.055,
+      "peak_Hz": 35.16875,
+      "onset_interval_s": 0.1999999999999993,
+      "interevent_gap_s": 0.11999999999999922
+    },
+    {
+      "start_s": 10.13,
+      "end_s": 10.21,
+      "duration_s": 0.08,
+      "quiet_gap_s": 0.05,
+      "peak_s": 10.145,
+      "peak_Hz": 29.2875,
+      "onset_interval_s": 0.10000000000000142,
+      "interevent_gap_s": 0.05000000000000071
+    },
+    {
+      "start_s": 10.33,
+      "end_s": 10.44,
+      "duration_s": 0.11,
+      "quiet_gap_s": 0.05,
+      "peak_s": 10.385,
+      "peak_Hz": 57.54375,
+      "onset_interval_s": 0.1999999999999993,
+      "interevent_gap_s": 0.11999999999999922
+    },
+    {
+      "start_s": 10.61,
+      "end_s": 10.68,
+      "duration_s": 0.07,
+      "quiet_gap_s": 0.17,
+      "peak_s": 10.645,
+      "peak_Hz": 44.59375,
+      "onset_interval_s": 0.27999999999999936,
+      "interevent_gap_s": 0.16999999999999993
+    },
+    {
+      "start_s": 10.71,
+      "end_s": 10.78,
+      "duration_s": 0.07,
+      "quiet_gap_s": 0.03,
+      "peak_s": 10.735,
+      "peak_Hz": 30.44375,
+      "onset_interval_s": 0.10000000000000142,
+      "interevent_gap_s": 0.030000000000001137
+    },
+    {
+      "start_s": 11.01,
+      "end_s": 11.09,
+      "duration_s": 0.08,
+      "quiet_gap_s": 0.04,
+      "peak_s": 11.055,
+      "peak_Hz": 67.86875,
+      "onset_interval_s": 0.29999999999999893,
+      "interevent_gap_s": 0.23000000000000043
+    },
+    {
+      "start_s": 11.35,
+      "end_s": 11.43,
+      "duration_s": 0.08,
+      "quiet_gap_s": 0.15,
+      "peak_s": 11.415000000000001,
+      "peak_Hz": 33.86875,
+      "onset_interval_s": 0.33999999999999986,
+      "interevent_gap_s": 0.2599999999999998
+    },
+    {
+      "start_s": 11.51,
+      "end_s": 11.66,
+      "duration_s": 0.15,
+      "quiet_gap_s": 0.08,
+      "peak_s": 11.565,
+      "peak_Hz": 31.59375,
+      "onset_interval_s": 0.16000000000000014,
+      "interevent_gap_s": 0.08000000000000007
+    },
+    {
+      "start_s": 11.74,
+      "end_s": 11.82,
+      "duration_s": 0.08,
+      "quiet_gap_s": 0.08,
+      "peak_s": 11.755,
+      "peak_Hz": 31.709375,
+      "onset_interval_s": 0.23000000000000043,
+      "interevent_gap_s": 0.08000000000000007
+    },
+    {
+      "start_s": 12.1,
+      "end_s": 12.24,
+      "duration_s": 0.14,
+      "quiet_gap_s": 0.15,
+      "peak_s": 12.115,
+      "peak_Hz": 30.0875,
+      "onset_interval_s": 0.35999999999999943,
+      "interevent_gap_s": 0.27999999999999936
+    },
+    {
+      "start_s": 12.39,
+      "end_s": 12.48,
+      "duration_s": 0.09,
+      "quiet_gap_s": 0.15,
+      "peak_s": 12.435,
+      "peak_Hz": 25.86875,
+      "onset_interval_s": 0.2900000000000009,
+      "interevent_gap_s": 0.15000000000000036
+    },
+    {
+      "start_s": 12.5,
+      "end_s": 12.63,
+      "duration_s": 0.13,
+      "quiet_gap_s": 0.02,
+      "peak_s": 12.565,
+      "peak_Hz": 29.60625,
+      "onset_interval_s": 0.10999999999999943,
+      "interevent_gap_s": 0.019999999999999574
+    },
+    {
+      "start_s": 12.76,
+      "end_s": 12.84,
+      "duration_s": 0.08,
+      "quiet_gap_s": 0.13,
+      "peak_s": 12.795,
+      "peak_Hz": 56.196875,
+      "onset_interval_s": 0.2599999999999998,
+      "interevent_gap_s": 0.129999999999999
+    },
+    {
+      "start_s": 13.09,
+      "end_s": 13.17,
+      "duration_s": 0.08,
+      "quiet_gap_s": 0.25,
+      "peak_s": 13.155000000000001,
+      "peak_Hz": 52.728125,
+      "onset_interval_s": 0.33000000000000007,
+      "interevent_gap_s": 0.25
+    },
+    {
+      "start_s": 13.33,
+      "end_s": 13.4,
+      "duration_s": 0.07,
+      "quiet_gap_s": 0.16,
+      "peak_s": 13.375,
+      "peak_Hz": 58.728125,
+      "onset_interval_s": 0.2400000000000002,
+      "interevent_gap_s": 0.16000000000000014
+    },
+    {
+      "start_s": 13.540000000000001,
+      "end_s": 13.67,
+      "duration_s": 0.13,
+      "quiet_gap_s": 0.05,
+      "peak_s": 13.575000000000001,
+      "peak_Hz": 37.525,
+      "onset_interval_s": 0.21000000000000085,
+      "interevent_gap_s": 0.14000000000000057
+    },
+    {
+      "start_s": 13.86,
+      "end_s": 13.93,
+      "duration_s": 0.07,
+      "quiet_gap_s": 0.19,
+      "peak_s": 13.915000000000001,
+      "peak_Hz": 31.803125,
+      "onset_interval_s": 0.3199999999999985,
+      "interevent_gap_s": 0.1899999999999995
+    },
+    {
+      "start_s": 13.97,
+      "end_s": 14.05,
+      "duration_s": 0.08,
+      "quiet_gap_s": 0.04,
+      "peak_s": 14.015,
+      "peak_Hz": 27.515625,
+      "onset_interval_s": 0.11000000000000121,
+      "interevent_gap_s": 0.040000000000000924
+    },
+    {
+      "start_s": 14.200000000000001,
+      "end_s": 14.27,
+      "duration_s": 0.07,
+      "quiet_gap_s": 0.15,
+      "peak_s": 14.225,
+      "peak_Hz": 30.125,
+      "onset_interval_s": 0.23000000000000043,
+      "interevent_gap_s": 0.15000000000000036
+    },
+    {
+      "start_s": 14.4,
+      "end_s": 14.540000000000001,
+      "duration_s": 0.14,
+      "quiet_gap_s": 0.13,
+      "peak_s": 14.465,
+      "peak_Hz": 38.21875,
+      "onset_interval_s": 0.1999999999999993,
+      "interevent_gap_s": 0.13000000000000078
+    },
+    {
+      "start_s": 14.58,
+      "end_s": 14.61,
+      "duration_s": 0.03,
+      "quiet_gap_s": 0.04,
+      "peak_s": 14.595,
+      "peak_Hz": 34.621875,
+      "onset_interval_s": 0.17999999999999972,
+      "interevent_gap_s": 0.03999999999999915
+    },
+    {
+      "start_s": 14.82,
+      "end_s": 14.97,
+      "duration_s": 0.15,
+      "quiet_gap_s": 0.21,
+      "peak_s": 14.845,
+      "peak_Hz": 39.915625,
+      "onset_interval_s": 0.2400000000000002,
+      "interevent_gap_s": 0.21000000000000085
+    },
+    {
+      "start_s": 15.16,
+      "end_s": 15.24,
+      "duration_s": 0.08,
+      "quiet_gap_s": 0.19,
+      "peak_s": 15.215,
+      "peak_Hz": 72.340625,
+      "onset_interval_s": 0.33999999999999986,
+      "interevent_gap_s": 0.1899999999999995
+    },
+    {
+      "start_s": 15.38,
+      "end_s": 15.450000000000001,
+      "duration_s": 0.07,
+      "quiet_gap_s": 0.14,
+      "peak_s": 15.395,
+      "peak_Hz": 29.6,
+      "onset_interval_s": 0.22000000000000064,
+      "interevent_gap_s": 0.14000000000000057
+    },
+    {
+      "start_s": 15.5,
+      "end_s": 15.56,
+      "duration_s": 0.06,
+      "quiet_gap_s": 0.05,
+      "peak_s": 15.535,
+      "peak_Hz": 33.0875,
+      "onset_interval_s": 0.11999999999999922,
+      "interevent_gap_s": 0.049999999999998934
+    },
+    {
+      "start_s": 15.64,
+      "end_s": 15.72,
+      "duration_s": 0.08,
+      "quiet_gap_s": 0.08,
+      "peak_s": 15.665000000000001,
+      "peak_Hz": 30.4625,
+      "onset_interval_s": 0.14000000000000057,
+      "interevent_gap_s": 0.08000000000000007
+    },
+    {
+      "start_s": 15.76,
+      "end_s": 15.83,
+      "duration_s": 0.07,
+      "quiet_gap_s": 0.04,
+      "peak_s": 15.795,
+      "peak_Hz": 37.909375,
+      "onset_interval_s": 0.11999999999999922,
+      "interevent_gap_s": 0.03999999999999915
+    },
+    {
+      "start_s": 15.98,
+      "end_s": 16.07,
+      "duration_s": 0.09,
+      "quiet_gap_s": 0.15,
+      "peak_s": 16.005,
+      "peak_Hz": 51.678125,
+      "onset_interval_s": 0.22000000000000064,
+      "interevent_gap_s": 0.15000000000000036
+    },
+    {
+      "start_s": 16.37,
+      "end_s": 16.45,
+      "duration_s": 0.08,
+      "quiet_gap_s": 0.08,
+      "peak_s": 16.425,
+      "peak_Hz": 35.334375,
+      "onset_interval_s": 0.39000000000000057,
+      "interevent_gap_s": 0.3000000000000007
+    },
+    {
+      "start_s": 16.6,
+      "end_s": 16.66,
+      "duration_s": 0.06,
+      "quiet_gap_s": 0.15,
+      "peak_s": 16.635,
+      "peak_Hz": 41.95625,
+      "onset_interval_s": 0.23000000000000043,
+      "interevent_gap_s": 0.15000000000000213
+    },
+    {
+      "start_s": 16.68,
+      "end_s": 16.740000000000002,
+      "duration_s": 0.06,
+      "quiet_gap_s": 0.02,
+      "peak_s": 16.715,
+      "peak_Hz": 31.059375,
+      "onset_interval_s": 0.0799999999999983,
+      "interevent_gap_s": 0.019999999999999574
+    },
+    {
+      "start_s": 16.9,
+      "end_s": 17.02,
+      "duration_s": 0.12,
+      "quiet_gap_s": 0.16,
+      "peak_s": 16.995,
+      "peak_Hz": 47.659375,
+      "onset_interval_s": 0.21999999999999886,
+      "interevent_gap_s": 0.1599999999999966
+    },
+    {
+      "start_s": 17.19,
+      "end_s": 17.28,
+      "duration_s": 0.09,
+      "quiet_gap_s": 0.17,
+      "peak_s": 17.215,
+      "peak_Hz": 60.334375,
+      "onset_interval_s": 0.2900000000000027,
+      "interevent_gap_s": 0.1700000000000017
+    },
+    {
+      "start_s": 17.43,
+      "end_s": 17.52,
+      "duration_s": 0.09,
+      "quiet_gap_s": 0.15,
+      "peak_s": 17.485,
+      "peak_Hz": 59.45625,
+      "onset_interval_s": 0.23999999999999844,
+      "interevent_gap_s": 0.14999999999999858
+    },
+    {
+      "start_s": 17.81,
+      "end_s": 17.900000000000002,
+      "duration_s": 0.09,
+      "quiet_gap_s": 0.29,
+      "peak_s": 17.835,
+      "peak_Hz": 67.88125,
+      "onset_interval_s": 0.379999999999999,
+      "interevent_gap_s": 0.28999999999999915
+    },
+    {
+      "start_s": 18.14,
+      "end_s": 18.25,
+      "duration_s": 0.11,
+      "quiet_gap_s": 0.24,
+      "peak_s": 18.165,
+      "peak_Hz": 47.3375,
+      "onset_interval_s": 0.33000000000000185,
+      "interevent_gap_s": 0.23999999999999844
+    },
+    {
+      "start_s": 18.34,
+      "end_s": 18.490000000000002,
+      "duration_s": 0.15,
+      "quiet_gap_s": 0.09,
+      "peak_s": 18.365000000000002,
+      "peak_Hz": 30.940625,
+      "onset_interval_s": 0.1999999999999993,
+      "interevent_gap_s": 0.08999999999999986
+    },
+    {
+      "start_s": 18.57,
+      "end_s": 18.69,
+      "duration_s": 0.12,
+      "quiet_gap_s": 0.08,
+      "peak_s": 18.645,
+      "peak_Hz": 23.415625,
+      "onset_interval_s": 0.23000000000000043,
+      "interevent_gap_s": 0.0799999999999983
+    },
+    {
+      "start_s": 18.73,
+      "end_s": 18.79,
+      "duration_s": 0.06,
+      "quiet_gap_s": 0.04,
+      "peak_s": 18.765,
+      "peak_Hz": 37.79375,
+      "onset_interval_s": 0.16000000000000014,
+      "interevent_gap_s": 0.03999999999999915
+    },
+    {
+      "start_s": 19.04,
+      "end_s": 19.18,
+      "duration_s": 0.14,
+      "quiet_gap_s": 0.11,
+      "peak_s": 19.135,
+      "peak_Hz": 31.4625,
+      "onset_interval_s": 0.3099999999999987,
+      "interevent_gap_s": 0.25
+    },
+    {
+      "start_s": 19.400000000000002,
+      "end_s": 19.48,
+      "duration_s": 0.08,
+      "quiet_gap_s": 0.22,
+      "peak_s": 19.455000000000002,
+      "peak_Hz": 93.815625,
+      "onset_interval_s": 0.360000000000003,
+      "interevent_gap_s": 0.22000000000000242
+    },
+    {
+      "start_s": 19.650000000000002,
+      "end_s": 19.77,
+      "duration_s": 0.12,
+      "quiet_gap_s": 0.17,
+      "peak_s": 19.665,
+      "peak_Hz": 37.828125,
+      "onset_interval_s": 0.25,
+      "interevent_gap_s": 0.1700000000000017
+    },
+    {
+      "start_s": 19.79,
+      "end_s": 19.82,
+      "duration_s": 0.03,
+      "quiet_gap_s": 0.02,
+      "peak_s": 19.805,
+      "peak_Hz": 23.7625,
+      "onset_interval_s": 0.13999999999999702,
+      "interevent_gap_s": 0.019999999999999574
+    },
+    {
+      "start_s": 19.92,
+      "end_s": 19.95,
+      "duration_s": 0.03,
+      "quiet_gap_s": 0.1,
+      "peak_s": 19.935,
+      "peak_Hz": 20.9875,
+      "onset_interval_s": 0.13000000000000256,
+      "interevent_gap_s": 0.10000000000000142
+    }
+  ],
+  "broad_intervals": [
+    {
+      "start_s": 8.85,
+      "end_s": 8.9,
+      "duration_s": 0.05
+    },
+    {
+      "start_s": 13.100000000000001,
+      "end_s": 13.15,
+      "duration_s": 0.05
+    },
+    {
+      "start_s": 13.350000000000001,
+      "end_s": 13.4,
+      "duration_s": 0.05
+    },
+    {
+      "start_s": 16.0,
+      "end_s": 16.05,
+      "duration_s": 0.05
+    },
+    {
+      "start_s": 16.95,
+      "end_s": 17.0,
+      "duration_s": 0.05
+    },
+    {
+      "start_s": 17.2,
+      "end_s": 17.25,
+      "duration_s": 0.05
+    }
+  ],
+  "broad_definition": "Descriptive only: at least50% of20x20native cells have50ms rate>=20Hz; not the high-state or recovery acceptance criterion.",
+  "max_E_10ms_Hz": 93.815625,
+  "mean_Z_end": 0.8200803389970143,
+  "mean_Z_min": 0.8165161279679739,
+  "M_current_end": 0.005180049894897252,
+  "Z_recovery_target_fraction_late": 0.815119375,
+  "no_intervention": true,
+  "human_review": "PENDING",
+  "finite_events_before_first_entry": 87,
+  "core_high_intervals": {
+    "A": [],
+    "B": []
+  },
+  "mechanism_tail": {
+    "global_E_rate_Hz": 10.677769574359267,
+    "global_raw_conductance_ratio": 0.0,
+    "global_applied_conductance_ratio": 0.0,
+    "phi_mean_mV": 2.690005978644263,
+    "phi_max_mV": 11.167347286555188,
+    "global_outward_current_mV_equiv": 0.0
+  }
+}

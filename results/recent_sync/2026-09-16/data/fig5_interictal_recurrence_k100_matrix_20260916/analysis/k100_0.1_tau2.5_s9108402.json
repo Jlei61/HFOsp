@@ -1,0 +1,2074 @@
+{
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_interictal_recurrence_k100_matrix_20260916/runs/k100_0.1_tau2.5_s9108402",
+  "run_status": "STOPPED_AT_CHECKPOINT_FOR_TRIAGE",
+  "job": {
+    "name": "k100_0.1_tau2.5_s9108402",
+    "seed": 9108402,
+    "eta_m": 0.0005,
+    "tau_M_s": 1.0,
+    "tau_Z_s": 5.0,
+    "threshold": 95.19851312666987,
+    "mode": "native",
+    "gamma": 0.16666666666666666,
+    "global_gain": 0.029440596381478282,
+    "global_resource": "native_z",
+    "phi_jump": 0.0,
+    "horizon_s": 120.0,
+    "checkpoint_s": 2.0,
+    "device": 1,
+    "qa": false,
+    "feedback_form": "conductance",
+    "C_R": 6.299613071787578,
+    "reference_voltage_mV": 18.0,
+    "reference_gap_mV": 35.66284793826844,
+    "global_reversal_mV": -17.662847938268442,
+    "sahp_gain": 0.04,
+    "sahp_tau_s": 2.5,
+    "stop_after_second_entry": false,
+    "k100": 0.1,
+    "per_spike_increment_gK_over_gL": 0.0004,
+    "steady_state_gK_over_gL_at_100Hz": 0.1,
+    "independent_noise_seed_of": "k100_0.1_tau2.5_s9108401"
+  },
+  "rule": {
+    "bin_ms": 10,
+    "quiet_Hz": 5.0,
+    "quiet_duration_ms": 20.0,
+    "peak_Hz": 20.0,
+    "short_duration_ms": [
+      20.0,
+      200.0
+    ],
+    "required_brief_events": 5,
+    "minimum_event_span_s": 2.0,
+    "minimum_brief_fraction": 0.8
+  },
+  "primary": {
+    "observed_s": 22.0,
+    "entries": [
+      {
+        "onset_s": 20.37,
+        "confirmation_s": 20.57
+      }
+    ],
+    "low_activity_exits": [],
+    "preentry": {
+      "window_s": [
+        0.5,
+        20.37
+      ],
+      "finite_events": [
+        {
+          "start_s": 0.64,
+          "end_s": 0.76,
+          "duration_s": 0.12,
+          "quiet_gap_s": 0.14,
+          "peak_s": 0.665,
+          "peak_Hz": 50.262499999999996,
+          "onset_interval_s": 0.26,
+          "interevent_gap_s": 0.14
+        },
+        {
+          "start_s": 0.98,
+          "end_s": 1.08,
+          "duration_s": 0.1,
+          "quiet_gap_s": 0.22,
+          "peak_s": 0.995,
+          "peak_Hz": 33.459375,
+          "onset_interval_s": 0.33999999999999997,
+          "interevent_gap_s": 0.21999999999999997
+        },
+        {
+          "start_s": 1.19,
+          "end_s": 1.3,
+          "duration_s": 0.11,
+          "quiet_gap_s": 0.11,
+          "peak_s": 1.215,
+          "peak_Hz": 44.4,
+          "onset_interval_s": 0.20999999999999996,
+          "interevent_gap_s": 0.10999999999999988
+        },
+        {
+          "start_s": 1.45,
+          "end_s": 1.48,
+          "duration_s": 0.03,
+          "quiet_gap_s": 0.15,
+          "peak_s": 1.465,
+          "peak_Hz": 23.290625000000002,
+          "onset_interval_s": 0.26,
+          "interevent_gap_s": 0.1499999999999999
+        },
+        {
+          "start_s": 1.59,
+          "end_s": 1.6400000000000001,
+          "duration_s": 0.05,
+          "quiet_gap_s": 0.11,
+          "peak_s": 1.605,
+          "peak_Hz": 62.01875,
+          "onset_interval_s": 0.14000000000000012,
+          "interevent_gap_s": 0.1100000000000001
+        },
+        {
+          "start_s": 1.78,
+          "end_s": 1.82,
+          "duration_s": 0.04,
+          "quiet_gap_s": 0.14,
+          "peak_s": 1.805,
+          "peak_Hz": 38.553125,
+          "onset_interval_s": 0.18999999999999995,
+          "interevent_gap_s": 0.1399999999999999
+        },
+        {
+          "start_s": 1.95,
+          "end_s": 2.06,
+          "duration_s": 0.11,
+          "quiet_gap_s": 0.13,
+          "peak_s": 1.975,
+          "peak_Hz": 47.090625,
+          "onset_interval_s": 0.16999999999999993,
+          "interevent_gap_s": 0.1299999999999999
+        },
+        {
+          "start_s": 2.22,
+          "end_s": 2.34,
+          "duration_s": 0.12,
+          "quiet_gap_s": 0.16,
+          "peak_s": 2.235,
+          "peak_Hz": 51.493750000000006,
+          "onset_interval_s": 0.27000000000000024,
+          "interevent_gap_s": 0.16000000000000014
+        },
+        {
+          "start_s": 2.48,
+          "end_s": 2.5500000000000003,
+          "duration_s": 0.07,
+          "quiet_gap_s": 0.14,
+          "peak_s": 2.505,
+          "peak_Hz": 53.109375,
+          "onset_interval_s": 0.2599999999999998,
+          "interevent_gap_s": 0.14000000000000012
+        },
+        {
+          "start_s": 2.71,
+          "end_s": 2.8000000000000003,
+          "duration_s": 0.09,
+          "quiet_gap_s": 0.16,
+          "peak_s": 2.725,
+          "peak_Hz": 44.26562499999999,
+          "onset_interval_s": 0.22999999999999998,
+          "interevent_gap_s": 0.1599999999999997
+        },
+        {
+          "start_s": 2.98,
+          "end_s": 3.0300000000000002,
+          "duration_s": 0.05,
+          "quiet_gap_s": 0.18,
+          "peak_s": 3.005,
+          "peak_Hz": 36.375,
+          "onset_interval_s": 0.27,
+          "interevent_gap_s": 0.17999999999999972
+        },
+        {
+          "start_s": 3.16,
+          "end_s": 3.23,
+          "duration_s": 0.07,
+          "quiet_gap_s": 0.13,
+          "peak_s": 3.1950000000000003,
+          "peak_Hz": 51.425,
+          "onset_interval_s": 0.18000000000000016,
+          "interevent_gap_s": 0.1299999999999999
+        },
+        {
+          "start_s": 3.38,
+          "end_s": 3.42,
+          "duration_s": 0.04,
+          "quiet_gap_s": 0.15,
+          "peak_s": 3.395,
+          "peak_Hz": 27.181250000000002,
+          "onset_interval_s": 0.21999999999999975,
+          "interevent_gap_s": 0.1499999999999999
+        },
+        {
+          "start_s": 3.54,
+          "end_s": 3.61,
+          "duration_s": 0.07,
+          "quiet_gap_s": 0.12,
+          "peak_s": 3.565,
+          "peak_Hz": 35.0875,
+          "onset_interval_s": 0.16000000000000014,
+          "interevent_gap_s": 0.1200000000000001
+        },
+        {
+          "start_s": 3.7800000000000002,
+          "end_s": 3.8200000000000003,
+          "duration_s": 0.04,
+          "quiet_gap_s": 0.17,
+          "peak_s": 3.805,
+          "peak_Hz": 27.146874999999998,
+          "onset_interval_s": 0.2400000000000002,
+          "interevent_gap_s": 0.17000000000000037
+        },
+        {
+          "start_s": 3.94,
+          "end_s": 4.04,
+          "duration_s": 0.1,
+          "quiet_gap_s": 0.12,
+          "peak_s": 3.955,
+          "peak_Hz": 50.11875,
+          "onset_interval_s": 0.1599999999999997,
+          "interevent_gap_s": 0.11999999999999966
+        },
+        {
+          "start_s": 4.16,
+          "end_s": 4.21,
+          "duration_s": 0.05,
+          "quiet_gap_s": 0.12,
+          "peak_s": 4.175,
+          "peak_Hz": 50.887499999999996,
+          "onset_interval_s": 0.2200000000000002,
+          "interevent_gap_s": 0.1200000000000001
+        },
+        {
+          "start_s": 4.36,
+          "end_s": 4.44,
+          "duration_s": 0.08,
+          "quiet_gap_s": 0.15,
+          "peak_s": 4.385,
+          "peak_Hz": 58.56249999999999,
+          "onset_interval_s": 0.20000000000000018,
+          "interevent_gap_s": 0.15000000000000036
+        },
+        {
+          "start_s": 4.66,
+          "end_s": 4.7700000000000005,
+          "duration_s": 0.11,
+          "quiet_gap_s": 0.22,
+          "peak_s": 4.675,
+          "peak_Hz": 30.959374999999998,
+          "onset_interval_s": 0.2999999999999998,
+          "interevent_gap_s": 0.21999999999999975
+        },
+        {
+          "start_s": 5.03,
+          "end_s": 5.11,
+          "duration_s": 0.08,
+          "quiet_gap_s": 0.26,
+          "peak_s": 5.055,
+          "peak_Hz": 38.521875,
+          "onset_interval_s": 0.3700000000000001,
+          "interevent_gap_s": 0.2599999999999998
+        },
+        {
+          "start_s": 5.32,
+          "end_s": 5.42,
+          "duration_s": 0.1,
+          "quiet_gap_s": 0.21,
+          "peak_s": 5.345,
+          "peak_Hz": 52.731249999999996,
+          "onset_interval_s": 0.29000000000000004,
+          "interevent_gap_s": 0.20999999999999996
+        },
+        {
+          "start_s": 5.73,
+          "end_s": 5.8,
+          "duration_s": 0.07,
+          "quiet_gap_s": 0.31,
+          "peak_s": 5.755,
+          "peak_Hz": 43.990625,
+          "onset_interval_s": 0.41000000000000014,
+          "interevent_gap_s": 0.3100000000000005
+        },
+        {
+          "start_s": 6.08,
+          "end_s": 6.17,
+          "duration_s": 0.09,
+          "quiet_gap_s": 0.28,
+          "peak_s": 6.105,
+          "peak_Hz": 60.3625,
+          "onset_interval_s": 0.34999999999999964,
+          "interevent_gap_s": 0.28000000000000025
+        },
+        {
+          "start_s": 6.3,
+          "end_s": 6.38,
+          "duration_s": 0.08,
+          "quiet_gap_s": 0.13,
+          "peak_s": 6.325,
+          "peak_Hz": 44.51875,
+          "onset_interval_s": 0.21999999999999975,
+          "interevent_gap_s": 0.1299999999999999
+        },
+        {
+          "start_s": 6.51,
+          "end_s": 6.6000000000000005,
+          "duration_s": 0.09,
+          "quiet_gap_s": 0.13,
+          "peak_s": 6.535,
+          "peak_Hz": 59.13125,
+          "onset_interval_s": 0.20999999999999996,
+          "interevent_gap_s": 0.1299999999999999
+        },
+        {
+          "start_s": 6.8100000000000005,
+          "end_s": 6.8500000000000005,
+          "duration_s": 0.04,
+          "quiet_gap_s": 0.21,
+          "peak_s": 6.835,
+          "peak_Hz": 20.603125,
+          "onset_interval_s": 0.3000000000000007,
+          "interevent_gap_s": 0.20999999999999996
+        },
+        {
+          "start_s": 7.03,
+          "end_s": 7.08,
+          "duration_s": 0.05,
+          "quiet_gap_s": 0.18,
+          "peak_s": 7.055,
+          "peak_Hz": 64.35625,
+          "onset_interval_s": 0.21999999999999975,
+          "interevent_gap_s": 0.17999999999999972
+        },
+        {
+          "start_s": 7.23,
+          "end_s": 7.33,
+          "duration_s": 0.1,
+          "quiet_gap_s": 0.11,
+          "peak_s": 7.255,
+          "peak_Hz": 58.034375000000004,
+          "onset_interval_s": 0.20000000000000018,
+          "interevent_gap_s": 0.15000000000000036
+        },
+        {
+          "start_s": 7.51,
+          "end_s": 7.57,
+          "duration_s": 0.06,
+          "quiet_gap_s": 0.18,
+          "peak_s": 7.535,
+          "peak_Hz": 55.53125,
+          "onset_interval_s": 0.27999999999999936,
+          "interevent_gap_s": 0.17999999999999972
+        },
+        {
+          "start_s": 7.71,
+          "end_s": 7.82,
+          "duration_s": 0.11,
+          "quiet_gap_s": 0.14,
+          "peak_s": 7.735,
+          "peak_Hz": 54.681250000000006,
+          "onset_interval_s": 0.20000000000000018,
+          "interevent_gap_s": 0.13999999999999968
+        },
+        {
+          "start_s": 8.22,
+          "end_s": 8.32,
+          "duration_s": 0.1,
+          "quiet_gap_s": 0.4,
+          "peak_s": 8.245000000000001,
+          "peak_Hz": 41.575,
+          "onset_interval_s": 0.5100000000000007,
+          "interevent_gap_s": 0.40000000000000036
+        },
+        {
+          "start_s": 8.49,
+          "end_s": 8.540000000000001,
+          "duration_s": 0.05,
+          "quiet_gap_s": 0.17,
+          "peak_s": 8.515,
+          "peak_Hz": 57.396875,
+          "onset_interval_s": 0.2699999999999996,
+          "interevent_gap_s": 0.16999999999999993
+        },
+        {
+          "start_s": 8.82,
+          "end_s": 8.91,
+          "duration_s": 0.09,
+          "quiet_gap_s": 0.22,
+          "peak_s": 8.845,
+          "peak_Hz": 60.41562499999999,
+          "onset_interval_s": 0.33000000000000007,
+          "interevent_gap_s": 0.27999999999999936
+        },
+        {
+          "start_s": 9.06,
+          "end_s": 9.1,
+          "duration_s": 0.04,
+          "quiet_gap_s": 0.15,
+          "peak_s": 9.085,
+          "peak_Hz": 37.24375,
+          "onset_interval_s": 0.2400000000000002,
+          "interevent_gap_s": 0.15000000000000036
+        },
+        {
+          "start_s": 9.34,
+          "end_s": 9.46,
+          "duration_s": 0.12,
+          "quiet_gap_s": 0.24,
+          "peak_s": 9.365,
+          "peak_Hz": 43.3125,
+          "onset_interval_s": 0.27999999999999936,
+          "interevent_gap_s": 0.2400000000000002
+        },
+        {
+          "start_s": 9.620000000000001,
+          "end_s": 9.73,
+          "duration_s": 0.11,
+          "quiet_gap_s": 0.16,
+          "peak_s": 9.645,
+          "peak_Hz": 38.965624999999996,
+          "onset_interval_s": 0.28000000000000114,
+          "interevent_gap_s": 0.16000000000000014
+        },
+        {
+          "start_s": 10.0,
+          "end_s": 10.08,
+          "duration_s": 0.08,
+          "quiet_gap_s": 0.27,
+          "peak_s": 10.035,
+          "peak_Hz": 51.803125,
+          "onset_interval_s": 0.379999999999999,
+          "interevent_gap_s": 0.2699999999999996
+        },
+        {
+          "start_s": 10.290000000000001,
+          "end_s": 10.41,
+          "duration_s": 0.12,
+          "quiet_gap_s": 0.21,
+          "peak_s": 10.315,
+          "peak_Hz": 68.203125,
+          "onset_interval_s": 0.2900000000000009,
+          "interevent_gap_s": 0.21000000000000085
+        },
+        {
+          "start_s": 10.58,
+          "end_s": 10.700000000000001,
+          "duration_s": 0.12,
+          "quiet_gap_s": 0.17,
+          "peak_s": 10.605,
+          "peak_Hz": 48.115625,
+          "onset_interval_s": 0.28999999999999915,
+          "interevent_gap_s": 0.16999999999999993
+        },
+        {
+          "start_s": 10.84,
+          "end_s": 10.91,
+          "duration_s": 0.07,
+          "quiet_gap_s": 0.14,
+          "peak_s": 10.865,
+          "peak_Hz": 58.865625,
+          "onset_interval_s": 0.2599999999999998,
+          "interevent_gap_s": 0.1399999999999988
+        },
+        {
+          "start_s": 11.08,
+          "end_s": 11.18,
+          "duration_s": 0.1,
+          "quiet_gap_s": 0.17,
+          "peak_s": 11.115,
+          "peak_Hz": 59.89375,
+          "onset_interval_s": 0.2400000000000002,
+          "interevent_gap_s": 0.16999999999999993
+        },
+        {
+          "start_s": 11.3,
+          "end_s": 11.39,
+          "duration_s": 0.09,
+          "quiet_gap_s": 0.12,
+          "peak_s": 11.325000000000001,
+          "peak_Hz": 54.459374999999994,
+          "onset_interval_s": 0.22000000000000064,
+          "interevent_gap_s": 0.120000000000001
+        },
+        {
+          "start_s": 11.57,
+          "end_s": 11.64,
+          "duration_s": 0.07,
+          "quiet_gap_s": 0.18,
+          "peak_s": 11.595,
+          "peak_Hz": 51.98125,
+          "onset_interval_s": 0.2699999999999996,
+          "interevent_gap_s": 0.17999999999999972
+        },
+        {
+          "start_s": 11.8,
+          "end_s": 11.9,
+          "duration_s": 0.1,
+          "quiet_gap_s": 0.16,
+          "peak_s": 11.825000000000001,
+          "peak_Hz": 84.065625,
+          "onset_interval_s": 0.23000000000000043,
+          "interevent_gap_s": 0.16000000000000014
+        },
+        {
+          "start_s": 12.05,
+          "end_s": 12.13,
+          "duration_s": 0.08,
+          "quiet_gap_s": 0.15,
+          "peak_s": 12.075000000000001,
+          "peak_Hz": 81.48125,
+          "onset_interval_s": 0.25,
+          "interevent_gap_s": 0.15000000000000036
+        },
+        {
+          "start_s": 12.39,
+          "end_s": 12.51,
+          "duration_s": 0.12,
+          "quiet_gap_s": 0.26,
+          "peak_s": 12.415000000000001,
+          "peak_Hz": 47.590624999999996,
+          "onset_interval_s": 0.33999999999999986,
+          "interevent_gap_s": 0.2599999999999998
+        },
+        {
+          "start_s": 12.68,
+          "end_s": 12.74,
+          "duration_s": 0.06,
+          "quiet_gap_s": 0.17,
+          "peak_s": 12.705,
+          "peak_Hz": 62.0375,
+          "onset_interval_s": 0.28999999999999915,
+          "interevent_gap_s": 0.16999999999999993
+        },
+        {
+          "start_s": 13.27,
+          "end_s": 13.38,
+          "duration_s": 0.11,
+          "quiet_gap_s": 0.53,
+          "peak_s": 13.305,
+          "peak_Hz": 65.69375,
+          "onset_interval_s": 0.5899999999999999,
+          "interevent_gap_s": 0.5299999999999994
+        },
+        {
+          "start_s": 13.67,
+          "end_s": 13.74,
+          "duration_s": 0.07,
+          "quiet_gap_s": 0.29,
+          "peak_s": 13.695,
+          "peak_Hz": 50.068749999999994,
+          "onset_interval_s": 0.40000000000000036,
+          "interevent_gap_s": 0.28999999999999915
+        },
+        {
+          "start_s": 13.98,
+          "end_s": 14.05,
+          "duration_s": 0.07,
+          "quiet_gap_s": 0.24,
+          "peak_s": 14.005,
+          "peak_Hz": 64.1875,
+          "onset_interval_s": 0.3100000000000005,
+          "interevent_gap_s": 0.2400000000000002
+        },
+        {
+          "start_s": 14.39,
+          "end_s": 14.51,
+          "duration_s": 0.12,
+          "quiet_gap_s": 0.34,
+          "peak_s": 14.415000000000001,
+          "peak_Hz": 58.178125,
+          "onset_interval_s": 0.41000000000000014,
+          "interevent_gap_s": 0.33999999999999986
+        },
+        {
+          "start_s": 14.65,
+          "end_s": 14.700000000000001,
+          "duration_s": 0.05,
+          "quiet_gap_s": 0.14,
+          "peak_s": 14.675,
+          "peak_Hz": 58.821875,
+          "onset_interval_s": 0.2599999999999998,
+          "interevent_gap_s": 0.14000000000000057
+        },
+        {
+          "start_s": 14.86,
+          "end_s": 14.98,
+          "duration_s": 0.12,
+          "quiet_gap_s": 0.16,
+          "peak_s": 14.895,
+          "peak_Hz": 52.19375,
+          "onset_interval_s": 0.20999999999999908,
+          "interevent_gap_s": 0.15999999999999837
+        },
+        {
+          "start_s": 15.18,
+          "end_s": 15.280000000000001,
+          "duration_s": 0.1,
+          "quiet_gap_s": 0.2,
+          "peak_s": 15.205,
+          "peak_Hz": 58.2875,
+          "onset_interval_s": 0.3200000000000003,
+          "interevent_gap_s": 0.1999999999999993
+        },
+        {
+          "start_s": 15.46,
+          "end_s": 15.540000000000001,
+          "duration_s": 0.08,
+          "quiet_gap_s": 0.18,
+          "peak_s": 15.495000000000001,
+          "peak_Hz": 61.165625,
+          "onset_interval_s": 0.28000000000000114,
+          "interevent_gap_s": 0.17999999999999972
+        },
+        {
+          "start_s": 15.71,
+          "end_s": 15.790000000000001,
+          "duration_s": 0.08,
+          "quiet_gap_s": 0.17,
+          "peak_s": 15.735000000000001,
+          "peak_Hz": 61.381249999999994,
+          "onset_interval_s": 0.25,
+          "interevent_gap_s": 0.16999999999999993
+        },
+        {
+          "start_s": 16.18,
+          "end_s": 16.28,
+          "duration_s": 0.1,
+          "quiet_gap_s": 0.39,
+          "peak_s": 16.205000000000002,
+          "peak_Hz": 58.381249999999994,
+          "onset_interval_s": 0.46999999999999886,
+          "interevent_gap_s": 0.3899999999999988
+        },
+        {
+          "start_s": 16.69,
+          "end_s": 16.81,
+          "duration_s": 0.12,
+          "quiet_gap_s": 0.19,
+          "peak_s": 16.715,
+          "peak_Hz": 59.23125,
+          "onset_interval_s": 0.5100000000000016,
+          "interevent_gap_s": 0.41000000000000014
+        },
+        {
+          "start_s": 16.96,
+          "end_s": 17.01,
+          "duration_s": 0.05,
+          "quiet_gap_s": 0.15,
+          "peak_s": 16.985,
+          "peak_Hz": 52.40625,
+          "onset_interval_s": 0.2699999999999996,
+          "interevent_gap_s": 0.15000000000000213
+        },
+        {
+          "start_s": 17.21,
+          "end_s": 17.31,
+          "duration_s": 0.1,
+          "quiet_gap_s": 0.2,
+          "peak_s": 17.235,
+          "peak_Hz": 63.70625,
+          "onset_interval_s": 0.25,
+          "interevent_gap_s": 0.1999999999999993
+        },
+        {
+          "start_s": 17.56,
+          "end_s": 17.64,
+          "duration_s": 0.08,
+          "quiet_gap_s": 0.25,
+          "peak_s": 17.585,
+          "peak_Hz": 37.915625,
+          "onset_interval_s": 0.34999999999999787,
+          "interevent_gap_s": 0.25
+        },
+        {
+          "start_s": 17.79,
+          "end_s": 17.88,
+          "duration_s": 0.09,
+          "quiet_gap_s": 0.15,
+          "peak_s": 17.805,
+          "peak_Hz": 71.125,
+          "onset_interval_s": 0.23000000000000043,
+          "interevent_gap_s": 0.14999999999999858
+        },
+        {
+          "start_s": 18.05,
+          "end_s": 18.150000000000002,
+          "duration_s": 0.1,
+          "quiet_gap_s": 0.17,
+          "peak_s": 18.075,
+          "peak_Hz": 59.2375,
+          "onset_interval_s": 0.26000000000000156,
+          "interevent_gap_s": 0.1700000000000017
+        },
+        {
+          "start_s": 18.29,
+          "end_s": 18.38,
+          "duration_s": 0.09,
+          "quiet_gap_s": 0.14,
+          "peak_s": 18.315,
+          "peak_Hz": 41.69375,
+          "onset_interval_s": 0.23999999999999844,
+          "interevent_gap_s": 0.13999999999999702
+        }
+      ],
+      "brief_events": [
+        {
+          "start_s": 0.64,
+          "end_s": 0.76,
+          "duration_s": 0.12,
+          "quiet_gap_s": 0.14,
+          "peak_s": 0.665,
+          "peak_Hz": 50.262499999999996,
+          "onset_interval_s": 0.26,
+          "interevent_gap_s": 0.14
+        },
+        {
+          "start_s": 0.98,
+          "end_s": 1.08,
+          "duration_s": 0.1,
+          "quiet_gap_s": 0.22,
+          "peak_s": 0.995,
+          "peak_Hz": 33.459375,
+          "onset_interval_s": 0.33999999999999997,
+          "interevent_gap_s": 0.21999999999999997
+        },
+        {
+          "start_s": 1.19,
+          "end_s": 1.3,
+          "duration_s": 0.11,
+          "quiet_gap_s": 0.11,
+          "peak_s": 1.215,
+          "peak_Hz": 44.4,
+          "onset_interval_s": 0.20999999999999996,
+          "interevent_gap_s": 0.10999999999999988
+        },
+        {
+          "start_s": 1.45,
+          "end_s": 1.48,
+          "duration_s": 0.03,
+          "quiet_gap_s": 0.15,
+          "peak_s": 1.465,
+          "peak_Hz": 23.290625000000002,
+          "onset_interval_s": 0.26,
+          "interevent_gap_s": 0.1499999999999999
+        },
+        {
+          "start_s": 1.59,
+          "end_s": 1.6400000000000001,
+          "duration_s": 0.05,
+          "quiet_gap_s": 0.11,
+          "peak_s": 1.605,
+          "peak_Hz": 62.01875,
+          "onset_interval_s": 0.14000000000000012,
+          "interevent_gap_s": 0.1100000000000001
+        },
+        {
+          "start_s": 1.78,
+          "end_s": 1.82,
+          "duration_s": 0.04,
+          "quiet_gap_s": 0.14,
+          "peak_s": 1.805,
+          "peak_Hz": 38.553125,
+          "onset_interval_s": 0.18999999999999995,
+          "interevent_gap_s": 0.1399999999999999
+        },
+        {
+          "start_s": 1.95,
+          "end_s": 2.06,
+          "duration_s": 0.11,
+          "quiet_gap_s": 0.13,
+          "peak_s": 1.975,
+          "peak_Hz": 47.090625,
+          "onset_interval_s": 0.16999999999999993,
+          "interevent_gap_s": 0.1299999999999999
+        },
+        {
+          "start_s": 2.22,
+          "end_s": 2.34,
+          "duration_s": 0.12,
+          "quiet_gap_s": 0.16,
+          "peak_s": 2.235,
+          "peak_Hz": 51.493750000000006,
+          "onset_interval_s": 0.27000000000000024,
+          "interevent_gap_s": 0.16000000000000014
+        },
+        {
+          "start_s": 2.48,
+          "end_s": 2.5500000000000003,
+          "duration_s": 0.07,
+          "quiet_gap_s": 0.14,
+          "peak_s": 2.505,
+          "peak_Hz": 53.109375,
+          "onset_interval_s": 0.2599999999999998,
+          "interevent_gap_s": 0.14000000000000012
+        },
+        {
+          "start_s": 2.71,
+          "end_s": 2.8000000000000003,
+          "duration_s": 0.09,
+          "quiet_gap_s": 0.16,
+          "peak_s": 2.725,
+          "peak_Hz": 44.26562499999999,
+          "onset_interval_s": 0.22999999999999998,
+          "interevent_gap_s": 0.1599999999999997
+        },
+        {
+          "start_s": 2.98,
+          "end_s": 3.0300000000000002,
+          "duration_s": 0.05,
+          "quiet_gap_s": 0.18,
+          "peak_s": 3.005,
+          "peak_Hz": 36.375,
+          "onset_interval_s": 0.27,
+          "interevent_gap_s": 0.17999999999999972
+        },
+        {
+          "start_s": 3.16,
+          "end_s": 3.23,
+          "duration_s": 0.07,
+          "quiet_gap_s": 0.13,
+          "peak_s": 3.1950000000000003,
+          "peak_Hz": 51.425,
+          "onset_interval_s": 0.18000000000000016,
+          "interevent_gap_s": 0.1299999999999999
+        },
+        {
+          "start_s": 3.38,
+          "end_s": 3.42,
+          "duration_s": 0.04,
+          "quiet_gap_s": 0.15,
+          "peak_s": 3.395,
+          "peak_Hz": 27.181250000000002,
+          "onset_interval_s": 0.21999999999999975,
+          "interevent_gap_s": 0.1499999999999999
+        },
+        {
+          "start_s": 3.54,
+          "end_s": 3.61,
+          "duration_s": 0.07,
+          "quiet_gap_s": 0.12,
+          "peak_s": 3.565,
+          "peak_Hz": 35.0875,
+          "onset_interval_s": 0.16000000000000014,
+          "interevent_gap_s": 0.1200000000000001
+        },
+        {
+          "start_s": 3.7800000000000002,
+          "end_s": 3.8200000000000003,
+          "duration_s": 0.04,
+          "quiet_gap_s": 0.17,
+          "peak_s": 3.805,
+          "peak_Hz": 27.146874999999998,
+          "onset_interval_s": 0.2400000000000002,
+          "interevent_gap_s": 0.17000000000000037
+        },
+        {
+          "start_s": 3.94,
+          "end_s": 4.04,
+          "duration_s": 0.1,
+          "quiet_gap_s": 0.12,
+          "peak_s": 3.955,
+          "peak_Hz": 50.11875,
+          "onset_interval_s": 0.1599999999999997,
+          "interevent_gap_s": 0.11999999999999966
+        },
+        {
+          "start_s": 4.16,
+          "end_s": 4.21,
+          "duration_s": 0.05,
+          "quiet_gap_s": 0.12,
+          "peak_s": 4.175,
+          "peak_Hz": 50.887499999999996,
+          "onset_interval_s": 0.2200000000000002,
+          "interevent_gap_s": 0.1200000000000001
+        },
+        {
+          "start_s": 4.36,
+          "end_s": 4.44,
+          "duration_s": 0.08,
+          "quiet_gap_s": 0.15,
+          "peak_s": 4.385,
+          "peak_Hz": 58.56249999999999,
+          "onset_interval_s": 0.20000000000000018,
+          "interevent_gap_s": 0.15000000000000036
+        },
+        {
+          "start_s": 4.66,
+          "end_s": 4.7700000000000005,
+          "duration_s": 0.11,
+          "quiet_gap_s": 0.22,
+          "peak_s": 4.675,
+          "peak_Hz": 30.959374999999998,
+          "onset_interval_s": 0.2999999999999998,
+          "interevent_gap_s": 0.21999999999999975
+        },
+        {
+          "start_s": 5.03,
+          "end_s": 5.11,
+          "duration_s": 0.08,
+          "quiet_gap_s": 0.26,
+          "peak_s": 5.055,
+          "peak_Hz": 38.521875,
+          "onset_interval_s": 0.3700000000000001,
+          "interevent_gap_s": 0.2599999999999998
+        },
+        {
+          "start_s": 5.32,
+          "end_s": 5.42,
+          "duration_s": 0.1,
+          "quiet_gap_s": 0.21,
+          "peak_s": 5.345,
+          "peak_Hz": 52.731249999999996,
+          "onset_interval_s": 0.29000000000000004,
+          "interevent_gap_s": 0.20999999999999996
+        },
+        {
+          "start_s": 5.73,
+          "end_s": 5.8,
+          "duration_s": 0.07,
+          "quiet_gap_s": 0.31,
+          "peak_s": 5.755,
+          "peak_Hz": 43.990625,
+          "onset_interval_s": 0.41000000000000014,
+          "interevent_gap_s": 0.3100000000000005
+        },
+        {
+          "start_s": 6.08,
+          "end_s": 6.17,
+          "duration_s": 0.09,
+          "quiet_gap_s": 0.28,
+          "peak_s": 6.105,
+          "peak_Hz": 60.3625,
+          "onset_interval_s": 0.34999999999999964,
+          "interevent_gap_s": 0.28000000000000025
+        },
+        {
+          "start_s": 6.3,
+          "end_s": 6.38,
+          "duration_s": 0.08,
+          "quiet_gap_s": 0.13,
+          "peak_s": 6.325,
+          "peak_Hz": 44.51875,
+          "onset_interval_s": 0.21999999999999975,
+          "interevent_gap_s": 0.1299999999999999
+        },
+        {
+          "start_s": 6.51,
+          "end_s": 6.6000000000000005,
+          "duration_s": 0.09,
+          "quiet_gap_s": 0.13,
+          "peak_s": 6.535,
+          "peak_Hz": 59.13125,
+          "onset_interval_s": 0.20999999999999996,
+          "interevent_gap_s": 0.1299999999999999
+        },
+        {
+          "start_s": 6.8100000000000005,
+          "end_s": 6.8500000000000005,
+          "duration_s": 0.04,
+          "quiet_gap_s": 0.21,
+          "peak_s": 6.835,
+          "peak_Hz": 20.603125,
+          "onset_interval_s": 0.3000000000000007,
+          "interevent_gap_s": 0.20999999999999996
+        },
+        {
+          "start_s": 7.03,
+          "end_s": 7.08,
+          "duration_s": 0.05,
+          "quiet_gap_s": 0.18,
+          "peak_s": 7.055,
+          "peak_Hz": 64.35625,
+          "onset_interval_s": 0.21999999999999975,
+          "interevent_gap_s": 0.17999999999999972
+        },
+        {
+          "start_s": 7.23,
+          "end_s": 7.33,
+          "duration_s": 0.1,
+          "quiet_gap_s": 0.11,
+          "peak_s": 7.255,
+          "peak_Hz": 58.034375000000004,
+          "onset_interval_s": 0.20000000000000018,
+          "interevent_gap_s": 0.15000000000000036
+        },
+        {
+          "start_s": 7.51,
+          "end_s": 7.57,
+          "duration_s": 0.06,
+          "quiet_gap_s": 0.18,
+          "peak_s": 7.535,
+          "peak_Hz": 55.53125,
+          "onset_interval_s": 0.27999999999999936,
+          "interevent_gap_s": 0.17999999999999972
+        },
+        {
+          "start_s": 7.71,
+          "end_s": 7.82,
+          "duration_s": 0.11,
+          "quiet_gap_s": 0.14,
+          "peak_s": 7.735,
+          "peak_Hz": 54.681250000000006,
+          "onset_interval_s": 0.20000000000000018,
+          "interevent_gap_s": 0.13999999999999968
+        },
+        {
+          "start_s": 8.22,
+          "end_s": 8.32,
+          "duration_s": 0.1,
+          "quiet_gap_s": 0.4,
+          "peak_s": 8.245000000000001,
+          "peak_Hz": 41.575,
+          "onset_interval_s": 0.5100000000000007,
+          "interevent_gap_s": 0.40000000000000036
+        },
+        {
+          "start_s": 8.49,
+          "end_s": 8.540000000000001,
+          "duration_s": 0.05,
+          "quiet_gap_s": 0.17,
+          "peak_s": 8.515,
+          "peak_Hz": 57.396875,
+          "onset_interval_s": 0.2699999999999996,
+          "interevent_gap_s": 0.16999999999999993
+        },
+        {
+          "start_s": 8.82,
+          "end_s": 8.91,
+          "duration_s": 0.09,
+          "quiet_gap_s": 0.22,
+          "peak_s": 8.845,
+          "peak_Hz": 60.41562499999999,
+          "onset_interval_s": 0.33000000000000007,
+          "interevent_gap_s": 0.27999999999999936
+        },
+        {
+          "start_s": 9.06,
+          "end_s": 9.1,
+          "duration_s": 0.04,
+          "quiet_gap_s": 0.15,
+          "peak_s": 9.085,
+          "peak_Hz": 37.24375,
+          "onset_interval_s": 0.2400000000000002,
+          "interevent_gap_s": 0.15000000000000036
+        },
+        {
+          "start_s": 9.34,
+          "end_s": 9.46,
+          "duration_s": 0.12,
+          "quiet_gap_s": 0.24,
+          "peak_s": 9.365,
+          "peak_Hz": 43.3125,
+          "onset_interval_s": 0.27999999999999936,
+          "interevent_gap_s": 0.2400000000000002
+        },
+        {
+          "start_s": 9.620000000000001,
+          "end_s": 9.73,
+          "duration_s": 0.11,
+          "quiet_gap_s": 0.16,
+          "peak_s": 9.645,
+          "peak_Hz": 38.965624999999996,
+          "onset_interval_s": 0.28000000000000114,
+          "interevent_gap_s": 0.16000000000000014
+        },
+        {
+          "start_s": 10.0,
+          "end_s": 10.08,
+          "duration_s": 0.08,
+          "quiet_gap_s": 0.27,
+          "peak_s": 10.035,
+          "peak_Hz": 51.803125,
+          "onset_interval_s": 0.379999999999999,
+          "interevent_gap_s": 0.2699999999999996
+        },
+        {
+          "start_s": 10.290000000000001,
+          "end_s": 10.41,
+          "duration_s": 0.12,
+          "quiet_gap_s": 0.21,
+          "peak_s": 10.315,
+          "peak_Hz": 68.203125,
+          "onset_interval_s": 0.2900000000000009,
+          "interevent_gap_s": 0.21000000000000085
+        },
+        {
+          "start_s": 10.58,
+          "end_s": 10.700000000000001,
+          "duration_s": 0.12,
+          "quiet_gap_s": 0.17,
+          "peak_s": 10.605,
+          "peak_Hz": 48.115625,
+          "onset_interval_s": 0.28999999999999915,
+          "interevent_gap_s": 0.16999999999999993
+        },
+        {
+          "start_s": 10.84,
+          "end_s": 10.91,
+          "duration_s": 0.07,
+          "quiet_gap_s": 0.14,
+          "peak_s": 10.865,
+          "peak_Hz": 58.865625,
+          "onset_interval_s": 0.2599999999999998,
+          "interevent_gap_s": 0.1399999999999988
+        },
+        {
+          "start_s": 11.08,
+          "end_s": 11.18,
+          "duration_s": 0.1,
+          "quiet_gap_s": 0.17,
+          "peak_s": 11.115,
+          "peak_Hz": 59.89375,
+          "onset_interval_s": 0.2400000000000002,
+          "interevent_gap_s": 0.16999999999999993
+        },
+        {
+          "start_s": 11.3,
+          "end_s": 11.39,
+          "duration_s": 0.09,
+          "quiet_gap_s": 0.12,
+          "peak_s": 11.325000000000001,
+          "peak_Hz": 54.459374999999994,
+          "onset_interval_s": 0.22000000000000064,
+          "interevent_gap_s": 0.120000000000001
+        },
+        {
+          "start_s": 11.57,
+          "end_s": 11.64,
+          "duration_s": 0.07,
+          "quiet_gap_s": 0.18,
+          "peak_s": 11.595,
+          "peak_Hz": 51.98125,
+          "onset_interval_s": 0.2699999999999996,
+          "interevent_gap_s": 0.17999999999999972
+        },
+        {
+          "start_s": 11.8,
+          "end_s": 11.9,
+          "duration_s": 0.1,
+          "quiet_gap_s": 0.16,
+          "peak_s": 11.825000000000001,
+          "peak_Hz": 84.065625,
+          "onset_interval_s": 0.23000000000000043,
+          "interevent_gap_s": 0.16000000000000014
+        },
+        {
+          "start_s": 12.05,
+          "end_s": 12.13,
+          "duration_s": 0.08,
+          "quiet_gap_s": 0.15,
+          "peak_s": 12.075000000000001,
+          "peak_Hz": 81.48125,
+          "onset_interval_s": 0.25,
+          "interevent_gap_s": 0.15000000000000036
+        },
+        {
+          "start_s": 12.39,
+          "end_s": 12.51,
+          "duration_s": 0.12,
+          "quiet_gap_s": 0.26,
+          "peak_s": 12.415000000000001,
+          "peak_Hz": 47.590624999999996,
+          "onset_interval_s": 0.33999999999999986,
+          "interevent_gap_s": 0.2599999999999998
+        },
+        {
+          "start_s": 12.68,
+          "end_s": 12.74,
+          "duration_s": 0.06,
+          "quiet_gap_s": 0.17,
+          "peak_s": 12.705,
+          "peak_Hz": 62.0375,
+          "onset_interval_s": 0.28999999999999915,
+          "interevent_gap_s": 0.16999999999999993
+        },
+        {
+          "start_s": 13.27,
+          "end_s": 13.38,
+          "duration_s": 0.11,
+          "quiet_gap_s": 0.53,
+          "peak_s": 13.305,
+          "peak_Hz": 65.69375,
+          "onset_interval_s": 0.5899999999999999,
+          "interevent_gap_s": 0.5299999999999994
+        },
+        {
+          "start_s": 13.67,
+          "end_s": 13.74,
+          "duration_s": 0.07,
+          "quiet_gap_s": 0.29,
+          "peak_s": 13.695,
+          "peak_Hz": 50.068749999999994,
+          "onset_interval_s": 0.40000000000000036,
+          "interevent_gap_s": 0.28999999999999915
+        },
+        {
+          "start_s": 13.98,
+          "end_s": 14.05,
+          "duration_s": 0.07,
+          "quiet_gap_s": 0.24,
+          "peak_s": 14.005,
+          "peak_Hz": 64.1875,
+          "onset_interval_s": 0.3100000000000005,
+          "interevent_gap_s": 0.2400000000000002
+        },
+        {
+          "start_s": 14.39,
+          "end_s": 14.51,
+          "duration_s": 0.12,
+          "quiet_gap_s": 0.34,
+          "peak_s": 14.415000000000001,
+          "peak_Hz": 58.178125,
+          "onset_interval_s": 0.41000000000000014,
+          "interevent_gap_s": 0.33999999999999986
+        },
+        {
+          "start_s": 14.65,
+          "end_s": 14.700000000000001,
+          "duration_s": 0.05,
+          "quiet_gap_s": 0.14,
+          "peak_s": 14.675,
+          "peak_Hz": 58.821875,
+          "onset_interval_s": 0.2599999999999998,
+          "interevent_gap_s": 0.14000000000000057
+        },
+        {
+          "start_s": 14.86,
+          "end_s": 14.98,
+          "duration_s": 0.12,
+          "quiet_gap_s": 0.16,
+          "peak_s": 14.895,
+          "peak_Hz": 52.19375,
+          "onset_interval_s": 0.20999999999999908,
+          "interevent_gap_s": 0.15999999999999837
+        },
+        {
+          "start_s": 15.18,
+          "end_s": 15.280000000000001,
+          "duration_s": 0.1,
+          "quiet_gap_s": 0.2,
+          "peak_s": 15.205,
+          "peak_Hz": 58.2875,
+          "onset_interval_s": 0.3200000000000003,
+          "interevent_gap_s": 0.1999999999999993
+        },
+        {
+          "start_s": 15.46,
+          "end_s": 15.540000000000001,
+          "duration_s": 0.08,
+          "quiet_gap_s": 0.18,
+          "peak_s": 15.495000000000001,
+          "peak_Hz": 61.165625,
+          "onset_interval_s": 0.28000000000000114,
+          "interevent_gap_s": 0.17999999999999972
+        },
+        {
+          "start_s": 15.71,
+          "end_s": 15.790000000000001,
+          "duration_s": 0.08,
+          "quiet_gap_s": 0.17,
+          "peak_s": 15.735000000000001,
+          "peak_Hz": 61.381249999999994,
+          "onset_interval_s": 0.25,
+          "interevent_gap_s": 0.16999999999999993
+        },
+        {
+          "start_s": 16.18,
+          "end_s": 16.28,
+          "duration_s": 0.1,
+          "quiet_gap_s": 0.39,
+          "peak_s": 16.205000000000002,
+          "peak_Hz": 58.381249999999994,
+          "onset_interval_s": 0.46999999999999886,
+          "interevent_gap_s": 0.3899999999999988
+        },
+        {
+          "start_s": 16.69,
+          "end_s": 16.81,
+          "duration_s": 0.12,
+          "quiet_gap_s": 0.19,
+          "peak_s": 16.715,
+          "peak_Hz": 59.23125,
+          "onset_interval_s": 0.5100000000000016,
+          "interevent_gap_s": 0.41000000000000014
+        },
+        {
+          "start_s": 16.96,
+          "end_s": 17.01,
+          "duration_s": 0.05,
+          "quiet_gap_s": 0.15,
+          "peak_s": 16.985,
+          "peak_Hz": 52.40625,
+          "onset_interval_s": 0.2699999999999996,
+          "interevent_gap_s": 0.15000000000000213
+        },
+        {
+          "start_s": 17.21,
+          "end_s": 17.31,
+          "duration_s": 0.1,
+          "quiet_gap_s": 0.2,
+          "peak_s": 17.235,
+          "peak_Hz": 63.70625,
+          "onset_interval_s": 0.25,
+          "interevent_gap_s": 0.1999999999999993
+        },
+        {
+          "start_s": 17.56,
+          "end_s": 17.64,
+          "duration_s": 0.08,
+          "quiet_gap_s": 0.25,
+          "peak_s": 17.585,
+          "peak_Hz": 37.915625,
+          "onset_interval_s": 0.34999999999999787,
+          "interevent_gap_s": 0.25
+        },
+        {
+          "start_s": 17.79,
+          "end_s": 17.88,
+          "duration_s": 0.09,
+          "quiet_gap_s": 0.15,
+          "peak_s": 17.805,
+          "peak_Hz": 71.125,
+          "onset_interval_s": 0.23000000000000043,
+          "interevent_gap_s": 0.14999999999999858
+        },
+        {
+          "start_s": 18.05,
+          "end_s": 18.150000000000002,
+          "duration_s": 0.1,
+          "quiet_gap_s": 0.17,
+          "peak_s": 18.075,
+          "peak_Hz": 59.2375,
+          "onset_interval_s": 0.26000000000000156,
+          "interevent_gap_s": 0.1700000000000017
+        },
+        {
+          "start_s": 18.29,
+          "end_s": 18.38,
+          "duration_s": 0.09,
+          "quiet_gap_s": 0.14,
+          "peak_s": 18.315,
+          "peak_Hz": 41.69375,
+          "onset_interval_s": 0.23999999999999844,
+          "interevent_gap_s": 0.13999999999999702
+        }
+      ],
+      "finite_count": 64,
+      "brief_count": 64,
+      "event_span_s": 17.74,
+      "brief_fraction": 1.0,
+      "event_rate_Hz": 3.2209360845495723
+    },
+    "interhigh_intervals": [],
+    "latest_postexit": null,
+    "events": [
+      {
+        "start_s": 0.07,
+        "end_s": 0.19,
+        "duration_s": 0.12,
+        "quiet_gap_s": 0.07,
+        "peak_s": 0.085,
+        "peak_Hz": 50.565625000000004,
+        "onset_interval_s": null,
+        "interevent_gap_s": null
+      },
+      {
+        "start_s": 0.38,
+        "end_s": 0.5,
+        "duration_s": 0.12,
+        "quiet_gap_s": 0.19,
+        "peak_s": 0.405,
+        "peak_Hz": 35.19375,
+        "onset_interval_s": 0.31,
+        "interevent_gap_s": 0.19
+      },
+      {
+        "start_s": 0.64,
+        "end_s": 0.76,
+        "duration_s": 0.12,
+        "quiet_gap_s": 0.14,
+        "peak_s": 0.665,
+        "peak_Hz": 50.262499999999996,
+        "onset_interval_s": 0.26,
+        "interevent_gap_s": 0.14
+      },
+      {
+        "start_s": 0.98,
+        "end_s": 1.08,
+        "duration_s": 0.1,
+        "quiet_gap_s": 0.22,
+        "peak_s": 0.995,
+        "peak_Hz": 33.459375,
+        "onset_interval_s": 0.33999999999999997,
+        "interevent_gap_s": 0.21999999999999997
+      },
+      {
+        "start_s": 1.19,
+        "end_s": 1.3,
+        "duration_s": 0.11,
+        "quiet_gap_s": 0.11,
+        "peak_s": 1.215,
+        "peak_Hz": 44.4,
+        "onset_interval_s": 0.20999999999999996,
+        "interevent_gap_s": 0.10999999999999988
+      },
+      {
+        "start_s": 1.45,
+        "end_s": 1.48,
+        "duration_s": 0.03,
+        "quiet_gap_s": 0.15,
+        "peak_s": 1.465,
+        "peak_Hz": 23.290625000000002,
+        "onset_interval_s": 0.26,
+        "interevent_gap_s": 0.1499999999999999
+      },
+      {
+        "start_s": 1.59,
+        "end_s": 1.6400000000000001,
+        "duration_s": 0.05,
+        "quiet_gap_s": 0.11,
+        "peak_s": 1.605,
+        "peak_Hz": 62.01875,
+        "onset_interval_s": 0.14000000000000012,
+        "interevent_gap_s": 0.1100000000000001
+      },
+      {
+        "start_s": 1.78,
+        "end_s": 1.82,
+        "duration_s": 0.04,
+        "quiet_gap_s": 0.14,
+        "peak_s": 1.805,
+        "peak_Hz": 38.553125,
+        "onset_interval_s": 0.18999999999999995,
+        "interevent_gap_s": 0.1399999999999999
+      },
+      {
+        "start_s": 1.95,
+        "end_s": 2.06,
+        "duration_s": 0.11,
+        "quiet_gap_s": 0.13,
+        "peak_s": 1.975,
+        "peak_Hz": 47.090625,
+        "onset_interval_s": 0.16999999999999993,
+        "interevent_gap_s": 0.1299999999999999
+      },
+      {
+        "start_s": 2.22,
+        "end_s": 2.34,
+        "duration_s": 0.12,
+        "quiet_gap_s": 0.16,
+        "peak_s": 2.235,
+        "peak_Hz": 51.493750000000006,
+        "onset_interval_s": 0.27000000000000024,
+        "interevent_gap_s": 0.16000000000000014
+      },
+      {
+        "start_s": 2.48,
+        "end_s": 2.5500000000000003,
+        "duration_s": 0.07,
+        "quiet_gap_s": 0.14,
+        "peak_s": 2.505,
+        "peak_Hz": 53.109375,
+        "onset_interval_s": 0.2599999999999998,
+        "interevent_gap_s": 0.14000000000000012
+      },
+      {
+        "start_s": 2.71,
+        "end_s": 2.8000000000000003,
+        "duration_s": 0.09,
+        "quiet_gap_s": 0.16,
+        "peak_s": 2.725,
+        "peak_Hz": 44.26562499999999,
+        "onset_interval_s": 0.22999999999999998,
+        "interevent_gap_s": 0.1599999999999997
+      },
+      {
+        "start_s": 2.98,
+        "end_s": 3.0300000000000002,
+        "duration_s": 0.05,
+        "quiet_gap_s": 0.18,
+        "peak_s": 3.005,
+        "peak_Hz": 36.375,
+        "onset_interval_s": 0.27,
+        "interevent_gap_s": 0.17999999999999972
+      },
+      {
+        "start_s": 3.16,
+        "end_s": 3.23,
+        "duration_s": 0.07,
+        "quiet_gap_s": 0.13,
+        "peak_s": 3.1950000000000003,
+        "peak_Hz": 51.425,
+        "onset_interval_s": 0.18000000000000016,
+        "interevent_gap_s": 0.1299999999999999
+      },
+      {
+        "start_s": 3.38,
+        "end_s": 3.42,
+        "duration_s": 0.04,
+        "quiet_gap_s": 0.15,
+        "peak_s": 3.395,
+        "peak_Hz": 27.181250000000002,
+        "onset_interval_s": 0.21999999999999975,
+        "interevent_gap_s": 0.1499999999999999
+      },
+      {
+        "start_s": 3.54,
+        "end_s": 3.61,
+        "duration_s": 0.07,
+        "quiet_gap_s": 0.12,
+        "peak_s": 3.565,
+        "peak_Hz": 35.0875,
+        "onset_interval_s": 0.16000000000000014,
+        "interevent_gap_s": 0.1200000000000001
+      },
+      {
+        "start_s": 3.7800000000000002,
+        "end_s": 3.8200000000000003,
+        "duration_s": 0.04,
+        "quiet_gap_s": 0.17,
+        "peak_s": 3.805,
+        "peak_Hz": 27.146874999999998,
+        "onset_interval_s": 0.2400000000000002,
+        "interevent_gap_s": 0.17000000000000037
+      },
+      {
+        "start_s": 3.94,
+        "end_s": 4.04,
+        "duration_s": 0.1,
+        "quiet_gap_s": 0.12,
+        "peak_s": 3.955,
+        "peak_Hz": 50.11875,
+        "onset_interval_s": 0.1599999999999997,
+        "interevent_gap_s": 0.11999999999999966
+      },
+      {
+        "start_s": 4.16,
+        "end_s": 4.21,
+        "duration_s": 0.05,
+        "quiet_gap_s": 0.12,
+        "peak_s": 4.175,
+        "peak_Hz": 50.887499999999996,
+        "onset_interval_s": 0.2200000000000002,
+        "interevent_gap_s": 0.1200000000000001
+      },
+      {
+        "start_s": 4.36,
+        "end_s": 4.44,
+        "duration_s": 0.08,
+        "quiet_gap_s": 0.15,
+        "peak_s": 4.385,
+        "peak_Hz": 58.56249999999999,
+        "onset_interval_s": 0.20000000000000018,
+        "interevent_gap_s": 0.15000000000000036
+      },
+      {
+        "start_s": 4.66,
+        "end_s": 4.7700000000000005,
+        "duration_s": 0.11,
+        "quiet_gap_s": 0.22,
+        "peak_s": 4.675,
+        "peak_Hz": 30.959374999999998,
+        "onset_interval_s": 0.2999999999999998,
+        "interevent_gap_s": 0.21999999999999975
+      },
+      {
+        "start_s": 5.03,
+        "end_s": 5.11,
+        "duration_s": 0.08,
+        "quiet_gap_s": 0.26,
+        "peak_s": 5.055,
+        "peak_Hz": 38.521875,
+        "onset_interval_s": 0.3700000000000001,
+        "interevent_gap_s": 0.2599999999999998
+      },
+      {
+        "start_s": 5.32,
+        "end_s": 5.42,
+        "duration_s": 0.1,
+        "quiet_gap_s": 0.21,
+        "peak_s": 5.345,
+        "peak_Hz": 52.731249999999996,
+        "onset_interval_s": 0.29000000000000004,
+        "interevent_gap_s": 0.20999999999999996
+      },
+      {
+        "start_s": 5.73,
+        "end_s": 5.8,
+        "duration_s": 0.07,
+        "quiet_gap_s": 0.31,
+        "peak_s": 5.755,
+        "peak_Hz": 43.990625,
+        "onset_interval_s": 0.41000000000000014,
+        "interevent_gap_s": 0.3100000000000005
+      },
+      {
+        "start_s": 6.08,
+        "end_s": 6.17,
+        "duration_s": 0.09,
+        "quiet_gap_s": 0.28,
+        "peak_s": 6.105,
+        "peak_Hz": 60.3625,
+        "onset_interval_s": 0.34999999999999964,
+        "interevent_gap_s": 0.28000000000000025
+      },
+      {
+        "start_s": 6.3,
+        "end_s": 6.38,
+        "duration_s": 0.08,
+        "quiet_gap_s": 0.13,
+        "peak_s": 6.325,
+        "peak_Hz": 44.51875,
+        "onset_interval_s": 0.21999999999999975,
+        "interevent_gap_s": 0.1299999999999999
+      },
+      {
+        "start_s": 6.51,
+        "end_s": 6.6000000000000005,
+        "duration_s": 0.09,
+        "quiet_gap_s": 0.13,
+        "peak_s": 6.535,
+        "peak_Hz": 59.13125,
+        "onset_interval_s": 0.20999999999999996,
+        "interevent_gap_s": 0.1299999999999999
+      },
+      {
+        "start_s": 6.8100000000000005,
+        "end_s": 6.8500000000000005,
+        "duration_s": 0.04,
+        "quiet_gap_s": 0.21,
+        "peak_s": 6.835,
+        "peak_Hz": 20.603125,
+        "onset_interval_s": 0.3000000000000007,
+        "interevent_gap_s": 0.20999999999999996
+      },
+      {
+        "start_s": 7.03,
+        "end_s": 7.08,
+        "duration_s": 0.05,
+        "quiet_gap_s": 0.18,
+        "peak_s": 7.055,
+        "peak_Hz": 64.35625,
+        "onset_interval_s": 0.21999999999999975,
+        "interevent_gap_s": 0.17999999999999972
+      },
+      {
+        "start_s": 7.23,
+        "end_s": 7.33,
+        "duration_s": 0.1,
+        "quiet_gap_s": 0.11,
+        "peak_s": 7.255,
+        "peak_Hz": 58.034375000000004,
+        "onset_interval_s": 0.20000000000000018,
+        "interevent_gap_s": 0.15000000000000036
+      },
+      {
+        "start_s": 7.51,
+        "end_s": 7.57,
+        "duration_s": 0.06,
+        "quiet_gap_s": 0.18,
+        "peak_s": 7.535,
+        "peak_Hz": 55.53125,
+        "onset_interval_s": 0.27999999999999936,
+        "interevent_gap_s": 0.17999999999999972
+      },
+      {
+        "start_s": 7.71,
+        "end_s": 7.82,
+        "duration_s": 0.11,
+        "quiet_gap_s": 0.14,
+        "peak_s": 7.735,
+        "peak_Hz": 54.681250000000006,
+        "onset_interval_s": 0.20000000000000018,
+        "interevent_gap_s": 0.13999999999999968
+      },
+      {
+        "start_s": 8.22,
+        "end_s": 8.32,
+        "duration_s": 0.1,
+        "quiet_gap_s": 0.4,
+        "peak_s": 8.245000000000001,
+        "peak_Hz": 41.575,
+        "onset_interval_s": 0.5100000000000007,
+        "interevent_gap_s": 0.40000000000000036
+      },
+      {
+        "start_s": 8.49,
+        "end_s": 8.540000000000001,
+        "duration_s": 0.05,
+        "quiet_gap_s": 0.17,
+        "peak_s": 8.515,
+        "peak_Hz": 57.396875,
+        "onset_interval_s": 0.2699999999999996,
+        "interevent_gap_s": 0.16999999999999993
+      },
+      {
+        "start_s": 8.82,
+        "end_s": 8.91,
+        "duration_s": 0.09,
+        "quiet_gap_s": 0.22,
+        "peak_s": 8.845,
+        "peak_Hz": 60.41562499999999,
+        "onset_interval_s": 0.33000000000000007,
+        "interevent_gap_s": 0.27999999999999936
+      },
+      {
+        "start_s": 9.06,
+        "end_s": 9.1,
+        "duration_s": 0.04,
+        "quiet_gap_s": 0.15,
+        "peak_s": 9.085,
+        "peak_Hz": 37.24375,
+        "onset_interval_s": 0.2400000000000002,
+        "interevent_gap_s": 0.15000000000000036
+      },
+      {
+        "start_s": 9.34,
+        "end_s": 9.46,
+        "duration_s": 0.12,
+        "quiet_gap_s": 0.24,
+        "peak_s": 9.365,
+        "peak_Hz": 43.3125,
+        "onset_interval_s": 0.27999999999999936,
+        "interevent_gap_s": 0.2400000000000002
+      },
+      {
+        "start_s": 9.620000000000001,
+        "end_s": 9.73,
+        "duration_s": 0.11,
+        "quiet_gap_s": 0.16,
+        "peak_s": 9.645,
+        "peak_Hz": 38.965624999999996,
+        "onset_interval_s": 0.28000000000000114,
+        "interevent_gap_s": 0.16000000000000014
+      },
+      {
+        "start_s": 10.0,
+        "end_s": 10.08,
+        "duration_s": 0.08,
+        "quiet_gap_s": 0.27,
+        "peak_s": 10.035,
+        "peak_Hz": 51.803125,
+        "onset_interval_s": 0.379999999999999,
+        "interevent_gap_s": 0.2699999999999996
+      },
+      {
+        "start_s": 10.290000000000001,
+        "end_s": 10.41,
+        "duration_s": 0.12,
+        "quiet_gap_s": 0.21,
+        "peak_s": 10.315,
+        "peak_Hz": 68.203125,
+        "onset_interval_s": 0.2900000000000009,
+        "interevent_gap_s": 0.21000000000000085
+      },
+      {
+        "start_s": 10.58,
+        "end_s": 10.700000000000001,
+        "duration_s": 0.12,
+        "quiet_gap_s": 0.17,
+        "peak_s": 10.605,
+        "peak_Hz": 48.115625,
+        "onset_interval_s": 0.28999999999999915,
+        "interevent_gap_s": 0.16999999999999993
+      },
+      {
+        "start_s": 10.84,
+        "end_s": 10.91,
+        "duration_s": 0.07,
+        "quiet_gap_s": 0.14,
+        "peak_s": 10.865,
+        "peak_Hz": 58.865625,
+        "onset_interval_s": 0.2599999999999998,
+        "interevent_gap_s": 0.1399999999999988
+      },
+      {
+        "start_s": 11.08,
+        "end_s": 11.18,
+        "duration_s": 0.1,
+        "quiet_gap_s": 0.17,
+        "peak_s": 11.115,
+        "peak_Hz": 59.89375,
+        "onset_interval_s": 0.2400000000000002,
+        "interevent_gap_s": 0.16999999999999993
+      },
+      {
+        "start_s": 11.3,
+        "end_s": 11.39,
+        "duration_s": 0.09,
+        "quiet_gap_s": 0.12,
+        "peak_s": 11.325000000000001,
+        "peak_Hz": 54.459374999999994,
+        "onset_interval_s": 0.22000000000000064,
+        "interevent_gap_s": 0.120000000000001
+      },
+      {
+        "start_s": 11.57,
+        "end_s": 11.64,
+        "duration_s": 0.07,
+        "quiet_gap_s": 0.18,
+        "peak_s": 11.595,
+        "peak_Hz": 51.98125,
+        "onset_interval_s": 0.2699999999999996,
+        "interevent_gap_s": 0.17999999999999972
+      },
+      {
+        "start_s": 11.8,
+        "end_s": 11.9,
+        "duration_s": 0.1,
+        "quiet_gap_s": 0.16,
+        "peak_s": 11.825000000000001,
+        "peak_Hz": 84.065625,
+        "onset_interval_s": 0.23000000000000043,
+        "interevent_gap_s": 0.16000000000000014
+      },
+      {
+        "start_s": 12.05,
+        "end_s": 12.13,
+        "duration_s": 0.08,
+        "quiet_gap_s": 0.15,
+        "peak_s": 12.075000000000001,
+        "peak_Hz": 81.48125,
+        "onset_interval_s": 0.25,
+        "interevent_gap_s": 0.15000000000000036
+      },
+      {
+        "start_s": 12.39,
+        "end_s": 12.51,
+        "duration_s": 0.12,
+        "quiet_gap_s": 0.26,
+        "peak_s": 12.415000000000001,
+        "peak_Hz": 47.590624999999996,
+        "onset_interval_s": 0.33999999999999986,
+        "interevent_gap_s": 0.2599999999999998
+      },
+      {
+        "start_s": 12.68,
+        "end_s": 12.74,
+        "duration_s": 0.06,
+        "quiet_gap_s": 0.17,
+        "peak_s": 12.705,
+        "peak_Hz": 62.0375,
+        "onset_interval_s": 0.28999999999999915,
+        "interevent_gap_s": 0.16999999999999993
+      },
+      {
+        "start_s": 13.27,
+        "end_s": 13.38,
+        "duration_s": 0.11,
+        "quiet_gap_s": 0.53,
+        "peak_s": 13.305,
+        "peak_Hz": 65.69375,
+        "onset_interval_s": 0.5899999999999999,
+        "interevent_gap_s": 0.5299999999999994
+      },
+      {
+        "start_s": 13.67,
+        "end_s": 13.74,
+        "duration_s": 0.07,
+        "quiet_gap_s": 0.29,
+        "peak_s": 13.695,
+        "peak_Hz": 50.068749999999994,
+        "onset_interval_s": 0.40000000000000036,
+        "interevent_gap_s": 0.28999999999999915
+      },
+      {
+        "start_s": 13.98,
+        "end_s": 14.05,
+        "duration_s": 0.07,
+        "quiet_gap_s": 0.24,
+        "peak_s": 14.005,
+        "peak_Hz": 64.1875,
+        "onset_interval_s": 0.3100000000000005,
+        "interevent_gap_s": 0.2400000000000002
+      },
+      {
+        "start_s": 14.39,
+        "end_s": 14.51,
+        "duration_s": 0.12,
+        "quiet_gap_s": 0.34,
+        "peak_s": 14.415000000000001,
+        "peak_Hz": 58.178125,
+        "onset_interval_s": 0.41000000000000014,
+        "interevent_gap_s": 0.33999999999999986
+      },
+      {
+        "start_s": 14.65,
+        "end_s": 14.700000000000001,
+        "duration_s": 0.05,
+        "quiet_gap_s": 0.14,
+        "peak_s": 14.675,
+        "peak_Hz": 58.821875,
+        "onset_interval_s": 0.2599999999999998,
+        "interevent_gap_s": 0.14000000000000057
+      },
+      {
+        "start_s": 14.86,
+        "end_s": 14.98,
+        "duration_s": 0.12,
+        "quiet_gap_s": 0.16,
+        "peak_s": 14.895,
+        "peak_Hz": 52.19375,
+        "onset_interval_s": 0.20999999999999908,
+        "interevent_gap_s": 0.15999999999999837
+      },
+      {
+        "start_s": 15.18,
+        "end_s": 15.280000000000001,
+        "duration_s": 0.1,
+        "quiet_gap_s": 0.2,
+        "peak_s": 15.205,
+        "peak_Hz": 58.2875,
+        "onset_interval_s": 0.3200000000000003,
+        "interevent_gap_s": 0.1999999999999993
+      },
+      {
+        "start_s": 15.46,
+        "end_s": 15.540000000000001,
+        "duration_s": 0.08,
+        "quiet_gap_s": 0.18,
+        "peak_s": 15.495000000000001,
+        "peak_Hz": 61.165625,
+        "onset_interval_s": 0.28000000000000114,
+        "interevent_gap_s": 0.17999999999999972
+      },
+      {
+        "start_s": 15.71,
+        "end_s": 15.790000000000001,
+        "duration_s": 0.08,
+        "quiet_gap_s": 0.17,
+        "peak_s": 15.735000000000001,
+        "peak_Hz": 61.381249999999994,
+        "onset_interval_s": 0.25,
+        "interevent_gap_s": 0.16999999999999993
+      },
+      {
+        "start_s": 16.18,
+        "end_s": 16.28,
+        "duration_s": 0.1,
+        "quiet_gap_s": 0.39,
+        "peak_s": 16.205000000000002,
+        "peak_Hz": 58.381249999999994,
+        "onset_interval_s": 0.46999999999999886,
+        "interevent_gap_s": 0.3899999999999988
+      },
+      {
+        "start_s": 16.69,
+        "end_s": 16.81,
+        "duration_s": 0.12,
+        "quiet_gap_s": 0.19,
+        "peak_s": 16.715,
+        "peak_Hz": 59.23125,
+        "onset_interval_s": 0.5100000000000016,
+        "interevent_gap_s": 0.41000000000000014
+      },
+      {
+        "start_s": 16.96,
+        "end_s": 17.01,
+        "duration_s": 0.05,
+        "quiet_gap_s": 0.15,
+        "peak_s": 16.985,
+        "peak_Hz": 52.40625,
+        "onset_interval_s": 0.2699999999999996,
+        "interevent_gap_s": 0.15000000000000213
+      },
+      {
+        "start_s": 17.21,
+        "end_s": 17.31,
+        "duration_s": 0.1,
+        "quiet_gap_s": 0.2,
+        "peak_s": 17.235,
+        "peak_Hz": 63.70625,
+        "onset_interval_s": 0.25,
+        "interevent_gap_s": 0.1999999999999993
+      },
+      {
+        "start_s": 17.56,
+        "end_s": 17.64,
+        "duration_s": 0.08,
+        "quiet_gap_s": 0.25,
+        "peak_s": 17.585,
+        "peak_Hz": 37.915625,
+        "onset_interval_s": 0.34999999999999787,
+        "interevent_gap_s": 0.25
+      },
+      {
+        "start_s": 17.79,
+        "end_s": 17.88,
+        "duration_s": 0.09,
+        "quiet_gap_s": 0.15,
+        "peak_s": 17.805,
+        "peak_Hz": 71.125,
+        "onset_interval_s": 0.23000000000000043,
+        "interevent_gap_s": 0.14999999999999858
+      },
+      {
+        "start_s": 18.05,
+        "end_s": 18.150000000000002,
+        "duration_s": 0.1,
+        "quiet_gap_s": 0.17,
+        "peak_s": 18.075,
+        "peak_Hz": 59.2375,
+        "onset_interval_s": 0.26000000000000156,
+        "interevent_gap_s": 0.1700000000000017
+      },
+      {
+        "start_s": 18.29,
+        "end_s": 18.38,
+        "duration_s": 0.09,
+        "quiet_gap_s": 0.14,
+        "peak_s": 18.315,
+        "peak_Hz": 41.69375,
+        "onset_interval_s": 0.23999999999999844,
+        "interevent_gap_s": 0.13999999999999702
+      }
+    ],
+    "temporal_loop_pass": false,
+    "preentry_brief_screen": true,
+    "classification": "HIGH_WITHOUT_EXIT",
+    "high_gate": "All E >=200Hz for200ms; unchanged",
+    "event_settings": {
+      "dt_s": 0.01,
+      "quiet_Hz": 5.0,
+      "max_duration_s": 0.2,
+      "minimum_events": 5
+    }
+  },
+  "sensitivity": [
+    {
+      "event_settings": {
+        "dt_s": 0.005,
+        "quiet_Hz": 5.0,
+        "max_duration_s": 0.2,
+        "minimum_events": 5
+      },
+      "classification": "HIGH_WITHOUT_EXIT",
+      "temporal_loop_pass": false
+    },
+    {
+      "event_settings": {
+        "dt_s": 0.01,
+        "quiet_Hz": 1.0,
+        "max_duration_s": 0.2,
+        "minimum_events": 5
+      },
+      "classification": "HIGH_WITHOUT_EXIT",
+      "temporal_loop_pass": false
+    },
+    {
+      "event_settings": {
+        "dt_s": 0.01,
+        "quiet_Hz": 5.0,
+        "max_duration_s": 0.3,
+        "minimum_events": 5
+      },
+      "classification": "HIGH_WITHOUT_EXIT",
+      "temporal_loop_pass": false
+    },
+    {
+      "event_settings": {
+        "dt_s": 0.01,
+        "quiet_Hz": 5.0,
+        "max_duration_s": 0.2,
+        "minimum_events": 3
+      },
+      "classification": "HIGH_WITHOUT_EXIT",
+      "temporal_loop_pass": false
+    }
+  ],
+  "exact_all_E_zero_interval_s": [
+    14.059000000000001,
+    14.128
+  ],
+  "morphology_and_spatial_acceptance": "PENDING_NATIVE_REVIEW",
+  "full_Fig5_acceptance": "NOT_ESTABLISHED",
+  "human_review": "PENDING"
+}

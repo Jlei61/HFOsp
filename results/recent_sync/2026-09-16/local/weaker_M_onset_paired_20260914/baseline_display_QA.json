@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "checks": [
+    {
+      "seed": 9108401,
+      "same_contact_scales": true,
+      "same_canonical_patient": true,
+      "same_full_display_window": true,
+      "aligned_ABC": true,
+      "same_zoom_samples": true
+    },
+    {
+      "seed": 9108402,
+      "same_contact_scales": true,
+      "same_canonical_patient": true,
+      "same_full_display_window": true,
+      "aligned_ABC": true,
+      "same_zoom_samples": true
+    }
+  ],
+  "human_review": "PENDING",
+  "simulator_observer_QA": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/weaker_M_onset_paired_20260914/qa.json",
+  "checkpoint_resume_QA": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/weaker_M_onset_paired_20260914/checkpoint_resume_qa.json"
+}

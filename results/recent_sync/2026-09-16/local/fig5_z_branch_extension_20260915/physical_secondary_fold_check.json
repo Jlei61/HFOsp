@@ -1,0 +1,43 @@
+{
+  "status": "NUMERICAL_STATIONARY_FOLD_CONFIRMED",
+  "s": 0.1431287269478909,
+  "mean_z": 0.8568712730521091,
+  "mean_e_hz": 37.199409086060655,
+  "residual_max_hz": 4.834113198626255e-08,
+  "critical_eigenvalue": [
+    -6.164577707730744e-09,
+    0.0
+  ],
+  "second_smallest_eigenvalue_modulus": 0.13158287691864326,
+  "right_null_residual": 6.164574215923638e-09,
+  "left_null_residual": 1.805798217005051e-08,
+  "transversality": 4634.38456192839,
+  "quadratic_checks": [
+    {
+      "step_hz": 0.1,
+      "quadratic_coefficient": 0.0005887027250477682
+    },
+    {
+      "step_hz": 0.05,
+      "quadratic_coefficient": 0.0008646056870705398
+    },
+    {
+      "step_hz": 0.02,
+      "quadratic_coefficient": 0.002428825869929204
+    }
+  ],
+  "core_a_b_surround_mode_energy": [
+    0.02437907685840004,
+    0.12472223196590008,
+    0.8508986911756998
+  ],
+  "continuation_bracket": [
+    164,
+    165
+  ],
+  "full_delay_dynamic_stability": "NOT_COMPUTED",
+  "native_irregular_burst_onset": "NOT_ESTABLISHED",
+  "branch": "equilibrium_low_trusted_continued",
+  "physical_z_range": true,
+  "scope": "Fold of the frozen v1 stationary equations with equilibrium dynamic M eliminated; v1 failed native bursting correspondence."
+}

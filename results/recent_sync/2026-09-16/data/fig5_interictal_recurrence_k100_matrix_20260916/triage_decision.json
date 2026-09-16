@@ -1,0 +1,31 @@
+{
+  "epoch": 1789495513.7656822,
+  "local": "2026-09-16 02:05:13",
+  "observed_at_decision": {
+    "k100_0.1_tau2.5_s9108401": 32.0,
+    "k100_0.1_tau5_s9108401": 30.0,
+    "k100_0.25_tau5_s9108401": 38.0,
+    "k100_0.5_tau1_s9108401": 40.0,
+    "k100_0.5_tau2.5_s9108401": 38.0,
+    "k100_0.25_tau1_s9108401": 34.0,
+    "k100_0.25_tau2.5_s9108401": 38.0
+  },
+  "extend": [
+    "k100_0.25_tau1_s9108401",
+    "k100_0.25_tau2.5_s9108401"
+  ],
+  "stop_at_checkpoint": [
+    "k100_0.1_tau2.5_s9108401",
+    "k100_0.1_tau5_s9108401",
+    "k100_0.25_tau5_s9108401",
+    "k100_0.5_tau1_s9108401",
+    "k100_0.5_tau2.5_s9108401"
+  ],
+  "reasoning": [
+    "Entry boundary lies between k100=0.1 (all three tau_K enter at 16-20 s and stay in the refractory-limited plateau; the plateau is absorbing: Z=0, both inhibitory pathways gone, K 30-60x too weak) and k100>=0.25 (no entry by 34-40 s, Z stable 0.92-0.95).",
+    "The two extended conditions are the boundary-adjacent row: k100=0.25 with the fastest K (tau_K=1 s, gain 0.25) and k100=0.25 with tau_K=2.5 s (gain 0.1, i.e. the same per-spike increment as the old entering condition k100=0.1/tau_K=1 s), giving a same-increment/different-tau contrast.",
+    "Stopped conditions are censored, not failures: the two k100=0.1 plateaus add nothing beyond the old tau_K=1 s run and the causal branches; k100=0.25/tau5 and k100=0.5 rows are no-entry within their windows and are recorded as censored no-entry.",
+    "Independent noise seeds 9108402/9108403 are added to both extended conditions, plus one seed for the entering condition k100=0.1/tau_K=2.5 s to check that entry itself is noise-robust."
+  ],
+  "not_chosen_by": "earliest onset or best-looking figure; chosen by entry/exit/brief-event/current-mechanism evidence and the boundary position in the matrix"
+}

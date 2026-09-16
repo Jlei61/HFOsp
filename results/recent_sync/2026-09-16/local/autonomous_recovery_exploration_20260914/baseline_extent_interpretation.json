@@ -1,0 +1,50 @@
+{
+  "window_s": [
+    0.2,
+    8
+  ],
+  "rows": [
+    {
+      "name": "native_weak_s9108401",
+      "n": 34,
+      "median_duration_s": 0.1,
+      "median_preceding_quiet_s": 0.11,
+      "by_threshold": {
+        "20": {
+          "union_area": 0.7175,
+          "peak_simultaneous_area": 0.355
+        },
+        "50": {
+          "union_area": 0.68875,
+          "peak_simultaneous_area": 0.3175
+        },
+        "100": {
+          "union_area": 0.6575,
+          "peak_simultaneous_area": 0.26625
+        }
+      }
+    },
+    {
+      "name": "phi1_g0_s9108401",
+      "n": 32,
+      "median_duration_s": 0.095,
+      "median_preceding_quiet_s": 0.13,
+      "by_threshold": {
+        "20": {
+          "union_area": 0.57125,
+          "peak_simultaneous_area": 0.245
+        },
+        "50": {
+          "union_area": 0.54,
+          "peak_simultaneous_area": 0.215
+        },
+        "100": {
+          "union_area": 0.5,
+          "peak_simultaneous_area": 0.17
+        }
+      }
+    }
+  ],
+  "interpretation": "The native pre-entry reference already has spatially broad transient events at a20Hz local recruitment threshold. Broad area alone cannot identify a seizure-like state or recovery. Distinguish transient sequential recruitment from sustained recruitment and loss of quiet gaps; retain threshold sensitivity and compare identical pre-entry windows.",
+  "patient_validation": "These are model cells/events on the manual substrate, not an independent recovery of patient TA/TB distributions."
+}

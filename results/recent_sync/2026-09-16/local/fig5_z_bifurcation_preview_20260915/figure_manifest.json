@@ -1,0 +1,61 @@
+{
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_current_network_z_state_v1",
+  "statistical_unit": "one frozen-Z continuation",
+  "native_runs": 24,
+  "native_main": "history 8 s, W1; final 4 s of a 10 s continuation",
+  "native_other": "other histories/futures: open mean markers",
+  "extrema_definition": "10 ms population rate; inner extrema prominence >=20 Hz and distance >=20 ms; absolute min/max always shown",
+  "equilibrium_branches": [
+    {
+      "file": "recruited_equilibria",
+      "points": 130,
+      "max_residual_hz": 1.916064377383009e-06
+    }
+  ],
+  "branch_stability": "NOT_COMPUTED",
+  "native_irregular_bifurcation_type": "NOT_ESTABLISHED",
+  "reduced_stationary_fold": {
+    "status": "NUMERICAL_STATIONARY_FOLD_CONFIRMED",
+    "s": 0.2786725791633563,
+    "mean_z": 0.7213274208366437,
+    "mean_e_hz": 277.9699873598276,
+    "residual_max_hz": 1.6692069948476274e-10,
+    "critical_eigenvalue": [
+      -1.7366064142549548e-10,
+      0.0
+    ],
+    "second_smallest_eigenvalue_modulus": 0.14296899021140216,
+    "right_null_residual": 1.7366066179912524e-10,
+    "left_null_residual": 4.452148608029686e-10,
+    "transversality": 3263.5010698379365,
+    "quadratic_checks": [
+      {
+        "step_hz": 0.1,
+        "quadratic_coefficient": -0.0007765751385450074
+      },
+      {
+        "step_hz": 0.05,
+        "quadratic_coefficient": -0.0008335115565704644
+      },
+      {
+        "step_hz": 0.02,
+        "quadratic_coefficient": -0.0011063467859198978
+      }
+    ],
+    "core_a_b_surround_mode_energy": [
+      7.907723156267846e-11,
+      2.2723357543039438e-07,
+      0.9999997726873473
+    ],
+    "continuation_bracket": [
+      44,
+      45
+    ],
+    "full_delay_dynamic_stability": "NOT_COMPUTED",
+    "native_irregular_burst_onset": "NOT_ESTABLISHED",
+    "scope": "Fold of the frozen v1 stationary equations with equilibrium dynamic M eliminated; this is the high-rate family, and v1 failed native bursting correspondence."
+  },
+  "status": "CANDIDATE_PENDING_AUTHOR_VISUAL_REVIEW",
+  "model_correspondence": "FAILED_IN_PRIOR_MILESTONE",
+  "native_physical_simulations_added": 0
+}

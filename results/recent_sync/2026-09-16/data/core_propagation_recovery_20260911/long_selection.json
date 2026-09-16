@@ -1,0 +1,396 @@
+{
+ "status": "FROZEN_BEFORE_DISPATCH",
+ "stage": "recovery_long_20260911",
+ "candidates": [
+  {
+   "id": "refine_near_EE075",
+   "layout": "near_upper",
+   "centers_mm": [
+    [
+     5.712184916450571,
+     13.574047194943589
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.75,
+    "EE_core_to_out_scale": 1.0,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 1.0,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "declared_refinement",
+   "changed_value": null,
+   "adjacency_changes": true,
+   "stage": "recovery_long_20260911",
+   "parent_id": "recovery_upper_wide_recurrence",
+   "changed_parameters": {},
+   "display_name": "\u9760\u8fd1\u4e0a\u90e8 SCL\uff1b\u6838\u5185 EE \u00d70.75",
+   "core_mean_rate_scale": 1.0,
+   "geometry_change": null
+  },
+  {
+   "id": "refine_near_EE085",
+   "layout": "near_upper",
+   "centers_mm": [
+    [
+     5.712184916450571,
+     13.574047194943589
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.0,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 1.0,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "declared_refinement",
+   "changed_value": null,
+   "adjacency_changes": true,
+   "stage": "recovery_long_20260911",
+   "parent_id": "refine_near_EE075",
+   "changed_parameters": {
+    "EE_same_core_scale": 0.85
+   },
+   "display_name": "\u9760\u8fd1\u4e0a\u90e8 SCL\uff1b\u6838\u5185 EE \u00d70.85",
+   "core_mean_rate_scale": 1.0,
+   "geometry_change": null
+  },
+  {
+   "id": "refine_near_EE085_A115",
+   "layout": "near_upper",
+   "centers_mm": [
+    [
+     5.712184916450571,
+     13.574047194943589
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.0,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 1.0,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.15,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "declared_refinement",
+   "changed_value": null,
+   "adjacency_changes": true,
+   "stage": "recovery_long_20260911",
+   "parent_id": "refine_near_EE085",
+   "changed_parameters": {
+    "depth_A_scale": 1.15
+   },
+   "display_name": "\u9760\u8fd1\u4e0a\u90e8 SCL\uff1bEE \u00d70.85\uff0b\u5de6\u6838\u964d\u5e45 \u00d71.15",
+   "core_mean_rate_scale": 1.0,
+   "geometry_change": null
+  },
+  {
+   "id": "refine_near_EE085_mean095",
+   "layout": "near_upper",
+   "centers_mm": [
+    [
+     5.712184916450571,
+     13.574047194943589
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.0,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 1.0,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "declared_refinement",
+   "changed_value": null,
+   "adjacency_changes": true,
+   "stage": "recovery_long_20260911",
+   "parent_id": "refine_near_EE085",
+   "changed_parameters": {
+    "core_mean_rate_scale": 0.95
+   },
+   "display_name": "\u9760\u8fd1\u4e0a\u90e8 SCL\uff1bEE \u00d70.85\uff0b\u6838\u5185\u8f93\u5165\u5747\u503c \u00d70.95",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null
+  },
+  {
+   "id": "refine_mid_EE075",
+   "layout": "intermediate_up3",
+   "centers_mm": [
+    [
+     4.19921432,
+     12.12890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.75,
+    "EE_core_to_out_scale": 1.0,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 1.0,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "declared_refinement",
+   "changed_value": null,
+   "adjacency_changes": true,
+   "stage": "recovery_long_20260911",
+   "parent_id": "refine_near_EE075",
+   "changed_parameters": {},
+   "display_name": "\u7aef\u70b9\u539f\u4f4d\u4e0a\u79fb 3 mm\uff1b\u6838\u5185 EE \u00d70.75",
+   "core_mean_rate_scale": 1.0,
+   "geometry_change": {
+    "from_centers_mm": [
+     [
+      5.712184916450571,
+      13.574047194943589
+     ],
+     [
+      16.47920304,
+      3.96551153
+     ]
+    ],
+    "to_centers_mm": [
+     [
+      4.19921432,
+      12.12890135
+     ],
+     [
+      16.47920304,
+      3.96551153
+     ]
+    ]
+   }
+  },
+  {
+   "id": "refine_mid_EE085",
+   "layout": "intermediate_up3",
+   "centers_mm": [
+    [
+     4.19921432,
+     12.12890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.0,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 1.0,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "declared_refinement",
+   "changed_value": null,
+   "adjacency_changes": true,
+   "stage": "recovery_long_20260911",
+   "parent_id": "refine_mid_EE075",
+   "changed_parameters": {
+    "EE_same_core_scale": 0.85
+   },
+   "display_name": "\u7aef\u70b9\u539f\u4f4d\u4e0a\u79fb 3 mm\uff1b\u6838\u5185 EE \u00d70.85",
+   "core_mean_rate_scale": 1.0,
+   "geometry_change": null
+  },
+  {
+   "id": "refine_mid_EE085_A115",
+   "layout": "intermediate_up3",
+   "centers_mm": [
+    [
+     4.19921432,
+     12.12890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.0,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 1.0,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.15,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "declared_refinement",
+   "changed_value": null,
+   "adjacency_changes": true,
+   "stage": "recovery_long_20260911",
+   "parent_id": "refine_mid_EE085",
+   "changed_parameters": {
+    "depth_A_scale": 1.15
+   },
+   "display_name": "\u7aef\u70b9\u539f\u4f4d\u4e0a\u79fb 3 mm\uff1bEE \u00d70.85\uff0b\u5de6\u6838\u964d\u5e45 \u00d71.15",
+   "core_mean_rate_scale": 1.0,
+   "geometry_change": null
+  },
+  {
+   "id": "refine_mid_EE085_mean095",
+   "layout": "intermediate_up3",
+   "centers_mm": [
+    [
+     4.19921432,
+     12.12890135
+    ],
+    [
+     16.47920304,
+     3.96551153
+    ]
+   ],
+   "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+   ],
+   "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.0,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 1.0,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 0.0
+   },
+   "changed_parameter": "declared_refinement",
+   "changed_value": null,
+   "adjacency_changes": true,
+   "stage": "recovery_long_20260911",
+   "parent_id": "refine_mid_EE085",
+   "changed_parameters": {
+    "core_mean_rate_scale": 0.95
+   },
+   "display_name": "\u7aef\u70b9\u539f\u4f4d\u4e0a\u79fb 3 mm\uff1bEE \u00d70.85\uff0b\u6838\u5185\u8f93\u5165\u5747\u503c \u00d70.95",
+   "core_mean_rate_scale": 0.95,
+   "geometry_change": null
+  }
+ ],
+ "topology_seed": 2511,
+ "seeds": [
+  847101,
+  847102
+ ],
+ "duration_ms": 60000.0,
+ "worker_script": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_core_tonic_recovery.py",
+ "source_plan": "/data/hfosp/topic4_sef_hfo/core_propagation_recovery_20260911/tonic_input_plan.json",
+ "reason": "Completed 16-run wave: 1125 detections, 120 primary; only weaker intraccore EE condition has both replays scorable (21/22 primary), but TA scarce. Interpolate recurrence, adjust left-core excitability, compare a nearer-prior geometry and one core-input mean perturbation.",
+ "allocation": "16 runs replaces original 16 long-support-only replays; no increase in formal 48-new/168-total or 8-10h limits",
+ "controls": "Each EE/depth/input effect has a same-geometry 60s direct comparator; geometry contrast changes only left-core location and its associated membership/input support.",
+ "display_correction": "Fig2C main displays participants only. Retain full-contact QC, add participant-conditioned comparison. This does not change the frozen scorer or event selection.",
+ "no_change": "patient target, classifier, primary selection, global GABA18ms, core nonpositive threshold shifts, outside deterministic mean and no external slow I/ZM/kick"
+}

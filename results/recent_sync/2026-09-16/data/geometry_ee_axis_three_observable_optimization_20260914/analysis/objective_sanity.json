@@ -1,0 +1,696 @@
+{
+ "status": "PASS",
+ "checks": {
+  "collapse_worse": true,
+  "rod_shift_worsens_timing": true,
+  "local_shuffle_worsens_timing": true,
+  "break_joint_participation_worse": true,
+  "cpu_gpu_features_match": true
+ },
+ "median_by_control": {
+  "SCL_order_shuffled": {
+   "J": -0.029428999521051713,
+   "components": [
+    -0.032800789739155,
+    -0.01551646927208282,
+    -0.039969739551917335
+   ]
+  },
+  "SCL_plus_35ms": {
+   "J": 0.922074342817857,
+   "components": [
+    0.7418419307131834,
+    1.8074783848414593,
+    0.26060177736327256
+   ]
+  },
+  "independent_contact_columns": {
+   "J": 5.876290603832648,
+   "components": [
+    4.997586466169517,
+    7.62075537519538,
+    5.010529970133046
+   ]
+  },
+  "mode_collapsed": {
+   "J": 2.265344933153978,
+   "components": [
+    2.236139146825617,
+    2.3480235683098463,
+    2.0821189549921217
+   ]
+  },
+  "patient_resample": {
+   "J": -0.031023486667097647,
+   "components": [
+    -0.031700196327484935,
+    -0.02822443068217709,
+    -0.03181292711645993
+   ]
+  }
+ },
+ "results": [
+  {
+   "repetition": 0,
+   "control": "patient_resample",
+   "J": -0.01244390663608115,
+   "N": 128,
+   "mode_counts": {
+    "TA": 90,
+    "TB": 38
+   },
+   "components": [
+    -0.013437740154619609,
+    -0.006317711443452305,
+    -0.01757626831017154
+   ],
+   "participation_marginals_preserved": true
+  },
+  {
+   "repetition": 0,
+   "control": "mode_collapsed",
+   "J": 1.3738329823560245,
+   "N": 128,
+   "mode_counts": {
+    "TA": 90,
+    "TB": 38
+   },
+   "components": [
+    1.0957452020224958,
+    2.3160418707108144,
+    0.7097118743347632
+   ],
+   "participation_marginals_preserved": false
+  },
+  {
+   "repetition": 0,
+   "control": "SCL_plus_35ms",
+   "J": 0.8550066513785892,
+   "N": 128,
+   "mode_counts": {
+    "TA": 74,
+    "TB": 54
+   },
+   "components": [
+    0.6942626810162649,
+    1.6695955029410599,
+    0.2011617701784433
+   ],
+   "participation_marginals_preserved": true
+  },
+  {
+   "repetition": 0,
+   "control": "SCL_order_shuffled",
+   "J": -0.026107331263722843,
+   "N": 128,
+   "mode_counts": {
+    "TA": 89,
+    "TB": 39
+   },
+   "components": [
+    -0.029194846845333827,
+    -0.015237253764748358,
+    -0.03388989318108635
+   ],
+   "participation_marginals_preserved": true
+  },
+  {
+   "repetition": 0,
+   "control": "independent_contact_columns",
+   "J": 6.047727206196278,
+   "N": 128,
+   "mode_counts": {
+    "TA": 34,
+    "TB": 94
+   },
+   "components": [
+    5.197455034350033,
+    7.783713512465894,
+    5.1620130717729085
+   ],
+   "participation_marginals_preserved": true
+  },
+  {
+   "repetition": 1,
+   "control": "patient_resample",
+   "J": -0.06116931014466178,
+   "N": 128,
+   "mode_counts": {
+    "TA": 85,
+    "TB": 43
+   },
+   "components": [
+    -0.06026134680240597,
+    -0.06427480913648155,
+    -0.05897177449509781
+   ],
+   "participation_marginals_preserved": true
+  },
+  {
+   "repetition": 1,
+   "control": "mode_collapsed",
+   "J": 2.2451606744634804,
+   "N": 128,
+   "mode_counts": {
+    "TA": 85,
+    "TB": 43
+   },
+   "components": [
+    2.391125059526462,
+    2.142709526217716,
+    2.2016474376462636
+   ],
+   "participation_marginals_preserved": false
+  },
+  {
+   "repetition": 1,
+   "control": "SCL_plus_35ms",
+   "J": 0.989142034257125,
+   "N": 128,
+   "mode_counts": {
+    "TA": 71,
+    "TB": 57
+   },
+   "components": [
+    0.7894211804101018,
+    1.8579631378131716,
+    0.3200417845481018
+   ],
+   "participation_marginals_preserved": true
+  },
+  {
+   "repetition": 1,
+   "control": "SCL_order_shuffled",
+   "J": -0.05079275764990143,
+   "N": 128,
+   "mode_counts": {
+    "TA": 84,
+    "TB": 44
+   },
+   "components": [
+    -0.051364983645837886,
+    -0.04490041162770941,
+    -0.05611287767615698
+   ],
+   "participation_marginals_preserved": true
+  },
+  {
+   "repetition": 1,
+   "control": "independent_contact_columns",
+   "J": 5.1225779227420345,
+   "N": 128,
+   "mode_counts": {
+    "TA": 40,
+    "TB": 88
+   },
+   "components": [
+    4.082843134167427,
+    7.223307672988777,
+    4.061582961069901
+   ],
+   "participation_marginals_preserved": true
+  },
+  {
+   "repetition": 2,
+   "control": "patient_resample",
+   "J": -0.051198128329707104,
+   "N": 128,
+   "mode_counts": {
+    "TA": 83,
+    "TB": 45
+   },
+   "components": [
+    -0.050102717567437706,
+    -0.055666234169642254,
+    -0.047825433252041354
+   ],
+   "participation_marginals_preserved": true
+  },
+  {
+   "repetition": 2,
+   "control": "mode_collapsed",
+   "J": 2.9981172103194997,
+   "N": 128,
+   "mode_counts": {
+    "TA": 83,
+    "TB": 45
+   },
+   "components": [
+    3.0749921159965328,
+    2.380005265908878,
+    3.5393542490530883
+   ],
+   "participation_marginals_preserved": false
+  },
+  {
+   "repetition": 2,
+   "control": "SCL_plus_35ms",
+   "J": 1.1362864544966627,
+   "N": 128,
+   "mode_counts": {
+    "TA": 70,
+    "TB": 58
+   },
+   "components": [
+    0.954714694361016,
+    2.043140601546746,
+    0.41100406758222635
+   ],
+   "participation_marginals_preserved": true
+  },
+  {
+   "repetition": 2,
+   "control": "SCL_order_shuffled",
+   "J": -0.04061091798650323,
+   "N": 128,
+   "mode_counts": {
+    "TA": 83,
+    "TB": 45
+   },
+   "components": [
+    -0.042935385695641586,
+    -0.031071935011826736,
+    -0.047825433252041354
+   ],
+   "participation_marginals_preserved": true
+  },
+  {
+   "repetition": 2,
+   "control": "independent_contact_columns",
+   "J": 5.996488076886359,
+   "N": 128,
+   "mode_counts": {
+    "TA": 35,
+    "TB": 93
+   },
+   "components": [
+    5.1400995508745115,
+    7.694967812392183,
+    5.154396867392382
+   ],
+   "participation_marginals_preserved": true
+  },
+  {
+   "repetition": 3,
+   "control": "patient_resample",
+   "J": 0.09559283781708823,
+   "N": 128,
+   "mode_counts": {
+    "TA": 94,
+    "TB": 34
+   },
+   "components": [
+    0.0968339061112776,
+    0.08944932767643723,
+    0.10049527966354987
+   ],
+   "participation_marginals_preserved": true
+  },
+  {
+   "repetition": 3,
+   "control": "mode_collapsed",
+   "J": 1.5486079222445082,
+   "N": 128,
+   "mode_counts": {
+    "TA": 94,
+    "TB": 34
+   },
+   "components": [
+    1.4049544647777978,
+    2.1988382259734207,
+    1.0420310759823062
+   ],
+   "participation_marginals_preserved": false
+  },
+  {
+   "repetition": 3,
+   "control": "SCL_plus_35ms",
+   "J": 0.8149069842228472,
+   "N": 128,
+   "mode_counts": {
+    "TA": 75,
+    "TB": 53
+   },
+   "components": [
+    0.6348993239743143,
+    1.666975167946575,
+    0.14284646074765228
+   ],
+   "participation_marginals_preserved": true
+  },
+  {
+   "repetition": 3,
+   "control": "SCL_order_shuffled",
+   "J": 0.10383299115116612,
+   "N": 128,
+   "mode_counts": {
+    "TA": 94,
+    "TB": 34
+   },
+   "components": [
+    0.10265734727035628,
+    0.1083463465195922,
+    0.10049527966354987
+   ],
+   "participation_marginals_preserved": true
+  },
+  {
+   "repetition": 3,
+   "control": "independent_contact_columns",
+   "J": 5.327130639885325,
+   "N": 128,
+   "mode_counts": {
+    "TA": 39,
+    "TB": 89
+   },
+   "components": [
+    4.302352443047613,
+    7.3836529366223695,
+    4.2953865399859925
+   ],
+   "participation_marginals_preserved": true
+  },
+  {
+   "repetition": 4,
+   "control": "patient_resample",
+   "J": -0.049603066698114144,
+   "N": 128,
+   "mode_counts": {
+    "TA": 87,
+    "TB": 41
+   },
+   "components": [
+    -0.04996265250035026,
+    -0.05279696167124385,
+    -0.04604958592274832
+   ],
+   "participation_marginals_preserved": true
+  },
+  {
+   "repetition": 4,
+   "control": "mode_collapsed",
+   "J": 2.4940998637006477,
+   "N": 128,
+   "mode_counts": {
+    "TA": 87,
+    "TB": 41
+   },
+   "components": [
+    2.4066082137309226,
+    2.506601161964089,
+    2.5690902154069315
+   ],
+   "participation_marginals_preserved": false
+  },
+  {
+   "repetition": 4,
+   "control": "SCL_plus_35ms",
+   "J": 1.3229710285706038,
+   "N": 128,
+   "mode_counts": {
+    "TA": 67,
+    "TB": 61
+   },
+   "components": [
+    1.139847610024965,
+    2.2116619104339095,
+    0.617403565252937
+   ],
+   "participation_marginals_preserved": true
+  },
+  {
+   "repetition": 4,
+   "control": "SCL_order_shuffled",
+   "J": -0.032750667778380586,
+   "N": 128,
+   "mode_counts": {
+    "TA": 87,
+    "TB": 41
+   },
+   "components": [
+    -0.03640673263297616,
+    -0.01579568477941728,
+    -0.04604958592274832
+   ],
+   "participation_marginals_preserved": true
+  },
+  {
+   "repetition": 4,
+   "control": "independent_contact_columns",
+   "J": 4.745658829212055,
+   "N": 128,
+   "mode_counts": {
+    "TA": 43,
+    "TB": 85
+   },
+   "components": [
+    3.660563278703829,
+    6.927959476169833,
+    3.6484537327625044
+   ],
+   "participation_marginals_preserved": true
+  },
+  {
+   "repetition": 5,
+   "control": "patient_resample",
+   "J": 0.43551467099077074,
+   "N": 128,
+   "mode_counts": {
+    "TA": 101,
+    "TB": 27
+   },
+   "components": [
+    0.4429275470387843,
+    0.4236743624643269,
+    0.439942103469201
+   ],
+   "participation_marginals_preserved": true
+  },
+  {
+   "repetition": 5,
+   "control": "mode_collapsed",
+   "J": 2.7896962141175004,
+   "N": 128,
+   "mode_counts": {
+    "TA": 101,
+    "TB": 27
+   },
+   "components": [
+    2.504990168294384,
+    3.184463846992771,
+    2.679634627065347
+   ],
+   "participation_marginals_preserved": false
+  },
+  {
+   "repetition": 5,
+   "control": "SCL_plus_35ms",
+   "J": 0.5450898975484427,
+   "N": 128,
+   "mode_counts": {
+    "TA": 82,
+    "TB": 46
+   },
+   "components": [
+    0.37719283414322424,
+    1.304067110094217,
+    -0.04599025159211319
+   ],
+   "participation_marginals_preserved": true
+  },
+  {
+   "repetition": 5,
+   "control": "SCL_order_shuffled",
+   "J": 0.39329857931492573,
+   "N": 128,
+   "mode_counts": {
+    "TA": 100,
+    "TB": 28
+   },
+   "components": [
+    0.3968595762012628,
+    0.3969358635203484,
+    0.3861002982231661
+   ],
+   "participation_marginals_preserved": true
+  },
+  {
+   "repetition": 5,
+   "control": "independent_contact_columns",
+   "J": 5.756093130778937,
+   "N": 128,
+   "mode_counts": {
+    "TA": 36,
+    "TB": 92
+   },
+   "components": [
+    4.855073381464524,
+    7.546542937998577,
+    4.866663072873711
+   ],
+   "participation_marginals_preserved": true
+  },
+  {
+   "repetition": 6,
+   "control": "patient_resample",
+   "J": 0.0008040822437036819,
+   "N": 128,
+   "mode_counts": {
+    "TA": 91,
+    "TB": 37
+   },
+   "components": [
+    -0.005882436462961834,
+    0.01407707177055357,
+    -0.00578238857648069
+   ],
+   "participation_marginals_preserved": true
+  },
+  {
+   "repetition": 6,
+   "control": "mode_collapsed",
+   "J": 2.285529191844475,
+   "N": 128,
+   "mode_counts": {
+    "TA": 91,
+    "TB": 37
+   },
+   "components": [
+    2.0811532341247725,
+    2.8128438690706723,
+    1.96259047233798
+   ],
+   "participation_marginals_preserved": false
+  },
+  {
+   "repetition": 6,
+   "control": "SCL_plus_35ms",
+   "J": 0.809289025015215,
+   "N": 128,
+   "mode_counts": {
+    "TA": 76,
+    "TB": 52
+   },
+   "components": [
+    0.5610713322973168,
+    1.7569936318697472,
+    0.10980211087858117
+   ],
+   "participation_marginals_preserved": true
+  },
+  {
+   "repetition": 6,
+   "control": "SCL_order_shuffled",
+   "J": -0.006211425111421277,
+   "N": 128,
+   "mode_counts": {
+    "TA": 90,
+    "TB": 38
+   },
+   "components": [
+    -0.013961173724129085,
+    0.019294557561000087,
+    -0.023967659171134834
+   ],
+   "participation_marginals_preserved": true
+  },
+  {
+   "repetition": 6,
+   "control": "independent_contact_columns",
+   "J": 6.152717829729756,
+   "N": 128,
+   "mode_counts": {
+    "TA": 34,
+    "TB": 94
+   },
+   "components": [
+    5.2710772444563805,
+    7.9282555161689485,
+    5.258820728563941
+   ],
+   "participation_marginals_preserved": true
+  },
+  {
+   "repetition": 7,
+   "control": "patient_resample",
+   "J": -0.05539150538068924,
+   "N": 128,
+   "mode_counts": {
+    "TA": 83,
+    "TB": 45
+   },
+   "components": [
+    -0.05766967357667574,
+    -0.050131149920901875,
+    -0.05837369264449011
+   ],
+   "participation_marginals_preserved": true
+  },
+  {
+   "repetition": 7,
+   "control": "mode_collapsed",
+   "J": 1.4955324633390472,
+   "N": 128,
+   "mode_counts": {
+    "TA": 83,
+    "TB": 45
+   },
+   "components": [
+    1.197618094163681,
+    2.252036275567743,
+    1.0369430202857175
+   ],
+   "participation_marginals_preserved": false
+  },
+  {
+   "repetition": 7,
+   "control": "SCL_plus_35ms",
+   "J": 1.6859407915736841,
+   "N": 128,
+   "mode_counts": {
+    "TA": 63,
+    "TB": 65
+   },
+   "components": [
+    1.4130402560362678,
+    2.7468589777637495,
+    0.8979231409210351
+   ],
+   "participation_marginals_preserved": true
+  },
+  {
+   "repetition": 7,
+   "control": "SCL_order_shuffled",
+   "J": -0.03784948466941689,
+   "N": 128,
+   "mode_counts": {
+    "TA": 82,
+    "TB": 46
+   },
+   "components": [
+    -0.04583194248764809,
+    -0.01892512424462511,
+    -0.04879138727597747
+   ],
+   "participation_marginals_preserved": true
+  },
+  {
+   "repetition": 7,
+   "control": "independent_contact_columns",
+   "J": 6.2663036471334665,
+   "N": 128,
+   "mode_counts": {
+    "TA": 33,
+    "TB": 95
+   },
+   "components": [
+    5.338701988945651,
+    8.118019775206111,
+    5.34218917724864
+   ],
+   "participation_marginals_preserved": true
+  }
+ ],
+ "cpu_gpu_max_error": 1.0364972768961422e-16,
+ "note": "These targeted controls do not establish full patient propagation recovery."
+}

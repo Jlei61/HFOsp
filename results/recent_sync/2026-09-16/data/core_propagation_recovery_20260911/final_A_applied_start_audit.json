@@ -1,0 +1,662 @@
+{
+  "status": "PASS_APPLIED_CONFIGURATION",
+  "runs": [
+    {
+      "candidate": "refine_midpoint_EE075",
+      "seed": 847101,
+      "checks": {
+        "actual_core_mean_scale": true,
+        "actual_no_raised_E": true,
+        "actual_depths": true,
+        "stochastic_count_matches_core": true
+      },
+      "input": {
+        "mode": "core_poisson_outside_expected",
+        "n_stochastic": 1512,
+        "n_deterministic": 38488,
+        "ou_loading": "1 on E in either core, 0 elsewhere",
+        "outside": "exact expected arrivals nu_signal*dt each step",
+        "spatial_ou": "off",
+        "slow_I_state": "off",
+        "ZM": "off",
+        "kick": "off",
+        "core_mean_rate_scale": 1.0,
+        "baseline_signal_per_ms": 1.3174634224662056,
+        "core_mean_signal_per_ms": 1.3174634224662056,
+        "core_constant_offset_per_ms": 0.0,
+        "outside_mean_signal_per_ms": 1.3174634224662056,
+        "OU_sigma_n": 3.3,
+        "OU_tau_ms": 150.0,
+        "hook": "None (exact legacy call)",
+        "poisson": "conditional count variance equals conditional mean; this variance is not held fixed when mean changes"
+      },
+      "threshold_audit": {
+        "physics": "core_connectivity_v2",
+        "centers_mm": [
+          [
+            4.955699618225285,
+            12.851474272471794
+          ],
+          [
+            16.47920304,
+            3.96551153
+          ]
+        ],
+        "radii_mm": [
+          1.7525782905619196,
+          1.7525782905619196
+        ],
+        "depth_scales": [
+          1.0,
+          1.0
+        ],
+        "floor_mV": 11.0,
+        "v_base_mV": 18.0,
+        "members": [
+          770,
+          742
+        ],
+        "n_members": 1512,
+        "overlap_members": 0,
+        "total_lowering_mV": 1069.8927635940859,
+        "total_lowering_per_core_mV": [
+          539.2298952001681,
+          530.6628683939177
+        ],
+        "mean_lowering_per_member_mV": [
+          0.7002985651950235,
+          0.7151790679163311
+        ],
+        "floor_clipped_count": 0,
+        "floor_clipped_total_mV": 0.0,
+        "n_raised": 0,
+        "n_lowered": 1057,
+        "latent_identity_sha256": "535b5bd9b136fbd76abf5a04c7bbc170b035846232778d0157cb4532bd9f1a27",
+        "quantile_seed": 20260806,
+        "boundary_clipped": [
+          false,
+          false
+        ],
+        "disks_overlap": false,
+        "min_vtheta_mV": 14.651453679538626,
+        "max_vtheta_mV": 18.0
+      },
+      "applied_path": "/data/hfosp/topic4_sef_hfo/core_connectivity_search_20260910/recovery_final_refinement_20260911/units/refine_midpoint_EE075/2511_847101/applied_physics.json"
+    },
+    {
+      "candidate": "refine_midpoint_EE075",
+      "seed": 847102,
+      "checks": {
+        "actual_core_mean_scale": true,
+        "actual_no_raised_E": true,
+        "actual_depths": true,
+        "stochastic_count_matches_core": true
+      },
+      "input": {
+        "mode": "core_poisson_outside_expected",
+        "n_stochastic": 1512,
+        "n_deterministic": 38488,
+        "ou_loading": "1 on E in either core, 0 elsewhere",
+        "outside": "exact expected arrivals nu_signal*dt each step",
+        "spatial_ou": "off",
+        "slow_I_state": "off",
+        "ZM": "off",
+        "kick": "off",
+        "core_mean_rate_scale": 1.0,
+        "baseline_signal_per_ms": 1.3174634224662056,
+        "core_mean_signal_per_ms": 1.3174634224662056,
+        "core_constant_offset_per_ms": 0.0,
+        "outside_mean_signal_per_ms": 1.3174634224662056,
+        "OU_sigma_n": 3.3,
+        "OU_tau_ms": 150.0,
+        "hook": "None (exact legacy call)",
+        "poisson": "conditional count variance equals conditional mean; this variance is not held fixed when mean changes"
+      },
+      "threshold_audit": {
+        "physics": "core_connectivity_v2",
+        "centers_mm": [
+          [
+            4.955699618225285,
+            12.851474272471794
+          ],
+          [
+            16.47920304,
+            3.96551153
+          ]
+        ],
+        "radii_mm": [
+          1.7525782905619196,
+          1.7525782905619196
+        ],
+        "depth_scales": [
+          1.0,
+          1.0
+        ],
+        "floor_mV": 11.0,
+        "v_base_mV": 18.0,
+        "members": [
+          770,
+          742
+        ],
+        "n_members": 1512,
+        "overlap_members": 0,
+        "total_lowering_mV": 1069.8927635940859,
+        "total_lowering_per_core_mV": [
+          539.2298952001681,
+          530.6628683939177
+        ],
+        "mean_lowering_per_member_mV": [
+          0.7002985651950235,
+          0.7151790679163311
+        ],
+        "floor_clipped_count": 0,
+        "floor_clipped_total_mV": 0.0,
+        "n_raised": 0,
+        "n_lowered": 1057,
+        "latent_identity_sha256": "535b5bd9b136fbd76abf5a04c7bbc170b035846232778d0157cb4532bd9f1a27",
+        "quantile_seed": 20260806,
+        "boundary_clipped": [
+          false,
+          false
+        ],
+        "disks_overlap": false,
+        "min_vtheta_mV": 14.651453679538626,
+        "max_vtheta_mV": 18.0
+      },
+      "applied_path": "/data/hfosp/topic4_sef_hfo/core_connectivity_search_20260910/recovery_final_refinement_20260911/units/refine_midpoint_EE075/2511_847102/applied_physics.json"
+    },
+    {
+      "candidate": "refine_midpoint_EE075_A115",
+      "seed": 847101,
+      "checks": {
+        "actual_core_mean_scale": true,
+        "actual_no_raised_E": true,
+        "actual_depths": true,
+        "stochastic_count_matches_core": true
+      },
+      "input": {
+        "mode": "core_poisson_outside_expected",
+        "n_stochastic": 1512,
+        "n_deterministic": 38488,
+        "ou_loading": "1 on E in either core, 0 elsewhere",
+        "outside": "exact expected arrivals nu_signal*dt each step",
+        "spatial_ou": "off",
+        "slow_I_state": "off",
+        "ZM": "off",
+        "kick": "off",
+        "core_mean_rate_scale": 1.0,
+        "baseline_signal_per_ms": 1.3174634224662056,
+        "core_mean_signal_per_ms": 1.3174634224662056,
+        "core_constant_offset_per_ms": 0.0,
+        "outside_mean_signal_per_ms": 1.3174634224662056,
+        "OU_sigma_n": 3.3,
+        "OU_tau_ms": 150.0,
+        "hook": "None (exact legacy call)",
+        "poisson": "conditional count variance equals conditional mean; this variance is not held fixed when mean changes"
+      },
+      "threshold_audit": {
+        "physics": "core_connectivity_v2",
+        "centers_mm": [
+          [
+            4.955699618225285,
+            12.851474272471794
+          ],
+          [
+            16.47920304,
+            3.96551153
+          ]
+        ],
+        "radii_mm": [
+          1.7525782905619196,
+          1.7525782905619196
+        ],
+        "depth_scales": [
+          1.15,
+          1.0
+        ],
+        "floor_mV": 11.0,
+        "v_base_mV": 18.0,
+        "members": [
+          770,
+          742
+        ],
+        "n_members": 1512,
+        "overlap_members": 0,
+        "total_lowering_mV": 1150.777247874111,
+        "total_lowering_per_core_mV": [
+          620.1143794801933,
+          530.6628683939177
+        ],
+        "mean_lowering_per_member_mV": [
+          0.805343349974277,
+          0.7151790679163311
+        ],
+        "floor_clipped_count": 0,
+        "floor_clipped_total_mV": 0.0,
+        "n_raised": 0,
+        "n_lowered": 1057,
+        "latent_identity_sha256": "535b5bd9b136fbd76abf5a04c7bbc170b035846232778d0157cb4532bd9f1a27",
+        "quantile_seed": 20260806,
+        "boundary_clipped": [
+          false,
+          false
+        ],
+        "disks_overlap": false,
+        "min_vtheta_mV": 14.159684962969703,
+        "max_vtheta_mV": 18.0
+      },
+      "applied_path": "/data/hfosp/topic4_sef_hfo/core_connectivity_search_20260910/recovery_final_refinement_20260911/units/refine_midpoint_EE075_A115/2511_847101/applied_physics.json"
+    },
+    {
+      "candidate": "refine_midpoint_EE075_A115",
+      "seed": 847102,
+      "checks": {
+        "actual_core_mean_scale": true,
+        "actual_no_raised_E": true,
+        "actual_depths": true,
+        "stochastic_count_matches_core": true
+      },
+      "input": {
+        "mode": "core_poisson_outside_expected",
+        "n_stochastic": 1512,
+        "n_deterministic": 38488,
+        "ou_loading": "1 on E in either core, 0 elsewhere",
+        "outside": "exact expected arrivals nu_signal*dt each step",
+        "spatial_ou": "off",
+        "slow_I_state": "off",
+        "ZM": "off",
+        "kick": "off",
+        "core_mean_rate_scale": 1.0,
+        "baseline_signal_per_ms": 1.3174634224662056,
+        "core_mean_signal_per_ms": 1.3174634224662056,
+        "core_constant_offset_per_ms": 0.0,
+        "outside_mean_signal_per_ms": 1.3174634224662056,
+        "OU_sigma_n": 3.3,
+        "OU_tau_ms": 150.0,
+        "hook": "None (exact legacy call)",
+        "poisson": "conditional count variance equals conditional mean; this variance is not held fixed when mean changes"
+      },
+      "threshold_audit": {
+        "physics": "core_connectivity_v2",
+        "centers_mm": [
+          [
+            4.955699618225285,
+            12.851474272471794
+          ],
+          [
+            16.47920304,
+            3.96551153
+          ]
+        ],
+        "radii_mm": [
+          1.7525782905619196,
+          1.7525782905619196
+        ],
+        "depth_scales": [
+          1.15,
+          1.0
+        ],
+        "floor_mV": 11.0,
+        "v_base_mV": 18.0,
+        "members": [
+          770,
+          742
+        ],
+        "n_members": 1512,
+        "overlap_members": 0,
+        "total_lowering_mV": 1150.777247874111,
+        "total_lowering_per_core_mV": [
+          620.1143794801933,
+          530.6628683939177
+        ],
+        "mean_lowering_per_member_mV": [
+          0.805343349974277,
+          0.7151790679163311
+        ],
+        "floor_clipped_count": 0,
+        "floor_clipped_total_mV": 0.0,
+        "n_raised": 0,
+        "n_lowered": 1057,
+        "latent_identity_sha256": "535b5bd9b136fbd76abf5a04c7bbc170b035846232778d0157cb4532bd9f1a27",
+        "quantile_seed": 20260806,
+        "boundary_clipped": [
+          false,
+          false
+        ],
+        "disks_overlap": false,
+        "min_vtheta_mV": 14.159684962969703,
+        "max_vtheta_mV": 18.0
+      },
+      "applied_path": "/data/hfosp/topic4_sef_hfo/core_connectivity_search_20260910/recovery_final_refinement_20260911/units/refine_midpoint_EE075_A115/2511_847102/applied_physics.json"
+    },
+    {
+      "candidate": "refine_midpoint_EE085_mean095",
+      "seed": 847101,
+      "checks": {
+        "actual_core_mean_scale": true,
+        "actual_no_raised_E": true,
+        "actual_depths": true,
+        "stochastic_count_matches_core": true
+      },
+      "input": {
+        "mode": "core_poisson_outside_expected",
+        "n_stochastic": 1512,
+        "n_deterministic": 38488,
+        "ou_loading": "1 on E in either core, 0 elsewhere",
+        "outside": "exact expected arrivals nu_signal*dt each step",
+        "spatial_ou": "off",
+        "slow_I_state": "off",
+        "ZM": "off",
+        "kick": "off",
+        "core_mean_rate_scale": 0.95,
+        "baseline_signal_per_ms": 1.3174634224662056,
+        "core_mean_signal_per_ms": 1.2515902513428954,
+        "core_constant_offset_per_ms": -0.06587317112331034,
+        "outside_mean_signal_per_ms": 1.3174634224662056,
+        "OU_sigma_n": 3.3,
+        "OU_tau_ms": 150.0,
+        "hook": "external_e_rate_drive: constant offset only on core E",
+        "poisson": "conditional count variance equals conditional mean; this variance is not held fixed when mean changes"
+      },
+      "threshold_audit": {
+        "physics": "core_connectivity_v2",
+        "centers_mm": [
+          [
+            4.955699618225285,
+            12.851474272471794
+          ],
+          [
+            16.47920304,
+            3.96551153
+          ]
+        ],
+        "radii_mm": [
+          1.7525782905619196,
+          1.7525782905619196
+        ],
+        "depth_scales": [
+          1.0,
+          1.0
+        ],
+        "floor_mV": 11.0,
+        "v_base_mV": 18.0,
+        "members": [
+          770,
+          742
+        ],
+        "n_members": 1512,
+        "overlap_members": 0,
+        "total_lowering_mV": 1069.8927635940859,
+        "total_lowering_per_core_mV": [
+          539.2298952001681,
+          530.6628683939177
+        ],
+        "mean_lowering_per_member_mV": [
+          0.7002985651950235,
+          0.7151790679163311
+        ],
+        "floor_clipped_count": 0,
+        "floor_clipped_total_mV": 0.0,
+        "n_raised": 0,
+        "n_lowered": 1057,
+        "latent_identity_sha256": "535b5bd9b136fbd76abf5a04c7bbc170b035846232778d0157cb4532bd9f1a27",
+        "quantile_seed": 20260806,
+        "boundary_clipped": [
+          false,
+          false
+        ],
+        "disks_overlap": false,
+        "min_vtheta_mV": 14.651453679538626,
+        "max_vtheta_mV": 18.0
+      },
+      "applied_path": "/data/hfosp/topic4_sef_hfo/core_connectivity_search_20260910/recovery_final_refinement_20260911/units/refine_midpoint_EE085_mean095/2511_847101/applied_physics.json"
+    },
+    {
+      "candidate": "refine_midpoint_EE085_mean095",
+      "seed": 847102,
+      "checks": {
+        "actual_core_mean_scale": true,
+        "actual_no_raised_E": true,
+        "actual_depths": true,
+        "stochastic_count_matches_core": true
+      },
+      "input": {
+        "mode": "core_poisson_outside_expected",
+        "n_stochastic": 1512,
+        "n_deterministic": 38488,
+        "ou_loading": "1 on E in either core, 0 elsewhere",
+        "outside": "exact expected arrivals nu_signal*dt each step",
+        "spatial_ou": "off",
+        "slow_I_state": "off",
+        "ZM": "off",
+        "kick": "off",
+        "core_mean_rate_scale": 0.95,
+        "baseline_signal_per_ms": 1.3174634224662056,
+        "core_mean_signal_per_ms": 1.2515902513428954,
+        "core_constant_offset_per_ms": -0.06587317112331034,
+        "outside_mean_signal_per_ms": 1.3174634224662056,
+        "OU_sigma_n": 3.3,
+        "OU_tau_ms": 150.0,
+        "hook": "external_e_rate_drive: constant offset only on core E",
+        "poisson": "conditional count variance equals conditional mean; this variance is not held fixed when mean changes"
+      },
+      "threshold_audit": {
+        "physics": "core_connectivity_v2",
+        "centers_mm": [
+          [
+            4.955699618225285,
+            12.851474272471794
+          ],
+          [
+            16.47920304,
+            3.96551153
+          ]
+        ],
+        "radii_mm": [
+          1.7525782905619196,
+          1.7525782905619196
+        ],
+        "depth_scales": [
+          1.0,
+          1.0
+        ],
+        "floor_mV": 11.0,
+        "v_base_mV": 18.0,
+        "members": [
+          770,
+          742
+        ],
+        "n_members": 1512,
+        "overlap_members": 0,
+        "total_lowering_mV": 1069.8927635940859,
+        "total_lowering_per_core_mV": [
+          539.2298952001681,
+          530.6628683939177
+        ],
+        "mean_lowering_per_member_mV": [
+          0.7002985651950235,
+          0.7151790679163311
+        ],
+        "floor_clipped_count": 0,
+        "floor_clipped_total_mV": 0.0,
+        "n_raised": 0,
+        "n_lowered": 1057,
+        "latent_identity_sha256": "535b5bd9b136fbd76abf5a04c7bbc170b035846232778d0157cb4532bd9f1a27",
+        "quantile_seed": 20260806,
+        "boundary_clipped": [
+          false,
+          false
+        ],
+        "disks_overlap": false,
+        "min_vtheta_mV": 14.651453679538626,
+        "max_vtheta_mV": 18.0
+      },
+      "applied_path": "/data/hfosp/topic4_sef_hfo/core_connectivity_search_20260910/recovery_final_refinement_20260911/units/refine_midpoint_EE085_mean095/2511_847102/applied_physics.json"
+    },
+    {
+      "candidate": "refine_midpoint_EE085_A115_mean095",
+      "seed": 847101,
+      "checks": {
+        "actual_core_mean_scale": true,
+        "actual_no_raised_E": true,
+        "actual_depths": true,
+        "stochastic_count_matches_core": true
+      },
+      "input": {
+        "mode": "core_poisson_outside_expected",
+        "n_stochastic": 1512,
+        "n_deterministic": 38488,
+        "ou_loading": "1 on E in either core, 0 elsewhere",
+        "outside": "exact expected arrivals nu_signal*dt each step",
+        "spatial_ou": "off",
+        "slow_I_state": "off",
+        "ZM": "off",
+        "kick": "off",
+        "core_mean_rate_scale": 0.95,
+        "baseline_signal_per_ms": 1.3174634224662056,
+        "core_mean_signal_per_ms": 1.2515902513428954,
+        "core_constant_offset_per_ms": -0.06587317112331034,
+        "outside_mean_signal_per_ms": 1.3174634224662056,
+        "OU_sigma_n": 3.3,
+        "OU_tau_ms": 150.0,
+        "hook": "external_e_rate_drive: constant offset only on core E",
+        "poisson": "conditional count variance equals conditional mean; this variance is not held fixed when mean changes"
+      },
+      "threshold_audit": {
+        "physics": "core_connectivity_v2",
+        "centers_mm": [
+          [
+            4.955699618225285,
+            12.851474272471794
+          ],
+          [
+            16.47920304,
+            3.96551153
+          ]
+        ],
+        "radii_mm": [
+          1.7525782905619196,
+          1.7525782905619196
+        ],
+        "depth_scales": [
+          1.15,
+          1.0
+        ],
+        "floor_mV": 11.0,
+        "v_base_mV": 18.0,
+        "members": [
+          770,
+          742
+        ],
+        "n_members": 1512,
+        "overlap_members": 0,
+        "total_lowering_mV": 1150.777247874111,
+        "total_lowering_per_core_mV": [
+          620.1143794801933,
+          530.6628683939177
+        ],
+        "mean_lowering_per_member_mV": [
+          0.805343349974277,
+          0.7151790679163311
+        ],
+        "floor_clipped_count": 0,
+        "floor_clipped_total_mV": 0.0,
+        "n_raised": 0,
+        "n_lowered": 1057,
+        "latent_identity_sha256": "535b5bd9b136fbd76abf5a04c7bbc170b035846232778d0157cb4532bd9f1a27",
+        "quantile_seed": 20260806,
+        "boundary_clipped": [
+          false,
+          false
+        ],
+        "disks_overlap": false,
+        "min_vtheta_mV": 14.159684962969703,
+        "max_vtheta_mV": 18.0
+      },
+      "applied_path": "/data/hfosp/topic4_sef_hfo/core_connectivity_search_20260910/recovery_final_refinement_20260911/units/refine_midpoint_EE085_A115_mean095/2511_847101/applied_physics.json"
+    },
+    {
+      "candidate": "refine_midpoint_EE085_A115_mean095",
+      "seed": 847102,
+      "checks": {
+        "actual_core_mean_scale": true,
+        "actual_no_raised_E": true,
+        "actual_depths": true,
+        "stochastic_count_matches_core": true
+      },
+      "input": {
+        "mode": "core_poisson_outside_expected",
+        "n_stochastic": 1512,
+        "n_deterministic": 38488,
+        "ou_loading": "1 on E in either core, 0 elsewhere",
+        "outside": "exact expected arrivals nu_signal*dt each step",
+        "spatial_ou": "off",
+        "slow_I_state": "off",
+        "ZM": "off",
+        "kick": "off",
+        "core_mean_rate_scale": 0.95,
+        "baseline_signal_per_ms": 1.3174634224662056,
+        "core_mean_signal_per_ms": 1.2515902513428954,
+        "core_constant_offset_per_ms": -0.06587317112331034,
+        "outside_mean_signal_per_ms": 1.3174634224662056,
+        "OU_sigma_n": 3.3,
+        "OU_tau_ms": 150.0,
+        "hook": "external_e_rate_drive: constant offset only on core E",
+        "poisson": "conditional count variance equals conditional mean; this variance is not held fixed when mean changes"
+      },
+      "threshold_audit": {
+        "physics": "core_connectivity_v2",
+        "centers_mm": [
+          [
+            4.955699618225285,
+            12.851474272471794
+          ],
+          [
+            16.47920304,
+            3.96551153
+          ]
+        ],
+        "radii_mm": [
+          1.7525782905619196,
+          1.7525782905619196
+        ],
+        "depth_scales": [
+          1.15,
+          1.0
+        ],
+        "floor_mV": 11.0,
+        "v_base_mV": 18.0,
+        "members": [
+          770,
+          742
+        ],
+        "n_members": 1512,
+        "overlap_members": 0,
+        "total_lowering_mV": 1150.777247874111,
+        "total_lowering_per_core_mV": [
+          620.1143794801933,
+          530.6628683939177
+        ],
+        "mean_lowering_per_member_mV": [
+          0.805343349974277,
+          0.7151790679163311
+        ],
+        "floor_clipped_count": 0,
+        "floor_clipped_total_mV": 0.0,
+        "n_raised": 0,
+        "n_lowered": 1057,
+        "latent_identity_sha256": "535b5bd9b136fbd76abf5a04c7bbc170b035846232778d0157cb4532bd9f1a27",
+        "quantile_seed": 20260806,
+        "boundary_clipped": [
+          false,
+          false
+        ],
+        "disks_overlap": false,
+        "min_vtheta_mV": 14.159684962969703,
+        "max_vtheta_mV": 18.0
+      },
+      "applied_path": "/data/hfosp/topic4_sef_hfo/core_connectivity_search_20260910/recovery_final_refinement_20260911/units/refine_midpoint_EE085_A115_mean095/2511_847102/applied_physics.json"
+    }
+  ],
+  "per_step_rate_application_checked_again_by_worker_at_completion": true
+}

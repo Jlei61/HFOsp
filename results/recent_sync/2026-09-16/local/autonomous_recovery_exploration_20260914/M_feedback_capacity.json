@@ -1,0 +1,66 @@
+{
+  "rows": [
+    {
+      "name": "native_weak_s9108401",
+      "eta_tau_seconds": 0.0005,
+      "maximum_steady_M_current_at_E500Hz": 0.25
+    },
+    {
+      "name": "native_longM_s9108401",
+      "eta_tau_seconds": 0.1,
+      "maximum_steady_M_current_at_E500Hz": 50.0
+    },
+    {
+      "name": "native_midM_s9108401",
+      "eta_tau_seconds": 0.3,
+      "maximum_steady_M_current_at_E500Hz": 150.0
+    },
+    {
+      "name": "native_fastZ_s9108401",
+      "eta_tau_seconds": 1.0,
+      "maximum_steady_M_current_at_E500Hz": 500.0
+    },
+    {
+      "name": "mix_g0.25_eta0.005_s9108401",
+      "eta_tau_seconds": 0.01,
+      "maximum_steady_M_current_at_E500Hz": 5.0
+    },
+    {
+      "name": "mix_g0.5_eta0.005_s9108401",
+      "eta_tau_seconds": 0.01,
+      "maximum_steady_M_current_at_E500Hz": 5.0
+    },
+    {
+      "name": "mix_g0.75_eta0.005_s9108401",
+      "eta_tau_seconds": 0.01,
+      "maximum_steady_M_current_at_E500Hz": 5.0
+    },
+    {
+      "name": "mix_g0.25_eta0.02_s9108401",
+      "eta_tau_seconds": 0.04,
+      "maximum_steady_M_current_at_E500Hz": 20.0
+    },
+    {
+      "name": "mix_g0.5_eta0.02_s9108401",
+      "eta_tau_seconds": 0.04,
+      "maximum_steady_M_current_at_E500Hz": 20.0
+    },
+    {
+      "name": "mix_g0.75_eta0.02_s9108401",
+      "eta_tau_seconds": 0.04,
+      "maximum_steady_M_current_at_E500Hz": 20.0
+    },
+    {
+      "name": "add_g0.25_s9108401",
+      "eta_tau_seconds": 0.01,
+      "maximum_steady_M_current_at_E500Hz": 5.0
+    },
+    {
+      "name": "add_g0.5_s9108401",
+      "eta_tau_seconds": 0.01,
+      "maximum_steady_M_current_at_E500Hz": 5.0
+    }
+  ],
+  "observed_late_saturated_IE_mean": 1579.6,
+  "interpretation": "Upper steady current at the E refractory bound for constant500Hz; native M discretization has exact same equilibrium. It is not a network stability proof. Conditions with small headroom may still avoid collapse via retained inhibition, but cannot be assumed to terminate an already disinhibited500Hz state through M alone."
+}

@@ -1,0 +1,363 @@
+{
+  "time": "2026-09-13T04:20:17.915089+08:00",
+  "goal_review_due": "2026-09-13T09:32:26+08:00",
+  "states": {
+    "followup": {
+      "status": "RESPONSE_RUNNING",
+      "stage": "response",
+      "total": 60,
+      "complete": 54,
+      "queued": 0,
+      "active": [
+        {
+          "pid": 3965604,
+          "unit": [
+            "up3__ellipse4__EI_same_core_scale_0.75__y_plus10",
+            2511,
+            847101
+          ],
+          "rss_gib": 2.022491455078125,
+          "progress": {
+            "status": "SIMULATING",
+            "job": {
+              "candidate": "up3__ellipse4__EI_same_core_scale_0.75__y_plus10",
+              "stage": "response",
+              "topology_seed": 2511,
+              "dynamics_seed": 847101,
+              "duration_ms": 60000.0
+            },
+            "simulated_ms": 43000.0,
+            "updated_unix": 1789244084.1910586
+          }
+        },
+        {
+          "pid": 4063749,
+          "unit": [
+            "up3__ellipse4__EI_same_core_scale_0.75__y_plus10",
+            2511,
+            847102
+          ],
+          "rss_gib": 2.01177978515625,
+          "progress": {
+            "status": "SIMULATING",
+            "job": {
+              "candidate": "up3__ellipse4__EI_same_core_scale_0.75__y_plus10",
+              "stage": "response",
+              "topology_seed": 2511,
+              "dynamics_seed": 847102,
+              "duration_ms": 60000.0
+            },
+            "simulated_ms": 32000.0,
+            "updated_unix": 1789244152.8985806
+          }
+        },
+        {
+          "pid": 4070465,
+          "unit": [
+            "up3__ellipse4__EI_same_core_scale_0.75__radius205",
+            2511,
+            847101
+          ],
+          "rss_gib": 2.0070533752441406,
+          "progress": {
+            "status": "SIMULATING",
+            "job": {
+              "candidate": "up3__ellipse4__EI_same_core_scale_0.75__radius205",
+              "stage": "response",
+              "topology_seed": 2511,
+              "dynamics_seed": 847101,
+              "duration_ms": 60000.0
+            },
+            "simulated_ms": 28000.0,
+            "updated_unix": 1789244196.9118474
+          }
+        },
+        {
+          "pid": 4125167,
+          "unit": [
+            "up3__ellipse4__EI_same_core_scale_0.75__radius205",
+            2511,
+            847102
+          ],
+          "rss_gib": 2.001903533935547,
+          "progress": {
+            "status": "SIMULATING",
+            "job": {
+              "candidate": "up3__ellipse4__EI_same_core_scale_0.75__radius205",
+              "stage": "response",
+              "topology_seed": 2511,
+              "dynamics_seed": 847102,
+              "duration_ms": 60000.0
+            },
+            "simulated_ms": 23000.0,
+            "updated_unix": 1789244412.1177719
+          }
+        },
+        {
+          "pid": 4151252,
+          "unit": [
+            "up3__ellipse4__EI_same_core_scale_0.75__radius235",
+            2511,
+            847101
+          ],
+          "rss_gib": 1.9959793090820312,
+          "progress": {
+            "status": "SIMULATING",
+            "job": {
+              "candidate": "up3__ellipse4__EI_same_core_scale_0.75__radius235",
+              "stage": "response",
+              "topology_seed": 2511,
+              "dynamics_seed": 847101,
+              "duration_ms": 60000.0
+            },
+            "simulated_ms": 17000.0,
+            "updated_unix": 1789244184.812109
+          }
+        },
+        {
+          "pid": 4168996,
+          "unit": [
+            "up3__ellipse4__EI_same_core_scale_0.75__radius235",
+            2511,
+            847102
+          ],
+          "rss_gib": 1.998138427734375,
+          "progress": {
+            "status": "SIMULATING",
+            "job": {
+              "candidate": "up3__ellipse4__EI_same_core_scale_0.75__radius235",
+              "stage": "response",
+              "topology_seed": 2511,
+              "dynamics_seed": 847102,
+              "duration_ms": 60000.0
+            },
+            "simulated_ms": 19000.0,
+            "updated_unix": 1789244333.9105225
+          }
+        }
+      ],
+      "max_workers": 20,
+      "peak_rss_gib": 2.9343299865722656,
+      "available_gib": 123.00322341918945,
+      "failures": [],
+      "updated_unix": 1789244413.1274889
+    },
+    "multiseed": {
+      "status": "RESPONSE_RUNNING",
+      "stage": "response",
+      "total": 108,
+      "complete": 0,
+      "queued": 104,
+      "active": [
+        {
+          "pid": 4078535,
+          "unit": [
+            "bridge_circle_out125",
+            2511,
+            847401
+          ],
+          "rss_gib": 2.0039405822753906,
+          "progress": {
+            "status": "SIMULATING",
+            "job": {
+              "candidate": "bridge_circle_out125",
+              "stage": "response",
+              "topology_seed": 2511,
+              "dynamics_seed": 847401,
+              "duration_ms": 60000.0
+            },
+            "simulated_ms": 25000.0,
+            "updated_unix": 1789244206.4125109
+          }
+        },
+        {
+          "pid": 4078701,
+          "unit": [
+            "bridge_circle_out125_xminus075",
+            2511,
+            847401
+          ],
+          "rss_gib": 2.0053977966308594,
+          "progress": {
+            "status": "SIMULATING",
+            "job": {
+              "candidate": "bridge_circle_out125_xminus075",
+              "stage": "response",
+              "topology_seed": 2511,
+              "dynamics_seed": 847401,
+              "duration_ms": 60000.0
+            },
+            "simulated_ms": 26000.0,
+            "updated_unix": 1789244318.164237
+          }
+        },
+        {
+          "pid": 4151248,
+          "unit": [
+            "bridge_circle_out125",
+            2711,
+            847401
+          ],
+          "rss_gib": 2.099285125732422,
+          "progress": {
+            "status": "SIMULATING",
+            "job": {
+              "candidate": "bridge_circle_out125",
+              "stage": "response",
+              "topology_seed": 2711,
+              "dynamics_seed": 847401,
+              "duration_ms": 60000.0
+            },
+            "simulated_ms": 18000.0,
+            "updated_unix": 1789244040.5517938
+          }
+        },
+        {
+          "pid": 15948,
+          "unit": [
+            "bridge_circle_out125_xminus075",
+            2711,
+            847401
+          ],
+          "rss_gib": 1.9897575378417969,
+          "progress": {
+            "status": "SIMULATING",
+            "job": {
+              "candidate": "bridge_circle_out125_xminus075",
+              "stage": "response",
+              "topology_seed": 2711,
+              "dynamics_seed": 847401,
+              "duration_ms": 60000.0
+            },
+            "simulated_ms": 12000.000000000002,
+            "updated_unix": 1789244336.6002991
+          }
+        }
+      ],
+      "max_workers": 4,
+      "previous_running": true,
+      "predecessor_active": 6,
+      "predecessor_growth_gib": 41.962615966796875,
+      "own_growth_gib": 27.90161895751953,
+      "optional_probe_active": 1,
+      "optional_probe_growth_gib": 6.908145904541016,
+      "optional_probe_priority": true,
+      "available_gib": 122.99374771118164,
+      "required_gib": 125.77238082885742,
+      "peak_rss_gib": 0.0,
+      "failures": [],
+      "updated_unix": 1789244415.2921982
+    },
+    "global_axis": {
+      "status": "RESPONSE_RUNNING",
+      "stage": "response",
+      "total": 6,
+      "complete": 0,
+      "pending": [
+        [
+          "global_axis_-15",
+          2511,
+          847101
+        ],
+        [
+          "global_axis_+15",
+          2511,
+          847101
+        ],
+        [
+          "global_axis_+0",
+          2511,
+          847102
+        ],
+        [
+          "global_axis_-15",
+          2511,
+          847102
+        ],
+        [
+          "global_axis_+15",
+          2511,
+          847102
+        ]
+      ],
+      "active": [
+        {
+          "pid": 136040,
+          "unit": [
+            "global_axis_+0",
+            2511,
+            847101
+          ],
+          "rss_gib": 2.0918235778808594,
+          "progress": {
+            "status": "SIMULATING",
+            "job": {
+              "candidate": "global_axis_+0",
+              "stage": "response",
+              "topology_seed": 2511,
+              "dynamics_seed": 847101,
+              "duration_ms": 20000.0
+            },
+            "simulated_ms": 3000.0,
+            "updated_unix": 1789244290.4436474
+          }
+        }
+      ],
+      "shared_active": [
+        {
+          "pid": 3965604,
+          "rss_gib": 2.0224876403808594
+        },
+        {
+          "pid": 4063749,
+          "rss_gib": 2.0117721557617188
+        },
+        {
+          "pid": 4070465,
+          "rss_gib": 2.007049560546875
+        },
+        {
+          "pid": 4125167,
+          "rss_gib": 2.001873016357422
+        },
+        {
+          "pid": 4151252,
+          "rss_gib": 1.9959793090820312
+        },
+        {
+          "pid": 4168996,
+          "rss_gib": 1.9981307983398438
+        },
+        {
+          "pid": 4078535,
+          "rss_gib": 2.003875732421875
+        },
+        {
+          "pid": 4078701,
+          "rss_gib": 2.005382537841797
+        },
+        {
+          "pid": 4151248,
+          "rss_gib": 2.099273681640625
+        },
+        {
+          "pid": 15948,
+          "rss_gib": 1.98974609375
+        }
+      ],
+      "available_gib": 122.99269104003906,
+      "required_gib": 125.7726058959961,
+      "failures": [],
+      "updated_unix": 1789244409.8521292
+    }
+  },
+  "completed_analyses": [
+    "core_phase_tb_fold: four-page PDF, window shifts across 377 TB events, common core-rate axes",
+    "core_contact_sampling: actual geometric readout-weight reconstruction; no signal-fraction claim",
+    "tb_core_timing_native_review: two fixed subgroup-own-mean TB GIFs, each 125 native 2ms frames, patient Fig2C and model core rates/readout synchronized",
+    "global_axis_residual_probe/applied_geometry_audit: 3 actual canaries, weighted EE edge axes, input and immutable-static checks"
+  ],
+  "physics_changes": "none to F or N; G retains its existing 6x20s budget and 3x500ms checks",
+  "scientific_judgment": "Core timing, electrode sampling and native-front interactions must be distinguished. Neither better subgroup contact order nor two labels establish recovered patient TB. G propagation response remains pending.",
+  "next": "Continue existing controllers and analyze complete outputs; no speculative new physical batch. Report actual completed and pending evidence at 09:32."
+}

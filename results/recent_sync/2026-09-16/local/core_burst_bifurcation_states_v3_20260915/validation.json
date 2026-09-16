@@ -1,0 +1,71 @@
+{
+  "number_of_native_runs_added": 0,
+  "number_of_extended_orbits": 5,
+  "number_of_displayed_verified_orbits": 14,
+  "largest_displayed_J_EE_core": 1.175,
+  "max_extension_residual": 1.997194076786002e-10,
+  "max_extension_offgrid_defect_hz": 6.306205557748967e-09,
+  "native_correspondence": [
+    {
+      "number": 1,
+      "J_EE_core": 0.5,
+      "peak_10ms_active_fraction_quantiles": [],
+      "parameter_left_of_closure_fold": true
+    },
+    {
+      "number": 2,
+      "J_EE_core": 0.7,
+      "peak_10ms_active_fraction_quantiles": [
+        0.10916666666666666,
+        0.1361111111111111,
+        0.1711111111111111
+      ],
+      "parameter_left_of_closure_fold": true
+    },
+    {
+      "number": 3,
+      "J_EE_core": 0.85,
+      "peak_10ms_active_fraction_quantiles": [
+        0.29694444444444446,
+        0.9055555555555556,
+        1.0
+      ],
+      "parameter_left_of_closure_fold": true
+    },
+    {
+      "number": 4,
+      "J_EE_core": 1.0,
+      "peak_10ms_active_fraction_quantiles": [
+        0.99875,
+        1.0,
+        1.0
+      ],
+      "parameter_left_of_closure_fold": true
+    }
+  ],
+  "endpoint_floquet_refinement": [
+    {
+      "dt_ms": 0.09999492371869745,
+      "phase_error": 0.00020208401735621884,
+      "transverse": 0.002064500168733847
+    },
+    {
+      "dt_ms": 0.049997461859348724,
+      "phase_error": 5.095158348900064e-05,
+      "transverse": 0.0020642441049205287
+    },
+    {
+      "dt_ms": 0.024998730929674362,
+      "phase_error": 1.2890263545006775e-05,
+      "transverse": 0.0020641795754820546
+    }
+  ],
+  "neutral_error_refinement_ratios": [
+    3.9661969956212344,
+    3.9527185236439526
+  ],
+  "direct_core_to_core_edges_absent": true,
+  "status": "NUMERICAL_AND_SOURCE_CHECKS_PASSED",
+  "visual_review": "PASS",
+  "human_visual_review": "PENDING"
+}

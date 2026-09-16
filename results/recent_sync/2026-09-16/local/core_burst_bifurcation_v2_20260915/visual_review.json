@@ -1,0 +1,20 @@
+{
+  "agent_visual_review": "COMPLETED",
+  "human_visual_acceptance": "PENDING",
+  "reviewed": [
+    "01_classical_bifurcation",
+    "02_eigenvalues_and_eigenvectors",
+    "03_period_divergence",
+    "04_global_return",
+    "05_floquet_stability",
+    "06_continued_burst_waveforms"
+  ],
+  "pdf_first_page_render": "qa/pdf_page1.png",
+  "repairs": [
+    "Moved annotations away from branches.",
+    "Used a shared waveform legend and shifted time origin to show complete bursts.",
+    "Labeled model correspondence as unvalidated.",
+    "Displayed Floquet moduli below 1e-10 as bounds.",
+    "Distinguished characteristic left nullvector from the saved full generator adjoint."
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "cumulative_reference_runs": 10,
+  "controls": [
+    {
+      "label": "exp2_global_removed",
+      "local_weight": 250.0,
+      "global_weight": 0.0
+    },
+    {
+      "label": "exp2_global_redistributed_local",
+      "local_weight": 300.0,
+      "global_weight": 0.0
+    }
+  ],
+  "reason": "Distinguish a spatially uniform feedback contribution from a simple reduction of total inhibitory strength. Both controls change only the existing source projection weights; no new state or recovery rule.",
+  "baseline": "exp2a_s20260915",
+  "not_original_figure_panels": true
+}

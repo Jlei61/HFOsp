@@ -1,0 +1,328 @@
+{
+ "status": "STATIC_RECONSTRUCTION_MATCHES_RECORDED_RUN",
+ "no_simulation": true,
+ "params": {
+  "V_th": 18.0,
+  "V_reset": 11.0,
+  "E_gaba": 11.0,
+  "V_L": 0.0,
+  "tau_m_E": 20.0,
+  "tau_m_I": 10.0,
+  "tau_ref_E": 2.0,
+  "tau_ref_I": 1.0,
+  "tau_r_AMPA": 0.7,
+  "tau_d_AMPA": 3.5,
+  "tau_r_GABA": 1.0,
+  "tau_d_GABA": 18.0,
+  "tau0": 0.1,
+  "v_axon": 0.3,
+  "g": 3.6,
+  "w_EE": 0.1575,
+  "w_IE": 0.2625,
+  "J_ext_E": 0.455,
+  "J_ext_I": 0.85,
+  "C_EE": 800,
+  "C_IE": 800,
+  "C_EI": 200,
+  "C_II": 200,
+  "l_EE": 0.38,
+  "l_IE": 0.25,
+  "l_EI": 0.25,
+  "l_II": 0.25,
+  "rho_EE": 0.6,
+  "rho_IE": 0.0,
+  "rho_EI": 0.0,
+  "rho_II": 0.0,
+  "sigma_n": 3.3,
+  "tau_n": 150.0,
+  "nu_ext_ratio": 0.6,
+  "rx": 0.13,
+  "Rr": 0.278,
+  "grid_spacing": 0.4,
+  "grid_margin": 0.2,
+  "L": 20.0,
+  "density": 100.0,
+  "f_E": 0.8,
+  "dt": 0.1,
+  "T": 60000.0,
+  "delay_dt": 0.1,
+  "seed": 2511
+ },
+ "engine": {
+  "L": 20.0,
+  "density": 100.0,
+  "AR": 2.0,
+  "g": 3.6,
+  "dt": 0.1,
+  "k_dir": 2,
+  "core_mean": 17.5,
+  "core_std": 1.0,
+  "core_r": 1.5,
+  "v_base": 18.0
+ },
+ "threshold_quantile_seed": 20260806,
+ "patient_contact_names": null,
+ "reference_kernel": {
+  "l_par": 0.5374011537017762,
+  "l_perp": 0.26870057685088805,
+  "theta_deg": -22.80538396505847,
+  "theta_rad": -0.3980290373717898,
+  "reference_theta_deg": -22.80538396505847,
+  "reference_ar": 2.0,
+  "perp_scale": 1.0,
+  "parallel_scale": 1.0,
+  "angle_offset_deg": 0.0,
+  "is_reference": true
+ },
+ "actual_kernel": {
+  "l_par": 0.5374011537017762,
+  "l_perp": 0.40305086527633205,
+  "theta_deg": -22.80538396505847,
+  "theta_rad": -0.3980290373717898,
+  "reference_theta_deg": -22.80538396505847,
+  "reference_ar": 2.0,
+  "perp_scale": 1.5,
+  "parallel_scale": 1.0,
+  "angle_offset_deg": 0.0,
+  "is_reference": false
+ },
+ "threshold": {
+  "physics": "core_shape_output_v1",
+  "centers_mm": [
+   [
+    3.4492143200000003,
+    12.12890135
+   ],
+   [
+    16.47920304,
+    3.96551153
+   ]
+  ],
+  "radii_mm": [
+   1.7525782905619196,
+   1.7525782905619196
+  ],
+  "depth_scales": [
+   1.0,
+   1.0
+  ],
+  "floor_mV": 11.0,
+  "v_base_mV": 18.0,
+  "members": [
+   742,
+   742
+  ],
+  "n_members": 1484,
+  "overlap_members": 0,
+  "total_lowering_mV": 1091.0551031310029,
+  "total_lowering_per_core_mV": [
+   560.3922347370849,
+   530.6628683939177
+  ],
+  "mean_lowering_per_member_mV": [
+   0.7552455993761252,
+   0.7151790679163311
+  ],
+  "floor_clipped_count": 0,
+  "floor_clipped_total_mV": 0.0,
+  "n_raised": 0,
+  "n_lowered": 1056,
+  "latent_identity_sha256": "535b5bd9b136fbd76abf5a04c7bbc170b035846232778d0157cb4532bd9f1a27",
+  "quantile_seed": 20260806,
+  "boundary_clipped": [
+   false,
+   false
+  ],
+  "disks_overlap": false,
+  "min_vtheta_mV": 14.29138637388975,
+  "max_vtheta_mV": 18.0,
+  "applied_A_depth_scale": 1.0,
+  "shape_requested": {},
+  "ellipse_A_semiaxes_mm": [
+   1.7525782905619196,
+   1.7525782905619196
+  ],
+  "ellipse_A_angle_deg": 0.0,
+  "ellipse_metric_cutoff": 1.0,
+  "matched_E_count": true,
+  "dose_target_mV": null,
+  "dose_error_mV": null
+ },
+ "static_identity": {
+  "positions_E_sha256": "a00b2c75b5e9a2784065c3b7bdbc66eef02eef1e077f8d7d10d3e9c45f39010e",
+  "vtheta_sha256": "862bb4d5abb0dac3146cc89d2a1be4c6a4e9a5460a6938b14a4b76e4c87f7045",
+  "vtheta_float64_sha256": "1d7ce8a7c6016b92fda40b72e0c376fc287c25dc5a5ae247835f75ff1436bc85",
+  "h_sha256": "4ca77e656eb1efd0d7321518667ea4d6aa3d32fb30809d8956f2fcf4b3868e1a",
+  "core_index_sha256": "31eb06d63438d18a22b640613a37baa78b2a8158c21b5675bdead2c921197861",
+  "ampa_topology_sha256": "6f26d29b3a812945fe4fa89d4332f59cbea6b99426ca1d9cf06e222a5549eb46",
+  "ampa_values_sha256": "14a337b2dd9ace72af407bc984fb29fc5267e949c338761e18faef0854c3fd67",
+  "gaba_topology_sha256": "e8a90e54178aa8de7d0ea30e5995d1d4c920b738e4320cc48c5e81db0da4f38d",
+  "gaba_values_sha256": "d5dc8cebeb752e4e464a3945fb595c5996521635eb40c0a6fd42c844d6bf3a6a"
+ },
+ "network_cache": {
+  "hit": true,
+  "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/substrate_autapse_correction/network_cache/f39d1409a4cfdab1ce9fecbdcfaf832c12e00523ee730bb92c1a404b7d1b5649.pkl",
+  "sha256": "5d5b14221d9ad8fb82346699fbaa8ef2ee64b508f2dc6da403dc1da5595b2a2c",
+  "sampler": "positive_weight_no_autapse_v2"
+ },
+ "parent_path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/config/topic4_continuous_core_state_r1.json",
+ "parent_sources": {
+  "evaluator": {
+   "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multidimensional_interictal_observation_repair_v2/evaluator.pkl",
+   "sha256": "cf0207113956420eadfe70ddca126cd050f7ea9e514ea15b044c869a210ad2d5"
+  },
+  "evaluator_qualification": {
+   "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multidimensional_interictal_observation_repair_v2/qualification.json",
+   "sha256": "065df1e086d5225edcfe0e2d681eed27c63a6d97e7af04adadb7a8b1a8931186"
+  },
+  "candidate_manifest": {
+   "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multievent_distribution_search_v2_1/execution/training_24s/candidate_manifest.json",
+   "sha256": "69c0a3f95048c500e8bfb2a8d86c3bf349ab8ea36c230d55cd8d66a2de470a0e"
+  },
+  "execution_config": {
+   "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multievent_distribution_search_v2_1/execution/training_24s/execution_config.json",
+   "sha256": "05b1bd94b7342434ca5e4f79278356ba1e629d36b8a0e9c06549e31aa59aac94"
+  },
+  "objective": {
+   "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multievent_distribution_search_v2_1/training_objective_v2_1.pkl",
+   "sha256": "02c99998a10daa66702c48897a3ca02b82955ec0e278a47052c8a225e84c9337"
+  },
+  "observation_contract": {
+   "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multidimensional_interictal_observation_repair_v2/observation_contract.json",
+   "sha256": "eca7e125bcf535a5ce6a41536818c8ea1de51c34f2569c4b195a49458436854c"
+  },
+  "baseline_worker_arrays": {
+   "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multievent_distribution_search_v2_1/execution/training_24s/workers/v2_anchor_historical__baseline_topo_2511_dyn_2511.npz",
+   "sha256": "2e39e913a8276c88fc9c94bdbc5be8c3228d8b2724e966d36f78ab909f23b1b6"
+  }
+ },
+ "physical_source_snapshot": {
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_core_connectivity_search.py": "85e39e9af2fff68c60db2c37b6fd1369f38ac53433f8f30a5f88b079d31e7ef4",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_core_connectivity_v2.py": "a9ae8ed188d7f36e4cc1a1890eb26dc278f0d937f1689154fe891f80ec0f2238",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/snn_engine/kick_probe_core_input_v2.py": "bba9dbaba8ee68d8e1b43682b21d6e87a2a6e082513e6fa6453126375b27a37b",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_streaming_spike_readout.py": "a493db8a8516599f2169e9baada36288169e98416d726d27eebf6d04efc00314",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_initial_state_runtime.py": "06c4bf8e037f982c8ec995d8550c230d8528bfeeb29b983df31a0659cbebc03f",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_initial_state.py": "1e9ed1ffe67cb085e6b740ba49ffc99ef03d9ced723988b68910c6d6dee2650d",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_observation_repaired.py": "089a2a414c3c270708d99862cc94ba5aa1864cd881170abf3165a8d77ec9894a",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/snn_engine/connectivity.py": "53d3bf765f7084cda924d3b23a6cb6e5f6a21293d9ae1e0e2d8f8cf89a1d3303",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/snn_engine/connectivity_rot.py": "3fa6c87df4c8756132b3fe6734fd9f73673a731914e9937befbaf073f00e2b9f",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/snn_engine/params.py": "c2036d1e1548c3db89adab27f8a7a57f9cdf584b5fed360963c966004cf88884",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_core_field.py": "4b66406ca93ff558fe204e12a9a9d1bcfe0ead4cd2b4ef3527603347e3699e46",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_core_driven_input.py": "dcabc862504c5b98cd26fd659859e45013d7391cd11a529ccb457c70fd9b69e3",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_core_connectivity.py": "2ed2b10d939d6b5b22f635d3dcd76ec769b3d675b439260f1cdc0252160579e6",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_core_ou_correlation_recovery.py": "cefc84736368236ed421ad60bdf846b0b089a059c26168e3820ca25a55da1616",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_shape_output_response.py": "58907d3b08ea9b6769b16410430ee8edbb5814733d739b332a7cf85638854855",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_core_ou_correlation.py": "3a277975cb7183fdfdccc7b522f5d0dfd1d27a4ae6f46e55dd1ce971b5d06ed5",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_core_shape_output.py": "f8fc2640ea7817db80099192a976cc41be412f628fab21edc933aebd08313f22",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_core_field_runner.py": "123bfebc82bfe37d71875175f1c2343aa702f5f9b8d9a33ee11d2046eb9258ba",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/rebuild_topic4_autapse_corrected_reference.py": "35a4da8dc4e23f7b5095f0a70884dd09d4e31f0eef7d950bba826ffb75ae004d"
+ },
+ "observation_contract": {
+  "version": "fixed_reference_unique_contact_observer_v2",
+  "contact_names": [
+   "SCL9",
+   "ICL11",
+   "SCL8",
+   "ICL10",
+   "SCL7",
+   "ICL9",
+   "ICL8",
+   "SCL6",
+   "ICL7",
+   "ICL6",
+   "ICL5",
+   "ICL4",
+   "ICL3",
+   "ICL2",
+   "ICL1"
+  ],
+  "dt_ms": 2.0,
+  "baseline": [
+   1.830322467864778e-24,
+   3.916838809075497e-29,
+   1.0896173620643711e-18,
+   5.918470156321451e-27,
+   3.5222520446766313e-15,
+   9.092780146080532e-33,
+   1.1556900798856777e-39,
+   7.244672797866031e-18,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "threshold": [
+   0.06383456295728693,
+   0.05756779652833954,
+   0.0630299171209337,
+   0.05205175742506989,
+   0.062342106431725886,
+   0.05372808566689509,
+   0.04400833407044413,
+   0.062223956614732776,
+   0.04583957780897634,
+   0.05813617169857025,
+   0.06584100073575974,
+   0.06809289544820787,
+   0.06932647794485093,
+   0.07098095443844797,
+   0.07194970604777337
+  ],
+  "reference_high_q995": [
+   0.6383456295728692,
+   0.5756779652833954,
+   0.630299171209337,
+   0.5205175742506989,
+   0.6234210643172271,
+   0.5372808566689509,
+   0.4400833407044413,
+   0.6222395661473277,
+   0.45839577808976334,
+   0.5813617169857025,
+   0.6584100073575974,
+   0.6809289544820787,
+   0.6932647794485093,
+   0.7098095443844797,
+   0.7194970604777337
+  ],
+  "noise_sigma_MAD": [
+   2.7136360908563196e-24,
+   5.807105218335332e-29,
+   1.6154667009966366e-18,
+   8.774723853762183e-27,
+   5.222090881437573e-15,
+   1.3480955844578996e-32,
+   1.7134261124385056e-39,
+   1.0740951890116177e-17,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "calibration_window_ms": [
+   500.0,
+   6000.0
+  ],
+  "threshold_rule": "baseline + max(6 quiet MAD sigma, 0.1 * (reference q99.5 - baseline))",
+  "minimum_detection_ms": 4.0,
+  "extension_ms": 30.0,
+  "window_ms": 250.0,
+  "channel_fraction": 0.5,
+  "burnin_ms": 500.0,
+  "maximum_centroid_mass_outside_local_detection": "reported, not filtered",
+  "reference": {
+   "worker_path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/vth_dual_core_xy_research/selection/workers/control_historical_matched_seed_2515.json",
+   "worker_sha256": "144fbc564e3556162ac823d655664b74e1596905aaa9e78b82067740c750ce99",
+   "arrays_path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/vth_dual_core_xy_research/selection/workers/control_historical_matched_seed_2515.npz",
+   "arrays_sha256": "921faf95f245ab1de2743a0d09d271278dca0733bd14d2438f506d823784cbe2",
+   "seed": 2515,
+   "reference_role": "historical matched baseline on a topology/dynamics seed outside this four-seed parameter round; not untouched patient validation"
+  }
+ }
+}

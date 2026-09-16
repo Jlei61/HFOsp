@@ -1,0 +1,106 @@
+{
+ "previous_controller": 367653,
+ "controller_pid": 491275,
+ "early_cap_before": 8,
+ "early_cap_after": 10,
+ "after_previous_cap": 16,
+ "after_probe_cap": 18,
+ "previous_active": 3,
+ "available_before_gib": 117.56660461425781,
+ "dispatch_required_before_gib": 100.48296737670898,
+ "workers_preserved": [
+  {
+   "pid": 15948,
+   "unit": [
+    "bridge_circle_out125_xminus075",
+    2711,
+    847401
+   ],
+   "stage": "response",
+   "process_created_unix": 1789239537.33,
+   "log": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/logs/response_bridge_circle_out125_xminus075_2711_847401.log"
+  },
+  {
+   "pid": 258720,
+   "unit": [
+    "bridge_circle_out125",
+    2712,
+    847401
+   ],
+   "stage": "response",
+   "process_created_unix": 1789246583.57,
+   "log": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/logs/response_bridge_circle_out125_2712_847401.log"
+  },
+  {
+   "pid": 259108,
+   "unit": [
+    "bridge_circle_out125_xminus075",
+    2712,
+    847401
+   ],
+   "stage": "response",
+   "process_created_unix": 1789246589.22,
+   "log": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/logs/response_bridge_circle_out125_xminus075_2712_847401.log"
+  },
+  {
+   "pid": 4078535,
+   "unit": [
+    "bridge_circle_out125",
+    2511,
+    847401
+   ],
+   "stage": "response",
+   "process_created_unix": 1789235775.35,
+   "log": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/logs/response_bridge_circle_out125_2511_847401.log"
+  },
+  {
+   "pid": 4078701,
+   "unit": [
+    "bridge_circle_out125_xminus075",
+    2511,
+    847401
+   ],
+   "stage": "response",
+   "process_created_unix": 1789235780.86,
+   "log": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/logs/response_bridge_circle_out125_xminus075_2511_847401.log"
+  },
+  {
+   "pid": 4151248,
+   "unit": [
+    "bridge_circle_out125",
+    2711,
+    847401
+   ],
+   "stage": "response",
+   "process_created_unix": 1789237873.35,
+   "log": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/logs/response_bridge_circle_out125_2711_847401.log"
+  },
+  {
+   "pid": 368494,
+   "unit": [
+    "bridge_circle_out125",
+    2511,
+    847402
+   ],
+   "stage": "response",
+   "process_created_unix": 1789251607.98,
+   "log": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/logs/response_bridge_circle_out125_2511_847402.log"
+  },
+  {
+   "pid": 368499,
+   "unit": [
+    "bridge_circle_out125_xminus075",
+    2511,
+    847402
+   ],
+   "stage": "response",
+   "process_created_unix": 1789251613.72,
+   "log": "/data/hfosp/topic4_sef_hfo/core_multiseed_response_curves_20260913/logs/response_bridge_circle_out125_xminus075_2511_847402.log"
+  }
+ ],
+ "physical_workers_restarted": 0,
+ "parameters_seeds_duration_order_budget_changed": false,
+ "memory_policy": "unchanged phase9/6GiB reserves,40GiB dispatch margin,18GiB process-tree and30GiB host protection; max10, not forced10",
+ "controller_source_sha256": "5a29d82a0fc1e7d198d01f5b8ea8da64f5a40da599f1963c698ea4cee480bbb4",
+ "created_unix": 1789255570.2856662
+}

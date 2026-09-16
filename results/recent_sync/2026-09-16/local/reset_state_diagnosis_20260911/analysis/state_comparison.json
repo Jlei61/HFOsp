@@ -1,0 +1,69 @@
+{
+  "stats": [
+    {
+      "name": "z_only_long",
+      "observed": false,
+      "recovered": true,
+      "observation_status": "RIGHT_CENSORED_WITHOUT_RECURRENT_HIGH",
+      "latency_since_release_s": null,
+      "censor_time_since_release_s": 923.5,
+      "windows": [
+        {
+          "window": "post_release",
+          "time_s": [
+            76.5,
+            86.5
+          ],
+          "mean_Z": 0.9688618127584856,
+          "mean_Z_core_AB": [
+            0.9754292905224338,
+            0.974775235599157
+          ],
+          "mean_adaptation_current_E_AB": [
+            1.711948186615636,
+            2.317468889262956,
+            2.6391881223098643
+          ],
+          "mean_E_hz": 5.34075625,
+          "regional_E_hz": [
+            6.197082228116706,
+            6.544402035623404,
+            5.288499671700589
+          ]
+        },
+        {
+          "window": "late",
+          "time_s": [
+            970.0,
+            1000.0
+          ],
+          "mean_Z": 0.8381923709710638,
+          "mean_Z_core_AB": [
+            0.8316017782171778,
+            0.7701379513961901
+          ],
+          "mean_adaptation_current_E_AB": [
+            0.5535723118550742,
+            0.6495954506311645,
+            1.0074806232991218
+          ],
+          "mean_E_hz": 13.797301041666666,
+          "regional_E_hz": [
+            16.296905393456825,
+            25.21963528413926,
+            13.440680674108098
+          ]
+        }
+      ]
+    }
+  ],
+  "input_pair_checks": [],
+  "original_replay_qa": null,
+  "human_review": "PENDING",
+  "figure_acceptance": {
+    "contract": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/reset_state_diagnosis_20260911/figure_acceptance.md",
+    "status": "FULL_FIGURE_ACCEPTANCE_NOT_ESTABLISHED",
+    "native_recurrence_observed": false,
+    "diagnostic_results_do_not_replace_full_figure": true
+  }
+}

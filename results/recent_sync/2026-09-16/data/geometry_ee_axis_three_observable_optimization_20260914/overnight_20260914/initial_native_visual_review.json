@@ -1,0 +1,40 @@
+{
+ "status": "PRELIMINARY_G1_ACTUAL_VISUAL_REVIEW",
+ "candidate": "g1_axis2_minus",
+ "topology": 2511,
+ "noise": 847401,
+ "time": "2026-09-15T00:33:36.718046+08:00",
+ "inspected_files": [
+  {
+   "path": "/data/hfosp/topic4_sef_hfo/geometry_ee_axis_three_observable_optimization_20260914/analysis/native_review/g1_axis2_minus/2511_847401/g1_axis2_minus_847401_same_network.png",
+   "sha256": "e5ea3d08edf2f4537ec8efad8e6b65200b749ba9a91a11f22e92c2235686cb65"
+  },
+  {
+   "path": "/data/hfosp/topic4_sef_hfo/geometry_ee_axis_three_observable_optimization_20260914/analysis/native_review/g1_axis2_minus/2511_847401/g1_axis2_minus_patient_spectra_model_envelopes.png",
+   "sha256": "e025c5d683770cab81be9f0a96d05b4271fb6a237ca377be81e2af803925a945"
+  },
+  {
+   "path": "/data/hfosp/topic4_sef_hfo/geometry_ee_axis_three_observable_optimization_20260914/analysis/native_review/g1_axis2_minus/2511_847401/agent_frame_inspection/TB_event4_offset100ms.png",
+   "sha256": "343580be7b5bb40b49d20989c4c83653f3bb05b36395b69984b6e532ae9ba3e9"
+  },
+  {
+   "path": "/data/hfosp/topic4_sef_hfo/geometry_ee_axis_three_observable_optimization_20260914/analysis/native_review/g1_axis2_minus/2511_847401/agent_frame_inspection/TB_three_events_native_frames.png",
+   "sha256": "c402d4ce247378a1a0384c0333d456b168e18660c4e71c430568f58e1aa10b21"
+  },
+  {
+   "path": "/data/hfosp/topic4_sef_hfo/geometry_ee_axis_three_observable_optimization_20260914/analysis/patient_count_block_reference/figures/patient_actual_N_reference.png",
+   "sha256": "2aa12efc8f6440c6571676a6602739d044c799ab5e064f5732416fa43ac2a174"
+  }
+ ],
+ "model_examples": {
+  "TA_representative": 23,
+  "TB_representative": 13,
+  "TB_chronological_first_three": [
+   4,
+   7,
+   13
+  ]
+ },
+ "scientific_acceptance": "Partial distribution-score improvement only; patient TB propagation not accepted",
+ "G3_review": false
+}
