@@ -1,5 +1,9 @@
 # Topic 4：SEF-HFO Framework —— 间期 HFO 传播的空间易激场 SNN 模型
 
+> **本工作树 E10 双核任务更新（2026-09-07）**：当前合同为[多事件分布学习 v2.1 设计](archive/topic4/sef_hfo/same_network_multievent_distribution_design_v2_1_2026-09-07.md)及[执行 prompt](archive/topic4/sef_hfo/same_network_multievent_distribution_v2_1_execution_prompt_2026-09-07.md)。保留48初始条件及11维范围；主排序改为去自配对经验统计量，D16仅作诊断；确认采用2张新拓扑×2次噪声重演，具体路径仅作提名后验证。本次完成设计、配置和来源说明，修订目标实现、离线扫描和新物理执行仍待完成；旧8项检查不能证明修订目标已通过资格。本更新不改变其他分支或下列历史cohort结论。
+
+> **初态条件传播支线（2026-09-07，方案交付）**：[执行计划](archive/topic4/sef_hfo/initial_state_conditioned_propagation_plan_v1_2026-09-07.md)与[执行 prompt](archive/topic4/sef_hfo/initial_state_conditioned_propagation_execution_prompt_v1_2026-09-07.md)已落实。冻结old_joint基线，以同图3初态×12噪声重演检验后12秒的模式偏好；达到预设持续效应标准后再用一张新图重复，最多72次24秒运行。模式比例和患者条件传播质量分开判定，不要求每个初态覆盖完整混合分布，不预设双稳态。本次已复核FIT和历史轨迹，未实施新初态接口、未启动新仿真；主线仍按自身v2.1合同继续。
+
 > **2026-06-28 瘦身 + 重命名**：本文件由 `topic4_sef_itp_framework.md` 重命名为 `topic4_sef_hfo.md`，
 > Topic 4 收敛到 **SNN 模型主线**。以下过时计划与代码已**整条删除**（不再是 archive，避免误导）：
 > HR/FHN 抽象节点模型（`src/topic4_modeling/hr_*`、phase4_v1）、kuramoto/BHPN-toy（`pr_t4_1_bhpn_toy`、

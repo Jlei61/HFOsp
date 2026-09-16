@@ -1,0 +1,78 @@
+{
+  "version": "joint_rank_space_xy_replicated_anchors_v3",
+  "observation": {
+    "window_ms": 250.0,
+    "extension_ms": 30.0,
+    "channel_fraction": 0.5,
+    "margin": 0.1,
+    "timing": "centroid",
+    "burnin_ms": 500.0
+  },
+  "observation_boundary": "Shared group-event packing applied to firing-density proxy; not a validated HFO/LFP forward model. No causal-family masking or K=2 filtering.",
+  "loss": "Whole-event Gaussian random-feature kernel mean distance on participation, rank, relative timing and fixed spatial moments. Patient-only fixed maps; no angle target. Ranking removes within-sample diagonal term; acceptance uses original nonnegative distance and matched-N training tolerance.",
+  "direction_loss_weight": 0.0,
+  "core_axis_prior_weight": 0.0,
+  "calibration": {
+    "seed": 2026090607,
+    "draws": 64,
+    "sample_sizes": [
+      16,
+      32,
+      64,
+      128,
+      256
+    ],
+    "quantile": 0.95
+  },
+  "search": {
+    "proposals_per_round": 24,
+    "random_fraction": 0.5,
+    "restart_random_fraction": 0.85,
+    "interior_fraction": 0.75,
+    "local_scales_mm": [
+      0.6,
+      1.5,
+      3.0
+    ],
+    "fit_seeds": [
+      2511,
+      2512
+    ],
+    "fit_duration_ms": 8000.0,
+    "low_yield_duration_ms": 12000.0,
+    "minimum_pool_events": 64,
+    "automatic_rounds_before_capacity_review": 8,
+    "race_seeds": [
+      2513,
+      2514,
+      2515,
+      2516,
+      2517,
+      2518
+    ],
+    "racers_per_round": 6,
+    "local_anchor_rule": "Only complete common training seed set 2511-2518, >=64 real events, no runaway, complete disjoint disks. Two-seed candidates remain screens and cannot steer local refinement."
+  },
+  "confirmation": {
+    "n_seeds": 6,
+    "seed_base": 43000,
+    "duration_ms": 20000.0,
+    "minimum_pooled_events": 64,
+    "minimum_events_per_seed": 5,
+    "require_disk_clearance_mm": 0.0,
+    "minimum_good_joint_loss_seeds": 5,
+    "independent_geometry_checks": true
+  },
+  "adaptation": "Reuse all v2 trajectories and exact patient calibration. Local refinement and stagnation tracking use only replicated training incumbents. New independent random starts remain >=50%; short-run scores only nominate additional common-seed simulations. Patient target, observation, kernels and acceptance stay unchanged.",
+  "runtime": {
+    "maximum_workers": 24,
+    "reserve_gib": 40.0,
+    "screen_minimum_worker_gib": 12.0,
+    "confirmation_minimum_worker_gib": 25.0,
+    "minimum_disk_gib": 30.0
+  },
+  "heldout_opened": false,
+  "auto_fig5_after_qualified_confirmation": true,
+  "claims": "One-patient development working point; no uniqueness, anatomical-core localization, clinical seizure or formal equilibrium bifurcation claim. Sequential confirmation attempts are logged and are not a single untouched validation experiment.",
+  "objective_version": "joint_rank_space_xy_kernel_v2"
+}

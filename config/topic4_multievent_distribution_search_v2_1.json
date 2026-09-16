@@ -1,0 +1,397 @@
+{
+  "version": "same_network_multievent_distribution_search_v2_1",
+  "scientific_role": "development_only_patient_distribution_fit_with_postfit_route_validation",
+  "output_root": "results/topic4_sef_hfo/multievent_distribution_search_v2_1",
+  "frozen_reference": "results/topic4_sef_hfo/multidimensional_interictal_observation_repair_v2",
+  "training": {
+    "objective": "mean_per_training_unit_equal_weight_positive_scaled_off_diagonal_empirical_statistics",
+    "matched_events_per_network": 16,
+    "mode_definition": "inherit_frozen_patient_FIT_KMeans_K2_no_TA_TB_named_constraints",
+    "global_weight": 0.5,
+    "balanced_modes_weight": 0.5,
+    "network_aggregation": "equal_weight_mean_no_event_pooling",
+    "network_seeds": [
+      2511,
+      2512
+    ],
+    "duration_ms": 24000,
+    "insufficient_events": "null_loss_no_formal_rank_no_partial_unit_average",
+    "runaway": "retain_physical_failure_separately_from_execution_state_no_interictal_rank",
+    "route_features_in_objective": false,
+    "validation_metrics_in_optimizer": false,
+    "primary_statistic": "squared_mean_target_distance_minus_population_feature_variance_over_N_minus_1",
+    "diagnostic_statistic": "D16_exact_without_replacement_subset_mean_squared_distance",
+    "minimum_events_for_ranking_per_unit": 16,
+    "mathematical_minimum_events": 2,
+    "allow_negative_primary_statistic": true,
+    "clip_primary_statistic": false,
+    "normalization": "inherit_frozen_positive_v2_CAL_D16_scales_do_not_recalibrate",
+    "normalizers": {
+      "global": 0.0425770294722167,
+      "balanced_modes": 0.21306191302831015
+    },
+    "seed_units": [
+      {
+        "topology_seed": 2511,
+        "dynamics_seed": 2511
+      },
+      {
+        "topology_seed": 2512,
+        "dynamics_seed": 2512
+      }
+    ],
+    "estimand": "single_event_distribution_not_event_sequence_transition_law",
+    "continuous_event_unbiasedness_claim": false
+  },
+  "parameters": {
+    "x1_mm": [
+      0.75,
+      19.25
+    ],
+    "y1_mm": [
+      0.75,
+      19.25
+    ],
+    "x2_mm": [
+      0.75,
+      19.25
+    ],
+    "y2_mm": [
+      0.75,
+      19.25
+    ],
+    "node_gain": [
+      0.5,
+      1.4
+    ],
+    "E_to_E_weight_scale": [
+      0.8,
+      1.2
+    ],
+    "E_to_I_weight_scale": [
+      0.8,
+      1.3
+    ],
+    "I_to_E_weight_scale": [
+      0.8,
+      1.2
+    ],
+    "tau_d_GABA_ms": [
+      12.0,
+      28.0
+    ],
+    "EE_angle_offset_deg": [
+      -45.0,
+      45.0
+    ],
+    "EE_weight_aspect_ratio": [
+      1.0,
+      3.0
+    ]
+  },
+  "geometry": {
+    "target_nodes": 1499,
+    "minimum_center_separation_mm": 4.0,
+    "require_disjoint_disks": true,
+    "minimum_fraction_nodes_per_core": 0.25,
+    "domain": "whole_sheet",
+    "core_axis_alignment_constraint": false,
+    "source_region_preference": false,
+    "patient_template_endpoint_constraint": false
+  },
+  "fixed_model": {
+    "Z_M": "off",
+    "noise_law": "existing_global_and_spatial_OU_fixed_no_per_event_changes",
+    "I_to_I_weight_scale": 1.0,
+    "graph_generation": "existing_autapse_corrected_reference_theta_and_AR2",
+    "EE_geometry_intervention": "fixed_graph_incoming_EE_sum_preserving_weight_redistribution",
+    "kinetics_intervention": "GABA_decay_at_fixed_jump_and_rise_not_integrated_dose_matched",
+    "readout": "frozen_repaired_observer_and_contact_identity",
+    "model_event_specific_inputs": false
+  },
+  "search": {
+    "two_independent_populations": true,
+    "population_size_each": 24,
+    "historical_anchor_count": 6,
+    "fresh_scrambled_sobol_candidates": 42,
+    "adaptive_offspring_per_population": 8,
+    "adaptive_method": "two_sequential_deferred_batches_DE_rand_1_bin_F0.6_CR0.8_normalized_coordinates_reflected_bounds",
+    "maximum_unique_conditions": 64,
+    "maximum_training_simulations": 128,
+    "nomination": "best_two_estimable_physically_distinct_conditions_per_population_across_all_evaluated_candidates_by_L_off_only",
+    "tie_breaker": "candidate_id_lexicographic",
+    "automatic_extra_generations": false,
+    "initial_candidates": "inherit_existing_48_manifest_and_hash",
+    "initial_design_claim": "randomized_space_filling_proposals_after_geometric_rejection_not_balanced_Sobol_net",
+    "de_update": "G2A_deferred_from_G1_then_G2B_deferred_from_post_G2A_population",
+    "adaptive_batches": [
+      {
+        "name": "G2-A",
+        "targets_per_population": 4,
+        "parent_population": "G1"
+      },
+      {
+        "name": "G2-B",
+        "targets_per_population": 4,
+        "parent_population": "post_G2A_delayed_replacement"
+      }
+    ],
+    "targets_per_population_per_batch": 4,
+    "donors_per_target": 3,
+    "donors_distinct_and_exclude_target": true,
+    "force_one_mutant_coordinate": true,
+    "proposal_rng_and_indices_persist_before_each_batch_dispatch": true,
+    "G2B_actual_parameters_frozen_only_after_G2A_update": true,
+    "feedback_path_guarantees_replacement_or_improvement": false,
+    "scipy_polish_or_extra_local_evaluations": false,
+    "geometrically_valid_unscored_vectors_may_propose": true,
+    "replacement": {
+      "scored_child_unscored_parent": "replace",
+      "both_scored": "replace_only_if_strictly_lower_primary_loss",
+      "both_unscored": "retain_parent_without_fit_order",
+      "incomplete_execution": "resolve_before_population_update"
+    },
+    "same_candidate_pool_score_comparison": [
+      "loss_off",
+      "loss_off_A_component_diagnostic_only",
+      "loss_off_B_subtraction_diagnostic_only",
+      "loss_D16",
+      "round1_pooled_joint_diagnostic_only"
+    ],
+    "executor_value_audit_each_phase": "G1_before_G2A_then_G2A_before_score_and_G2B_then_G2B_before_score_and_nomination_then_G3_before_analysis",
+    "condition_level_deduplication": "exact_full_physical_parameter_identity_including_time_constants_only_unless_cross_topology_core_swap_symmetry_is_proven",
+    "training_topology_cache_equivalence": "unit_reuse_only_not_condition_level_deduplication",
+    "core_swap_equivalence": "not_applied_without_cross_topology_h_delta_vtheta_vtheta_and_weight_symmetry_proof",
+    "resume": "restore_persisted_proposals_random_draws_seed_pairs_parent_snapshots_and_score_version"
+  },
+  "postfit_validation": {
+    "nominees": 4,
+    "reference_conditions": [
+      "historical__baseline",
+      "support_rank__baseline",
+      "old_joint__baseline"
+    ],
+    "duration_ms": 24000,
+    "maximum_simulations": 28,
+    "patient_mode_participation_signed_order_and_lag": true,
+    "right_lower_start_and_subsequent_recruitment": "postfit_validation_only_population_variation_retained",
+    "first_centroid_not_ignition": true,
+    "native_field_movies": "all_detected_events_chronological_for_prespecified_representative_pair_plus_all_4_pairs_event_tables_and_native_snapshots;include_second_dynamics_replay_for_same_topology",
+    "data_independence": "FIT_CAL_PROBE_all_reused_development_PROBE_closed_until_nomination_no_pristine_holdout_claim",
+    "automatic_score_feedback": false,
+    "automatic_model_freeze": false,
+    "automatic_fig5": false,
+    "topology_seeds": [
+      6101,
+      6102
+    ],
+    "dynamics_seeds": [
+      7101,
+      7102
+    ],
+    "seed_pairs": [
+      {
+        "topology_seed": 6101,
+        "dynamics_seed": 7101
+      },
+      {
+        "topology_seed": 6101,
+        "dynamics_seed": 7102
+      },
+      {
+        "topology_seed": 6102,
+        "dynamics_seed": 7101
+      },
+      {
+        "topology_seed": 6102,
+        "dynamics_seed": 7102
+      }
+    ],
+    "seed_ids_status": "proposed_check_task_history_then_freeze_before_execution",
+    "same_graph_contract": "positions_cell_types_edges_delays_weights_static_heterogeneity_core_members_signed_thresholds_fixed_within_condition_and_topology",
+    "replay_changes": "global_OU_spatial_OU_and_external_Poisson_realizations_with_same_deterministic_initial_state",
+    "cross_candidate_randomness_term": "shared_integer_seed_only_unless_identical_random_call_trace_is_verified",
+    "same_graph_replay_checks": "static_array_hashes_identical_dynamics_seed_distinct_dynamic_outputs_distinct",
+    "exact_full_execution_repeat": "not_added_outside_fixed_156_run_budget_resume_hash_check_is_not_an_independent_repeat",
+    "mode_support": "compare_actual_N_and_mode_counts_with_patient_block_matched_reference_no_every_run_every_mode_gate",
+    "mode_conditional_diagnostics": [
+      "participation_lag_joint_structure",
+      "distance_to_each_patient_cluster",
+      "relative_cluster_distance",
+      "within_cluster_spread",
+      "time_resolved_envelope",
+      "native_field"
+    ],
+    "six_second_segments": {
+      "boundaries_seconds": [
+        0,
+        6,
+        12,
+        18,
+        24
+      ],
+      "assignment": "qualifying_interval_midpoint",
+      "existing_burnin_seconds": 0.5,
+      "report_effective_observation_duration": true,
+      "interval_assignment": "later_event_with_cross_segment_flag",
+      "feeds_training": false
+    },
+    "patient_time_packet": {
+      "events_per_mode": 32,
+      "reserve_ids_per_mode": 32,
+      "maximum_events_per_block_target": 8,
+      "minimum_blocks_target": 4,
+      "selection": "freeze_real_IDs_and_block_mapping_before_candidate_validation_no_route_or_match_filter",
+      "trace_during": "G0_G1",
+      "compare_after": "nomination_frozen",
+      "balanced_packet_estimates_natural_frequency": false,
+      "natural_frequency_source": "full_qualified_event_table",
+      "save_full_envelope": true,
+      "quantiles": [
+        0.1,
+        0.5,
+        0.9
+      ],
+      "edge_mass_window_ms": 10,
+      "window_states": [
+        "complete",
+        "edge_mass_suspected",
+        "known_window_or_record_clipped",
+        "unreadable"
+      ],
+      "clipped_quantiles": "window_conditional_only_full_event_not_estimable"
+    }
+  },
+  "resources": {
+    "maximum_workers": 8,
+    "worker_address_space_limit_gib": 18,
+    "system_memory_reserve_gib": 40,
+    "analysis_address_space_limit_gib": 8,
+    "minimum_free_disk_gib": 30,
+    "account_other_snn_future_memory": true,
+    "failure_action": "stop_new_dispatch_drain_running_jobs_preserve_results",
+    "long_duration_canary_required": true,
+    "default_start_all_workers": false,
+    "address_space_limit_is_physical_memory_budget": false,
+    "memory_accounting": "process_tree_RSS_PSS_peaks_plus_other_jobs_growth_analysis_compression_GIF_and_disk",
+    "cgroup": "use_only_if_delegation_and_memory_controller_verified_otherwise_process_tree_monitoring",
+    "admission": "measured_canary_peak_plus_margin_with_system_reserve_and_other_jobs_growth",
+    "separate_status_fields": [
+      "physical_status",
+      "execution_status"
+    ],
+    "cache": "immutable_baseline_weights_rebuilt_per_condition_no_cumulative_reweighting",
+    "canary_reuse": "same_physics_observer_duration_seed_pair_and_raw_output_contract_loss_only_changes_allow_rescoring"
+  },
+  "status": "DESIGN_REVISION_IMPLEMENTATION_PENDING",
+  "worker_execution_config": false,
+  "inheritance": {
+    "initial_candidate_manifest": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multievent_distribution_search_v2/initial_candidate_manifest.json",
+      "sha256": "161980af00f3131f3ea14bcb014d0826ea280267387cebe57c33b174a132df36"
+    },
+    "normalizer_source": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multievent_distribution_search_v2/loss_qualification.json",
+      "sha256": "f02ef4e0ec8b4cc76decafe09b3594604838d2c64028fb4fc32fb582006f49b7"
+    },
+    "old_payload": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multievent_distribution_search_v2/training_objective.pkl",
+      "sha256": "b29d9869ed998d48e6b9c99af82aa420f3d22c21775c35816ccdda2e173894e5"
+    },
+    "reuse_initial_candidates_without_regeneration": true,
+    "old_payload_is_v2_1_objective": false,
+    "master_seed": 3854897931
+  },
+  "offline_diagnostics": {
+    "run_alongside_G0_G1": true,
+    "blocks_G0_G1": false,
+    "complete_before_G2_ranking_freeze": true,
+    "mixture_scan": {
+      "synthetic_p": [
+        0.2,
+        0.1,
+        0.02
+      ],
+      "include_patient_p": true,
+      "include_q_equal_p_and_D16_analytic_minimum": true,
+      "N": [
+        16,
+        32,
+        64
+      ],
+      "resamples_per_point": 128,
+      "compare": [
+        "D16",
+        "D_off"
+      ]
+    },
+    "within_mode_temporal_spread_scan": {
+      "scales": [
+        0,
+        0.5,
+        0.75,
+        1,
+        1.25,
+        1.5
+      ],
+      "preserve_participation_mask": true,
+      "recompute_rank_and_features": true,
+      "N": [
+        16,
+        32,
+        64
+      ],
+      "resamples_per_point": 128,
+      "scope": "time_rank_variation_not_all_biological_variation"
+    }
+  },
+  "physical_logging": {
+    "EE_geometry": [
+      "actual_weighted_uncentered_displacement_second_moment_axis",
+      "sqrt_eigenvalue_ratio",
+      "weighted_distance_distribution",
+      "per_target_total_input_absolute_and_relative_error"
+    ],
+    "isotropic_axis": "not_identifiable",
+    "sparse_streaming": true,
+    "local_learned_edge_coefficients": {
+      "g_EE": 0.0,
+      "g_EtoI": 0.0
+    },
+    "GABA_decay_dose_matched": false
+  },
+  "milestones": {
+    "G0": {
+      "runs": 3,
+      "conditions": "historical_baseline_and_two_existing_random_conditions",
+      "legacy_seed": 2511,
+      "duration_ms": 24000,
+      "reuse_in_G1": true,
+      "depends_on_patient_packet_or_loss_scans": false
+    },
+    "G1": {
+      "conditions": 48,
+      "training_units_each": 2,
+      "scientific_fit_quality_is_batch_stop_gate": false
+    },
+    "G2": {
+      "offspring_conditions": 16,
+      "training_units_each": 2,
+      "batches": 2,
+      "offspring_conditions_per_batch": 8,
+      "requires": "frozen_D_off_ranking_then_persisted_G2A_batch_then_post_G2A_update_and_persisted_G2B_batch"
+    },
+    "G3": {
+      "conditions_max": 7,
+      "topologies": 2,
+      "dynamics_replays_per_topology": 2,
+      "simulations_max": 28
+    },
+    "G4": {
+      "terminal_status": "ROUND_COMPLETE_PENDING_SCIENTIFIC_REVIEW",
+      "positive_result_required": false,
+      "automatic_next_search": false
+    },
+    "total_formal_simulations_max": 156
+  }
+}

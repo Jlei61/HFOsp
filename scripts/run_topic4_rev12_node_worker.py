@@ -62,6 +62,7 @@ from src.sef_hfo_snn_adapter import snn_event_envelope  # noqa: E402
 
 
 ALLOWED_SCIENTIFIC_ROLES = {
+    "development_only_vth_dual_core_xy_research",
     "development_only_node_dualmode_refit",
     "development_only_event_identity_canary",
     "development_only_engine_derived_event_identity_canary",
@@ -489,6 +490,8 @@ def main() -> None:
     parser.add_argument("--dynamics-seed", type=int, default=None,
                         help="simulator net['rng'] and OU-drive seed; defaults to --seed")
     parser.add_argument("--expected-commit", required=True)
+    parser.add_argument("--runtime-manifest", type=Path,
+                        help="Explicit source-hash snapshot for the corrected XY search")
     parser.add_argument("--artifact-root", type=Path,
                         default=Path("/home/honglab/leijiaxin/HFOsp"))
     parser.add_argument("--out-json", type=Path)
@@ -498,6 +501,8 @@ def main() -> None:
     config_path = args.config.resolve()
     config = json.loads(config_path.read_text())
     _validate_scientific_role(config["scientific_role"])
+    if config['scientific_role'] == 'development_only_vth_dual_core_xy_research' and not args.runtime_manifest:
+        raise RuntimeError('corrected XY research requires its source-hash snapshot')
     active_seeds = {
         int(seed) for key in (
             "canary_network_seeds", "fit_network_seeds",
@@ -546,7 +551,7 @@ def main() -> None:
     expected_commit = subprocess.check_output(
         ["git", "rev-parse", args.expected_commit], cwd=ROOT, text=True,
     ).strip()
-    provenance = _runtime_provenance(expected_commit)
+    provenance = _runtime_provenance(None if args.runtime_manifest else expected_commit)
     provenance.update({
         "config_path": str(config_path.relative_to(ROOT)),
         "config_sha256": _sha256(config_path),
@@ -555,9 +560,16 @@ def main() -> None:
         ),
         "systemd_unit": os.environ.get("REV12ND_SYSTEMD_UNIT"),
     })
-    if (provenance["runtime_modules_dirty"]
-            or not provenance["runtime_modules_match_expected_commit"]
-            or provenance["config_sha256"] != provenance["config_sha256_at_expected_commit"]):
+    if args.runtime_manifest:
+        from src.topic4_xy_search import verify_runtime_snapshot
+        if config['scientific_role'] != 'development_only_vth_dual_core_xy_research':
+            raise RuntimeError('source-hash execution is only defined for the XY research')
+        provenance['source_hash_snapshot'] = verify_runtime_snapshot(
+            args.runtime_manifest, ROOT, required_paths=provenance['runtime_module_sha256'],
+            config_path=config_path, candidate_manifest_path=manifest_path)
+    elif (provenance["runtime_modules_dirty"]
+              or not provenance["runtime_modules_match_expected_commit"]
+              or provenance["config_sha256"] != provenance["config_sha256_at_expected_commit"]):
         raise RuntimeError("rev12-ND runtime modules or config are not frozen")
 
     output_root = artifact_root / config["output_root"]
@@ -594,6 +606,8 @@ def main() -> None:
     base_candidate_id = str(config.get("reference", {}).get(
         "base_substrate_candidate_id", "node_baseline",
     ))
+    if args.runtime_manifest and str(topology_seed) not in config.get('corrected_networks', {}):
+        raise RuntimeError('corrected XY search requires an explicitly bound graph')
     substrate = build_substrate(
         transition, base_candidate_id, args.seed, cache_dir=str(cache_dir),
         field_transform=field_transform,
@@ -612,7 +626,17 @@ def main() -> None:
             None if ellipse_reference_aspect is None else float(ellipse_reference_aspect)),
         artifact_root=artifact_root,
         topology_seed=topology_seed, dynamics_seed=dynamics_seed,
+        network_cache_record=config.get('corrected_networks', {}).get(str(topology_seed)),
     )
+    if args.runtime_manifest:
+        from src.topic4_xy_search import audit_geometry
+        geometry = audit_geometry(substrate.positions_e, candidate['node_field']['centers_mm'],
+                                  candidate['node_field']['target_count'])
+        if candidate.get('domain') == 'interior' and geometry['minimum_clearance_mm'] < 1.5:
+            raise RuntimeError('interior candidate failed actual-neuron boundary clearance')
+        if np.any(substrate.edge_coefficients != 0):
+            raise RuntimeError('VTH-only search has nonzero learned connectivity')
+        substrate.extras['xy_geometry_audit'] = geometry
     simulation = config["search"]["simulation"]
     substrate.params.T = float(simulation["duration_ms"])
     substrate.net["rng"] = np.random.default_rng(dynamics_seed)
@@ -1450,9 +1474,17 @@ def main() -> None:
             **substrate.extras["node_mapping_audit"],
             "mapping_sha256": node_mapping.get("mapping_sha256"),
         },
+        "xy_geometry_audit": substrate.extras.get('xy_geometry_audit'),
+        "network_cache_source": substrate.network_cache,
         "arrays": {"path": str(out_npz), "sha256": _sha256(out_npz)},
         "provenance": provenance,
     }
+    if args.runtime_manifest:
+        final_runtime = _runtime_provenance(None)
+        verify_runtime_snapshot(args.runtime_manifest, ROOT,
+            required_paths=final_runtime['runtime_module_sha256'],
+            config_path=config_path, candidate_manifest_path=manifest_path)
+        payload['provenance']['runtime_module_sha256_at_completion'] = final_runtime['runtime_module_sha256']
     atomic_write_json(_json_safe(payload), str(out_json))
     print(json.dumps({
         "status": payload["status"], "candidate": args.candidate_id,

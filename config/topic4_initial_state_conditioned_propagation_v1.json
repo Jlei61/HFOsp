@@ -1,0 +1,376 @@
+{
+  "schema_version": 1,
+  "design_id": "topic4_initial_state_conditioned_propagation_v1",
+  "status": "PLAN_READY_IMPLEMENTATION_PENDING",
+  "configuration_kind": "design_not_legacy_worker_execution_config",
+  "source_root": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix",
+  "plan": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/docs/archive/topic4/sef_hfo/initial_state_conditioned_propagation_plan_v1_2026-09-07.md",
+  "input_audit": {
+    "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/docs/archive/topic4/sef_hfo/initial_state_conditioned_propagation_input_audit_v1_2026-09-07.json",
+    "sha256": "aa09695f1dbeb392c864a7631dd18fbfc20181d8f5e30eb3fd99af28729b0fbd"
+  },
+  "sources": {
+    "evaluator": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multidimensional_interictal_observation_repair_v2/evaluator.pkl",
+      "sha256": "cf0207113956420eadfe70ddca126cd050f7ea9e514ea15b044c869a210ad2d5"
+    },
+    "evaluator_qualification": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multidimensional_interictal_observation_repair_v2/qualification.json",
+      "sha256": "065df1e086d5225edcfe0e2d681eed27c63a6d97e7af04adadb7a8b1a8931186"
+    },
+    "candidate_manifest": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multievent_distribution_search_v2_1/execution/training_24s/candidate_manifest.json",
+      "sha256": "69c0a3f95048c500e8bfb2a8d86c3bf349ab8ea36c230d55cd8d66a2de470a0e"
+    },
+    "execution_config": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multievent_distribution_search_v2_1/execution/training_24s/execution_config.json",
+      "sha256": "05b1bd94b7342434ca5e4f79278356ba1e629d36b8a0e9c06549e31aa59aac94"
+    },
+    "baseline_worker_arrays": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multievent_distribution_search_v2_1/execution/training_24s/workers/v2_anchor_old_joint__baseline_topo_2511_dyn_2511.npz",
+      "sha256": "61684ddd45a2111fe2e14bc253b6059bd81f383edaea47ef531d096157427e07"
+    },
+    "engine": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/kick_probe.py",
+      "sha256": "dc1c12a7c250138c94716e3fb0da9633e8c54687735b781d52cf870167639a77"
+    },
+    "params": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/params.py",
+      "sha256": "c2036d1e1548c3db89adab27f8a7a57f9cdf584b5fed360963c966004cf88884"
+    },
+    "worker": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/scripts/run_topic4_multidimensional_worker.py",
+      "sha256": "0e1427fadb06b24cdf270f58a65fa40ebe58868392fb8351fe94a6dd7a6f1937"
+    },
+    "objective": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multievent_distribution_search_v2_1/training_objective_v2_1.pkl",
+      "sha256": "02c99998a10daa66702c48897a3ca02b82955ec0e278a47052c8a225e84c9337"
+    },
+    "observation_contract": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multidimensional_interictal_observation_repair_v2/observation_contract.json",
+      "sha256": "eca7e125bcf535a5ce6a41536818c8ea1de51c34f2569c4b195a49458436854c"
+    }
+  },
+  "candidate_id": "v2_anchor_old_joint__baseline",
+  "candidate": {
+    "candidate_id": "v2_anchor_old_joint__baseline",
+    "node_field": {
+      "field_type": "manual_dual_core_budget_matched",
+      "centers_mm": [
+        [
+          3.4137384763728753,
+          8.851719529317585
+        ],
+        [
+          12.250167835789803,
+          7.903496701563711
+        ]
+      ],
+      "target_count": 1499,
+      "field_sha256": "731fa85551800c6064e6ebe5894fbb39db77f0bdba1f4482fa2a4bb70b2ec3f5"
+    },
+    "domain": "whole_sheet",
+    "proposal": "historical_comparator_not_a_route_constraint",
+    "anchor": "old_joint",
+    "arm": "baseline",
+    "geometry": {
+      "field_type": "manual_dual_core_budget_matched",
+      "target_count": 1499,
+      "selected_count": 1499,
+      "distance_cutoff_mm": 1.724605446665451,
+      "strictly_inside_cutoff_count": 1498,
+      "boundary_tie_count": 1,
+      "selected_per_core": [
+        733,
+        766
+      ],
+      "maximum_selected_distance_per_core_mm": [
+        1.724605446665451,
+        1.7245174222613782
+      ],
+      "h_sha256": "bb6fcf53798c0a6998d0feceda1e4aad4d606e1bd7a7b21b14bfb8750b16be21",
+      "minimum_clearance_mm": 1.6891330297074243,
+      "center_separation_mm": 8.88715985875347,
+      "center_line_angle_deg": -6.124878940433872,
+      "full_disks_disjoint": true
+    },
+    "node_mapping": {
+      "node_gain": 1.0,
+      "signed_depth_shrinkage": 1.0
+    },
+    "mechanisms": {
+      "g_EE": 0.0,
+      "g_EtoI": 0.0,
+      "Z_M": "off",
+      "ellipse_angle_deg": -22.80538396505847,
+      "ellipse_aspect_ratio": 2.0,
+      "ellipse_reference_angle_deg": -22.80538396505847,
+      "ellipse_reference_aspect_ratio": 2.0
+    },
+    "selection_eligible": true,
+    "dynamic_parameters": {
+      "E_to_E_weight_scale": 1.0,
+      "E_to_I_weight_scale": 1.0,
+      "I_to_E_weight_scale": 1.0,
+      "I_to_I_weight_scale": 1.0,
+      "tau_d_GABA_ms": 18.0
+    },
+    "population": 0,
+    "reference_candidate_id": "old_joint__baseline"
+  },
+  "candidate_canonical_json_sha256": "f4d563ea76d628db3d5f52a6d1b3be7bef78df651e5c0d18c41f3f63cfc72009",
+  "graph_reference": {
+    "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/substrate_autapse_correction/network_cache/f39d1409a4cfdab1ce9fecbdcfaf832c12e00523ee730bb92c1a404b7d1b5649.pkl",
+    "sha256": "5d5b14221d9ad8fb82346699fbaa8ef2ee64b508f2dc6da403dc1da5595b2a2c",
+    "topology_seed": 2511,
+    "status": "CORRECTED_GRAPH_VALIDATED",
+    "pathways": {
+      "E_to_E": {
+        "targets": 32000,
+        "edge_count": 25600000,
+        "in_degree_min": 800,
+        "in_degree_max": 800,
+        "expected_in_degree": 800,
+        "exact_expected_degree": true,
+        "self_edges": 0,
+        "mean_incoming_weight": 3600.0
+      },
+      "E_to_I": {
+        "targets": 8000,
+        "edge_count": 6400000,
+        "in_degree_min": 800,
+        "in_degree_max": 800,
+        "expected_in_degree": 800,
+        "exact_expected_degree": true,
+        "self_edges": 0,
+        "mean_incoming_weight": 3000.0000000000005
+      },
+      "I_to_E": {
+        "targets": 32000,
+        "edge_count": 6400000,
+        "in_degree_min": 200,
+        "in_degree_max": 200,
+        "expected_in_degree": 200,
+        "exact_expected_degree": true,
+        "self_edges": 0,
+        "mean_incoming_weight": 2426.760000000002
+      },
+      "I_to_I": {
+        "targets": 8000,
+        "edge_count": 1600000,
+        "in_degree_min": 200,
+        "in_degree_max": 200,
+        "expected_in_degree": 200,
+        "exact_expected_degree": true,
+        "self_edges": 0,
+        "mean_incoming_weight": 1890.0000000000005
+      }
+    },
+    "config": {
+      "L": 20.0,
+      "density": 100.0,
+      "f_E": 0.8,
+      "seed": 2511,
+      "g": 3.6,
+      "C_EE": 800,
+      "C_IE": 800,
+      "C_EI": 200,
+      "C_II": 200,
+      "l_EE": 0.38,
+      "l_IE": 0.25,
+      "l_EI": 0.25,
+      "l_II": 0.25,
+      "rho_EE": 0.6,
+      "rho_IE": 0.0,
+      "rho_EI": 0.0,
+      "rho_II": 0.0,
+      "tau0": 0.1,
+      "v_axon": 0.3,
+      "delay_dt": 0.1,
+      "theta_EE_deg": -22.80538396505847,
+      "AR": 2.0,
+      "numpy_version": "1.26.4",
+      "rng_bit_generator": "PCG64",
+      "partner_sampler_version": "positive_weight_no_autapse_v2",
+      "dt": 0.1,
+      "w_EE": 0.1575,
+      "w_IE": 0.2625,
+      "tau_m_E": 20.0,
+      "tau_m_I": 10.0,
+      "tau_r_AMPA": 0.7,
+      "tau_r_GABA": 1.0,
+      "git_commit": "336800aabfed51f0d2a8bf008b90fc1d94e0046c"
+    },
+    "cache_hit": true
+  },
+  "initialization": {
+    "variable": "V_only_at_t0",
+    "default_V_mV": 11.0,
+    "increment_mV": 1.0,
+    "required_threshold_margin_mV": 0.5,
+    "membership": "actual_h_positive_E_nearest_existing_center_then_equal_min_K_nearest_members_distance_index_tie_break",
+    "core_order": "unchanged_candidate_centers_order_no_mode_mapping",
+    "arms": [
+      {
+        "id": "B0",
+        "perturbed_core_index": null
+      },
+      {
+        "id": "B1",
+        "perturbed_core_index": 0
+      },
+      {
+        "id": "B2",
+        "perturbed_core_index": 1
+      }
+    ],
+    "other_dynamic_initial_states": "identical_to_native_B0",
+    "initialization_rng_draws": 0,
+    "mutually_exclusive_with_resume_state": true
+  },
+  "simulation": {
+    "dt_ms": 0.1,
+    "duration_ms": 24000.0,
+    "observer_burn_in_ms": 500.0,
+    "early_stop_runaway": true,
+    "slow_Z_M": "off",
+    "kick": false,
+    "forced_spikes": false,
+    "persistent_threshold_modulation": false,
+    "external_drive": "identical_innovations_and_Poisson_counts_within_each_noise_pair"
+  },
+  "stages": {
+    "screen": {
+      "topology_seed": 2511,
+      "dynamics_seeds": [
+        820101,
+        820102,
+        820103,
+        820104,
+        820105,
+        820106,
+        820107,
+        820108,
+        820109,
+        820110,
+        820111,
+        820112
+      ]
+    },
+    "replication": {
+      "topology_seed": 6251,
+      "dynamics_seeds": [
+        820201,
+        820202,
+        820203,
+        820204,
+        820205,
+        820206,
+        820207,
+        820208,
+        820209,
+        820210,
+        820211,
+        820212
+      ]
+    },
+    "screen_runs": 36,
+    "replication_runs": 36,
+    "formal_canaries_included_in_screen": 3,
+    "maximum_formal_runs": 72,
+    "replication_gate": "screen_primary_persistent_effect_pass"
+  },
+  "statistics": {
+    "primary_window_ms": [
+      12000.0,
+      24000.0
+    ],
+    "primary_mode": 0,
+    "primary_contrast": [
+      "B1",
+      "B2"
+    ],
+    "unit": "paired_dynamics_run_on_one_fixed_graph",
+    "event_weighting": "equal_run_not_event_pool",
+    "bootstrap_resamples": 10000,
+    "analysis_seed": 2026090717,
+    "ci_level": 0.95,
+    "paired_exchange_test": "two_sided_all_2_power_12_sign_assignments_abs_mean_ties_included_pair_exchangeability_assumption",
+    "paired_exchange_assignments": 4096,
+    "alpha": 0.05,
+    "priority_effect_threshold_fraction": 0.1,
+    "screen_gate": [
+      "all_12_pairs_estimable",
+      "exchange_p_le_0_05",
+      "bootstrap_95_ci_excludes_zero",
+      "absolute_mean_effect_ge_0_10",
+      "not_flagged_unstable_single_pair_or_conflicting_inference"
+    ],
+    "zero_event_proportion": null,
+    "drop_nonestimable_pairs": false,
+    "missing_pair_effect_bounds": [
+      -1.0,
+      1.0
+    ],
+    "minimum_mode_count_required_for_proportion": 0,
+    "minimum_total_classified_events_for_proportion": 1,
+    "apply_mainline_N16_gate": false,
+    "secondary_windows_ms": [
+      [
+        500,
+        6000
+      ],
+      [
+        6000,
+        12000
+      ],
+      [
+        12000,
+        18000
+      ],
+      [
+        18000,
+        24000
+      ],
+      [
+        500,
+        24000
+      ]
+    ],
+    "secondary_baseline_contrasts": [
+      "B1-B0",
+      "B2-B0"
+    ],
+    "secondary_baseline_multiple_testing": "Holm_for_two_late_contrasts",
+    "replication": "independent_same_gate_and_direction_report_each_graph_no_pooling_to_rescue",
+    "bootstrap_interval_method": "percentile",
+    "instability_rules": {
+      "max_pair_absolute_contribution_fraction_gt": 0.5,
+      "leave_one_pair_out_sign_flip": true,
+      "bootstrap_exchange_significance_disagreement": true,
+      "all_zero_contribution_ratio": 0.0
+    }
+  },
+  "conditional_quality": {
+    "patient_reference": "FIT_only_block_resampling",
+    "seed": 2026090721,
+    "bootstrap_resamples": 10000,
+    "classifier": "frozen_repaired_evaluator",
+    "use_all_classified_events_including_unsupported": true,
+    "minimum_N_for_conditional_D_off": 2,
+    "preserve_negative_D_off": true,
+    "validate_specific_routes": "existing_FIT_development_only_no_feedback_to_probe",
+    "release_mainline_patient_packet": false,
+    "call_evaluator_metrics": false
+  },
+  "resources": {
+    "maximum_branch_physical_workers": 2,
+    "maximum_combined_mainline_and_branch_workers": 8,
+    "minimum_free_disk_gib": 30,
+    "admission": "actual_process_tree_peak_and_mainline_headroom",
+    "kill_or_pause_other_jobs": false
+  },
+  "output_root": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/initial_state_conditioned_propagation_v1",
+  "future_structural_state_experiments_authorized_by_this_design": false,
+  "new_simulations_launched_by_plan_delivery": 0
+}

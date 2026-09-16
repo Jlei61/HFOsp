@@ -32,6 +32,16 @@ from __future__ import annotations
 import numpy as np
 from scipy import sparse
 
+PARTNER_SAMPLER_VERSION = "positive_weight_no_autapse_v2"
+
+
+def _positive_weight_keys(weights, rng):
+    """Keep zero-weight sources ineligible without changing the RNG draw count."""
+    draws = rng.standard_exponential(len(weights))
+    keys = np.full(len(weights), np.inf, dtype=float)
+    np.divide(draws, weights, out=keys, where=weights > 0.0)
+    return keys
+
 
 def place_neurons(p, rng):
     N = int(round(p.density * p.L * p.L))
@@ -74,7 +84,7 @@ def _sample_partners(pos_t, src_pos, C, l, rho, rng, self_local=None):
     Ns = len(src_pos)
     if Cc >= Ns:
         return np.arange(Ns)
-    keys = rng.standard_exponential(Ns) / np.where(w > 0.0, w, np.inf)
+    keys = _positive_weight_keys(w, rng)
     return np.argpartition(keys, Cc - 1)[:Cc]
 
 
