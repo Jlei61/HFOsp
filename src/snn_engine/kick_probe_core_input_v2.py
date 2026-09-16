@@ -1,3 +1,8 @@
+# Versioned core-input engine v2 (core_connectivity_v2, 2026-09-10). v1 and kick_probe.py remain untouched.
+# Source (v1) SHA256: e3517d1702703d6580c672c84f1a4e19efc020e1738c7775eef7046f8425329f
+# Only change vs v1: optional `deterministic_external_mask` -- masked neurons receive the exact
+# expected external arrivals nu*dt every step instead of a Poisson draw; unmasked neurons keep the
+# Poisson draw. mask=None reproduces v1 byte for byte (same RNG consumption).
 """
 Excitability probe for the spatially-structured E-I LIF network.
 
@@ -121,7 +126,9 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                   feedback_gain=0.0, feedback_tau_ms=0.0, dump_fb=False,
                   fb_override_trace=None, ee_std_mode="local",
                   external_e_rate_drive=None, node_accessibility=None,
-                  initial_voltage=None, step_observer=None, external_i_state=None):
+                  initial_voltage=None, step_observer=None, external_i_state=None,
+                  global_ou_loading=None, afferent_rate_observer=None,
+                  deterministic_external_mask=None):
     """Verbatim copy of model.simulate's integration loop, with ONE addition:
     a localized transient kick on the external Poisson rate. The kick adds
     `KICK_BOOST` (extra external rate, 1/ms) to the E neurons in a disk of
@@ -157,6 +164,18 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
     rng = net["rng"]
     NE, NI = net["NE"], net["NI"]
     N = NE + NI
+    if global_ou_loading is not None:
+        global_ou_loading = np.asarray(global_ou_loading, float).copy()
+        if global_ou_loading.shape != (N,) or not np.isfinite(global_ou_loading).all() or np.any((global_ou_loading < 0) | (global_ou_loading > 1)):
+            raise ValueError("global OU loading must be a finite [0,1] vector over all neurons")
+    # ---- v2: deterministic expected-arrival mask (checklist C2). None -> legacy all-Poisson path. ----
+    if deterministic_external_mask is not None:
+        deterministic_external_mask = np.asarray(deterministic_external_mask, bool)
+        if deterministic_external_mask.shape != (N,):
+            raise ValueError("deterministic_external_mask must be a boolean vector over all neurons")
+        _stochastic_idx = np.flatnonzero(~deterministic_external_mask)
+    else:
+        _stochastic_idx = None
     labels = net["labels"]
     pos = net["pos"]
     ampa = net["ampa_by_delay"]
@@ -422,7 +441,8 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         tm = time_offset_ms + t * dt
         # ----- external homogeneous Poisson rate (Eq 6) -----
         xi = ou_a * xi + ou_b * rng.standard_normal()
-        nu_now = nu_signal_fn(tm) + xi
+        nu_signal = nu_signal_fn(tm)
+        nu_now = nu_signal + xi
         if nu_now < 0.0:
             nu_now = 0.0
 
@@ -440,7 +460,8 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         if ee_std_on:
             x_dep += (1.0 - x_dep) * x_rec_f                 # M1: recover availability toward 1 each step
         # ===================== KICK: the only change vs model.simulate =====================
-        nu_vec = np.full(N, max(nu_now, 0.0))
+        nu_vec = (np.full(N, max(nu_now, 0.0)) if global_ou_loading is None
+                  else np.maximum(nu_signal + xi * global_ou_loading, 0.0))
         if external_e_rate_drive is not None:
             delta_rate = np.asarray(external_e_rate_drive.step(tm), float)
             if delta_rate.shape != (NE,) or not np.isfinite(delta_rate).all():
@@ -453,7 +474,14 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
             nu_vec[kick_mask] += KICK_BOOST          # extra external rate, units 1/ms
         if t_kick2 is not None and t_kick2 <= tm < t_kick2 + DUR_KICK:
             nu_vec[kick_mask] += KICK_BOOST2         # M4-2 post-offset retrigger probe (same source core; None -> parity)
-        ext = rng.poisson(nu_vec * dt, size=N).astype(np.float64)
+        if afferent_rate_observer is not None:
+            afferent_rate_observer.observe(t, tm, nu_signal, xi, nu_vec)
+        if _stochastic_idx is None:
+            ext = rng.poisson(nu_vec * dt, size=N).astype(np.float64)
+        else:
+            # v2: exact expectation nu*dt outside the stochastic support; Poisson only on the support.
+            ext = nu_vec * dt
+            ext[_stochastic_idx] = rng.poisson(ext[_stochastic_idx]).astype(np.float64)
         # Continuous-core-state R1: retain the legacy Poisson draw and master
         # RNG consumption; a separate coupling changes only selected I counts.
         if external_i_state is not None:
@@ -676,6 +704,15 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
             }
         ),
     )
+    res["external_input"] = (
+        {"mode": "legacy_all_poisson", "n_deterministic": 0, "n_stochastic": int(N)}
+        if _stochastic_idx is None else {
+            "mode": "core_poisson_outside_expected",
+            "n_deterministic": int(deterministic_external_mask.sum()),
+            "n_stochastic": int(_stochastic_idx.size),
+            "expected_arrivals_per_step_deterministic": float(
+                max(float(nu_signal_fn(time_offset_ms)), 0.0) * dt),
+        })
     res["post_runaway_recorded_ms"] = (
         0.0 if _detect_t is None else round((nsteps - _detect_t) * dt, 1))
     res["initial_V"] = initial_V                              # ISCP-v1: the t=0 membrane voltage actually used

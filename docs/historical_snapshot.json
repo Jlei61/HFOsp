@@ -1,0 +1,766 @@
+{
+  "label": "continuous-core",
+  "source": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1",
+  "base": "b3bd36da0bb81ac26d036f2dc16e60748abff8cc",
+  "files": [
+    {
+      "path": "src/snn_engine/kick_probe.py",
+      "sha256": "4418528b2769dcbc7d8e69daf2d217b32ce91ba64c44481c42206638e4d2ac63",
+      "bytes": 48569
+    },
+    {
+      "path": "config/topic4_continuous_core_state_r1.json",
+      "sha256": "4e6a01b97855d95a31a0422ba68f654fa13b5a03a36668d465a73e73ac25dba8",
+      "bytes": 7296
+    },
+    {
+      "path": "docs/archive/topic4/sef_hfo/continuous_core_state_round1_2026-09-09.md",
+      "sha256": "56dfd4b06185c5f2c4c1fb6cc5ecb47feb8e17859bc43d136ebb3051dc658146",
+      "bytes": 4900
+    },
+    {
+      "path": "docs/archive/topic4/sef_hfo/global_state_s_drift_diffusion_design_2026-09-09.md",
+      "sha256": "577a9559bd9519238b14afc96609fd0e5d4f455cd972360c6f930dd6cdfc94f0",
+      "bytes": 10375
+    },
+    {
+      "path": "scripts/analyze_topic4_continuous_core_state_r1.py",
+      "sha256": "a659e0d9487b51d23734e1399ee9bef435f93bbf30208e8d83624a14776be2dc",
+      "bytes": 19784
+    },
+    {
+      "path": "scripts/analyze_topic4_core_connectivity_search.py",
+      "sha256": "8ffc857fbfcae0946132f7c2d5c9b339ac2b646648da17fdb091951d995e3185",
+      "bytes": 48332
+    },
+    {
+      "path": "scripts/analyze_topic4_core_driven_input_pilot.py",
+      "sha256": "8c3f4c2590ceb47317b990612d9f0f7da67a3b1454a9f091a43a658df50a5b2c",
+      "bytes": 15785
+    },
+    {
+      "path": "scripts/analyze_topic4_core_extent_long.py",
+      "sha256": "08488594316ce670cbe09b078cf5aea78a3a4bcdbc05db9c4795e9609942030b",
+      "bytes": 9166
+    },
+    {
+      "path": "scripts/analyze_topic4_core_position_native_response.py",
+      "sha256": "4fdf854b82a7371fe69023e68629a169e99702b81f74e6e4f956963830a38fba",
+      "bytes": 7433
+    },
+    {
+      "path": "scripts/analyze_topic4_core_position_response.py",
+      "sha256": "61c733f5df5f8284976a3c5855a0c4bbbdb73a72b8cd6df2ac3783f0d8ec623b",
+      "bytes": 34594
+    },
+    {
+      "path": "scripts/analyze_topic4_first_refinement_response.py",
+      "sha256": "4c1901a4f36d797fcf533ab1cb39cd3f3beecd95d9fb3e3f9c0b9f4f764e0aa0",
+      "bytes": 15095
+    },
+    {
+      "path": "scripts/analyze_topic4_geometry_threshold_refinement.py",
+      "sha256": "02e23018ae9f6ea648671be8b739ba614842c6e6b99e7360e7168b3425563d25",
+      "bytes": 24297
+    },
+    {
+      "path": "scripts/benchmark_topic4_gpu_scatter.py",
+      "sha256": "9b991831842abec4e0e6b4c8c2c7b531f840c38c2a966c062657f829a672c09e",
+      "bytes": 2894
+    },
+    {
+      "path": "scripts/launch_topic4_continuous_core_state_r1.py",
+      "sha256": "be53d54607b6291a020ab2664e83318e7a017f824bff2bee158790ed6cf50bda",
+      "bytes": 2775
+    },
+    {
+      "path": "scripts/long_topic4_core_extent.py",
+      "sha256": "9d396e072f52eab942b2583dcae8aff7776869df1751bb9efbaff2a06cb93282",
+      "bytes": 11560
+    },
+    {
+      "path": "scripts/paper_figures/plot_topic4_continuous_state_effect.py",
+      "sha256": "0b33940586c9882550af62db9f8f3c694152da2f10b11a820f371ba1f3b0fc23",
+      "bytes": 4881
+    },
+    {
+      "path": "scripts/paper_figures/plot_topic4_continuous_state_representatives.py",
+      "sha256": "1f3aceb5eb799ab42a5d609be3ae5ed09716089762fe45cc16119071a6dab5c7",
+      "bytes": 15524
+    },
+    {
+      "path": "scripts/paper_figures/plot_topic4_core_extent_pilot.py",
+      "sha256": "aa8cc330dc27a281e3090eebeda8d4728521a324bcd3aa93a75d37bae879b0c2",
+      "bytes": 17029
+    },
+    {
+      "path": "scripts/pilot_topic4_core_extent.py",
+      "sha256": "73f691f4380a81e6ce89601c88c1039be3cf55db8842b76722ad1eaeee6f3395",
+      "bytes": 16402
+    },
+    {
+      "path": "scripts/plot_topic4_core_position_key_result.py",
+      "sha256": "f36449ef48fa4cec8905e0a4e1c6f0113acf70cef4cc484a2e85d276f6fd7636",
+      "bytes": 4805
+    },
+    {
+      "path": "scripts/plot_topic4_first_native_review.py",
+      "sha256": "c88c20a40ea3370f22a85cdf0dbad23c6bbbfe8936dd41bf2b3abddb41725a43",
+      "bytes": 3789
+    },
+    {
+      "path": "scripts/plot_topic4_fixed_contact_comparison.py",
+      "sha256": "99cf7178aa2693a81cc5df780895a6fe4f22d874edace3666a22ba1750a18ae7",
+      "bytes": 5275
+    },
+    {
+      "path": "scripts/plot_topic4_state_support_fields.py",
+      "sha256": "facc31226e96f503f694ddad8f9d544d1f4085839182ca81588b3adff943f9e4",
+      "bytes": 3474
+    },
+    {
+      "path": "scripts/qualify_topic4_joint_mask_score.py",
+      "sha256": "f092cbf78b666d3c4c2a5d861183b592f31bc95bc3a2d74e7a5e42f01da12d22",
+      "bytes": 3850
+    },
+    {
+      "path": "scripts/run_topic4_continuous_core_state_r1.py",
+      "sha256": "4e0c484c515d036cb5109613f9bc250468e2fecb5bcc1094cbe381e17785878b",
+      "bytes": 10973
+    },
+    {
+      "path": "scripts/run_topic4_core_connectivity_search.py",
+      "sha256": "85e39e9af2fff68c60db2c37b6fd1369f38ac53433f8f30a5f88b079d31e7ef4",
+      "bytes": 28243
+    },
+    {
+      "path": "scripts/run_topic4_core_connectivity_stages.py",
+      "sha256": "831b0a389c67c9cebb0f36a3dacc4344544ffaee5a3459d8737e7e7bba63e7b9",
+      "bytes": 20086
+    },
+    {
+      "path": "scripts/run_topic4_core_driven_input_pilot.py",
+      "sha256": "d72ce9d6f1c00b42e63639836f97a13aa183817994d8b21e8e26e48f6ec19bc8",
+      "bytes": 12433
+    },
+    {
+      "path": "scripts/run_topic4_core_position_response.py",
+      "sha256": "4a7fa9abc2ad82233e10406e08d791f18b2dc192fd7d0debe5d138134d0ed60c",
+      "bytes": 11230
+    },
+    {
+      "path": "scripts/run_topic4_geometry_threshold_refinement.py",
+      "sha256": "87fb1ec5a82b8ea8f1154ec78bae715fbe754d3c5e15b64c4582bd4ee8bbf2c0",
+      "bytes": 9718
+    },
+    {
+      "path": "scripts/run_topic4_overnight_supplement.py",
+      "sha256": "d709d910099fc3f2f71a0d80110e52edfc8399bf9ff46221e5d11f9585bde4b9",
+      "bytes": 13768
+    },
+    {
+      "path": "src/snn_engine/kick_probe_core_input_v1.py",
+      "sha256": "e3517d1702703d6580c672c84f1a4e19efc020e1738c7775eef7046f8425329f",
+      "bytes": 49495
+    },
+    {
+      "path": "src/snn_engine/kick_probe_core_input_v2.py",
+      "sha256": "bba9dbaba8ee68d8e1b43682b21d6e87a2a6e082513e6fa6453126375b27a37b",
+      "bytes": 51031
+    },
+    {
+      "path": "src/topic4_continuous_core_state.py",
+      "sha256": "cdb8a8ba7da5e340209bc791af088138ad52dbb6db5540486431dcf90bcc5970",
+      "bytes": 7026
+    },
+    {
+      "path": "src/topic4_core_connectivity_v2.py",
+      "sha256": "a9ae8ed188d7f36e4cc1a1890eb26dc278f0d937f1689154fe891f80ec0f2238",
+      "bytes": 21144
+    },
+    {
+      "path": "src/topic4_core_driven_input.py",
+      "sha256": "dcabc862504c5b98cd26fd659859e45013d7391cd11a529ccb457c70fd9b69e3",
+      "bytes": 1836
+    },
+    {
+      "path": "src/topic4_joint_participation_mask.py",
+      "sha256": "4fd413859ff32db23422a2350427258524d80c2d4c75130fe6130b5ffaf15faa",
+      "bytes": 5951
+    },
+    {
+      "path": "src/topic4_streaming_spike_readout.py",
+      "sha256": "a493db8a8516599f2169e9baada36288169e98416d726d27eebf6d04efc00314",
+      "bytes": 3823
+    },
+    {
+      "path": "tests/test_run_topic4_core_connectivity_search.py",
+      "sha256": "f7be7d169ed3cfeca97c787184dc56b61cd625998f390826a9808add263a7123",
+      "bytes": 2800
+    },
+    {
+      "path": "tests/test_topic4_continuous_core_state.py",
+      "sha256": "b326c9191b5da14b6deb19320874252ecf66eccedb0124d01b81381b561b8cf9",
+      "bytes": 2832
+    },
+    {
+      "path": "tests/test_topic4_core_connectivity_adaptive.py",
+      "sha256": "c58d9619f02154bda17487a10e2e781de17c624d3a37f1cd63ff95f8f7108c71",
+      "bytes": 2417
+    },
+    {
+      "path": "tests/test_topic4_core_connectivity_v2.py",
+      "sha256": "7167b55780e2fd3da7f4f1e47e1ef04c4f3d319e8fd934691dd14b998d30be5c",
+      "bytes": 13894
+    },
+    {
+      "path": "tests/test_topic4_core_driven_input.py",
+      "sha256": "dee7a38533a46c3a7d6cee56f0ce7d0118ad30dda201266410c16b20304da6e5",
+      "bytes": 2337
+    },
+    {
+      "path": "tests/test_topic4_core_extent_pilot.py",
+      "sha256": "5a6dde719836e1ce448ed7e58dae444b576210a7a10bce6e17917b2501439bcc",
+      "bytes": 1334
+    },
+    {
+      "path": "tests/test_topic4_core_input_v2_engine.py",
+      "sha256": "07c39a8f8e02c73c1f25bdc78c4145bf4cd5f68a62dbea7d305ec220d61df21f",
+      "bytes": 3560
+    },
+    {
+      "path": "tests/test_topic4_joint_participation_mask.py",
+      "sha256": "08b7224b68d10ba273f775ee5b92f5b413837dafb10e7f5d18ebf3c033aef0bf",
+      "bytes": 4032
+    },
+    {
+      "path": "tests/test_topic4_streaming_spike_readout.py",
+      "sha256": "2b31481535bfa0490b2d90eb9944ea57010506462c89df1159fb55b13418ef48",
+      "bytes": 1293
+    }
+  ],
+  "excluded": [
+    {
+      "path": "GENTS.md",
+      "status": "M ",
+      "reason": "conflict/deletion/symlink; unchanged in live tree"
+    },
+    {
+      "path": "scripts/analyze_topic4_core_ou_correlation_effect.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/analyze_topic4_global_axis_residual_probe.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/analyze_topic4_multiseed_response_curves.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/analyze_topic4_propagation_recovery_night.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/analyze_topic4_recovery_completed_phase.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/analyze_topic4_recruitment_tradeoff_followup.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/analyze_topic4_rotation_response.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/analyze_topic4_shape_output_response.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/analyze_topic4_three_observable_bo.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/analyze_topic4_three_observable_core_timing.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/audit_topic4_core_contact_sampling.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/audit_topic4_core_phase_tb_paths.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/audit_topic4_core_timing_and_tb_routes.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/audit_topic4_geometry_core_contact_timing.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/audit_topic4_global_axis_applied_geometry.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/audit_topic4_label_free_objective.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/audit_topic4_length_prefix_replay.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/audit_topic4_local_burst_observer.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/audit_topic4_new_noise_core_strata.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/audit_topic4_paired_input_streams.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/audit_topic4_recovery_delivery.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/audit_topic4_recovery_night_closeout.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/audit_topic4_recovery_patient_support.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/audit_topic4_recovery_score_components.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/audit_topic4_rod_lag_participation.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/build_topic4_overnight_review.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/close_topic4_three_observable_night.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/continue_topic4_three_observable_response.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/control_topic4_three_observable_bo.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/decompose_topic4_three_observable_scores.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/finalize_topic4_eight_hour_review.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/finalize_topic4_three_observable_night.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/inspect_topic4_three_observable_confirmation_media.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/media_topic4_three_observable_bo.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/paper_figures/plot_topic4_fixed_shaft_gifs.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/paper_figures/plot_topic4_recovery_review.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/plot_topic4_all_condition_time_review.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/plot_topic4_continuous_native_review.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/plot_topic4_core_ou_propagation_response.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/plot_topic4_core_prior_extent_audit.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/plot_topic4_core_recovery_screen_findings.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/plot_topic4_core_to_contact_timing.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/plot_topic4_core_window_alias.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/plot_topic4_current_inline_review.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/plot_topic4_early_contact_geometry.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/plot_topic4_parameter_response_summary.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/plot_topic4_parameter_window_update.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/plot_topic4_patient_block_context.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/plot_topic4_recovery_capacity_examples.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/plot_topic4_recovery_core_timing.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/plot_topic4_recovery_distributions.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/plot_topic4_recovery_parameter_response.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/plot_topic4_recovery_temporal_support.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/plot_topic4_three_observable_confirmation_interpretation.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/plot_topic4_three_observable_event_timecourse.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/prepare_topic4_core_ou_correlation_canary.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/prepare_topic4_recovery_core_correlation_final.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/prepare_topic4_recovery_factorial_confirmation.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/prepare_topic4_recovery_long_panel.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/prepare_topic4_recovery_midpoint_refinement.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/reference_topic4_three_observable_blocks.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/render_topic4_ellipse_yplus1_first_noise.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/render_topic4_ellipse_yplus1_two_noise.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/render_topic4_first_noise_bridge_review.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/render_topic4_shape_output_gifs.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/render_topic4_tb_core_timing_review.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/report_topic4_label_free_dense.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/report_topic4_label_free_key_results.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/report_topic4_three_observable_confirmation.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/report_topic4_three_observable_raw.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/review_topic4_bridge_event_distributions.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/review_topic4_connectivity_overnight.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/review_topic4_first_global_axis_response.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/review_topic4_new_network_late_scl.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/review_topic4_plus15_rotation.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/review_topic4_position_new_noise_replay.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/review_topic4_radius_tradeoff.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/review_topic4_response_20260913.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/review_topic4_scl_templates.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/review_topic4_shape_response_20260912.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/review_topic4_three_observable_batch.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/review_topic4_three_observable_night.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/review_topic4_workpoint_tradeoffs.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/run_topic4_core_ou_correlation_recovery.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/run_topic4_core_tonic_recovery.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/run_topic4_global_axis_residual_probe.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/run_topic4_label_free_dense_search.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/run_topic4_multiseed_response_curves.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/run_topic4_propagation_recovery_night.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/run_topic4_recruitment_tradeoff_followup.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/run_topic4_shape_output_response.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/run_topic4_three_observable_bo.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/summarize_topic4_completed_parameter_effects.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/summarize_topic4_geometry_confirmation_effects.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/test_topic4_three_observable_execution.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/topic4_patient_mean_spectra.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/topic4_phase_memory_reserve.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "scripts/topic4_three_observable_plot_labels.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "src/topic4_core_ou_correlation.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "src/topic4_core_shape_output.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "src/topic4_pdf_font_guard.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "src/topic4_three_observable_label_free.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    },
+    {
+      "path": "src/topic4_three_observable_objective.py",
+      "status": "??",
+      "reason": "recent/active; not closed as historical"
+    }
+  ],
+  "syntax_errors": [],
+  "capture_utc": "2026-09-16T02:21:38.156283+00:00"
+}

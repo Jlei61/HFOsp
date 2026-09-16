@@ -1,3 +1,6 @@
+# Versioned core-input engine. Historical kick_probe.py remains untouched.
+# Source SHA256: 4418528b2769dcbc7d8e69daf2d217b32ce91ba64c44481c42206638e4d2ac63
+# Only changes: optional global OU spatial loading and read-only afferent-rate audit.
 """
 Excitability probe for the spatially-structured E-I LIF network.
 
@@ -121,7 +124,8 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                   feedback_gain=0.0, feedback_tau_ms=0.0, dump_fb=False,
                   fb_override_trace=None, ee_std_mode="local",
                   external_e_rate_drive=None, node_accessibility=None,
-                  initial_voltage=None, step_observer=None, external_i_state=None):
+                  initial_voltage=None, step_observer=None, external_i_state=None,
+                  global_ou_loading=None, afferent_rate_observer=None):
     """Verbatim copy of model.simulate's integration loop, with ONE addition:
     a localized transient kick on the external Poisson rate. The kick adds
     `KICK_BOOST` (extra external rate, 1/ms) to the E neurons in a disk of
@@ -157,6 +161,10 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
     rng = net["rng"]
     NE, NI = net["NE"], net["NI"]
     N = NE + NI
+    if global_ou_loading is not None:
+        global_ou_loading = np.asarray(global_ou_loading, float).copy()
+        if global_ou_loading.shape != (N,) or not np.isfinite(global_ou_loading).all() or np.any((global_ou_loading < 0) | (global_ou_loading > 1)):
+            raise ValueError("global OU loading must be a finite [0,1] vector over all neurons")
     labels = net["labels"]
     pos = net["pos"]
     ampa = net["ampa_by_delay"]
@@ -422,7 +430,8 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         tm = time_offset_ms + t * dt
         # ----- external homogeneous Poisson rate (Eq 6) -----
         xi = ou_a * xi + ou_b * rng.standard_normal()
-        nu_now = nu_signal_fn(tm) + xi
+        nu_signal = nu_signal_fn(tm)
+        nu_now = nu_signal + xi
         if nu_now < 0.0:
             nu_now = 0.0
 
@@ -440,7 +449,8 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         if ee_std_on:
             x_dep += (1.0 - x_dep) * x_rec_f                 # M1: recover availability toward 1 each step
         # ===================== KICK: the only change vs model.simulate =====================
-        nu_vec = np.full(N, max(nu_now, 0.0))
+        nu_vec = (np.full(N, max(nu_now, 0.0)) if global_ou_loading is None
+                  else np.maximum(nu_signal + xi * global_ou_loading, 0.0))
         if external_e_rate_drive is not None:
             delta_rate = np.asarray(external_e_rate_drive.step(tm), float)
             if delta_rate.shape != (NE,) or not np.isfinite(delta_rate).all():
@@ -453,6 +463,8 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
             nu_vec[kick_mask] += KICK_BOOST          # extra external rate, units 1/ms
         if t_kick2 is not None and t_kick2 <= tm < t_kick2 + DUR_KICK:
             nu_vec[kick_mask] += KICK_BOOST2         # M4-2 post-offset retrigger probe (same source core; None -> parity)
+        if afferent_rate_observer is not None:
+            afferent_rate_observer.observe(t, tm, nu_signal, xi, nu_vec)
         ext = rng.poisson(nu_vec * dt, size=N).astype(np.float64)
         # Continuous-core-state R1: retain the legacy Poisson draw and master
         # RNG consumption; a separate coupling changes only selected I counts.
