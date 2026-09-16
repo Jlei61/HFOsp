@@ -5,54 +5,22 @@
 1. 间期 HFO 群体事件是癫痫病理网络的指示器。
 2. 间期活动可能是病理网络动态的推动者；这部分主要通过模型和病例场景说明可行机制。
 
-## Fig1: 间期 HFO 群体事件与病理网络读出
+## Fig1: 间期 HFO 群体事件的患者特异性时序组织
 
-### Fig1-A: 单 HFO 形态与原始群体事件示例
+**唯一输出目录**：`results/paper-ready-figure/fig1/figures/`。Figure 1A 是作者手绘示意图，不由代码生成，也不放入 `paper-ready-figure`。
 
-**目的**：先用人工标注 HFO 集合说明单个 HFO 的波形与时频形态，再用最直观的原始信号说明，间期 HFO 可跨通道共同出现，并且群体内部存在可量化的早晚关系。
+| panel | 当前内容 | 文件 |
+|---|---|---|
+| B1 | 人工标注 HFO n=178 的波形与 raw/normalized spectrum | `fig1-panelb1.{png,pdf}` |
+| B2 | Yuquan Y3 群体事件原始波形、normalized spectrogram 与质心轨迹 | `fig1-panelb2.{png,pdf}` |
+| C | E7 时间顺序 masked rank heatmap、day/night strip 与 rank distribution | `fig1-panelc.{png,pdf}` |
+| D | 40 人 masked shared-participant MI data vs permutation null | `fig1-paneld.{png,pdf}` |
+| E | 同一 E7 的全量 TA/TB 聚类重排与 mean-rank profiles | `fig1-panele.{png,pdf}` |
+| F | overall vs within-template MI uplift；右下配对小 panel 比较 single-template 与 multi-cluster MI | `fig1-panelf.{png,pdf}` |
 
-**当前验收版本**：
+复现入口为 `scripts/paper_figures/build_main_figures_1_2.py --figure 1`；底层仍调用已验收的 HFO、heatmap、rank distribution 与统计 painter。独立文件均不带 panel 字母；`fig1-complete-layout.{png,pdf}` 是带 B–F 字母的完整排版。C 与 E 必须来自同一患者、同一 6,556 个有效事件；E 中 TA/TB 计数之和必须守恒。SOZ ROC 不属于当前 Figure 1，保留在 supplementary SOZ 包。
 
-- 输出目录：`results/paper-ready-figure/fig1_hfo_group_event_demo/figures/`
-- 正式文件：`fig1-panela1.{png,pdf}` / `fig1-panela2.{png,pdf}`
-- 复现入口：`scripts/paper_figures/plot_fig1_single_hfo_schematic.py` + `plot_fig1_hfo_group_event_legacy_style.py`，由 `plot_fig1_interictal_hfo_temporal_scaffold.py` 收口到正式文件名
-- a1 数据来源：legacy `zhangkexuan_pickSigs.npz` + `zhangkexuan_annot_v4.pik`，人工标注 HFO n=178
-- a2 数据来源：Yuquan Y3, `FC10477Q`
-- 固定示例事件：packed event indices `22,237,1458`
-- 图形合同：a1 为 178 段 HFO 叠加波形 + raw/normalized mean spectrum；a2 左侧为 80–250 Hz stacked bipolar traces，右侧为 normalized magnitude spectrogram，并用主高频增强连通区的加权质心点/线显示群体事件内部时序。两者统一使用 magnitude + Gaussian σ=1.5；A1/A2 分别保留 180 ms / 50 ms 窗以匹配各自时间尺度。
-
-**当前口径**：
-
-这张图只承担现象入口作用，不单独证明 cohort-level 传播模板或机制结论。它应该把读者带到后续 Fig1-B/C/D 的定量结果：群体事件可被定义、可排序、可汇总到病理网络轴。
-
-### Fig1-B: 群体事件定义与传播 rank
-
-**计划内容**：展示从 HFO detections 到 packed group event，再到 channel-level event rank / template 的分析流程。
-
-**需要补齐**：
-
-- 明确使用 masked `lagPatRank` 后的正式 pipeline 输出。
-- 选一个 subject-level schematic，而不是堆 cohort 数值。
-- 避免把示意图画成方法 supplement；主图只保留读者理解传播 rank 所需的最小链条。
-
-### Fig1-C: 病理网络指示器的 cohort-level 证据
-
-**计划内容**：展示间期 HFO 群体事件的空间组织、SOZ/病灶相关性或网络轴 readout。
-
-**需要补齐**：
-
-- 从 Topic 1/3 当前验收结论里选择最稳的 cohort-level readout。
-- 区分“事件存在时序结构”和“该结构指向病理网络”的证据层级。
-- 主图只放一个核心统计面板，完整分层表放 supplement。
-
-### Fig1-D: 从指示器到动力学 scaffold
-
-**计划内容**：把间期传播模板和病理网络 scaffold 连接起来，作为后续建模主张的入口。
-
-**需要补齐**：
-
-- 明确哪些内容来自真实数据，哪些只是模型 bridge。
-- 不在 Fig1 里提前声称“推动者”机制已经被证明；只说明 Fig1 给出可被模型解释的病理网络读出。
+**当前口径**：Figure 1 支持群体 HFO 事件存在患者特异、可重复出现的时序模板，并显示分模板后的 rank-concordance 提升；它不单独证明共享三维空间轴、发作传播或机制因果。
 
 ## Fig2-Fig6 暂定分工
 
@@ -60,20 +28,13 @@
 
 优先承载真实数据主结果：传播模板、网络轴、SOZ/临床相关性、跨事件稳定性。这里应该是第一核心论点的主要证据区。
 
-### Fig2-A: 单 subject 间期传播时序素材图
+### Fig2-A/B: 空间投影方法与方向代表性
 
-**目的**：用真实数据单 subject 的长时序图展示，间期 HFO group events 不是随机单通道事件，而是反复落在稳定的 channel-level first-to-last rank 结构上；无监督聚类后，主素材优先呈现两类模板 TA/TB。
-
-**当前素材版本**：
-
-- 输出目录：`results/interictal_propagation_masked/figures/per_subject/`
-- 示例文件：`epilepsiae_958_propagation.png`
-- 复现入口：`scripts/plot_interictal_propagation.py --masked-features --pr3 --paper-style --max-events 2000`
-- 视觉合同：`docs/fig2_temporal_propagation_panel_spec.md`
-
-**当前口径**：
-
-Fig2 时序图是 subject-level 真实数据素材，不是 cohort-level 统计，也不是模型图。它支持“事件反复进入稳定传播模板”的可视化叙事；cohort-level 数字仍要由 masked propagation summary / matching-index 统计面板承载。TA/TB 只是同一 subject 内两类模板的图上别名，不跨 subject 合并。
+- **唯一输出目录**：`results/paper-ready-figure/fig2/figures/`。
+- **Fig2-A**：`fig2-panela.{png,pdf,svg}`，近方形 2×2 展示作者提供的 Y9 植入概览、E1146 真实 skull-stripped T1 局部 cutaway、电极到冻结平面的三维几何，以及含 `σ=6 mm` Gaussian 显示范围的二维触点覆盖。E1146 三块均标明 `ICL` / `SCL` 电极杆。上排不写标题；下排只保留居中的 `Electrodes projection` 与 `2D local field`。不画流程箭头或 legend；右下 viewport 固定为单元格的 72%，左下完整显示投影平面。Y9 overview 的既有红/蓝方向 glyph 只属于 overview，E1146 三块不重复 TA/TB rank field、方向、rank 色彩或 early/late。
+- **Fig2-B**：`fig2-panelb.{png,pdf}`，左侧以 E1146/E548 的同一组留出事件方向对比仅时序模板轴和时序--空间模板轴，右侧展示 25 名可评估患者的留出方向增益及记录块内方向置换零模型。配对小提琴比较移至 FigS4-B。
+- **口径**：A 只解释代表性植入概览到 subject-T1 空间注册、冻结坐标投影和 display-support 的方法 pipeline；Y9 与 E1146 不是同一病例，不能写成连续 patient-specific zoom。Gaussian 不是组织活动或 scoring kernel，且 E1146 历史 MNI warp 类型不可重建。B 支持真实三维电极信息提高患者内跨记录块的方向一致性；该留出设计不是未见患者预测，也不证明连续组织传播轨迹、速度或机制因果。
+- **排版合同**：A–F 独立文件均不带左上角字母；`fig2-complete-layout.{png,pdf}` 是带 A–F 字母的完整排版。
 
 ### Fig2-C: 间期单事件包络传播场（paper-ready 候选）
 
@@ -81,24 +42,23 @@ Fig2 时序图是 subject-level 真实数据素材，不是 cohort-level 统计�
 
 **当前候选版本**：
 
-- 输出目录：`results/paper-ready-figure/fig2c_interictal_event_envelope_field/figures/`
-- 正式 candidate：`fig2c_candidate_E1146_interictal_event_envelope_field.{png,pdf}`
-- 动态 sidecar：`fig2c_candidate_E1146_interictal_event_envelope_field.gif`
-- 复现入口：`scripts/paper_figures/plot_fig2c_interictal_event_envelope_field.py --subject epilepsiae_1146`
+- 输出目录：`results/paper-ready-figure/fig2/figures/`
+- 正式 candidate：`fig2-panelc.{png,pdf}`
+- 统一复现入口：`scripts/paper_figures/build_main_figures_1_2.py --figure 2`；默认从已验收 v7 矢量 PDF 导出 600 dpi PNG，显式 `--recompute-fig2c` 才重新读取原始 EEG。
 - 固定视觉与科学合同：`docs/fig2c_interictal_event_envelope_field_spec.md`；以后所有间期传播场 frame/GIF 必须先读该文件并复用 canonical renderer。
-- 图形合同：两行 TA/TB；每行按 `readout | readout colorbar | gap | 6 square field frames | field colorbar` 排列。E1146 静态帧为 `−8, +4, +15, +27, +38, +50 ms`；GIF 为同一窗口、2 ms 生物学帧间隔。包络场使用 `magma`、participant-only support、固定 6 mm display kernel 和 TA/TB 共同 `vmax`。
+- 图形合同：两行 TA/TB；每行按 `readout | 4 envelope frames | frozen template field` 排列。E1146 v7 静态帧为严格等间距的 `0, +14, +28, +42 ms`，由 contact-level selector 自动选择；包络场使用低饱和蓝灰、participant-only support、固定 6 mm display kernel，并按每次事件完整窗 q99 分别归一化。
 
 **当前口径**：
 
 Fig2-C 是 raw-EEG-derived envelope timing 在既有冻结间期轴上的 representative cross-check。当前合同只覆盖 TA/TB 各一次 exemplar 的单事件版本，不覆盖多事件 event train；后续多事件 GIF 另立事件边界、逐事件 t0 与抽样规范。exemplar 分组、参与触点和显示几何仍来自模板管线，因此不是 template-free 或独立验证；单被试两次事件不能升级为 cohort-level traveling-wave 或机制证据。E1146 当前仍是 candidate，最终是否进入主图需与 Fig2 其余 panel 的信息增量共同裁决。
 
-### Fig2-E 旧单患者候选（已由 Fig2-E+F 联合行取代）
+### Fig2-D: E1146 冻结 TA/TB shared-plane template fields
 
 **目的**：把 channel-level TA/TB propagation rank 放回患者自己的电极几何中，展示间期群体事件模板所定义的连续空间传播结构。该 panel 只使用冻结的间期轴与 field，不读取任何发作、onset、subtype 或能量数据。
 
 **当前候选版本**：
 
-- 候选目录：`results/paper-ready-figure/fig2e_interictal_template_fields/figures/`
+- 正式文件：`results/paper-ready-figure/fig2/figures/fig2-paneld.{png,pdf}`
 - 当前代表患者：`E1146`；TA/TB 两轴宽泛共线且传播方向相反，因此两幅图使用同一个 shared plane。代表患者尚未最终锁定。
 - 全部素材：`results/interictal_propagation_masked/template_gradient_fields/figures/`，包含 28 名可建双轴患者的单患者图和 atlas；26 人具有有效二维几何，单杆患者只保留作方向审阅，不作为最终二维示例候选。
 - 冻结输入：`results/interictal_propagation_masked/template_gradient_fields/per_subject/<subject>.json`。
@@ -108,9 +68,9 @@ Fig2-C 是 raw-EEG-derived envelope timing 在既有冻结间期轴上的 repres
 
 **当前状态**：
 
-该目录继续作为公共 renderer、全患者素材和旧版单患者候选的来源，不再单独占用 Figure 2E。正式 Figure 2E 改为下述联合行左侧的4例 shared-axis TA/TB 场；发作早期能量关系仍由 Fig3 的 field-concordance 分析独立回答。
+该 panel 只展示代表患者的冻结静态模板场。Figure 2E 扩展为下述4例 shared-axis TA/TB 场；发作早期能量关系仍由 Fig3 的 field-concordance 分析独立回答。
 
-### Fig2-E+F: shared-axis TA–TB field 形态与队列反向性（联合行候选）
+### Fig2-E/F: shared-axis TA–TB field 形态与队列反向性（独立 panel 候选）
 
 **目的**：在 Fig2 前面已经展示定轴、单事件传播和代表患者 TA/TB 场之后，用一个不做关系分层的
 cohort 行回答：已有 shared axis 的患者中，TA 与 TB 连续 field 是否呈系统性的反向组织，并且 cohort
@@ -118,8 +78,8 @@ cohort 行回答：已有 shared axis 的患者中，TA 与 TB 连续 field 是�
 
 **当前候选版本**：
 
-- 输出目录：`results/paper-ready-figure/fig2_shared_field_reversal/figures/`。
-- 正式候选：`fig2_shared_field_reversal_last_row.{png,pdf}`，尺寸固定为 7.15 × 3.05 inch，作为 Figure 2E+F 联合行横跨整版使用。
+- 输出目录：`results/paper-ready-figure/fig2/figures/`。
+- 正式候选：`fig2-panele.{png,pdf}` 与 `fig2-panelf.{png,pdf}`；不再输出 E+F 联合文件。
 - 复现入口：`scripts/paper_figures/plot_fig2_shared_field_reversal_row.py`。
 - 主分母：已有 `shared_a/shared_b` 且 `geometry_2d_supported=true` 的12名患者；不按 signed axis cosine、
   same/reversed 标签或 strict-stability 分组。
@@ -142,57 +102,56 @@ outcome-selected morphology，不能冒充独立验证；右侧全12人分布才
 各自 channel-null 中位数的配对 Wilcoxon 为 `P=0.08813`，within-shaft cohort sensitivity 为
 `P=0.87836`，因此不能泛化成所有空间 null 均显著或多数单患者均显著。
 
-### Fig3-A: 发作原始波形与标准频带谱（正式版，LOCKED 2026-07-18）
+### Fig3-A/B: 断轴发作信号与代表性频谱表型对照（UPDATED 2026-09-03）
 
-**目的**：作为 Fig3 的正式起始 panel，用一个真实 seizure 建立读者可见的 signal context：clinical onset 前后的 raw SEEG、同一代表通道的 baseline-normalized TFR，以及四档 band-power trajectory。它解释后续 field readout 消费的原始信号与 baseline 关系，但本身不是 cohort 统计或机制证据。
+**目的**：A 并列展示一次 broadband-type 与一次典型 gamma-type 发作的 raw SEEG + TFR；B 用未经截断的连续时间轴比较二者的四档 band-power trajectory。颜色表示发作表型，不表示频带。
 
 **正式版本**：
 
-- canonical 输出目录：`results/paper-ready-figure/fig3a_raw_spectral_context/figures/`；旧 `fig3_sup2_raw_spectral_context/` 只保留历史副本。
-- 正式文件：`epilepsiae_1146_seizure_07_raw_spectral_context.png` / `.pdf`，同目录含 summary JSON 和中文 README。
-- 复现入口：`scripts/paper_figures/plot_fig3_raw_spectral_context.py --subject epilepsiae_1146 --seizure-idx 7`
-- 冻结案例：`E1146` seizure `7`，CAR，lagPat joint-valid 15 contacts，代表通道 `SCL9`；显示 `[-120,+20] s`，baseline `[-120,-90) s`，clinical-onset shading `[0,10) s`。
-- 图形合同：左侧 raw SEEG / TFR 上下同宽并严格时间对齐，TFR colorbar 占独立窄列；右侧 2×2 为 low bands (1–30 Hz)、gamma (30–80 Hz)、high-gamma (80–150 Hz)、broadband (1–150 Hz)。同一行共享 y limits，y ticks 只放左图。无内部 a/b、无 EEG onset、无 onset 竖线；标题只写 `E1146` / `TFR on SCL9`。
-- 完整视觉合同：`docs/figure_style_guide.md` §5a；验收记录：`docs/archive/topic5/fig3a_raw_spectral_context_acceptance_2026-07-18.md`。
+- canonical 输出目录：`results/paper-ready-figure/fig3/figures/`。
+- 正式文件：`fig3-panela.{png,pdf}`、`fig3-panelb.{png,pdf}`；完整拼版为 `fig3-complete-layout.{png,pdf}`。
+- 统一复现入口：`scripts/paper_figures/build_main_figure_3.py`；A/B producer 为 `plot_fig3_raw_spectral_context.py --independent-only`。
+- 冻结案例：`E10 | SZ8`（`broadband_1_150`，`SCL9`）与主图 Fig3 已接受的 `E20 | SZ8`（source zero-based seizure index 7；`gamma_nonbroadband`，`HRB1`），均为 CAR。A 的两个内部示例只显示 20 s baseline `[-110,-90] s` 与 `[-10,+20] s`，省略 `[-90,-10] s`；baseline 归一化仍使用 `[-120,-90) s`，clinical-onset shading 仍为 `[0,10) s`。
+- 图形合同：A 内横向排列两次发作，各自 raw SEEG / TFR 上下同宽并共享同一断轴映射，两个 TFR 共用 colorbar；B 为四频带 2×2，每格叠加两次发作并连续显示 `[-120,+20] s`，不得断轴。浅蓝紫 `#8D9FCD` 表示 broadband-type，青绿 `#62BE9F` 表示 gamma-type；A 的类型标签与 B 的曲线/legend 共用这套语义色。B 的 legend 放在 low-bands 图左上角的无曲线区、两项纵向排列，只写 `Broadband` / `Gamma`；患者、SZ 与通道身份由 A 标题承担。四图在 0 s 统一画黑色竖直虚线；同一行共享 y limits，y ticks 只放左图，ylabel 简写为 `dB`。独立文件不写 A/B；完整拼版才加字母。
+- 完整视觉合同：`docs/figure_style_guide.md` §5a；验收记录：`docs/archive/topic5/fig3ab_representative_phenotype_context_acceptance_2026-09-03.md`。
 
 **当前口径**：
 
-Fig3-A 是正式的 representative signal-context panel。它可支持“clinical onset 附近出现宽频能量增强，并可在 raw SEEG/TFR/band-power 三层直接核对”；不能单独支持 timing-order replay、direction replay、onset-emergent alignment、cohort superiority 或机制。
+Fig3-A/B 是 representative signal-context。它们可支持“E10/SZ8/SCL9 呈 broadband 增强，而 E20/SZ8/HRB1 呈典型 gamma-dominant 快活动增强”。两例患者和代表通道均不同，因此只能说明两类可见形态，不能把差异归因于发作模式本身；也不能单独支持表型 prevalence、cohort superiority、timing-order replay、direction replay、onset-emergent alignment 或机制。
 
-### Fig3-B: 间期 TA 时序场与发作早期能量场（paper-ready locked）
+### Fig3-C: 间期 TA 时序场与发作早期能量场（paper-ready locked）
 
-**目的**：在同一个冻结 shared plane 上，把 E1146 的间期 TA timing field 与一例和 TA 最一致的真实发作 early broadband power 并排展示，建立 Fig3-A signal context 与下游 field-concordance 统计之间的空间读出桥。
+**目的**：在同一个冻结 shared plane 上，把 E1146 的间期 TA timing field 与一例和 TA 最一致的真实发作 early broadband power 并排展示，建立 Fig3-A/B signal context 与下游 field-concordance 统计之间的空间读出桥。
 
 **当前正式版本**：
 
-- 输出目录：`results/paper-ready-figure/fig3b_interictal_ictal_shared_field/figures/`。
+- canonical 输出：`results/paper-ready-figure/fig3/figures/fig3-panelc.{png,pdf}`；原目录保留为 producer/source。
 - 当前实例锁定 E1146 seizure 2。仅按整体 TA correlation 选出的 seizure 9 会出现中段先亮；加入全触点正 robust-z、TA winner、左右最早端点覆盖和 early-to-late 直接梯度后得到 seizure 2 / 10 / 23 / 1 四个候选，最终目视选择 seizure 2。Fig3-A 仍为 seizure 7。
 - 左图：冻结 TA timing field，`viridis` early→late；`TA fields` 使用红色固定语义色。
-- 右图：标题 `Early-ictal broadband power`；精确 `1–150 Hz`、clinical `[0,10] s`、远端 EEG baseline-normalized log-band power；连续 min–max 插值、无 rank、无 sign flip，使用 `Blues`，高 power 为深色。
-- 左右严格共用 TA support、shared plane、extent 和同一个 6 mm display sigma；两个 panel 分别写 xlabel，右图保留完整边框。左 colorbar 标题 `ranks`；两条 colorbar 分别显示真实 propagation rank 与 robust-z，不再显示无量纲 `0/1`。
+- C 不写整体标题。右图标题分两行：上行为匿名病例 `E10 | SZ3`，下行为 `Early ictal field`；精确 `1–150 Hz`、clinical `[0,10] s`、远端 EEG baseline-normalized log-band power；连续 min–max 插值、无 rank、无 sign flip，使用 `Blues`，高 power 为深色。右 colorbar 的可见标题简写为 `power` / `z`。
+- 左右严格共用 TA support、shared plane、extent 和同一个 6 mm display sigma；两个 panel 分别写 xlabel，空间 y label 统一为 `Y (mm)`，右图不重复 shared y ticks。左 colorbar 与 Fig2 共用 `viridis` normalized-rank 语法，标题 `ranks`、ticks 为 `0 early / 0.5 / 1 late`；原始 propagation rank 范围只留在 metadata。右 colorbar 继续显示 robust-z。
 - seizure 2 的 15/15 early-ictal robust-z 均为正（`+1.03–+3.68`）；TA 一致性仍是触点间空间模式相关，不等于 cohort 级能量结论。
 - 正式复现入口：`scripts/paper_figures/plot_fig3b_interictal_ictal_shared_field.py`，默认输出 seizure 2；候选 provenance 由 `plot_fig3b_positive_ta_candidates.py` 保留。
 - 完整合同：`docs/fig3b_interictal_ictal_shared_field_spec.md`。
 
 **当前口径**：
 
-Fig3-B 是 intentionally selected morphology-aware TA representative。它说明一例正向发作早期能量分布可在冻结间期 TA 坐标中被直观看到；由于 seizure 经过形态 gate 与目视选择，不能写成独立 replay 证据、cohort 结论或机制证明。
+Fig3-C 是 intentionally selected morphology-aware TA representative。它说明一例正向发作早期能量分布可在冻结间期 TA 坐标中被直观看到；由于 seizure 经过形态 gate 与目视选择，不能写成独立 replay 证据、cohort 结论或机制证明。
 
-### Fig3 field-concordance cohort statistic（panel 编号待总拼版）
+### Fig3-D: clinical-onset gradient-field cohort statistic（LOCKED）
 
-**目的**：用一个紧凑 Data-vs-Null 统计面板说明，间期 HFO 传播场和发作早期激活场在 maxAB 可评估 subject 层面整体高于 channel-shuffle null；不再展示 per-subject board。
+**目的**：用一个紧凑 Data-vs-Null 面板比较 clinical onset 后 0–10 s 的 gradient-field concordance 与 channel-shuffle null。
 
 **当前验收版本**：
 
-- 输出目录：`results/paper-ready-figure/fig3_field_concordance_cohort_stat/figures/`
-- 正式文件：`field_concordance_cohort_stat.png` / `field_concordance_cohort_stat.pdf`
-- 复现入口：`scripts/paper_figures/plot_fig3_field_concordance_cohort_stat.py`
-- 数据来源：`results/topic5_ictal_recruitment/axis_alignment/axis_alignment_{broadband,broadband150,hfa}_max_ab_B1000.json`
-- 图形合同：按参考图风格画三组 `Data` vs `Null` 的 violin + box + subject 点，并用浅灰线连接同一 subject 的 paired Data/Null 值；三组为 `BB 1-45 maxAB`、`BB 1-150 maxAB`、`HFA 60-100 maxAB`。不写 `All candidates`，不画背景网格线，不混入 broad fallback。当前 maxAB 可评估 subject 为 20 个；`BB 1-150` 为 line-noise-masked sensitivity，原 `bb_auc` 仍是 legacy 1-45 Hz。
+- canonical 输出：`results/paper-ready-figure/fig3/figures/fig3-paneld.{png,pdf}`。
+- source：`results/paper-ready-figure/fig3-sup-tspectral-field-concordance/figures/clinical_onset_gradient_field_cohort_stat.pdf`。
+- 复现入口：`scripts/paper_figures/plot_fig3_clinical_onset_gradient_field_cohort.py`，总拼版由 `build_main_figure_3.py` 复制矢量源并以 600 dpi 输出 PNG。
+- 图形合同：Pooled `n=17`、Broadband `n=16`、Gamma `n=11`；Pooled/Broadband 标 `*`，Gamma 标 `n.s.`。旧 endpoint `n=20` 三组全显著版本不得替换本 panel。
 
 **当前口径**：
 
-这个 panel 支持“共享粗网络轴 / field concordance”，不表示发作沿间期方向逐点重放，也不替代 Topic 5 A-line primary FDR 定稿表。这里的 Null 是所选候选的 channel-shuffle median，用于展示 cohort-level shift above null；formal pass 仍以 selection-corrected p95/p-value 表为准。
+这个 panel 支持 clinical-onset gradient-field concordance 高于 channel-shuffle null 的 pooled/broadband cohort 读出；Gamma 不显著。它不表示发作沿间期方向逐点重放，也不支持频段特异或机制结论。
 
 **Field-concordance supplement（发作内 field 动力学，exploratory，2026-06-28）**：把早期单窗 field concordance 扩到**整段发作**——同一 field 渲染（间期 **A|B 锚** + 发作内各时刻激活场，锚到发作前布局，红/蓝=source 端点集合），外加每 subject 一个 **field 演化 GIF**（onset→offset，直观看发作场的传播变化）。配套统计（走廊轴向 vs 非轴向占比随进程）：**broad 队列有暗示（轴向降 5/8、非轴向升 8/8 by sign）但 narrow 扩队列不复现甚至反向（3/7、2/7）→ 方向减弱假设不稳健、依队列/substrate**。**定位 = supplementary**：主推**可视化**，方向统计**不进 claim**；z-ER 中后期偏示意。复现：`scripts/{run,plot,analyze}_topic5_*field_dynamics*.py --substrate {broad,narrow}`；归档 `docs/archive/topic5/ictal_field_dynamics_pilot_2026-06-28.md`。
 
@@ -222,33 +181,48 @@ Fig3-B 是 intentionally selected morphology-aware TA representative。它说明
 
 **科学边界**：冻结 archive 的 early-ictal shared-field cohort null（二维共线 n=7，within-shaft p=0.346；shared-vs-own p=0.938）仍是 cohort 级主参照。这里的 sliding-window null 回答逐人哪些时间段偏离杆内置换，不能把 3/7 cluster 写成 cohort superiority，也不能因为 pre-onset cluster 而写 onset-emergent alignment。within-shaft power 仍依赖 shaft sizes；E583 的 3/22 coverage 尤其需要降级解释。
 
-### Fig4: 被试特异性 SNN + KMeans readout 核验（E1146）
+### Supplementary Video 2: Figure 3C peri-onset field evolution
 
-**目的**：把同一 cm-SNN 标准底物按**病人真实电极平面**摆放，两个低阈值核放在**两类间期模板各自最早的电极区**（=两类模板的 source，轴两端），看同一虚拟 SEEG（=病人真实触点）能否读出正/反间期传播，并用无监督 KMeans 验证 readout 事件是否自然分成两类。
+E10 | SZ3 的静态 Figure 3C 被扩展为 `[-120,+20] s` 动态场。上排固定冻结 TA 间期场，仅更新右侧
+1–150 Hz baseline-robust-z 发作场；下排显示幅度感知模板表达量 `Q=max(|q_A|,|q_B|)`，并以红蓝点标记 TA/TB 主导。每帧为
+10 s 滑窗，步长 2 s，右侧 power-z 色标跨帧固定，避免逐帧归一化制造虚假的场强变化；`[0,10] s`
+帧必须通过正式 Fig3C 的逐触点数值一致性闸门。正式投稿入口为
+`results/paper-ready-figure/supplementary-video-2.gif`，生成 sidecar 位于
+`results/paper-ready-figure/supplementary-video-2-fig3c-peri-onset-field/figures/`。该视频只补足代表病例的
+动态可视化，不新增 cohort、onset-emergent alignment、template-free replay 或机制结论。
 
-**Fig4A：subject-specific SNN readout**
+### Fig4: Data-driven interictal SNN（A–G 修订版，B 预留）
 
-- 输出目录：`results/paper-ready-figure/fig_subject_snn_epilepsiae_1146/figures/`
-- 正式文件：`fig_subject_snn_epilepsiae_1146.png` / `.pdf`
-- 复现入口：`scripts/paper_figures/plot_fig_subject_snn.py`（消费 `scripts/run_sef_hfo_subject_snn.py --placement template_source` 的产物）
-- 图形合同：四列结构 `mechanism | tempA source | tempB source | electrode readout`；mechanism 显示两核与电极最早区 overlap + E->E 长轴带；readout 用 spontaneous twoend，暖/冷阴影分 tempA/tempB 事件。
+**当前状态**：A–G 已按作者 2026-09-03 最新顺序重排，B 明确预留为空；科学口径仍受冻结结果边界约束。唯一完整布局为
+`results/paper-ready-figure/fig4/figures/fig4-complete-layout.png`；同目录保存无角标 A、C–G 独立
+PNG/PDF，B 当前没有独立文件。完整 producer 为 `scripts/paper_figures/build_main_figure_4.py`，只消费冻结产物，不重跑仿真。
 
-**Fig4B：KMeans k=2 readout verification**
+**作者布局叙事**：
 
-- 正式文件：`fig_subject_snn_epilepsiae_1146_kmeans2.png` / `.pdf`
-- 复现入口：`scripts/paper_figures/plot_fig_subject_snn_kmeans2.py`
-- 图形合同：**四块** `clustered event heatmap | per-channel rank distribution | cluster rank distributions | model-vs-real 2×2 相似性矩阵`。前三块**复用仓库成熟 canonical 画图函数**（`scripts/plot_interictal_propagation.py` 的 `_plot_rank_histogram` / `_plot_rank_heatmap` / `_plot_cluster_boundaries` / `_plot_cluster_rank_fig4`，与 Topic-1a per_subject 图同一套），不手搓；heatmap rank colorbar 竖放在 heatmap 右侧；KMeans 显示标签不用 C0/C1，而用模板名（`t_a` 红、`t_b` 蓝）；第三块 legend 放在 panel 内右上角。第四块 = 模型 fwd/rev × 真实 t_a/t_b Spearman 矩阵，只用 star 显示方向性置换 p（不写数值）、aspect=equal，matrix colorbar 与矩阵等高。
-- **LOCKED 模式**：每个 subject-SNN 案例固定出 Fig4A（readout 四列）+ Fig4B（KMeans 四块）两张主图；Fig4C（real-vs-model profile）/ Fig4D（组合 S 置换 null）为可选 supplement。
-- 当前结果：同一个 seed3 spontaneous twoend readout 的 14 个 clean directional events 被 `KMeans k=2` 分成 `t_a/t_b` = 6/8；方向 purity=1.00；`within_cluster_tau_mean=0.939`；更干净的 shared-overlap corr = -0.69。
+- **A**：将 local E/I microcircuit 与 patient-specific E/I substrate 拼为同一 panel。左侧机制图置于虚线框内、标题在框外；右侧保留触点几何和 E/I substrate，不显示各向异性 E→E corridor 或 possible-core 覆盖。左右局部框按同一视野尺度匹配；左侧 scale bar 为 0.5 mm，右侧显示 −10–10 mm 坐标，触点 sampling footprint 以低透明度深绿色表示。
+- **B**：使用 A 右侧现有留白，完整拼板中只保留 B 角标；后续补入 data-driven 不同参数对患者间期事件复现的影响，当前不放占位文字或临时数据。
+- **C**：展示冻结 data-driven Node field 与 Model TA/Model TB 两种空间模式。Node-field 色条不得与 3D 图或 Model TA 的 y-label 重叠；两个模型方图缩至网格单元的 74%。
+- **D**：精简后的模型/患者 rank profile；图例置于绘图区下方，不压低主图。
+- **E**：模型 MTA/MTB 与患者 TA/TB 的 contact-split cross-fit matrix；两个命名匹配单元格分别显示 matched within-shaft contact-permutation 结果。
+- **F**：同一冻结网络的 30–80 Hz virtual-contact readout；MTA/MTB 阴影按各自实际 recruitment-onset span 加 12 ms 边界显示，不使用完整 detector-event 时长；不显示 a.u. 比例文字或逐通道黑色 onset 点。
+- **G**：34 人 canonical-layout held-out recovery 与 matched within-shaft null；完整显示 34/23/15/11 四层人数。
 
-**Fig4C：模型模板 vs 真实间期模板一致性**
+**当前口径**：图支持 patient-constrained Node/local-connectivity substrate 能产生自发、可返回、双簇
+组织的间期 event-like activity，并给出同一冻结 E10 development case 的 direct readout、自然聚类与
+patient-template rank 对照。34 人 canonical layout 上存在弱 held-out 优势，但 same-network K=2 门槛未过，
+真实几何优势归零。因此不能写“复现了完整患者间期活动”“恢复了解剖 core”或“证明了 EE/E→I 临床
+因果机制”。原 KMeans heatmap/rank-distribution panel 移至 FigS7-E；冻结 pathway ablation 作为 FigS7-A–D 展示。详见
+`docs/archive/topic4/sef_hfo/data_driven_interictal_snn_closeout_2026-08-17.md`。
 
-- 正式文件：`fig_subject_snn_epilepsiae_1146_realvsmodel.png` / `.pdf`
-- 复现入口：`scripts/paper_figures/plot_fig_subject_snn_realvsmodel.py`
-- 图形合同：A=真实 t_a/t_b 逐通道 `typical_rank`，B=模型 forward/reverse 逐通道平均 rank；一致性以逐通道 Spearman 判。
-- 当前结果：**model-forward vs real-t_a ρ=+0.87（n=7）、model-reverse vs real-t_b ρ=+0.62（n=11）**，交叉项为负 → 模型在 ICL readout 通道上复现了真实间期模板的传播顺序与 swap 反向结构。**结论=一致**，故未触发"不一致则重做 1146 仿真"。
+### FigS7: 冻结局部连接路径消融与 KMeans 结构
 
-**当前口径（诚实）**：E1146（ICL 密杆，能采到完整传播）成立，但不是机制证明。模型 readout 顺序与真实间期模板一致（Fig4C），但属单被试、读出级一致性，非因果/cohort。自发双向**与 seed 有关**（seed3 6 正/8 反；seed1/2 偏反向），分开驱动 source 5/0、sink 0/9。读出依赖 `k_dir=2`（病人电极稀疏放宽，载重参数）+ 真实几何 plane-fit。E958（稀疏栅格）阴性。不声称"真实病人机制被证明"；这是机制/读出可行性示意。
+12 张全新配对网络分别运行 Node、+EE、+E-to-I 和 +EE+EI 四个冻结连接臂，以 network seed
+为独立单位展示 Mode 1/2 事件占比、de novo KMeans K=2 与冻结标签的 balanced match，以及
+返回事件 OOD 比例。E 为从主图移入的 627 个 formal clean model events 的 masked-rank heatmap、
+逐触点 rank distribution 和唯一共享色条。独立 A–E panel 不带角标，`supp_fig7-complete-layout` 才带 A–E；
+A–D 星号表示相对 Node 的配对 90% network-bootstrap CI 不跨 0（4,096 draws，未做多重比较校正）。
+该补图只支持 development case 中的模型内部 pathway effect pattern 与事件结构，不支持患者因果连接、
+解剖 core 恢复或真实几何泛化。
 
 ### Fig5-Fig6: 间期活动作为推动者的模型与病例场景
 

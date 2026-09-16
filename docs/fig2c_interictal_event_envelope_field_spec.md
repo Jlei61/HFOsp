@@ -1,6 +1,6 @@
 # Fig2-C 间期单事件包络传播 frame / GIF 规范
 
-> 合同：`fig2c_interictal_event_envelope_field_candidate_v10`
+> 合同：`fig2c_interictal_event_envelope_field_candidate_v12`
 > 状态：paper-ready candidate；后续所有“间期传播场 frame / event-envelope GIF”先读本文件。  
 > Canonical Figure 2 packager：`scripts/paper_figures/build_main_figures_1_2.py`
 > Fig2-C source producer：`scripts/paper_figures/plot_fig2c_interictal_event_envelope_field.py`
@@ -67,12 +67,12 @@ gap | frozen template rank field | rank colorbar
 ### 4.2 右侧 field frames
 
 - 所有 frame 使用同一 frozen shared plane、物理毫米坐标、相同 x/y limits、`aspect="equal"`。
-- E1146 v10 输出 4 帧为 `0, +16, +32, +48 ms`。这些值不是硬编码：selector 在完整 `−8…+50 ms` 窗内建立 2 ms contact-level 网格，只搜索等间距的四帧算术序列。每个候选时刻都在**本事件全部参与触点**上计算可见度、加权轴向质心和 top-3 热点质心；这与实际渲染 field 的 participant-only support 一致，不再只用 ICL 轴杆代替二维场。
+- E1146 v12 输出 4 帧为 `0, +16, +32, +48 ms`。这些值不是硬编码：selector 在完整 `−8…+50 ms` 窗内建立 2 ms contact-level 网格，只搜索等间距的四帧算术序列。每个候选时刻都在**本事件全部参与触点**上计算可见度、加权轴向质心和 top-3 热点质心；这与实际渲染 field 的 participant-only support 一致，不再只用 ICL 轴杆代替二维场。
 - 四帧间隔必须完全相等且至少 8 ms，首帧不晚于 +2 ms、末帧不早于窗口末端前 8 ms；完整参与触点的 joint visibility 每帧≥0.30。每一步 TA/TB 的完整参与触点加权质心必须分别沿正/负方向移动至少 2 mm，top-3 热点质心必须分别沿正/负方向移动至少 4 mm；同时保留沿轴总体方向、首末位移、状态差异和端点交接门作为辅助约束。选择优先最大化最弱一步的双行热点移动，再考虑完整场质心、可见度和整体方向。整个选择只读取 contact envelope 和冻结坐标，不读取渲染 field pixel。
 - 若其他患者不存在严格合格组合，renderer 明确回退到 4 个全窗等间隔时刻，并在 metadata 写 `uniform_fallback_*`；不得静默手挑。`t=0` 始终由两幅 readout 中的黑色竖线标记。
 - 每个 field 都保留 x ticks；只在下排中央 frame 写共享 xlabel `shared TA axis (mm)`。
 - 左侧 field 只保留数值 y ticks，不重复 transverse 或 TA/TB y-label。
-- 包络使用低饱和蓝灰顺序色图 `fig2c_muted_bluegray`，固定 `PowerNorm(gamma=0.5, vmin=0, vmax=1)`。最右 `viridis` 模板场仍是视觉主位。TA/TB 各自有一条与本行 field 等高的 colorbar，标签固定为 `Relative HFO envelope`，ticks 为 `0, 0.5, 1`。
+- 包络使用低饱和、亮度严格单调的 `fig2c_soft_teal_navy`，固定 `PowerNorm(gamma=0.5, vmin=0, vmax=1)`。色带由近白 `#f7f9f8` 过渡到 navy `#314766`；CIE L* 从约 97.8 单调降到 29.7，无亮度反转，强度顺序不依赖红绿辨色。最右 `viridis` 模板场仍是视觉主位。TA/TB 各自有一条与本行 field 等高的 colorbar，标签固定为 `Relative HFO envelope`，ticks 为 `0, 0.5, 1`。
 - 静态四帧逐帧以最强三个参与触点的均值归一化，1 表示该帧的 top-3 mean，超过 1 的触点 clip 到 1。这一处理只用于比较每帧的**空间集中位置**，明确取消帧间及 TA/TB 间绝对幅度比较；连续幅度演化由同图 readout 和 complete-window-q99 GIF 承担。不得把静态颜色深浅写成随时间增强/衰减。
 - 参与触点画深蓝灰外圈以在浅色底上保持可见；未参与触点只画浅灰空心圈，不进入主图平滑。
 
@@ -81,10 +81,10 @@ gap | frozen template rank field | rank colorbar
 - 每行最右各放一幅冻结群体模板场，上 `TA template`、下 `TB template`；这两幅不是单事件场。
 - 必须调用 `build_interictal_ab_panel_payloads()` 和 `draw_interictal_rank_field_panel()`；不得从当前 exemplar 重拟合或复制平滑函数。
 - 与中间 event frames 使用同一 shared plane、contact order、物理毫米范围和 6 mm display kernel。
-- field 内部仍用冻结 rank 的线性 `viridis` 映射，但 colorbar 必须显示 artifact 中的实际 rank 数值（E1146 为 `0–14`），不得只报归一化 `0–1`；它不是毫秒时延。
-- 每行 colorbar 顶部标题只写 `ranks`，不在右侧放长竖排标题；数值 tick 保留实际 rank，最低/最高端分别附 `early` / `late`，不用括号。
+- field 内部仍用冻结 rank 的线性 `viridis` 映射；显示时对 TA、TB 各自的冻结 early→late rank 做线性 min–max，colorbar 固定为 `0–1`。底层 artifact 实际 rank 范围继续写入 metadata 供审计，但不再直接显示在画布上。
+- 每行 colorbar 顶部标题只写 `ranks`，不在右侧放长竖排标题；ticks 固定为 `0, 0.5, 1`，最低/最高端分别附 `early` / `late`，不用括号。该数值是归一化顺序，不是毫秒时延。
 - TA/TB 两幅模板场都显示简写 y-label `y (mm)`；不得只给第一行，也不再写较长的 `transverse (mm)`。
-- 中间低饱和蓝灰 envelope cmap 与最右 `viridis` 是两种不同物理量；不得共享 colorbar 或互换标签。
+- 中间 soft teal-to-navy envelope cmap 与最右 `viridis` 是两种不同物理量；不得共享 colorbar 或互换标签。
 
 ### 4.4 标题与字号
 
@@ -99,13 +99,16 @@ GIF 必须复用静态 candidate 的同一对 exemplar、participant mask、shar
 
 - 生物学时间：与静态图同一窗口，E1146 为 `−8…+50 ms`；
 - 生物学帧间隔：`2 ms`，共 30 帧；
-- 播放速度：默认 `12 fps`，只为观看，不代表真实时间倍率；
+- 播放速度：固定 `12.5 fps`（GIF 精确的 80 ms/frame），只为观看，不代表真实时间倍率；
 - 每行左侧 readout 增加黑色虚线 cursor，必须与中间当前 envelope field 帧使用同一时间值；
 - 最右 template rank field 在 GIF 中保持静态，只提供群体模板空间参照；
 - field title 显示当前相对时间；
 - GIF 循环播放，不在末尾加入新的数据帧；
 - metadata 必须分别记录 biological step 和 playback fps，禁止把二者混为一谈。
 - 本 GIF 始终是一对单事件 side-by-side comparison，不承担事件间状态切换；多事件 GIF 另立合同。
+- 2026-08-19 作者锁定该 GIF 为 `Supplementary Video 1`。正式投稿入口是
+  `results/paper-ready-figure/supplementary-video-1.gif`；`fig2/figures/fig2-panelc.gif` 只保留为
+  同字节 source sidecar。两者 SHA-256 必须一致，顶层 metadata 必须记录该指纹和完整 movie contract。
 
 ## 6. 标准输出与复现
 
@@ -132,6 +135,13 @@ README.md
 metadata 位于 `results/paper-ready-figure/fig2/fig2_panelc_metadata.json`。底层 producer
 `plot_fig2c_interictal_event_envelope_field.py` 仍先生成带长 stem 的临时 source 文件，统一 builder
 随后原子移动到上述 canonical panel 名；不得把旧的 `fig2c_interictal_event_envelope_field/` 顶层目录恢复为论文入口。
+
+锁定的补充视频另写到 paper-ready 根目录：
+
+```text
+results/paper-ready-figure/supplementary-video-1.gif
+results/paper-ready-figure/supplementary-video-1_metadata.json
+```
 
 ### 6.1 更换单事件 exemplar 前的候选筛查
 
@@ -179,7 +189,7 @@ block 去重；同一 block 的不同事件允许并列进入候选屏，但最�
 传入 `--use-medoid-ta` 才回到旧 medoid。
 
 当前 Fig2-C 已锁定 E1146 TB `event_pos=937`：ICL 9/11、SCL 2/4 参与，沿 ICL 的
-质心-轴 Spearman 为 −0.817，并通过 v10 的完整参与触点 frame gate。四帧 top-3 热点轴坐标约为
+质心-轴 Spearman 为 −0.817，并通过 v12 的完整参与触点 frame gate。四帧 top-3 热点轴坐标约为
 `+12.4, +0.5, −6.5, −10.8 mm`，与 TA 的相反移动在每个相邻时间步都可见。旧 event 829
 虽然沿 ICL 总体方向合格，但前三个渲染场的峰位置基本不动，无法通过新的逐步热点门，因此退出
 paper-ready candidate。event 937 仍只称为 `direction-qualified illustrative exemplar`；canonical
@@ -189,7 +199,7 @@ producer 默认读取它，只有显式传入 `--use-medoid-tb` 才回到旧 med
 
 ```bash
 python scripts/paper_figures/screen_fig2c_tb_event_candidates.py \
-  --subject epilepsiae_1146 --gif-event-pos 937 --gif-step-ms 2 --gif-fps 12 \
+  --subject epilepsiae_1146 --gif-event-pos 937 --gif-step-ms 2 --gif-fps 12.5 \
   --mark-selected-for-fig2c
 ```
 
@@ -217,7 +227,7 @@ scripts/paper_figures/build_main_figures_1_2.py；Fig2-C source producer 是
 scripts/paper_figures/plot_fig2c_interictal_event_envelope_field.py，禁止复制 renderer 另写一套。
 必须复用 frozen interictal artifact、fingerprint、contact order、shared plane、
 participant-only support、单带 return_hil_enve、Fig1a spectrogram helper、6 mm display kernel、
-低饱和蓝灰 envelope cmap 和固定 `PowerNorm(gamma=0.5)`；静态四帧分别按本帧 participant top-3
+低饱和、亮度单调的 soft teal-to-navy envelope cmap 和固定 `PowerNorm(gamma=0.5)`；静态四帧分别按本帧 participant top-3
 robust-z mean 归一化到 0–1，GIF 则分别按完整显示窗 participant-only q99 归一化。
 两类原始分母都写 metadata，中间颜色不得用于比较 TA/TB 或静态帧间绝对幅度。静态图按 single-event readout | cbar | 4 个
 equal-interval full-field hotspot envelope frames | cbar | frozen template rank field | cbar；t=0 由 readout 黑色竖线标记，

@@ -92,3 +92,45 @@ def test_build_figure_writes_field_examples_cohort_and_null(tmp_path, monkeypatc
     assert (tmp_path / "figures/fig2_shared_field_reversal_last_row.pdf").exists()
     assert (tmp_path / "figures/fig2_shared_field_reversal_last_row_metadata.json").exists()
     assert (tmp_path / "fig2_shared_field_reversal_cohort_null.npz").exists()
+    assert metadata["figure_role"].startswith("Figure 2E+F")
+    assert set(metadata["panel_assignments"]) == {"Figure 2E", "Figure 2F"}
+
+
+def test_build_independent_panels_writes_e_and_f_separately(tmp_path, monkeypatch) -> None:
+    rows = _rows()
+    rng = np.random.default_rng(5)
+    nulls = {
+        row["subject_id"]: rng.normal(0.0, 0.2, size=300)
+        for row in rows
+    }
+
+    def fake_payloads(record, *, display_sigma_mm):
+        payload = {
+            "subject_id": record["subject_id"],
+            "xs": np.asarray([-5.0, 5.0]),
+            "ys": np.asarray([-10.0, 10.0]),
+            "frame": {"xlim": (-20.0, 20.0), "ylim": (-20.0, 20.0)},
+        }
+        return (dict(payload), dict(payload), "shared")
+
+    def fake_draw(ax, payload, template, **kwargs):
+        value = 0.25 if template == "TA" else 0.75
+        ax.imshow(np.full((2, 2), value), cmap="viridis", vmin=0, vmax=1)
+        ax.set_xticks([])
+        ax.set_yticks([])
+
+    monkeypatch.setattr(fig2_row, "build_interictal_ab_panel_payloads", fake_payloads)
+    monkeypatch.setattr(fig2_row, "draw_interictal_rank_field_panel", fake_draw)
+    metadata = fig2_row.build_independent_panels(
+        rows,
+        channel_nulls=nulls,
+        out_dir=tmp_path,
+        seed=7,
+        n_cohort_draws=2_000,
+    )
+
+    assert metadata["schema_version"] == "figure2_independent_panels_ef_v1"
+    for stem in ("fig2-panele", "fig2-panelf"):
+        assert (tmp_path / f"figures/{stem}.png").exists()
+        assert (tmp_path / f"figures/{stem}.pdf").exists()
+    assert not (tmp_path / "figures/fig2_shared_field_reversal_last_row.png").exists()

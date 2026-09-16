@@ -256,6 +256,17 @@
   因此新人体 H3 按合同 0 作业，判为不可检验而非生物学阴性。权威报告位于
   `results/epi_prssm/continuous_marked_state/r1/r1_3_long_triage_goal_report/`。
 
+### 2026-08-27 R1.4 / T2-R2.0 / H2b 阶段
+
+- 白话版：`results/epi_prssm/continuous_marked_state/r1/final_reports/r1_4_t2_r2_h2b_plain_2026-08-27.md`
+- 技术版：`results/epi_prssm/continuous_marked_state/r1/final_reports/r1_4_t2_r2_h2b_technical_2026-08-27.md`
+- **更正记录（必读，优先于上面两版）**：`r1_4_t2_r2_h2b_post_review_corrections_2026-08-27.md`
+  - 五条科学结论全部成立，承重数字逐项核对通过（H2b 从逐发作产生表独立重算复现）。
+  - 主要更正：把「搜索找不到边」误记为「测不了」——E958 的 load 源 3/3 seed 停在零边，
+    而同排 current-event 臂在相同行上拟合出边并胜过无边，这是支持度最好的患者给出的
+    H3a 阴性回答，原先整行打 `n/a`。另修 10-donor 敏感性与主分析嵌入精度不一致、
+    陈旧敏感性会被静默接受、报告生成器写死分母。
+
 ### 2026-08-26 近期 goals 综合复审
 
 - 白话版：`results/epi_prssm/continuous_marked_state/r1/final_reports/recent_goals_integrated_review_plain_2026-08-26.md`

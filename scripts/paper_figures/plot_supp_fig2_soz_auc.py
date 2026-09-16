@@ -31,6 +31,15 @@ from paper_figures import plot_fig1_interictal_hfo_temporal_scaffold as fig1  # 
 from paper_figures.patient_public_labels import public_patient_label  # noqa: E402
 import plot_refine_soz_validation as refine_plot  # noqa: E402
 from src.plot_style import COL_YQ  # noqa: E402
+from src.supplementary_figure_style import (  # noqa: E402
+    ANNOTATION_SIZE,
+    AXIS_LABEL_SIZE,
+    PANEL_LETTER_SIZE,
+    SIGNIFICANCE_SIZE,
+    TICK_LABEL_SIZE,
+    apply_supplementary_rcparams,
+    normalize_axis_text,
+)
 
 
 OUT_ROOT = ROOT / "results/paper-ready-figure/supp_fig2_soz_auc"
@@ -112,8 +121,8 @@ def _auc_inset(ax: plt.Axes, rows: list[dict], color: str) -> None:
     inset.set_ylim(0.0, 1.02)
     inset.set_xticks([])
     inset.set_yticks([0, 0.5, 1.0])
-    inset.set_ylabel("AUC", fontsize=6.5, labelpad=1)
-    inset.tick_params(axis="y", labelsize=6, length=2, pad=1)
+    inset.set_ylabel("AUC", fontsize=AXIS_LABEL_SIZE, labelpad=1)
+    inset.tick_params(axis="y", labelsize=TICK_LABEL_SIZE, length=2, pad=1)
     inset.spines[["top", "right", "bottom"]].set_visible(False)
     inset.spines["left"].set_linewidth(0.6)
 
@@ -186,15 +195,15 @@ def _plot_paired_auc(
         p_text,
         ha="center",
         va="bottom",
-        fontsize=9.0,
+        fontsize=SIGNIFICANCE_SIZE,
         fontweight="bold" if "*" in p_text else "normal",
     )
     ax.set_xlim(-0.45, 1.45)
     ax.set_ylim(0.0, 1.08)
     ax.set_xticks([0, 1], ["Raw", "Synchronized"])
-    ax.set_xlabel(LABELS[dataset], color=color, fontsize=8.0, labelpad=4)
-    ax.set_ylabel("Subject AUC", fontsize=8.5, labelpad=4)
-    ax.tick_params(axis="both", labelsize=7.2, length=2.5, width=0.7)
+    ax.set_xlabel(LABELS[dataset], color=color, fontsize=AXIS_LABEL_SIZE, labelpad=4)
+    ax.set_ylabel("Subject AUC", fontsize=AXIS_LABEL_SIZE, labelpad=4)
+    ax.tick_params(axis="both", labelsize=TICK_LABEL_SIZE, length=2.5, width=0.7)
     fig1._style_axis(ax)
     ax.set_box_aspect(1.0)
     return {
@@ -222,6 +231,7 @@ def _write_pair_csv(rows: list[dict]) -> None:
 
 def main() -> None:
     fig1._apply_rcparams()
+    apply_supplementary_rcparams()
     FIG_DIR.mkdir(parents=True, exist_ok=True)
 
     roc_rows = {
@@ -263,9 +273,9 @@ def main() -> None:
             if artist.get_text().startswith("mean AUC"):
                 artist.remove()
         ax.set_title("")
-        ax.set_xlabel("False-positive rate", fontsize=8.5, labelpad=4)
-        ax.set_ylabel("True-positive rate", fontsize=8.5, labelpad=4)
-        ax.tick_params(axis="both", labelsize=7.2, length=2.5, width=0.7)
+        ax.set_xlabel("False-positive rate", fontsize=AXIS_LABEL_SIZE, labelpad=4)
+        ax.set_ylabel("True-positive rate", fontsize=AXIS_LABEL_SIZE, labelpad=4)
+        ax.tick_params(axis="both", labelsize=TICK_LABEL_SIZE, length=2.5, width=0.7)
         ax.set_box_aspect(1.0)
         ax.text(
             0.04,
@@ -275,7 +285,7 @@ def main() -> None:
             ha="left",
             va="top",
             color=COLORS[dataset],
-            fontsize=7.6,
+            fontsize=ANNOTATION_SIZE,
         )
         _auc_inset(ax, roc_rows[dataset], COLORS[dataset])
         roc_subjects = roc_summaries[dataset].pop("subjects")
@@ -301,9 +311,11 @@ def main() -> None:
             label,
             ha="left",
             va="top",
-            fontsize=11,
+            fontsize=PANEL_LETTER_SIZE,
             fontweight="bold",
         )
+    for axis in (*axes_roc, *axes_pair):
+        normalize_axis_text(axis)
     stem = FIG_DIR / "supp_fig2_soz_auc_raw_vs_synchronized"
     png, pdf = stem.with_suffix(".png"), stem.with_suffix(".pdf")
     fig.savefig(png, dpi=400, facecolor="white", bbox_inches="tight")

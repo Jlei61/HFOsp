@@ -96,6 +96,6 @@ Y1–Y18 沿用旧临床表的正式顺序；新增两例已在不入库的 priv
 ### 放入 S3/S4，而不是继续加宽人口学表
 
 - **Table S3 temporal evidence**：`patient, dataset, artifact_lineage, n_events, n_core_channels, masked_features, stable_k, overall_tau, within_tau, uplift, MI_p, reproducibility_grade, opposing_pair_candidate, opposing_pair_reproduced`；
-- **Table S4 spatial evidence**：`patient, n_implanted_shafts, coordinate_available, coordinate_space, geometry_tier, n_mapped_contacts, heldout_axis_rho, paired_axis_cosine, endpoint_compactness, spatial_eligible, exclusion_reason`。
+- **Table S4 spatial evidence**：`patient, n_implanted_shafts, coordinate_available, coordinate_space, geometry_tier, n_mapped_contacts, timing_only_direction_score, timing_plus_space_direction_score, spatial_information_gain, heldout_axis_rho, paired_axis_cosine, endpoint_compactness, spatial_eligible, exclusion_reason`。
 
 这样 S1/S2 回答“患者是谁、记录了什么”，S3/S4 回答“每位患者支持了哪一层论文结论”。

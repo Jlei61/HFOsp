@@ -53,16 +53,18 @@
 
 ### Topic 4：模型层 —— SEF-HFO 空间易激场模型
 
-关注间期事件机制建模层，目标是给 Topic 1 现象（稳定模板、正反共享 endpoint、模板选择近似随机、慢漂解耦）提供机制解释而非拟合。
+**当前设计口径（用户确认，2026-09-09）**：由患者间期传播轴与端点区域的几何中心提供空间先验，初始化共享双核网络；以多事件参与、顺序、时差和空间联合分布拟合范围、中心及有效参数，再通过配对参数干预与独立重演分析两类传播如何形成。拟合工作点与机制证据分别建立。统一规范见[患者传播几何先验下的 SNN](topic4_patient_geometry_prior_snn.md)。当前范围/中心 pilot 不因方向更新自动扩展到全部参数；下列早期计划与结果按其日期保留。
 
-- 正式入口：`docs/topic4_sef_hfo.md`（**v0.2 plan lock draft 2026-06-01**）
-- 当前主模型计划：`docs/archive/topic4/sef_hfo_topic4_v2_plan_2026-06-01.md`
+- 正式入口：[Topic 4 主文档](topic4_sef_hfo.md)与[共享科学口径](topic4_patient_geometry_prior_snn.md)。
+- 早期主模型计划：`docs/archive/topic4/sef_hfo_topic4_v2_plan_2026-06-01.md`（历史设计，不作当前搜索合同）。
 - 上游 SBA framework：`docs/paper1_framework_sba.md`（SEF-ITP 取代其 BHPN-toy 部分；保留 P1/P2/P3/P5 红线）
 - 核心断言：间期群体 HFO = 局部低异质性、各向异性连接、近临界但仍亚阈值的 E-I 易激斑块，在噪声触发下产生的自限性瞬态传播事件；低异质性必须通过 effective gain 实际计算进入稳定性分析
 - 6 条 pre-registered 预测：H1 endpoint 空间紧凑 / H2 source-sink 反向几何 / H3 mark independence + stable geometry / H4 rate-geometry 解耦 / H5 发作邻近 endpoint identity shift / H6 participation-field 空间分隔
 - 建模路线：effective gain → linear dispersion map → finite-pulse response map → 2D rate field + geometry controls → LIF E-I SNN → 抽象慢变量 feasibility bridge；旧 HR/FHN Phase 4 route 降级为历史探索 / sensitivity
 - **当前执行状态（2026-07-12，M3 收口、M4 进行中）**：M3 A 线（源空间逐细胞 onset 梯度）与 B 线（非正规瞬态）共同支持 E→E scaffold 上的轴向招募；M3A-v2/v2.1/v2.2 仍未把它转成受控离轴/全局招募。随后 criticality M1/M2 把失稳问题再拆开：M1 的 crossing 时机仍 `unresolved_operating_point`；M2 接受 **core-localized ignition**（不是全场同时软化），但 nonlinear spread 因 epsilon/polarity sensitivity 保持 `undetermined`。这只是上游诊断，**当前主动机制层已经是 M4**；M4 负责局部起燃后的有界、终止与恢复，M2 不覆盖其新设计、acceptance 或 ablation。总体仍是 **mechanism screen，不是发作机制 validation**。M-stage 主文档：`docs/topic4_m3_stage.md`（criticality handoff 见 §6.1）
 - **M4 / M4-2 / M4-3A update（结果 2026-07-08/10，2026-07-12 合入 `main`）**：M4 pass-1 的活动依赖除法池把 q_I 耗竭 runaway 打开成**窄窗口有界持续态**，但该态空间宽、marginal、不可撤回且不自终止——所以只支持“pool can bound”，不支持完整 seizure cycle。M4-2 在该工作点加 E→E STD，3 seed 全 map 0 `terminate_clean`：弱 STD 碎裂，强/慢 STD 压死；这是此衬底/工作点/网格内的 scoped clean no-go，不是 STD 普遍失败。M4-3A 再换连续、活动驱动的 conductance shunt `n→a`，主网格加边界细化共 30 格仍 0 `terminate_clean` / 0 go：弱 shunt 把 bounded 态推向 runaway，强 shunt 推向 fragment，中间无干净终止窗。**当前未证的新线索**是 shunt 可能因降低稳态放电而削弱 `S_G` 累积；下一杠杆仍是 M4-3B graph-kernel smoke / deferred `g_K` / `D_EE` 三选一，不能把 no-go 写成“已证明必须换 D_EE”。证据见 `docs/archive/topic4/sef_hfo/m4_pass1_divisive_shared_pool_acceptance_2026-07-09.md`、`docs/archive/topic4/m4_2_std_termination_p1_sweep_2026-07-08.md`、`docs/archive/topic4/m4_3a_continuous_shunting_p1_discovery_2026-07-10.md`。
+- **Data-driven interictal SNN closeout（2026-08-17；Fig4 A–H 修订 2026-08-19）**：患者约束的 Node field 在新网络中稳定产生自发、可返回、双簇组织的 event-like activity；冻结 EE/E→I pathway ablation 给出模型内的静态功能分解。34 人 canonical layout 上 23/34 的 held-out loss 优于各自杆内 relabel null，但 same-network K=2 仅 15/34，真实几何中位优势为 `-0.0007`、`P=0.98`。安全结论是 **development-level partial substrate support**，不是完整患者间期活动或真实几何泛化。静态 field/edge 追参暂时关闭；Z/M 发作统一保持独立验收。收官证据：`docs/archive/topic4/sef_hfo/data_driven_interictal_snn_closeout_2026-08-17.md`；当前 Figure 4 A–H 修订版：`results/paper-ready-figure/fig4/figures/fig4-complete-layout.png`。
+- **Spatial Z/M + stationary OU tonic runaway 与相图（2026-09-03）**：冻结 `tonic_b0_v2` 在全新 seeds 1841/1842/1843 上 3/3 进入持续、全局、近饱和平台；代表 seed 1842 为 55.1→393.9 Hz、active-E/sheet=1.00、15/15 触点、post 1.717 s。matched-noise 双初值 pilot 在 `eta_m=0.02` 得到 `q=0.860 L/L → 0.840/0.820 L/I → 0.805 I/I → 0.790/0.770 I/H`，q-only 的 `q=0.825` 为 `L/I`，故 OU-on finite SNN 仍只支持 **low → broad intermediate/metastable band → tonic runaway**，没有 robust `L/H` 同点共存。新的患者匹配 1 mm deterministic reduction 经 pseudo-arclength、同 q 双根、fixed-point Jacobian simple real zero mode、transversality 与 quadratic nondegeneracy 数值确认 generic saddle-node（`eta_m=0.02: q_fold=0.890825926`），但它只属于 OU-mean frozen-q fast subsystem，且与 SNN 经验边缘 `q≈0.80–0.825` 不重合。允许写 reduced-model saddle-node；禁止写 finite-SNN phase transition。仍缺网格收敛、colored-OU closure、delay-aware Hopf 与三 seed 长驻留。Fig. 5B 原时间轨迹回折仍不是解析 fold。详见 `docs/topic4_sef_hfo.md` 顶部状态锁与 `docs/archive/topic4/data_driven_zm_ictal_transition/spatial_zm_phase_bifurcation_analysis_2026-09-03.md`。
 
 ### Topic 5：Seizure-related analysis（subject 内 seizure subtype + 下游 pre-ictal/outcome）
 
@@ -82,7 +84,7 @@
 
 ### Topic 1
 
-间期群体事件内部存在稳定但多模态的传播结构；`k=2` 是主导压缩但不是普适真相，少数 subject 需要 `k=4` 到 `k=6` 才能更好描述。PR-2.5 显示这些模板在 split-half / blockwise 尺度上总体稳定（`23/30 strong`, `7/30 moderate`），forward/reverse 候选关系在 `11/12` subject 中复现。PR-5 进一步支持 post-ictal dominant-template 绝对招募率升高；但 rate 调制与 seizure-onset cluster 的共现具有明显异质性（strict 子群而非全体规律），需要新的 burst-level 指标继续刻画。PR-6A 截至 2026-04-23 仅完成 Step0-2 与 Step3-preview 审阅：ER 值得继续作为 clinical 前 electrographic recruitment 的候选特征，但 onset-rank 提取层尚未封板。cluster-aware 分析显示刻板性真实存在，但 SOZ 优势目前仍偏探索性。事件级同步性在线队列水平总体为 null，仅 extra-focal phase synchrony 出现探索性 `pre > post`。
+间期群体事件内部存在稳定但多模态的传播结构；`k=2` 是主导压缩但不是普适真相，少数 subject 需要 `k=4` 到 `k=6` 才能更好描述。PR-2.5 显示这些模板在 split-half / blockwise 尺度上总体稳定（`23/30 strong`, `7/30 moderate`），forward/reverse 候选关系在 `11/12` subject 中复现。新增记录块交叉验证进一步表明，真实三维方向信息提高了留出方向一致性：25 名可评估患者中 21 名提高，方向得分中位数由 0.506 增至 0.568，中位增益 0.028（95% CI 0.001–0.063；单侧配对 Wilcoxon p=9.08e-4）。PR-5 进一步支持 post-ictal dominant-template 绝对招募率升高；但 rate 调制与 seizure-onset cluster 的共现具有明显异质性（strict 子群而非全体规律），需要新的 burst-level 指标继续刻画。cluster-aware 分析显示刻板性真实存在，但 SOZ 优势目前仍偏探索性。事件级同步性在线队列水平总体为 null，仅 extra-focal phase synchrony 出现探索性 `pre > post`。
 
 ### Topic 2
 
@@ -93,6 +95,8 @@
 lagPat 群体事件框架的 SOZ / non-SOZ 对比受结构性选择偏差污染。per-channel relaxed-refine 分析显示：原始 serial correlation 没有 SOZ 差异，但去趋势后 SOZ 更像保留了额外的局部短程记忆。
 
 ### Topic 4
+
+**当前 Figure 4 问题（2026-09-09）**：在患者传播几何先验下，拟合患者相容的有效网络配置，检验 core 范围、中心偏移、E/I 与连接各向异性对参与和传播的作用；临床 SOZ、内源状态机制及分岔结论分别验收。见[统一设计口径](topic4_patient_geometry_prior_snn.md)。下文保留旧理论路线与历史证据，不作为新 pilot 的执行状态。
 
 SEF-HFO v0.2（2026-06-01 plan lock draft）把 Topic 4 主模型收紧为一个可证伪机制闭环：低异质性不能直接等同近临界，必须先进入群体输入-输出曲线并改变局部 gain；线性稳定性只给小扰动地图，有限幅脉冲图才证明“能点燃但不失控”；稳定模板和高通道身份偏置必须高于电极几何 / 采样方式 controls。文献 framing 采用“具体细胞机制多样、中观动力学收敛”的安全口径：离子、泵、胶质、抑制和连接结构都可能改变易激性与恢复能力，但 SEF-HFO 只抽象检验 HFO 群体事件的自限传播、有限扰动响应、事件率调制和空间招募。旧 HR/FHN Phase 4 route 降级为历史探索 / sensitivity。真实数据验收合同仍沿用 v1 的 6 条预测（H1–H6），但 v0.2 建模主指标改为 held-out rank stability、split-half / odd-even stability、inter-template anti-correlation、self-limited pulse response 和 controls fail；`k=2` 与 raw identity bias 只作描述性输出。下一步主线是先做 effective gain + linear dispersion + finite-pulse response，再跑 2D rate field 和真实模板 pipeline。
 
@@ -152,7 +156,7 @@ PR-0 v2.3 ictal ER timing atlas + PR-1 z-ER subtyping 在 16 个 epilepsiae subj
 
 ### Topic 1
 
-- 结果：`results/interictal_propagation/`
+- 结果：`results/interictal_propagation_masked/`（含 `spatial_information_gain/`）；历史未屏蔽结果保留于 `results/interictal_propagation/`
 - 代码：`src/interictal_propagation.py`
 - 脚本：`scripts/run_interictal_propagation.py`、`scripts/plot_interictal_propagation.py`
 
@@ -184,7 +188,7 @@ PR-0 v2.3 ictal ER timing atlas + PR-1 z-ER subtyping 在 16 个 epilepsiae subj
 
 ## 5. 当前最稳的科学结论
 
-- Topic 1：内部传播不是单一模板，而是多模态且多数以双模态为主的病理网络传播路径；legacy MI 可复现，cluster-aware τ 明显高于整体 τ，而且模板在 split-half / blockwise 尺度上总体稳定。
+- Topic 1：内部传播不是单一模板，而是多模态且多数以双模态为主的病理网络传播路径；legacy MI 可复现，cluster-aware τ 明显高于整体 τ，模板在 split-half / blockwise 尺度上总体稳定，真实三维方向信息还能提高留出记录块上的方向一致性。
 - Topic 1：interictal synchrony 在 cohort level 没有支持“post-ictal reset / pre-ictal resynchronization”；唯一值得继续追的是 extra-focal `phase_e` 的 `pre > post`。
 - Topic 2：`~2 Hz` peak 不是 oscillator；IEI 是 lognormal，不是 power-law。
 - Topic 2：IEI 相邻正相关是硬结果，支持慢率漂移；去趋势后仍保留短程依赖。

@@ -78,11 +78,19 @@ def r1_table(rows: list[dict]) -> str:
 
 
 def t2_table(rows: list[dict]) -> str:
+    """One table for both reports.
+
+    The seed columns are a partition of three: an edge that was fitted, an edge
+    the search left at zero, and a seed with no usable support at all.  Only the
+    last is a missing measurement.  A zero edge on a design that *could* carry
+    one is an ordinary negative, which is why the sibling-arm column sits next
+    to it: it says whether the same machinery fitted an edge on the same rows.
+    """
     if not rows:
         return "没有患者通过冻结的稳定 T1 条件，因此人体 T2 未启动。"
     output = [
-        "| 患者 | source | 可估计 seed | 结构零 seed | 支持不足 seed | next real−placebo | next real−current | H5 state MSE | H5 mark | H10 state MSE | H10 mark |",
-        "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
+        "| 患者 | source | 拟合出边的 seed | 零边 seed | 无支持 seed | 同排对照臂拟合出边的 seed | next real−placebo | next real−current | H5 state MSE | H5 mark | H10 state MSE | H10 mark |",
+        "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for row in rows:
         output.append(
@@ -90,6 +98,7 @@ def t2_table(rows: list[dict]) -> str:
             f"{row['estimable_seeds']}/3 | "
             f"{row['structural_zero_seeds']}/3 | "
             f"{row['support_ineligible_seeds']}/3 | "
+            f"{row.get('sibling_current_edge_fitted_seeds', 0)}/3 | "
             f"{number(row['next_real_minus_placebo_joint'])} | "
             f"{number(row['next_real_minus_current_joint'])} | "
             f"{number(row['H5_real_minus_placebo_state_mse'])} | "
@@ -192,12 +201,19 @@ def main() -> None:
     elif load_rows:
         h3_sentence = (
             f"N=100 load edge 在 {len(load_rows)} 位稳定 T1 患者中没有形成至少 2/3 seed 的 "
-            "real-over-donor-and-current 增量；按可估计性区分普通阴性与结构零。"
+            "real-over-donor-and-current 增量。三种 seed 结局要分开读："
+            "拟合出边、搜索停在零边、以及完全没有可用支持——只有最后一种是"
+            "缺测量。零边发生在**能够**承载一条边的设计上时，它就是一个普通阴性；"
+            "E958 的 load 源 3/3 seed 停在零边，而同排的 current-event 臂在完全"
+            "相同的行上拟合出了边并胜过无边，所以这是本轮支持度最好的患者给出的"
+            "一个阴性回答，不是一格空白。"
         )
     else:
         h3_sentence = "没有患者达到冻结的稳定 T1 条件，所以人体 T2 正确地没有启动。"
 
     plain = f"""# Continuous marked-state R1.4 / T2-R2.0 阶段报告：白话版
+
+> 代码复审更正记录：`docs/archive/topic5/r1_4_t2_r2_h2b_post_review_corrections_2026-08-27.md`（2026-08-27）。
 
 **日期：** {date.today().isoformat()}
 **范围：** 六患者 R1.4、N=100 T2-R2.0、修复后 H2b 一次性重跑。
@@ -225,7 +241,7 @@ def main() -> None:
 
 ## H2b：修复后的发作前结果
 
-- 分母必须分开读：34 位患者进入，27 位有可分析发作；30 min 主 lead 有 {h2b_lead30['step_3_seizures_eligible_all']} 次资格发作，其中 {h2b_all['n_seizures']} 次主端点可计算。{h2b_lead30['step_4_seizures_meeting_observation_premise']} 次满足高可观测条件，其中 {h2b_high['n_seizures']} 次主端点可计算。
+- 分母必须分开读：{h2b_lead30['step_1_cohort_patients']} 位患者进入，{h2b_lead30['step_2_patients_with_any_analysable_seizure']} 位有可分析发作；30 min 主 lead 有 {h2b_lead30['step_3_seizures_eligible_all']} 次资格发作，其中 {h2b_all['n_seizures']} 次主端点可计算。{h2b_lead30['step_4_seizures_meeting_observation_premise']} 次满足高可观测条件，其中 {h2b_high['n_seizures']} 次主端点可计算。
 - 主 population 层：患者中位 {number(h2b_all['median_delta'], 4)} SD，{h2b_all['n_favourable']}/{h2b_all['n_patients']} 同向，sign p={h2b_all['sign_test_p']:.4g}。
 - high-observability 敏感性层：患者中位 {number(h2b_high['median_delta'], 4)} SD，{h2b_high['n_favourable']}/{h2b_high['n_patients']} 同向，sign p={h2b_high['sign_test_p']:.4g}。
 - hard caliper 实际覆盖率为 {100 * h2b_caliper['share_with_caliper_applied']:.1f}%，机器结论为 `{h2b_caliper['scientific_status']}`；其余发作退回 soft matching，所以不能把全体结果写成“混杂已完全配平”。
@@ -239,7 +255,9 @@ def main() -> None:
 
 {t2_table(t2_rows)}
 
-next-event 只支持 exposure-conditioned prediction；只有真实边可估计且产生非零位移，并在 H5/H10 同时改善未来 state MSE 与 mark，才记为一次 jump 经冻结 generator 保留下来的 state update。表中差值只在真实边可估计的 seed 上取中位；结构零不混入数值中位。本轮 load H5/H10 达到至少 2/3 seed 的患者数分别为 {load_h5}/{len(load_rows)}、{load_h10}/{len(load_rows)}。聚合器独立复算该标签，并纠正了 {stored_persistence_mismatches} 个“真实边为零却因 placebo 更差而被标阳”的旧标签。允许扩 N=50/200 的患者-source 组合为 {len(expansion)} 个；本轮没有自动扩尺度。
+next-event 只支持 exposure-conditioned prediction；只有真实边可估计且产生非零位移，并在 H5/H10 同时改善未来 state MSE 与 mark，才记为一次 jump 经冻结 generator 保留下来的 state update。表中差值只在真实边被拟合出来的 seed 上取中位——真实边为零时 real−no-edge 恒为零，
+而 real−placebo 只反映 placebo 更差，两者都不能进中位。但零边 seed 本身要计数并配上
+同排对照臂的证据，不能整行写成 n/a。本轮 load H5/H10 达到至少 2/3 seed 的患者数分别为 {load_h5}/{len(load_rows)}、{load_h10}/{len(load_rows)}。聚合器独立复算该标签，并纠正了 {stored_persistence_mismatches} 个“真实边为零却因 placebo 更差而被标阳”的旧标签。允许扩 N=50/200 的患者-source 组合为 {len(expansion)} 个；本轮没有自动扩尺度。
 
 ## 目前对三个假设的证据力度
 
@@ -263,6 +281,8 @@ next-event 只支持 exposure-conditioned prediction；只有真实边可估计�
 """
 
     technical = f"""# Continuous marked-state R1.4 / T2-R2.0 阶段报告：技术版
+
+> 代码复审更正记录：`docs/archive/topic5/r1_4_t2_r2_h2b_post_review_corrections_2026-08-27.md`（2026-08-27）。
 
 **日期：** {date.today().isoformat()}
 **冻结合同：** `docs/archive/topic5/continuous_marked_state_r1_4_t2_r2_0_contract_2026-08-27.md`
@@ -298,18 +318,23 @@ synthetic revision=`{synthetic['revision']}`；positive/zero/reversed-sign × 3 
 {json.dumps(synthetic['criteria'], indent=2, sort_keys=True)}
 ```
 
-每个人体臂持久化 exposure variance/rank、B=0 gradient norm、selected epoch、edge norm 与是否离开零。结构零记为不可估计，不进入 favourable 分母；普通 validation 阴性保留。
+每个人体臂持久化 exposure variance/rank、B=0 gradient norm、selected epoch、edge norm 与是否离开零。
+可识别性（gradient 有限且非零、exposure 满秩、spread 非退化）是设计的属性，边有没有胜过零边是结果；
+两者分列为 `real_edge_status` 的 FITTED / ZERO_EDGE_SELECTED / NOT_IDENTIFIABLE。
+只有 NOT_IDENTIFIABLE 与 support-ineligible 才是缺测量；ZERO_EDGE_SELECTED 是普通阴性，
+连同同排对照臂是否拟合出边一起报告。
 
 ## 4. 人体 T2-R2.0
 
 {t2_table(t2_rows)}
 
-primary increment 要求同一 seed 的 real next-event joint NLL 同时小于 state-matched non-overlap placebo 与 current-event-only。patient/source 扩展要求至少 2/3 seeds 可估计且达到 primary increment；scale expansion candidates={json.dumps(expansion, ensure_ascii=False)}。主表 contrast 仅对 real edge estimable seed 取中位，结构零单列不入数值分母。H5/H10 直接从 anchor post-event state 经冻结 matrix exponential 到目标事件，不读新 raw observation、不施加后续 T2 jump；state target 是冻结 T1 的 filtered pre-event state。persistence 标签在聚合时依据数值重算，强制要求 real edge estimable + nonzero displacement + state MSE<placebo + mark NLL<placebo；本轮发现并纠正 stored flag mismatches={stored_persistence_mismatches}。
+primary increment 要求同一 seed 的 real next-event joint NLL 同时小于 state-matched non-overlap placebo 与 current-event-only。patient/source 扩展要求至少 2/3 seeds 可估计且达到 primary increment；scale expansion candidates={json.dumps(expansion, ensure_ascii=False)}。主表 contrast 仅对真实边被拟合出来的 seed 取中位（零边使 real−no-edge 恒零、使
+real−placebo 只反映 placebo 更差）；零边 seed 单列计数并附同排对照臂证据，不作缺测量处理。H5/H10 直接从 anchor post-event state 经冻结 matrix exponential 到目标事件，不读新 raw observation、不施加后续 T2 jump；state target 是冻结 T1 的 filtered pre-event state。persistence 标签在聚合时依据数值重算，强制要求 real edge estimable + nonzero displacement + state MSE<placebo + mark NLL<placebo；本轮发现并纠正 stored flag mismatches={stored_persistence_mismatches}。
 
 ## 5. H2b 修复后重跑
 
 - producer=408/408；aggregate cards={h2b_rerun['aggregate_cards']}；旧汇总 archive=`{h2b_rerun['archive_manifest']}`。
-- denominator flow：34 patients → 27 analysable patients → {h2b_lead30['step_3_seizures_eligible_all']} eligible seizures → {h2b_all['n_seizures']} primary-endpoint usable；high-observability {h2b_lead30['step_4_seizures_meeting_observation_premise']} eligible → {h2b_high['n_seizures']} usable。
+- denominator flow：{h2b_lead30['step_1_cohort_patients']} patients → {h2b_lead30['step_2_patients_with_any_analysable_seizure']} analysable patients → {h2b_lead30['step_3_seizures_eligible_all']} eligible seizures → {h2b_all['n_seizures']} primary-endpoint usable；high-observability {h2b_lead30['step_4_seizures_meeting_observation_premise']} eligible → {h2b_high['n_seizures']} usable。
 - primary all-eligible/open-loop：median={h2b_all['median_delta']:+.6f}，favourable={h2b_all['n_favourable']}/{h2b_all['n_patients']}，p={h2b_all['sign_test_p']:.8g}。
 - high-observability/open-loop：median={h2b_high['median_delta']:+.6f}，favourable={h2b_high['n_favourable']}/{h2b_high['n_patients']}，p={h2b_high['sign_test_p']:.8g}。
 - hard-caliper share={h2b_caliper['share_with_caliper_applied']:.6f}，verdict=`{h2b_caliper['scientific_status']}`；fallback seizures 保留在 population 层，故不宣称全体已平衡。

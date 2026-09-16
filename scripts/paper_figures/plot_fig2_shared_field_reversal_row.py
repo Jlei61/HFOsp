@@ -41,6 +41,11 @@ from scripts.plot_topic5_template_field_ta_tb_contact_scatter import _zscore  # 
 from scripts.paper_figures.plot_fig3f_ab_dominance_cohort import (  # noqa: E402
     _pretty as _manuscript_id,
 )
+from src.paper_figure_typography import (  # noqa: E402
+    FINAL_VISUAL_TYPOGRAPHY_POLICY,
+    SHARED_FIELD_GRID_TYPOGRAPHY,
+    apply_panel_aware_figure_typography,
+)
 
 
 INPUT_ROOT = ROOT / "results/interictal_propagation_masked/template_gradient_fields"
@@ -260,7 +265,7 @@ def draw_patient_distribution(
             str(row["display_id"]),
             ha=align,
             va="center",
-            fontsize=5.8 if is_example else 5.5,
+            fontsize=8.2 if is_example else 7.8,
             color=EXAMPLE_COLOR if is_example else "#526874",
             fontweight="bold" if is_example else "normal",
         )
@@ -287,10 +292,12 @@ def draw_patient_distribution(
         transform=ax.transAxes,
         ha="left",
         va="top",
-        fontsize=7.0,
+        fontsize=10.0,
         color="#222222",
     )
-    ax.set_xlim(-1.02, 1.02)
+    # Keep the endpoint labels inside the exported panel after the complete
+    # layout reduces this narrow source panel.
+    ax.set_xlim(-1.08, 1.08)
     ax.set_ylim(-1.9, len(ordered) - 0.35)
     ax.set_yticks([])
     ax.tick_params(axis="x", labelbottom=False, length=0)
@@ -324,11 +331,11 @@ def draw_cohort_null(
         facecolor=COHORT_COLOR, edgecolor="white", linewidth=0.6,
         clip_on=False, zorder=5,
     )
-    ax.set_xlim(-1.02, 1.02)
+    ax.set_xlim(-1.08, 1.08)
     ax.set_ylim(0.0, 1.15)
     ax.set_yticks([])
     ax.set_xticks([-1.0, -0.5, 0.0, 0.5, 1.0])
-    ax.tick_params(axis="x", labelsize=6.2, length=2.2, pad=1.5)
+    ax.tick_params(axis="x", labelsize=9.0, length=2.6, pad=2.0)
     ax.spines[["top", "right", "left"]].set_visible(False)
     ax.spines["bottom"].set_color("#777777")
     ax.spines["bottom"].set_linewidth(0.65)
@@ -610,6 +617,181 @@ within-shaft cohort sensitivity 为 P={sensitivity['within_shaft_cohort_shift_p_
     (figures / "README.md").write_text(text, encoding="utf-8")
 
 
+def build_independent_panels(
+    rows: Sequence[dict],
+    *,
+    channel_nulls: Mapping[str, np.ndarray],
+    out_dir: Path,
+    seed: int = 20260721,
+    n_cohort_draws: int = 100_000,
+    expected_statistics: Mapping[str, object] | None = None,
+) -> dict:
+    """Render Figure 2E and 2F as separate publication files."""
+    examples = select_examples(rows)
+    null_summary, null_delta = build_cohort_shift_null(
+        rows, channel_nulls, n_draws=n_cohort_draws, base_seed=seed,
+    )
+    if expected_statistics is not None:
+        frozen = expected_statistics["cohort_summary"]["channel"]
+        frozen_p = float(frozen["cohort_shift_p_negative"])
+        if not np.isclose(null_summary["p_negative"], frozen_p, atol=1e-12, rtol=0):
+            raise ValueError(
+                "reconstructed channel-shuffle cohort P does not match frozen statistics: "
+                f"{null_summary['p_negative']} vs {frozen_p}"
+            )
+
+    rc = {
+        "font.family": "sans-serif",
+        "font.sans-serif": ["Arial", "DejaVu Sans"],
+        "font.size": 7.0,
+        "axes.linewidth": 0.7,
+        "pdf.fonttype": 42,
+        "ps.fonttype": 42,
+    }
+    figures = out_dir / "figures"
+    figures.mkdir(parents=True, exist_ok=True)
+
+    with plt.rc_context(rc):
+        # Keep the accepted 4-column x 2-row arrangement.  The larger source
+        # canvas is only typography headroom; it is not a panel reflow.
+        fig_e = plt.figure(figsize=(12.3, 5.2), facecolor="white")
+        grid = fig_e.add_gridspec(
+            2, 5, width_ratios=(1.0, 1.0, 1.0, 1.0, 0.065),
+            left=0.13, right=0.86, top=0.90, bottom=0.26,
+            wspace=0.32, hspace=0.28,
+        )
+        field_axes: list[plt.Axes] = []
+        for column, row in enumerate(examples):
+            dat_a, dat_b, mode = build_interictal_ab_panel_payloads(
+                row["record"], display_sigma_mm=DEFAULT_DISPLAY_SIGMA_MM,
+            )
+            if mode != "shared":
+                raise ValueError(f"example {row['subject_id']} is not rendered on a shared plane")
+            apply_common_display_window(dat_a, dat_b)
+            ax_a = fig_e.add_subplot(grid[0, column])
+            ax_b = fig_e.add_subplot(grid[1, column], sharex=ax_a, sharey=ax_a)
+            draw_interictal_rank_field_panel(
+                ax_a, dat_a, "TA", compact=True, panel_title=str(row["display_id"]),
+                contact_outline_lw=1.2, contact_size=58, show_template_tag=False,
+            )
+            draw_interictal_rank_field_panel(
+                ax_b, dat_b, "TB", compact=True,
+                contact_outline_lw=1.2, contact_size=58, show_template_tag=False,
+            )
+            ax_a.set_title(
+                str(row["display_id"]), fontweight="bold",
+                color="#222222", pad=6.0,
+            )
+            ax_b.set_title("")
+            _restore_compact_axis_ticks(ax_a)
+            _restore_compact_axis_ticks(ax_b)
+            if column == 0:
+                ax_a.set_ylabel("y (mm)")
+                ax_b.set_ylabel("y (mm)")
+            else:
+                # All maps share the same physical window; repeating these
+                # labels adds no information and causes enlarged ticks to
+                # collide with the field immediately to the left.
+                ax_a.tick_params(axis="y", labelleft=False)
+                ax_b.tick_params(axis="y", labelleft=False)
+            field_axes.extend([ax_a, ax_b])
+        cbar_ax = fig_e.add_subplot(grid[:, 4])
+        colorbar = fig_e.colorbar(
+            plt.cm.ScalarMappable(norm=plt.Normalize(0, 1), cmap="viridis"),
+            cax=cbar_ax,
+        )
+        colorbar.set_ticks([0.0, 1.0])
+        colorbar.set_ticklabels(["0 (early)", "1 (late)"])
+        colorbar.ax.tick_params(length=3.0, pad=3.0)
+        fig_e.canvas.draw()
+        field_left = min(ax.get_position().x0 for ax in field_axes)
+        field_right = max(ax.get_position().x1 for ax in field_axes)
+        field_bottom = min(ax.get_position().y0 for ax in field_axes)
+        field_top = max(ax.get_position().y1 for ax in field_axes)
+        cbar_pos = cbar_ax.get_position()
+        cbar_ax.set_position([cbar_pos.x0, field_bottom, cbar_pos.width, field_top - field_bottom])
+        fig_e.text(
+            0.5 * (field_left + field_right), 0.035, "Shared TA axis (mm)",
+            ha="center", va="bottom", color="#222222",
+        )
+        first_ta = field_axes[0].get_position()
+        first_tb = field_axes[1].get_position()
+        fig_e.text(
+            0.025, 0.5 * (first_ta.y0 + first_ta.y1), "TA field",
+            ha="center", va="center", rotation=90,
+            fontweight="bold", color=TA_COLOR,
+        )
+        fig_e.text(
+            0.025, 0.5 * (first_tb.y0 + first_tb.y1), "TB field",
+            ha="center", va="center", rotation=90,
+            fontweight="bold", color=TB_COLOR,
+        )
+        typography_diagnostics = apply_panel_aware_figure_typography(
+            fig_e,
+            spec=SHARED_FIELD_GRID_TYPOGRAPHY,
+            policy=FINAL_VISUAL_TYPOGRAPHY_POLICY,
+            dense_axes=field_axes,
+            colorbar_axes=[cbar_ax],
+            enforce_atomic_axis_gate=False,
+        )
+        for ax in field_axes:
+            ax.tick_params(axis="x", pad=3.0)
+        for ax in (field_axes[0], field_axes[1]):
+            ax.tick_params(axis="y", pad=3.0)
+        png_e = figures / "fig2-panele.png"
+        pdf_e = figures / "fig2-panele.pdf"
+        fig_e.savefig(png_e, dpi=600, facecolor="white")
+        fig_e.savefig(pdf_e, facecolor="white")
+        plt.close(fig_e)
+
+        fig_f = plt.figure(figsize=(3.0, 3.05), facecolor="white")
+        grid_f = fig_f.add_gridspec(
+            2, 1, height_ratios=(1.55, 0.75), left=0.13, right=0.985,
+            top=0.91, bottom=0.17, hspace=0.025,
+        )
+        distribution_ax = fig_f.add_subplot(grid_f[0, 0])
+        null_ax = fig_f.add_subplot(grid_f[1, 0])
+        distribution_summary = draw_patient_distribution(distribution_ax, rows, examples)
+        draw_cohort_null(null_ax, null_delta, null_summary)
+        fig_f.text(
+            0.55, 0.035, "TA–TB reversal vs spatial null (Δr)",
+            ha="center", va="bottom", fontsize=10.0, color="#222222",
+        )
+        png_f = figures / "fig2-panelf.png"
+        pdf_f = figures / "fig2-panelf.pdf"
+        fig_f.savefig(png_f, dpi=600, facecolor="white")
+        fig_f.savefig(pdf_f, facecolor="white")
+        plt.close(fig_f)
+
+    out_dir.mkdir(parents=True, exist_ok=True)
+    null_npz = out_dir / "fig2_shared_field_reversal_cohort_null.npz"
+    np.savez_compressed(null_npz, channel_cohort_median_shift=null_delta)
+    metadata = {
+        "schema_version": "figure2_independent_panels_ef_v1",
+        "panel_assignments": {
+            "Figure 2E": "four locked paired TA/TB shared-axis rank-field examples",
+            "Figure 2F": "complete shared-axis cohort distribution and full-contact spatial null",
+        },
+        "examples": [
+            {"subject_id": row["subject_id"], "display_id": row["display_id"], "r": float(row["r"])}
+            for row in examples
+        ],
+        "distribution": distribution_summary,
+        "panel_e_typography": typography_diagnostics,
+        "full_contact_shuffle": null_summary,
+        "outputs": {
+            "panel_e_png": _portable_path(png_e),
+            "panel_e_pdf": _portable_path(pdf_e),
+            "panel_f_png": _portable_path(png_f),
+            "panel_f_pdf": _portable_path(pdf_f),
+            "cohort_null_npz": _portable_path(null_npz),
+        },
+    }
+    metadata_path = out_dir / "fig2_panel_ef_metadata.json"
+    metadata_path.write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + "\n")
+    return metadata
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input-root", type=Path, default=INPUT_ROOT)
@@ -624,7 +806,7 @@ def main() -> None:
     rows = load_shared_field_rows(args.input_root, yuquan_labels=yuquan_labels)
     channel_nulls = load_channel_nulls(args.null_draws, rows)
     statistics = json.loads(args.statistics.read_text())
-    metadata = build_figure(
+    metadata = build_independent_panels(
         rows,
         channel_nulls=channel_nulls,
         out_dir=args.output_dir,
@@ -632,8 +814,8 @@ def main() -> None:
         n_cohort_draws=args.n_cohort_draws,
         expected_statistics=statistics,
     )
-    _write_readme(args.output_dir, metadata)
-    print(f"[done] wrote {metadata['outputs']['png']}")
+    print(f"[done] wrote {metadata['outputs']['panel_e_png']}")
+    print(f"[done] wrote {metadata['outputs']['panel_f_png']}")
     print(
         f"[done] shared-2D n={metadata['distribution']['n']}, "
         f"negative={metadata['distribution']['n_negative']}, "

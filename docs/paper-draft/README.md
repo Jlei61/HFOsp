@@ -19,8 +19,8 @@
 
 - [Core 1：间期 HFO 传播骨架](core1_interictal_hfo_propagation_scaffold.md)
 - [Figure 1：间期 HFO 时序组织](figure1_interictal_hfo_temporal_scaffold.md)
-- [Supplementary Figures S1–S6 中文 Overleaf 图注](supplementary_figure_legends_s1_s6_zh.tex)：按 `FigS1`–`FigS6` 编号整理的完整 LaTeX figure blocks；S1 明确为 legacy 人工标注事件验证集。
-- [Supplementary Figures S2–S6 英文图注](supplementary_figure_legends_s2_s6.md)：按 Nature Computational Science 投稿语法整理的可直接粘贴版本；逐 panel 定义样本单位、图形元素、统计检验和缩写。
+- [Supplementary Figures S1–S7 中文 Overleaf 图注](supplementary_figure_legends_s1_s7_zh.tex)：按 `FigS1`–`FigS7` 编号整理的完整 LaTeX figure blocks；S1 明确为 legacy 人工标注事件验证集，S7 保留模型内部 pathway-effect 的解释边界。
+- [Supplementary Figures S2–S7 英文图注](supplementary_figure_legends_s2_s7.md)：按 Nature Computational Science 投稿语法整理的可直接粘贴版本；逐 panel 定义样本单位、图形元素、统计检验和缩写。
 - [Cohort contract 与 Supplementary Tables](cohort_contract_and_supplementary_tables.md)
 
 ## 计算模型

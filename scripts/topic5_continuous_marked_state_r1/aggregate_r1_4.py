@@ -157,14 +157,35 @@ def main() -> None:
                 ]
                 if all(path.exists() for path in sensitivity_paths):
                     sensitivity = [json.loads(path.read_text()) for path in sensitivity_paths]
-                    if any(
-                        value.get("same_checkpoint_as_primary_5_donor") is not True
-                        or value.get("sealed_opened") is not False
-                        for value in sensitivity
-                    ):
-                        raise ValueError(
-                            f"invalid 10-donor sensitivity for {subject}"
-                        )
+                    # `same_checkpoint_as_primary_5_donor` is written by the
+                    # producer at its own run time; on its own it cannot detect
+                    # that the primary has since been refitted.  Compare the
+                    # recorded source hash against the primary actually being
+                    # summarised, and require the same embedding precision, or a
+                    # 5-vs-10-donor contrast silently mixes two checkpoints.
+                    primary_hashes = {
+                        value["checkpoint_sha256"] for value in explicit
+                    }
+                    for value, primary in zip(sensitivity, explicit):
+                        if (value.get("status") != "COMPLETE"
+                                or value.get("same_checkpoint_as_primary_5_donor")
+                                is not True
+                                or value.get("sealed_opened") is not False):
+                            raise ValueError(
+                                f"invalid 10-donor sensitivity for {subject}"
+                            )
+                        if value.get("source_checkpoint_sha256") not in primary_hashes:
+                            raise ValueError(
+                                f"stale 10-donor sensitivity for {subject}: "
+                                "source checkpoint is not one of the summarised "
+                                "primary fits"
+                            )
+                        recorded = value.get("embedding_precision_matches_primary")
+                        if recorded is False:
+                            raise ValueError(
+                                f"10-donor sensitivity for {subject} used a "
+                                "different embedding precision than the primary"
+                            )
                     row["correct_minus_wrong_joint_10_donor"] = median([
                         value["correct_minus_wrong_median"]["joint_nll_per_event"]
                         for value in sensitivity

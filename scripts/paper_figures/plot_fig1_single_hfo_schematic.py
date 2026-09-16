@@ -150,7 +150,7 @@ def _plot(
     fig, axes = plt.subplots(
         3,
         1,
-        figsize=(1.62, 4.22),
+        figsize=(1.75, 4.22),
         sharex=True,
         gridspec_kw={"height_ratios": [1.0, 1.0, 1.0], "hspace": 0.43},
     )
@@ -158,7 +158,7 @@ def _plot(
 
     ax0.plot(waveform_t, snippets.T, color="black", linewidth=0.28, alpha=0.23)
     ax0.plot(waveform_t, np.mean(snippets, axis=0), color="#FFD000", linewidth=1.05, zorder=5)
-    ax0.set_title("HFO n = 178", color="red", fontsize=9.2, fontweight="normal", pad=3)
+    ax0.set_title("HFO n = 178", color="red", fontsize=12.5, fontweight="normal", pad=4)
 
     raw_limits = np.nanpercentile(raw_spec, [1.0, 99.0])
     norm_abs = float(np.nanpercentile(np.abs(norm_spec), 99.0))
@@ -184,25 +184,25 @@ def _plot(
     )
 
     for ax, title in ((ax1, "raw Spec"), (ax2, "normalized Spec")):
-        ax.set_title(title, fontsize=7.7, fontweight="normal", pad=2)
-        ax.set_ylabel("Freq (Hz)", fontsize=7)
+        ax.set_title(title, fontsize=10.5, fontweight="normal", pad=3)
+        ax.set_ylabel("Freq (Hz)", fontsize=9.5, labelpad=5)
         ax.set_ylim(0.0, 240.0)
         ax.set_yticks([0, 100, 200])
 
-    ax2.set_xlabel("Time (s)", fontsize=7)
+    ax2.set_xlabel("Time (s)", fontsize=9.5, labelpad=5)
     for ax in axes:
         ax.set_xlim(0.0, duration)
         ax.set_xticks([0.0, 0.25, 0.50])
         ax.set_xticklabels(["0.00", "0.25", "0.50"])
         ax.margins(x=0.0)
-        ax.tick_params(axis="both", labelsize=6.4, length=2.0, width=0.55, pad=1.5)
+        ax.tick_params(axis="both", labelsize=9.0, length=2.5, width=0.7, pad=2.0)
         ax.tick_params(axis="x", labelbottom=True)
         ax.spines["top"].set_visible(False)
         ax.spines["right"].set_visible(False)
         ax.spines["left"].set_linewidth(0.55)
         ax.spines["bottom"].set_linewidth(0.55)
 
-    fig.subplots_adjust(left=0.255, right=0.985, bottom=0.095, top=0.955)
+    fig.subplots_adjust(left=0.30, right=0.985, bottom=0.11, top=0.95)
     fig.savefig(output_png, dpi=300, facecolor="white")
     fig.savefig(output_pdf, facecolor="white")
     plt.close(fig)

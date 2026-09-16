@@ -96,12 +96,12 @@ def _matrix(model, patient, contacts):
     return matrix
 
 
-def crossfit_margin(normalized_ranks, profiles, folds):
-    """Cross-fit signed margin for already normalized model event ranks.
+def crossfit_matrix(normalized_ranks, profiles, folds):
+    """Cross-fit similarity matrix for already normalized model event ranks.
 
     Mirrors ``crossfit_patient_readout``: assign on one within-shaft alternating
-    contact fold, evaluate on the disjoint fold, swap, then take the signed
-    margin of the fold-averaged matrix.
+    contact fold, evaluate on the disjoint fold, swap, then average the two
+    fold-specific 2x2 matrices.
     """
     stack = []
     for assignment_contacts, evaluation_contacts in (
@@ -115,7 +115,47 @@ def crossfit_margin(normalized_ranks, profiles, folds):
         np.nansum(stack, axis=0), count,
         out=np.full(stack.shape[1:], np.nan), where=count > 0,
     )
-    return signed_matrix_margin(matrix)
+    return matrix
+
+
+def crossfit_margin(normalized_ranks, profiles, folds):
+    """Signed margin of :func:`crossfit_matrix`."""
+    return signed_matrix_margin(crossfit_matrix(normalized_ranks, profiles, folds))
+
+
+def _contact_permutation_blocks(n_contacts, shaft_ids):
+    if shaft_ids is None:
+        return [np.arange(n_contacts)]
+    shaft_ids = np.asarray(shaft_ids)
+    if len(shaft_ids) != n_contacts:
+        raise ValueError("shaft_ids must contain one value per contact")
+    return [
+        np.flatnonzero(shaft_ids == shaft) for shaft in np.unique(shaft_ids)
+    ]
+
+
+def contact_permutation_matrix_draws(
+        ranks, patient_ranks, patient_labels, folds, *, draws, seed,
+        shaft_ids=None):
+    """Cross-fit 2x2 matrices after permuting model contact identity.
+
+    The permutation contract is identical to :func:`contact_permutation_draws`.
+    Keeping the full matrix makes it possible to test a named model--patient
+    similarity (for example MTA--TA) rather than a four-cell summary margin.
+    Draw indices remain aligned across networks for equal-network aggregation.
+    """
+    normalized = normalize_event_ranks(ranks)
+    profiles = patient_profiles(patient_ranks, patient_labels)
+    rng = np.random.default_rng(int(seed))
+    n_contacts = normalized.shape[1]
+    blocks = _contact_permutation_blocks(n_contacts, shaft_ids)
+    values = np.full((int(draws), 2, 2), np.nan)
+    for draw in range(int(draws)):
+        order = np.arange(n_contacts)
+        for block in blocks:
+            order[block] = rng.permutation(block)
+        values[draw] = crossfit_matrix(normalized[:, order], profiles, folds)
+    return values
 
 
 def contact_permutation_draws(
@@ -130,23 +170,13 @@ def contact_permutation_draws(
     permutation to within-shaft exchanges, which additionally preserves the
     shaft-level ordering that the implantation geometry already fixes.
     """
-    normalized = normalize_event_ranks(ranks)
-    profiles = patient_profiles(patient_ranks, patient_labels)
-    rng = np.random.default_rng(int(seed))
-    n_contacts = normalized.shape[1]
-    if shaft_ids is None:
-        blocks = [np.arange(n_contacts)]
-    else:
-        shaft_ids = np.asarray(shaft_ids)
-        blocks = [
-            np.flatnonzero(shaft_ids == shaft) for shaft in np.unique(shaft_ids)
-        ]
+    matrices = contact_permutation_matrix_draws(
+        ranks, patient_ranks, patient_labels, folds,
+        draws=draws, seed=seed, shaft_ids=shaft_ids,
+    )
     values = []
-    for _ in range(int(draws)):
-        order = np.arange(n_contacts)
-        for block in blocks:
-            order[block] = rng.permutation(block)
-        margin = crossfit_margin(normalized[:, order], profiles, folds)
+    for matrix in matrices:
+        margin = signed_matrix_margin(matrix)
         if margin is not None and np.isfinite(margin):
             values.append(float(margin))
     return np.asarray(values, float)

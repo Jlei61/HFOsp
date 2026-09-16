@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build Supplementary Figure 5 from a cohort pie and the accepted gamma panel."""
+"""Build the historical phenotype panel now absorbed into Main Figure 3."""
 from __future__ import annotations
 
 import json
@@ -19,6 +19,12 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "scripts"))
 
 import plot_topic5_early_spectral_phenotypes as phenotype_plot  # noqa: E402
+from src.supplementary_figure_style import (  # noqa: E402
+    ANNOTATION_SIZE,
+    IDENTITY_SIZE,
+    PANEL_LETTER_SIZE,
+    apply_supplementary_rcparams,
+)
 
 
 PHENOTYPE_ROOT = (
@@ -33,9 +39,9 @@ FIG_DIR = OUT_ROOT / "figures"
 GAMMA_PNG = FIG_DIR / "epilepsiae_635_seizure_07_raw_spectral_context.png"
 GAMMA_JSON = FIG_DIR / "epilepsiae_635_seizure_07_raw_spectral_context_summary.json"
 SHORT_LABELS = {
-    "broadband_1_150": "Broadband\n1–150 Hz",
-    "gamma_nonbroadband": "Gamma-dominant\n30–80 Hz",
-    "low_frequency_only": "Low-frequency only\n1–13 Hz",
+    "broadband_1_150": "Broadband (1–150 Hz)",
+    "gamma_nonbroadband": "Gamma-dominant (30–80 Hz)",
+    "low_frequency_only": "Low-frequency only (1–13 Hz)",
     "other": "Other patterns",
 }
 
@@ -99,7 +105,7 @@ def _draw_composition_pie(ax: plt.Axes, rows: list[dict]) -> None:
     )
     label_positions = {
         "broadband_1_150": (1.03, 0.43, "left"),
-        "gamma_nonbroadband": (0.48, -0.98, "left"),
+        "gamma_nonbroadband": (0.95, -0.98, "right"),
         "low_frequency_only": (-1.02, -0.72, "right"),
         "other": (-1.02, 0.45, "right"),
     }
@@ -113,7 +119,7 @@ def _draw_composition_pie(ax: plt.Axes, rows: list[dict]) -> None:
             xytext=(x_text, y_text),
             ha=horizontal_alignment,
             va="center",
-            fontsize=6.7,
+            fontsize=ANNOTATION_SIZE,
             linespacing=1.05,
             color="black",
             arrowprops={
@@ -134,7 +140,7 @@ def _draw_composition_pie(ax: plt.Axes, rows: list[dict]) -> None:
         f"{rows[0]['denominator_subjects']} patients",
         ha="center",
         va="top",
-        fontsize=7.0,
+        fontsize=ANNOTATION_SIZE,
         color="black",
     )
     ax.text(
@@ -143,7 +149,7 @@ def _draw_composition_pie(ax: plt.Axes, rows: list[dict]) -> None:
         "Early ictal spectral phenotypes",
         ha="center",
         va="bottom",
-        fontsize=8.0,
+        fontsize=IDENTITY_SIZE,
         fontweight="bold",
         color="black",
     )
@@ -153,7 +159,7 @@ def _draw_composition_pie(ax: plt.Axes, rows: list[dict]) -> None:
         "mutually exclusive classification",
         ha="center",
         va="bottom",
-        fontsize=6.5,
+        fontsize=ANNOTATION_SIZE,
         color="0.25",
     )
     ax.set_xlim(-1.42, 1.42)
@@ -168,15 +174,8 @@ def main() -> None:
     gamma_summary, gamma_state = _gamma_context()
     gamma_image = plt.imread(GAMMA_PNG)
 
-    plt.rcParams.update(
-        {
-            "font.family": "sans-serif",
-            "font.sans-serif": ["Arial", "DejaVu Sans"],
-            "pdf.fonttype": 42,
-            "ps.fonttype": 42,
-            "axes.unicode_minus": False,
-        }
-    )
+    apply_supplementary_rcparams()
+    plt.rcParams["axes.unicode_minus"] = False
     fig = plt.figure(figsize=(14.25, 4.25), facecolor="white")
     grid = fig.add_gridspec(
         1,
@@ -206,7 +205,7 @@ def main() -> None:
             label,
             ha="left",
             va="top",
-            fontsize=11,
+            fontsize=PANEL_LETTER_SIZE,
             fontweight="bold",
         )
 
@@ -245,9 +244,10 @@ def main() -> None:
         f"cohort-level inference."
     )
     metadata = {
-        "figure": "Supplementary Figure 5",
+        "figure": "Historical phenotype panel absorbed into Main Figure 3",
+        "paper_status": "OMITTED_FROM_SUPPLEMENT",
         "caption": (
-            f"Supplementary Fig. 5 | {caption_title} "
+            f"Historical phenotype panel | {caption_title} "
             f"{caption_body.replace('**', '')}"
         ),
         "panel_a": {
@@ -291,7 +291,7 @@ def main() -> None:
     )
     (FIG_DIR / "README.md").write_text(
         "### supp_fig5_phenotypes_and_gamma_example.png\n\n"
-        f"**Supplementary Fig. 5 | {caption_title}**\n\n"
+        f"**Historical phenotype panel absorbed into Main Figure 3 | {caption_title}**\n\n"
         f"{caption_body}\n\n"
         "**关注点**：A 是描述性分型；B 只说明 gamma_nonbroadband 类的可见"
         "信号形态，不承担队列统计或机制结论。\n",

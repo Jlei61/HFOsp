@@ -164,7 +164,8 @@ def load_fitted_explicit_t1(subject: str, seed: int, *,
                             r1_2b_root: Path | None = None,
                             r1_3_root: Path | None = None,
                             observation_cache_root: Path | None = None,
-                            embedding_batch_size: int = 64) -> FittedT1Context:
+                            embedding_batch_size: int = 64,
+                            use_amp: bool = False) -> FittedT1Context:
     """Reconstruct and freeze a completed formal explicit R1.3 checkpoint."""
     r1_2_root = Path(r1_2_root or contract.RESULT_ROOT / "r1_2")
     r1_2b_root = Path(r1_2b_root or contract.RESULT_ROOT / "r1_2b")
@@ -232,7 +233,7 @@ def load_fitted_explicit_t1(subject: str, seed: int, *,
     )
     embedding = materialize_embedding(
         model, design, loader, device=device,
-        batch_size=int(embedding_batch_size), use_amp=False,
+        batch_size=int(embedding_batch_size), use_amp=bool(use_amp),
     )
     with torch.no_grad():
         anchor_state = filtered_anchor_states(

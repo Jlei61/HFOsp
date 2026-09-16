@@ -21,6 +21,7 @@ from src.topic5_continuous_marked_state_r1.r1_2 import (
     load_full_design,
 )
 from src.topic5_continuous_marked_state_r1.r1_2b import JointLastLayerStateModel
+from src.topic5_continuous_marked_state_r1.t2_r2_human import R1_4_REVISION
 from src.topic5_continuous_marked_state_r1.r1_2b_diagnostics import (
     evaluate_mark_endpoints,
     median_metric_dict,
@@ -104,7 +105,13 @@ def main() -> None:
         "--seed", required=True, type=int, choices=(0, 1, 2, 3, 4),
     )
     parser.add_argument("--device", default="cuda")
-    parser.add_argument("--experiment-label", default="r1_3_formal_pilot")
+    # Constrained: this label gates the recorded-coverage-segment wrong-time
+    # donor rule, so a free-text typo would silently downgrade a science
+    # contract while every other R1.4 flag still applied.
+    parser.add_argument(
+        "--experiment-label", default="r1_3_formal_pilot",
+        choices=("r1_3_formal_pilot", R1_4_REVISION),
+    )
     parser.add_argument("--observer-epochs", type=int, default=2)
     parser.add_argument("--joint-epochs", type=int, default=2)
     parser.add_argument("--chunk-anchors", type=int, default=8)
@@ -324,8 +331,13 @@ def main() -> None:
             chunk = max(1, chunk // 2)
             torch.cuda.empty_cache()
 
+    # Record the precision: any sensitivity that re-materialises this embedding
+    # has to match it, or a 5-vs-10-donor comparison confounds donor count with
+    # fp16-vs-fp32 embedding noise at effect sizes of order 1e-4.
+    embedding_use_amp = True
     embedding = materialize_embedding(
-        model, design, loader, device=args.device, batch_size=chunk
+        model, design, loader, device=args.device, batch_size=chunk,
+        use_amp=embedding_use_amp,
     )
     persistent = asdict(evaluate_full_t1(
         model, design, embedding, "validation", device=args.device,
@@ -345,7 +357,7 @@ def main() -> None:
     ))
     observation_coverage = np.asarray(cached_contact_mask, dtype=np.float64).mean(1)
     anchor_segment = None
-    if args.experiment_label == "r1_4_six_patient_explicit_primary_raw_residual_v1":
+    if args.experiment_label == R1_4_REVISION:
         anchor_segment = np.searchsorted(
             coverage.stop, np.asarray(design.anchor_time, dtype=np.float64), side="right"
         )
@@ -499,6 +511,12 @@ def main() -> None:
             observation_cache_manifest_path
         ),
         "full_recorded_support": True,
+        "embedding_precision": {
+            "use_amp": bool(embedding_use_amp),
+            "autocast_active": bool(
+                embedding_use_amp and str(args.device).startswith("cuda")
+            ),
+        },
         "sealed_opened": False,
         "claim_boundary": (
             "development R1.3 target-trained observer; "

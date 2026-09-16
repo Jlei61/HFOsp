@@ -1,0 +1,116 @@
+contract:
+  name: topic5_shared_propagation_field_v0_1
+  version: "0.1"
+  source_spec: docs/superpowers/specs/2026-07-30-topic5-shared-propagation-field-rnn-v0_1.md
+  masked_rank_required: true
+  ab_label_forbidden: true
+  physical_axis_forbidden: true
+  geometry_input_forbidden: true
+  soz_label_forbidden: true
+  ictal_target_forbidden: true
+  inter_event_interval_forbidden: true
+  recurrent_teacher_forcing_forbidden: true
+
+data:
+  dataset_dir: results/topic5_interictal_rank_distribution/dataset_v0_4
+  old_split_status: previously_read_not_confirmatory_for_rnnv2
+  development_pool: old_train80_only
+  inner_validation_fraction: 0.15
+  inner_test_fraction: 0.15
+  condition_on_first_rank_set: true
+  condition_on_event_length: true
+  condition_on_rank_set_cardinality: true
+  exclude_recruited_contacts: true
+
+model:
+  name: spf_rnn_v2_0_core
+  latent_dim: 4
+  latent_dim_sensitivity: [2, 4, 6]
+  encoder_hidden: 32
+  dynamics: autonomous_tanh_rate_rnn
+  process_noise: false
+  static_bias: frozen_train_only_smoothed_participation_logit
+  static_bias_alpha: 0.5
+  observation: exact_conditional_k_subset
+  jacobian_soft_cap: 1.5
+  phase_order: 2
+
+training:
+  optimizer: AdamW
+  learning_rate: 0.01
+  weight_decay_optimizer: 0.0001
+  batch_events: 256
+  epochs: 400
+  gradient_clip: 1.0
+  beta_final: 1.0
+  kl_warmup_epochs: 10
+  free_bits_per_dimension: 0.02
+  jacobian_weight: 0.001
+  # Shared AdamW is the only generic weight penalty. Keeping this zero avoids
+  # penalizing different parameter subsets in M3 and M4.
+  explicit_weight_penalty: 0.0
+  early_stopping_patience: 20
+  # Patience is reset only by a scientifically material relative improvement,
+  # while the exact lowest checkpoint is still retained for scoring.
+  early_stopping_relative_min_delta: 0.0001
+  convergence_tolerance: 0.002
+  minimum_relative_improvement: 0.001
+  minimum_training_epochs: 20
+  # A best checkpoint at initialization or the first two updates can be a
+  # high-learning-rate overshoot, not evidence that the fit is adequate.
+  minimum_best_epoch: 3
+  learning_rate_rescue_factor: 0.2
+  lr_scheduler_factor: 0.5
+  lr_scheduler_patience: 8
+  minimum_learning_rate: 0.00001
+  seeds: [20260730, 20260731, 20260801]
+
+# All models share the exact observation likelihood and event partitions.
+# Non-latent controls maximize it directly; latent models optimize an ELBO and
+# are evaluated only by repeated future-blind prior-predictive estimates. The
+# scaffold is refit by maximum likelihood under the scoring objective.
+ladder:
+  members: [m0_static, m1_markov, m1_markov_phase, m2_markov_mixture, m2_markov_mixture_phase, m3_template, m4_field, m4_field_phase]
+  scaffold_estimator: maximum_likelihood_under_scoring_objective
+  scaffold_steps: 300
+  scaffold_learning_rate: 0.05
+  mixture_components: 3
+  max_train_events: 20000
+  max_validation_events: 2048
+  max_test_events: 2048
+
+evaluation:
+  prior_predictive_samples: 64
+  prior_predictive_repeats: 4
+  monitor_prior_samples: 8
+  rollout_repeats: 4
+  importance_samples: 64
+  max_validation_events_for_development: 1024
+  report_posterior_reconstruction_as_diagnostic_only: true
+  repertoire_metrics:
+    - participation_mae
+    - rank_wasserstein
+    - precedence_mae
+    - precedence_correlation
+  baselines:
+    - static_fixed_schedule
+    - first_order_markov_fixed_schedule
+  raw_contact_loading_or_field_weight_claim_forbidden: true
+
+gates:
+  g0_snn_identifiability: existing_artifact_reuse_audit
+  g1_full_event_generation: locked_not_run
+  g2_stable_observable_structure: locked_not_run
+  g3_one_structure_many_trajectories: locked_not_run
+  human_structure_interpretation_requires_g0: true
+
+resources:
+  conda_env: cuda_env
+  device: cuda
+  cpu_threads: 4
+
+outputs:
+  root: results/topic5_shared_propagation_field
+  phase0: results/topic5_shared_propagation_field/phase0
+  development: results/topic5_shared_propagation_field/development
+  formal: results/topic5_shared_propagation_field/formal

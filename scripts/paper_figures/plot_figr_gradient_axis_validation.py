@@ -54,6 +54,7 @@ from src.topic5_tspectral_field_concordance import (  # noqa: E402
 
 
 DEFAULT_EXAMPLES = ("epilepsiae_1146", "epilepsiae_548")
+DEFAULT_EXAMPLE_LABELS = ("E1146", "E548")
 DEFAULT_BINS = 18
 DEFAULT_OUT = ROOT / "results/paper-ready-figure/fig2b_gradient_axis_validation"
 LEGACY_NULL_CACHE = (
@@ -773,7 +774,7 @@ def build_figure(
         "pdf": figures / f"{stem}.pdf",
         "metadata": figures / f"{stem}_metadata.json",
     }
-    fig.savefig(outputs["png"], dpi=300, facecolor="white")
+    fig.savefig(outputs["png"], dpi=600, facecolor="white")
     fig.savefig(outputs["pdf"], facecolor="white")
     plt.close(fig)
 

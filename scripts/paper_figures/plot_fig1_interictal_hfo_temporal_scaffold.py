@@ -5,12 +5,12 @@ Figure scope is intentionally temporal: group-event observation, refined-HFO
 SOZ anchor, a masked representative temporal-template example, and cohort-level
 MI/uplift. Spatial-axis evidence belongs to the next main figure.
 
-The manuscript's Figure 1A is a hand-drawn schematic and is intentionally not
-produced or retained here.  Code-generated panels follow the manuscript panel
-letters exactly so they can be assembled externally without aliases:
+Figure 1A is extracted by the main builder from a legacy supplementary TIFF;
+this module generates B-F.  Panels follow the manuscript panel letters exactly
+so they can be assembled without aliases:
 
     fig1-panelb1  legacy manually annotated HFO morphology set (n=178)
-    fig1-panelb2  group-event phenomenon (reused Y3 demo, copied verbatim)
+    fig1-panelb2  group-event phenomenon (accepted Y3 demo)
     fig1-panelc   time-ordered masked rank heatmap + rank distributions
     fig1-paneld   MI data vs permutation null (40 subjects)
     fig1-panele   TA/TB clustered heatmap + mean-rank profiles
@@ -38,6 +38,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
 from matplotlib.lines import Line2D
+from matplotlib.patches import Patch
 import numpy as np
 
 
@@ -49,6 +50,12 @@ sys.path.insert(0, str(SCRIPTS))
 import plot_interictal_propagation as propagation_plot  # noqa: E402
 import plot_refine_soz_validation as refine_plot  # noqa: E402
 from src.interictal_propagation import _valid_event_indices  # noqa: E402
+from src.paper_figure_typography import (  # noqa: E402
+    COMPACT_STATISTICAL_TYPOGRAPHY,
+    DENSE_MULTIPANEL_TYPOGRAPHY,
+    LOCKED_PANEL_TYPOGRAPHY_POLICY,
+    apply_panel_aware_figure_typography,
+)
 from src.plot_style import COL_EPI, COL_YQ  # noqa: E402
 
 
@@ -72,6 +79,18 @@ SOZ_JSON = {
 }
 EPI_ROC_COLOR = "#7A3E87"
 EPI_STAT_COLOR = "#B07A74"
+FIG1E_TEMPLATE_COLORS = {"TA": "#B2182B", "TB": "#2166AC"}
+FIG1_RANK_COLORBAR_TITLE = "Heatmap rank\nFirst → Last"
+FIG1F_INSET_BOUNDS = [0.68, 0.13, 0.28, 0.36]
+FIG1F_INSET_YLABEL_FONTSIZE = 9.0
+FIG1F_INSET_TICK_FONTSIZE = 8.0
+FIG1_DF_FIGSIZE = (3.9, 3.9)
+FIG1_DF_SUBPLOT_ADJUST = {
+    "left": 0.20,
+    "right": 0.97,
+    "bottom": 0.22,
+    "top": 0.84,
+}
 
 
 def _panel_label(ax: plt.Axes, label: str, x: float = -0.08, y: float = 1.08) -> None:
@@ -106,11 +125,49 @@ def _apply_rcparams() -> None:
     )
 
 
-def _save_panel(fig: plt.Figure, output_dir: Path, stem: str) -> list[str]:
+def _save_panel(
+    fig: plt.Figure,
+    output_dir: Path,
+    stem: str,
+    *,
+    tight_bbox: bool = True,
+) -> list[str]:
+    active_axes = [ax for ax in fig.axes if ax.axison]
+    colorbar_axes = [
+        ax for ax in active_axes
+        if ax.get_label() == "<colorbar>" or ax.get_position().width < 0.03
+    ]
+    is_dense = stem in {"fig1-panelc", "fig1-panele"}
+    dense_axes = (
+        [ax for ax in active_axes if ax not in colorbar_axes]
+        if is_dense
+        else []
+    )
+    apply_panel_aware_figure_typography(
+        fig,
+        spec=(
+            DENSE_MULTIPANEL_TYPOGRAPHY
+            if is_dense
+            else COMPACT_STATISTICAL_TYPOGRAPHY
+        ),
+        policy=LOCKED_PANEL_TYPOGRAPHY_POLICY,
+        dense_axes=dense_axes,
+        colorbar_axes=colorbar_axes,
+        enforce_atomic_axis_gate=False,
+    )
+    if stem == "fig1-panelf":
+        dataset_legend = fig.axes[0].get_legend()
+        if dataset_legend is not None:
+            for text in dataset_legend.get_texts():
+                text.set_fontsize(12.0)
+            for handle in dataset_legend.legend_handles:
+                if hasattr(handle, "set_markersize"):
+                    handle.set_markersize(5.0)
     png = output_dir / f"{stem}.png"
     pdf = output_dir / f"{stem}.pdf"
-    fig.savefig(png, dpi=600, facecolor="white", bbox_inches="tight")
-    fig.savefig(pdf, facecolor="white", bbox_inches="tight")
+    bbox_inches = "tight" if tight_bbox else None
+    fig.savefig(png, dpi=600, facecolor="white", bbox_inches=bbox_inches)
+    fig.savefig(pdf, facecolor="white", bbox_inches=bbox_inches)
     plt.close(fig)
     return [str(png.relative_to(ROOT)), str(pdf.relative_to(ROOT))]
 
@@ -123,7 +180,8 @@ def _render_panel_b_sources(output_dir: Path, single_hfo_png: Path, group_event_
         src_pdf = src_png.with_suffix(".pdf")
         if src_pdf.exists():
             dst_pdf = output_dir / f"{stem}.pdf"
-            shutil.copyfile(src_pdf, dst_pdf)
+            if src_pdf.resolve() != dst_pdf.resolve():
+                shutil.copyfile(src_pdf, dst_pdf)
             subprocess.run(
                 ["pdftoppm", "-png", "-singlefile", "-r", "600", str(dst_pdf),
                  str(output_dir / stem)],
@@ -379,7 +437,18 @@ def _place_panel_c_colorbar(fig: plt.Figure, image, ax_cbar: plt.Axes) -> None:
     cbar = fig.colorbar(image, cax=ax_cbar, orientation="vertical")
     pos = ax_cbar.get_position()
     ax_cbar.set_position([pos.x0 - 0.018, pos.y0, pos.width, pos.height])
-    cbar.set_label("First → Last", fontsize=10.5)
+    cbar.set_label("")
+    cbar.ax.text(
+        0.5,
+        1.035,
+        FIG1_RANK_COLORBAR_TITLE,
+        transform=cbar.ax.transAxes,
+        ha="center",
+        va="bottom",
+        fontsize=9.5,
+        linespacing=0.95,
+        clip_on=False,
+    )
     cbar.ax.tick_params(labelsize=8.5, length=2)
 
 
@@ -436,6 +505,10 @@ def _draw_fig1e_cluster_row(
     ax_mean_dummy = fig.add_subplot(right[1], sharex=ax_mean)
     ax_mean_dummy.axis("off")
     ax_cluster_dummy.axis("off")
+    semantic_names = cluster_label_names or ["TA", "TB"]
+    semantic_colors = cluster_colors or [
+        FIG1E_TEMPLATE_COLORS[name] for name in semantic_names
+    ]
     ranks = arr["ranks"]
     bools = arr["bools"]
     channel_order = arr["channel_order"]
@@ -486,10 +559,13 @@ def _draw_fig1e_cluster_row(
         label_fontsize=cluster_label_fontsize,
         label_box=False,
         boundary_band=False,
-        label_names=cluster_label_names or ["TA", "TB"],
-        label_colors=cluster_colors,
+        label_names=semantic_names,
+        label_colors=semantic_colors,
         label_y_offset=0.5,
     )
+    for text in ax_cluster.texts:
+        if text.get_text().split(maxsplit=1)[0] in semantic_names:
+            text.set_fontweight("bold")
     if show_heatmap_xlabel:
         ax_cluster.set_xlabel("Population events (clustered)", fontsize=10.5)
     else:
@@ -512,8 +588,8 @@ def _draw_fig1e_cluster_row(
         invert_yaxis=False,
         show_ylabels=False,
         marker_size=3.5,
-        line_colors=cluster_colors,
-        label_names=mean_profile_label_names,
+        line_colors=semantic_colors,
+        label_names=mean_profile_label_names or semantic_names,
     )
     if show_mean_xlabel:
         ax_mean.set_xlabel("Rank", fontsize=10.5)
@@ -547,6 +623,7 @@ def _draw_fig1e_cluster_row(
         "cluster_boundary": cluster_boundary,
         "gap_half_width": gap_half_width,
         "image": im,
+        "template_semantic_colors": dict(zip(semantic_names, semantic_colors)),
     }
 
 
@@ -555,16 +632,16 @@ def _render_temporal_order_panel(
     arr: dict,
     display_label: str,
 ) -> dict:
-    fig = plt.figure(figsize=(11.6, 3.35), facecolor="white")
+    fig = plt.figure(figsize=(11.6, 3.55), facecolor="white")
     outer = gridspec.GridSpec(
         1,
         3,
         figure=fig,
         width_ratios=[8.4, 0.16, 1.35],
-        wspace=0.13,
+        wspace=0.16,
         left=0.065,
         right=0.985,
-        bottom=0.14,
+        bottom=0.17,
         top=0.88,
     )
     ax_raw, ax_strip, ax_cbar, ax_dist = _panel_c_row_axes(fig, outer, 0)
@@ -585,10 +662,7 @@ def _render_temporal_order_panel(
     ax_raw.tick_params(axis="x", labelbottom=False)
     ax_raw.set_xlabel("")
     propagation_plot._plot_daynight_strip(ax_strip, arr["day_mask"])
-    ax_strip.set_xlabel(
-        "Population events (time-ordered)  ·  strip: day (white) / night (black)",
-        fontsize=10.5,
-    )
+    ax_strip.set_xlabel("Population events (time-ordered)", fontsize=10.5)
     propagation_plot._plot_rank_histogram(
         ax_dist,
         ranks,
@@ -596,7 +670,7 @@ def _render_temporal_order_panel(
         arr["valid_events"],
         channel_order,
         arr["channel_names"],
-        title="Rank dist.",
+        title="",
         show_ylabels=False,
         label_fontsize=10.5,
         title_fontsize=10,
@@ -613,6 +687,21 @@ def _render_temporal_order_panel(
         fontsize=9.5,
         fontweight="bold",
     )
+    ax_raw.legend(
+        handles=[
+            Patch(facecolor="white", edgecolor="0.25", linewidth=0.8, label="Day"),
+            Patch(facecolor="black", edgecolor="black", linewidth=0.8, label="Night"),
+        ],
+        loc="lower right",
+        bbox_to_anchor=(0.78, 1.025),
+        ncol=2,
+        frameon=False,
+        fontsize=8.5,
+        handlelength=1.2,
+        handletextpad=0.4,
+        columnspacing=0.9,
+        borderaxespad=0.0,
+    )
     files = _save_panel(fig, output_dir, "fig1-panelc")
     return {
         "panel_id": "c",
@@ -623,6 +712,11 @@ def _render_temporal_order_panel(
         "axis_label_fontsize_points": 10.5,
         "channel_label_fontsize_points": 9.5,
         "colorbar_label_fontsize_points": 10.5,
+        "rank_colorbar": {
+            "title": FIG1_RANK_COLORBAR_TITLE,
+            "placement": "horizontal title above colorbar",
+            "side_label_removed": True,
+        },
         "panel_column_order": ["event_heatmap", "colorbar", "rank_summary"],
         "record": f"results/interictal_propagation_masked/per_subject/{arr['dataset']}_{arr['subject']}.json",
         "public_patient_label": display_label,
@@ -630,6 +724,11 @@ def _render_temporal_order_panel(
         "displayed_events": int(arr["display_events"].size),
         "masked_features": True,
         "daynight_strip": True,
+        "daynight_legend": {
+            "labels": ["Day", "Night"],
+            "placement": "same title row as patient label, upper-right of heatmap",
+            "removed_from_xlabel": True,
+        },
         "masked_mi_mean": arr["mi_mean"],
         "rank_distribution_helper": "scripts/plot_interictal_propagation.py::_plot_rank_histogram",
     }
@@ -639,10 +738,10 @@ def _render_clustered_template_panel(
     output_dir: Path,
     arr: dict,
 ) -> dict:
-    fig = plt.figure(figsize=(11.6, 3.35), facecolor="white")
+    fig = plt.figure(figsize=(11.6, 3.55), facecolor="white")
     outer = gridspec.GridSpec(
-        1, 3, figure=fig, width_ratios=[8.4, 0.16, 1.35], wspace=0.13,
-        left=0.065, right=0.985, bottom=0.14, top=0.88,
+        1, 3, figure=fig, width_ratios=[8.4, 0.16, 1.35], wspace=0.16,
+        left=0.065, right=0.985, bottom=0.17, top=0.88,
     )
     drawn = _draw_fig1e_cluster_row(fig, outer, 0, arr)
     cluster_boundary = int(drawn["cluster_boundary"])
@@ -666,6 +765,13 @@ def _render_clustered_template_panel(
             "gap_half_width_events": gap_half_width,
         },
         "masked_features": True,
+        "template_semantic_colors": drawn["template_semantic_colors"],
+        "template_labels_bold": True,
+        "rank_colorbar": {
+            "title": FIG1_RANK_COLORBAR_TITLE,
+            "placement": "horizontal title above colorbar",
+            "side_label_removed": True,
+        },
         "chosen_k": arr["chosen_k"],
         "within_cluster_tau": arr["within_cluster_tau"],
         "overall_tau": arr["overall_tau"],
@@ -680,7 +786,9 @@ def _plot_mi(ax: plt.Axes, records: list[dict]) -> dict:
     import scipy.stats as st
 
     colors = {"yuquan": COL_YQ, "epilepsiae": EPI_STAT_COLOR}
-    positions = {"yuquan": (0.0, 0.6), "epilepsiae": (1.8, 2.4)}
+    # Keep the square D/F panel geometry while giving enlarged Data/Null ticks
+    # enough physical separation at the final composed size.
+    positions = {"yuquan": (0.0, 1.10), "epilepsiae": (2.25, 3.35)}
     summary = {}
     bracket_tops = []
     for group_index, dataset in enumerate(("yuquan", "epilepsiae")):
@@ -711,21 +819,28 @@ def _plot_mi(ax: plt.Axes, records: list[dict]) -> dict:
             "p_value_mannwhitney_greater": float(p_value),
             "all_mi_records_masked": bool(all(r["legacy_mi"].get("masked") is True for r in subset)),
         }
-    ax.set_xticks([0.0, 0.6, 1.8, 2.4])
+    ax.set_xticks([0.0, 1.10, 2.25, 3.35])
     ax.set_xticklabels(["Data", "Null", "Data", "Null"], fontsize=8.5)
-    ax.text(0.3, -0.125, "Yuquan", transform=ax.get_xaxis_transform(), ha="center", fontsize=9.5)
-    ax.text(2.1, -0.125, "Epilepsiae", transform=ax.get_xaxis_transform(), ha="center", fontsize=9.5)
+    ax.text(0.55, -0.125, "Yuquan", transform=ax.get_xaxis_transform(), ha="center", fontsize=9.5)
+    ax.text(2.80, -0.125, "Epilepsiae", transform=ax.get_xaxis_transform(), ha="center", fontsize=9.5)
+    ax.set_xlim(-0.55, 3.90)
     ax.set_ylabel("MI", fontsize=10.5)
-    ax.set_title("MI: data vs permutation null", fontsize=10.5, pad=8)
     ax.set_ylim(0.0, max(0.58, max(bracket_tops)))
     _style_axis(ax)
     return summary
 
 
 def _render_mi_panel(output_dir: Path, records: list[dict]) -> dict:
-    fig, ax = plt.subplots(figsize=(5.2, 3.9), facecolor="white")
+    fig, ax = plt.subplots(figsize=FIG1_DF_FIGSIZE, facecolor="white")
     summary = _plot_mi(ax, records)
-    files = _save_panel(fig, output_dir, "fig1-paneld")
+    ax.set_box_aspect(1.0)
+    for text in ax.texts:
+        if text.get_text() in {"Yuquan", "Epilepsiae"}:
+            text.set_y(-0.22)
+    fig.subplots_adjust(**FIG1_DF_SUBPLOT_ADJUST)
+    files = _save_panel(
+        fig, output_dir, "fig1-paneld", tight_bbox=False,
+    )
     return {
         "panel_id": "d",
         "files": files,
@@ -737,6 +852,146 @@ def _render_mi_panel(output_dir: Path, records: list[dict]) -> dict:
         "summary_display": "shared violin_with_scatter helper: violin + box/IQR + whiskers + subject points",
         "significance_display": "shared add_significance_bracket helper; Mann-Whitney U, data > null",
         "y_axis_starts_at_zero": True,
+        "paired_panel_geometry": {
+            "matched_to": "fig1-panelf",
+            "figure_size_inches": list(FIG1_DF_FIGSIZE),
+            "axes_box_aspect": 1.0,
+            "subplot_adjust": FIG1_DF_SUBPLOT_ADJUST,
+            "tight_bbox": False,
+        },
+    }
+
+
+def _plot_uplift_distribution_inset(
+    ax: plt.Axes,
+    records: list[dict],
+    overall_arr: np.ndarray,
+    within_arr: np.ndarray,
+) -> dict:
+    """Add the compact paired MI summary used by the supplementary HFO-AUC panel."""
+    import scipy.stats as st
+
+    colors = {"yuquan": COL_YQ, "epilepsiae": EPI_STAT_COLOR}
+
+    def _lighten(color: str, amount: float = 0.62) -> tuple[float, float, float]:
+        rgb = np.asarray(matplotlib.colors.to_rgb(color), dtype=float)
+        return tuple(rgb + (1.0 - rgb) * amount)
+
+    inset = ax.inset_axes(FIG1F_INSET_BOUNDS, zorder=6)
+    inset.set_facecolor("white")
+    for record, single_value, multi_value in zip(records, overall_arr, within_arr):
+        dataset_color = colors[str(record["dataset"])]
+        inset.plot(
+            [0, 1],
+            [single_value, multi_value],
+            color="0.38",
+            lw=0.45,
+            alpha=0.46,
+            zorder=1,
+        )
+        inset.scatter(
+            [0, 1],
+            [single_value, multi_value],
+            s=8.5,
+            color=[_lighten(dataset_color), dataset_color],
+            edgecolor="white",
+            linewidth=0.25,
+            alpha=0.86,
+            zorder=3,
+        )
+
+    means = [float(np.mean(overall_arr)), float(np.mean(within_arr))]
+    inset.bar(
+        [0, 1],
+        means,
+        width=0.58,
+        color=["#D9D9D9", "#8AA0AA"],
+        alpha=0.62,
+        edgecolor="none",
+        zorder=0,
+    )
+    inset.hlines(means, [-0.23, 0.77], [0.23, 1.23], color="black", lw=1.05, zorder=4)
+
+    try:
+        test = st.wilcoxon(within_arr, overall_arr, alternative="two-sided", method="auto")
+        statistic = float(test.statistic)
+        p_value = float(test.pvalue)
+    except ValueError:
+        statistic = float("nan")
+        p_value = float("nan")
+    if not np.isfinite(p_value):
+        p_text = "n.s."
+    elif p_value < 0.001:
+        p_text = "***"
+    elif p_value < 0.01:
+        p_text = "**"
+    elif p_value < 0.05:
+        p_text = "*"
+    else:
+        p_text = "n.s."
+
+    bracket_y = float(max(np.max(overall_arr), np.max(within_arr)) + 0.035)
+    cap = 0.012
+    inset.plot(
+        [0, 0, 1, 1],
+        [bracket_y - cap, bracket_y, bracket_y, bracket_y - cap],
+        color="black",
+        lw=0.75,
+        clip_on=False,
+        zorder=5,
+    )
+    inset.text(
+        0.5,
+        bracket_y + 0.008,
+        p_text,
+        ha="center",
+        va="bottom",
+        fontsize=8.0,
+        fontweight="bold" if "*" in p_text else "normal",
+        clip_on=False,
+    )
+    inset.set_xlim(-0.42, 1.42)
+    inset.set_ylim(0.0, max(0.90, bracket_y + 0.055))
+    inset.set_xticks([0, 1])
+    inset.set_xticklabels(["Single", "Multi"])
+    inset.set_yticks([0.0, 0.4, 0.8])
+    inset.set_ylabel(
+        "MI", fontsize=FIG1F_INSET_YLABEL_FONTSIZE, labelpad=2.0,
+    )
+    inset.tick_params(
+        axis="both",
+        labelsize=FIG1F_INSET_TICK_FONTSIZE,
+        length=2.4,
+        width=0.75,
+        pad=1.5,
+    )
+    inset.spines[["top", "right"]].set_visible(False)
+    inset.spines[["left", "bottom"]].set_linewidth(0.65)
+
+    return {
+        "n_paired": int(len(records)),
+        "single_template_mean": means[0],
+        "single_template_median": float(np.median(overall_arr)),
+        "multi_cluster_mean": means[1],
+        "multi_cluster_median": float(np.median(within_arr)),
+        "mean_delta": float(np.mean(within_arr - overall_arr)),
+        "median_delta": float(np.median(within_arr - overall_arr)),
+        "n_improved": int(np.sum(within_arr > overall_arr)),
+        "wilcoxon_two_sided_statistic": statistic,
+        "wilcoxon_two_sided_p": p_value,
+        "significance_label": p_text,
+        "display": "paired subject points and lines, mean bars, and paired Wilcoxon bracket",
+        "reference_grammar": "Supplementary Fig. 2 raw-vs-synchronized HFO AUC",
+        "layout_bounds_axes_fraction": FIG1F_INSET_BOUNDS,
+        "layout_aspect": "narrow portrait inset, not square",
+        "ylabel_fontsize_points": FIG1F_INSET_YLABEL_FONTSIZE,
+        "tick_label_fontsize_points": FIG1F_INSET_TICK_FONTSIZE,
+        "x_tick_labels": ["Single", "Multi"],
+        "x_tick_label_meanings": {
+            "Single": "single-template MI",
+            "Multi": "multi-cluster MI",
+        },
+        "x_tick_labels_single_line": True,
     }
 
 
@@ -761,28 +1016,28 @@ def _plot_uplift(ax: plt.Axes, records: list[dict]) -> dict:
     ax.set_ylabel("Within-template MI", fontsize=10)
     median_uplift = float(np.median(within_arr - overall_arr))
     n_above = int(np.sum(within_arr > overall_arr))
-    ax.set_title("Template-aware MI uplift", fontsize=10.5, pad=7)
-    ax.text(
-        0.96,
-        0.055,
-        f"median ΔMI = {median_uplift:+.3f}",
-        transform=ax.transAxes,
-        ha="right",
-        va="bottom",
-        fontsize=8.5,
-        color="0.35",
+    paired_distribution = _plot_uplift_distribution_inset(
+        ax, records, overall_arr, within_arr,
     )
-    ax.legend(
+    legend = ax.legend(
         handles=[
-            Line2D([0], [0], marker="o", linestyle="none", markerfacecolor=colors["yuquan"], markeredgecolor="white", markersize=6, label="Yuquan"),
-            Line2D([0], [0], marker="o", linestyle="none", markerfacecolor=colors["epilepsiae"], markeredgecolor="white", markersize=6, label="Epilepsiae"),
+            Line2D([0], [0], marker="o", linestyle="none", markerfacecolor=colors["yuquan"], markeredgecolor="white", markersize=5, label="Yuquan"),
+            Line2D([0], [0], marker="o", linestyle="none", markerfacecolor=colors["epilepsiae"], markeredgecolor="white", markersize=5, label="Epilepsiae"),
         ],
         loc="upper right",
-        frameon=False,
-        fontsize=8.5,
-        handletextpad=0.35,
+        frameon=True,
+        facecolor="white",
+        edgecolor="0.55",
+        framealpha=0.92,
+        fancybox=False,
+        fontsize=7.5,
+        handlelength=0.8,
+        handletextpad=0.25,
+        labelspacing=0.25,
+        borderpad=0.25,
         borderaxespad=0.35,
     )
+    legend.get_frame().set_linewidth(0.8)
     ax.set_aspect("equal", adjustable="box")
     _style_axis(ax)
     return {
@@ -793,21 +1048,42 @@ def _plot_uplift(ax: plt.Axes, records: list[dict]) -> dict:
         "display_labels": ["Overall MI", "Within-template MI"],
         "underlying_fields": ["adaptive_cluster.overall_tau", "adaptive_cluster.within_cluster_tau_mean"],
         "gray_below_diagonal_region": True,
+        "gray_summary_text_removed": True,
+        "paired_distribution_inset": paired_distribution,
         "axis_limits_start_at_zero": True,
         "dataset_legend": True,
+        "dataset_legend_frame": {
+            "visible": True,
+            "facecolor": "white",
+            "edgecolor": "0.55",
+            "linewidth": 0.8,
+            "producer_fontsize_points": 7.5,
+            "rendered_fontsize_points": 12.0,
+            "marker_size_points": 5.0,
+        },
     }
 
 
 def _render_uplift_panel(output_dir: Path, records: list[dict]) -> dict:
-    fig, ax = plt.subplots(figsize=(3.9, 3.9), facecolor="white")
+    fig, ax = plt.subplots(figsize=FIG1_DF_FIGSIZE, facecolor="white")
     summary = _plot_uplift(ax, records)
-    files = _save_panel(fig, output_dir, "fig1-panelf")
+    fig.subplots_adjust(**FIG1_DF_SUBPLOT_ADJUST)
+    files = _save_panel(
+        fig, output_dir, "fig1-panelf", tight_bbox=False,
+    )
     return {
         "panel_id": "f",
         "files": files,
         "producer_source": "scripts/plot_interictal_propagation.py --masked-features",
         "records": "results/interictal_propagation_masked/per_subject/*.json",
         "uplift": summary,
+        "paired_panel_geometry": {
+            "matched_to": "fig1-paneld",
+            "figure_size_inches": list(FIG1_DF_FIGSIZE),
+            "axes_box_aspect": 1.0,
+            "subplot_adjust": FIG1_DF_SUBPLOT_ADJUST,
+            "tight_bbox": False,
+        },
     }
 
 
@@ -815,25 +1091,31 @@ def _write_readme(output_dir: Path) -> None:
     (output_dir / "README.md").write_text(
         """# Figure 1 panel 与完整排版输出
 
-Figure 1A 是作者手绘示意图，不由代码生成，也不保存在本目录。独立 panel 文件不写左上角 panel 字母；字母只出现在 `fig1-complete-layout` 完整排版中。
+Figure 1A 由主 builder 从旧 Supplementary Figure S6 TIFF 固定裁剪一张 representative SEEG 植入脑图；不绑定患者身份，也不重画科学元素。独立 panel 文件不写左上角 panel 字母；字母只出现在 `fig1-complete-layout` 完整排版中。
+
+### fig1-panela.png / .pdf
+
+复用 `ReplayIED/tiffs/fig_s6_画板 1.tif` 上排的脑表面与 SEEG 电极渲染，只做固定裁剪和分辨率转换。
+
+**关注点**：A 只建立代表性的植入空间背景；图中不报告患者编号，彩色触点也不作为 Figure 1 的独立统计结论。
 
 ### fig1-panelb1.png / .pdf
 
 严格复用 legacy 人工标注的 178 段 HFO，展示黑色叠加波形、黄色均值及 raw/normalized 平均谱。三行 x 轴均铺满完整 0–0.6 s，首末频谱 cell 仅延展绘图边界、不修改谱值。
 
-**关注点**：标题应为红色 `HFO n = 178`，两张谱在 x 轴左右均不应出现白带。
+**关注点**：红色计数标签应为 `HFO n = 178`，两张谱在 x 轴左右均不应出现白带。
 
 ### fig1-panelb2.png / .pdf
 
-展示 Yuquan Y3 的三个真实群体 HFO 事件及 normalized spectrogram。B1/B2 的谱量统一为 Gaussian-smoothed magnitude；B2 保留原 50 ms Hamming 窗以维持群体事件的时间分辨率，红点取主峰 ≥70% 连通增强区的同图加权质心。
+展示 Yuquan Y3 的三个真实群体 HFO 事件及 normalized spectrogram。B1/B2 的谱量统一为 Gaussian-smoothed magnitude；B2 保留原 50 ms Hamming 窗以维持群体事件的时间分辨率，红点取主峰 ≥70% 连通增强区的同图加权质心。左侧波形与右侧 spectrogram 使用相同时间范围、相同刻度和相同数据轴宽度；色条占独立窄列。
 
-**关注点**：每个红点应落在对应通道的高频能量增强团内，左右外边界无白带，只有事件之间保留白色分隔线。
+**关注点**：两块数据轴的时间尺度在物理宽度上必须一致；每个红点应落在对应通道的高频能量增强团内，左右外边界无白带，只有事件之间保留白色分隔线。
 
 ### fig1-panelc.png / .pdf
 
 展示 Epilepsiae E7 的 masked 时间顺序热图、原始 overlapping rank ridgeline 与 day/night strip。
 
-**关注点**：非参与触点必须保持空白；day/night strip 与事件时间顺序严格对齐。
+**关注点**：非参与触点必须保持空白；day/night strip 与事件时间顺序严格对齐；Day/Night 使用黑白方块在患者标题同一行单独画 legend，xlabel 只保留 `Population events (time-ordered)`；colorbar 使用顶部水平标题 `Heatmap rank / First → Last`。
 
 ### fig1-paneld.png / .pdf
 
@@ -845,17 +1127,17 @@ Figure 1A 是作者手绘示意图，不由代码生成，也不保存在本目�
 
 将同一位 Epilepsiae E7 的全量 6,556 个有效事件按 masked KMeans k=2 的 TA/TB 标签重排，并展示两类 mean-rank 轮廓。
 
-**关注点**：TA/TB 两个 n 之和必须等于 6,556；两类之间使用白底灰色斜线断带并截断 x 轴线。
+**关注点**：TA/TB 两个 n 之和必须等于 6,556；TA/TB 顶部标签必须粗体显示，TA 固定为红色 `#B2182B`，TB 固定为蓝色 `#2166AC`，并与右侧 mean-rank 曲线一致；colorbar 标题固定放在色条上方。
 
 ### fig1-panelf.png / .pdf
 
-Overall 与 within-template MI 配对散点，量化分模板后的 matching uplift。底层数值仍来自 masked `overall_tau` / `within_cluster_tau_mean` rank-concordance fields，但图面统一使用 MI 简写。画布只显示 median ΔMI，cohort 计数留给 caption/正文。
+Overall 与 within-template MI 配对散点，量化分模板后的 matching uplift。底层数值仍来自 masked `overall_tau` / `within_cluster_tau_mean` rank-concordance fields，但图面统一使用 MI 简写。右下小 panel 复用补充图 HFO AUC 的配对语法，以患者连线、均值柱和配对 Wilcoxon 括号直接比较 single-template 与 multi-cluster MI。
 
-**关注点**：两轴从 0 开始；对角线下方恢复灰区；右上角图例解释蓝色 Yuquan、棕色 Epilepsiae；统计文字移入无数据的右下灰区。
+**关注点**：两轴从 0 开始；对角线下方保留灰区；右上角 Yuquan/Epilepsiae 图例必须使用较小字号并带白底细边框；右下不再放灰色摘要字，而应以窄竖向、非方形布局显示 40 名患者的配对 MI 分布和显著性括号。x 轴用居中的单行短标签 `Single` / `Multi`，分别表示 single-template MI / multi-cluster MI。
 
 ### fig1-complete-layout.png / .pdf
 
-将代码生成的 B–F panel 排为完整 Figure 1，并在完整画布上添加 B–F 字母。A 为作者手绘内容，因此本版保留 A 的外部拼入边界。
+将 TIFF 提取的 A 与代码生成的 B–F panel 排为完整 Figure 1，并在完整画布上统一添加 A–F 字母。
 
 **关注点**：独立 panel 内不应重复出现字母；完整排版中的字母位置和字号应统一。
 """,
@@ -902,15 +1184,27 @@ def build(
     outputs = [f for panel in panels.values() for f in panel["files"]]
 
     metadata = {
-        "schema_version": "paper_figure1_independent_panels_v4",
+        "schema_version": "paper_figure1_independent_panels_v6",
+        "panelf_canonical_contract": {
+            "contract_id": "fig1f_single_template_vs_multi_cluster_paired_inset_v1",
+            "locked_on": "2026-09-02",
+            "required_visual": "paired subject lines and points, mean bars, and paired Wilcoxon bracket in the lower-right inset",
+            "forbidden_visual": "gray median-delta summary text in the lower-right region",
+            "statistics": "two-sided paired Wilcoxon on adaptive_cluster.overall_tau vs adaptive_cluster.within_cluster_tau_mean",
+        },
+        "panele_canonical_contract": {
+            "contract_id": "fig1e_ta_red_tb_blue_semantic_colors_v1",
+            "template_semantic_colors": FIG1E_TEMPLATE_COLORS,
+            "required_visual": "TA labels and mean-rank profile are red; TB labels and mean-rank profile are blue",
+        },
         "claim_scope": "Interictal HFO population events exhibit recurrent patient-specific temporal organization.",
         "forbidden_upgrade": "This figure alone does not establish a shared 3D propagation axis.",
         "producer": "scripts/paper_figures/plot_fig1_interictal_hfo_temporal_scaffold.py",
         "panel_id_stamped": {
             "individual_panels": False,
-            "note": "panel letters are added only by fig1-complete-layout; Figure 1A is hand-drawn and absent",
+            "note": "panel letters are added only by fig1-complete-layout; Figure 1A is supplied by the main builder from a legacy supplementary TIFF",
         },
-        "figure1a": "hand-drawn; intentionally not generated or retained in paper-ready-figure",
+        "figure1a": "main builder supplies a fixed crop from legacy Supplementary Figure S6",
         "composite_emitted": False,
         "split_half_included": False,
         "paneld_statistic": "masked shared-participant MI (phantom ranks excluded); 40/40 significant, cohort median 0.228.",

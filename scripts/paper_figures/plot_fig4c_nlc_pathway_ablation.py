@@ -41,6 +41,12 @@ ARM_LABELS = ("Node", "+EE", "+E-to-I", "+EE+EI")
 ARM_COLORS = ("#777777", "#D7892F", "#2A9D8F", "#202020")
 TA_COLOR = "#C43C39"
 TB_COLOR = "#277DA1"
+DISPLAY_ENDPOINTS = {
+    "Mode 1 share (%)": "TB_like_fraction",
+    "Mode 2 share (%)": "TB_like_fraction",
+    "KMeans match (%)": "natural_alignment",
+    "OOD (%)": "ood_fraction_returned",
+}
 
 
 def _classifier(manifest):
@@ -93,7 +99,7 @@ def _historical_rows(config_path, root):
         "endpoint_status": "POST_HOC_ON_FROZEN_EXACT_ABLATION",
         "source_verdict": str((root / "confirmation_verdict.json").relative_to(ROOT)),
         "new_confirmation_required_for_main_claim": True,
-    }
+    }, None
 
 
 def _mechanism_rows(root):
@@ -105,7 +111,7 @@ def _mechanism_rows(root):
         "endpoint_status": "PRE_REGISTERED_INDEPENDENT_CONFIRMATION",
         "source_verdict": str(verdict_path.relative_to(ROOT)),
         "new_confirmation_required_for_main_claim": False,
-    }
+    }, verdict["paired_differences_vs_node"]
 
 
 def _metric_arrays(rows, seeds):
@@ -155,7 +161,36 @@ def _style():
     })
 
 
-def _draw_axis(axis, values, title, *, draws, seed):
+def _significant_node_arms(title, paired_differences):
+    """Return non-Node arm indices whose paired 90% CI excludes zero."""
+    if paired_differences is None:
+        return []
+    endpoint = DISPLAY_ENDPOINTS[title]
+    significant = []
+    for arm_index, arm_id in enumerate(ARM_IDS[1:], start=1):
+        result = paired_differences[arm_id][endpoint]
+        if result.get("status") != "OK":
+            continue
+        if float(result["q05"]) > 0.0 or float(result["q95"]) < 0.0:
+            significant.append(arm_index)
+    return significant
+
+
+def _draw_significance_bracket(axis, arm_index, level):
+    y = 103.0 + 8.0 * level
+    height = 2.0
+    axis.plot(
+        [0.0, 0.0, float(arm_index), float(arm_index)],
+        [y, y + height, y + height, y],
+        color="#333333", lw=0.7, clip_on=False, zorder=5,
+    )
+    axis.text(
+        0.5 * arm_index, y + height + 0.8, "*",
+        ha="center", va="bottom", fontsize=8.0, color="#222222", zorder=6,
+    )
+
+
+def _draw_axis(axis, values, title, *, draws, seed, significant_arms=()):
     x = np.arange(len(ARM_IDS), dtype=float)
     for row in values:
         finite = np.isfinite(row)
@@ -184,6 +219,8 @@ def _draw_axis(axis, values, title, *, draws, seed):
     axis.spines["left"].set_color("#777777")
     axis.spines["bottom"].set_color("#777777")
     axis.margins(x=0.10)
+    for level, arm_index in enumerate(significant_arms):
+        _draw_significance_bracket(axis, arm_index, level)
 
 
 def _save(fig, stem):
@@ -267,21 +304,37 @@ def main():
     config = json.loads(config_path.read_text())
     root = ROOT / config["output_root"]
     if (root / "mechanism_verdict.json").exists():
-        rows, seeds, source = _mechanism_rows(root)
+        rows, seeds, source, paired_differences = _mechanism_rows(root)
         stem_name = "fig4c_nlc_pathway_ablation_confirmation"
     else:
-        rows, seeds, source = _historical_rows(config_path, root)
+        rows, seeds, source, paired_differences = _historical_rows(config_path, root)
         stem_name = "fig4c_nlc_pathway_ablation_posthoc"
     metrics = _metric_arrays(rows, seeds)
+    annotated_comparisons = {
+        title: [ARM_IDS[index] for index in _significant_node_arms(
+            title, paired_differences,
+        )]
+        for title in metrics
+    }
     _style()
-    fig, axes = plt.subplots(1, 4, figsize=(7.15, 2.45))
+    fig, axes = plt.subplots(1, 4, figsize=(7.15, 2.62))
     for index, (title, values) in enumerate(metrics.items()):
-        _draw_axis(axes[index], values, title, draws=4096, seed=20260820 + 20 * index)
+        _draw_axis(
+            axes[index], values, title, draws=4096,
+            seed=20260820 + 20 * index,
+            significant_arms=_significant_node_arms(title, paired_differences),
+        )
     axes[0].title.set_color(TA_COLOR)
     axes[1].title.set_color(TB_COLOR)
     for axis in axes:
-        axis.set_ylim(0.0, 102.0)
-    fig.subplots_adjust(left=0.055, right=0.995, bottom=0.25, top=0.91, wspace=0.42)
+        axis.set_ylim(0.0, 120.0)
+    fig.text(
+        0.5, 0.018,
+        "* paired vs Node: 90% network-bootstrap CI excludes 0; "
+        "n=12, 4,096 draws; no multiplicity correction",
+        ha="center", va="bottom", fontsize=5.2, color="#555555",
+    )
+    fig.subplots_adjust(left=0.055, right=0.995, bottom=0.29, top=0.91, wspace=0.42)
     stem = Path(args.output_dir).resolve() / stem_name
     _save(fig, stem)
     plt.close(fig)
@@ -304,7 +357,13 @@ def main():
             "OOD (%)": "fraction of returned events outside frozen patient support",
         },
         "natural_clusters_are_not_relabelled_as_patient_modes": True,
-        "statistics": "equal-network mean and 90% network bootstrap interval; raw paired networks shown",
+        "statistics": {
+            "summary": "equal-network mean and 90% network bootstrap interval; raw paired networks shown",
+            "star_rule": "paired arm-minus-Node 90% network-bootstrap CI excludes zero",
+            "bootstrap_draws": 4096,
+            "multiplicity_correction": "none",
+            "annotated_arm_vs_node": annotated_comparisons,
+        },
         "canvas_has_no_claim_text_or_internal_panel_letter": True,
         "outputs": [
             str(stem.with_suffix(".png").relative_to(ROOT)),

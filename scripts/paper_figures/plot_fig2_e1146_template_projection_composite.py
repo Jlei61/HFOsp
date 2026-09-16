@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
-"""E1146 method composite: high-HFO contacts, shared plane, and TA/TB fields.
+"""Spatial-method panel: implantation overview, local T1, and 2-D projection.
 
-The figure uses the frozen E1146 interictal field artifact without refitting
-axes, plane, ranks, support, or contact order.  It separates three objects:
-
-1. the two local implantation shafts fitted as straight 3-D rods, with the
-   frozen TA/TB directions defining the shared plane and its principal axis;
-2. the selected contacts on that plane, together with their 6-mm Gaussian
-   display support;
-3. the canonical support-limited TA/TB rank fields on that same plane.
+The upper-left overview is the author-supplied Y9 implantation image.  The
+remaining three stages use the frozen E1146 MNI152 1-mm spatial bundle and
+show local T1 anatomy, the 3-D contact-to-plane operation, and the
+support-limited 2-D contact coverage.  The explicit subject switch prevents
+the overview from being mistaken for a same-subject zoom sequence.
 """
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import sys
@@ -23,9 +21,12 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import nibabel as nib
 import numpy as np
+
+from scipy.ndimage import map_coordinates
 from matplotlib import gridspec
-from matplotlib.patches import Circle, FancyArrowPatch
+from matplotlib.patches import Circle
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 
@@ -33,45 +34,81 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from scripts.plot_topic5_interictal_template_ab_fields import (  # noqa: E402
-    build_interictal_ab_panel_payloads,
-    draw_interictal_rank_field_panel,
+from src.paper_figure_typography import (  # noqa: E402
+    ILLUSTRATIVE_PANEL_TYPOGRAPHY,
+    LOCKED_PANEL_TYPOGRAPHY_POLICY,
+    apply_panel_aware_figure_typography,
 )
 from src.seeg_coord_loader import (  # noqa: E402
     enumerate_subject_all_channels,
     load_subject_coords,
 )
+from scripts.paper_figures.patient_public_labels import public_patient_label  # noqa: E402
 
 
 SUBJECT_ID = "epilepsiae_1146"
-DISPLAY_LABEL = "E1146"
+DISPLAY_LABEL = public_patient_label(*SUBJECT_ID.split("_", 1))
 INPUT_ARTIFACT = (
     ROOT
     / "results/interictal_propagation_masked/template_gradient_fields/per_subject"
     / f"{SUBJECT_ID}.json"
 )
+MNI_BUNDLE = ROOT / "exports/epilepsiae_1146_mni_bundle"
+T1_PATH = MNI_BUNDLE / "epilepsiae_1146_T1_mni152_1mm.nii.gz"
+T1_MANIFEST = MNI_BUNDLE / "manifest.json"
+IMPLANTATION_OVERVIEW = (
+    ROOT / "scripts/paper_figures/assets/fig2_y9_implantation_overview.png"
+)
+IMPLANTATION_OVERVIEW_SHA256 = (
+    "631a4b737ed9c779ed74ce8d799a17b53b6f83b704c7e79ff0ece01955b717a2"
+)
 OUTPUT_DIR = (
     ROOT
-    / "results/paper-ready-figure/fig2_e1146_template_projection_composite/figures"
+    / "results/paper-ready-figure/fig2/figures"
 )
+
 DISPLAY_SIGMA_MM = 6.0
 NORMAL_DISPLAY_EXAGGERATION = 3.0
-N_EARLY_SPATIAL_CONTACTS = 3
-# Display-only separation along the shared-plane normal.  The frozen plane's
-# x/y coordinates are unchanged; lowering its rendered z position exposes the
-# near-coplanar ICL shaft and the SCL shaft's plane crossing.
-DISPLAY_PLANE_Z = -1.2
+DISPLAY_PLANE_Z = -1.15
+GEOMETRY_PADDING_FRACTION = 0.18
+GEOMETRY_BOX_ZOOM = 1.00
+PROJECTION_PANEL_SCALE = 0.84
 
-TA_COLOR = "#B2182B"
-TB_COLOR = "#2166AC"
-ROD_CONTACT_FACE = "#F2F4F5"
-ROD_CONTACT_EDGE = "#4F5A60"
-PROJECTION_COLOR = "#587F8B"
-INK = "#24292D"
-MID_GREY = "#737C81"
-LIGHT_GREY = "#C8CED2"
-PLANE_FACE = "#E1E9ED"
-PLANE_EDGE = "#9AA7AE"
+INK = "#273238"
+MID_GREY = "#77848A"
+CONTEXT_CONTACT = "#D9DEE0"
+SELECTED_CONTACT = "#2B7C87"
+SELECTED_DARK = "#225F68"
+PLANE_FACE = "#D9ECEE"
+PLANE_EDGE = "#7E9CA2"
+
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _draw_implantation_overview(ax) -> None:
+    """Render the frozen author-supplied Y9 implantation overview."""
+    if not IMPLANTATION_OVERVIEW.exists():
+        raise FileNotFoundError(IMPLANTATION_OVERVIEW)
+    digest = _sha256(IMPLANTATION_OVERVIEW)
+    if digest != IMPLANTATION_OVERVIEW_SHA256:
+        raise ValueError(
+            "Y9 implantation overview differs from the accepted source asset: "
+            f"{digest}"
+        )
+    image = plt.imread(IMPLANTATION_OVERVIEW)
+    if image.shape[:2] != (392, 488):
+        raise ValueError(f"unexpected Y9 overview dimensions: {image.shape[:2]}")
+    ax.imshow(image, interpolation="lanczos")
+    height, width = image.shape[:2]
+    ax.set_xlim(-0.045 * width, 1.045 * width)
+    ax.set_ylim(1.045 * height, -0.045 * height)
+    ax.set_axis_off()
 
 
 def _contact_number(name: str) -> int:
@@ -90,7 +127,31 @@ def _shaft_indices(names: Sequence[str], shafts: Sequence[str]) -> list[np.ndarr
     return groups
 
 
-def _load_case() -> tuple[dict, dict, dict, list[str], np.ndarray, str]:
+def _shaft_label_position(
+    display_points: np.ndarray,
+    ordering_points: np.ndarray,
+    idx: np.ndarray,
+    *,
+    offset: float,
+) -> np.ndarray:
+    """Place a shaft name just beyond its minimum projected-x endpoint."""
+    endpoint = int(idx[np.argmin(ordering_points[idx, 0])])
+    others = idx[idx != endpoint]
+    nearest = int(
+        others[
+            np.argmin(
+                np.linalg.norm(
+                    ordering_points[others] - ordering_points[endpoint], axis=1,
+                )
+            )
+        ]
+    )
+    outward = display_points[endpoint] - display_points[nearest]
+    outward /= np.linalg.norm(outward)
+    return display_points[endpoint] + float(offset) * outward
+
+
+def _load_case() -> tuple[dict, list[str], np.ndarray, str]:
     record = json.loads(INPUT_ARTIFACT.read_text())
     if record.get("subject_id") != SUBJECT_ID or record.get("status") != "ok":
         raise ValueError(f"unexpected or unavailable record: {record.get('subject_id')}")
@@ -100,14 +161,8 @@ def _load_case() -> tuple[dict, dict, dict, list[str], np.ndarray, str]:
         raise ValueError("E1146 no longer meets the frozen two-dimensional geometry contract")
     if not bool((pair.get("relation") or {}).get("collinear")):
         raise ValueError("E1146 no longer meets the frozen shared-plane criterion")
-    if not all(key in (field.get("field_models") or {}) for key in ("shared_a", "shared_b")):
-        raise ValueError("E1146 frozen artifact is missing shared TA/TB field models")
-
-    dat_a, dat_b, mode = build_interictal_ab_panel_payloads(
-        record, display_sigma_mm=DISPLAY_SIGMA_MM,
-    )
-    if mode != "shared":
-        raise ValueError(f"expected shared-plane E1146 artifact, found {mode!r}")
+    if "shared" not in (field.get("planes") or {}):
+        raise ValueError("E1146 frozen artifact is missing its shared patient plane")
 
     all_names = enumerate_subject_all_channels("epilepsiae", "1146")
     coord = load_subject_coords("epilepsiae", "1146", all_names)
@@ -116,18 +171,41 @@ def _load_case() -> tuple[dict, dict, dict, list[str], np.ndarray, str]:
             f"unexpected E1146 coordinate contract: {coord.coord_space}/{coord.coord_units}"
         )
     if not bool(np.all(coord.mapped_mask_in_requested_order)):
-        raise ValueError("one or more E1146 ICL/SCL context contacts lack coordinates")
+        raise ValueError("one or more E1146 invasive contacts lack coordinates")
     selected = set(str(x) for x in field["contact_order"])
     if not selected.issubset(set(all_names)):
         raise ValueError("frozen E1146 field contacts are not contained in the implantation")
     return (
         record,
-        dat_a,
-        dat_b,
         all_names,
         np.asarray(coord.coords_array_in_requested_order, float),
         coord.coord_space,
     )
+
+
+def _load_t1() -> tuple[nib.Nifti1Image, np.ndarray, dict]:
+    if not T1_PATH.exists() or not T1_MANIFEST.exists():
+        raise FileNotFoundError("E1146 MNI spatial bundle is incomplete")
+    manifest = json.loads(T1_MANIFEST.read_text())
+    if manifest.get("coord_space") != "mni152_1mm":
+        raise ValueError("E1146 T1 manifest is not on the MNI152 1-mm grid")
+    image = nib.load(str(T1_PATH))
+    data = np.asarray(image.dataobj, dtype=float)
+    expected_shape = tuple(int(x) for x in manifest["mni152_1mm_shape"])
+    if data.shape != expected_shape:
+        raise ValueError(f"T1 shape mismatch: {data.shape} != {expected_shape}")
+    if not np.allclose(image.affine, manifest["mni152_1mm_affine"], atol=1e-6):
+        raise ValueError("T1 affine differs from its frozen bundle manifest")
+    return image, data, manifest
+
+
+def _canonical_transverse_sign(vector: Sequence[float]) -> int:
+    """Resolve the arbitrary plane-basis sign from geometry alone."""
+    vec = np.asarray(vector, float)
+    if vec.shape != (3,) or not np.isfinite(vec).all() or np.linalg.norm(vec) <= 0:
+        raise ValueError("transverse basis must be one finite nonzero 3-D vector")
+    dominant = int(np.argmax(np.abs(vec)))
+    return 1 if vec[dominant] >= 0 else -1
 
 
 def _basis(record: Mapping[str, object], transverse_sign: int) -> dict[str, np.ndarray]:
@@ -151,33 +229,10 @@ def _to_basis(points: np.ndarray, basis: Mapping[str, np.ndarray]) -> np.ndarray
     )
 
 
-def _vector_2d(vector: Sequence[float], basis: Mapping[str, np.ndarray]) -> np.ndarray:
-    vec = np.asarray(vector, float)
-    out = np.asarray([vec @ basis["u"], vec @ basis["w"]], float)
-    return out / np.linalg.norm(out)
-
-
-def _selected_support(record: Mapping[str, object]) -> np.ndarray:
-    support_a = np.asarray(record["interictal_field"]["support_a"], float)
-    support_b = np.asarray(record["interictal_field"]["support_b"], float)
-    return 0.5 * (support_a + support_b)
-
-
-def _earliest_contact_names(
-    record: Mapping[str, object], rank_key: str, n_contacts: int,
-) -> list[str]:
-    field = record["interictal_field"]
-    names = np.asarray([str(x) for x in field["contact_order"]], dtype=object)
-    ranks = np.asarray(field[rank_key], float)
-    valid = np.where(np.isfinite(ranks))[0]
-    order = valid[np.argsort(ranks[valid], kind="stable")]
-    return names[order[:n_contacts]].tolist()
-
-
 def _fit_straight_shaft_points(
     coords: np.ndarray, names: Sequence[str], shafts: Sequence[str],
 ) -> tuple[np.ndarray, dict[str, dict[str, float]]]:
-    """Place each displayed contact on its shaft's best-fit 3-D line."""
+    """Place displayed carrier contacts on each shaft's best-fit 3-D line."""
     points = np.asarray(coords, float)
     fitted = np.empty_like(points)
     stats: dict[str, dict[str, float]] = {}
@@ -199,40 +254,198 @@ def _fit_straight_shaft_points(
     return fitted, stats
 
 
-def _draw_local_geometry(
-    ax,
+def _local_geometry(
     record: Mapping[str, object],
-    dat_a: Mapping[str, object],
     basis: Mapping[str, np.ndarray],
     context_names: Sequence[str],
     context_coords: np.ndarray,
-) -> None:
-    # Honor explicit artist layers so early-contact colors remain visible even
-    # when the 3-D painter would otherwise place them behind the display plane.
-    ax.computed_zorder = False
+) -> dict[str, object]:
     all_names = np.asarray([str(x) for x in context_names], dtype=object)
-    all_shafts = np.asarray([re.sub(r"\d+$", "", str(x)) for x in all_names], dtype=object)
-    all_coords = _to_basis(context_coords, basis)
-    xlim = tuple(float(x) for x in dat_a["frame"]["xlim"])
-    ylim = tuple(float(x) for x in dat_a["frame"]["ylim"])
-    local_two_shaft = np.isin(all_shafts, ["ICL", "SCL"])
-    names = all_names[local_two_shaft].tolist()
-    shafts = all_shafts[local_two_shaft].tolist()
-    coords_true = all_coords[local_two_shaft]
-    # E1146's selected contacts genuinely lie very close to the plane
-    # (max residual 0.82 mm).  A fixed normal-axis display exaggeration makes
-    # the rod-to-plane operation legible without changing any x/y projection.
-    fitted_true, _ = _fit_straight_shaft_points(coords_true, names, shafts)
-    # The physical carrier and its displayed contacts form one ideal straight
-    # SEEG shaft.  Plane footprints retain the measured E1146 x/y coordinates;
-    # fitting those footprints would incorrectly force the field inputs onto a
-    # straight line and break consistency with the downstream panels.
-    measured_coords = coords_true.copy()
-    measured_coords[:, 2] *= NORMAL_DISPLAY_EXAGGERATION
-    rod_contacts = fitted_true.copy()
-    rod_contacts[:, 2] *= NORMAL_DISPLAY_EXAGGERATION
-    feet = measured_coords.copy()
-    feet[:, 2] = DISPLAY_PLANE_Z
+    all_shafts = np.asarray(
+        [re.sub(r"\d+$", "", str(x)) for x in all_names], dtype=object,
+    )
+    local_mask = np.isin(all_shafts, ["ICL", "SCL"])
+    names = all_names[local_mask]
+    shafts = all_shafts[local_mask]
+    world = np.asarray(context_coords, float)[local_mask]
+    measured = _to_basis(world, basis)
+    fitted, fit_stats = _fit_straight_shaft_points(
+        measured, names.tolist(), shafts.tolist(),
+    )
+    world_fitted, world_fit_stats = _fit_straight_shaft_points(
+        world, names.tolist(), shafts.tolist(),
+    )
+    selected_set = set(str(x) for x in record["interictal_field"]["contact_order"])
+    selected = np.asarray([str(name) in selected_set for name in names], bool)
+    return {
+        "names": names,
+        "shafts": shafts,
+        "measured": measured,
+        "fitted": fitted,
+        "world": world,
+        "world_fitted": world_fitted,
+        "selected": selected,
+        "fit_stats": fit_stats,
+        "world_fit_stats": world_fit_stats,
+    }
+
+
+def _selected_support(
+    record: Mapping[str, object], geometry: Mapping[str, object],
+) -> np.ndarray:
+    field = record["interictal_field"]
+    source_names = [str(x) for x in field["contact_order"]]
+    mean_support = 0.5 * (
+        np.asarray(field["support_a"], float) + np.asarray(field["support_b"], float)
+    )
+    by_name = dict(zip(source_names, mean_support, strict=True))
+    return np.asarray(
+        [float(by_name.get(str(name), 0.0)) for name in geometry["names"]],
+        dtype=float,
+    )
+
+
+def _limits_2d(xy: np.ndarray, pad_fraction: float = 0.12) -> tuple[tuple[float, float], tuple[float, float]]:
+    xy = np.asarray(xy, float)
+    mins = np.nanmin(xy, axis=0)
+    maxs = np.nanmax(xy, axis=0)
+    span = np.maximum(maxs - mins, 1.0)
+    pad = pad_fraction * span
+    return (
+        (float(mins[0] - pad[0]), float(maxs[0] + pad[0])),
+        (float(mins[1] - pad[1]), float(maxs[1] + pad[1])),
+    )
+
+
+def _sample_t1(
+    image: nib.Nifti1Image, data: np.ndarray, world_points: np.ndarray,
+) -> np.ndarray:
+    points = np.asarray(world_points, float)
+    voxels = nib.affines.apply_affine(
+        np.linalg.inv(image.affine), points.reshape(-1, 3),
+    )
+    sampled = map_coordinates(
+        data, voxels.T, order=1, mode="constant", cval=0.0,
+    )
+    return sampled.reshape(points.shape[:-1])
+
+
+def _t1_display_range(data: np.ndarray) -> tuple[float, float]:
+    tissue = np.asarray(data, float)
+    tissue = tissue[np.isfinite(tissue) & (tissue > 5.0)]
+    if tissue.size == 0:
+        raise ValueError("E1146 T1 contains no non-background tissue")
+    low, high = np.percentile(tissue, [2.0, 99.0])
+    return float(low), float(high)
+
+
+def _t1_facecolors(
+    values: np.ndarray, display_range: tuple[float, float], alpha: float,
+) -> np.ndarray:
+    low, high = display_range
+    normalized = np.clip((np.asarray(values, float) - low) / (high - low), 0.0, 1.0)
+    rgba = plt.cm.gray(normalized**0.78)
+    rgba[..., 3] = float(alpha) * (np.asarray(values) > 5.0)
+    return rgba
+
+
+def _draw_subject_t1_cutaway(
+    ax,
+    image: nib.Nifti1Image,
+    data: np.ndarray,
+    geometry: Mapping[str, object],
+) -> None:
+    """Render three real E1146 T1 planes around the local ICL/SCL contacts."""
+    ax.computed_zorder = False
+    world = np.asarray(geometry["world"], float)
+    fitted = np.asarray(geometry["world_fitted"], float)
+    names = np.asarray(geometry["names"], dtype=object)
+    shafts = np.asarray(geometry["shafts"], dtype=object)
+    selected = np.asarray(geometry["selected"], bool)
+    measured = np.asarray(geometry["measured"], float)
+    center = np.mean(world, axis=0)
+    mins = np.min(world, axis=0) - np.asarray([14.0, 15.0, 14.0])
+    maxs = np.max(world, axis=0) + np.asarray([14.0, 15.0, 14.0])
+    display_range = _t1_display_range(data)
+
+    x = np.linspace(mins[0], maxs[0], 76)
+    y = np.linspace(mins[1], maxs[1], 68)
+    z = np.linspace(mins[2], maxs[2], 68)
+    yy, zz = np.meshgrid(y, z)
+    xx_sag = np.full_like(yy, center[0])
+    sag_world = np.stack([xx_sag, yy, zz], axis=-1)
+    xx, zz_cor = np.meshgrid(x, z)
+    yy_cor = np.full_like(xx, center[1])
+    cor_world = np.stack([xx, yy_cor, zz_cor], axis=-1)
+    xx_ax, yy_ax = np.meshgrid(x, y)
+    zz_ax = np.full_like(xx_ax, center[2])
+    ax_world = np.stack([xx_ax, yy_ax, zz_ax], axis=-1)
+
+    planes = (
+        (xx_sag, yy, zz, sag_world, 0.70),
+        (xx, yy_cor, zz_cor, cor_world, 0.68),
+        (xx_ax, yy_ax, zz_ax, ax_world, 0.64),
+    )
+    for px, py, pz, points, alpha in planes:
+        values = _sample_t1(image, data, points)
+        ax.plot_surface(
+            px, py, pz,
+            facecolors=_t1_facecolors(values, display_range, alpha),
+            rstride=1, cstride=1, shade=False, linewidth=0.0,
+            antialiased=False, zorder=1,
+        )
+
+    for idx in _shaft_indices(names.tolist(), shafts.tolist()):
+        direction = fitted[idx[-1]] - fitted[idx[0]]
+        direction /= np.linalg.norm(direction)
+        carrier = np.vstack(
+            [fitted[idx[0]] - 0.9 * direction, fitted[idx[-1]] + 0.9 * direction]
+        )
+        ax.plot(
+            *carrier.T, color="#45545B", lw=1.25, alpha=0.92,
+            solid_capstyle="round", zorder=7,
+        )
+    ax.scatter(
+        *world[~selected].T, s=15.0, facecolor=CONTEXT_CONTACT,
+        edgecolor=MID_GREY, linewidth=0.50, depthshade=False, zorder=8,
+    )
+    ax.scatter(
+        *world[selected].T, s=21.0, facecolor=SELECTED_CONTACT,
+        edgecolor="white", linewidth=0.60, depthshade=False, zorder=9,
+    )
+    for idx in _shaft_indices(names.tolist(), shafts.tolist()):
+        label_position = _shaft_label_position(
+            fitted, measured, idx, offset=2.2,
+        )
+        ax.text(
+            *label_position, str(shafts[int(idx[0])]),
+            color="#66757B", fontsize=6.0, fontweight="bold",
+            ha="right", va="center", zorder=10,
+        )
+    ax.set_xlim(mins[0], maxs[0])
+    ax.set_ylim(mins[1], maxs[1])
+    ax.set_zlim(mins[2], maxs[2])
+    ax.set_box_aspect(maxs - mins, zoom=1.30)
+    ax.set_proj_type("ortho")
+    ax.view_init(elev=22.0, azim=-105.0)
+    ax.set_axis_off()
+
+
+def _draw_contact_geometry(ax, geometry: Mapping[str, object]) -> None:
+    """Render real E1146 local 3-D geometry and its display projection plane."""
+    ax.computed_zorder = False
+    measured = np.asarray(geometry["measured"], float)
+    fitted = np.asarray(geometry["fitted"], float).copy()
+    names = np.asarray(geometry["names"], dtype=object)
+    shafts = np.asarray(geometry["shafts"], dtype=object)
+    selected = np.asarray(geometry["selected"], bool)
+
+    fitted[:, 2] *= NORMAL_DISPLAY_EXAGGERATION
+    display_measured = measured.copy()
+    display_measured[:, 2] *= NORMAL_DISPLAY_EXAGGERATION
+    xlim, ylim = _limits_2d(
+        measured[:, :2], pad_fraction=GEOMETRY_PADDING_FRACTION,
+    )
     corners = np.asarray(
         [
             [xlim[0], ylim[0], DISPLAY_PLANE_Z],
@@ -244,268 +457,214 @@ def _draw_local_geometry(
     ax.add_collection3d(
         Poly3DCollection(
             [corners], facecolor=PLANE_FACE, edgecolor=PLANE_EDGE,
-            linewidth=0.55, alpha=0.42, zorder=0,
+            linewidth=0.7, alpha=0.48, zorder=0,
         )
     )
 
-    groups = _shaft_indices(names, shafts)
-    for idx in groups:
-        direction = rod_contacts[idx[-1]] - rod_contacts[idx[0]]
+    for idx in _shaft_indices(names.tolist(), shafts.tolist()):
+        direction = fitted[idx[-1]] - fitted[idx[0]]
         direction /= np.linalg.norm(direction)
         carrier = np.vstack(
-            [rod_contacts[idx[0]] - 1.15 * direction,
-             rod_contacts[idx[-1]] + 1.15 * direction]
+            [fitted[idx[0]] - 0.8 * direction, fitted[idx[-1]] + 0.8 * direction]
         )
-        relative_z = carrier[:, 2] - DISPLAY_PLANE_Z
-        if float(relative_z[0] * relative_z[1]) < 0.0:
-            fraction = float(relative_z[0] / (relative_z[0] - relative_z[1]))
-            crossing = carrier[0] + fraction * (carrier[1] - carrier[0])
-            segments = [
-                (np.vstack([carrier[0], crossing]), relative_z[0] >= 0.0),
-                (np.vstack([crossing, carrier[1]]), relative_z[1] >= 0.0),
-            ]
-            ax.scatter(
-                *crossing, s=10, facecolor="#5A666C", edgecolor="white",
-                linewidth=0.4, depthshade=False, zorder=4.2,
-            )
-        else:
-            segments = [(carrier, bool(np.mean(relative_z) >= 0.0))]
-        for segment, above_plane in segments:
-            alpha = 0.96 if above_plane else 0.34
-            linestyle = "-" if above_plane else (0, (2.0, 1.5))
-            ax.plot(
-                *segment.T, color="#A9B1B5", lw=2.8, alpha=alpha,
-                linestyle=linestyle, zorder=2.9, solid_capstyle="round",
-            )
-            ax.plot(
-                *segment.T, color="#5A666C", lw=0.72,
-                alpha=0.92 if above_plane else 0.38,
-                linestyle=linestyle, zorder=3.0, solid_capstyle="round",
-            )
-        for contact in idx:
-            contact = int(contact)
-            ax.plot(
-                [rod_contacts[contact, 0], feet[contact, 0]],
-                [rod_contacts[contact, 1], feet[contact, 1]],
-                [rod_contacts[contact, 2], DISPLAY_PLANE_Z],
-                color="#A1AAAE", lw=0.34, alpha=0.28, zorder=2.2,
-            )
-
-    ax.scatter(
-        *feet.T, s=5.5, facecolor="#7F8B90", edgecolor="none",
-        linewidth=0.0, alpha=0.32, depthshade=False, zorder=2.8,
-    )
-    ax.scatter(
-        *rod_contacts.T, s=21.0, facecolor=ROD_CONTACT_FACE,
-        edgecolor=ROD_CONTACT_EDGE, linewidth=0.72, depthshade=False, zorder=5,
-    )
-
-    early_ta = set(
-        _earliest_contact_names(record, "rank_a", N_EARLY_SPATIAL_CONTACTS)
-    )
-    early_tb = set(
-        _earliest_contact_names(record, "rank_b", N_EARLY_SPATIAL_CONTACTS)
-    )
-    name_array = np.asarray(names, dtype=object)
-    ta_only = np.asarray(
-        [str(name) in early_ta and str(name) not in early_tb for name in name_array],
-        bool,
-    )
-    tb_only = np.asarray(
-        [str(name) in early_tb and str(name) not in early_ta for name in name_array],
-        bool,
-    )
-    overlap = np.asarray(
-        [str(name) in early_ta and str(name) in early_tb for name in name_array],
-        bool,
-    )
-    for mask, color in ((ta_only, TA_COLOR), (tb_only, TB_COLOR)):
-        ax.scatter(
-            *rod_contacts[mask].T, s=21.0, facecolor=color,
-            edgecolor=ROD_CONTACT_EDGE,
-            linewidth=0.72, depthshade=False, zorder=6.2,
-        )
-    for point in rod_contacts[overlap]:
         ax.plot(
-            [point[0]], [point[1]], [point[2]], linestyle="None", marker="o",
-            markersize=4.55, fillstyle="left", markerfacecolor=TA_COLOR,
-            markerfacecoloralt=TB_COLOR, markeredgecolor=ROD_CONTACT_EDGE,
-            markeredgewidth=0.72, zorder=6.4,
+            *carrier.T, color=MID_GREY, lw=2.2, alpha=0.92,
+            solid_capstyle="round", zorder=3,
         )
 
-    _draw_template_directions_3d(ax, record, basis)
+    for point in display_measured[selected]:
+        ax.plot(
+            [point[0], point[0]], [point[1], point[1]],
+            [point[2], DISPLAY_PLANE_Z], color=PLANE_EDGE,
+            lw=0.42, alpha=0.42, zorder=2,
+        )
+    feet = display_measured[:, :2]
+    ax.scatter(
+        feet[selected, 0], feet[selected, 1],
+        np.full(int(np.sum(selected)), DISPLAY_PLANE_Z),
+        s=8.0, facecolor=SELECTED_CONTACT, edgecolor="none",
+        alpha=0.42, depthshade=False, zorder=2.7,
+    )
+    ax.scatter(
+        *fitted[~selected].T, s=18.0, facecolor=CONTEXT_CONTACT,
+        edgecolor=MID_GREY, linewidth=0.58, depthshade=False, zorder=4.5,
+    )
+    ax.scatter(
+        *fitted[selected].T, s=25.0, facecolor=SELECTED_CONTACT,
+        edgecolor=SELECTED_DARK, linewidth=0.65, depthshade=False, zorder=5.0,
+    )
+    for idx in _shaft_indices(names.tolist(), shafts.tolist()):
+        label_position = _shaft_label_position(
+            fitted, measured, idx, offset=1.8,
+        )
+        ax.text(
+            *label_position, str(shafts[int(idx[0])]),
+            color="#66757B", fontsize=6.0, fontweight="bold",
+            ha="right", va="center", zorder=6.0,
+        )
 
     zlim = (
-        float(min(rod_contacts[:, 2].min(), DISPLAY_PLANE_Z) - 1.2),
-        float(max(rod_contacts[:, 2].max(), 1.2) + 1.2),
+        float(min(fitted[:, 2].min(), DISPLAY_PLANE_Z) - 0.9),
+        float(max(fitted[:, 2].max(), 0.7) + 0.9),
     )
     ax.set_xlim(*xlim)
     ax.set_ylim(*ylim)
     ax.set_zlim(*zlim)
     ax.set_box_aspect(
         (xlim[1] - xlim[0], ylim[1] - ylim[0], zlim[1] - zlim[0]),
-        zoom=1.08,
+        zoom=GEOMETRY_BOX_ZOOM,
     )
+    ax.set_anchor("N")
     ax.set_proj_type("ortho")
-    ax.view_init(elev=32.0, azim=-95.0)
+    ax.view_init(elev=29.0, azim=-98.0)
     ax.set_axis_off()
 
 
-def _draw_template_directions_3d(
-    ax,
-    record: Mapping[str, object],
-    basis: Mapping[str, np.ndarray],
-) -> None:
-    ua = _vector_2d(record["axis_pair"]["axis_a"]["u"], basis)
-    ub = _vector_2d(record["axis_pair"]["axis_b"]["u"], basis)
-    length = 8.2
-    direction_specs = (
-        (ua, TA_COLOR, "TA", np.asarray([-14.0, 2.8, DISPLAY_PLANE_Z + 0.15])),
-        (ub, TB_COLOR, "TB", np.asarray([14.0, 0.2, DISPLAY_PLANE_Z + 0.15])),
-    )
-    for vector, color, label, origin in direction_specs:
-        vector3 = np.asarray([vector[0], vector[1], 0.0])
-        ax.quiver(
-            *origin, *(length * vector3), color=color, lw=0.95,
-            arrow_length_ratio=0.12, normalize=False, zorder=8,
-        )
-        label_xy = origin + 0.48 * length * vector3
-        label_xy[2] += 0.54
-        ax.text(
-            *label_xy, label, color=color, fontsize=6.4,
-            fontweight="normal", ha="center", va="center", zorder=9,
-        )
+def _draw_projection(
+    ax, record: Mapping[str, object], geometry: Mapping[str, object],
+) -> str:
+    """Draw contact projection and the exact 6-mm Gaussian display coverage."""
+    measured = np.asarray(geometry["measured"], float)
+    names = np.asarray(geometry["names"], dtype=object)
+    shafts = np.asarray(geometry["shafts"], dtype=object)
+    selected = np.asarray(geometry["selected"], bool)
+    support = _selected_support(record, geometry)
+    xy = measured[:, :2]
+    xlim, ylim = _limits_2d(xy, pad_fraction=0.24)
 
-
-def _draw_projected_support(
-    ax,
-    record: Mapping[str, object],
-    payload: Mapping[str, object],
-) -> int:
-    xs = np.asarray(payload["xs"], float)
-    ys = np.asarray(payload["ys"], float)
-    names = [str(x) for x in payload["names"]]
-    shafts = [str(x) for x in record["interictal_field"]["shafts"]]
-    support = _selected_support(record)
-    xlim = tuple(float(x) for x in payload["frame"]["xlim"])
-    ylim = tuple(float(x) for x in payload["frame"]["ylim"])
-
-    gx = np.linspace(*xlim, 280)
-    gy = np.linspace(*ylim, 280)
+    ax.set_facecolor("#F7FAFA")
+    gx = np.linspace(*xlim, 300)
+    gy = np.linspace(*ylim, 260)
     xx, yy = np.meshgrid(gx, gy)
-    d2 = (xx[..., None] - xs) ** 2 + (yy[..., None] - ys) ** 2
+    d2 = (xx[..., None] - xy[:, 0]) ** 2 + (yy[..., None] - xy[:, 1]) ** 2
     weights = np.exp(-d2 / (2.0 * DISPLAY_SIGMA_MM**2))
     density = np.sum(weights * support[None, None, :], axis=2)
     density /= float(np.nanmax(density))
     rgba = np.empty((*density.shape, 4), float)
-    rgba[..., :3] = np.asarray([0.34, 0.53, 0.59])
-    rgba[..., 3] = 0.22 * density * (density >= 0.03)
+    rgba[..., :3] = np.asarray([0.22, 0.54, 0.58])
+    rgba[..., 3] = 0.28 * density * (density >= 0.03)
     ax.imshow(
         rgba, origin="lower", extent=[*xlim, *ylim],
         interpolation="bilinear", zorder=0,
     )
+    for idx in _shaft_indices(names.tolist(), shafts.tolist()):
+        points = xy[idx]
+        ax.plot(
+            points[:, 0], points[:, 1], color="#9AA8AD", lw=0.75,
+            alpha=0.78, zorder=1,
+        )
+        shaft = str(shafts[int(idx[0])])
+        anchor = points[int(np.argmin(points[:, 0]))]
+        ax.text(
+            anchor[0] - 0.8, anchor[1], shaft, color="#66757B",
+            fontsize=5.8, ha="right", va="center", zorder=5,
+        )
 
-    sizes = 28.0 + 16.0 * support
     ax.scatter(
-        xs, ys, s=sizes, facecolor=PROJECTION_COLOR, edgecolor="white",
-        linewidth=0.82, zorder=4,
+        xy[~selected, 0], xy[~selected, 1], s=20.0,
+        facecolor=CONTEXT_CONTACT, edgecolor=MID_GREY,
+        linewidth=0.60, zorder=3, label="local context",
+    )
+    ax.scatter(
+        xy[selected, 0], xy[selected, 1], s=28.0,
+        facecolor=SELECTED_CONTACT, edgecolor="white",
+        linewidth=0.72, zorder=4, label="analysis contacts",
     )
 
     kernel_index = int(np.argmax(support))
-    cx, cy = float(xs[kernel_index]), float(ys[kernel_index])
+    kernel_name = str(names[kernel_index])
+    cx, cy = float(xy[kernel_index, 0]), float(xy[kernel_index, 1])
     ax.add_patch(
         Circle(
-            (cx, cy), DISPLAY_SIGMA_MM, facecolor="none", edgecolor="#526E77",
-            linewidth=0.78, zorder=3,
+            (cx, cy), DISPLAY_SIGMA_MM, facecolor="none",
+            edgecolor=SELECTED_DARK, linewidth=0.85, zorder=5,
         )
     )
     angle = np.deg2rad(135.0)
     ex = cx + DISPLAY_SIGMA_MM * np.cos(angle)
     ey = cy + DISPLAY_SIGMA_MM * np.sin(angle)
-    ax.plot([cx, ex], [cy, ey], color="#526E77", lw=0.72, zorder=5)
+    ax.plot([cx, ex], [cy, ey], color=SELECTED_DARK, lw=0.72, zorder=6)
     ax.text(
-        0.5 * (cx + ex) - 0.4, 0.5 * (cy + ey) + 0.65, "6 mm",
-        ha="center", va="bottom", fontsize=5.7, color="#46555B", zorder=6,
+        0.5 * (cx + ex) - 0.3, 0.5 * (cy + ey) + 0.6,
+        r"$\sigma=6$ mm", ha="center", va="bottom", fontsize=5.7,
+        color=SELECTED_DARK, zorder=6,
     )
 
+    scale_length = 10.0
+    scale_x0 = xlim[0] + 0.09 * (xlim[1] - xlim[0])
+    scale_y = ylim[0] + 0.10 * (ylim[1] - ylim[0])
+    ax.plot(
+        [scale_x0, scale_x0 + scale_length], [scale_y, scale_y],
+        color=INK, lw=1.1, solid_capstyle="butt", zorder=6,
+    )
+    ax.text(
+        scale_x0 + 0.5 * scale_length, scale_y + 0.65, "10 mm",
+        color=INK, fontsize=5.6, ha="center", va="bottom", zorder=6,
+    )
     ax.set_xlim(*xlim)
     ax.set_ylim(*ylim)
     ax.set_aspect("equal", adjustable="box")
     ax.set_xticks([])
     ax.set_yticks([])
     for spine in ax.spines.values():
-        spine.set_color("#AAB3B7")
-        spine.set_linewidth(0.55)
-    return kernel_index
-
-
-def _draw_field(ax, payload: Mapping[str, object], template: str) -> None:
-    draw_interictal_rank_field_panel(
-        ax, payload, template, compact=True, panel_title="",
-        contact_outline_lw=0.85, contact_size=27,
-    )
-    ax.set_title("")
-    for spine in ax.spines.values():
-        spine.set_visible(False)
-
-
-def _flow_arrow(fig, left_ax, right_ax, *, y_from_right: bool = False) -> None:
-    left = left_ax.get_position()
-    right = right_ax.get_position()
-    y_box = right if y_from_right else left
-    y = 0.5 * (y_box.y0 + y_box.y1)
-    fig.add_artist(
-        FancyArrowPatch(
-            (left.x1 + 0.0035, y), (right.x0 - 0.0035, y),
-            transform=fig.transFigure, arrowstyle="-|>", mutation_scale=8.0,
-            lw=1.05, color="#7E888D", clip_on=False,
-        )
-    )
+        spine.set_color(PLANE_EDGE)
+        spine.set_linewidth(0.62)
+    return kernel_name
 
 
 def _metadata(
     record: Mapping[str, object],
-    payload: Mapping[str, object],
     basis: Mapping[str, np.ndarray],
-    context_names: Sequence[str],
-    context_coords: np.ndarray,
+    geometry: Mapping[str, object],
     coord_space: str,
+    transverse_sign: int,
+    t1_manifest: Mapping[str, object],
     kernel_contact: str,
 ) -> dict:
+    measured = np.asarray(geometry["measured"], float)
+    selected = np.asarray(geometry["selected"], bool)
     selected_names = [str(x) for x in record["interictal_field"]["contact_order"]]
-    selected_coords = np.asarray(record["interictal_field"]["coords"], float)
-    residual = _to_basis(selected_coords, basis)[:, 2]
-    all_names = np.asarray([str(x) for x in context_names], dtype=object)
-    all_shafts = np.asarray([re.sub(r"\d+$", "", str(x)) for x in all_names], dtype=object)
-    local_mask = np.isin(all_shafts, ["ICL", "SCL"])
-    local_names = all_names[local_mask].tolist()
-    local_shafts = all_shafts[local_mask].tolist()
-    local_coords = _to_basis(np.asarray(context_coords, float), basis)[local_mask]
-    straight_local, straight_fit_stats = _fit_straight_shaft_points(
-        local_coords, local_names, local_shafts,
-    )
-    straight_local_display = straight_local.copy()
-    straight_local_display[:, 2] *= NORMAL_DISPLAY_EXAGGERATION
-    display_crossing: dict[str, bool] = {}
-    for idx in _shaft_indices(local_names, local_shafts):
-        shaft = str(local_shafts[int(idx[0])])
-        z = straight_local_display[idx, 2]
-        display_crossing[shaft] = bool(
-            float(np.min(z)) <= DISPLAY_PLANE_Z <= float(np.max(z))
-        )
-    selected_set = set(selected_names)
-    not_selected = [x for x in local_names if x not in selected_set]
-    relation = record["axis_pair"]["relation"]
-    pair_bootstrap = record["axis_pair"]["pair_bootstrap"]
+    local_names = [str(x) for x in np.asarray(geometry["names"], dtype=object)]
+    local_residual = measured[:, 2]
+    residual = measured[selected, 2]
+    t1_entry = t1_manifest["files"][T1_PATH.name]
     return {
-        "schema_version": "fig2_e1146_template_projection_composite_v15",
+        "schema_version": "fig2_mixed_subject_implant_projection_2x2_v7",
         "subject_id": SUBJECT_ID,
         "display_label": DISPLAY_LABEL,
+        "overview_subject_id": "yuquan_zhaochenxi",
+        "overview_display_label": "Y9",
+        "subject_continuity_across_panels": False,
         "input_artifact": str(INPUT_ARTIFACT.resolve()),
         "input_contract": record.get("contract"),
         "input_fingerprint_algorithm": record["interictal_field"]["fingerprint_algorithm"],
         "input_fingerprint_sha256": record["interictal_field"]["fingerprint_sha256"],
         "coordinate_space": coord_space,
+        "visual_story": [
+            "author_supplied_y9_implantation_overview",
+            "subject_t1_local_cutaway",
+            "local_electrode_geometry_to_plane",
+            "contact_projection_with_gaussian_support_coverage",
+        ],
+        "implantation_overview": {
+            "source_image": str(IMPLANTATION_OVERVIEW.resolve()),
+            "source_image_sha256": IMPLANTATION_OVERVIEW_SHA256,
+            "source_image_shape_px": [392, 488],
+            "subject_id": "yuquan_zhaochenxi",
+            "display_label": "Y9",
+            "role": "representative implantation overview",
+            "same_subject_as_projection_stages": False,
+        },
+        "anatomical_context": {
+            "source_t1": str(T1_PATH.resolve()),
+            "source_t1_sha256": t1_entry["sha256"],
+            "source_t1_shape": t1_manifest["mni152_1mm_shape"],
+            "source_t1_affine": t1_manifest["mni152_1mm_affine"],
+            "source_t1_description": "subject-specific skull-stripped T1",
+            "local_cutaway": "three orthogonal T1 planes through local-contact centroid",
+            "world_coordinate_convention": t1_manifest["world_coordinate_convention"],
+            "normalization_certainty": t1_manifest["normalization_certainty"],
+        },
         "implantation": {
             "n_all_invasive_contacts": len(
                 enumerate_subject_all_channels("epilepsiae", "1146")
@@ -513,116 +672,103 @@ def _metadata(
             "local_context_shafts": ["ICL", "SCL"],
             "n_local_context_contacts": len(local_names),
             "local_context_contacts": local_names,
-            "n_lagpat_selected_contacts": len(selected_names),
-            "lagpat_selected_contacts": selected_names,
-            "local_context_not_selected": not_selected,
+            "n_analysis_contacts": len(selected_names),
+            "analysis_contacts": selected_names,
+            "local_context_not_selected": [
+                name for name in local_names if name not in set(selected_names)
+            ],
             "selection_contract": record["interictal_field"]["field_contact_policy"],
-            "support_source": record.get("support_source"),
-            "selected_subset_of_local_context": selected_set.issubset(set(local_names)),
+            "selected_subset_of_local_context": set(selected_names).issubset(set(local_names)),
         },
-        "axis_contract": {
-            "definition": record["axis_definition"],
-            "direction": record["axis_direction_convention"],
-            "u_ta": record["axis_pair"]["axis_a"]["u"],
-            "u_tb": record["axis_pair"]["axis_b"]["u"],
-            "cos_ta_tb": relation["cosine"],
-            "line_angle_deg": relation["line_angle_deg"],
-            "relation": relation["relation"],
-            "point_estimate_collinear": relation["collinear"],
-            "pair_bootstrap_p_collinear": pair_bootstrap["p_collinear"],
-            "pair_bootstrap_p_sign_stable": pair_bootstrap["p_sign_stable"],
-            "pair_bootstrap_robust_collinear": pair_bootstrap["robust_collinear"],
-        },
-        "shared_plane": {
+        "projection_plane": {
+            "source": "frozen_patient_shared_plane",
             "u": np.asarray(basis["u"]).tolist(),
             "w_after_display_sign": np.asarray(basis["w"]).tolist(),
             "normal": np.asarray(basis["normal"]).tolist(),
             "origin_mm": np.asarray(basis["origin"]).tolist(),
-            "transverse_sign": int(payload["transverse_sign"]),
+            "transverse_sign": int(transverse_sign),
             "selected_normal_residual_max_abs_mm": float(np.max(np.abs(residual))),
             "selected_normal_residual_rms_mm": float(np.sqrt(np.mean(residual**2))),
+            "local_context_normal_residual_max_abs_mm": float(
+                np.max(np.abs(local_residual))
+            ),
+            "projection_contact_marker_contract": (
+                "grey local-context contacts may lie farther from the frozen plane than "
+                "selected analysis contacts; the measured 2-D coordinates are unchanged"
+            ),
         },
         "rendering": {
-            "display_sigma_mm": DISPLAY_SIGMA_MM,
-            "kernel_exemplar_contact": kernel_contact,
-            "continuous_field_renderer": (
-                "scripts.plot_topic5_interictal_template_ab_fields."
-                "draw_interictal_rank_field_panel"
-            ),
-            "contact_style_contract": {
-                "straight_3d_rod_contacts": ROD_CONTACT_FACE,
-                "left_panel_measured_plane_footprints": "small low-alpha grey with no edge",
-                "middle_panel_field_nodes": PROJECTION_COLOR,
-                "yellow_highlight_rings": False,
-            },
-            "flow_arrow_contract": {
-                "length": "span the compact inter-panel gap",
-                "line_width_pt": 1.05,
-                "mutation_scale": 8.0,
-            },
-            "spatial_early_contact_overlay": {
-                "n_per_template": N_EARLY_SPATIAL_CONTACTS,
-                "ta_contacts": _earliest_contact_names(
-                    record, "rank_a", N_EARLY_SPATIAL_CONTACTS,
-                ),
-                "tb_contacts": _earliest_contact_names(
-                    record, "rank_b", N_EARLY_SPATIAL_CONTACTS,
-                ),
-                "shared_contact_style": "half TA red and half TB blue",
-                "edge_style": "same dark edge and size as all other 3-D shaft contacts",
-                "scope": "left-panel 3-D shaft contacts only",
-            },
-            "direction_glyph_contract": {
-                "origins": "separate template-specific origins adjacent to opposite early-contact sides",
-                "placement": (
-                    "TA occupies the left inter-shaft gap and points toward the TB-early blue side; "
-                    "TB occupies the right inter-shaft gap and points toward the TA-early red side"
-                ),
-                "line_width_pt": 0.95,
-                "font_weight": "normal",
-                "shared_axis_rendered": False,
-                "angle_wedge_rendered": False,
-            },
+            "layout": "2x2",
             "projection_focus_shafts": ["ICL", "SCL"],
-            "straight_shaft_display_fit": straight_fit_stats,
-            "left_panel_camera": {"elevation_deg": 32.0, "azimuth_deg": -95.0},
+            "straight_shaft_display_fit": geometry["fit_stats"],
             "normal_display_exaggeration": NORMAL_DISPLAY_EXAGGERATION,
             "normal_display_exaggeration_scope": (
-                "left 3-D method illustration only; x/y projection, axes, plane and fields unchanged"
+                "3-D electrode-geometry stage only; measured x/y projection is unchanged"
             ),
             "display_plane_normal_offset_units": DISPLAY_PLANE_Z,
             "display_plane_offset_scope": (
-                "left-panel z separation only; frozen shared-plane x/y coordinates and all fields unchanged"
+                "3-D display separation only; frozen 2-D coordinates are unchanged"
             ),
-            "display_plane_crossing_by_shaft": display_crossing,
-            "projection_contract": (
-                "each implanted carrier and its displayed 3-D contacts lie on the same "
-                "best-fit straight line; plane footprints retain the measured E1146 x/y "
-                "projection coordinates, are shown as small blue-grey points, and are not "
-                "joined into a projected rod"
+            "pipeline_arrows_rendered": False,
+            "panel_grid_equal_width_height": True,
+            "narrative_panel_titles_rendered": False,
+            "view_identity_source": "figure legend",
+            "legend_rendered": False,
+            "geometry_padding_fraction": GEOMETRY_PADDING_FRACTION,
+            "geometry_box_zoom": GEOMETRY_BOX_ZOOM,
+            "geometry_panel_vertical_shift_figure_fraction": 0.015,
+            "projection_panel_scale_in_cell": PROJECTION_PANEL_SCALE,
+            "shaft_labels_rendered": {
+                "e1146_anatomy": ["ICL", "SCL"],
+                "electrodes_projection": ["ICL", "SCL"],
+                "local_field": ["ICL", "SCL"],
+            },
+            "figure_size_inches": [5.80, 3.85],
+            "propagation_direction_glyphs_rendered": True,
+            "propagation_direction_glyphs_scope": (
+                "present only inside the author-supplied Y9 implantation overview; "
+                f"the {DISPLAY_LABEL} anatomy, projection geometry, and Gaussian-support stages "
+                "remain direction-free"
             ),
-            "colormap": "viridis",
-            "rank_scale": [
-                float(np.nanmin(record["interictal_field"]["rank_a"])),
-                float(np.nanmax(record["interictal_field"]["rank_a"])),
-            ],
-            "png_dpi": 400,
+            "e1146_projection_direction_glyphs_rendered": False,
+            "template_labels_rendered": False,
+            "template_rank_fields_rendered": False,
+            "continuous_template_rank_interpolation_rendered": False,
+            "rank_colormap_rendered": False,
+            "gaussian_support_coverage_rendered": True,
+            "gaussian_support_source": "mean_of_frozen_support_a_and_support_b",
+            "gaussian_display_sigma_mm": DISPLAY_SIGMA_MM,
+            "gaussian_kernel_exemplar_contact": kernel_contact,
+            "gaussian_support_is_measured_tissue_field": False,
+            "context_contact_color": CONTEXT_CONTACT,
+            "analysis_contact_color": SELECTED_CONTACT,
+            "png_dpi": 600,
             "pdf_fonttype": 42,
         },
         "claim_boundary": (
-            "Patient-specific method illustration. Highlighted contacts are the exact frozen "
-            "lagPat-selected, joint-valid, positive-support TA/TB field contacts; no visual "
-            "threshold is introduced. The shared plane is allowed by the frozen point-estimate "
-            "collinearity route, but its paired-bootstrap robust_collinear flag is false. "
-            "Continuous surfaces are support-limited display interpolation, not measurements in "
-            "unsampled tissue."
+            f"Spatial-method illustration only. The Y9 overview and the {DISPLAY_LABEL} projection "
+            "stages are representative examples from different subjects and are labelled as "
+            f"such; the ordered 2x2 layout is not a same-subject zoom. {DISPLAY_LABEL} "
+            "anatomy and contact locations use its frozen MNI-grid bundle, whose historical "
+            "warp type is unverified. The 6-mm Gaussian layer shows display support coverage, "
+            "not measured tissue activity or the analysis scoring kernel. The direction "
+            f"glyphs visible in the supplied Y9 overview are not propagated into the {DISPLAY_LABEL} "
+            "projection stages, and no rank field is shown."
         ),
     }
 
 
-def plot() -> tuple[Path, Path, Path, Path]:
-    record, dat_a, dat_b, context_names, context_coords, coord_space = _load_case()
-    basis = _basis(record, int(dat_a["transverse_sign"]))
+def plot(
+    output_dir: Path = OUTPUT_DIR,
+    stem: str = "fig2-panela",
+) -> tuple[Path, Path, Path, Path]:
+    record, context_names, context_coords, coord_space = _load_case()
+    transverse_sign = _canonical_transverse_sign(
+        record["interictal_field"]["planes"]["shared"]["w"]
+    )
+    basis = _basis(record, transverse_sign)
+    geometry = _local_geometry(record, basis, context_names, context_coords)
+    t1_image, t1_data, t1_manifest = _load_t1()
 
     rc = {
         "font.family": "sans-serif",
@@ -633,78 +779,83 @@ def plot() -> tuple[Path, Path, Path, Path]:
         "ps.fonttype": 42,
     }
     with plt.rc_context(rc):
-        fig = plt.figure(figsize=(7.18, 2.74), facecolor="white")
+        fig = plt.figure(figsize=(5.80, 3.85), facecolor="white")
         gs = gridspec.GridSpec(
-            2, 4, figure=fig,
-            width_ratios=[2.24, 1.34, 1.0, 0.055],
-            height_ratios=[1.0, 1.0],
-            left=0.012, right=0.940, top=0.965, bottom=0.055,
-            wspace=0.085, hspace=0.075,
+            2, 2, figure=fig,
+            width_ratios=[1.0, 1.0], height_ratios=[1.0, 1.0],
+            left=0.020, right=0.990, top=0.980, bottom=0.035,
+            wspace=0.05, hspace=0.06,
         )
-        ax_geometry = fig.add_subplot(gs[:, 0], projection="3d")
-        ax_projection = fig.add_subplot(gs[:, 1])
-        ax_field_a = fig.add_subplot(gs[0, 2])
-        ax_field_b = fig.add_subplot(gs[1, 2])
-        cax = fig.add_subplot(gs[:, 3])
+        ax_overview = fig.add_subplot(gs[0, 0])
+        ax_brain = fig.add_subplot(gs[0, 1], projection="3d")
+        ax_geometry = fig.add_subplot(gs[1, 0], projection="3d")
+        ax_projection = fig.add_subplot(gs[1, 1])
 
-        _draw_local_geometry(
-            ax_geometry, record, dat_a, basis, context_names, context_coords,
-        )
-        kernel_index = _draw_projected_support(ax_projection, record, dat_a)
-        _draw_field(ax_field_a, dat_a, "TA")
-        _draw_field(ax_field_b, dat_b, "TB")
+        _draw_implantation_overview(ax_overview)
+        _draw_subject_t1_cutaway(ax_brain, t1_image, t1_data, geometry)
+        _draw_contact_geometry(ax_geometry, geometry)
+        kernel_contact = _draw_projection(ax_projection, record, geometry)
 
-        rank_min = float(
-            min(np.nanmin(dat_a["rank_values"]), np.nanmin(dat_b["rank_values"]))
+        geometry_position = ax_geometry.get_position()
+        ax_geometry.set_position(
+            [
+                geometry_position.x0,
+                geometry_position.y0 + 0.015,
+                geometry_position.width,
+                geometry_position.height,
+            ]
         )
-        rank_max = float(
-            max(np.nanmax(dat_a["rank_values"]), np.nanmax(dat_b["rank_values"]))
+        projection_cell = gs[1, 1].get_position(fig)
+        scaled_width = projection_cell.width * PROJECTION_PANEL_SCALE
+        scaled_height = projection_cell.height * PROJECTION_PANEL_SCALE
+        ax_projection.set_position(
+            [
+                projection_cell.x0 + 0.5 * (projection_cell.width - scaled_width),
+                projection_cell.y1 - scaled_height,
+                scaled_width,
+                scaled_height,
+            ]
         )
-        colorbar = fig.colorbar(
-            plt.cm.ScalarMappable(
-                cmap="viridis", norm=plt.Normalize(rank_min, rank_max),
-            ),
-            cax=cax,
+        ax_projection.set_anchor("N")
+        # The figure legend explains these two lower views.  Nature-style main
+        # figures do not repeat narrative subplot titles inside the canvas.
+        apply_panel_aware_figure_typography(
+            fig,
+            spec=ILLUSTRATIVE_PANEL_TYPOGRAPHY,
+            policy=LOCKED_PANEL_TYPOGRAPHY_POLICY,
+            enforce_atomic_axis_gate=False,
         )
-        colorbar.set_ticks([rank_min, rank_max])
-        colorbar.set_ticklabels(["early", "late"])
-        colorbar.ax.tick_params(labelsize=5.8, length=1.8, pad=1.2)
-        colorbar.outline.set_linewidth(0.55)
-
-        fig.canvas.draw()
-        _flow_arrow(fig, ax_geometry, ax_projection)
-        _flow_arrow(fig, ax_projection, ax_field_a, y_from_right=True)
-        _flow_arrow(fig, ax_projection, ax_field_b, y_from_right=True)
-
-        OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-        stem = "fig2_E1146_template_projection_composite"
-        png = OUTPUT_DIR / f"{stem}.png"
-        pdf = OUTPUT_DIR / f"{stem}.pdf"
-        svg = OUTPUT_DIR / f"{stem}.svg"
-        metadata_path = OUTPUT_DIR / f"{stem}_metadata.json"
-        fig.savefig(png, dpi=400, facecolor="white")
+        output_dir.mkdir(parents=True, exist_ok=True)
+        png = output_dir / f"{stem}.png"
+        pdf = output_dir / f"{stem}.pdf"
+        svg = output_dir / f"{stem}.svg"
+        metadata_path = output_dir / f"{stem}_metadata.json"
+        fig.savefig(png, dpi=600, facecolor="white")
         fig.savefig(pdf, facecolor="white")
         fig.savefig(svg, facecolor="white")
         plt.close(fig)
 
-    kernel_contact = str(dat_a["names"][kernel_index])
     metadata_path.write_text(
         json.dumps(
             _metadata(
-                record, dat_a, basis, context_names, context_coords,
-                coord_space, kernel_contact,
+                record, basis, geometry, coord_space, transverse_sign,
+                t1_manifest, kernel_contact,
             ),
+            ensure_ascii=False,
             indent=2,
         )
-        + "\n"
+        + "\n",
+        encoding="utf-8",
     )
     return png, pdf, svg, metadata_path
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.parse_args()
-    for path in plot():
+    parser.add_argument("--output-dir", type=Path, default=OUTPUT_DIR)
+    parser.add_argument("--stem", default="fig2-panela")
+    args = parser.parse_args()
+    for path in plot(args.output_dir, args.stem):
         print(f"[done] {path}")
 
 

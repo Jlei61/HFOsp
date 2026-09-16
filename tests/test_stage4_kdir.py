@@ -11,6 +11,7 @@ sys.path.insert(0, "scripts")
 sys.path.insert(0, os.path.join("src", "snn_engine"))
 sys.path.insert(0, os.getcwd())
 import run_sef_hfo_snn_cm_spontaneous_readout as R   # noqa: E402
+from scripts.run_sef_hfo_subject_snn import _participant_floor  # noqa: E402
 from src.sef_hfo_observation import VirtualMontage    # noqa: E402
 
 
@@ -52,8 +53,8 @@ def test_read_event_default_is_kdir3_partmin7_byte_identical():
 
 def test_part_min_floor_relation():
     # the participant floor is 2*k_dir+1 (the contract the runner derives from --k-dir)
-    assert 2 * 3 + 1 == 7
-    assert 2 * 2 + 1 == 5
+    assert _participant_floor(3) == 7
+    assert _participant_floor(2) == 5
 
 
 def test_montage_pitch_knob_denser_and_default_unchanged():

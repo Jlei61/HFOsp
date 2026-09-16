@@ -251,13 +251,30 @@ def main() -> None:
     }
     real_audit = estimability["real_cumulative"]
     real_fit = fits["real_cumulative"]
-    estimable = bool(
+    # Identifiability is a property of the design, not of the answer: finite
+    # gradient, a gradient that is not already zero, full-rank exposure and a
+    # non-degenerate spread.  Whether the fitted edge then beat the zero edge is
+    # the *result*.  Folding the result into the word "estimable" makes an
+    # ordinary negative look like a missing measurement.
+    identifiable = bool(
         real_audit["gradient_finite"]
         and real_audit["gradient_at_zero_norm"] > 1e-8
         and real_audit["exposure_rank"] == real_audit["exposure_dim"]
         and min(real_audit["exposure_sd"]) > 1e-8
-        and real_fit["edge_left_zero_initialisation"]
     )
+    left_zero = bool(real_fit["edge_left_zero_initialisation"])
+    real_edge_status = (
+        "FITTED" if identifiable and left_zero else
+        "ZERO_EDGE_SELECTED" if identifiable else
+        "NOT_IDENTIFIABLE"
+    )
+    # A sibling arm on identical rows that did leave zero proves the machinery
+    # could have fitted an edge here, so a zero real edge is evidence.
+    current_beats_no_edge = bool(
+        next_event["current_event_only"]["joint_nll_per_event"]
+        < next_event["no_edge"]["joint_nll_per_event"]
+    )
+    estimable = bool(identifiable and left_zero)
     primary_increment = bool(
         estimable
         and comparisons["next_event"][
@@ -309,6 +326,10 @@ def main() -> None:
         },
         "comparisons": comparisons,
         "real_edge_estimable": estimable,
+        "real_edge_identifiable": identifiable,
+        "real_edge_status": real_edge_status,
+        "sibling_current_event_edge_beats_no_edge": current_beats_no_edge,
+        "zero_edge_is_ordinary_negative_when_identifiable": True,
         "primary_next_event_increment": primary_increment,
         "one_shot_persistence": persistence,
         "checkpoint": str(checkpoint_path),
@@ -337,6 +358,10 @@ def main() -> None:
         "status": result["status"], "subject": args.subject,
         "seed": args.seed, "source": args.source,
         "real_edge_estimable": estimable,
+        "real_edge_identifiable": identifiable,
+        "real_edge_status": real_edge_status,
+        "sibling_current_event_edge_beats_no_edge": current_beats_no_edge,
+        "zero_edge_is_ordinary_negative_when_identifiable": True,
         "primary_next_event_increment": primary_increment,
         "one_shot_persistence": persistence,
         "output": str(output / "result.json"),

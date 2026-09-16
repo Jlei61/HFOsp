@@ -46,6 +46,14 @@ from paper_figures.patient_public_labels import (  # noqa: E402
     public_patient_label,
 )
 import plot_interictal_propagation as propagation_plot  # noqa: E402
+from src.supplementary_figure_style import (  # noqa: E402
+    AXIS_LABEL_SIZE,
+    IDENTITY_SIZE,
+    PANEL_LETTER_SIZE,
+    TICK_LABEL_SIZE,
+    apply_supplementary_rcparams,
+    normalize_axis_text,
+)
 
 
 RESULT_ROOT = ROOT / "results/interictal_propagation_masked"
@@ -275,7 +283,7 @@ def _draw_scan_panels(
                 str(int(value)),
                 ha="center",
                 va="bottom",
-                fontsize=8,
+                fontsize=TICK_LABEL_SIZE,
             )
     ax.set_ylim(0, max(counts) * 1.15)
     ax.set_xticks(K_VALUES)
@@ -297,7 +305,7 @@ def _draw_scan_panels(
     )
     ax.axhline(0.0, color="0.35", lw=0.75, zorder=0)
     ax.set_xlabel("Number of clusters, K")
-    ax.set_ylabel("Δ silhouette\n(relative to K=2)")
+    ax.set_ylabel("Silhouette Δ vs K=2")
     ax.set_xticks(K_VALUES)
 
     ax = axes[2]
@@ -317,22 +325,15 @@ def _draw_scan_panels(
 
     for axis in axes:
         axis.spines[["top", "right"]].set_visible(False)
-        axis.tick_params(labelsize=7.4, length=2.5)
-        axis.xaxis.label.set_size(8.0)
-        axis.yaxis.label.set_size(8.0)
+        axis.tick_params(labelsize=TICK_LABEL_SIZE, length=2.5)
+        axis.xaxis.label.set_size(AXIS_LABEL_SIZE)
+        axis.yaxis.label.set_size(AXIS_LABEL_SIZE)
         axis.grid(axis="y", color="0.92", lw=0.6, zorder=0)
 
 
 def _plot_scan(rows: list[dict[str, Any]], distribution: dict[str, int]) -> Path:
-    plt.rcParams.update(
-        {
-            "font.family": "sans-serif",
-            "font.sans-serif": ["Arial", "DejaVu Sans"],
-            "pdf.fonttype": 42,
-            "ps.fonttype": 42,
-            "axes.unicode_minus": False,
-        }
-    )
+    apply_supplementary_rcparams()
+    plt.rcParams["axes.unicode_minus"] = False
     fig, axes = plt.subplots(
         1,
         3,
@@ -341,6 +342,8 @@ def _plot_scan(rows: list[dict[str, Any]], distribution: dict[str, int]) -> Path
         facecolor="white",
     )
     _draw_scan_panels(axes, rows, distribution)
+    for axis in axes:
+        normalize_axis_text(axis)
 
     fig.subplots_adjust(left=0.07, right=0.99, bottom=0.19, top=0.91, wspace=0.42)
     png = FIG_DIR / "supp_fig3a_k2_to_k10_scan.png"
@@ -415,8 +418,8 @@ def _draw_multi_k_row(
         arr["ordered_names"],
         title="",
         display_bools=bools[channel_order][:, events],
-        ytick_fontsize=5.6,
-        xtick_fontsize=6.2,
+        ytick_fontsize=TICK_LABEL_SIZE,
+        xtick_fontsize=TICK_LABEL_SIZE,
     )
     gap_half_width = max(2, int(round(0.006 * len(events))))
     cursor = 0
@@ -446,7 +449,7 @@ def _draw_multi_k_row(
             transform=ax_heat.get_xaxis_transform(),
             ha="center",
             va="bottom",
-            fontsize=6.7,
+            fontsize=TICK_LABEL_SIZE,
             fontweight="bold",
             color=color,
             clip_on=False,
@@ -461,13 +464,13 @@ def _draw_multi_k_row(
         transform=ax_heat.transAxes,
         ha="left",
         va="bottom",
-        fontsize=7.6,
+        fontsize=IDENTITY_SIZE,
         fontweight="bold",
         color="black",
         clip_on=False,
     )
     if show_xlabel:
-        ax_heat.set_xlabel("Population events (clustered)", fontsize=8.0)
+        ax_heat.set_xlabel("Population events (clustered)", fontsize=AXIS_LABEL_SIZE)
     else:
         ax_heat.set_xlabel("")
         ax_heat.tick_params(axis="x", bottom=False, labelbottom=False)
@@ -506,10 +509,10 @@ def _draw_multi_k_row(
     ax_mean.set_xlim(-0.5, len(channel_order) - 0.5)
     ax_mean.set_ylim(-0.5, len(channel_order) - 0.5)
     ax_mean.set_yticks([])
-    ax_mean.tick_params(axis="x", labelsize=6.2, length=2.2)
+    ax_mean.tick_params(axis="x", labelsize=TICK_LABEL_SIZE, length=2.2)
     ax_mean.spines[["top", "right", "left"]].set_visible(False)
     if show_xlabel:
-        ax_mean.set_xlabel("Rank", fontsize=8.0)
+        ax_mean.set_xlabel("Rank", fontsize=AXIS_LABEL_SIZE)
     else:
         ax_mean.set_xlabel("")
         ax_mean.tick_params(axis="x", bottom=False, labelbottom=False)
@@ -527,6 +530,7 @@ def _plot_combined(
     distribution: dict[str, int],
 ) -> tuple[Path, list[dict[str, Any]]]:
     examples = _select_examples(records, rows)
+    apply_supplementary_rcparams()
     fig = plt.figure(figsize=(7.8, 7.05), facecolor="white")
     main = gridspec.GridSpec(
         2,
@@ -594,9 +598,9 @@ def _plot_combined(
     sm = ScalarMappable(norm=Normalize(0.0, 1.0), cmap="viridis")
     cbar = fig.colorbar(sm, cax=cax, orientation="horizontal")
     cbar.set_ticks([0.0, 1.0], labels=["First", "Last"])
-    cbar.ax.tick_params(labelsize=7, length=2, pad=1)
+    cbar.ax.tick_params(labelsize=TICK_LABEL_SIZE, length=2, pad=1)
     cbar.outline.set_linewidth(0.55)
-    cbar.set_label("Recruitment order", fontsize=7.5, labelpad=1)
+    cbar.set_label("Recruitment order", fontsize=AXIS_LABEL_SIZE, labelpad=1)
     fig.add_subplot(example_grid[3, 1]).axis("off")
 
     fig.canvas.draw()
@@ -610,10 +614,17 @@ def _plot_combined(
             label,
             ha="left",
             va="top",
-            fontsize=11,
+            fontsize=PANEL_LETTER_SIZE,
             fontweight="bold",
         )
 
+    for axis in scan_axes:
+        normalize_axis_text(axis)
+    for axis in fig.axes:
+        if axis is not cax and axis.get_visible():
+            normalize_axis_text(axis)
+    cax.tick_params(labelsize=TICK_LABEL_SIZE)
+    cax.xaxis.label.set_fontsize(AXIS_LABEL_SIZE)
     png = FIG_DIR / "supp_fig3_k_scan_and_multipatient_templates.png"
     pdf = FIG_DIR / "supp_fig3_k_scan_and_multipatient_templates.pdf"
     fig.savefig(png, dpi=300, bbox_inches="tight", facecolor="white")

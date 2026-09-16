@@ -141,9 +141,17 @@ def _score_row(ds_sid: str, seizure_idx: int, lo: float, hi: float, offset: floa
         r = per_template.get(key, {})
         row[f"{key}_signed_corr"] = _nan(r.get("signed_corr"))
         row[f"{key}_abs_corr"] = _nan(r.get("abs_corr"))
+        row[f"{key}_signed_projection_z"] = _nan(r.get("signed_projection_z"))
+        row[f"{key}_abs_projection_z"] = _nan(r.get("abs_projection_z"))
         row[f"{key}_mirror_choice"] = r.get("mirror_choice")
     row["maxAB_abs_corr"] = max(row["A_abs_corr"], row["B_abs_corr"])
     row["maxAB_signed_corr"] = row[f"{best}_signed_corr"] if best in ("A", "B") else float("nan")
+    projection_best = max(
+        ("A", "B"), key=lambda key: row[f"{key}_abs_projection_z"]
+    )
+    row["best_projection_template"] = projection_best
+    row["maxAB_abs_projection_z"] = row[f"{projection_best}_abs_projection_z"]
+    row["maxAB_signed_projection_z"] = row[f"{projection_best}_signed_projection_z"]
     return row
 
 
@@ -162,7 +170,7 @@ def _aggregate(df: pd.DataFrame) -> pd.DataFrame:
     for (lo, hi, cen), g in df.groupby(["window_start_sec", "window_end_sec", "window_center_sec"], sort=True):
         v = pd.to_numeric(g["maxAB_abs_corr"], errors="coerce").dropna().to_numpy(float)
         signed = pd.to_numeric(g["maxAB_signed_corr"], errors="coerce").dropna().to_numpy(float)
-        rows.append({
+        row = {
             "window_start_sec": float(lo),
             "window_end_sec": float(hi),
             "window_center_sec": float(cen),
@@ -177,7 +185,20 @@ def _aggregate(df: pd.DataFrame) -> pd.DataFrame:
             "median_maxAB_signed_corr": float(np.median(signed)) if signed.size else np.nan,
             "sd_maxAB_signed_corr": float(np.std(signed, ddof=1)) if signed.size >= 2 else np.nan,
             "var_maxAB_signed_corr": float(np.var(signed, ddof=1)) if signed.size >= 2 else np.nan,
-        })
+        }
+        for prefix, column in {
+            "maxAB_abs_projection_z": "maxAB_abs_projection_z",
+            "A_signed_projection_z": "A_signed_projection_z",
+            "B_signed_projection_z": "B_signed_projection_z",
+        }.items():
+            values = pd.to_numeric(g[column], errors="coerce").dropna().to_numpy(float)
+            row[f"mean_{prefix}"] = float(np.mean(values)) if values.size else np.nan
+            row[f"median_{prefix}"] = float(np.median(values)) if values.size else np.nan
+            row[f"sd_{prefix}"] = float(np.std(values, ddof=1)) if values.size >= 2 else np.nan
+            row[f"var_{prefix}"] = float(np.var(values, ddof=1)) if values.size >= 2 else np.nan
+            row[f"q25_{prefix}"] = float(np.percentile(values, 25)) if values.size else np.nan
+            row[f"q75_{prefix}"] = float(np.percentile(values, 75)) if values.size else np.nan
+        rows.append(row)
     return pd.DataFrame(rows)
 
 
@@ -320,7 +341,10 @@ def run(args: argparse.Namespace) -> tuple[Path, Path, Path]:
         "band_hz": [float(args.band_lo), float(args.band_hi)],
         "window_sec": float(args.window_sec),
         "step_sec": float(args.step_sec),
-        "feature": "1-150 Hz log power, per-channel baseline robust-z; signed values, shared-gradient maxAB |r| similarity",
+        "feature": (
+            "1-150 Hz log power, per-channel baseline robust-z; shared-gradient "
+            "morphology r plus amplitude-aware projection in robust-z units"
+        ),
         "field_contract": str(per["field_contract"].iloc[0]),
         "field_plane": "shared",
         "field_scorers": ["shared_a", "shared_b"],
@@ -355,6 +379,20 @@ def run(args: argparse.Namespace) -> tuple[Path, Path, Path]:
         "early_0_30": {
             "median_of_aggregate_median": float(np.nanmedian(early["median_maxAB_abs_corr"])) if len(early) else None,
             "median_of_aggregate_variance": float(np.nanmedian(early["var_maxAB_abs_corr"])) if len(early) else None,
+        },
+        "template_projection_z": {
+            "definition": (
+                "mean(zscore(frozen template field) * smoothed ictal activation); "
+                "identity/mirror orientation selected by abs correlation"
+            ),
+            "pre_m120_0_median": (
+                float(np.nanmedian(pre["median_maxAB_abs_projection_z"]))
+                if len(pre) else None
+            ),
+            "early_0_30_median": (
+                float(np.nanmedian(early["median_maxAB_abs_projection_z"]))
+                if len(early) else None
+            ),
         },
     }
     _atomic_json(summary, summary_json)

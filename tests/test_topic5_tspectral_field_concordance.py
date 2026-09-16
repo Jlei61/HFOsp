@@ -192,6 +192,10 @@ def test_batch_null_scorer_matches_rowwise_and_reselects_mirror_and_maxab():
             assert np.isclose(got["own_a_abs"][draw, window], expected["own_a_abs"])
             assert np.isclose(got["own_b_abs"][draw, window], expected["own_b_abs"])
             assert np.isclose(got["own_maxab"][draw, window], expected["own_maxab"])
+            assert np.isclose(
+                got["own_maxab_projection_z"][draw, window],
+                expected["own_maxab_projection_z"],
+            )
 
 
 def test_one_null_draw_uses_one_contact_permutation_across_all_timepoints():

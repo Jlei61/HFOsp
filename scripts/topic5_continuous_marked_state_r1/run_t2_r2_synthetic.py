@@ -98,6 +98,11 @@ def one_truth(truth: float, seed: int, *, device: str) -> dict:
     real = accumulated / scale
     # A donor history separated by 1,500 events cannot overlap the effective
     # 5N history used by the human placebo.
+    # NOTE: this is a shifted-exposure stand-in, not the estimator the human
+    # arms use.  The human placebo is state_matched_nonoverlap_placebo: an
+    # 83-dimensional nearest-neighbour match against a TRAIN-only donor pool
+    # with a 5N non-overlap rule.  The synthetic therefore calibrates the edge
+    # fit and the sign recovery, but it does not calibrate the human matching.
     placebo = np.roll(real, 1500)
     current = innovation / float(innovation[train].std())
     rate = np.exp(float(truth) * .30 * real)
@@ -208,6 +213,16 @@ def main() -> None:
         "by_truth": by_truth,
         "criteria": passed,
         "all_criteria_pass": bool(all(passed.values())),
+        "placebo_construction": {
+            "synthetic": "shifted real exposure (np.roll by 1500 events)",
+            "human": "state_matched_nonoverlap_placebo (TRAIN-only donor pool, "
+                     "83-D nearest neighbour, 5N non-overlap rule)",
+            "calibrates_human_matching": False,
+            "note": (
+                "the placebo criteria below calibrate the edge fit and sign "
+                "recovery, not the human donor matcher"
+            ),
+        },
         "sealed_opened": False,
         "source_hashes": {
             "t2_r2": contract.sha256_file(

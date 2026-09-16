@@ -1,53 +1,61 @@
-# Figure 4：被试特异性 SNN 的双向传播与电极读出
+# Figure 4：患者约束的局部 E/I 网络与间期传播读出
 
-> 状态：正式图示工作第四版；Panel A/B 已按冻结 gradient shared-plane、Figure 5 virtual-SEEG 语法与 Figure 1 rank 语法重画，等待作者目视锁图。
-> 当前代表病例：E1146。该图是单被试的模型—读出可行性与模板一致性示例，不是 cohort 证据，也不是对真实生物机制的因果证明。
+> **研究方向更新（2026-09-10）**：以下是既有正式拼板合同，不能当作当前新实验已恢复患者双模式的结论。当前研发以端点几何为先验，以非正阈值 core 与优先 core 输入为基础，建立局部 E/I 实际连接参数对参与、顺序、时间及空间传播的配对作用；允许权重/连接数量直接变化。关键黑底时序、原生多事件图和参数响应统一更新至[协作者报告](../snn_model_report_current.md)，科学定义见[共享设计](../topic4_patient_geometry_prior_snn.md)。正式面板仍按原验收程序替换。
 
-## 核心问题
+> 状态：2026-09-03 作者指定的 A–G 布局版本。Panel A 的组合设计已确认；Panel B 暂时空置，等待 data-driven 参数敏感性结果；原 B–F 顺延为 C–G。当前代表病例统一显示为 E10。
 
-同一个带 E→E 各向异性长轴的 E/I LIF 网络，在长轴两端放置由患者两类间期模板最早触点定义的低阈值 E core 后，能否在无外部 kick 的背景噪声下产生方向相反的自限事件，并被同一套患者真实电极 montage 读成两类稳定传播模板。
+## 一句话论证
 
-## 正式 panel 分组
+在患者触点几何和传播模板约束下，冻结的局部 E/I 网络能够产生两种方向相关的间期样读出，但队列闸门与真实几何敏感性限制了该结果的泛化和机制解释。
 
-### A｜模型假设与患者特异性摆放
+## Panel 合同
 
-左侧是代码原生的单神经元连接示意，不再使用外部借图，也不重复右侧的空间布局。postsynaptic E neuron 放在两个 kernel 的共同空间中心，只保留一个 recurrent E input 和一个 local I input。当前 active artifact 中 `l_EE=0.380 mm`、`AR=2`，故 E→E 长轴尺度为 `0.380×√2=0.537 mm`；其余 E/I 核为 `0.250 mm`。因此正式图没有画成“兴奋核更窄、抑制核更宽”，因为那会与 Panel B/C 的实际仿真参数相反。
+### A｜局部 E/I circuit 与患者特异性底物
 
-右侧读取 E1146 的 shared-plane 重跑 figdata，电极坐标直接来自冻结 `template_gradient_fields` artifact；显示时只把 20-mm sheet 中心移到原点，不再按 source→sink 轴二次旋转。两个 core 的成员仍沿用已接受的 `template_source_foci` 合同，因此这次只修正坐标框架，没有偷偷改模型 core 定义。两个 core 采用同一颜色且不标 A/B，因为模型假设它们同质；箭头被移除，因为各向异性轴不预设单向传播。
+左侧机制示意与右侧 patient-specific E/I substrate 拼为一个 panel。虚线框表示具有相同视野尺度的代表性局部邻域，不表示从患者空间中恢复出的解剖核心。左侧 scale bar 为 0.5 mm；右侧坐标范围为 −10 至 10 mm。触点周围的低透明度深绿色区域表示 virtual-contact firing-density Gaussian sampling footprint（σ = 0.25 mm），不是解剖边界。右侧不显示 anisotropic E→E corridor 或 possible-core 覆盖层。
 
-### B｜同一底物产生相反传播并被同一 montage 读出
+### B｜预留：data-driven 参数敏感性
 
-左侧只保留 model forward 和 model reverse 两个代表事件，不再重复 Panel A 已展示的机制/底物图。两个事件图均使用冻结的 `TA–TB shared axis × y` 坐标和同一 `early → late` 归一化色标；色条标为 `relative firing onset`，对应每个 E 神经元在事件内的首次放电时刻。右侧复用 accepted Figure 5 的 virtual-SEEG 语法：从同一 spontaneous run 截取 1200 ms 连续窗口，显示 signed 30–80 Hz 波形，并同时标出一个完整 model forward 橙色事件和一个完整 model reverse 蓝色事件；不拼接轨迹，不加入发作期/runaway 标记，也不再用 peak 点和折线覆盖原始波形。两个空间图采用紧凑组内间距，并与右侧 readout 保留最小必要间隔；readout legend 移到波形轴上方，不覆盖任何通道。
+该 panel 暂时空置，后续用于展示不同 data-driven 参数对患者间期事件复现的影响。当前拼板只保留 B 角标，不加入占位文字、示意数据或未经确认的结果。
 
-Panel B 使用 shared-plane 上重新运行并通过双向门的 seed 5 spontaneous twoend artifact（model forward/reverse directional events = 1/4，15/15 触点有效，`theta_deg=-22.8°`）。右侧窗口选择规则要求同一连续轨迹中必须同时存在 model forward 与 model reverse clean event；当前 1200 ms 窗口各包含一个完整事件。方向判定使用 `k_dir=2`，这是患者电极稀疏条件下的载重参数，必须保留在 Methods、caption 或 metadata 中。
+### C｜Node field 与模型空间模式
 
-### C｜无监督聚类与真实模板一致性核验
+左侧展示冻结 data-driven Node field，右侧展示 12 张网络 pooled clean events 的 Model TA 与 Model TB 空间模式。Node-field 色条与空间图分离；模型图使用 x (mm) 和 y (mm) 坐标。MTA/MTB 是 development-case 模型模式，不是恢复出的离散解剖核心。
 
-Panel C 使用 21 个 paired network seeds。每个 seed 固定同一神经元位置与 network realization，分别运行 4 s source-only 和 4 s sink-only arm；总仿真时长 168 s。全部 arm 固定 `L=20`、`core_r=1.5`、`core_mean=17.5`、`core_std=1.0` 与 `k_dir=2`，共获得 222 个 clean directional events（model forward/reverse=103/119）。触点需在至少 15% clean events 中参与才进入图与 rank 统计；仅 SCL9（7.7%）被排除，保留 ICL1–ICL11。正式图改为与 Panel B 对齐的三块布局：clustered heatmap、mean-rank profile、model–data correlation matrix；删除 Rank dist. panel。相关矩阵行标 model forward/reverse，列标 data forward/reverse。灰格表示保留触点在单个事件中未被招募。必须注意：该 21-seed 池仍来自旧 per-template 坐标几何；在 shared-plane 下完成同规模重跑前，不能把 Panel C 写成与 Panel A/B 完全同几何的正式验证。
+### D｜模型与患者 rank profiles
 
-Pooled KMeans 得到 `model forward/reverse=103/119`、direction purity `1.000`、within-cluster tau `0.919`、shared-overlap correlation `−0.983`。在每个 paired seed 内置换方向标签后，cluster–direction association 为 `P=1.0×10⁻⁴`。LOSO purity 中位数为 `1.000`、范围 `0.714–1.000`；shared-overlap correlation 中位数 `−0.983`、范围 `−0.983–−0.358`。模型—真实模板矩阵为 `[[0.983, −1.000], [−0.963, 0.844]]`，四格方向性 channel-shuffle permutation `P≤0.001`。222 个事件用于事件级聚类显示，独立重复单位仍是 21 个 paired network seeds。
+该 panel 比较模型 MTA/MTB 与患者 TA/TB 的 mean-rank profiles。患者模板使用 all-event Timing+Space 标签，模型事件与 KMeans 保持冻结。该图显示同一 development case 中的模板对应，不构成患者盲或队列级模板恢复。
 
-这里必须区分 Panel B 与 Panel C 的科学任务。Panel B 展示双核同网自发时，同一连续轨迹确实可出现相反事件；Panel C 为获得每类上百个可读事件，采用同一网络的 source-only/sink-only 控制 arm 检验两端各自能否产生与真实 data forward/reverse 一致的 rank pattern。它支持“两个端点具有产生相反 readout 的能力”，不支持“双核同网长期自发且方向平衡”。
+### E｜模型与患者 cross-fit
 
-新增工作点审计表明，更大的 core 不能稳定解决双核同网的方向不平衡。旧几何中 `core_r=1.5` 的 26-seed、8 s spontaneous 审计为 29/99；`core_r=2.5` 在 4 个 4 s seed 中为 11/14，但同样 4 个 seed 延长到 8 s 后变为 4/28。shared-plane 的同 seed 复核也显示 `core_r=2.5` 为 0/11，而 `core_r=1.5` seed 5 为 1/4。因此正式 B 仍保留 `core_r=1.5`，不把 larger core 当作伪装后的“平衡工作点”。
+该 panel 展示模型 MTA/MTB 与患者 TA/TB 的 contact-split Spearman cross-fit matrix。两个命名匹配单元格中的星号分别表示 MTA–TA 与 MTB–TB 相似度高于各自的 within-shaft contact-permutation null；不显示统一 diagonal-margin 检验。
+
+### F｜同网络 virtual-contact readout
+
+该 panel 展示同一冻结网络窗口内的 30–80 Hz virtual-contact firing-density readout。MTA/MTB 阴影按参与触点的 recruitment-onset span 绘制，两侧各增加 12 ms 显示边界。该信号不是 current、LFP 或临床 SEEG。
+
+### G｜队列闸门与 matched null
+
+该 panel 展示 34 名患者的 canonical-layout held-out recovery：34 名患者进入评估，23 名的 held-out loss 低于 matched null，15 名满足 same-network two-mode gate，11 名同时满足两项。右侧为患者内 paired held-out loss；图中显著性只对应连续 loss 的预注册配对检验，11/34 为描述性交集。
+
+## Figure legend
+
+**Figure 4 | A patient-constrained local E/I network generates two interictal-like propagation readouts.** **A,** Local E/I circuit schematic and patient-specific substrate. The dashed callout links scale-matched local fields of view without implying an anatomically recovered core. Dark-green halos show the virtual-contact firing-density sampling footprint. **B,** [Reserved for the effects of data-driven parameter variation on reproducing patient interictal events.] **C,** Frozen data-driven Node field and pooled Model TA and Model TB spatial patterns. **D,** Mean recruitment-rank profiles for model MTA/MTB and patient TA/TB templates defined using all-event Timing+Space labels. **E,** Equal-network contact-split cross-fit between the frozen model and patient templates. **F,** Representative 30–80 Hz virtual-contact firing-density readout from one frozen network window; shading denotes recruitment-onset spans. **G,** Cohort gates and paired canonical-layout held-out loss relative to the matched within-shaft null in 34 patients. Panels A and C–G support development-case model-to-readout correspondence and a weak canonical-layout cohort advantage, but do not establish anatomical-core recovery, patient causal connectivity or patient-blind real-geometry generalization. Panel B remains a layout placeholder and contributes no evidence in the current version.
+
+## Supplementary migration
+
+原主图 masked-rank KMeans heatmap/rank distribution 已移至 Supplementary Fig. 7E。cross-fit similarity matrix 保留在主图 Fig4-E，并继续显示两项命名匹配相似度各自相对于 within-shaft contact-permutation null 的检验。
 
 ## 输出与复现
 
-- 正式分组输出：`results/paper-ready-figure/fig4_subject_snn_e1146/figures/`
-- 一键复现：`python scripts/paper_figures/plot_fig4_subject_snn_grouped.py`
-- Panel A：`fig4_panel_a_model_setup.{png,pdf,svg}`
-- Panel B：`fig4_panel_b_bidirectional_readout.{png,pdf}`
-- Panel C：`fig4_panel_c_model_validation.{png,pdf}`
-- Panel C 统计：`fig4_panel_c_model_validation_{statistics.json,per_seed.csv}`
-- 工作点审计：`fig4_working_point_audit.{json,csv}`
-- 总 metadata：`fig4_grouped_metadata.json`
-
-## Caption 骨架
-
-**Figure 4 | A patient-specific anisotropic E/I spiking network generates opposing interictal-event readouts.** **A,** Model hypothesis and E1146-specific placement. Only recurrent E→E connectivity was anisotropic, and equal low-threshold excitatory cores were positioned at the two template-source regions of the patient-specific propagation axis. **B,** A continuous spontaneous simulation window contained both forward and reverse events, producing opposing recruitment gradients in the same virtual SEEG montage. **C,** Across 21 paired network seeds, source-only and sink-only control arms yielded 103 and 119 clean directional readouts, respectively; masked-feature clustering separated the opposing rank patterns and reproduced the expected similarity structure relative to the patient’s empirical interictal templates.
+- 当前完整拼板：`results/paper-ready-figure/fig4/figures/fig4-complete-layout.{png,pdf}`
+- 独立 panel：`results/paper-ready-figure/fig4/figures/fig4-panela.{png,pdf}` 与 `fig4-panel{c..g}.{png,pdf}`；B 当前无独立文件
+- 主图 producer：`scripts/paper_figures/build_main_figure_4.py`
+- Supplementary Fig. 7 producer：`scripts/paper_figures/build_supplementary_figure_7.py`
+- 旧草稿归档：`docs/archive/topic4/figure4_subject_specific_snn_pre_2026-09-03.md`
 
 ## 当前解释边界
 
-- 允许：shared-plane 的单个患者特异性模型底物可产生并读出两种相反的间期样传播次序；旧几何的控制 arm 模型 readout 与该患者真实模板顺序一致；聚类—方向关系在 paired-seed 分层统计下保留。
-- 暂不允许：把当前 Panel C 写成 shared-plane 坐标下的高 n 验证；这需要对应重跑 21 个 paired seeds。
-- 不允许：真实患者的两个模板已经被证明由两个低阈值 core 引起；双核同网可以长期自发且方向平衡；222 个事件等于 222 次独立仿真；单病例结果代表 cohort；模型解释了 HFO carrier 或 clinical seizure onset。
+- 允许：冻结的患者约束底物可产生并读出两种间期样传播模式；模型与患者模板在 E10 development case 中具有方向相关的 rank 对应。
+- 有限支持：34 人 canonical-layout held-out loss 相对 matched null 存在弱优势，但 same-network K = 2 与 observation-layout sensitivity 闸门未全部通过。
+- 不允许：将图解释为恢复了解剖核心、证明了患者因果连接，或实现了患者盲、真实几何条件下的泛化。

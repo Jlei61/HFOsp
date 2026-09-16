@@ -68,7 +68,9 @@ def _nan(v):
     return f if np.isfinite(f) else float("nan")
 
 
-def _load_frozen_shared(ds_sid: str) -> tuple[dict, dict]:
+def _load_frozen_shared(
+    ds_sid: str, frozen_field_dir: Path | None = None
+) -> tuple[dict, dict]:
     """Load a fingerprint-valid, two-dimensional shared A/B field record.
 
     Shared field keys alone are not an analysis-eligibility contract.  The
@@ -77,7 +79,8 @@ def _load_frozen_shared(ds_sid: str) -> tuple[dict, dict]:
     effective rank >= 2 for both template axes).  One-dimensional records are
     retained upstream as directional sensitivities but are forbidden here.
     """
-    fp = FROZEN_FIELD_DIR / f"{ds_sid}.json"
+    field_dir = FROZEN_FIELD_DIR if frozen_field_dir is None else Path(frozen_field_dir)
+    fp = field_dir / f"{ds_sid}.json"
     if not fp.exists():
         raise FileNotFoundError(fp)
     record = json.loads(fp.read_text())
@@ -264,6 +267,8 @@ def _shared_scorer(ds_sid: str, matched_names: list[str]):
             out[label] = {
                 "signed_corr": result["signed_r"],
                 "abs_corr": result["abs_r"],
+                "signed_projection_z": result["signed_projection_z"],
+                "abs_projection_z": result["abs_projection_z"],
                 "mirror_choice": result["mirror_choice"],
             }
         abs_vals = [_nan(v.get("abs_corr")) for v in out.values()]
@@ -447,9 +452,17 @@ def main() -> None:
             r = per_template.get(key, {})
             row[f"{key}_signed_corr"] = _nan(r.get("signed_corr"))
             row[f"{key}_abs_corr"] = _nan(r.get("abs_corr"))
+            row[f"{key}_signed_projection_z"] = _nan(r.get("signed_projection_z"))
+            row[f"{key}_abs_projection_z"] = _nan(r.get("abs_projection_z"))
             row[f"{key}_mirror_choice"] = r.get("mirror_choice")
         row["maxAB_abs_corr"] = max(row["A_abs_corr"], row["B_abs_corr"])
         row["maxAB_signed_corr"] = row[f"{best}_signed_corr"] if best in ("A", "B") else float("nan")
+        projection_best = max(
+            ("A", "B"), key=lambda key: row[f"{key}_abs_projection_z"]
+        )
+        row["best_projection_template"] = projection_best
+        row["maxAB_abs_projection_z"] = row[f"{projection_best}_abs_projection_z"]
+        row["maxAB_signed_projection_z"] = row[f"{projection_best}_signed_projection_z"]
         rows.append(row)
 
     onset_per_template, onset_best = score(onset_vals)
@@ -478,7 +491,10 @@ def main() -> None:
         "seizure_id": sw.seizure_id,
         "band_hz": [float(args.band_lo), float(args.band_hi)],
         "feature": "signed per-channel baseline robust-z log power",
-        "metric": "frozen shared-gradient field score with identity/mirror reselection",
+        "metric": (
+            "frozen shared-gradient field morphology plus amplitude-aware template "
+            "projection; identity/mirror selected by abs correlation"
+        ),
         "field_contract": field_record["contract"],
         "field_plane": "shared",
         "field_scorers": ["shared_a", "shared_b"],
@@ -505,6 +521,9 @@ def main() -> None:
             "A_signed": _summ(col("A_signed_corr")),
             "B_signed": _summ(col("B_signed_corr")),
             "maxAB_signed": _summ(col("maxAB_signed_corr")),
+            "A_projection_z": _summ(col("A_signed_projection_z")),
+            "B_projection_z": _summ(col("B_signed_projection_z")),
+            "maxAB_abs_projection_z": _summ(col("maxAB_abs_projection_z")),
             "pre_maxAB_abs": _summ(col("maxAB_abs_corr", "pre")),
             "ictal_maxAB_abs": _summ(col("maxAB_abs_corr", "ictal")),
         },

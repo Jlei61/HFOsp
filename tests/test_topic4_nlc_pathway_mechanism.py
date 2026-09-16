@@ -4,6 +4,7 @@ import numpy as np
 
 from scripts.paper_figures.plot_fig4c_nlc_pathway_ablation import (
     _metric_arrays,
+    _significant_node_arms,
 )
 from src.topic4_nlc_pathway_mechanism import (
     ARM_IDS,
@@ -33,6 +34,32 @@ def test_fig4c_displays_mode_shares_and_kmeans_alignment_as_percentages():
     )
     np.testing.assert_allclose(metrics["KMeans match (%)"][0], [50, 60, 70, 80])
     np.testing.assert_allclose(metrics["OOD (%)"][0], [40, 30, 20, 10])
+
+
+def test_fig4c_stars_only_paired_node_contrasts_whose_90pct_ci_excludes_zero():
+    comparisons = {
+        arm: {
+            endpoint: {"status": "OK", "q05": -0.1, "q95": 0.1}
+            for endpoint in (
+                "TB_like_fraction", "natural_alignment", "ood_fraction_returned",
+            )
+        }
+        for arm in ARM_IDS[1:]
+    }
+    comparisons[ARM_IDS[2]]["TB_like_fraction"] = {
+        "status": "OK", "q05": 0.02, "q95": 0.12,
+    }
+    comparisons[ARM_IDS[3]]["natural_alignment"] = {
+        "status": "OK", "q05": -0.15, "q95": -0.03,
+    }
+    comparisons[ARM_IDS[3]]["ood_fraction_returned"] = {
+        "status": "OK", "q05": -0.20, "q95": -0.04,
+    }
+    assert _significant_node_arms("Mode 1 share (%)", comparisons) == [2]
+    assert _significant_node_arms("Mode 2 share (%)", comparisons) == [2]
+    assert _significant_node_arms("KMeans match (%)", comparisons) == [3]
+    assert _significant_node_arms("OOD (%)", comparisons) == [3]
+    assert _significant_node_arms("OOD (%)", None) == []
 
 
 def test_mode_endpoints_count_absent_mode_as_zero():

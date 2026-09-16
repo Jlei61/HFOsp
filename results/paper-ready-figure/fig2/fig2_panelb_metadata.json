@@ -1,143 +1,137 @@
 {
   "figure_role": "Figure 2B replacement candidate: held-out spatial-information gain",
-  "scientific_question": "Does patient-specific electrode geometry add information beyond within-event relative timing when discovering recurring interictal propagation modes?",
+  "scientific_question": "Does real-coordinate spatial direction improve held-out direction consistency when every interictal event remains in template discovery?",
   "cohort_flow": {
     "n_requested": 26,
-    "n_eligible": 25,
-    "n_skipped": 1,
-    "skipped": [
-      {
-        "subject_id": "yuquan_huanghanwen",
-        "reason": "timing_plus_space: train cluster support below 20: [17, 37]"
-      }
-    ]
+    "n_eligible": 26,
+    "n_skipped": 0,
+    "skipped": []
   },
   "cohort_statistics": {
-    "n": 25,
-    "timing_only_median": 0.5064714692121572,
-    "timing_plus_space_median": 0.5684013798610377,
-    "median_gain": 0.028165477639596537,
+    "n": 26,
+    "timing_only_median": 0.43514521948670226,
+    "timing_plus_space_median": 0.47900192162099997,
+    "median_gain": 0.04156536735053562,
     "median_gain_bootstrap_ci95": [
-      0.0011393792948090065,
-      0.06322092386305983
+      0.010716364789677413,
+      0.06413847699491079
     ],
-    "n_positive_gain": 21,
+    "n_positive_gain": 22,
     "n_negative_gain": 4,
-    "paired_wilcoxon_greater_p": 0.0009078383445739746,
+    "paired_wilcoxon_greater_p": 9.5367431640625e-06,
     "direction_shuffle_null": {
       "n_draws": 1000,
-      "cohort_median_null_median": -0.0023077219286535104,
+      "cohort_median_null_median": -0.010356619830823843,
       "cohort_median_null_ci95": [
-        -0.00640035146154901,
-        0.0006922050413145899
+        -0.01462037482265406,
+        -0.006184753706548988
       ],
       "empirical_p_observed_median_greater": 0.000999000999000999
     },
     "dataset_sensitivity": {
       "epilepsiae": {
         "n": 16,
-        "median_gain": 0.03705979701816156,
-        "n_positive": 15
+        "median_gain": 0.04815709194105522,
+        "n_positive": 16
       },
       "yuquan": {
-        "n": 9,
-        "median_gain": 0.008968765876940177,
+        "n": 10,
+        "median_gain": 0.013235098388836686,
         "n_positive": 6
       }
     },
     "absolute_direction_scores": {
-      "timing_only_median": 0.5064714692121572,
+      "timing_only_median": 0.43514521948670226,
       "timing_only_bootstrap_ci95": [
-        0.43747042609752645,
-        0.5661649277043013
+        0.3662570233191414,
+        0.4797149879642689
       ],
-      "timing_plus_space_median": 0.5684013798610377,
+      "timing_plus_space_median": 0.47900192162099997,
       "timing_plus_space_bootstrap_ci95": [
-        0.5006913499605863,
-        0.631674151586789
+        0.43571624809099574,
+        0.5431981401438175
       ],
-      "hybrid_direction_shuffle_null_median": 0.145145158947106,
+      "hybrid_direction_shuffle_null_median": 0.08447832670104856,
       "hybrid_direction_shuffle_null_ci95": [
-        0.1298388555944867,
-        0.16106317573011458
+        0.07887281157291262,
+        0.09005209470555765
       ],
       "hybrid_observed_vs_null_empirical_p": 0.000999000999000999
     }
   },
   "sampling_seed_sensitivity": {
-    "analysis": "event-subsampling seed sensitivity",
-    "status": "complete",
-    "contract": {
-      "max_events_per_subject": 5000,
-      "seeds": [
-        20260825,
-        20260826,
-        20260827
-      ],
-      "common_patient_set_only": true,
-      "n_common_patients": 24,
-      "excluded_from_common_set": [
-        "epilepsiae_1077",
-        "yuquan_huanghanwen"
-      ],
-      "primary_statistic": "patient-level median spatial_information_gain",
-      "primary_test": "one-sided paired Wilcoxon on timing-plus-space versus timing-only",
-      "note": "Sensitivity seeds used 10 direction-shuffle draws because the paired score and Wilcoxon test do not depend on null-draw count."
-    },
-    "results": [
-      {
-        "seed": 20260825,
-        "n": 24,
-        "median_gain": 0.018567121758268357,
-        "n_positive": 20,
-        "paired_wilcoxon_greater_p": 0.0017521381378173828
-      },
-      {
-        "seed": 20260826,
-        "n": 24,
-        "median_gain": 0.01634993882050531,
-        "n_positive": 17,
-        "paired_wilcoxon_greater_p": 0.007522463798522949
-      },
-      {
-        "seed": 20260827,
-        "n": 24,
-        "median_gain": 0.02490329400526059,
-        "n_positive": 16,
-        "paired_wilcoxon_greater_p": 0.008203327655792236
-      }
-    ],
-    "verdict": "The positive held-out spatial-information gain survives all three deterministic event-subsampling seeds on the same 24-patient denominator."
+    "status": "not_applicable_all_event_primary"
   },
   "analysis_contract": {
-    "scientific_question": "Does patient-specific electrode geometry add information beyond within-event relative timing when discovering recurring interictal propagation modes?",
+    "scientific_question": "Does real-coordinate spatial direction improve held-out direction consistency when every interictal event remains in template discovery?",
     "statistical_unit": "patient",
-    "input_cohort": "same 26-patient two-dimensional direction-score cohort used by current Figure 2B",
-    "event_subset": "same deterministic maximum-size sample in both arms; independent geometry+LOCO QC before splitting",
-    "temporal_arm": "KMeans k=2 on canonical masked-rank features",
-    "hybrid_arm": "same temporal features plus train-fold 3D event directions, with equal total train variance per view",
-    "heldout_rule": "two-way alternating recording-block cross-fit; held-out assignment uses rank templates only",
-    "primary_metric": "patient-level timing-plus-space minus timing-only held-out direction score",
-    "direction_score": "equal-fold, equal-cluster mean signed cosine between held-out event direction and its assigned train-template gradient axis",
+    "training_event_universe": "all available interictal events in both arms",
+    "temporal_channel_universe": "all event-artifact channels; unmapped channels remain in timing features",
+    "spatial_missingness": "direction unavailable means a masked spatial view, not event deletion or zero-vector imputation",
+    "hard_event_qc_used": false,
+    "heldout_rule": "alternating recording-block cross-fit; rank-template assignment only",
+    "direction_score_domain": "common minimally direction-estimable and rank-assignable held-out events after both models freeze",
+    "primary_metric": "same equal-fold equal-cluster signed-cosine score as Figure 2B",
+    "sensitivity_metric": "held-out-event-weighted signed cosine",
     "primary_test": "one-sided paired Wilcoxon across patients",
-    "null_sensitivity": "shuffle held-out event directions within recording block after both models are frozen",
-    "claim_boundary": "supports added held-out directional information in the QC-clean, geometry-estimable event subset; not unseen-patient prediction, tissue trajectory, speed, or mechanism/causality",
     "ictal_input": "none",
-    "spatial_coordinates_pooled_across_patients": false,
-    "k": 2,
-    "max_events_per_subject": 5000,
-    "min_train_and_test_events_per_cluster": 20,
+    "max_events_per_subject": 0,
+    "min_train_cluster_events": 20,
     "n_direction_shuffle_draws": 1000,
-    "seed": 20260825
+    "n_training_spatial_shuffle_draws": 50,
+    "seed": 20260825,
+    "claim_boundary": "tests added held-out directional organization without hard event QC; events with mathematically undefined direction still affect clustering but cannot be a direction-score outcome"
   },
   "rose_examples": [
     {
       "subject_id": "epilepsiae_1146",
-      "display_label": "E1146",
+      "display_label": "E10",
       "visual_fold": 0,
-      "n_train_events": 2592,
-      "n_test_events": 2266,
+      "n_train_events": 21985,
+      "n_test_events": 24698,
       "train_blocks": [
+        0,
+        2,
+        4,
+        6,
+        8,
+        10,
+        12,
+        14,
+        16,
+        18,
+        20,
+        22,
+        24,
+        26,
+        28,
+        30,
+        32,
+        34,
+        36,
+        38,
+        40,
+        42,
+        44,
+        46,
+        48,
+        50,
+        52,
+        54,
+        56,
+        58,
+        60,
+        62,
+        64,
+        66,
+        68,
+        70,
+        72,
+        74,
+        76,
+        78
+      ],
+      "test_blocks": [
         1,
         3,
         5,
@@ -166,18 +160,124 @@
         51,
         53,
         55,
+        57,
         59,
         61,
         63,
         65,
         67,
+        69,
         71,
         73,
         75,
         77,
         79
       ],
-      "test_blocks": [
+      "train_label_ami": 0.6559333209207034,
+      "train_label_overlap_after_symmetry_match": 0.9372299294973846,
+      "test_label_overlap": 0.9889464733986557,
+      "test_reassigned_fraction": 0.011053526601344238,
+      "n_common_rose_events": 24698,
+      "common_display_basis": {
+        "axis_a": [
+          0.8885878218435654,
+          0.3124436696654867,
+          -0.3358431719676201
+        ],
+        "transverse": [
+          -0.25521870891069964,
+          -0.2716067102525185,
+          -0.9279510792966191
+        ],
+        "theta_b_rad": 2.5080362165157615,
+        "theta_b_deg": 143.69989007231226,
+        "cosine": -0.8059271464104942,
+        "basis_source": "ta_tb_axis_span"
+      },
+      "hybrid_label_swap_to_temporal": false,
+      "methods": {
+        "timing_only": {
+          "direction_score": 0.7099709835436598,
+          "cluster_scores": [
+            0.8212841826488161,
+            0.5986577844385035
+          ],
+          "train_cluster_counts": [
+            14274,
+            7711
+          ],
+          "test_cluster_counts": [
+            16803,
+            7895
+          ],
+          "template_axes_xyz": [
+            [
+              0.8884839499023174,
+              0.31233318030917173,
+              -0.3362205455410699
+            ],
+            [
+              -0.8605863976870305,
+              -0.4132027405339607,
+              -0.2977491348959465
+            ]
+          ],
+          "axis_angle_in_common_display_basis_rad": [
+            0.00040670393931690563,
+            2.4878482472903065
+          ],
+          "axis_projection_norm": [
+            1.0,
+            1.0
+          ],
+          "spatial_scale": null
+        },
+        "timing_plus_space": {
+          "direction_score": 0.7181793894554342,
+          "cluster_scores": [
+            0.8118097491713572,
+            0.6245490297395114
+          ],
+          "train_cluster_counts": [
+            15134,
+            6851
+          ],
+          "test_cluster_counts": [
+            17076,
+            7622
+          ],
+          "template_axes_xyz": [
+            [
+              0.8885878218435654,
+              0.3124436696654867,
+              -0.3358431719676201
+            ],
+            [
+              -0.8672302813774478,
+              -0.4126020070000074,
+              -0.2786955738463718
+            ]
+          ],
+          "axis_angle_in_common_display_basis_rad": [
+            1.315180086901212e-16,
+            2.5080362165157615
+          ],
+          "axis_projection_norm": [
+            1.0000000000000002,
+            0.9999999999999999
+          ],
+          "spatial_scale": 1.1237224455420147
+        }
+      }
+    },
+    {
+      "subject_id": "epilepsiae_548",
+      "display_label": "E14",
+      "visual_fold": 0,
+      "n_train_events": 15879,
+      "n_test_events": 9403,
+      "train_blocks": [
+        0,
         2,
         4,
         6,
@@ -205,216 +305,9 @@
         50,
         52,
         54,
-        58,
-        60,
-        62,
-        64,
-        66,
-        68,
-        72,
-        74,
-        76,
-        78
-      ],
-      "train_label_ami": 0.6775769637332669,
-      "train_label_overlap_after_symmetry_match": 0.9448302469135802,
-      "test_label_overlap": 0.9916151809355693,
-      "test_reassigned_fraction": 0.008384819064430714,
-      "n_common_rose_events": 2266,
-      "common_display_basis": {
-        "axis_a": [
-          -0.8479851624963551,
-          -0.41385262664624073,
-          -0.3311301369613426
-        ],
-        "transverse": [
-          0.36830160289193203,
-          -0.010828443389453655,
-          -0.9296433047793089
-        ],
-        "theta_b_rad": 2.483774992558409,
-        "theta_b_deg": 142.3098243337343,
-        "cosine": -0.7913283780245719,
-        "basis_source": "ta_tb_axis_span"
-      },
-      "hybrid_label_swap_to_temporal": true,
-      "methods": {
-        "timing_only": {
-          "direction_score": 0.7108432994205697,
-          "cluster_scores": [
-            0.6046720580416934,
-            0.8170145407994459
-          ],
-          "train_cluster_counts": [
-            884,
-            1708
-          ],
-          "test_cluster_counts": [
-            714,
-            1552
-          ],
-          "template_axes_xyz": [
-            [
-              -0.8588113809486151,
-              -0.41333067500776466,
-              -0.3026561829052208
-            ],
-            [
-              0.8738957035340231,
-              0.2976888585707956,
-              -0.38430149990286466
-            ]
-          ],
-          "axis_angle_in_common_display_basis_rad": [
-            6.2527170070747875,
-            2.399411529769177
-          ],
-          "axis_projection_norm": [
-            1.0,
-            0.9999999999999998
-          ],
-          "spatial_scale": null
-        },
-        "timing_plus_space": {
-          "direction_score": 0.7180679022385816,
-          "cluster_scores": [
-            0.6229595053797676,
-            0.8131762990973955
-          ],
-          "train_cluster_counts": [
-            817,
-            1775
-          ],
-          "test_cluster_counts": [
-            703,
-            1563
-          ],
-          "template_axes_xyz": [
-            [
-              -0.8479851624963551,
-              -0.41385262664624073,
-              -0.3311301369613426
-            ],
-            [
-              0.8962111420281862,
-              0.3208729110276047,
-              -0.30634321254632846
-            ]
-          ],
-          "axis_angle_in_common_display_basis_rad": [
-            1.420074292810885e-16,
-            2.483774992558409
-          ],
-          "axis_projection_norm": [
-            1.0,
-            0.9999999999999999
-          ],
-          "spatial_scale": 1.1333596494948908
-        }
-      }
-    },
-    {
-      "subject_id": "epilepsiae_548",
-      "display_label": "E548",
-      "visual_fold": 0,
-      "n_train_events": 1380,
-      "n_test_events": 2450,
-      "train_blocks": [
-        0,
-        4,
-        9,
-        11,
-        13,
-        15,
-        17,
-        19,
-        21,
-        23,
-        25,
-        29,
-        31,
-        33,
-        35,
-        38,
-        40,
-        42,
-        44,
-        46,
-        48,
-        50,
-        52,
-        54,
         56,
         58,
-        61,
-        63,
-        65,
-        67,
-        69,
-        71,
-        73,
-        75,
-        78,
-        80,
-        83,
-        85,
-        87,
-        89,
-        91,
-        93,
-        95,
-        97,
-        99,
-        101,
-        103,
-        105,
-        107,
-        109,
-        111,
-        113,
-        115,
-        117,
-        119,
-        121,
-        123,
-        125,
-        127,
-        129,
-        131,
-        133,
-        135,
-        137,
-        139,
-        141,
-        143
-      ],
-      "test_blocks": [
-        3,
-        5,
-        10,
-        12,
-        14,
-        16,
-        18,
-        20,
-        22,
-        24,
-        27,
-        30,
-        32,
-        34,
-        36,
-        39,
-        41,
-        43,
-        45,
-        47,
-        49,
-        51,
-        53,
-        55,
-        57,
-        59,
+        60,
         62,
         64,
         66,
@@ -422,8 +315,9 @@
         70,
         72,
         74,
-        77,
-        79,
+        76,
+        78,
+        80,
         82,
         84,
         86,
@@ -456,115 +350,189 @@
         140,
         142
       ],
-      "train_label_ami": 0.014758718768165608,
-      "train_label_overlap_after_symmetry_match": 0.563768115942029,
-      "test_label_overlap": 0.4820408163265306,
-      "test_reassigned_fraction": 0.5179591836734694,
-      "n_common_rose_events": 2450,
+      "test_blocks": [
+        1,
+        3,
+        5,
+        7,
+        9,
+        11,
+        13,
+        15,
+        17,
+        19,
+        21,
+        23,
+        25,
+        27,
+        29,
+        31,
+        33,
+        35,
+        37,
+        39,
+        41,
+        43,
+        45,
+        47,
+        49,
+        51,
+        53,
+        55,
+        57,
+        59,
+        61,
+        63,
+        65,
+        67,
+        69,
+        71,
+        73,
+        75,
+        77,
+        79,
+        81,
+        83,
+        85,
+        87,
+        89,
+        91,
+        93,
+        95,
+        97,
+        99,
+        101,
+        103,
+        105,
+        107,
+        109,
+        111,
+        113,
+        115,
+        117,
+        119,
+        121,
+        123,
+        125,
+        127,
+        129,
+        131,
+        133,
+        135,
+        137,
+        139,
+        141,
+        143
+      ],
+      "train_label_ami": 0.028690162821882657,
+      "train_label_overlap_after_symmetry_match": 0.5841677687511808,
+      "test_label_overlap": 0.41444219929809634,
+      "test_reassigned_fraction": 0.5855578007019037,
+      "n_common_rose_events": 9403,
       "common_display_basis": {
         "axis_a": [
-          0.20901059903975167,
-          -0.1138919326326522,
-          0.9712585634990528
+          -0.1615822829801106,
+          -0.9056526165950737,
+          -0.39202615203763147
         ],
         "transverse": [
-          0.0837099315606136,
-          -0.98746568916722,
-          -0.1338064276319512
+          0.2160745142769874,
+          -0.4200748391721509,
+          0.8813903413212875
         ],
-        "theta_b_rad": 2.158753148491317,
-        "theta_b_deg": 123.68744441913076,
-        "cosine": -0.5546621028412003,
+        "theta_b_rad": 1.890590077743561,
+        "theta_b_deg": 108.32283224401624,
+        "cosine": -0.3143707750224105,
         "basis_source": "ta_tb_axis_span"
       },
       "hybrid_label_swap_to_temporal": true,
       "methods": {
         "timing_only": {
-          "direction_score": 0.37557525055659813,
+          "direction_score": 0.21986819161635018,
           "cluster_scores": [
-            0.4140443567980165,
-            0.3371061443151798
+            0.18702168746067324,
+            0.25271469577202715
           ],
           "train_cluster_counts": [
-            438,
-            942
+            11322,
+            4557
           ],
           "test_cluster_counts": [
-            278,
-            2172
+            7145,
+            2258
           ],
           "template_axes_xyz": [
             [
-              -0.30963260200180415,
-              0.35089091912639087,
-              0.8837438625824956
+              0.21731870671680611,
+              -0.3225464970771033,
+              0.92126887331236
             ],
             [
-              0.11040400283350715,
-              -0.7002363653362466,
-              0.7053226132905577
+              -0.055128043157019434,
+              0.1728565118591277,
+              0.983403032924738
             ]
           ],
           "axis_angle_in_common_display_basis_rad": [
-            5.706081664726403,
-            0.6559068834536208
+            1.675158559850118,
+            2.1690547979920676
           ],
           "axis_projection_norm": [
-            0.8993101607631696,
-            0.9941732670195497
+            0.999888378229857,
+            0.9466546517585722
           ],
           "spatial_scale": null
         },
         "timing_plus_space": {
-          "direction_score": 0.4762339915473073,
+          "direction_score": 0.4170740743235378,
           "cluster_scores": [
-            0.5073681687070878,
-            0.44509981438752677
+            0.4422532986972697,
+            0.391894849949806
           ],
           "train_cluster_counts": [
-            698,
-            682
+            7849,
+            8030
           ],
           "test_cluster_counts": [
-            1267,
-            1183
+            3565,
+            5838
           ],
           "template_axes_xyz": [
             [
-              0.20901059903975167,
-              -0.1138919326326522,
-              0.9712585634990528
+              -0.1615822829801106,
+              -0.9056526165950737,
+              -0.39202615203763147
             ],
             [
-              -0.046277259427866514,
-              -0.758474654498835,
-              -0.6500573926529246
+              0.2559163437746984,
+              -0.11406644618455694,
+              0.9599456603599059
             ]
           ],
           "axis_angle_in_common_display_basis_rad": [
-            5.516589764084161e-17,
-            2.158753148491317
+            1.4149309533642523e-16,
+            1.890590077743561
           ],
           "axis_projection_norm": [
-            1.0,
+            1.0000000000000002,
             0.9999999999999999
           ],
-          "spatial_scale": 0.8499085542867268
+          "spatial_scale": 0.855278448469478
         }
       }
     }
   ],
   "visual_contract": {
-    "left": "one shared held-out all-event rose per locked E1146/E548 example; timing axes are dashed and timing-plus-space axes are solid in matched mode colors",
+    "left": "one shared held-out event-direction rose per locked E10/E14 example; red/blue encode propagation templates A/B, dashed axes come from timing-only template discovery, and solid axes come from template discovery augmented with real 3D event direction",
     "right": "original Figure 2B absolute-score/null grammar with paired timing-to-space patient endpoints",
     "rose_fold_role": "visual explanation only; cohort inference uses both cross-fit directions",
-    "rose_event_identity": "within each patient, both methods show exactly the same held-out QC-clean events as one neutral all-event distribution",
+    "rose_event_identity": "within each patient, both methods show exactly the same held-out all-event score denominator as one neutral distribution",
     "rose_assignment": "rank-template distance only; held-out directions are opened after assignment",
     "rose_display_basis": "one shared timing-plus-space axis plane per patient for both methods; timing-plus-space Mode 1 red solid axis is rotated to 0 degrees",
     "cluster_label_matching": "hybrid IDs are matched to temporal IDs by maximum train-event overlap; score is unchanged",
     "patient_labels_displayed": [
-      "E1146",
-      "E548"
+      "E10",
+      "E14"
     ],
     "score_encoding": "timing is an open blue circle and blue summary ridge; timing-plus-space is a filled terracotta circle and terracotta summary ridge; connectors preserve patient pairing",
     "absolute_null": "cohort-median held-out timing-plus-space scores after within-block direction shuffle on frozen models",
@@ -576,49 +544,50 @@
     "supplement": "paired violin with patient connectors, IQR, median, and exact paired Wilcoxon p value",
     "panel_letters": false,
     "dpi": 600,
-    "font": "Arial with DejaVu Sans fallback"
+    "font": "Arial with DejaVu Sans fallback",
+    "main_typography_scale": 1.28
   },
   "source": {
-    "subject_csv": "results/interictal_propagation_masked/spatial_information_gain/subject_spatial_information_gain.csv",
-    "subject_csv_sha256": "490085066c706316ed6f28f57953d23f87ddb34d852ef70b25687a9d964a6e97",
-    "summary_json": "results/interictal_propagation_masked/spatial_information_gain/spatial_information_gain_summary.json",
-    "summary_json_sha256": "3c8c7bb418efc4c64b7c50d51ca45d1884baacfaff21fb3269d9c7e4403ddbd0",
-    "cohort_null_npz": "results/interictal_propagation_masked/spatial_information_gain/cohort_direction_shuffle_null.npz",
-    "cohort_null_npz_sha256": "fe217caeacb4178e6dd9fa713635aa42dfa7328cf2a7bc13ba4d9d40888bdf13",
-    "sampling_seed_sensitivity_json": "results/interictal_propagation_masked/spatial_information_gain/sampling_seed_sensitivity.json",
-    "sampling_seed_sensitivity_json_sha256": "61a16c67236ced0a44742ca30865b3ec31171fbd263ac0440ad2587a994095ba",
+    "subject_csv": "results/interictal_propagation_masked/spatial_information_gain_all_events/subject_spatial_information_gain.csv",
+    "subject_csv_sha256": "7686948d2479522e58cf284376946bb3cb3eefc1e826f6633884327f3185fc00",
+    "summary_json": "results/interictal_propagation_masked/spatial_information_gain_all_events/spatial_information_gain_summary.json",
+    "summary_json_sha256": "4487aed3868247d51dbaf12ec2d842ffeacbd6790964e922664a98c1c44dd723",
+    "cohort_null_npz": "results/interictal_propagation_masked/spatial_information_gain_all_events/cohort_direction_shuffle_null.npz",
+    "cohort_null_npz_sha256": "44c0902c268278b22754fa91684778281342ee93bfb4ab92e1d534c9947a3089",
+    "sampling_seed_sensitivity_json": null,
+    "sampling_seed_sensitivity_json_sha256": null,
     "rose_subject_jsons": {
       "epilepsiae_1146": {
-        "path": "results/interictal_propagation_masked/spatial_information_gain/per_subject/epilepsiae_1146.json",
-        "sha256": "8694eb02f0b1c6ae6ba8537993944f140ccc503e260c85207e59f763f12e6a79"
+        "path": "results/interictal_propagation_masked/spatial_information_gain_all_events/per_subject/epilepsiae_1146.json",
+        "sha256": "1285624abd8c5028011c3014106d7ff120833f25f313f390093a324120b0f9a7"
       },
       "epilepsiae_548": {
-        "path": "results/interictal_propagation_masked/spatial_information_gain/per_subject/epilepsiae_548.json",
-        "sha256": "28b052ed3d4da015e7e52e0933f53def2f71eaa290f37442732fee0940ab16bb"
+        "path": "results/interictal_propagation_masked/spatial_information_gain_all_events/per_subject/epilepsiae_548.json",
+        "sha256": "b3a44275b10ea20f0a29dd1c0567c88401dc55bc5ba1efcba41eee240f3b54f2"
       }
     },
     "producer": "scripts/paper_figures/plot_interictal_spatial_information_gain.py"
   },
-  "claim_boundary": "supports added held-out directional information in the QC-clean, geometry-estimable event subset; not unseen-patient prediction, tissue trajectory, speed, or mechanism/causality",
+  "claim_boundary": "tests added held-out directional organization without hard event QC; events with mathematically undefined direction still affect clustering but cannot be a direction-score outcome",
   "outputs": {
-    "analysis_png": "results/interictal_propagation_masked/spatial_information_gain/figures/interictal_spatial_information_gain.png",
-    "analysis_pdf": "results/interictal_propagation_masked/spatial_information_gain/figures/interictal_spatial_information_gain.pdf",
-    "paper_png": "results/paper-ready-figure/fig2b_spatial_information_gain/figures/fig2b-spatial-information-gain.png",
-    "paper_pdf": "results/paper-ready-figure/fig2b_spatial_information_gain/figures/fig2b-spatial-information-gain.pdf",
-    "analysis_violin_png": "results/interictal_propagation_masked/spatial_information_gain/figures/interictal_spatial_information_gain_paired_violin.png",
-    "analysis_violin_pdf": "results/interictal_propagation_masked/spatial_information_gain/figures/interictal_spatial_information_gain_paired_violin.pdf",
-    "paper_violin_png": "results/paper-ready-figure/fig2b_spatial_information_gain/figures/fig2b-spatial-information-gain-paired-violin.png",
-    "paper_violin_pdf": "results/paper-ready-figure/fig2b_spatial_information_gain/figures/fig2b-spatial-information-gain-paired-violin.pdf",
-    "metadata": "results/paper-ready-figure/fig2b_spatial_information_gain/figures/fig2b-spatial-information-gain_metadata.json"
+    "analysis_png": "results/interictal_propagation_masked/spatial_information_gain_all_events/figures/interictal_spatial_information_gain.png",
+    "analysis_pdf": "results/interictal_propagation_masked/spatial_information_gain_all_events/figures/interictal_spatial_information_gain.pdf",
+    "paper_png": "results/paper-ready-figure/fig2_all_events_timing_plus_space/figures/fig2b-spatial-information-gain.png",
+    "paper_pdf": "results/paper-ready-figure/fig2_all_events_timing_plus_space/figures/fig2b-spatial-information-gain.pdf",
+    "analysis_violin_png": "results/interictal_propagation_masked/spatial_information_gain_all_events/figures/interictal_spatial_information_gain_paired_violin.png",
+    "analysis_violin_pdf": "results/interictal_propagation_masked/spatial_information_gain_all_events/figures/interictal_spatial_information_gain_paired_violin.pdf",
+    "paper_violin_png": "results/paper-ready-figure/fig2_all_events_timing_plus_space/figures/fig2b-spatial-information-gain-paired-violin.png",
+    "paper_violin_pdf": "results/paper-ready-figure/fig2_all_events_timing_plus_space/figures/fig2b-spatial-information-gain-paired-violin.pdf",
+    "metadata": "results/paper-ready-figure/fig2_all_events_timing_plus_space/figures/fig2b-spatial-information-gain_metadata.json"
   },
   "output_sha256": {
-    "analysis_png": "34fb4c3fc2b4963445a5dd71d98fcf98f35453938bc6e641a3db8da25111cbe5",
-    "analysis_pdf": "eaed2c55560f4e226d3a6a42a81a0f6040f14bff3eb5d86a33e9a0f6220e1486",
-    "paper_png": "34fb4c3fc2b4963445a5dd71d98fcf98f35453938bc6e641a3db8da25111cbe5",
-    "paper_pdf": "eaed2c55560f4e226d3a6a42a81a0f6040f14bff3eb5d86a33e9a0f6220e1486",
-    "analysis_violin_png": "574f379cfe79e5ee0e4655f8dd1104482b7f9cc7edc3b866cab6a15f2a719b4b",
-    "analysis_violin_pdf": "23562c9c032da32cb458a718414e1d857e9540f2649e66d9fdc14b47fa014577",
-    "paper_violin_png": "574f379cfe79e5ee0e4655f8dd1104482b7f9cc7edc3b866cab6a15f2a719b4b",
-    "paper_violin_pdf": "23562c9c032da32cb458a718414e1d857e9540f2649e66d9fdc14b47fa014577"
+    "analysis_png": "ea5f594f26c16bf2239012a8dadc05a6abca2b8d2c49140abd4e8df16b8e2e43",
+    "analysis_pdf": "8f89fad15657aaa265d6d851cf51d1b73adc0bf84b992cbe53b376b2b8900510",
+    "paper_png": "ea5f594f26c16bf2239012a8dadc05a6abca2b8d2c49140abd4e8df16b8e2e43",
+    "paper_pdf": "8f89fad15657aaa265d6d851cf51d1b73adc0bf84b992cbe53b376b2b8900510",
+    "analysis_violin_png": "87f90ab1213e79e3feb235ec381276ed331c2f20d134e6fd780bfb8520429e74",
+    "analysis_violin_pdf": "e6179e28aa1bd64019c36a0d6dee360866cfbc167ac9f306c28b5f67ad29f8d1",
+    "paper_violin_png": "87f90ab1213e79e3feb235ec381276ed331c2f20d134e6fd780bfb8520429e74",
+    "paper_violin_pdf": "e6179e28aa1bd64019c36a0d6dee360866cfbc167ac9f306c28b5f67ad29f8d1"
   }
 }

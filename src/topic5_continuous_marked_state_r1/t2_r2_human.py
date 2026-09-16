@@ -13,6 +13,7 @@ from .t2_r2 import (
     T2_R2_REVISION,
     build_horizon_mark_design,
     exponential_event_exposure,
+    standardise_exposure,
     fit_load_innovation_crossfit,
     fit_participation_innovation_crossfit,
     state_matched_nonoverlap_placebo,
@@ -30,6 +31,7 @@ def load_fitted_r1_4_explicit_t1(
     *,
     device: str = "cuda",
     r1_4_root: Path | None = None,
+    use_amp: bool | None = None,
 ) -> FittedT1Context:
     """Reconstruct one R1.4 explicit checkpoint and its event observations."""
     root = Path(r1_4_root or contract.RESULT_ROOT / "r1_4")
@@ -47,9 +49,16 @@ def load_fitted_r1_4_explicit_t1(
         "observation_cache_manifest_sha256"
     ]:
         raise ValueError("R1.4 observation manifest hash mismatch")
+    if use_amp is None:
+        # Default to whatever the primary fit used, so a re-materialised
+        # embedding is the same object the primary scored against.
+        use_amp = bool(
+            result.get("embedding_precision", {}).get("use_amp", False)
+        )
     context = load_fitted_explicit_t1(
         subject, seed, device=device, r1_3_root=root,
         observation_cache_root=cache_manifest_path.parent.parent,
+        use_amp=bool(use_amp),
     )
     if context.pre_event_observation is None:
         raise RuntimeError("R1.4 loader did not return event observation embeddings")
@@ -58,6 +67,12 @@ def load_fitted_r1_4_explicit_t1(
         "t1_source": "r1_4_explicit_target_trained_observer",
         "r1_4_result": str(result_path),
         "r1_4_result_sha256": contract.sha256_file(result_path),
+        "embedding_use_amp": bool(use_amp),
+        "embedding_precision_matches_primary": bool(
+            use_amp == bool(
+                result.get("embedding_precision", {}).get("use_amp", False)
+            )
+        ),
         "r1_4_experiment_label": result["experiment_label"],
         "persistent_minus_memoryless_joint": result["validation"][
             "persistent_minus_memoryless"
@@ -121,13 +136,37 @@ def build_r2_arm_designs(
     zeros = np.zeros_like(real, dtype=np.float32)
     current = np.asarray(innovation, dtype=np.float32)
     intercept = np.ones((len(real), 1), dtype=np.float32)
-    exposures = {
+    raw_exposures = {
         "no_edge": zeros,
         "real_cumulative": real,
         "state_matched_placebo": placebo,
         "current_event_only": current,
         "fitted_intercept_diagnostic": intercept,
     }
+    # Every fitted arm goes onto one TRAIN scale before B is estimated.  See
+    # standardise_exposure: the arms share a single early-stopped optimiser
+    # budget, and the cumulative arm arrives 12-21x larger than the
+    # current-event arm, which makes real-minus-current an optimiser artefact.
+    standardisation = {}
+    exposures = {"no_edge": zeros}
+    for label in (
+        "real_cumulative", "state_matched_placebo", "current_event_only",
+        "fitted_intercept_diagnostic",
+    ):
+        value, audit = standardise_exposure(
+            raw_exposures[label], train, common, label=label
+        )
+        exposures[label] = value
+        standardisation[label] = audit
+    standardisation["scale_ratio_before_standardisation"] = float(
+        np.max([
+            np.mean(standardisation[label]["train_sd_before"])
+            for label in ("real_cumulative", "current_event_only")
+        ]) / max(np.min([
+            np.mean(standardisation[label]["train_sd_before"])
+            for label in ("real_cumulative", "current_event_only")
+        ]), 1e-12)
+    )
     one_step = {
         label: build_one_step_design(
             design, context.pre_event_state, context.event_segment,
@@ -152,6 +191,7 @@ def build_r2_arm_designs(
             raise RuntimeError(f"T2-R2.0 arms changed H{horizon} support")
     audit = {
         "revision": T2_R2_REVISION,
+        "exposure_standardisation": standardisation,
         "source": source,
         "scale_events": 100,
         "innovation": innovation_audit,

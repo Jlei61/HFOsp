@@ -47,6 +47,9 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation, PillowWriter
 from matplotlib.cm import ScalarMappable
 from matplotlib.colors import LinearSegmentedColormap, Normalize, PowerNorm
+from matplotlib.transforms import Bbox
+
+plt.rcParams.update({"pdf.fonttype": 42, "ps.fonttype": 42})
 
 _ROOT = Path(__file__).resolve().parents[1]
 if str(_ROOT) not in sys.path:
@@ -66,6 +69,7 @@ from scripts.plot_topic5_interictal_template_ab_fields import (
     build_interictal_ab_panel_payloads,
     draw_interictal_rank_field_panel,
 )
+from scripts.paper_figures.patient_public_labels import public_patient_label
 from src.interictal_propagation import load_subject_propagation_events
 from src.lagpat_rank_audit import mask_phantom_ranks
 from src.preprocessing import load_epilepsiae_block
@@ -87,10 +91,10 @@ TOP_K, SNR_MIN_Z, SNR_MIN_CH = 40, 5.0, 5
 AXIAL_MIN_CH = 6       # 沿轴杆上至少 6 个触点的峰可测 —— 4 个点量不出梯度。
                        # 这是**可测性**门（看有几个点，不看斜率），不是挑漂亮的。
 FRAME_AVG_MS, N_FRAMES = 3.0, 4
-CMAP_NAME = "fig2c_muted_bluegray"
+CMAP_NAME = "fig2c_soft_teal_navy"
 CMAP = LinearSegmentedColormap.from_list(
     CMAP_NAME,
-    ["#f7f8fa", "#dfe7eb", "#b5c8d0", "#7f9eaa", "#456b78"],
+    ["#f7f9f8", "#dce9e4", "#b8d2ca", "#78aaa1", "#3f747d", "#314766"],
 )
 FIELD_DISPLAY_GAMMA = 0.50
 FIELD_DISPLAY_NORM_ID = "fixed_power_norm_gamma_0p50"
@@ -98,7 +102,7 @@ FIELD_DISPLAY_NORM = PowerNorm(gamma=FIELD_DISPLAY_GAMMA, vmin=0.0, vmax=1.0)
 STATIC_FIELD_NORMALIZATION_ID = "per_frame_participant_top3_mean_robust_z"
 STATIC_FIELD_CBAR_LABEL = "Relative HFO envelope"
 FRAME_PRE_MS, FRAME_MARGIN_MS, FRAME_MIN_POST_MS, FRAME_MAX_POST_MS = 8.0, 4.0, 35.0, 50.0
-GIF_STEP_MS, GIF_FPS = 2.0, 12
+GIF_STEP_MS, GIF_FPS = 2.0, 12.5
 NOTCH_HZ = (50.0, 100.0, 150.0, 200.0, 250.0)
 FIG1A_CMAP = "coolwarm"
 CENTROID_FACE = "#ffb000"
@@ -115,16 +119,16 @@ TEMPLATE_CONTACT_SIZE = 38
 TEMPLATE_CONTACT_OUTLINE_LW = 1.2
 FIGURE_WIDTH_IN = 12.8
 FIGURE_HEIGHT_IN = 4.9
-FIELD_TICK_LABELSIZE = 8
-CONTACT_TICK_LABELSIZE = 8
-READOUT_TICK_LABELSIZE = 9
-CBAR_TICK_LABELSIZE = 8
-CBAR_LABELSIZE = 9
-TICK_LENGTH = 1.5
-AXIS_LABELSIZE = 12
-FRAME_TITLE_SIZE = 12
-TEMPLATE_LABEL_SIZE = 12
-MAIN_TITLE_SIZE = 15
+FIELD_TICK_LABELSIZE = 11
+CONTACT_TICK_LABELSIZE = 9.5
+READOUT_TICK_LABELSIZE = 11
+CBAR_TICK_LABELSIZE = 10.5
+CBAR_LABELSIZE = 12
+TICK_LENGTH = 2.5
+AXIS_LABELSIZE = 16
+FRAME_TITLE_SIZE = 14
+TEMPLATE_LABEL_SIZE = 14
+MAIN_TITLE_SIZE = 20
 READOUT_COL = 0
 READOUT_CBAR_COL = 1
 GROUP_GAP_COL = 2
@@ -134,7 +138,7 @@ TEMPLATE_GAP_COL = FIELD_CBAR_COL + 1
 TEMPLATE_FIELD_COL = TEMPLATE_GAP_COL + 1
 TEMPLATE_CBAR_COL = TEMPLATE_FIELD_COL + 1
 N_LAYOUT_COLS = TEMPLATE_CBAR_COL + 1
-PAPER_SCHEMA_ID = "fig2c_interictal_event_envelope_field_candidate_v10"
+PAPER_SCHEMA_ID = "fig2c_interictal_event_envelope_field_candidate_v13"
 FIELD_NORMALIZATION_ID = "per_event_participant_q99_over_complete_display_window"
 STATIC_FRAME_GRID_STEP_MS = 2.0
 STATIC_FRAME_MIN_GAP_MS = 8.0
@@ -171,8 +175,9 @@ def _shared_display_geometry(shared_plane):
     return pts, int(sign), xlim, ylim
 
 
-def load_frozen(ds_sid):
-    rec = json.load(open(FROZEN / f"{ds_sid}.json"))
+def load_frozen(ds_sid, frozen_root=None):
+    root = FROZEN if frozen_root is None else Path(frozen_root)
+    rec = json.load(open(root / f"{ds_sid}.json"))
     scorers_from_interictal_record(rec)                          # <- fingerprint gate (raises)
     template_a, template_b, template_mode = build_interictal_ab_panel_payloads(
         rec, display_sigma_mm=DEFAULT_DISPLAY_SIGMA_MM,
@@ -977,12 +982,16 @@ def _template_panel(ax, fz, template, *, show_y, show_x):
         contact_size=TEMPLATE_CONTACT_SIZE,
         contact_outline_lw=TEMPLATE_CONTACT_OUTLINE_LW,
     )
-    ax.set_title(
-        f"{template} template", fontsize=TEMPLATE_LABEL_SIZE,
-        color=TEMPLATE_COLORS[template], fontweight="bold",
-    )
+    ax.set_title("")
     ax.set_xlabel("shared TA axis (mm)" if show_x else "", fontsize=AXIS_LABELSIZE)
     ax.set_ylabel("y (mm)" if show_y else "", fontsize=AXIS_LABELSIZE)
+    if show_y:
+        ax.text(
+            -0.52, 0.5, f"{template} field", transform=ax.transAxes,
+            ha="center", va="center", rotation=90,
+            fontsize=TEMPLATE_LABEL_SIZE, color=TEMPLATE_COLORS[template],
+            fontweight="bold",
+        )
     ax.tick_params(axis="both", labelsize=FIELD_TICK_LABELSIZE, length=TICK_LENGTH)
     if not show_y:
         ax.set_yticklabels([])
@@ -990,7 +999,7 @@ def _template_panel(ax, fz, template, *, show_y, show_x):
 
 
 def _template_rank_colorbar(fig, cax, fz, template):
-    """Show the frozen template's actual rank numbers while preserving viridis colours."""
+    """Show frozen template order on the same normalized 0..1 scale as the field."""
     values = np.asarray(fz["template_payloads"][template]["rank_values"], float)
     values = values[np.isfinite(values)]
     if values.size < 2:
@@ -998,17 +1007,11 @@ def _template_rank_colorbar(fig, cax, fz, template):
     lo, hi = float(np.min(values)), float(np.max(values))
     if hi <= lo:
         raise ValueError(f"{template}: frozen rank range is degenerate")
-    mid = float(0.5 * (lo + hi))
-    ticks = [lo, mid, hi]
-
-    def fmt(value):
-        return f"{value:.0f}" if np.isclose(value, np.round(value)) else f"{value:g}"
-
     cb = fig.colorbar(
-        ScalarMappable(Normalize(lo, hi), cmap="viridis"), cax=cax,
+        ScalarMappable(Normalize(0.0, 1.0), cmap="viridis"), cax=cax,
     )
-    cb.set_ticks(ticks)
-    cb.set_ticklabels([f"{fmt(lo)}  early", fmt(mid), f"{fmt(hi)}  late"])
+    cb.set_ticks([0.0, 0.5, 1.0])
+    cb.set_ticklabels(["0  early", "0.5", "1  late"])
     cb.ax.set_title("ranks", fontsize=CBAR_LABELSIZE, pad=4, loc="left")
     cb.ax.tick_params(labelsize=CBAR_TICK_LABELSIZE, length=TICK_LENGTH)
     return cb, (lo, hi)
@@ -1016,12 +1019,28 @@ def _template_rank_colorbar(fig, cax, fz, template):
 
 def _subject_title(ds_sid):
     dataset, sid = ds_sid.split("_", 1)
-    return f"E{sid}" if dataset == "epilepsiae" else sid
+    return public_patient_label(dataset, sid)
+
+
+def _axes_bbox_inches(fig, axes, *, pad_inches=0.045):
+    """Return a tight crop around selected axes without changing their layout."""
+    fig.canvas.draw()
+    renderer = fig.canvas.get_renderer()
+    bbox_px = Bbox.union([ax.get_tightbbox(renderer) for ax in axes if ax.get_visible()])
+    bbox_in = bbox_px.transformed(fig.dpi_scale_trans.inverted())
+    figure_bbox = fig.bbox_inches
+    return Bbox.from_extents(
+        max(figure_bbox.x0, bbox_in.x0 - pad_inches),
+        max(figure_bbox.y0, bbox_in.y0 - pad_inches),
+        min(figure_bbox.x1, bbox_in.x1 + pad_inches),
+        min(figure_bbox.y1, bbox_in.y1 + pad_inches),
+    )
 
 
 def render(
     ds_sid, fz, ea, eb, sa, sb, out_png, *, support_mode="participant",
-    extra_outputs=(), dpi=125, frame_window=None, normalization_scales_override=None,
+    extra_outputs=(), panel_c_outputs=(), panel_d_outputs=(), dpi=125,
+    frame_window=None, normalization_scales_override=None,
 ):
     pts = fz["points_mm"]
     sup = {"TA": _support(support_mode, fz, ea, "a"), "TB": _support(support_mode, fz, eb, "b")}
@@ -1076,7 +1095,7 @@ def render(
         axes[r, TEMPLATE_GAP_COL].set_axis_off()
         spec_im, _, _, _ = _readout(
             axes[r, READOUT_COL], e, fz, order, readout_xlim, st,
-            title=f"Sample from {lab}", template=lab, show_xlabel=True, row_label=lab,
+            title=f"{lab} samples", template=lab, show_xlabel=True, row_label=lab,
         )
         spec_cax = axes[r, READOUT_CBAR_COL]
         spec_cax.set_box_aspect(1.0 / SPEC_CBAR_WIDTH_RATIO)
@@ -1091,19 +1110,41 @@ def render(
         template_cax = axes[r, TEMPLATE_CBAR_COL]
         template_cax.set_box_aspect(1.0 / TEMPLATE_CBAR_WIDTH_RATIO)
         _template_rank_colorbar(fig, template_cax, fz, lab)
-    fig.suptitle(
-        _subject_title(ds_sid), x=0.01, ha="left",
-        fontsize=MAIN_TITLE_SIZE, fontweight="bold",
-    )
     outputs = [Path(out_png), *(Path(p) for p in extra_outputs)]
     for path in outputs:
         path.parent.mkdir(parents=True, exist_ok=True)
         fig.savefig(path, dpi=dpi, bbox_inches="tight")
+    c_axes = [
+        axes[r, c]
+        for r in range(2)
+        for c in (READOUT_COL, READOUT_CBAR_COL, *range(FRAME_COL_START, FIELD_CBAR_COL + 1))
+    ]
+    d_axes = [
+        axes[r, c]
+        for r in range(2)
+        for c in (TEMPLATE_FIELD_COL, TEMPLATE_CBAR_COL)
+    ]
+    split_outputs = {
+        "panel_c": [Path(p) for p in panel_c_outputs],
+        "panel_d": [Path(p) for p in panel_d_outputs],
+    }
+    split_axes = {"panel_c": c_axes, "panel_d": d_axes}
+    for panel_id, paths in split_outputs.items():
+        if not paths:
+            continue
+        bbox = _axes_bbox_inches(fig, split_axes[panel_id])
+        for path in paths:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            fig.savefig(path, dpi=dpi, bbox_inches=bbox, facecolor="white")
     plt.close(fig)
     print(f"  [figure] {Path(out_png).name}  frame-relative 0..1 "
           f"(selector q99 TA={scales['TA']:.1f}, TB={scales['TB']:.1f})  "
           f"window {t_lo:+.0f}..{t_hi:+.0f} ms ({support_mode})", flush=True)
-    return dict(t_lo_ms=float(t_lo), t_hi_ms=float(t_hi), vmax=float(vmax),
+    return dict(figure=str(Path(out_png)),
+                extra_outputs=[str(Path(p)) for p in extra_outputs],
+                panel_c_outputs=[str(Path(p)) for p in panel_c_outputs],
+                panel_d_outputs=[str(Path(p)) for p in panel_d_outputs],
+                t_lo_ms=float(t_lo), t_hi_ms=float(t_hi), vmax=float(vmax),
                 frame_times_ms=[float(x) for x in fts], support_mode=support_mode,
                 cmap=CMAP_NAME, normalization_mode=STATIC_FIELD_NORMALIZATION_ID,
                 display_norm=FIELD_DISPLAY_NORM_ID,
@@ -1121,8 +1162,12 @@ def render(
                 field_colorbars=("one labeled relative HFO envelope bar per TA/TB row; each "
                                  "static frame uses its own participant top-three mean reference"),
                 readout_colorbars="one labeled normalized-magnitude 0..1 bar per TA/TB row",
-                template_colorbars=("one viridis bar per TA/TB row titled ranks; actual frozen "
-                                    "rank numbers with separate early/late endpoint text"),
+                template_colorbars=("one viridis bar per TA/TB row titled ranks; normalized "
+                                    "0..1 ticks with separate early/late endpoint text"),
+                template_colorbar_range=[0.0, 1.0],
+                template_rank_normalization=(
+                    "linear min-max within each frozen template; 0=earliest, 1=latest"
+                ),
                 template_rank_ranges={
                     lab: [float(np.nanmin(fz["template_payloads"][lab]["rank_values"])),
                           float(np.nanmax(fz["template_payloads"][lab]["rank_values"]))]
@@ -1136,8 +1181,7 @@ def render(
                 display_sigma_mm=float(fz["display_sigma_mm"]),
                 display_xlim_mm=[float(x) for x in fz["display_xlim_mm"]],
                 display_ylim_mm=[float(x) for x in fz["display_ylim_mm"]],
-                transverse_sign=int(fz["transverse_sign"]), figure=str(out_png),
-                extra_outputs=[str(p) for p in outputs[1:]], dpi=int(dpi))
+                transverse_sign=int(fz["transverse_sign"]), dpi=int(dpi))
 
 
 def render_gif(
@@ -1179,7 +1223,7 @@ def render_gif(
     for r, (lab, e, st) in enumerate((("TA", ea, sa), ("TB", eb, sb))):
         spec_im, _, _, _ = _readout(
             axes[r, 0], e, fz, order, readout_xlim, st,
-            title=f"Sample from {lab}", template=lab, show_xlabel=True, row_label=lab,
+            title=f"{lab} samples", template=lab, show_xlabel=True, row_label=lab,
         )
         cursor_lines.append(
             axes[r, 0].axvline(
@@ -1285,8 +1329,12 @@ def render_gif(
                      "rank colorbar"),
         readout_xlim_ms=[float(x) for x in readout_xlim],
         readout_xlim_mode="common intersection of the two recorded STFT windows",
-        template_field=("frozen viridis propagation rank; colorbar shows actual frozen rank "
-                        "numbers and separate early/late endpoint text"),
+        template_field=("frozen viridis propagation rank; colorbar shows normalized 0..1 "
+                        "rank with separate early/late endpoint text"),
+        template_colorbar_range=[0.0, 1.0],
+        template_rank_normalization=(
+            "linear min-max within each frozen template; 0=earliest, 1=latest"
+        ),
         template_rank_ranges={
             lab: [float(np.nanmin(fz["template_payloads"][lab]["rank_values"])),
                   float(np.nanmax(fz["template_payloads"][lab]["rank_values"]))]
@@ -1316,13 +1364,14 @@ def _write_paper_ready_readme(figures_dir, ds_sid, js, static_meta, gif_meta):
 
 **关注点**：比较 TA/TB 热区沿冻结 shared axis 的相反移动；GIF 与静态 candidate 使用同一 exemplar、support、几何、6 mm display kernel 和 colormap，但量纲承担不同任务：GIF 固定每事件完整窗 q99 以保留连续幅度演化，静态小图逐帧以最强三个参与触点的均值归一化以突出空间位置。两者都不能用于比较 TA/TB 绝对 robust-z 幅度。
 """
-    text = f"""# Fig2-C candidate：E1146 间期单事件包络传播场
+    public_label = _subject_title(ds_sid)
+    text = f"""# Fig2-C/D candidate：{public_label} 间期单事件包络传播场
 
 ### {stem}.png / .pdf
 
-Fig2-C representative-subject 单事件候选：每行只放一个 exemplar（TA 一次、TB 一次），不是多事件 train。三组内容依次为：左侧 `Sample from TA/TB` normalized-magnitude spectrogram 与质心轨迹；中间 participant-only 单带 HFO Hilbert amplitude envelope 场；最右冻结群体 TA/TB propagation-rank field。静态帧为 `{frame_text} ms`，由 contact-level equal-interval full-field selector 在 2 ms 网格上确定：全部时间间隔完全相等；除轴杆共同可见度、状态分离、质心方向和端点交接门外，最终二维场实际使用的全部参与触点还必须共同可见度至少 {STATIC_FRAME_MIN_FULL_VISIBILITY:.2f}，每一步全参与触点质心至少移动 {STATIC_FRAME_MIN_FULL_CENTROID_STEP_MM:.1f} mm，top-3 热点至少移动 {STATIC_FRAME_MIN_HOTSPOT_STEP_MM:.1f} mm（TA 向右、TB 向左）。选择过程只读取接触点包络与冻结坐标，不读取渲染像素。为避免完整窗 q99 把有效但幅度较低的后帧压成近白色，四幅静态小图分别以该帧最强三个参与触点的 robust-z envelope 均值为 1 并 clip 到 0–1；colorbar 因此写 `{STATIC_FIELD_CBAR_LABEL}`。低饱和蓝灰 `{CMAP_NAME}` 继续固定使用 `PowerNorm(gamma={FIELD_DISPLAY_GAMMA:.2f})`。这种 frame-relative 显示只比较空间集中位置，不比较帧间、TA/TB 间绝对幅度；连续幅度演化保留在 GIF 的 complete-window q99 尺度中。最右使用 `viridis`，colorbar 顶部写 `ranks` 并显示 artifact 实际 rank，最低/最高端分别附 early/late。左侧两行取真实 STFT 窗的共同交集，避免无数据白边；三个 colorbar 均写明物理量。
+Fig2-C/D representative-subject 单事件候选：每行只放一个 exemplar（TA 一次、TB 一次），不是多事件 train。C 保留左侧 `Sample from TA/TB` normalized-magnitude spectrogram、质心轨迹及中间 participant-only 单带 HFO Hilbert amplitude envelope 场；D 直接使用同一已接受画布最右竖排的冻结群体 TA/TB propagation-rank field。静态帧为 `{frame_text} ms`，由 contact-level equal-interval full-field selector 在 2 ms 网格上确定：全部时间间隔完全相等；除轴杆共同可见度、状态分离、质心方向和端点交接门外，最终二维场实际使用的全部参与触点还必须共同可见度至少 {STATIC_FRAME_MIN_FULL_VISIBILITY:.2f}，每一步全参与触点质心至少移动 {STATIC_FRAME_MIN_FULL_CENTROID_STEP_MM:.1f} mm，top-3 热点至少移动 {STATIC_FRAME_MIN_HOTSPOT_STEP_MM:.1f} mm（TA 向右、TB 向左）。选择过程只读取接触点包络与冻结坐标，不读取渲染像素。为避免完整窗 q99 把有效但幅度较低的后帧压成近白色，四幅静态小图分别以该帧最强三个参与触点的 robust-z envelope 均值为 1 并 clip 到 0–1；colorbar 因此写 `{STATIC_FIELD_CBAR_LABEL}`。低饱和、色盲友好的 teal-to-navy `{CMAP_NAME}` 固定使用 `PowerNorm(gamma={FIELD_DISPLAY_GAMMA:.2f})`。这种 frame-relative 显示只比较空间集中位置，不比较帧间、TA/TB 间绝对幅度；连续幅度演化保留在 GIF 的 complete-window q99 尺度中。D 使用 `viridis`，colorbar 顶部写 `ranks`，并将每个冻结模板自己的 early→late rank 线性归一化为 `0–1`，最低/最高端分别附 early/late。左侧两行取真实 STFT 窗的共同交集，避免无数据白边；各 colorbar 均写明物理量。
 
-当前 E1146 的沿轴杆 {js['axial_shaft']} 质心-轴 Spearman 为 TA {ta['fig1a_centroid_vs_axis_rho']:+.3f}、TB {tb['fig1a_centroid_vs_axis_rho']:+.3f}。显示核固定为 6 mm，只控制画布连续性，不替换冻结分析 kernel。
+当前 {public_label} 的沿轴杆 {js['axial_shaft']} 质心-轴 Spearman 为 TA {ta['fig1a_centroid_vs_axis_rho']:+.3f}、TB {tb['fig1a_centroid_vs_axis_rho']:+.3f}。显示核固定为 6 mm，只控制画布连续性，不替换冻结分析 kernel。
 
 **关注点**：该图是 raw-EEG-derived envelope timing 在既有冻结间期轴上的 representative cross-check；不是 template-free 验证、cohort 统计、跨未采样组织的 traveling-wave 证明或机制证明。
 {gif_block}
@@ -1346,9 +1395,14 @@ def package_paper_ready(
     stem = _paper_stem(ds_sid)
     png = figures_dir / f"{stem}.png"
     pdf = figures_dir / f"{stem}.pdf"
+    panel_c_png = figures_dir / f"{stem}_panelc.png"
+    panel_c_pdf = figures_dir / f"{stem}_panelc.pdf"
+    panel_d_png = figures_dir / f"{stem}_paneld.png"
+    panel_d_pdf = figures_dir / f"{stem}_paneld.pdf"
     static_meta = render(
         ds_sid, fz, ea, eb, sa, sb, png, support_mode="participant",
-        extra_outputs=(pdf,), dpi=600,
+        extra_outputs=(pdf,), panel_c_outputs=(panel_c_png, panel_c_pdf),
+        panel_d_outputs=(panel_d_png, panel_d_pdf), dpi=600,
     )
     gif_meta = None
     if make_gif:
@@ -1360,6 +1414,7 @@ def package_paper_ready(
         schema_id=PAPER_SCHEMA_ID,
         status="paper-ready Fig2-C candidate; representative subject, not final locked panel",
         ds_sid=ds_sid,
+        public_patient_label=_subject_title(ds_sid),
         canonical_producer="scripts/paper_figures/build_main_figures_1_2.py",
         source_producer="scripts/paper_figures/plot_fig2c_interictal_event_envelope_field.py",
         core_renderer="scripts/plot_topic5_interictal_event_envelope_field.py",
@@ -1379,6 +1434,8 @@ def package_paper_ready(
     print(f"  [paper-readme] {readme}", flush=True)
     return dict(
         figures_dir=str(figures_dir), png=str(png), pdf=str(pdf),
+        panel_c_png=str(panel_c_png), panel_c_pdf=str(panel_c_pdf),
+        panel_d_png=str(panel_d_png), panel_d_pdf=str(panel_d_pdf),
         gif=(None if gif_meta is None else gif_meta["figure"]),
         metadata=str(meta_path), readme=str(readme), schema_id=PAPER_SCHEMA_ID,
     )
@@ -1433,7 +1490,7 @@ def _write_readme(ds_sid, fz, js):
 
 ### {main}
 
-左侧复用 Fig1a 的 Gaussian-smoothed magnitude、逐触点逐事件归一化、主增强区质心和真实 STFT cell 边界，并明确标题为单次 `Sample from TA/TB`；上下两行都写 `time (ms)`，x limits 取两次真实 STFT 窗的共同交集，标题在轴内靠右避开 colorbar，黑色竖线标记 `t=0`。中间两行在完全相同的 shared-plane 物理毫米坐标上显示 participant-only HFO envelope。4 个静态帧由严格等间距、轴向方向门和最终二维场全部参与触点的逐步质心/top-3 热点移动门共同确定，不从渲染像素手挑；每帧再以本帧最强三个参与触点的 robust-z envelope 均值归一化到 1，使幅度较低但已通过可见度门的后帧不会被完整窗 q99 压成近白色。低饱和蓝灰顺序色图固定使用 `PowerNorm(gamma={FIELD_DISPLAY_GAMMA:.2f})`；静态中间场只比较空间集中位置，不比较帧间或 TA/TB 绝对幅度。最右两幅调用冻结群体 TA/TB template-rank field 公共 renderer；`viridis` colorbar 顶部写 `ranks`，显示 artifact 实际 rank 数值并在最低/最高端分别附 early/late，两行 y-label 均简写为 `y (mm)`。沿轴杆 {fz['axial_shaft']} 的 Fig1a 质心-轴 Spearman 为 TA {ar:+.3f}、TB {br:+.3f}。
+左侧复用 Fig1a 的 Gaussian-smoothed magnitude、逐触点逐事件归一化、主增强区质心和真实 STFT cell 边界，并明确标题为单次 `Sample from TA/TB`；上下两行都写 `time (ms)`，x limits 取两次真实 STFT 窗的共同交集，标题在轴内靠右避开 colorbar，黑色竖线标记 `t=0`。中间两行在完全相同的 shared-plane 物理毫米坐标上显示 participant-only HFO envelope。4 个静态帧由严格等间距、轴向方向门和最终二维场全部参与触点的逐步质心/top-3 热点移动门共同确定，不从渲染像素手挑；每帧再以本帧最强三个参与触点的 robust-z envelope 均值归一化到 1，使幅度较低但已通过可见度门的后帧不会被完整窗 q99 压成近白色。低饱和、色盲友好的 teal-to-navy 顺序色图固定使用 `PowerNorm(gamma={FIELD_DISPLAY_GAMMA:.2f})`；静态中间场只比较空间集中位置，不比较帧间或 TA/TB 绝对幅度。最右两幅调用冻结群体 TA/TB template-rank field 公共 renderer；`viridis` colorbar 顶部写 `ranks`，显示各模板内线性归一化 `0–1` rank 并在最低/最高端分别附 early/late，两行 y-label 均简写为 `y (mm)`。沿轴杆 {fz['axial_shaft']} 的 Fig1a 质心-轴 Spearman 为 TA {ar:+.3f}、TB {br:+.3f}。
 
 **关注点**：比较两行质心轨迹与左侧热区移动是否同号相反；不要把单被试两次示例升级成跨二维组织的 traveling wave 证据。
 

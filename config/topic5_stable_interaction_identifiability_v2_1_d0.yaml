@@ -1,0 +1,64 @@
+contract:
+  name: topic5_stable_interaction_identifiability_v2_1_d0
+  source_spec: docs/superpowers/specs/2026-07-31-topic5-stable-interaction-identifiability-v2_1.md
+
+data:
+  dataset_dir: results/topic5_interictal_rank_distribution/dataset_v0_4
+  validation_fraction: 0.15
+  test_fraction: 0.15
+  max_train_events_per_half: 4800
+  max_monitor_events_per_half: 1024
+  max_probe_events: 2048
+  old_outer_heldout20_forbidden: true
+
+conditions:
+  - shared_graph_positive
+  - phase_template_negative
+  - mixture_zero_mean_backbone_negative
+  - event_random_graph_negative
+
+model:
+  graph_l1_weight: 0.0005
+  phase_rank: 3
+  max_weight: 3.0
+  leak: 0.25
+  positive_edge_weight: 2.4
+  background_weight: -0.15
+
+training:
+  fit_seeds: [20260731, 20260732, 20260733]
+  epochs: 300
+  patience: 35
+  learning_rate: 0.03
+  batch_events: 256
+  convergence_tolerance: 0.002
+  minimum_relative_improvement: 0.001
+  minimum_training_epochs: 20
+  minimum_best_epoch: 3
+  maximum_recovery_depth: 2
+  static_scaffold_steps: 300
+  static_scaffold_learning_rate: 0.05
+  static_scaffold_seed: 20260731
+
+frozen_decision:
+  minimum_positive_recovery_spearman: 0.50
+  minimum_positive_split_stability: 0.60
+  minimum_positive_minus_strongest_negative_stability: 0.10
+  require_all_three: true
+
+pilot:
+  subjects:
+    - epilepsiae_922
+    - epilepsiae_620
+    - epilepsiae_1096
+    - yuquan_zhangkexuan
+    - yuquan_chenziyang
+    - yuquan_zhangjiaqi
+
+forbidden_inputs:
+  ab_or_axis: true
+  soz: true
+  ictal: true
+  geometry: true
+  iei: true
+  snn: true

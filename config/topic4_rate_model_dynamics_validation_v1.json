@@ -1,0 +1,1357 @@
+{
+  "schema": "topic4_rate_model_dynamics_validation_base_v1",
+  "status": "V1_ORIGINAL_CLOSURE_FAILED_REPAIR_UNVALIDATED",
+  "date": "2026-09-08",
+  "candidate_id": "v2_1_pop1_de_b_002",
+  "authorization": "User accepted one fixed data-driven dual-core reference for reduction validation.",
+  "selection": {
+    "rule": "Lowest completed G3 equal-run L_off; candidate is development-selected using G3.",
+    "loss_off": 0.9786925451830731,
+    "global_optimality_claim": false,
+    "new_independent_test_claim": false
+  },
+  "topology_seed": 6101,
+  "topology_choice": "Smallest confirmation topology ID, not selected by per-network score.",
+  "candidate": {
+    "candidate_id": "v2_1_pop1_de_b_002",
+    "population": 1,
+    "proposal": "deferred_DE_rand_1_bin_v2_1",
+    "sobol_draw_index": 1,
+    "node_field": {
+      "field_type": "manual_dual_core_budget_matched",
+      "centers_mm": [
+        [
+          3.0639104903675616,
+          18.719856955537587
+        ],
+        [
+          12.823527318213674,
+          15.09090546916504
+        ]
+      ],
+      "target_count": 1499,
+      "field_sha256": "e114fe0ce1c21f58bc6da5769a3909ef8ef29c5d0d4e31e55df73d9f18cf6017"
+    },
+    "geometry": {
+      "field_type": "manual_dual_core_budget_matched",
+      "target_count": 1499,
+      "selected_count": 1499,
+      "distance_cutoff_mm": 1.7460112852450742,
+      "strictly_inside_cutoff_count": 1498,
+      "boundary_tie_count": 1,
+      "selected_per_core": [
+        712,
+        787
+      ],
+      "maximum_selected_distance_per_core_mm": [
+        1.7449791311277414,
+        1.7460112852450742
+      ],
+      "h_sha256": "57d5efde7f35b887722563293c297627aedb471661003c25ff495ea71e581b94",
+      "minimum_clearance_mm": -0.4658682407826611,
+      "center_separation_mm": 10.412464142402726,
+      "center_line_angle_deg": -20.39681536254044,
+      "full_disks_disjoint": true
+    },
+    "domain": "whole_sheet",
+    "node_mapping": {
+      "node_gain": 0.9101988644897936,
+      "signed_depth_shrinkage": 1.0
+    },
+    "mechanisms": {
+      "g_EE": 0.0,
+      "g_EtoI": 0.0,
+      "Z_M": "off",
+      "ellipse_angle_deg": -29.682336421368863,
+      "ellipse_aspect_ratio": 1.9359022695571184,
+      "ellipse_reference_angle_deg": -22.80538396505847,
+      "ellipse_reference_aspect_ratio": 2.0
+    },
+    "selection_eligible": true,
+    "dynamic_parameters": {
+      "E_to_E_weight_scale": 1.1587065309286118,
+      "E_to_I_weight_scale": 1.2045320562273265,
+      "I_to_E_weight_scale": 1.110216315165162,
+      "tau_d_GABA_ms": 20.611550480127335,
+      "I_to_I_weight_scale": 1.0
+    },
+    "parent_target_candidate_id": "v2_pop1_sobol_001",
+    "de_plan_record": {
+      "candidate_id": "v2_1_pop1_de_b_002",
+      "population": 1,
+      "target_index": 4,
+      "target_candidate_id": "v2_pop1_sobol_001",
+      "F": 0.6,
+      "CR": 0.8,
+      "accepted_attempt_index": 1,
+      "proposal_attempts": [
+        {
+          "attempt": 0,
+          "donor_indices": [
+            14,
+            19,
+            1
+          ],
+          "donor_candidate_ids": [
+            "v2_pop1_sobol_011",
+            "v2_pop1_sobol_016",
+            "v2_anchor_support_rank__vth_low"
+          ],
+          "crossover_uniform": [
+            0.8829271953646877,
+            0.9776474766858873,
+            0.3134152528358083,
+            0.8852189645661992,
+            0.44654427511347783,
+            0.031052420101780887,
+            0.08072430309790546,
+            0.920509491347097,
+            0.29963440967759347,
+            0.6212661603589266,
+            0.5728821905048656
+          ],
+          "forced_mutant_dimension": 0,
+          "crossover_mask": [
+            true,
+            false,
+            true,
+            false,
+            true,
+            true,
+            true,
+            false,
+            true,
+            true,
+            true
+          ],
+          "mutant_normalized": [
+            0.42926838382007787,
+            0.4919236904291091,
+            0.5332462942845627,
+            0.3607916754054839,
+            0.5173440276334684,
+            0.23900877218693486,
+            0.8569991119578482,
+            0.08383737262338395,
+            0.8258616937324404,
+            0.8508666513487697,
+            0.753573945350945
+          ],
+          "raw_normalized": [
+            0.42926838382007787,
+            0.29491273406893015,
+            0.5332462942845627,
+            0.43989541102200747,
+            0.5173440276334684,
+            0.23900877218693486,
+            0.8569991119578482,
+            0.4712665658444166,
+            0.8258616937324404,
+            0.8508666513487697,
+            0.753573945350945
+          ],
+          "reflected_normalized": [
+            0.42926838382007787,
+            0.29491273406893015,
+            0.5332462942845627,
+            0.43989541102200747,
+            0.5173440276334684,
+            0.23900877218693486,
+            0.8569991119578482,
+            0.4712665658444166,
+            0.8258616937324404,
+            0.8508666513487697,
+            0.753573945350945
+          ],
+          "raw_vector": [
+            8.69146510067144,
+            6.205885580275208,
+            10.615056444264411,
+            8.888065103907138,
+            0.9656096248701216,
+            0.895603508874774,
+            1.228499555978924,
+            0.9885066263377666,
+            25.21378709971905,
+            31.57799862138927,
+            2.50714789070189
+          ],
+          "reflected_vector": [
+            8.69146510067144,
+            6.205885580275208,
+            10.615056444264411,
+            8.888065103907138,
+            0.9656096248701216,
+            0.895603508874774,
+            1.228499555978924,
+            0.9885066263377666,
+            25.21378709971905,
+            31.57799862138927,
+            2.50714789070189
+          ],
+          "geometry_valid": false
+        },
+        {
+          "attempt": 1,
+          "donor_indices": [
+            3,
+            1,
+            16
+          ],
+          "donor_candidate_ids": [
+            "v2_pop1_sobol_000",
+            "v2_anchor_support_rank__vth_low",
+            "v2_pop1_sobol_013"
+          ],
+          "crossover_uniform": [
+            0.998992761062029,
+            0.5260738323702172,
+            0.7975362805419299,
+            0.49940908455199406,
+            0.6072538572771011,
+            0.5037054152304012,
+            0.2852678026093972,
+            0.7770243936199509,
+            0.6175238671247485,
+            0.5684645197188847,
+            0.31891428144376754
+          ],
+          "forced_mutant_dimension": 4,
+          "crossover_mask": [
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "mutant_normalized": [
+            0.3498163878652244,
+            1.0286563807817521,
+            0.6526230982818202,
+            0.7751840794143265,
+            0.45577651609977077,
+            1.1032336726784706,
+            1.190935887545347,
+            0.7755407879129053,
+            0.5382219050079584,
+            0.42358941715210674,
+            0.4679511347785592
+          ],
+          "raw_normalized": [
+            0.1250762427225709,
+            1.0286563807817521,
+            0.6526230982818202,
+            0.7751840794143265,
+            0.45577651609977077,
+            1.1032336726784706,
+            1.190935887545347,
+            0.7755407879129053,
+            0.5382219050079584,
+            0.42358941715210674,
+            0.4679511347785592
+          ],
+          "reflected_normalized": [
+            0.1250762427225709,
+            0.9713436192182479,
+            0.6526230982818202,
+            0.7751840794143265,
+            0.45577651609977077,
+            0.8967663273215294,
+            0.8090641124546529,
+            0.7755407879129053,
+            0.5382219050079584,
+            0.42358941715210674,
+            0.4679511347785592
+          ],
+          "raw_vector": [
+            3.0639104903675616,
+            19.780143044462413,
+            12.823527318213674,
+            15.09090546916504,
+            0.9101988644897936,
+            1.2412934690713882,
+            1.3954679437726736,
+            1.110216315165162,
+            20.611550480127335,
+            -6.876952456310391,
+            1.9359022695571184
+          ],
+          "reflected_vector": [
+            3.0639104903675616,
+            18.719856955537587,
+            12.823527318213674,
+            15.09090546916504,
+            0.9101988644897936,
+            1.1587065309286118,
+            1.2045320562273265,
+            1.110216315165162,
+            20.611550480127335,
+            -6.876952456310391,
+            1.9359022695571184
+          ],
+          "geometry_valid": true
+        }
+      ]
+    }
+  },
+  "realized_geometry": {
+    "field_type": "manual_dual_core_budget_matched",
+    "target_count": 1499,
+    "selected_count": 1499,
+    "distance_cutoff_mm": 1.7506715899834795,
+    "strictly_inside_cutoff_count": 1498,
+    "boundary_tie_count": 1,
+    "selected_per_core": [
+      687,
+      812
+    ],
+    "maximum_selected_distance_per_core_mm": [
+      1.7478053616496192,
+      1.7506715899834795
+    ],
+    "h_sha256": "35dc71274d43271d1367019108086195a8084676521499a43cc6d620661a80a7",
+    "minimum_clearance_mm": -0.4705285455210664,
+    "center_separation_mm": 10.412464142402726,
+    "center_line_angle_deg": -20.39681536254044,
+    "full_disks_disjoint": 1
+  },
+  "realized_ellipse": {
+    "definition": "weighted uncentered source-minus-target displacement second moment",
+    "edge_count": 25600000,
+    "total_weight": 115200000.0,
+    "second_moment_mm2": [
+      [
+        1.7414711304091879,
+        -0.6892302229872095
+      ],
+      [
+        -0.6892302229872095,
+        1.05965916122441
+      ]
+    ],
+    "eigenvalues_mm2": [
+      2.169496345996571,
+      0.6316339456370268
+    ],
+    "sqrt_eigenvalue_ratio": 1.853304287549407,
+    "major_axis_deg_unoriented": -31.841075753603292,
+    "axis_identifiable_ratio_ge_1p05": 1
+  },
+  "static_array_identity": {
+    "positions_E_sha256": "efe3931e74bd04adb9b5b00435d227c5a7fe3905dee7b74fdbbc2262172f85f6",
+    "h_sha256": "27b70d76a64300700ed16d6d915c4e22205a012260c6b3575335ccb94c1a2743",
+    "delta_vtheta_sha256": "50b502e59bf721b7e7314909af5df37e71c2de403111fb330f602cb9bc5e8191",
+    "vtheta_sha256": "a3476c4b12844c71e6b04801a1be5447a10c5016412d6c4ac470d93c2e06ee5d",
+    "ampa_topology_sha256": "1deba253dcfefa2a565b535dd03d07a4ffa41835be922203bed5cbaa4919a17e",
+    "ampa_values_sha256": "e1f834a7d35368fb2c96b4a1c36b8f7c326b89946fa273ca951b7bce6cef6baf",
+    "gaba_topology_sha256": "e64a0388d7d388b700fe88c93aa40f2511a5b76670bab58623dcc59ffe1a6c4c",
+    "gaba_values_sha256": "fa81f16c9c823598d32598913ba141d245878b449d850d3987e956c8e78e0166",
+    "identity_scope": "positions, E/I partition, delay-binned edges/weights, core mask, signed threshold offsets and thresholds"
+  },
+  "base_graph": {
+    "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/substrate_autapse_correction/network_cache/838e6b9ae8ed65356712f1097a39b0d39b3f7a7eab06469a4fa15a4200556228.pkl",
+    "sha256": "2251bf8e67d99eeb028435281c9d8ee8dfac814d16fe18d2a49679b551bf2884"
+  },
+  "transformed_graph_reconstruction_verified_this_freeze": true,
+  "reconstruction_requirement": "Apply historical worker mapping and compare all static_array_identity hashes before any new simulation; graph cache is before candidate transformations.",
+  "reference_runs": [
+    {
+      "dynamics_seed": 7101,
+      "worker": {
+        "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multievent_distribution_search_v2_1/execution/confirmation_24s/workers/v2_1_pop1_de_b_002_topo_6101_dyn_7101.json",
+        "sha256": "86763414c0643d1a7d64c7fcec7a7064744c03ca09ab92ce2895ec58a3cdd9c3"
+      },
+      "arrays": {
+        "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multievent_distribution_search_v2_1/execution/confirmation_24s/workers/v2_1_pop1_de_b_002_topo_6101_dyn_7101.npz",
+        "sha256": "30003241efaffe026bd1480728ab8a81cc8a38a10ed5ab7ed2523405d347b475"
+      },
+      "static_array_identity": {
+        "positions_E_sha256": "efe3931e74bd04adb9b5b00435d227c5a7fe3905dee7b74fdbbc2262172f85f6",
+        "h_sha256": "27b70d76a64300700ed16d6d915c4e22205a012260c6b3575335ccb94c1a2743",
+        "delta_vtheta_sha256": "50b502e59bf721b7e7314909af5df37e71c2de403111fb330f602cb9bc5e8191",
+        "vtheta_sha256": "a3476c4b12844c71e6b04801a1be5447a10c5016412d6c4ac470d93c2e06ee5d",
+        "ampa_topology_sha256": "1deba253dcfefa2a565b535dd03d07a4ffa41835be922203bed5cbaa4919a17e",
+        "ampa_values_sha256": "e1f834a7d35368fb2c96b4a1c36b8f7c326b89946fa273ca951b7bce6cef6baf",
+        "gaba_topology_sha256": "e64a0388d7d388b700fe88c93aa40f2511a5b76670bab58623dcc59ffe1a6c4c",
+        "gaba_values_sha256": "fa81f16c9c823598d32598913ba141d245878b449d850d3987e956c8e78e0166",
+        "identity_scope": "positions, E/I partition, delay-binned edges/weights, core mask, signed threshold offsets and thresholds"
+      },
+      "score": {
+        "status": "ESTIMABLE",
+        "n_events": 46,
+        "minimum_events_for_ranking": 16,
+        "mode_counts": [
+          16,
+          30
+        ],
+        "D_off": {
+          "global": 0.06717134445879093,
+          "balanced_modes": 0.042242976959674466
+        },
+        "D16": {
+          "global": 0.10856044687895788,
+          "balanced_modes": 0.24289340126315914
+        },
+        "A_B_decomposition": {
+          "global": {
+            "A_mean_target_squared_distance": 0.0815675539962403,
+            "B_finite_event_subtraction": 0.014396209537449375,
+            "D_off_equals_A_minus_B": 0.06717134445879093
+          },
+          "balanced_modes": {
+            "A_mean_target_squared_distance": 0.11203442889132131,
+            "B_finite_event_subtraction": 0.06979145193164685,
+            "D_off_equals_A_minus_B": 0.042242976959674466
+          }
+        },
+        "A_B_diagnostic_only_not_ranking_or_gate": true,
+        "loss_off": 0.8879545080576583,
+        "loss_D16": 1.8448776962468445,
+        "loss_off_A_component": 1.2207973561234622,
+        "loss_off_B_subtraction": 0.33284284806580394,
+        "loss_off_A_minus_B_reconstruction_error": 0.0
+      }
+    },
+    {
+      "dynamics_seed": 7102,
+      "worker": {
+        "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multievent_distribution_search_v2_1/execution/confirmation_24s/workers/v2_1_pop1_de_b_002_topo_6101_dyn_7102.json",
+        "sha256": "356132f2af4142f8c00e83ce22852cdadcebc884f7fb18851f9469583cec4b7f"
+      },
+      "arrays": {
+        "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multievent_distribution_search_v2_1/execution/confirmation_24s/workers/v2_1_pop1_de_b_002_topo_6101_dyn_7102.npz",
+        "sha256": "be527371766a90d16c41708071c584a850a96b69fa48ceb2014991dfa582b170"
+      },
+      "static_array_identity": {
+        "positions_E_sha256": "efe3931e74bd04adb9b5b00435d227c5a7fe3905dee7b74fdbbc2262172f85f6",
+        "h_sha256": "27b70d76a64300700ed16d6d915c4e22205a012260c6b3575335ccb94c1a2743",
+        "delta_vtheta_sha256": "50b502e59bf721b7e7314909af5df37e71c2de403111fb330f602cb9bc5e8191",
+        "vtheta_sha256": "a3476c4b12844c71e6b04801a1be5447a10c5016412d6c4ac470d93c2e06ee5d",
+        "ampa_topology_sha256": "1deba253dcfefa2a565b535dd03d07a4ffa41835be922203bed5cbaa4919a17e",
+        "ampa_values_sha256": "e1f834a7d35368fb2c96b4a1c36b8f7c326b89946fa273ca951b7bce6cef6baf",
+        "gaba_topology_sha256": "e64a0388d7d388b700fe88c93aa40f2511a5b76670bab58623dcc59ffe1a6c4c",
+        "gaba_values_sha256": "fa81f16c9c823598d32598913ba141d245878b449d850d3987e956c8e78e0166",
+        "identity_scope": "positions, E/I partition, delay-binned edges/weights, core mask, signed threshold offsets and thresholds"
+      },
+      "score": {
+        "status": "ESTIMABLE",
+        "n_events": 42,
+        "minimum_events_for_ranking": 16,
+        "mode_counts": [
+          12,
+          30
+        ],
+        "D_off": {
+          "global": 0.07042363311784036,
+          "balanced_modes": 0.049005919658172206
+        },
+        "D16": {
+          "global": 0.11063885864605517,
+          "balanced_modes": 0.22965210448558915
+        },
+        "A_B_decomposition": {
+          "global": {
+            "A_mean_target_squared_distance": 0.08574371903335076,
+            "B_finite_event_subtraction": 0.015320085915510404,
+            "D_off_equals_A_minus_B": 0.07042363311784036
+          },
+          "balanced_modes": {
+            "A_mean_target_squared_distance": 0.11782351387814056,
+            "B_finite_event_subtraction": 0.06881759421996836,
+            "D_off_equals_A_minus_B": 0.049005919658172206
+          }
+        },
+        "A_B_diagnostic_only_not_ranking_or_gate": true,
+        "loss_off": 0.9420183435110555,
+        "loss_D16": 1.838211537506328,
+        "loss_off_A_component": 1.2834252745568735,
+        "loss_off_B_subtraction": 0.3414069310458181,
+        "loss_off_A_minus_B_reconstruction_error": 1.1102230246251565e-16
+      }
+    }
+  ],
+  "source_records": {
+    "scripts/aggregate_topic4_rev9_edge_alpha_selection.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/scripts/aggregate_topic4_rev9_edge_alpha_selection.py",
+      "sha256": "7ed703ad07fcbc5487763f50769c669660b704b80c0d66f01618b67c8a98b809",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/scripts/aggregate_topic4_rev9_edge_alpha_selection.py",
+        "sha256": "7ed703ad07fcbc5487763f50769c669660b704b80c0d66f01618b67c8a98b809"
+      }
+    },
+    "scripts/aggregate_topic4_rev9_factorial.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/scripts/aggregate_topic4_rev9_factorial.py",
+      "sha256": "599f402389feabde03d9e850116b0a8c9fc3da2b4cc5f3a520290d6db5501c51",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/scripts/aggregate_topic4_rev9_factorial.py",
+        "sha256": "599f402389feabde03d9e850116b0a8c9fc3da2b4cc5f3a520290d6db5501c51"
+      }
+    },
+    "scripts/aggregate_topic4_rev9l_component_pair_phase1.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/scripts/aggregate_topic4_rev9l_component_pair_phase1.py",
+      "sha256": "7bfc0333234c92e683215730b715ef480a162e518d5dc7bbdd287ce62c71a439",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/scripts/aggregate_topic4_rev9l_component_pair_phase1.py",
+        "sha256": "7bfc0333234c92e683215730b715ef480a162e518d5dc7bbdd287ce62c71a439"
+      }
+    },
+    "scripts/aggregate_topic4_rev9l_forced_source_formal.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/scripts/aggregate_topic4_rev9l_forced_source_formal.py",
+      "sha256": "eafb803d8012ef051a1cc0c8136d09cef6dc97ffa623916e915723de8e6347ff",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/scripts/aggregate_topic4_rev9l_forced_source_formal.py",
+        "sha256": "eafb803d8012ef051a1cc0c8136d09cef6dc97ffa623916e915723de8e6347ff"
+      }
+    },
+    "scripts/aggregate_topic4_rev9l_packet_canary.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/scripts/aggregate_topic4_rev9l_packet_canary.py",
+      "sha256": "f7e128aaf317f7c826d429fc71b56a71fede8c133d1fb1ce1f0834d969804026",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/scripts/aggregate_topic4_rev9l_packet_canary.py",
+        "sha256": "f7e128aaf317f7c826d429fc71b56a71fede8c133d1fb1ce1f0834d969804026"
+      }
+    },
+    "scripts/audit_topic4_data_driven_core_mechanism.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/scripts/audit_topic4_data_driven_core_mechanism.py",
+      "sha256": "d39ff5e1faa67250d0cc51608ee79af3b3ecdcae08c835f7580e7962f19d30ef",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/scripts/audit_topic4_data_driven_core_mechanism.py",
+        "sha256": "d39ff5e1faa67250d0cc51608ee79af3b3ecdcae08c835f7580e7962f19d30ef"
+      }
+    },
+    "scripts/audit_topic4_rev9_review_fixes.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/scripts/audit_topic4_rev9_review_fixes.py",
+      "sha256": "eef74ba2b3e988d5dd7fa3b3af97613a382fb7d1f53fa2ddc8862c595cf1319b",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/scripts/audit_topic4_rev9_review_fixes.py",
+        "sha256": "eef74ba2b3e988d5dd7fa3b3af97613a382fb7d1f53fa2ddc8862c595cf1319b"
+      }
+    },
+    "scripts/build_topic4_core_field_stage3_rev8_figure_diagnostics.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/scripts/build_topic4_core_field_stage3_rev8_figure_diagnostics.py",
+      "sha256": "7e6ba3375f4145eefb3b2d3ff4dce199d8d27f10ec2ab999cc0fc119b6ae2116",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/scripts/build_topic4_core_field_stage3_rev8_figure_diagnostics.py",
+        "sha256": "7e6ba3375f4145eefb3b2d3ff4dce199d8d27f10ec2ab999cc0fc119b6ae2116"
+      }
+    },
+    "scripts/build_topic4_rev9_frozen_readouts.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/scripts/build_topic4_rev9_frozen_readouts.py",
+      "sha256": "0162cd89f2bfee9be86054ad45da32288d4251dc93eb573a0f94b93730cf372e",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/scripts/build_topic4_rev9_frozen_readouts.py",
+        "sha256": "0162cd89f2bfee9be86054ad45da32288d4251dc93eb573a0f94b93730cf372e"
+      }
+    },
+    "scripts/calibrate_topic4_core_field_stage3_joint_observable.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/scripts/calibrate_topic4_core_field_stage3_joint_observable.py",
+      "sha256": "aee3f1447ec65cecfd1481a7a949bb3a9cf6f0661aa8bd9d949cae9a6d7c2f73",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/scripts/calibrate_topic4_core_field_stage3_joint_observable.py",
+        "sha256": "aee3f1447ec65cecfd1481a7a949bb3a9cf6f0661aa8bd9d949cae9a6d7c2f73"
+      }
+    },
+    "scripts/capture_topic4_core_field_stage3_rev8_all_onsets.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/scripts/capture_topic4_core_field_stage3_rev8_all_onsets.py",
+      "sha256": "fb6680779065469406be6b47c9aa9dd5413e3e98414c4468c206da13a730a590",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/scripts/capture_topic4_core_field_stage3_rev8_all_onsets.py",
+        "sha256": "fb6680779065469406be6b47c9aa9dd5413e3e98414c4468c206da13a730a590"
+      }
+    },
+    "scripts/capture_topic4_core_field_stage3_rev8_readout.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/scripts/capture_topic4_core_field_stage3_rev8_readout.py",
+      "sha256": "601db1213dd47cb5778c67fe418f2bad86a95c761c2d7cde8ee2fdcfd0076632",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/scripts/capture_topic4_core_field_stage3_rev8_readout.py",
+        "sha256": "601db1213dd47cb5778c67fe418f2bad86a95c761c2d7cde8ee2fdcfd0076632"
+      }
+    },
+    "scripts/freeze_topic4_core_field_stage3_rev8_training_target.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/scripts/freeze_topic4_core_field_stage3_rev8_training_target.py",
+      "sha256": "2212c74d6712ee9ca19d8f1aab1ca1c26376cf9b9174493967a22186a358c9fe",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/scripts/freeze_topic4_core_field_stage3_rev8_training_target.py",
+        "sha256": "2212c74d6712ee9ca19d8f1aab1ca1c26376cf9b9174493967a22186a358c9fe"
+      }
+    },
+    "scripts/freeze_topic4_rev10_sa_spectral_field_candidates.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/scripts/freeze_topic4_rev10_sa_spectral_field_candidates.py",
+      "sha256": "1b575a82fbc8f95e0a571769fbe3e77b4f58ef4dd2d388bb17cb97c2cd76e5df",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/scripts/freeze_topic4_rev10_sa_spectral_field_candidates.py",
+        "sha256": "1b575a82fbc8f95e0a571769fbe3e77b4f58ef4dd2d388bb17cb97c2cd76e5df"
+      }
+    },
+    "scripts/paper_figures/plot_fig4_data_driven_core_field_rev8.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/scripts/paper_figures/plot_fig4_data_driven_core_field_rev8.py",
+      "sha256": "3a4ce181d7269db733db1efdb57accc47677b83be4cf6a9c9b34f8e91df76560",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/scripts/paper_figures/plot_fig4_data_driven_core_field_rev8.py",
+        "sha256": "3a4ce181d7269db733db1efdb57accc47677b83be4cf6a9c9b34f8e91df76560"
+      }
+    },
+    "scripts/paper_figures/plot_fig4_data_driven_core_field_rev8_kmeans.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/scripts/paper_figures/plot_fig4_data_driven_core_field_rev8_kmeans.py",
+      "sha256": "123d50dcc62b4725d74e932c6907bd8978320db7404d5112de667b1035e4fdb3",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/scripts/paper_figures/plot_fig4_data_driven_core_field_rev8_kmeans.py",
+        "sha256": "123d50dcc62b4725d74e932c6907bd8978320db7404d5112de667b1035e4fdb3"
+      }
+    },
+    "scripts/reconcile_topic4_rev9_node_kick_canary.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/scripts/reconcile_topic4_rev9_node_kick_canary.py",
+      "sha256": "1c07e28728a36c5b35f4d93be160fecb04ac869bc86463ca213d09bca3176dcc",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/scripts/reconcile_topic4_rev9_node_kick_canary.py",
+        "sha256": "1c07e28728a36c5b35f4d93be160fecb04ac869bc86463ca213d09bca3176dcc"
+      }
+    },
+    "scripts/reconcile_topic4_rev9_node_kick_windows.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/scripts/reconcile_topic4_rev9_node_kick_windows.py",
+      "sha256": "b7133e383b7129e18ba2bd457febc6101349195e6a345a206a8059928057e2d6",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/scripts/reconcile_topic4_rev9_node_kick_windows.py",
+        "sha256": "b7133e383b7129e18ba2bd457febc6101349195e6a345a206a8059928057e2d6"
+      }
+    },
+    "scripts/review_topic4_rev9l_forced_source_formal.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/scripts/review_topic4_rev9l_forced_source_formal.py",
+      "sha256": "dc6960ca414bc484d0ef60a9f0b6a55c9f61cc2f2f192df4b7f8586e081353cd",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/scripts/review_topic4_rev9l_forced_source_formal.py",
+        "sha256": "dc6960ca414bc484d0ef60a9f0b6a55c9f61cc2f2f192df4b7f8586e081353cd"
+      }
+    },
+    "scripts/run_sef_hfo_snn_cm_spontaneous_readout.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/scripts/run_sef_hfo_snn_cm_spontaneous_readout.py",
+      "sha256": "752fd9611d276bfba92c3bb96609869a4ff32c618c29af733e2fb08f250f3933",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/scripts/run_sef_hfo_snn_cm_spontaneous_readout.py",
+        "sha256": "752fd9611d276bfba92c3bb96609869a4ff32c618c29af733e2fb08f250f3933"
+      }
+    },
+    "scripts/run_topic4_core_field_stage3_confirm_fit.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/scripts/run_topic4_core_field_stage3_confirm_fit.py",
+      "sha256": "8eee6bf922a7ad8f9b7d78f1dcb78833cd52db9b7e772de57e00aa3218ee1528",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/scripts/run_topic4_core_field_stage3_confirm_fit.py",
+        "sha256": "8eee6bf922a7ad8f9b7d78f1dcb78833cd52db9b7e772de57e00aa3218ee1528"
+      }
+    },
+    "scripts/run_topic4_core_field_stage3_fit.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/scripts/run_topic4_core_field_stage3_fit.py",
+      "sha256": "d4399bcfbae78cad101daf4febff1421496a12ec9991dc8ee0d92645d0ddc7e7",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/scripts/run_topic4_core_field_stage3_fit.py",
+        "sha256": "d4399bcfbae78cad101daf4febff1421496a12ec9991dc8ee0d92645d0ddc7e7"
+      }
+    },
+    "scripts/run_topic4_core_field_stage3_joint_confirm.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/scripts/run_topic4_core_field_stage3_joint_confirm.py",
+      "sha256": "7a62d19c497450f3c124d06d7e650fbc85c028f1fabecb3c8540a0417b5ca21d",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/scripts/run_topic4_core_field_stage3_joint_confirm.py",
+        "sha256": "7a62d19c497450f3c124d06d7e650fbc85c028f1fabecb3c8540a0417b5ca21d"
+      }
+    },
+    "scripts/run_topic4_core_field_stage3_joint_fit.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/scripts/run_topic4_core_field_stage3_joint_fit.py",
+      "sha256": "38ba3b679ce90ff1149cb8781b6603011a13b48de42b1def48f570b0c4b012a6",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/scripts/run_topic4_core_field_stage3_joint_fit.py",
+        "sha256": "38ba3b679ce90ff1149cb8781b6603011a13b48de42b1def48f570b0c4b012a6"
+      }
+    },
+    "scripts/run_topic4_core_field_stage3_profile_round1.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/scripts/run_topic4_core_field_stage3_profile_round1.py",
+      "sha256": "f088a98a454457b6515fbebfd9357dbb2748e66094cebc04bf3ce08b50376a28",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/scripts/run_topic4_core_field_stage3_profile_round1.py",
+        "sha256": "f088a98a454457b6515fbebfd9357dbb2748e66094cebc04bf3ce08b50376a28"
+      }
+    },
+    "scripts/run_topic4_core_field_stage3_rev8_confirm.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/scripts/run_topic4_core_field_stage3_rev8_confirm.py",
+      "sha256": "f85d8518771a7dcd19a073abda607fdfd3e98f695aa996ca828547a6ca08de1a",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/scripts/run_topic4_core_field_stage3_rev8_confirm.py",
+        "sha256": "f85d8518771a7dcd19a073abda607fdfd3e98f695aa996ca828547a6ca08de1a"
+      }
+    },
+    "scripts/run_topic4_core_field_stage3_rev8_kmeans_fit.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/scripts/run_topic4_core_field_stage3_rev8_kmeans_fit.py",
+      "sha256": "6e5e089167d25c55653b2ccda64ecc8fde0db40c7abf1fe04c41ce30bd6edfc1",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/scripts/run_topic4_core_field_stage3_rev8_kmeans_fit.py",
+        "sha256": "6e5e089167d25c55653b2ccda64ecc8fde0db40c7abf1fe04c41ce30bd6edfc1"
+      }
+    },
+    "scripts/run_topic4_multidimensional_worker.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/scripts/run_topic4_multidimensional_worker.py",
+      "sha256": "0e1427fadb06b24cdf270f58a65fa40ebe58868392fb8351fe94a6dd7a6f1937",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/scripts/run_topic4_multidimensional_worker.py",
+        "sha256": "0e1427fadb06b24cdf270f58a65fa40ebe58868392fb8351fe94a6dd7a6f1937"
+      }
+    },
+    "scripts/run_topic4_rev10_sa_spectral_field_worker.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/scripts/run_topic4_rev10_sa_spectral_field_worker.py",
+      "sha256": "a1d5101ae76dc1490b2ca8153951ebf14046b91100b4ccfd0422dcf4c0e38eff",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/scripts/run_topic4_rev10_sa_spectral_field_worker.py",
+        "sha256": "a1d5101ae76dc1490b2ca8153951ebf14046b91100b4ccfd0422dcf4c0e38eff"
+      }
+    },
+    "scripts/run_topic4_rev12_node_worker.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/scripts/run_topic4_rev12_node_worker.py",
+      "sha256": "5dd9310acd41b166bc8e860e07c7242ae2623e6a0a9468070e1ae4ec8e8719f3",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/scripts/run_topic4_rev12_node_worker.py",
+        "sha256": "5dd9310acd41b166bc8e860e07c7242ae2623e6a0a9468070e1ae4ec8e8719f3"
+      }
+    },
+    "scripts/run_topic4_rev9_factorial_worker.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/scripts/run_topic4_rev9_factorial_worker.py",
+      "sha256": "ec87f57daf1f639c0cec731ed000acb51e109d323a2319f59aa397754325759d",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/scripts/run_topic4_rev9_factorial_worker.py",
+        "sha256": "ec87f57daf1f639c0cec731ed000acb51e109d323a2319f59aa397754325759d"
+      }
+    },
+    "scripts/run_topic4_rev9_node_kick_canary.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/scripts/run_topic4_rev9_node_kick_canary.py",
+      "sha256": "b548b1c813cf6878be1783410c618b14768700f90e553a5f772da4c3bb714e26",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/scripts/run_topic4_rev9_node_kick_canary.py",
+        "sha256": "b548b1c813cf6878be1783410c618b14768700f90e553a5f772da4c3bb714e26"
+      }
+    },
+    "scripts/run_topic4_rev9_sham_onset_scan.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/scripts/run_topic4_rev9_sham_onset_scan.py",
+      "sha256": "f8a0edac5800253fe3ace0e3b5ef149b9c15572c22096732020da4765ea381d9",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/scripts/run_topic4_rev9_sham_onset_scan.py",
+        "sha256": "f8a0edac5800253fe3ace0e3b5ef149b9c15572c22096732020da4765ea381d9"
+      }
+    },
+    "scripts/run_topic4_rev9_structure_audit.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/scripts/run_topic4_rev9_structure_audit.py",
+      "sha256": "32a146507772dd3989ba2f78a4f62fe59218b86f12efd7e9391d486873421f72",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/scripts/run_topic4_rev9_structure_audit.py",
+        "sha256": "32a146507772dd3989ba2f78a4f62fe59218b86f12efd7e9391d486873421f72"
+      }
+    },
+    "scripts/run_topic4_rev9l_forced_source_worker.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/scripts/run_topic4_rev9l_forced_source_worker.py",
+      "sha256": "0c8330f3025e06669593811ff4a32bd799f9c6b402bd67fd7d59fa845f08e042",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/scripts/run_topic4_rev9l_forced_source_worker.py",
+        "sha256": "0c8330f3025e06669593811ff4a32bd799f9c6b402bd67fd7d59fa845f08e042"
+      }
+    },
+    "scripts/run_topic4_rev9l_objective_replay.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/scripts/run_topic4_rev9l_objective_replay.py",
+      "sha256": "78d1a4878bbc67b3c4c913e5bfd6b4bdc3f682f235f1b28a1e4fe5cf74a6b7c4",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/scripts/run_topic4_rev9l_objective_replay.py",
+        "sha256": "78d1a4878bbc67b3c4c913e5bfd6b4bdc3f682f235f1b28a1e4fe5cf74a6b7c4"
+      }
+    },
+    "src/__init__.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/__init__.py",
+      "sha256": "20f5a5b165a3bd36ab1737f20efb1d7fd3fa6e096da94383d7e6304df4c1d74c",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/__init__.py",
+        "sha256": "20f5a5b165a3bd36ab1737f20efb1d7fd3fa6e096da94383d7e6304df4c1d74c"
+      }
+    },
+    "src/interictal_propagation.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/interictal_propagation.py",
+      "sha256": "db19da17a9d01da5d74c1fc653733968084bb3f6a24aacf11285c04fd1b94be3",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/interictal_propagation.py",
+        "sha256": "db19da17a9d01da5d74c1fc653733968084bb3f6a24aacf11285c04fd1b94be3"
+      }
+    },
+    "src/lagpat_rank_audit.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/lagpat_rank_audit.py",
+      "sha256": "7d5660d855a62dcfb0885fe22c43b010cf87e90e33e8c119a5a32a398cdafa23",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/lagpat_rank_audit.py",
+        "sha256": "7d5660d855a62dcfb0885fe22c43b010cf87e90e33e8c119a5a32a398cdafa23"
+      }
+    },
+    "src/rank_displacement.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/rank_displacement.py",
+      "sha256": "b22432db9f10726cd683fef7d6ecc7709dbb3abed1826f000d7ff1f32f037dec",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/rank_displacement.py",
+        "sha256": "b22432db9f10726cd683fef7d6ecc7709dbb3abed1826f000d7ff1f32f037dec"
+      }
+    },
+    "src/sef_hfo_a1b.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/sef_hfo_a1b.py",
+      "sha256": "fd6c90d7997c67217ebfb51b2a136ecc4bfd65d8145679222c48838978476d7e",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/sef_hfo_a1b.py",
+        "sha256": "fd6c90d7997c67217ebfb51b2a136ecc4bfd65d8145679222c48838978476d7e"
+      }
+    },
+    "src/sef_hfo_events.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/sef_hfo_events.py",
+      "sha256": "8a48e2e6b0a7158b63a4b5c9182facc0c76a3fff13f747620586240f55122ac2",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/sef_hfo_events.py",
+        "sha256": "8a48e2e6b0a7158b63a4b5c9182facc0c76a3fff13f747620586240f55122ac2"
+      }
+    },
+    "src/sef_hfo_field.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/sef_hfo_field.py",
+      "sha256": "3168a7cfeba2b3362cdef10a0ae602cf05ac9bd96aa819150da32a44bf6a071b",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/sef_hfo_field.py",
+        "sha256": "3168a7cfeba2b3362cdef10a0ae602cf05ac9bd96aa819150da32a44bf6a071b"
+      }
+    },
+    "src/sef_hfo_heterogeneity.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/sef_hfo_heterogeneity.py",
+      "sha256": "493330aff1af058e530900db5823d73bc6e065af95bf89a397b746c5e48d9f7b",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/sef_hfo_heterogeneity.py",
+        "sha256": "493330aff1af058e530900db5823d73bc6e065af95bf89a397b746c5e48d9f7b"
+      }
+    },
+    "src/sef_hfo_lif.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/sef_hfo_lif.py",
+      "sha256": "d21e6441559906c7c4685c6523f20a91179577d3ef5c25aee71fa27e5efb92a4",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/sef_hfo_lif.py",
+        "sha256": "d21e6441559906c7c4685c6523f20a91179577d3ef5c25aee71fa27e5efb92a4"
+      }
+    },
+    "src/sef_hfo_observation.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/sef_hfo_observation.py",
+      "sha256": "550bb2c11d15963acf5fc4561f3226a5621ef9dc50acba4d68f03b3cee85bded",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/sef_hfo_observation.py",
+        "sha256": "550bb2c11d15963acf5fc4561f3226a5621ef9dc50acba4d68f03b3cee85bded"
+      }
+    },
+    "src/sef_hfo_slowvars_quasistatic.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/sef_hfo_slowvars_quasistatic.py",
+      "sha256": "043421ceb33916fd40eb928ed227061ea653a0efbc1063c09ebd302257bcbee8",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/sef_hfo_slowvars_quasistatic.py",
+        "sha256": "043421ceb33916fd40eb928ed227061ea653a0efbc1063c09ebd302257bcbee8"
+      }
+    },
+    "src/sef_hfo_snn_adapter.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/sef_hfo_snn_adapter.py",
+      "sha256": "a0e77af75454ae2df99504d271c1a72939d14611f3464a7625423651be777952",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/sef_hfo_snn_adapter.py",
+        "sha256": "a0e77af75454ae2df99504d271c1a72939d14611f3464a7625423651be777952"
+      }
+    },
+    "src/sef_hfo_snn_engine_guard.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/sef_hfo_snn_engine_guard.py",
+      "sha256": "c34bd54659fd84632749c6df9220fc9f0c46c617bd17d6c51a1106ed37d6a124",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/sef_hfo_snn_engine_guard.py",
+        "sha256": "c34bd54659fd84632749c6df9220fc9f0c46c617bd17d6c51a1106ed37d6a124"
+      }
+    },
+    "src/sef_hfo_stability.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/sef_hfo_stability.py",
+      "sha256": "3f386204b3b8c738995964453a71803a4c451777c244e9fa02fa485519ac0451",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/sef_hfo_stability.py",
+        "sha256": "3f386204b3b8c738995964453a71803a4c451777c244e9fa02fa485519ac0451"
+      }
+    },
+    "src/sef_hfo_stage3.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/sef_hfo_stage3.py",
+      "sha256": "a48d6de7aa9e65cae6ddeba599b8d6e9260d427d47dead288ae3b731bb81bc5a",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/sef_hfo_stage3.py",
+        "sha256": "a48d6de7aa9e65cae6ddeba599b8d6e9260d427d47dead288ae3b731bb81bc5a"
+      }
+    },
+    "src/sef_hfo_stage4.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/sef_hfo_stage4.py",
+      "sha256": "ae1381ac278c8432ca164fe00e7ca4faac942bdc27852ff3b8cfa0079548d8d7",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/sef_hfo_stage4.py",
+        "sha256": "ae1381ac278c8432ca164fe00e7ca4faac942bdc27852ff3b8cfa0079548d8d7"
+      }
+    },
+    "src/sef_hfo_subject_placement.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/sef_hfo_subject_placement.py",
+      "sha256": "e08cc86981f92256118eb02eb9824de993b065ac80a1bff8bf1145a25a2390d9",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/sef_hfo_subject_placement.py",
+        "sha256": "e08cc86981f92256118eb02eb9824de993b065ac80a1bff8bf1145a25a2390d9"
+      }
+    },
+    "src/snn_engine/__init__.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/__init__.py",
+      "sha256": "963ad75b460d16f9251ccf9532d82033dd65e76b818e69dca4fd19fbb83328b1",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/snn_engine/__init__.py",
+        "sha256": "963ad75b460d16f9251ccf9532d82033dd65e76b818e69dca4fd19fbb83328b1"
+      }
+    },
+    "src/snn_engine/checkpoint.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/checkpoint.py",
+      "sha256": "fa08221ca9050657379b9aa77aa88cc1344a1f6711eec10665c25102f1f21538",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/snn_engine/checkpoint.py",
+        "sha256": "fa08221ca9050657379b9aa77aa88cc1344a1f6711eec10665c25102f1f21538"
+      }
+    },
+    "src/snn_engine/connectivity.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/connectivity.py",
+      "sha256": "53d3bf765f7084cda924d3b23a6cb6e5f6a21293d9ae1e0e2d8f8cf89a1d3303",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/snn_engine/connectivity.py",
+        "sha256": "53d3bf765f7084cda924d3b23a6cb6e5f6a21293d9ae1e0e2d8f8cf89a1d3303"
+      }
+    },
+    "src/snn_engine/connectivity_rot.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/connectivity_rot.py",
+      "sha256": "3fa6c87df4c8756132b3fe6734fd9f73673a731914e9937befbaf073f00e2b9f",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/snn_engine/connectivity_rot.py",
+        "sha256": "3fa6c87df4c8756132b3fe6734fd9f73673a731914e9937befbaf073f00e2b9f"
+      }
+    },
+    "src/snn_engine/kick_probe.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/kick_probe.py",
+      "sha256": "dc1c12a7c250138c94716e3fb0da9633e8c54687735b781d52cf870167639a77",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/snn_engine/kick_probe.py",
+        "sha256": "dc1c12a7c250138c94716e3fb0da9633e8c54687735b781d52cf870167639a77"
+      }
+    },
+    "src/snn_engine/lfp.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/lfp.py",
+      "sha256": "7f079081de4ef0215477df1ced4acb2ee60196e6e58c85416758c0064c365c47",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/snn_engine/lfp.py",
+        "sha256": "7f079081de4ef0215477df1ced4acb2ee60196e6e58c85416758c0064c365c47"
+      }
+    },
+    "src/snn_engine/model.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/model.py",
+      "sha256": "e77aad35cbfa2e48dbd597559bd63dbed142b3782ed7eddda94be411154da349",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/snn_engine/model.py",
+        "sha256": "e77aad35cbfa2e48dbd597559bd63dbed142b3782ed7eddda94be411154da349"
+      }
+    },
+    "src/snn_engine/mz_slow_vars.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/mz_slow_vars.py",
+      "sha256": "cc80980ff7539ea5c9c72f3724d810b838d7e230550e905d08a437d642dd11d3",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/snn_engine/mz_slow_vars.py",
+        "sha256": "cc80980ff7539ea5c9c72f3724d810b838d7e230550e905d08a437d642dd11d3"
+      }
+    },
+    "src/snn_engine/params.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/params.py",
+      "sha256": "c2036d1e1548c3db89adab27f8a7a57f9cdf584b5fed360963c966004cf88884",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/snn_engine/params.py",
+        "sha256": "c2036d1e1548c3db89adab27f8a7a57f9cdf584b5fed360963c966004cf88884"
+      }
+    },
+    "src/snn_engine/slow_vars.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/slow_vars.py",
+      "sha256": "1151c6cc92de21c55f0a59ede943df4dd15d5fd80766297a9bf96025d9c3d55a",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/snn_engine/slow_vars.py",
+        "sha256": "1151c6cc92de21c55f0a59ede943df4dd15d5fd80766297a9bf96025d9c3d55a"
+      }
+    },
+    "src/topic4_component_pair_edge.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_component_pair_edge.py",
+      "sha256": "c157f3f59855c94643b647b6a0df0602b433e07cab93b50b0ac0abdfab7484b8",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/topic4_component_pair_edge.py",
+        "sha256": "c157f3f59855c94643b647b6a0df0602b433e07cab93b50b0ac0abdfab7484b8"
+      }
+    },
+    "src/topic4_continuous_field.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_continuous_field.py",
+      "sha256": "e45e76a999d653164a1cf104da2f7077a21a88d10c6b4e2e1b10e5e54f625a4b",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/topic4_continuous_field.py",
+        "sha256": "e45e76a999d653164a1cf104da2f7077a21a88d10c6b4e2e1b10e5e54f625a4b"
+      }
+    },
+    "src/topic4_core_connectivity.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_core_connectivity.py",
+      "sha256": "2ed2b10d939d6b5b22f635d3dcd76ec769b3d675b439260f1cdc0252160579e6",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/topic4_core_connectivity.py",
+        "sha256": "2ed2b10d939d6b5b22f635d3dcd76ec769b3d675b439260f1cdc0252160579e6"
+      }
+    },
+    "src/topic4_core_field.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_core_field.py",
+      "sha256": "4b66406ca93ff558fe204e12a9a9d1bcfe0ead4cd2b4ef3527603347e3699e46",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/topic4_core_field.py",
+        "sha256": "4b66406ca93ff558fe204e12a9a9d1bcfe0ead4cd2b4ef3527603347e3699e46"
+      }
+    },
+    "src/topic4_core_field_cmaes.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_core_field_cmaes.py",
+      "sha256": "02358d98c70586fa69939bf485104618d9352eaa2654d3dfaba038383b300c9f",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/topic4_core_field_cmaes.py",
+        "sha256": "02358d98c70586fa69939bf485104618d9352eaa2654d3dfaba038383b300c9f"
+      }
+    },
+    "src/topic4_core_field_profile.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_core_field_profile.py",
+      "sha256": "33b46a0bf57e39ae67c9e5a8932f1916a693a4fc0c87ce689d9b8bbdc8638b7a",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/topic4_core_field_profile.py",
+        "sha256": "33b46a0bf57e39ae67c9e5a8932f1916a693a4fc0c87ce689d9b8bbdc8638b7a"
+      }
+    },
+    "src/topic4_core_field_report.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_core_field_report.py",
+      "sha256": "3c65249b0606b4f95a62f47e179331b597859e8d92b5b0722d09c353c8ee2390",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/topic4_core_field_report.py",
+        "sha256": "3c65249b0606b4f95a62f47e179331b597859e8d92b5b0722d09c353c8ee2390"
+      }
+    },
+    "src/topic4_core_field_rev9.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_core_field_rev9.py",
+      "sha256": "18cde90bed6207875de040ab8461284d5b4403461f2650eaec9cf711c6409484",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/topic4_core_field_rev9.py",
+        "sha256": "18cde90bed6207875de040ab8461284d5b4403461f2650eaec9cf711c6409484"
+      }
+    },
+    "src/topic4_core_field_runner.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_core_field_runner.py",
+      "sha256": "123bfebc82bfe37d71875175f1c2343aa702f5f9b8d9a33ee11d2046eb9258ba",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/topic4_core_field_runner.py",
+        "sha256": "123bfebc82bfe37d71875175f1c2343aa702f5f9b8d9a33ee11d2046eb9258ba"
+      }
+    },
+    "src/topic4_core_field_scoring.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_core_field_scoring.py",
+      "sha256": "7d2a6b116fbb441f247529f79b763940a1f71a243d18e69ccd09adfc9fc0a850",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/topic4_core_field_scoring.py",
+        "sha256": "7d2a6b116fbb441f247529f79b763940a1f71a243d18e69ccd09adfc9fc0a850"
+      }
+    },
+    "src/topic4_core_field_stage2.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_core_field_stage2.py",
+      "sha256": "5a9be6262c2087741fb63bbc497c085266e15b54f90ef7992adea795cf2d528c",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/topic4_core_field_stage2.py",
+        "sha256": "5a9be6262c2087741fb63bbc497c085266e15b54f90ef7992adea795cf2d528c"
+      }
+    },
+    "src/topic4_core_field_stage3.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_core_field_stage3.py",
+      "sha256": "e1300de1ae812ff5998fe653b0815bd239dd655a0ed98204e467f38e684a0b99",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/topic4_core_field_stage3.py",
+        "sha256": "e1300de1ae812ff5998fe653b0815bd239dd655a0ed98204e467f38e684a0b99"
+      }
+    },
+    "src/topic4_corridor_substrate.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_corridor_substrate.py",
+      "sha256": "268e191fb444c0c834d929d6bf72a9f5fa3ef931a46543ae5d813e45921a98b0",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/topic4_corridor_substrate.py",
+        "sha256": "268e191fb444c0c834d929d6bf72a9f5fa3ef931a46543ae5d813e45921a98b0"
+      }
+    },
+    "src/topic4_degnorm.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_degnorm.py",
+      "sha256": "edd940d6703b35d11161bdb16e56e36be93bc70fd57b4b86a105268dc32599c4",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/topic4_degnorm.py",
+        "sha256": "edd940d6703b35d11161bdb16e56e36be93bc70fd57b4b86a105268dc32599c4"
+      }
+    },
+    "src/topic4_forced_source_capacity.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_forced_source_capacity.py",
+      "sha256": "422d8e8ff046d18d536e66d0a076a43dc0ac757c3f8c0a49dcd15ba0d18ae6e7",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/topic4_forced_source_capacity.py",
+        "sha256": "422d8e8ff046d18d536e66d0a076a43dc0ac757c3f8c0a49dcd15ba0d18ae6e7"
+      }
+    },
+    "src/topic4_graph_edge_flow.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_graph_edge_flow.py",
+      "sha256": "2386badb2da058c0128f4ec785b9e41187f3a03cf3b094400e537741aa8af8e0",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/topic4_graph_edge_flow.py",
+        "sha256": "2386badb2da058c0128f4ec785b9e41187f3a03cf3b094400e537741aa8af8e0"
+      }
+    },
+    "src/topic4_hub_criticality.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_hub_criticality.py",
+      "sha256": "8827356f0459edd9232ef010ee7b5c9789c25309d04d8f23aefad1587c078d74",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/topic4_hub_criticality.py",
+        "sha256": "8827356f0459edd9232ef010ee7b5c9789c25309d04d8f23aefad1587c078d74"
+      }
+    },
+    "src/topic4_local_connectivity.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_local_connectivity.py",
+      "sha256": "ff72cf6d7508ba3549710a6f2e55733315acb8b83fed13baa281a467239a1c8c",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/topic4_local_connectivity.py",
+        "sha256": "ff72cf6d7508ba3549710a6f2e55733315acb8b83fed13baa281a467239a1c8c"
+      }
+    },
+    "src/topic4_manual_dual_core.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_manual_dual_core.py",
+      "sha256": "e5d7b29fa8f0fdb192d7b1c95e58d16f5b74caf534b8c95ff726585df31d8b8f",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/topic4_manual_dual_core.py",
+        "sha256": "e5d7b29fa8f0fdb192d7b1c95e58d16f5b74caf534b8c95ff726585df31d8b8f"
+      }
+    },
+    "src/topic4_mode_learnability.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_mode_learnability.py",
+      "sha256": "d2ebe3933b754a636865a9b8987160433a4444a5b670dfc1ac2a1a73e439d989",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/topic4_mode_learnability.py",
+        "sha256": "d2ebe3933b754a636865a9b8987160433a4444a5b670dfc1ac2a1a73e439d989"
+      }
+    },
+    "src/topic4_multidimensional_parameters.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_multidimensional_parameters.py",
+      "sha256": "22c5256d29efb47e8d9f310f1eff5a124047ed14b5d5e93a5d69e525b79fa44a",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/topic4_multidimensional_parameters.py",
+        "sha256": "22c5256d29efb47e8d9f310f1eff5a124047ed14b5d5e93a5d69e525b79fa44a"
+      }
+    },
+    "src/topic4_node_dualmode.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_node_dualmode.py",
+      "sha256": "9b27ca72d9edd92647aa1cd022d41aeebb011d1d3f61c80cdcd7fa96813211b6",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/topic4_node_dualmode.py",
+        "sha256": "9b27ca72d9edd92647aa1cd022d41aeebb011d1d3f61c80cdcd7fa96813211b6"
+      }
+    },
+    "src/topic4_permissivity.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_permissivity.py",
+      "sha256": "e553826b9c8a947bdb35a73f628f3496047db93387a5944424c1e0ec1d89258a",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/topic4_permissivity.py",
+        "sha256": "e553826b9c8a947bdb35a73f628f3496047db93387a5944424c1e0ec1d89258a"
+      }
+    },
+    "src/topic4_propagation_operator.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_propagation_operator.py",
+      "sha256": "2f6239dc6f2bc0436858560c08a4c84c6a2212b4ecf1bdb3b3e101d762375361",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/topic4_propagation_operator.py",
+        "sha256": "2f6239dc6f2bc0436858560c08a4c84c6a2212b4ecf1bdb3b3e101d762375361"
+      }
+    },
+    "src/topic4_rev20_dual_core_mechanism.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_rev20_dual_core_mechanism.py",
+      "sha256": "c006c4fbf9d422b0c1409648165303f82ab32995dc79be6665063bf860771ffb",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/topic4_rev20_dual_core_mechanism.py",
+        "sha256": "c006c4fbf9d422b0c1409648165303f82ab32995dc79be6665063bf860771ffb"
+      }
+    },
+    "src/topic4_rev9_edge_structure.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_rev9_edge_structure.py",
+      "sha256": "d07ce0db620e69f245768b0a55ea5969355c5d806e96d8b7cd61b2713dab0107",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/topic4_rev9_edge_structure.py",
+        "sha256": "d07ce0db620e69f245768b0a55ea5969355c5d806e96d8b7cd61b2713dab0107"
+      }
+    },
+    "src/topic4_rev9_factorial.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_rev9_factorial.py",
+      "sha256": "a68929b26f960f26bd6ac7c48f0ef2cd4ea37400d2c6b5ef4e974c65268ff87b",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/topic4_rev9_factorial.py",
+        "sha256": "a68929b26f960f26bd6ac7c48f0ef2cd4ea37400d2c6b5ef4e974c65268ff87b"
+      }
+    },
+    "src/topic4_rev9_local_response.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_rev9_local_response.py",
+      "sha256": "274ac52b2af60205e09f1406a58d1b0cdb6b7411496ed304b1c7216870be172a",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/topic4_rev9_local_response.py",
+        "sha256": "274ac52b2af60205e09f1406a58d1b0cdb6b7411496ed304b1c7216870be172a"
+      }
+    },
+    "src/topic4_rev9_response_matching.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_rev9_response_matching.py",
+      "sha256": "a306180a3b78213bed4660a8c40cafe5e15a2aca98f2f52e3d8929d80870bb2e",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/topic4_rev9_response_matching.py",
+        "sha256": "a306180a3b78213bed4660a8c40cafe5e15a2aca98f2f52e3d8929d80870bb2e"
+      }
+    },
+    "src/topic4_rev9_review_audit.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_rev9_review_audit.py",
+      "sha256": "cbcdd165f20d8b635e21fa5da88cdad2f3abf384d67eabcd1b511251108b3fba",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/topic4_rev9_review_audit.py",
+        "sha256": "cbcdd165f20d8b635e21fa5da88cdad2f3abf384d67eabcd1b511251108b3fba"
+      }
+    },
+    "src/topic4_spatial_ou_drive.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_spatial_ou_drive.py",
+      "sha256": "91b25ec3071549e882b0b54aae4858755212cc282dda7a50e6d84e845fae5f02",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/topic4_spatial_ou_drive.py",
+        "sha256": "91b25ec3071549e882b0b54aae4858755212cc282dda7a50e6d84e845fae5f02"
+      }
+    },
+    "src/topic4_spectral_field.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_spectral_field.py",
+      "sha256": "d1b8ece9807cefa474ba63087f3d68ecf107c610ab95c59a800ec52a1c25e75d",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/topic4_spectral_field.py",
+        "sha256": "d1b8ece9807cefa474ba63087f3d68ecf107c610ab95c59a800ec52a1c25e75d"
+      }
+    },
+    "src/topic4_xy_search.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_xy_search.py",
+      "sha256": "ef135f158ea96afab1f9de97c04d2d3141b5bd194c9f05af5a45f5f4a6fbb5bc",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/topic4_xy_search.py",
+        "sha256": "ef135f158ea96afab1f9de97c04d2d3141b5bd194c9f05af5a45f5f4a6fbb5bc"
+      }
+    },
+    "src/topic4_zm_d4.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_zm_d4.py",
+      "sha256": "f85269bdaa2c83912c2cb1349b86890ae3695879540cb7675d594229445900fc",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/topic4_zm_d4.py",
+        "sha256": "f85269bdaa2c83912c2cb1349b86890ae3695879540cb7675d594229445900fc"
+      }
+    },
+    "src/topic4_zm_ictal_transition.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_zm_ictal_transition.py",
+      "sha256": "1c72a016e6b5d42bf0018768e9f222c434221072f0fa68ee77e22e12f2bdda18",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/topic4_zm_ictal_transition.py",
+        "sha256": "1c72a016e6b5d42bf0018768e9f222c434221072f0fa68ee77e22e12f2bdda18"
+      }
+    },
+    "src/topic4_zm_slow_vars.py": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_zm_slow_vars.py",
+      "sha256": "cee979487ea2b35f75e573b6e39dd5c11d60d3fc5b228797ef5f9d90bd9f94cf",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/source_snapshot/src/topic4_zm_slow_vars.py",
+        "sha256": "cee979487ea2b35f75e573b6e39dd5c11d60d3fc5b228797ef5f9d90bd9f94cf"
+      }
+    }
+  },
+  "runtime_snapshot": {
+    "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multievent_distribution_search_v2_1/execution/confirmation_24s/runtime_snapshot.json",
+    "sha256": "35eebb68b1926e0f5dd5a3e01b774d57832a582120f09eb29a883151c52aee31"
+  },
+  "inputs": [
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multievent_distribution_search_v2_1/execution/confirmation_24s/execution_config.json",
+      "sha256": "abb8d97d0174057ff84c6d16145c9ccd2a0743527785b11553488d90fd69f664",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/input_snapshot/results/topic4_sef_hfo/multievent_distribution_search_v2_1/execution/confirmation_24s/execution_config.json",
+        "sha256": "abb8d97d0174057ff84c6d16145c9ccd2a0743527785b11553488d90fd69f664"
+      }
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multievent_distribution_search_v2_1/execution/confirmation_24s/candidate_manifest.json",
+      "sha256": "87bd7b9c79e7fc05bcca85c1b466d14cb4f4f855d1ead3762bf1c1554bb4cd1d",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/input_snapshot/results/topic4_sef_hfo/multievent_distribution_search_v2_1/execution/confirmation_24s/candidate_manifest.json",
+        "sha256": "87bd7b9c79e7fc05bcca85c1b466d14cb4f4f855d1ead3762bf1c1554bb4cd1d"
+      }
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/config/topic4_rev22_dci_transition_execution.json",
+      "sha256": "ac7d9ab0c71dec1a8b733d9d386a8effe8a6ff886a2ef9f44b79a8ba15b1f026",
+      "snapshot": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/input_snapshot/config/topic4_rev22_dci_transition_execution.json",
+        "sha256": "ac7d9ab0c71dec1a8b733d9d386a8effe8a6ff886a2ef9f44b79a8ba15b1f026"
+      }
+    }
+  ],
+  "evidence": [
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multievent_distribution_search_v2_1/g3_scores.json",
+      "sha256": "d22d23cce55f7529f8e249ca73c38c956a2c9a275bf95d6be706904d75e02cfd"
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multievent_distribution_search_v2_1/g3_candidates.json",
+      "sha256": "3b560c686f6516c3564f28bd85edc6f1c48fc6af16ba7a0a98b612e4942e2422"
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multievent_distribution_search_v2_1/scientific_review.md",
+      "sha256": "954e656c73eb9e13784b4e90dead4428794fecf55bb431cb0fa9de5e2322f56e"
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multievent_distribution_search_v2_1/g3_confirmation_analysis.json",
+      "sha256": "57bfa201ea027fb242efe5439159e1b0544f95754ea9f908aa840b68381394fd"
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multievent_distribution_search_v2_1/g3_six_second_segments.json",
+      "sha256": "624e4eba4bd2fb64b0be5763251427f0302b3244f8d45fc7a8d6af4c35228c71"
+    }
+  ],
+  "physical_contract": {
+    "sheet_mm": 20,
+    "n_e": 32000,
+    "n_i": 8000,
+    "dt_ms": 0.1,
+    "autapses": false,
+    "baseline_Z_M": "off",
+    "preserve": [
+      "realized positions and boundaries",
+      "empirical per-neuron thresholds",
+      "all transformed pathway weights and realized delay bins",
+      "synaptic rise and decay with original jump and impulse-area convention",
+      "external input mean, OU law, spatial covariance and clipping order"
+    ],
+    "tau_gaba_intervention": "Audit corrected: fixed jump/rise preserves infinite-horizon normalized-current impulse area; decay changes peak and timing. Finite-window and closed-loop total inhibition can change.",
+    "new_Z_M": "Separate matched extension only after baseline reduction validation; never inherit old GIF-base settings silently.",
+    "tau_gaba_audit": "results/topic4_sef_hfo/rate_model_dynamics_validation_v1/gaba_impulse_audit.json"
+  },
+  "validation_state": {
+    "reference_files_verified": true,
+    "n_frozen_source_files": 99,
+    "same_graph_reference_identity_verified": true,
+    "new_simulations_run": 9,
+    "interictal_rate_model_pass": false,
+    "sustained_oscillation_rate_model_pass": false,
+    "bifurcation_analysis_released": false,
+    "static_reconstruction_verified": true,
+    "prefix_600ms_native_counts_verified": true,
+    "reference_replay_details": "results/topic4_sef_hfo/rate_model_dynamics_validation_v1/snn/prefix_7101.json",
+    "new_simulations_count_definition": "completed full-network SNN runs, including prefix; isolated calibration assays excluded",
+    "analysis_path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/rate_model_dynamics_validation_v1/analysis.json"
+  }
+}

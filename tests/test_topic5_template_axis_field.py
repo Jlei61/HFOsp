@@ -131,6 +131,28 @@ def test_normalized_plane_and_field_score_recover_pattern():
     assert out["abs_r"] > 0.99
 
 
+def test_template_projection_retains_amplitude_but_rejects_uniform_offset():
+    x, _ = _geometry(41)
+    plane = make_normalized_plane(x, [1, 0, 0])
+    pts = plane["points"]
+    template = 2 * pts[:, 0] - 0.5 * pts[:, 1]
+    support = np.ones(len(x))
+    scorer = make_field_scorer(template, pts, support, plane["sigma"])
+
+    weak = score_field(scorer, 0.5 * template)
+    strong_centered = score_field(scorer, 4.0 * template)
+    strong = score_field(scorer, 4.0 * template + 10.0)
+
+    assert weak["abs_r"] > 0.99
+    assert strong["abs_r"] > 0.99
+    assert strong["abs_projection_z"] == pytest.approx(
+        8.0 * weak["abs_projection_z"], rel=1e-10
+    )
+    assert strong["signed_projection_z"] == pytest.approx(
+        strong_centered["signed_projection_z"], rel=1e-10
+    )
+
+
 def test_interictal_record_freezes_early_to_late_own_fields_without_ictal_input():
     x, shafts = _geometry(31)
     true_a = np.array([0.8, -0.4, 0.25])
@@ -305,7 +327,19 @@ def test_batch_scores_equal_rowwise_scores_and_reselect_maxab():
     batch = score_scorer_bundle_batch(bundle, values)
     for i, row in enumerate(values):
         single = score_scorer_bundle(bundle, row)
-        for key in ("own_a_abs", "own_b_abs", "own_maxab"):
+        for key in (
+            "own_a_abs",
+            "own_b_abs",
+            "own_maxab",
+            "own_a_signed_projection_z",
+            "own_b_abs_projection_z",
+            "own_maxab_projection_z",
+        ):
             assert np.isclose(batch[key][i], single[key], equal_nan=True)
     field_batch = score_field_batch(sa, values)
     assert np.allclose(field_batch["abs_r"], batch["own_a_abs"], equal_nan=True)
+    assert np.allclose(
+        field_batch["signed_projection_z"],
+        batch["own_a_signed_projection_z"],
+        equal_nan=True,
+    )

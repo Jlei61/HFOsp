@@ -3,6 +3,7 @@ import json
 import sys
 
 import numpy as np
+import pytest
 import torch
 
 from src.topic5_continuous_marked_state_r1.t2_r2 import (
@@ -15,6 +16,7 @@ from src.topic5_continuous_marked_state_r1.t2_r2 import (
     fit_load_innovation_crossfit,
     fit_r2_edge,
     classify_one_shot_persistence,
+    standardise_exposure,
     state_matched_nonoverlap_placebo,
 )
 from src.topic5_continuous_marked_state_r1.t2_s1 import OneStepDesign
@@ -297,3 +299,146 @@ def test_only_known_support_failures_are_downgraded() -> None:
     assert not run_t2_r2_human.support_limited(
         ValueError("unexpected tensor shape")
     )
+
+
+def _scaled_design(design: OneStepDesign, factor: float) -> OneStepDesign:
+    return OneStepDesign(**{
+        **{k: getattr(design, k) for k in design.__dataclass_fields__},
+        "exposure": (design.exposure * factor).astype(np.float32),
+    })
+
+
+def test_standardise_exposure_puts_every_arm_on_one_train_scale() -> None:
+    rng = np.random.default_rng(5)
+    n = 400
+    train = np.r_[np.ones(300, dtype=bool), np.zeros(100, dtype=bool)]
+    eligible = np.ones(n, dtype=bool)
+    cumulative = rng.normal(scale=18.0, size=n)
+    current = rng.normal(scale=1.0, size=n)
+    scaled_cumulative, audit_c = standardise_exposure(
+        cumulative, train, eligible, label="real_cumulative"
+    )
+    scaled_current, audit_e = standardise_exposure(
+        current, train, eligible, label="current_event_only"
+    )
+    assert audit_c["train_sd_after"][0] == pytest.approx(1.0, abs=1e-6)
+    assert audit_e["train_sd_after"][0] == pytest.approx(1.0, abs=1e-6)
+    assert audit_c["train_sd_before"][0] / audit_e["train_sd_before"][0] > 10
+    # A constant column is left alone rather than divided by zero.
+    constant, audit_k = standardise_exposure(
+        np.ones((n, 1)), train, eligible, label="fitted_intercept_diagnostic"
+    )
+    assert audit_k["constant_columns_left_unscaled"] == [0]
+    assert np.allclose(constant, 1.0)
+    # B @ x is invariant, so this is a reparameterisation of the same model.
+    edge = ExposureEdge(2, 1)
+    with torch.no_grad():
+        edge.matrix.fill_(0.3)
+    state = torch.zeros(n, 2)
+    raw = edge(state, torch.as_tensor(cumulative, dtype=torch.float32))
+    rescaled = ExposureEdge(2, 1)
+    with torch.no_grad():
+        rescaled.matrix.fill_(0.3 * float(audit_c["train_sd_before"][0]))
+    assert torch.allclose(
+        raw, rescaled(state, torch.as_tensor(scaled_cumulative)), atol=1e-3
+    )
+
+
+def test_unstandardised_exposure_scale_changes_the_early_stopped_fit() -> None:
+    # The regression that motivates standardisation.  AdamW is largely
+    # scale-free, so the *achieved* fit barely moves: the scale-adjusted edge
+    # norms agree to about one percent here.  What does move is the epoch the
+    # chronological inner-TRAIN search stops at, and that is the quantity the
+    # arms are supposed to share.  Two arms whose raw exposures differ 12-21x
+    # are therefore stopped at different points of their own trajectories.
+    model = _Model()
+    base = _synthetic_design(1.0)
+    _, small = fit_r2_edge(
+        model, _scaled_design(base, 1.0), device="cpu", seed=3, epochs=30,
+        learning_rate=.03, batch_size=256,
+    )
+    _, large = fit_r2_edge(
+        model, _scaled_design(base, 18.0), device="cpu", seed=3, epochs=30,
+        learning_rate=.03, batch_size=256,
+    )
+    assert large["selected_epoch"] != small["selected_epoch"]
+    assert large["edge_norm"] * 18.0 == pytest.approx(
+        small["edge_norm"], rel=.05
+    )
+    # ...and standardising both back onto one scale removes the difference.
+    train = base.split == 0
+    eligible = np.ones(len(base.split), dtype=bool)
+    fits = []
+    for factor in (1.0, 18.0):
+        exposure, _ = standardise_exposure(
+            base.exposure * factor, train, eligible, label=f"x{factor}"
+        )
+        _, fit = fit_r2_edge(
+            model, _scaled_design(base, 1.0).__class__(**{
+                **{k: getattr(base, k) for k in base.__dataclass_fields__},
+                "exposure": exposure,
+            }),
+            device="cpu", seed=3, epochs=30, learning_rate=.03, batch_size=256,
+        )
+        fits.append(fit)
+    assert fits[0]["selected_epoch"] == fits[1]["selected_epoch"]
+    assert fits[0]["edge_norm"] == pytest.approx(fits[1]["edge_norm"], rel=1e-6)
+
+
+def _t2_payload(*, status="ESTIMATED", left_zero=True, current_beats=False,
+                real=0.0):
+    return {
+        "analysis_status": status,
+        "real_edge_estimable": bool(left_zero),
+        "real_edge_status": "FITTED" if left_zero else "ZERO_EDGE_SELECTED",
+        "primary_next_event_increment": False,
+        "fits": {"real_cumulative": {
+            "edge_left_zero_initialisation": bool(left_zero)
+        }},
+        "validation": {
+            "next_event": {
+                "no_edge": {"joint_nll_per_event": 10.0},
+                "current_event_only": {
+                    "joint_nll_per_event": 9.9 if current_beats else 10.1
+                },
+            },
+            "horizons": {},
+        },
+        "comparisons": {},
+    }
+
+
+def test_zero_edge_on_an_identifiable_design_is_a_negative_not_a_blank(
+    tmp_path, monkeypatch,
+) -> None:
+    # The strongest-supported patient in the shipped run selected the zero edge
+    # in 3/3 seeds while the current-event arm on the same rows beat no-edge.
+    # That is an answer to H3a, so the row must carry it rather than print n/a
+    # across the board.
+    payloads = [
+        _t2_payload(left_zero=False, current_beats=True) for _ in range(3)
+    ]
+    zero_edge = [
+        value for value in payloads
+        if value["real_edge_status"] == "ZERO_EDGE_SELECTED"
+    ]
+    assert len(zero_edge) == 3
+    assert aggregate_t2_r2.edge_estimable_payloads(payloads) == []
+    sibling = sum(
+        value["validation"]["next_event"]["current_event_only"][
+            "joint_nll_per_event"
+        ] < value["validation"]["next_event"]["no_edge"]["joint_nll_per_event"]
+        for value in payloads
+    )
+    assert sibling == 3
+
+
+def test_support_ineligible_is_the_only_missing_measurement() -> None:
+    # A seed with no usable one-step pairs cannot answer anything; a seed whose
+    # search returned the zero edge answered "no".  They must not share a label.
+    no_support = _t2_payload(status="NOT_ESTIMABLE")
+    zero_edge = _t2_payload(left_zero=False)
+    assert no_support["analysis_status"] == "NOT_ESTIMABLE"
+    assert zero_edge["analysis_status"] == "ESTIMATED"
+    assert zero_edge["real_edge_status"] == "ZERO_EDGE_SELECTED"
+    assert aggregate_t2_r2.edge_estimable_payloads([no_support, zero_edge]) == []

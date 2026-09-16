@@ -1,0 +1,90 @@
+contract:
+  name: topic5_stable_interaction_identifiability_v2_1
+  source_spec: docs/superpowers/specs/2026-07-31-topic5-stable-interaction-identifiability-v2_1.md
+
+data:
+  dataset_dir: results/topic5_interictal_rank_distribution/dataset_v0_4
+  validation_fraction: 0.15
+  test_fraction: 0.15
+  max_train_events: 9600
+  max_validation_events: 2048
+  max_test_events: 2048
+  old_outer_heldout20_forbidden: true
+
+unseen_start:
+  selection_partition: inner_train_only
+  selection_rule: most_frequent_qualifying_first_rank_then_lexicographic_key
+  minimum_train_events: 20
+  minimum_validation_events: 20
+  minimum_test_events: 20
+  minimum_intermediate_sender_support_after_holdout: 20
+  models:
+    - sig0_phase_envelope
+    - sig1_feedback_graph
+    - m1_markov_matched_phase
+    - m2_mixture_matched_phase
+    - m3_latent_template
+  primary_endpoints:
+    - unseen_start_nll_per_decision
+    - unseen_start_precedence_mae
+  interpretation: compositional_generalization_not_seen_distribution_dominance
+
+split_stability:
+  source_partition: inner_train_only
+  chronological_halves: true
+  within_half_monitor_fraction: 0.15
+  max_train_events_per_half: 4800
+  max_monitor_events_per_half: 1024
+  max_common_probe_events: 2048
+  fitted_model: sig1_feedback_graph
+  matched_nulls:
+    - m1_phase_surrogate
+    - m3_template_surrogate
+  null_generator_fit_seed: 20260731
+  contact_label_permutations: 200
+  primary_operator: supported_marginal_one_step_influence
+  static_and_phase_response: removed_by_within_context_sender_control
+
+model:
+  graph_l1_weight: 0.0005
+  event_drive: false
+  process_noise: false
+  multiple_fields: false
+
+training:
+  fit_seeds: [20260731, 20260732, 20260733]
+  epochs: 300
+  patience: 35
+  learning_rate: 0.03
+  batch_events: 256
+  convergence_tolerance: 0.002
+  minimum_relative_improvement: 0.001
+  minimum_training_epochs: 20
+  minimum_best_epoch: 3
+  maximum_recovery_depth: 2
+  static_scaffold_steps: 300
+  static_scaffold_learning_rate: 0.05
+  static_scaffold_seed: 20260731
+
+evaluation:
+  rollout_repeats: 4
+  prior_predictive_samples: 64
+  prior_predictive_repeats: 4
+  importance_samples: 64
+
+pilot:
+  subjects:
+    - epilepsiae_922
+    - epilepsiae_620
+    - epilepsiae_1096
+    - yuquan_zhangkexuan
+    - yuquan_chenziyang
+    - yuquan_zhangjiaqi
+
+forbidden_inputs:
+  ab_or_axis: true
+  soz: true
+  ictal: true
+  geometry: true
+  iei: true
+  snn: true

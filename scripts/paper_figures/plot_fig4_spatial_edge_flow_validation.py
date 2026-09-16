@@ -372,8 +372,25 @@ def _figure2a_context_geometry(bundle):
         plot_fig2_e1146_template_projection_composite as figure2a,
     )
 
-    record, dat_a, _, names, coords, coord_space = figure2a._load_case()
-    basis = figure2a._basis(record, int(dat_a["transverse_sign"]))
+    case = figure2a._load_case()
+    if len(case) == 4:
+        # Current Figure 2A returns the frozen record plus the complete local
+        # implantation.  Reconstruct the same deterministic display sign from
+        # the shared-plane transverse vector, exactly as its public plot()
+        # entry point does.
+        record, names, coords, coord_space = case
+        transverse_sign = figure2a._canonical_transverse_sign(
+            record["interictal_field"]["planes"]["shared"]["w"]
+        )
+    elif len(case) == 6:
+        # Backward compatibility for the pre-geometry-only Figure 2A API.
+        record, dat_a, _, names, coords, coord_space = case
+        transverse_sign = int(dat_a["transverse_sign"])
+    else:
+        raise RuntimeError(
+            f"unsupported Figure 2A geometry payload with {len(case)} fields"
+        )
+    basis = figure2a._basis(record, transverse_sign)
     basis_coords = figure2a._to_basis(coords, basis)
     names = np.asarray(names, dtype=str)
     shafts = np.asarray([
@@ -652,7 +669,10 @@ def _bandpass_contact_activity(envelope, dt_ms, band_hz=TRACE_BAND_HZ):
     return sosfiltfilt(sos, envelope, axis=1)
 
 
-def _plot_readout(ax, bundle, pair):
+def _plot_readout(
+        ax, bundle, pair, *,
+        shade_contract="detector_event", shade_pad_ms=18.0,
+        show_onset_markers=True, show_scale_bar=True):
     if pair is None:
         ax.text(0.5, 0.52, "MTA/MTB readout unavailable",
                 transform=ax.transAxes, ha="center", va="center",
@@ -690,33 +710,51 @@ def _plot_readout(ax, bundle, pair):
     offsets = np.arange(len(contacts), dtype=float) * 1.25
     for mode, global_index in ((TA_MODE, ta_index), (TB_MODE, tb_index)):
         local = records[global_index]["local_index"]
-        shade_pad_ms = 18.0
-        ax.axvspan(max(start, block["event_t_on_ms"][local] - shade_pad_ms) - start,
-                   min(stop, block["event_t_off_ms"][local] + shade_pad_ms) - start,
+        if shade_contract == "recruitment_onset_span":
+            finite_onsets = bundle["onsets"][global_index]
+            finite_onsets = finite_onsets[np.isfinite(finite_onsets)]
+            if len(finite_onsets):
+                shade_on = float(np.min(finite_onsets))
+                shade_off = float(np.max(finite_onsets))
+            else:
+                shade_on = float(block["event_t_on_ms"][local])
+                shade_off = float(block["event_t_off_ms"][local])
+        elif shade_contract == "detector_event":
+            shade_on = float(block["event_t_on_ms"][local])
+            shade_off = float(block["event_t_off_ms"][local])
+        else:
+            raise ValueError(f"unknown readout shade contract: {shade_contract}")
+        ax.axvspan(max(start, shade_on - shade_pad_ms) - start,
+                   min(stop, shade_off + shade_pad_ms) - start,
                    color=MODE_COLORS[mode], alpha=0.14, lw=0)
     for row, contact in enumerate(contacts):
         shaft = bundle["static"]["shaft_ids"][contact]
         ax.plot(t, trace[contact] * 0.72 / scale + offsets[row],
                 color=SHAFT_COLORS[shaft], lw=0.95, alpha=0.96)
-    for mode, global_index in ((TA_MODE, ta_index), (TB_MODE, tb_index)):
-        onset = bundle["onsets"][global_index]
-        xs, ys = [], []
-        for row, contact in enumerate(contacts):
-            if not np.isfinite(onset[contact]):
-                continue
-            x = float(onset[contact] - start)
-            sample_index = int(np.clip(round(onset[contact] / dt), 0,
-                                       filtered.shape[1] - 1))
-            xs.append(x)
-            ys.append(offsets[row] + filtered[contact, sample_index] * 0.72 / scale)
-        ax.scatter(xs, ys, s=9, color="#222222", edgecolor="white",
-                   linewidth=0.25, zorder=8)
-    bar_x = 0.045 * max(stop - start, 1.0)
-    bar_y = offsets[-1] + 0.05
-    ax.plot([bar_x, bar_x], [bar_y - 0.36, bar_y + 0.36],
-            color="#222222", lw=1.6, clip_on=False)
-    ax.text(bar_x + 0.015 * max(stop - start, 1.0), bar_y,
-            f"{scale:.2g} a.u.", ha="left", va="center", fontsize=9)
+    if show_onset_markers:
+        for mode, global_index in ((TA_MODE, ta_index), (TB_MODE, tb_index)):
+            onset = bundle["onsets"][global_index]
+            xs, ys = [], []
+            for row, contact in enumerate(contacts):
+                if not np.isfinite(onset[contact]):
+                    continue
+                x = float(onset[contact] - start)
+                sample_index = int(np.clip(round(onset[contact] / dt), 0,
+                                           filtered.shape[1] - 1))
+                xs.append(x)
+                ys.append(
+                    offsets[row]
+                    + filtered[contact, sample_index] * 0.72 / scale
+                )
+            ax.scatter(xs, ys, s=9, color="#222222", edgecolor="white",
+                       linewidth=0.25, zorder=8)
+    if show_scale_bar:
+        bar_x = 0.045 * max(stop - start, 1.0)
+        bar_y = offsets[-1] + 0.05
+        ax.plot([bar_x, bar_x], [bar_y - 0.36, bar_y + 0.36],
+                color="#222222", lw=1.6, clip_on=False)
+        ax.text(bar_x + 0.015 * max(stop - start, 1.0), bar_y,
+                f"{scale:.2g} a.u.", ha="left", va="center", fontsize=9)
     ax.set_yticks(offsets, bundle["static"]["contact_names"][contacts], fontsize=9.5)
     for tick, contact in zip(ax.get_yticklabels(), contacts):
         tick.set_color(SHAFT_COLORS[bundle["static"]["shaft_ids"][contact]])
@@ -740,7 +778,10 @@ def _plot_readout(ax, bundle, pair):
             "signal_contract": "30-80 Hz bandpass of virtual-contact firing-density envelope",
             "not_current_lfp_or_clinical_seeg": True,
             "band_hz": list(TRACE_BAND_HZ), "common_scale_au": scale,
-            "display_shading_pad_ms": 18.0,
+            "display_shading_contract": shade_contract,
+            "display_shading_pad_ms": float(shade_pad_ms),
+            "onset_markers_displayed": bool(show_onset_markers),
+            "scale_bar_displayed": bool(show_scale_bar),
             "displayed_contact_count": int(len(contacts)),
             "contact_order": bundle["static"]["contact_names"][contacts].tolist(),
             "display_window_ms": [float(start), float(stop)]}
@@ -771,6 +812,20 @@ def _science_status(bundle):
     if path is None or not path.exists():
         return None
     verdict = _json(path)
+    primary_id = verdict.get("primary_candidate_id")
+    if primary_id is not None and bundle.get("candidate_id") != primary_id:
+        return {
+            "verdict_path": str(path),
+            "verdict_sha256": _sha256(path),
+            "verdict_status": "EXPLORATORY_CANDIDATE_VISUAL_CHECK",
+            "fig4_acceptance": "DIAGNOSTIC_ONLY",
+            "figure_eligible": False,
+            "parent_verdict_status": verdict.get("status"),
+            "parent_primary_candidate_id": primary_id,
+            "replication_pass": None,
+            "replication_rule": None,
+            "network_seed_is_the_independent_unit": True,
+        }
     return {
         "verdict_path": str(path),
         "verdict_sha256": _sha256(path),
@@ -913,13 +968,19 @@ def _render_direct(bundle, output_dir):
     if _is_spatial_ou(bundle):
         context = _plot_landscape(axes[0], bundle)
         if _is_nlc_confirmation(bundle):
+            arm = bundle.get("candidate", {}).get("arm")
+            node_only = arm == "Node"
             axes[0].text2D(
-                0.01, 0.97, "Node field + local E-to-E/E-to-I",
+                0.01, 0.97,
+                "Continuous Node field" if node_only
+                else "Node field + local E-to-E/E-to-I",
                 transform=axes[0].transAxes, ha="left", va="top",
                 fontsize=11.5, weight="bold", color="#243238",
             )
             axes[0].text2D(
-                0.01, 0.90, "fixed topology/delays; incoming-E budgets conserved",
+                0.01, 0.90,
+                "learned edge redistribution off; Z/M off" if node_only
+                else "fixed topology/delays; incoming-E budgets conserved",
                 transform=axes[0].transAxes, ha="left", va="top",
                 fontsize=8.8, color="#405158",
             )
@@ -1537,17 +1598,33 @@ def _write_readme(output_dir, bundle):
             + "\n\n"
         )
         if _is_nlc_confirmation(bundle):
+            node_only = bundle.get("candidate", {}).get("arm") == "Node"
+            mechanism_text = (
+                "左侧是连续 Node field；learned E-to-E/E-to-I 权重重分配和 "
+                "Z/M 均关闭，基础 topology、delays 与背景驱动保持冻结。"
+                if node_only else
+                "左侧是连续 Node field，并显示同一底物上的局部 "
+                "E-to-E/E-to-I 权重重分配；连接 topology 与 delays 不变，"
+                "每个 postsynaptic target 的 incoming-E 总量按 pathway 守恒。"
+            )
+            attention_text = (
+                "这是纯 Node 候选的独立视觉验收，不继承 Joint 候选的正式 PASS；"
+                "是否冻结由同网络双簇、患者模板一致性和作者目视共同裁定。"
+                if node_only else
+                "本轮通过的是同网络双簇、正 patient geometry 和相对 Node-only "
+                "的 composite-score 增益。"
+            )
             path.write_text(f"""{status_text}### fig4a_nlc_direct_readout
 
-这张图展示 final fresh-network 确认中的冻结候选 `{bundle['candidate_id']}`。左侧是连续 Node field，并明确标注同一底物上的局部 E-to-E/E-to-I 权重重分配；连接 topology 与 delays 不变，每个 postsynaptic target 的 incoming-E 总量按 pathway 守恒。中间汇总 {n_networks} 张网络的 formal clean Model TA/Model TB onset density，右侧从同一张网络选择一对时间分离的 MTA/MTB 事件，展示全部 15 个虚拟触点的 30--80 Hz firing-density envelope。
+这张图展示 final fresh-network artifact 中的候选 `{bundle['candidate_id']}`。{mechanism_text}中间汇总 {n_networks} 张网络的 formal clean Model TA/Model TB onset density，右侧从同一张网络选择一对时间分离的 MTA/MTB 事件，展示全部 15 个虚拟触点的 30--80 Hz firing-density envelope。
 
-**关注点**：这是静态 Node-connectivity substrate 的 development confirmation。波形不是 clinical SEEG，也不是 current-LFP；Z/M 在本轮关闭，不能由此声称发作生命周期已经统一。
+**关注点**：{attention_text}波形不是 clinical SEEG，也不是 current-LFP；不能由此声称发作生命周期已经统一。
 
 ### fig4b_nlc_kmeans_consistency
 
 这张图只使用同一冻结候选中 returned、双杆、patient-support 内、且至少有 3 个参与触点的 formal clean events。heatmap、missing-contact mask、固定触点顺序和 rank profile 复用 Figure 1E painter；KMeans 不读取患者标签。{matrix_text}图下方同时给出 pooled 描述统计和 {n_networks} 张网络等权的 natural alignment / contact-split cross-fit 区间。
 
-**关注点**：本轮通过的是同网络双簇、正 patient geometry 和相对 Node-only 的 composite-score 增益；它仍是 patient-development 结果，不是 patient-blind generalization 或完整患者间期波形复现。
+**关注点**：{attention_text}它仍是 patient-development 结果，不是 patient-blind generalization 或完整患者间期波形复现。
 """)
             return
         path.write_text(f"""{status_text}### fig4a_spatial_ou_direct_readout

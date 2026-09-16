@@ -362,23 +362,23 @@ def test_frozen_template_panel_uses_viridis_rank_not_event_envelope(fz):
     im = P._template_panel(ax, fz, "TA", show_y=True, show_x=True)
     assert im.get_cmap().name == "viridis"
     assert im.get_clim() == pytest.approx((0.0, 1.0))
-    assert ax.get_title() == "TA template"
+    assert ax.get_title() == ""
     assert ax.get_xlabel() == "shared TA axis (mm)"
     assert ax.get_ylabel() == "y (mm)"
     assert ax.collections[0].get_sizes()[0] == pytest.approx(P.TEMPLATE_CONTACT_SIZE)
     plt.close(fig)
 
 
-def test_template_colorbar_uses_actual_ranks_and_top_title(fz):
+def test_template_colorbar_uses_normalized_ranks_and_top_title(fz):
     fig, cax = plt.subplots(figsize=(1.0, 3.0))
     cb, rank_range = P._template_rank_colorbar(fig, cax, fz, "TA")
     assert rank_range == pytest.approx((0.0, 7.0))
     assert cb.ax.get_title(loc="left") == "ranks"
     assert cb.ax.get_title() == ""
     assert cb.ax.yaxis.label.get_text() == ""
-    assert cb.get_ticks() == pytest.approx([0.0, 3.5, 7.0])
+    assert cb.get_ticks() == pytest.approx([0.0, 0.5, 1.0])
     labels = [tick.get_text() for tick in cb.ax.get_yticklabels()]
-    assert labels == ["0  early", "3.5", "7  late"]
+    assert labels == ["0  early", "0.5", "1  late"]
     plt.close(fig)
 
 
@@ -476,7 +476,7 @@ def test_compact_layout_contract():
     assert (P.READOUT_COL, P.READOUT_CBAR_COL, P.GROUP_GAP_COL, P.FRAME_COL_START) == (0, 1, 2, 3)
     assert P.TEMPLATE_FIELD_COL > P.FIELD_CBAR_COL
     assert P.TEMPLATE_CBAR_COL == P.N_LAYOUT_COLS - 1
-    assert P._subject_title("epilepsiae_1146") == "E1146"
+    assert P._subject_title("epilepsiae_1146") == "E10"
 
 
 def test_frame_times_are_never_duplicated():
@@ -555,9 +555,9 @@ def test_gif_time_grid_keeps_true_endpoint_and_two_ms_contract():
 
 def test_paper_candidate_naming_contract():
     assert P._paper_stem("epilepsiae_1146") == (
-        "fig2c_candidate_E1146_interictal_event_envelope_field"
+        "fig2c_candidate_E10_interictal_event_envelope_field"
     )
-    assert P.PAPER_SCHEMA_ID == "fig2c_interictal_event_envelope_field_candidate_v10"
+    assert P.PAPER_SCHEMA_ID == "fig2c_interictal_event_envelope_field_candidate_v13"
     assert F12.FIG2C_ACCEPTED_SCHEMA == P.PAPER_SCHEMA_ID
     assert P.STATIC_FRAME_MIN_JOINT_VISIBILITY == pytest.approx(0.24)
     assert P.STATIC_FRAME_MIN_ENDPOINT_HANDOFF == pytest.approx(0.10)
@@ -565,7 +565,7 @@ def test_paper_candidate_naming_contract():
     assert P.STATIC_FRAME_MIN_FULL_CENTROID_STEP_MM == pytest.approx(2.0)
     assert P.STATIC_FRAME_MIN_HOTSPOT_STEP_MM == pytest.approx(4.0)
     assert "paper-ready-figure" not in str(PF.DEFAULT_OUT)
-    assert P.GIF_FPS == 12
+    assert P.GIF_FPS == pytest.approx(12.5)
     assert PF.LOCKED_TA_EVENT_POS["epilepsiae_1146"] == 6344
     assert PF.LOCKED_TB_EVENT_POS["epilepsiae_1146"] == 937
 
@@ -575,27 +575,77 @@ def test_fig2_builder_rewrites_staging_paths_to_canonical_panel_names(tmp_path):
     figures.mkdir()
     metadata_path = tmp_path / "fig2_panelc_metadata.json"
     metadata_path.write_text(json.dumps({
-        "static": {"figure": "/old/staging.png", "extra_outputs": ["/old/staging.pdf"]},
+        "static": {
+            "panel_c_outputs": ["/old/c.png", "/old/c.pdf"],
+            "panel_d_outputs": ["/old/d.png", "/old/d.pdf"],
+        },
         "gif": {"figure": "/old/staging.gif"},
     }))
     F12._canonicalize_fig2c_metadata(metadata_path, figures)
     metadata = json.loads(metadata_path.read_text())
-    assert Path(metadata["static"]["figure"]).name == "fig2-panelc.png"
-    assert Path(metadata["static"]["extra_outputs"][0]).name == "fig2-panelc.pdf"
+    assert [Path(path).name for path in metadata["static"]["panel_c_outputs"]] == [
+        "fig2-panelc.png", "fig2-panelc.pdf",
+    ]
+    assert [Path(path).name for path in metadata["static"]["panel_d_outputs"]] == [
+        "fig2-paneld.png", "fig2-paneld.pdf",
+    ]
     assert Path(metadata["gif"]["figure"]).name == "fig2-panelc.gif"
 
 
-def test_event_field_uses_muted_bluegray_not_salient_magma():
-    assert P.CMAP_NAME == "fig2c_muted_bluegray"
+def test_event_field_uses_soft_teal_navy_not_salient_magma():
+    assert P.CMAP_NAME == "fig2c_soft_teal_navy"
     assert P.CMAP.name == P.CMAP_NAME
     lo = np.asarray(P.CMAP(0.0)[:3])
     hi = np.asarray(P.CMAP(1.0)[:3])
+    assert lo == pytest.approx(np.asarray([0xF7, 0xF9, 0xF8]) / 255.0)
+    assert hi == pytest.approx(np.asarray([0x31, 0x47, 0x66]) / 255.0)
     assert lo.mean() > 0.9
     assert hi.mean() < 0.45
     assert hi.max() - hi.min() < 0.22
     assert P.FIELD_DISPLAY_GAMMA == pytest.approx(0.5)
     assert P.FIELD_DISPLAY_NORM(0.25) == pytest.approx(0.5)
     assert P.FIELD_DISPLAY_NORM_ID == "fixed_power_norm_gamma_0p50"
+
+
+def test_supplementary_video1_packaging_is_byte_identical_and_locked(tmp_path, monkeypatch):
+    source = tmp_path / "fig2" / "figures" / "fig2-panelc.gif"
+    source.parent.mkdir(parents=True)
+    source.write_bytes(b"GIF89a accepted animation bytes")
+    panel_metadata = tmp_path / "fig2" / "fig2_panelc_metadata.json"
+    panel_metadata.write_text(json.dumps({
+        "schema_id": F12.FIG2C_ACCEPTED_SCHEMA,
+        "ds_sid": "epilepsiae_1146",
+        "frozen_fingerprint": "abc123",
+        "claim_scope": "representative cross-check",
+        "exemplar": {"TA": {"event_pos": 6344}, "TB": {"event_pos": 937}},
+        "gif": {
+            "cmap": "fig2c_soft_teal_navy",
+            "frame_times_ms": [-8.0, -6.0],
+            "n_frames": 2,
+            "biological_step_ms": 2.0,
+            "playback_fps": 12.5,
+            "template_colorbar_range": [0.0, 1.0],
+            "template_rank_normalization": (
+                "linear min-max within each frozen template; 0=earliest, 1=latest"
+            ),
+        },
+    }))
+    canonical = tmp_path / "supplementary-video-1.gif"
+    canonical_metadata = tmp_path / "supplementary-video-1_metadata.json"
+    monkeypatch.setattr(F12, "ROOT", tmp_path)
+    monkeypatch.setattr(F12, "SUPPLEMENTARY_VIDEO1", canonical)
+    monkeypatch.setattr(F12, "SUPPLEMENTARY_VIDEO1_METADATA", canonical_metadata)
+
+    result = F12._package_supplementary_video1(source, panel_metadata)
+
+    assert canonical.read_bytes() == source.read_bytes()
+    assert result["paper_slot"] == "Supplementary Video 1"
+    assert result["schema_id"] == "supplementary_video1_interictal_event_envelope_v2"
+    assert result["exemplar_event_pos"] == {"TA": 6344, "TB": 937}
+    assert result["movie_contract"]["cmap"] == "fig2c_soft_teal_navy"
+    assert result["movie_contract"]["template_colorbar_range"] == [0.0, 1.0]
+    assert result["sha256"] == F12._sha256(source)
+    assert json.loads(canonical_metadata.read_text()) == result
 
 
 def test_small_gif_uses_same_frozen_geometry_and_writes_real_animation(tmp_path, fz, ta, tb):
@@ -612,6 +662,8 @@ def test_small_gif_uses_same_frozen_geometry_and_writes_real_animation(tmp_path,
     assert meta["normalization_mode"] == P.FIELD_NORMALIZATION_ID
     assert meta["display_norm"] == P.FIELD_DISPLAY_NORM_ID
     assert meta["display_gamma"] == pytest.approx(0.5)
+    assert meta["template_colorbar_range"] == [0.0, 1.0]
+    assert meta["template_rank_normalization"].startswith("linear min-max")
     assert set(meta["normalization_scales_robust_z"]) == {"TA", "TB"}
     assert meta["frame_times_ms"] == pytest.approx([-8.0, 22.0, 39.0])
     with Image.open(out) as im:

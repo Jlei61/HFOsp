@@ -31,11 +31,17 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
+plt.rcParams.update({"pdf.fonttype": 42, "ps.fonttype": 42})
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from src.paper_figure_typography import (  # noqa: E402
+    FINAL_MAIN_FIGURE_TYPOGRAPHY,
+    FINAL_VISUAL_TYPOGRAPHY_POLICY,
+    apply_panel_aware_figure_typography,
+)
 from scripts.plot_contact_plane_static import _limits_with_padding
 from scripts.plot_topic5_field_vs_ictal_swap import (
     FS_CBAR_LABEL,
@@ -342,9 +348,16 @@ def plot_interictal_ab_subject(
         panel_left_x, title_top + 0.018, f"{pretty} · {mode_label}",
         ha="left", va="bottom", fontsize=FS_SUBJECT_TITLE, fontweight="bold",
     )
+    apply_panel_aware_figure_typography(
+        fig,
+        spec=FINAL_MAIN_FIGURE_TYPOGRAPHY,
+        policy=FINAL_VISUAL_TYPOGRAPHY_POLICY,
+        colorbar_axes=[colorbar_ax],
+        enforce_atomic_axis_gate=False,
+    )
     output_dir.mkdir(parents=True, exist_ok=True)
     path = output_dir / f"{subject_id}_interictal_AB.{output_format}"
-    fig.savefig(path, dpi=150, bbox_inches="tight")
+    fig.savefig(path, dpi=600, bbox_inches="tight")
     plt.close(fig)
     return path
 

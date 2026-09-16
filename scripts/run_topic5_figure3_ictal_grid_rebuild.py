@@ -53,7 +53,17 @@ from src.topic5_t0_features import window_activation
 # ---- canonical inputs (handoff §2.4) -------------------------------------
 ANALYSIS = REPO / "results/topic5_ictal_recruitment/tspectral_field_concordance"
 PARENT_EVENT_CSV = ANALYSIS / "clinical_onset_gradient_field_cohort_stat_event.csv"
-FIELD_ROOT = REPO / "results/interictal_propagation_masked/template_gradient_fields/per_subject"
+FIELD_ROOTS = {
+    "timing_only": (
+        REPO / "results/interictal_propagation_masked/template_gradient_fields/per_subject"
+    ),
+    "timing_plus_3d_direction": (
+        REPO
+        / "results/interictal_propagation_masked"
+        / "template_gradient_fields_all_events_timing_plus_space"
+        / "per_subject"
+    ),
+}
 V2_BAND_CACHE = REPO / "results/topic5_ictal_recruitment/v2_band_scan/cache"
 BB150_CACHE = REPO / "results/topic5_ictal_recruitment/t0_feature_cache_bb150_1_150"
 PHENO_EPI = REPO / "results/topic5_ictal_recruitment/v2_band_scan/cache_tspectral_v1p2_common_1_80hz"
@@ -75,6 +85,13 @@ EXPECTED_STRICT = 106
 EXPECTED_GAMMA = 61
 EXPECTED_SHARED = {"epilepsiae_1084", "epilepsiae_1146", "epilepsiae_139",
                    "epilepsiae_384", "epilepsiae_548", "epilepsiae_590", "epilepsiae_958"}
+EXPECTED_SHARED_TIMING_PLUS_3D = {
+    "epilepsiae_1077", "epilepsiae_1084", "epilepsiae_1096",
+    "epilepsiae_1146", "epilepsiae_1150", "epilepsiae_139",
+    "epilepsiae_253", "epilepsiae_384", "epilepsiae_590",
+    "epilepsiae_620", "epilepsiae_635", "epilepsiae_958",
+    "yuquan_xuxinyi",
+}
 
 
 # --------------------------------------------------------------------------
@@ -137,9 +154,9 @@ def load_parent_events() -> pd.DataFrame:
 class SubjectField:
     """Frozen interictal geometry for one subject (routing + sigma_common + planes)."""
 
-    def __init__(self, subject: str, axis: str = "gradient"):
+    def __init__(self, subject: str, axis: str = "gradient", *, field_root: Path = FIELD_ROOTS["timing_only"]):
         self.subject = subject
-        path = FIELD_ROOT / f"{subject}.json"
+        path = field_root / f"{subject}.json"
         if not path.exists():
             raise SystemExit(f"missing frozen field: {path}")
         self.record = json.loads(path.read_text())
@@ -413,6 +430,11 @@ def main():
     ap.add_argument("--outdir", type=str, default=None)
     ap.add_argument("--validate-only", action="store_true")
     ap.add_argument("--verify-only", action="store_true")
+    ap.add_argument(
+        "--finalize-existing",
+        action="store_true",
+        help="validate completed CSV/NPZ outputs and write the manifest/summary without rescoring",
+    )
     ap.add_argument("--grids", type=str, default=f"{GRID_PRIMARY},{GRID_SENS}")
     ap.add_argument("--band-omnibus-perm", type=int, default=100000)
     ap.add_argument("--smoothing-policy", choices=["subject_fixed", "frozen_per_model"],
@@ -420,10 +442,20 @@ def main():
     ap.add_argument("--axis", choices=["gradient", "endpoint"], default="gradient",
                     help="gradient = frozen shared-else-own planes (primary); "
                          "endpoint = source->sink core axis, per-template A/B (axis-only sensitivity)")
+    ap.add_argument(
+        "--template-source",
+        choices=tuple(FIELD_ROOTS),
+        default="timing_only",
+        help=(
+            "frozen interictal TA/TB source: timing_only is the legacy field; "
+            "timing_plus_3d_direction is the all-event Timing + 3D direction field"
+        ),
+    )
     ap.add_argument("--score-bands-only", action="store_true",
                     help="keep the BB150 anchor in the common mask (mask unchanged) but score only "
                          "the 7 primary bands; skip anchor scoring and parent pooled/strict/gamma groups")
     args = ap.parse_args()
+    run_contract = f"{CONTRACT}_{args.template_source}"
 
     grids = [int(x) for x in args.grids.split(",")]
     bands = load_primary_bands()
@@ -434,15 +466,27 @@ def main():
 
     # routing + sigma inventory (validate-only stops here after mask check)
     subjects = list(dict.fromkeys(events.subject.tolist()))
-    fields = {s: SubjectField(s, axis=args.axis) for s in subjects}
+    field_root = FIELD_ROOTS[args.template_source]
+    fields = {
+        s: SubjectField(s, axis=args.axis, field_root=field_root)
+        for s in subjects
+    }
     if args.axis == "endpoint":
         assert all(fields[s].route == "endpoint" for s in subjects)
         print(f"[route] endpoint per-template A/B for all {len(subjects)} subjects "
               f"(axis-only; vs gradient shared-else-own)", flush=True)
     else:
         shared = {s for s in subjects if fields[s].route == "shared"}
-        if shared != EXPECTED_SHARED:
-            raise SystemExit(f"C3: shared routing {sorted(shared)} != expected {sorted(EXPECTED_SHARED)}")
+        expected_shared = (
+            EXPECTED_SHARED_TIMING_PLUS_3D
+            if args.template_source == "timing_plus_3d_direction"
+            else EXPECTED_SHARED
+        )
+        if shared != expected_shared:
+            raise SystemExit(
+                f"C3: shared routing {sorted(shared)} != expected "
+                f"{sorted(expected_shared)} for {args.template_source}"
+            )
         print(f"[route] shared={len(shared)} own={len(subjects)-len(shared)}", flush=True)
 
     if args.outdir is None and not args.validate_only:
@@ -450,7 +494,7 @@ def main():
     outdir = Path(args.outdir) if args.outdir else None
 
     input_paths = [PARENT_EVENT_CSV, CONFIG] + \
-        [FIELD_ROOT / f"{s}.json" for s in subjects] + \
+        [field_root / f"{s}.json" for s in subjects] + \
         [V2_BAND_CACHE / f"{s}.npz" for s in subjects] + \
         [BB150_CACHE / f"{s}.npz" for s in subjects]
     hashes_before = {str(p.relative_to(REPO)): sha256_file(p) for p in input_paths}
@@ -482,6 +526,21 @@ def main():
     if args.validate_only:
         print("[validate-only] cohort + routing + common-mask contract verified.")
         print(common_df.groupby("route").n_common_contacts.describe()[["min", "50%", "max"]])
+        return
+
+    if args.finalize_existing:
+        _finalize_existing_outputs(
+            events=events,
+            fields=fields,
+            common_df=common_df,
+            bands=bands,
+            grids=grids,
+            args=args,
+            input_paths=input_paths,
+            outdir=outdir,
+            field_root=field_root,
+            run_contract=run_contract,
+        )
         return
 
     outdir.mkdir(parents=True, exist_ok=True)
@@ -517,7 +576,8 @@ def main():
 
     _aggregate_and_write(events, fields, common_df, per_event, scored, ws_meta,
                          perm_audit, bands, band_names, grids, n_perm, args,
-                         hashes_before, input_paths, outdir)
+                         hashes_before, input_paths, outdir, field_root,
+                         run_contract)
 
 
 def _subject_fold(scored, events, subjects, method, key):
@@ -539,7 +599,8 @@ def _subject_fold(scored, events, subjects, method, key):
 
 def _aggregate_and_write(events, fields, common_df, per_event, scored, ws_meta,
                          perm_audit, bands, band_names, grids, n_perm, args,
-                         hashes_before, input_paths, outdir):
+                         hashes_before, input_paths, outdir, field_root,
+                         run_contract):
     subjects = list(dict.fromkeys(events.subject.tolist()))
     prim = f"R3_{grids[0]}"
     sens = f"R3_{grids[1]}" if len(grids) > 1 else None
@@ -831,7 +892,7 @@ def _aggregate_and_write(events, fields, common_df, per_event, scored, ws_meta,
                        if args.smoothing_policy == "subject_fixed"
                        else "frozen_per_model (shared->shared; own->A=own_a,B=own_b)")
     manifest = {
-        "contract": CONTRACT, "git_commit": commit,
+        "contract": run_contract, "git_commit": commit,
         "git_worktree_dirty": dirty,
         "reproducibility_note": ("code (runner/module/scripts) is committed on branch "
                                  "topic5-fig3-r3-grid-rebuild; results/ and figures are gitignored so "
@@ -841,6 +902,8 @@ def _aggregate_and_write(events, fields, common_df, per_event, scored, ws_meta,
         "seed": args.seed, "n_perm": n_perm, "grids": grids,
         "primary_grid": grids[0], "resolution_sensitivity_grid": grids[1] if len(grids) > 1 else None,
         "smoothing_policy": args.smoothing_policy,
+        "template_source": args.template_source,
+        "interictal_field_root": str(field_root.relative_to(REPO)),
         "axis": args.axis,
         "axis_note": ("endpoint = source->sink core axis (build_endpoint_cores k=3), per-template A/B "
                       "for all subjects; NOT the shared-else-own gradient routing (axis+routing confound)"
@@ -864,7 +927,7 @@ def _aggregate_and_write(events, fields, common_df, per_event, scored, ws_meta,
     (outdir / "contract_manifest.json").write_text(json.dumps(manifest, indent=2, default=str))
 
     summary = {
-        "contract": CONTRACT,
+        "contract": run_contract,
         "cohort": {"subjects": len(subjects), "events": len(events),
                    "shared": len({s for s in subjects if fields[s].route == 'shared'}),
                    "own": len({s for s in subjects if fields[s].route != 'shared'}),
@@ -895,6 +958,159 @@ def _aggregate_and_write(events, fields, common_df, per_event, scored, ws_meta,
         print(f"[summary] bands-only ({args.axis}); seven-band delta medians: " + json.dumps(
             [round(float(r["delta_cohort_median"]), 4) for r in band_cohort_rows]))
     print(f"[summary] resolution p95 |r161-r81| = {conv_p95:.4f}", flush=True)
+
+
+def _finalize_existing_outputs(
+    *, events, fields, common_df, bands, grids, args, input_paths, outdir,
+    field_root, run_contract,
+):
+    """Finish metadata after a post-write interruption without rescoring.
+
+    The numerical artifacts are written atomically before the manifest in the
+    main aggregation path.  This recovery path validates their full expected
+    dimensions and current input hashes before constructing metadata; it never
+    recomputes or substitutes statistics.
+    """
+    required = (
+        "multiband_subject.csv",
+        "multiband_cohort.csv",
+        "multiband_subject_null_draws.npz",
+        "multiband_band_omnibus.json",
+        "parent_anchor_cohort.csv",
+        "within_shaft_cohort.csv",
+        "fs_edge_sensitivity.csv",
+        "r2_r3_grid_convergence.csv",
+        "input_hashes_before_after.json",
+    )
+    missing = [name for name in required if not (outdir / name).is_file()]
+    if missing:
+        raise SystemExit(f"cannot finalize; missing outputs: {missing}")
+
+    band_names = [str(row["name"]) for row in bands]
+    subjects = list(dict.fromkeys(events.subject.tolist()))
+    arrays = np.load(outdir / "multiband_subject_null_draws.npz")
+    expected_shape = (len(subjects), len(band_names))
+    if arrays["D"].shape != expected_shape:
+        raise SystemExit(
+            f"cannot finalize; D shape {arrays['D'].shape} != {expected_shape}"
+        )
+    if arrays["N"].shape != (*expected_shape, int(args.n_perm)):
+        raise SystemExit(
+            f"cannot finalize; N shape {arrays['N'].shape} != "
+            f"{(*expected_shape, int(args.n_perm))}"
+        )
+    if [str(value) for value in arrays["subjects"]] != subjects:
+        raise SystemExit("cannot finalize; subject order mismatch")
+    if [str(value) for value in arrays["bands"]] != band_names:
+        raise SystemExit("cannot finalize; band order mismatch")
+
+    hash_record = json.loads(
+        (outdir / "input_hashes_before_after.json").read_text()
+    )
+    current_hashes = {
+        str(path.relative_to(REPO)): sha256_file(path) for path in input_paths
+    }
+    if not hash_record.get("unchanged") or current_hashes != hash_record["after"]:
+        raise SystemExit("cannot finalize; input hashes changed after scoring")
+
+    def records(name):
+        return pd.read_csv(outdir / name).to_dict(orient="records")
+
+    convergence = pd.read_csv(outdir / "r2_r3_grid_convergence.csv")
+    conv_p95 = float(np.percentile(convergence["abs_diff"], 95))
+    parent_rows = records("parent_anchor_cohort.csv")
+    seven_band = records("multiband_cohort.csv")
+    omnibus = json.loads((outdir / "multiband_band_omnibus.json").read_text())
+    within_rows = records("within_shaft_cohort.csv")
+    fs_rows = records("fs_edge_sensitivity.csv")
+    shared = {subject for subject in subjects if fields[subject].route == "shared"}
+
+    try:
+        commit = subprocess.check_output(
+            ["git", "-C", str(REPO), "rev-parse", "HEAD"]
+        ).decode().strip()
+        dirty = bool(
+            subprocess.check_output(
+                ["git", "-C", str(REPO), "status", "--porcelain"]
+            ).decode().strip()
+        )
+    except Exception:
+        commit, dirty = None, None
+
+    manifest = {
+        "contract": run_contract,
+        "git_commit": commit,
+        "git_worktree_dirty": dirty,
+        "reproducibility_note": (
+            "Recovered after a post-write manifest interruption. Numerical "
+            "CSV/NPZ artifacts were dimension-checked and their frozen input "
+            "hashes revalidated; no numerical statistic was recomputed."
+        ),
+        "seed": int(args.seed),
+        "n_perm": int(args.n_perm),
+        "grids": grids,
+        "primary_grid": grids[0],
+        "resolution_sensitivity_grid": grids[1] if len(grids) > 1 else None,
+        "smoothing_policy": args.smoothing_policy,
+        "template_source": args.template_source,
+        "interictal_field_root": str(field_root.relative_to(REPO)),
+        "axis": args.axis,
+        "band_definitions": bands,
+        "routing_rule": "complete_shared_else_own_fallback",
+        "fold": "seizure_median_within_subject_before_cohort",
+        "input_hashes": current_hashes,
+        "input_hashes_unchanged": True,
+        "expected": {
+            "subjects": EXPECTED_SUBJECTS,
+            "events": EXPECTED_EVENTS,
+            "strict": EXPECTED_STRICT,
+            "gamma": EXPECTED_GAMMA,
+        },
+        "finalization": "validated_existing_numerical_outputs",
+    }
+    (outdir / "contract_manifest.json").write_text(
+        json.dumps(manifest, indent=2, default=str)
+    )
+    summary = {
+        "contract": run_contract,
+        "cohort": {
+            "subjects": len(subjects),
+            "events": len(events),
+            "shared": len(shared),
+            "own": len(subjects) - len(shared),
+            "min_common_contacts": int(common_df.n_common_contacts.min()),
+            "median_common_contacts": int(common_df.n_common_contacts.median()),
+            "max_common_contacts": int(common_df.n_common_contacts.max()),
+        },
+        "parent_cohort": [
+            row for row in parent_rows if str(row["method"]).startswith("R3")
+        ],
+        "seven_band": seven_band,
+        "direct_band_omnibus": omnibus,
+        "resolution_convergence": {
+            "event_band_abs_diff_p95": conv_p95,
+            "gate_p95_le_0p02": bool(conv_p95 <= 0.02),
+            "subject_convergence": [],
+            "subject_convergence_recovery_note": (
+                "Per-band subject null convergence was not persisted before "
+                "the post-write interruption; event-level convergence and its "
+                "pre-registered p95 gate are preserved in the CSV."
+            ),
+        },
+        "within_shaft": within_rows[0],
+        "fs_edge": fs_rows,
+        "input_hashes_unchanged": True,
+        "outputs_root": str(outdir),
+        "finalization": "validated_existing_numerical_outputs",
+    }
+    (outdir / "summary.json").write_text(
+        json.dumps(summary, indent=2, default=str)
+    )
+    print(
+        f"[finalize] validated {len(subjects)} subjects, {len(band_names)} bands, "
+        f"{args.n_perm} null draws; manifest and summary written",
+        flush=True,
+    )
 
 
 if __name__ == "__main__":

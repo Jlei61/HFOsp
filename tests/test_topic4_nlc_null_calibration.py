@@ -11,6 +11,8 @@ from src.topic4_d6_natural_kmeans import (
 )
 from src.topic4_nlc_null_calibration import (
     contact_permutation_draws,
+    contact_permutation_matrix_draws,
+    crossfit_matrix,
     crossfit_margin,
     direction_label_permutation_draws,
     equal_network_null,
@@ -60,6 +62,22 @@ def test_fast_crossfit_margin_matches_reference(seed):
     assert fast == pytest.approx(reference, abs=1e-12)
 
 
+@pytest.mark.parametrize("seed", [0, 1, 2, 3, 4])
+def test_fast_crossfit_matrix_matches_reference(seed):
+    """Every cell must match before a cell-specific null can be trusted."""
+    ranks = _synthetic(seed)
+    patient_ranks, patient_labels = _patient(seed)
+    reference = crossfit_patient_readout(
+        ranks, patient_ranks, patient_labels, FOLDS,
+    )["matrix"]
+    fast = crossfit_matrix(
+        normalize_event_ranks(ranks),
+        patient_profiles(patient_ranks, patient_labels),
+        FOLDS,
+    )
+    np.testing.assert_allclose(fast, reference, atol=1e-12, rtol=0.0)
+
+
 def test_contact_permutation_null_is_centered_below_the_observed_signal():
     """A model that shares the patient axis must beat its own contact null."""
     ranks = _synthetic(7)
@@ -85,6 +103,22 @@ def test_contact_permutation_null_accepts_a_shaft_restriction():
         shaft_ids=shaft_ids,
     )
     assert len(draws) >= 30
+
+
+def test_contact_permutation_matrix_draws_are_aligned_and_deterministic():
+    ranks = _synthetic(6)
+    patient_ranks, patient_labels = _patient(6)
+    shaft_ids = np.asarray(["A"] * 8 + ["B"] * 7)
+    first = contact_permutation_matrix_draws(
+        ranks, patient_ranks, patient_labels, FOLDS, draws=24, seed=13,
+        shaft_ids=shaft_ids,
+    )
+    second = contact_permutation_matrix_draws(
+        ranks, patient_ranks, patient_labels, FOLDS, draws=24, seed=13,
+        shaft_ids=shaft_ids,
+    )
+    assert first.shape == (24, 2, 2)
+    np.testing.assert_allclose(first, second, equal_nan=True)
 
 
 def test_direction_label_null_is_above_one_half():

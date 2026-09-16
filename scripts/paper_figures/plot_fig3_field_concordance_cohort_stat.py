@@ -218,6 +218,9 @@ def plot_paired_data_null_groups(
     annotation_xy: tuple[float, float] = (0.97, 0.60),
     bottom: float | None = None,
     ylabel_fontsize: float = 11,
+    tick_fontsize: float = 10,
+    group_tick_fontsize: float = 9.2,
+    legend_fontsize: float = 8.2,
 ) -> None:
     """Reusable paired Data-vs-Null painter from the accepted Fig3 panel.
 
@@ -321,7 +324,7 @@ def plot_paired_data_null_groups(
         ax.set_xticks(centers)
         ax.set_xticklabels(
             [str(group.get("x_label", group["label"])) for group in groups],
-            fontsize=9.2,
+            fontsize=group_tick_fontsize,
         )
         ax.tick_params(axis="x", pad=4)
         ax.legend(
@@ -331,7 +334,7 @@ def plot_paired_data_null_groups(
             ],
             loc="lower right",
             frameon=False,
-            fontsize=8.2,
+            fontsize=legend_fontsize,
             handlelength=1.15,
         )
     else:
@@ -356,7 +359,7 @@ def plot_paired_data_null_groups(
             linespacing=1.45,
         )
     ax.spines[["top", "right"]].set_visible(False)
-    ax.tick_params(axis="both", width=1.0)
+    ax.tick_params(axis="both", labelsize=tick_fontsize, width=1.0)
     ax.yaxis.grid(False)
     ax.set_axisbelow(True)
     if bottom is None:

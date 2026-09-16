@@ -1,6 +1,6 @@
 # Topic 3：Where / SOZ 空间归因
 
-> 状态：**Epilepsiae 基础设施已解锁** — 2026-04-15 更新
+> 状态：**Epilepsiae 基础设施已解锁；clinical SOZ 三维紧凑性分析已完成** — 2026-08-20 更新
 > 范围：只讨论慢调制和时序差异在空间上发生在哪里，尤其是 SOZ / non-SOZ 的分离。
 > **Paper 1 架构性 framework**：`docs/paper1_framework_sba.md`（SBA framework：单核心假设 + 5 sharp predictions + 失败模式）。本 topic 的 PR-T3-1（数据驱动 SOZ audit）+ PR-8 v2（与 Topic 1 桥接的 endpoint anatomical anchoring）受 framework 中 P4 prediction 统辖；PR-T3-1 verdict 决定 P4 的 multi-source SOZ 协同检验如何落地。
 > **Topic 4 SEF-ITP framework**：`docs/topic4_sef_hfo.md`（2026-05-20 lock，取代 BHPN-toy；**Phase 0 解锁 2026-05-21**）—— PR-T3-1 Layer B 输出的数据驱动 SOZ 标签是 SEF-ITP H5（endpoint identity shift around seizures）的**第二份独立 SOZ 标签**，避免循环验证；H5 secondary 分析必须同时引用 clinical SOZ + data-driven SOZ 两个来源、不融合。**Coord loader v3.1 已落地**：`src/seeg_coord_loader.py` 自动发现 Epilepsiae MRI + 应用 MNI152 affine → Epilepsiae 通道坐标进入 cohort-comparable MNI mm 空间，可作 SEF-ITP H1 严格层 / H2 spatial reversal 主分析（27/27 病人 MRI 已确认 MNI152 1mm grid affine 一致）。
@@ -27,6 +27,7 @@
 
 - **Paper 1 framework（SBA）下的 Topic 3 角色**：本 topic 承担 P4 prediction（attractor 角色节点解剖锚定多源 SOZ proxy），通过 PR-T3-1（数据驱动 SOZ audit）+ PR-8 v2（held-out + multi-source SOZ）联合检验。Framework + 锁定的 PASS/NULL/FAIL 判据见 `docs/paper1_framework_sba.md` §5.4。
 - lagPat 群体事件框架中的 SOZ / non-SOZ 对比被结构性选择偏差严重污染。转到 per-channel relaxed-refine 后，raw serial correlation 的 SOZ 优势基本消失；更可信的信号是：**SOZ 通道在全局慢调制之上，可能额外保留了更强的局部短程记忆。**
+- **Clinical SOZ 空间紧凑性**：在 29 名坐标覆盖达标的患者中，SOZ 触点相对患者内等数量全植入触点 null 更紧凑（RMS 半径比中位数 0.375，95% CI 0.261–0.478；28/29 同向；单侧 Wilcoxon `P=3.7×10^-9`）；保留每个 electrode lead/array 的 SOZ 数量后结论仍成立（n=28，中位比值 0.653，95% CI 0.530–0.744；26/28 同向；`P=1.2×10^-7`）。该结果描述 clinical SOZ 本身的三维接触点几何，不能单独证明群体事件触点更集中。
 
 跨数据集 SOZ-AUC 验证证实新 pipeline 的检测质量与老论文一致：Yuquan refined AUC 0.874（老论文 0.857），Epilepsiae refined AUC 0.952。
 
@@ -150,6 +151,18 @@ Legacy 的一个隐患：`epilepsiae_detectHFOs.py` 模块顶部默认 `rel_thre
 
 **Epilepsiae Per-Subject 结果**：15 subjects with SOZ；完整表（subject × Raw AUC × Refined AUC × Δ × SOZ/Total）见 [`docs/archive/topic3/pr1_spatial_modulation/hfo_detection_rebuild_2026-04-15.md`](archive/topic3/pr1_spatial_modulation/hfo_detection_rebuild_2026-04-15.md) §4.4。Outlier：253（refine 后 AUC 大幅下降 0.872→0.731，29 ch + fs=512 Hz）、1150（轻微下降 0.970→0.926，3 SOZ / 124 total 极端不平衡）。
 
+### 4.5 Clinical SOZ 触点三维空间紧凑性（2026-08-19）
+
+本分析以 subject 为独立单元，比较 clinical SOZ 触点到自身质心的 RMS 半径与患者内等数量随机可映射颅内触点 null（每名患者 20,000 次）。35 名有 clinical SOZ 标签的患者中，29 名达到坐标合同；主分析的 SOZ/null 半径比中位数为 0.375（95% CI 0.261–0.478），28/29 同向，cohort 单侧 Wilcoxon `P=3.7×10^-9`。
+
+这里的 29 名不是既有 28 名 real-geometry sensitivity cohort 的分母漂移：后者限定在 34 名 masked stable-K2 propagation/model cohort 内，且包含 3 名没有 clinical SOZ 标签的患者；本分析从 35 名 clinical-SOZ-labelled cohort 独立筛选。两者仅重叠 24 名。within-lead/array 敏感性恰为 28 名，是因为 `zhangjiaqi` 没有组内置换自由度。
+
+为排除 SOZ 仅因落在少数电极杆或阵列而显得集中，又进行了 within-lead/array 敏感性：在每个通道名前缀组内保留观察到的 SOZ 数量，只随机具体触点位置。该分析 `n=28`，比值中位数 0.653（95% CI 0.530–0.744），26/28 同向，`P=1.2×10^-7`。median pairwise distance 也给出同向结果。
+
+**安全口径**：clinical SOZ 触点在患者内三维 SEEG 接触点空间中更紧凑，且不能只由 lead/array 选择解释。这不是“群体事件触点更集中”的直接检验；若与 SOZ-AUC 合并叙述，应明确是“群体事件相关 HFO 负荷具有 SOZ 富集”与“clinical SOZ 本身空间局限”两条互补证据。
+
+完整合同、排除清单、异质性与复现入口见 [`docs/archive/topic3/soz_contact_compactness_2026-08-19.md`](archive/topic3/soz_contact_compactness_2026-08-19.md)。当前图片仅为 candidate supplementary figure，未占用已有 FigS4 编号。
+
 
 ---
 
@@ -157,6 +170,7 @@ Legacy 的一个隐患：`epilepsiae_detectHFOs.py` 模块顶部默认 `rel_thre
 
 - **Epilepsiae per-channel 空间归因已解锁**——19/20 subjects 有完整 `gpu.npz` + `_refineGpu.npz`
 - 跨数据集 SOZ-AUC 验证通过：Yuquan refined 0.874 ≈ 老论文 0.857，Epilepsiae refined 0.952
+- Clinical SOZ 触点相对患者自身植入几何显著更紧凑；all-contact 与 within-lead/array 两个 null 及 median pairwise distance 均同向
 - 在 Yuquan-only per-channel 分析里，旧 lagPat 框架下的 SOZ raw-corr 优势并不稳
 - 更可信的信号是 detrended 之后的残差方向，而不是 raw serial correlation
 - `iei_median` 更短与 SOZ 更高事件率方向一致，但还只是边缘结果
@@ -217,6 +231,7 @@ Legacy 的一个隐患：`epilepsiae_detectHFOs.py` 模块顶部默认 `rel_thre
 - 检测结果：`results/hfo_detection/`（Yuquan + Epilepsiae gpu.npz / refineGpu.npz）
 - SOZ-AUC 结果：`results/refine_soz_validation/yuquan/`、`results/refine_soz_validation/epilepsiae/`
 - Per-channel 结果：`results/spatial_modulation/`
+- **Clinical SOZ 三维紧凑性**：`results/spatial_modulation/soz_contact_compactness/`；脚本 `scripts/run_soz_spatial_compactness.py`；完整报告 `docs/archive/topic3/soz_contact_compactness_2026-08-19.md`
 - **传播几何整合结果（Topic 1 × Topic 3 空间桥，探索性）**：`results/spatial_modulation/propagation_geometry/`
   - 顶层 `cohort_summary.json` / `cohort_summary.csv` 是 canonical 入口
   - `components/path_axis/` 保存模板均值 source/sink core、传播轴、留出半验证

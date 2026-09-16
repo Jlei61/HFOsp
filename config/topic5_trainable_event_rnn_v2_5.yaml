@@ -1,0 +1,96 @@
+contract: topic5_trainable_event_rnn_v2_5_4
+dataset_root: results/topic5_interictal_rank_distribution/dataset_v0_4/per_subject
+source_mapping_root: results/topic5_event_indexed_evolving_rank_field/development/input_audit/per_subject
+output_root: results/topic5_stable_repertoire_event_rnn/v2_5_4
+development_subjects:
+  - epilepsiae_922
+  - epilepsiae_620
+  - epilepsiae_1096
+  - yuquan_chenziyang
+  - yuquan_zhangjiaqi
+  - yuquan_zhangkexuan
+n_modes: 2
+history_length: 20
+horizon: 20
+training_target_windows: 1800
+maximum_training_windows: 2000
+ridge_alpha_grid: [0.01, 0.1, 1.0, 10.0, 100.0]
+baseline_profiles:
+  - {feature_name: unordered_l, decay: null}
+  - {feature_name: full_token_ewma, decay: 0.5}
+  - {feature_name: full_token_ewma, decay: 0.8}
+  - {feature_name: full_token_ewma, decay: 0.95}
+  - {feature_name: full_token_ewma, decay: 0.99}
+  - {feature_name: descriptor_ewma, decay: 0.5}
+  - {feature_name: descriptor_ewma, decay: 0.8}
+  - {feature_name: descriptor_ewma, decay: 0.95}
+  - {feature_name: descriptor_ewma, decay: 0.99}
+  - {feature_name: binned_lag, decay: null}
+screen_base_architecture:
+  cell: gru
+  hidden_size: 16
+  num_layers: 1
+  block_size: 1
+  input_layer_norm: false
+  hidden_layer_norm: false
+  dropout: 0.0
+  participation_weight: 0.25
+training_profiles:
+  - {name: adamw_3e-4_b32_z, optimizer: adamw, learning_rate: 0.0003, batch_size: 32, normalization: zscore, weight_decay: 0.0001, gradient_clip: 1.0}
+  - {name: adamw_1e-3_b64_z, optimizer: adamw, learning_rate: 0.001, batch_size: 64, normalization: zscore, weight_decay: 0.0001, gradient_clip: 1.0}
+  - {name: adamw_3e-3_b128_z, optimizer: adamw, learning_rate: 0.003, batch_size: 128, normalization: zscore, weight_decay: 0.0001, gradient_clip: 1.0}
+  - {name: adamw_1e-2_b128_z, optimizer: adamw, learning_rate: 0.01, batch_size: 128, normalization: zscore, weight_decay: 0.0001, gradient_clip: 1.0}
+  - {name: adam_1e-3_b64_z, optimizer: adam, learning_rate: 0.001, batch_size: 64, normalization: zscore, weight_decay: 0.0, gradient_clip: 1.0}
+  - {name: adam_3e-3_b128_z, optimizer: adam, learning_rate: 0.003, batch_size: 128, normalization: zscore, weight_decay: 0.0, gradient_clip: 1.0}
+  - {name: rmsprop_1e-3_b64_z, optimizer: rmsprop, learning_rate: 0.001, batch_size: 64, normalization: zscore, weight_decay: 0.0, gradient_clip: 1.0}
+  - {name: rmsprop_3e-3_b128_z, optimizer: rmsprop, learning_rate: 0.003, batch_size: 128, normalization: zscore, weight_decay: 0.0, gradient_clip: 1.0}
+  - {name: adamw_1e-3_b64_none, optimizer: adamw, learning_rate: 0.001, batch_size: 64, normalization: none, weight_decay: 0.0001, gradient_clip: 1.0}
+  - {name: adamw_1e-3_b64_robust, optimizer: adamw, learning_rate: 0.001, batch_size: 64, normalization: robust, weight_decay: 0.0001, gradient_clip: 1.0}
+  - {name: adamw_1e-3_b64_z_clip05, optimizer: adamw, learning_rate: 0.001, batch_size: 64, normalization: zscore, weight_decay: 0.0001, gradient_clip: 0.5}
+  - {name: adamw_1e-3_b64_z_clip5, optimizer: adamw, learning_rate: 0.001, batch_size: 64, normalization: zscore, weight_decay: 0.0001, gradient_clip: 5.0}
+architecture_profiles:
+  - {name: rnn_h8, cell: rnn, hidden_size: 8, num_layers: 1, block_size: 1, input_layer_norm: false, hidden_layer_norm: false, dropout: 0.0}
+  - {name: rnn_h16, cell: rnn, hidden_size: 16, num_layers: 1, block_size: 1, input_layer_norm: false, hidden_layer_norm: false, dropout: 0.0}
+  - {name: gru_h4, cell: gru, hidden_size: 4, num_layers: 1, block_size: 1, input_layer_norm: false, hidden_layer_norm: false, dropout: 0.0}
+  - {name: gru_h8, cell: gru, hidden_size: 8, num_layers: 1, block_size: 1, input_layer_norm: false, hidden_layer_norm: false, dropout: 0.0}
+  - {name: gru_h16, cell: gru, hidden_size: 16, num_layers: 1, block_size: 1, input_layer_norm: false, hidden_layer_norm: false, dropout: 0.0}
+  - {name: gru_h32, cell: gru, hidden_size: 32, num_layers: 1, block_size: 1, input_layer_norm: false, hidden_layer_norm: false, dropout: 0.0}
+  - {name: lstm_h8, cell: lstm, hidden_size: 8, num_layers: 1, block_size: 1, input_layer_norm: false, hidden_layer_norm: false, dropout: 0.0}
+  - {name: lstm_h16, cell: lstm, hidden_size: 16, num_layers: 1, block_size: 1, input_layer_norm: false, hidden_layer_norm: false, dropout: 0.0}
+  - {name: gru_h16_two_layer, cell: gru, hidden_size: 16, num_layers: 2, block_size: 1, input_layer_norm: false, hidden_layer_norm: false, dropout: 0.1}
+  - {name: gru_h16_input_ln, cell: gru, hidden_size: 16, num_layers: 1, block_size: 1, input_layer_norm: true, hidden_layer_norm: false, dropout: 0.0}
+  - {name: gru_h16_hidden_ln, cell: gru, hidden_size: 16, num_layers: 1, block_size: 1, input_layer_norm: false, hidden_layer_norm: true, dropout: 0.0}
+  - {name: gru_h16_step5, cell: gru, hidden_size: 16, num_layers: 1, block_size: 5, input_layer_norm: false, hidden_layer_norm: false, dropout: 0.0}
+joint_refinement_profiles:
+  - {name: reference}
+  - {name: lr_3e-4, learning_rate: 0.0003}
+  - {name: lr_1e-3, learning_rate: 0.001}
+  - {name: lr_1e-2, learning_rate: 0.01}
+  - {name: batch_32, batch_size: 32}
+  - {name: batch_64, batch_size: 64}
+  - {name: batch_256, batch_size: 256}
+  - {name: clip_0p5, gradient_clip: 0.5}
+  - {name: clip_5, gradient_clip: 5.0}
+  - {name: weight_decay_1e-4, weight_decay: 0.0001}
+  - {name: normalize_none, normalization: none}
+  - {name: normalize_robust, normalization: robust}
+  - {name: optimizer_adam, optimizer: adam}
+  - {name: optimizer_adamw, optimizer: adamw, weight_decay: 0.0001}
+  - {name: hidden_4, hidden_size: 4}
+  - {name: hidden_8, hidden_size: 8}
+  - {name: hidden_32, hidden_size: 32}
+  - {name: cell_rnn, cell: rnn}
+  - {name: cell_lstm, cell: lstm}
+  - {name: layers_2, num_layers: 2, dropout: 0.1}
+  - {name: step_5, block_size: 5}
+screen_seed: 17
+final_seeds: [17, 29, 43]
+maximum_epochs: 120
+minimum_epochs: 15
+patience: 15
+torch_num_threads: 1
+forbidden_inputs:
+  old_heldout20: true
+  ab_or_axis_labels: true
+  geometry_or_soz: true
+  ictal_or_snn: true

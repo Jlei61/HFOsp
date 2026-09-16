@@ -140,6 +140,58 @@ def main() -> None:
                     path_value(value, path) for value in edge_estimable
                 ])
             row["estimable_seeds"] = int(len(edge_estimable))
+            # A zero-selected edge on an identifiable design is an ordinary
+            # negative, not a missing measurement.  Keep it out of the contrast
+            # medians (a zero real edge makes real-minus-no-edge degenerate and
+            # real-minus-placebo an artefact of the placebo), but never blank the
+            # row: record how many seeds looked and found nothing, and whether a
+            # sibling arm on the same rows did fit an edge.
+            zero_edge = [
+                value for value in estimated
+                if value.get("real_edge_status", (
+                    "FITTED" if value["real_edge_estimable"]
+                    else "ZERO_EDGE_SELECTED"
+                )) == "ZERO_EDGE_SELECTED"
+            ]
+            row["zero_edge_selected_seeds"] = int(len(zero_edge))
+            row["not_identifiable_seeds"] = int(sum(
+                value.get("real_edge_status") == "NOT_IDENTIFIABLE"
+                for value in estimated
+            ))
+            row["unclassified_seeds"] = int(
+                len(payloads) - len(edge_estimable) - len(zero_edge)
+                - row["not_identifiable_seeds"]
+                - (len(payloads) - len(estimated))
+            )
+            # Derive rather than trust a flag: artifacts written before this
+            # field existed would otherwise report "no sibling fitted an edge"
+            # for runs where one plainly did.
+            def _sibling_fitted(value: dict) -> bool:
+                next_event = value.get("validation", {}).get("next_event", {})
+                if not {"current_event_only", "no_edge"} <= set(next_event):
+                    return bool(
+                        value.get("sibling_current_event_edge_beats_no_edge")
+                    )
+                return bool(
+                    next_event["current_event_only"]["joint_nll_per_event"]
+                    < next_event["no_edge"]["joint_nll_per_event"]
+                )
+
+            row["sibling_current_edge_fitted_seeds"] = int(sum(
+                _sibling_fitted(value) for value in estimated
+            ))
+            row["zero_edge_evidence"] = (
+                None if not zero_edge else
+                "the cumulative-exposure edge found no held-out gain in "
+                f"{len(zero_edge)}/{len(payloads)} seeds on an identifiable "
+                "design"
+                + (
+                    "; the current-event arm on the same rows did beat no-edge, "
+                    "so the machinery could have fitted one"
+                    if row["sibling_current_edge_fitted_seeds"] else
+                    "; no sibling arm fitted an edge either"
+                )
+            )
             row["primary_increment_seeds"] = int(sum(
                 value["primary_next_event_increment"] for value in payloads
             ))
@@ -230,6 +282,12 @@ def main() -> None:
             for row in rows if row["eligible_for_scale_expansion"]
         ],
         "ordinary_negative_is_reported_not_hidden": True,
+        "zero_edge_rule": (
+            "a zero-selected edge on an identifiable design is an ordinary "
+            "negative and is reported as zero_edge_selected_seeds with its "
+            "sibling-arm evidence; only NOT_IDENTIFIABLE and support-ineligible "
+            "seeds are missing measurements"
+        ),
         "event_rows_are_not_treated_as_independent_patients": True,
         "formal_test_partition_opened": False,
         "sealed_opened": False,

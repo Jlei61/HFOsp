@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build Supplementary Figure 6 on one aligned seven-band canvas.
+"""Build Supplementary Figure 5 on one aligned seven-band canvas.
 
 Panel A preserves the accepted cohort subject-delta/violin/maxT-FWER grammar.
 Panel B shows the same 17 subjects as a subject-by-band own-null heatmap.
@@ -27,12 +27,21 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from scripts.paper_figures.patient_public_labels import public_patient_label  # noqa: E402
+from src.supplementary_figure_style import (  # noqa: E402
+    ANNOTATION_SIZE,
+    AXIS_LABEL_SIZE,
+    PANEL_LETTER_SIZE,
+    SIGNIFICANCE_SIZE,
+    TICK_LABEL_SIZE,
+    apply_supplementary_rcparams,
+    normalize_axis_text,
+)
 CALC = (
     ROOT
     / "results/topic5_ictal_recruitment/field_concordance_grid_method_sensitivity/"
-    "n161_subject_fixed"
+    "n161_subject_fixed_timing_plus_3d_direction"
 )
-OUT_ROOT = ROOT / "results/paper-ready-figure/supp_fig6_multiband_field_concordance"
+OUT_ROOT = ROOT / "results/paper-ready-figure/supp_fig5_multiband_field_concordance"
 FIG_DIR = OUT_ROOT / "figures"
 NULL_NPZ = CALC / "multiband_subject_null_draws.npz"
 SUBJECT_CSV = CALC / "multiband_subject.csv"
@@ -94,6 +103,9 @@ def _load() -> dict:
         raise RuntimeError("NPZ delta does not match multiband_subject.csv")
     cohort = pd.read_csv(COHORT_CSV).set_index("band").reindex(BAND_ORDER)
     cohort_median = cohort["delta_cohort_median"].to_numpy(dtype=float)
+    cohort_per_band_p = cohort[
+        "coherent_cohort_spatial_null_p"
+    ].to_numpy(dtype=float)
     pfwer = cohort["seven_band_maxt_pfwer"].to_numpy(dtype=float)
 
     order = sorted(
@@ -109,6 +121,7 @@ def _load() -> dict:
         "delta": delta,
         "subject_p": subject_p,
         "cohort_median": cohort_median,
+        "cohort_per_band_p": cohort_per_band_p,
         "cohort_pfwer": pfwer,
         "order": np.asarray(order, dtype=int),
         "n_null": int(null.shape[2]),
@@ -121,7 +134,7 @@ def _draw_cohort(ax: plt.Axes, payload: dict) -> None:
     for col in range(len(BAND_ORDER)):
         values = payload["delta"][:, col]
         values = values[np.isfinite(values)]
-        significant = bool(payload["cohort_pfwer"][col] < 0.05)
+        significant = bool(payload["cohort_per_band_p"][col] < 0.05)
         color = SIG_COLOR if significant else NS_COLOR
         if values.size >= 2 and np.nanmax(values) > np.nanmin(values):
             body = ax.violinplot(
@@ -159,7 +172,7 @@ def _draw_cohort(ax: plt.Axes, payload: dict) -> None:
     y_lo = min(-0.62, data_min - 0.04)
     y_hi = max(0.48, data_max + 0.13)
     star_y = data_max + 0.075
-    for col, p_value in enumerate(payload["cohort_pfwer"]):
+    for col, p_value in enumerate(payload["cohort_per_band_p"]):
         if p_value < 0.05:
             ax.text(
                 col,
@@ -168,16 +181,16 @@ def _draw_cohort(ax: plt.Axes, payload: dict) -> None:
                 ha="center",
                 va="center",
                 color=SIG_COLOR,
-                fontsize=15,
+                fontsize=SIGNIFICANCE_SIZE,
                 fontweight="bold",
             )
     ax.axhline(0.0, color="0.48", lw=0.75)
     ax.set_xlim(-0.5, len(BAND_ORDER) - 0.5)
     ax.set_ylim(y_lo, y_hi)
-    ax.set_ylabel("Field concordance − own null (Δ)", fontsize=8)
+    ax.set_ylabel("Field concordance − own null (Δ)", fontsize=AXIS_LABEL_SIZE)
     ax.set_xticks(np.arange(len(BAND_ORDER)))
     ax.tick_params(axis="x", bottom=False, labelbottom=False)
-    ax.tick_params(axis="y", labelsize=7, length=2.5)
+    ax.tick_params(axis="y", labelsize=TICK_LABEL_SIZE, length=2.5)
     ax.grid(axis="y", color="0.91", lw=0.55, zorder=0)
     ax.spines[["top", "right"]].set_visible(False)
     ax.spines[["bottom", "left"]].set_linewidth(0.7)
@@ -213,7 +226,7 @@ def _draw_heatmap(
                     ha="center",
                     va="center",
                     color="white",
-                    fontsize=8.8,
+                    fontsize=SIGNIFICANCE_SIZE,
                     fontweight="bold",
                 )
                 artist.set_path_effects(
@@ -227,7 +240,7 @@ def _draw_heatmap(
             f"{value:+.02f}",
             ha="center",
             va="center",
-            fontsize=6.0,
+            fontsize=ANNOTATION_SIZE,
             color=color,
         )
     ax.set_xlim(-0.5, len(BAND_ORDER) - 0.5)
@@ -242,22 +255,22 @@ def _draw_heatmap(
         labeltop=True,
         bottom=False,
         labelbottom=False,
-        labelsize=7.2,
+        labelsize=TICK_LABEL_SIZE,
         length=0,
         pad=3,
     )
-    ax.tick_params(axis="y", labelsize=6.8, length=0)
+    ax.tick_params(axis="y", labelsize=TICK_LABEL_SIZE, length=0)
     for tick in ax.get_yticklabels():
         tick.set_fontweight("bold")
     for spine in ax.spines.values():
         spine.set_linewidth(0.6)
     cbar = fig.colorbar(image, cax=cax)
     cbar.set_label(
-        "Field concordance Δ\n(observed − own-null median)",
-        fontsize=6.8,
+        "Concordance Δ vs own null",
+        fontsize=AXIS_LABEL_SIZE,
         labelpad=7,
     )
-    cbar.ax.tick_params(labelsize=6.2, length=2)
+    cbar.ax.tick_params(labelsize=TICK_LABEL_SIZE, length=2)
     cbar.outline.set_linewidth(0.55)
     return subjects, pvalues
 
@@ -265,16 +278,9 @@ def _draw_heatmap(
 def main() -> None:
     payload = _load()
     FIG_DIR.mkdir(parents=True, exist_ok=True)
-    plt.rcParams.update(
-        {
-            "font.family": "sans-serif",
-            "font.sans-serif": ["Arial", "DejaVu Sans"],
-            "pdf.fonttype": 42,
-            "ps.fonttype": 42,
-            "axes.unicode_minus": False,
-        }
-    )
-    fig = plt.figure(figsize=(6.65, 5.85), facecolor="white")
+    apply_supplementary_rcparams()
+    plt.rcParams["axes.unicode_minus"] = False
+    fig = plt.figure(figsize=(6.25, 5.65), facecolor="white")
     grid = fig.add_gridspec(
         2,
         2,
@@ -301,7 +307,7 @@ def main() -> None:
         "A",
         ha="left",
         va="top",
-        fontsize=11,
+        fontsize=PANEL_LETTER_SIZE,
         fontweight="bold",
     )
     fig.text(
@@ -310,11 +316,18 @@ def main() -> None:
         "B",
         ha="left",
         va="top",
-        fontsize=11,
+        fontsize=PANEL_LETTER_SIZE,
         fontweight="bold",
     )
 
-    stem = FIG_DIR / "supp_fig6_multiband_cohort_and_subject_heatmap"
+    normalize_axis_text(ax_cohort)
+    normalize_axis_text(ax_heat)
+    for tick in ax_heat.get_yticklabels():
+        tick.set_fontweight("bold")
+    cax.yaxis.label.set_fontsize(AXIS_LABEL_SIZE)
+    cax.yaxis.label.set_fontweight("normal")
+    cax.tick_params(labelsize=TICK_LABEL_SIZE)
+    stem = FIG_DIR / "supp_fig5_multiband_cohort_and_subject_heatmap"
     fig.savefig(stem.with_suffix(".png"), dpi=400, bbox_inches="tight", facecolor="white")
     fig.savefig(stem.with_suffix(".pdf"), bbox_inches="tight", facecolor="white")
     plt.close(fig)
@@ -340,42 +353,59 @@ def main() -> None:
             }
         )
     omnibus = json.loads(OMNIBUS_JSON.read_text(encoding="utf-8"))
+    min_pfwer = float(np.nanmin(payload["cohort_pfwer"]))
+    n_fwer_significant = int(np.sum(payload["cohort_pfwer"] < 0.05))
     caption_title = (
-        "Multiband sensitivity analysis of ictal-to-interictal field concordance."
+        "Multiband ictal concordance with Timing + 3D direction templates."
     )
     caption_body = (
         f"**A,** Patient-level field-concordance difference (\u0394) across seven "
         f"frequency bands in {len(subjects)} patients. For each patient and "
         f"band, D is the median early-ictal dense-grid spatial concordance with "
-        f"the better-matching of two predefined interictal template fields "
+        f"the better-matching TA or TB field defined by Timing + 3D direction "
+        f"clustering "
         f"after resolving sign and transverse-mirror symmetry, and \u0394 is D minus the "
         f"median of that patient's all-contact permutation null "
         f"({payload['n_null']} draws); points denote patients, violins the "
         f"distributions and black horizontal lines the cohort medians. Red "
-        f"violins and stars denote bands significant under a coherent "
-        f"seven-band maxT family-wise error-rate correction (*P_FWER < 0.05). "
+        f"violins and stars denote a coherent cohort spatial-null test within "
+        f"that frequency band (one-sided permutation P < 0.05, uncorrected "
+        f"across the seven bands). "
         f"**B,** Heat map of the same patient-by-band \u0394 values, with rows "
         f"ordered by the number of bands exceeding the patient's own null and "
         f"the bottom row showing cohort medians; outlined stars denote "
         f"one-sided empirical patient-versus-own-null P < 0.05 and are not "
         f"cohort-level or multiplicity-corrected. Bands are \u03b4 (1\u20134 Hz), "
         f"\u03b8 (4\u20138 Hz), \u03b1 (8\u201313 Hz), \u03b2 (13\u201330 Hz), "
-        f"\u03b3 (30\u201380 Hz), R (80\u2013150 Hz) and FR (150\u2013250 Hz)."
+        f"\u03b3 (30\u201380 Hz), R (80\u2013150 Hz) and FR (150\u2013250 Hz). "
+        f"Five bands passed the per-band spatial-null test, whereas no band "
+        f"passed the seven-band maxT correction "
+        f"(minimum P_FWER = {min_pfwer:.3f}); the direct between-band omnibus "
+        f"test was also not significant (calibrated P = "
+        f"{float(omnibus['calibrated_p']):.3f})."
     )
     metadata = {
-        "figure": "Supplementary Figure 6",
+        "figure": "Supplementary Figure 5",
         "caption": (
-            f"Supplementary Fig. 6 | {caption_title} "
+            f"Supplementary Fig. 5 | {caption_title} "
             f"{caption_body.replace('**', '')}"
         ),
         "source": str(NULL_NPZ.relative_to(ROOT)),
         "n_subjects": len(subjects),
         "n_bands": len(BAND_ORDER),
         "n_null_draws_per_subject_band": payload["n_null"],
+        "interictal_template_source": "Timing + 3D direction",
         "panel_a": {
             "cell_source": str(SUBJECT_CSV.relative_to(ROOT)),
             "estimand": "subject-level D minus own all-contact null median",
-            "star": "seven-band coherent maxT-FWER P<0.05",
+            "star": (
+                "within-band coherent cohort spatial-null permutation P<0.05; "
+                "uncorrected across seven bands"
+            ),
+            "cohort_per_band_p": {
+                band: float(payload["cohort_per_band_p"][col])
+                for col, band in enumerate(BAND_ORDER)
+            },
             "cohort_pfwer_by_band": {
                 band: float(payload["cohort_pfwer"][col])
                 for col, band in enumerate(BAND_ORDER)
@@ -404,17 +434,19 @@ def main() -> None:
             "pdf": str(stem.with_suffix(".pdf").relative_to(ROOT)),
         },
     }
-    (OUT_ROOT / "supp_fig6_multiband_combined_metadata.json").write_text(
+    (OUT_ROOT / "supp_fig5_multiband_combined_metadata.json").write_text(
         json.dumps(metadata, indent=2, ensure_ascii=False) + "\n",
         encoding="utf-8",
     )
     (FIG_DIR / "README.md").write_text(
-        "### supp_fig6_multiband_cohort_and_subject_heatmap.png\n\n"
-        f"**Supplementary Fig. 6 | {caption_title}**\n\n"
+        "### supp_fig5_multiband_cohort_and_subject_heatmap.png\n\n"
+        f"**Supplementary Fig. 5 | {caption_title}**\n\n"
         f"{caption_body}\n\n"
-        "**关注点**：A 的星号是队列 maxT-FWER，B 的 cell 星号是患者自身 "
-        "null P<0.05，二者不可互换。频带间直接 omnibus 检验为非显著，因此"
-        "不能由 δ/θ 的星号声称它们显著强于其他频带。\n",
+        f"**关注点**：该版本使用 Timing + 3D direction TA/TB 模板。A 中 "
+        "A 的星号表示逐频带 cohort spatial-null P<0.05，未作七频带校正；"
+        f"{n_fwer_significant} 个频带通过七频带 maxT-FWER。B 的 cell 星号仅表示"
+        "患者自身 null P<0.05，不是队列水平结果。频带间直接 omnibus 检验为"
+        "非显著，不能声称存在优势频带。\n",
         encoding="utf-8",
     )
     print(stem.with_suffix(".png"))

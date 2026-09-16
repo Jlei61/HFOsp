@@ -6,7 +6,7 @@
 
 ## 1. 一句话论点
 
-在两个独立 SEEG 队列中，间期 HFO 群体事件在患者内反复呈现稳定而多模态的通道激活顺序；在具有可复现相反排序模板的患者子集中，两类模板可投影为同一三维 SEEG 接触点传播轴的相反读取，支持这些事件反复采样患者特异性病理传播骨架。
+在两个独立 SEEG 队列中，间期 HFO 群体事件在患者内反复呈现稳定而多模态的触点招募顺序；真实三维电极坐标提高了留出记录块上的传播方向一致性，在具有可复现相反排序模板的患者子集中，两类模板还表现为患者特异性三维传播轴的相反读取。
 
 边界：分析发生在 SOZ-enriched HFO network 中，但不能写成“证明了局限于 clinical SOZ 内部的传播轴”。
 
@@ -31,11 +31,12 @@ Artifact：`results/interictal_propagation_masked/pr1_cohort_summary.json`。
 | 指标 | 当前结果 | 解释 |
 |---|---:|---|
 | Geometry records | 30 ok；primary 23；fallback 3；descriptive 4 | 不与总体 n=40 混写 |
+| Held-out spatial-information gain | n=25；Timing median=0.506；Timing+space median=0.568；21/25 提高；median Δ=0.028，95% CI 0.001–0.063；P=9.08×10^-4 | 真实三维坐标为模板发现提供了超出相对时序的方向信息 |
 | Held-out axis validation | n=26；median Spearman rho=0.752 | 接触点轴可预测 held-out rank |
 | Paired axes | n=10 | 可严格比较两模板方向的 subset |
 | Strong reversed shared axis | 7/10；median cosine=-0.977 | 支持同轴相反读取 |
 
-Artifact：`results/spatial_modulation/propagation_geometry/cohort_summary.json`。
+Artifacts：`results/interictal_propagation_masked/spatial_information_gain/spatial_information_gain_summary.json`；`results/spatial_modulation/propagation_geometry/cohort_summary.json`。
 
 ### SOZ 边界
 
@@ -67,7 +68,7 @@ Figure 1 已指定为本核心主图。逐 panel 合同见 [`figure1_interictal_
 
 ### Table S4：Per-patient spatial evidence
 
-`patient, coordinate_available, coordinate_space, geometry_tier, n_mapped_contacts, heldout_axis_rho, paired_axis_cosine, endpoint_compactness, spatial_eligible, exclusion_reason`
+`patient, coordinate_available, coordinate_space, geometry_tier, n_mapped_contacts, timing_only_direction_score, timing_plus_space_direction_score, spatial_information_gain, heldout_axis_rho, paired_axis_cosine, endpoint_compactness, spatial_eligible, exclusion_reason`
 
 ## 5. Cohort denominator contract
 

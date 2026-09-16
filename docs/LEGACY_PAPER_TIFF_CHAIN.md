@@ -254,6 +254,8 @@
 | **A** | 个例（Y1, Y5）：脑区 bar + 3D 电极 UpStream 示意                            | `plotting_fig4_regionHist_median.py` + 3D 渲染    | `*_lagPat.npz`, region labels `<sub>.npy`, `chnXyzDict.npy` | `plotting_fig4_elecRegionLabels.py`（写 region labels），`p16_packGroupEvents*.py` |
 | **B** | 群体 First-Half-Rank 通道 ratio by brain region（Yuquan + Epilepsiae） | `plotting_fig4_regionHist_median.py`（bar chart） | region labels, `*_lagPat.npz`                               | `plotting_fig4_elecRegionLabels.py`                                            |
 
+当前重建稿 Figure 1A 复用本 TIFF Panel A 上排的一张脑表面/SEEG 植入渲染，仅作 representative implantation context。规范入口 `build_main_figures_1_2.py` 使用固定像素裁剪，不沿用原图的 Y1 标签、UpStream 解释或脑区柱状统计，也不据此声明 Figure 1A 的患者身份。
+
 
 ---
 
@@ -412,4 +414,3 @@
 - **追某张图的某个 panel** → 在本表对应 Figure 段找到 Panel 行 → 读画图脚本列 → 读输入资产列 → 读资产生成脚本列
 - TIFF 编号 ≠ 脚本前缀，永远从图面内容出发
 - 凡是主要依赖 `hist_meanX / MI / variance` 的 panel，先默认它在讲**老式未屏蔽 rank 模板链**，除非脚本明确先用了 `eventsBool`
-

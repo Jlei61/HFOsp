@@ -1,0 +1,57 @@
+contract:
+  name: topic5_event_indexed_evolving_rank_field_v2_2
+  phase: phase0_observability_only
+
+data:
+  dataset_dir: results/topic5_interictal_rank_distribution/dataset_v0_4
+  train80_calibration_fraction: 0.75
+  outer_heldout20_policy: not_entered_into_fitting_selection_or_scoring
+
+pilot:
+  subjects:
+    - epilepsiae_922
+    - epilepsiae_620
+    - epilepsiae_1096
+    - yuquan_chenziyang
+    - yuquan_zhangjiaqi
+    - yuquan_zhangkexuan
+
+blocks:
+  candidate_event_counts: [20, 40, 80]
+  min_calibration_blocks: 30
+  min_confirmation_blocks: 16
+  min_confirmation_adjacent_pairs: 10
+  rank_reliability_threshold: 0.60
+  participation_reliability_threshold: 0.70
+  reliability_repeats: 20
+  max_calibration_blocks_for_reliability: 128
+  max_calibration_blocks_for_low_rank: 128
+  max_confirmation_blocks_for_g0: 128
+  shrinkage_prior_events: 4.0
+  beta_prior: 0.5
+
+g0:
+  permutation_draws: 200
+  split_repeats: 20
+  max_between_pairs_per_repeat: 5000
+  distance_ratio_threshold: 1.10
+  permutation_p_threshold: 0.05
+  precedence_direction_required: true
+  random_seed: 20260801
+
+low_rank:
+  dimensions: [1, 2, 3, 4]
+  minimum_heldout_gain: 0.10
+  null_quantile: 0.95
+  permutation_draws: 200
+  middle_rank_lower: 0.20
+  middle_rank_upper: 0.80
+
+forbidden_inputs:
+  ab_labels: true
+  pathological_axis: true
+  soz: true
+  ictal_targets: true
+  snn: true
+  geometry: true
+  old_heldout20: true

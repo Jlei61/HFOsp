@@ -5,7 +5,8 @@
 **通过，锁定为 paper-ready Fig3-A 正式版本。** Canonical producer 为
 `scripts/paper_figures/plot_fig3_raw_spectral_context.py`，canonical 输出为
 `results/paper-ready-figure/fig3a_raw_spectral_context/figures/`。原
-`fig3_sup2_raw_spectral_context/` 仅保留历史溯源，不再作为正式 panel 引用。
+`results/paper-ready-figure/archive/2026-08-09_stale_aliases/fig3_sup2_raw_spectral_context/`
+仅保留历史溯源，不再作为正式 panel 引用。
 
 这张图承担 reader-facing signal context：把同一 seizure 的 raw SEEG、单通道 TFR 和四档
 band-power trajectory 放在一个连续 clinical-onset 时间轴上。它不是 cohort statistic，也不支持

@@ -19,12 +19,18 @@ from matplotlib.legend_handler import HandlerTuple
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 import numpy as np
+
 from scipy.stats import gaussian_kde
 
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from src.paper_figure_typography import (  # noqa: E402
+    DENSE_COMPARISON_TYPOGRAPHY,
+    LOCKED_PANEL_TYPOGRAPHY_POLICY,
+    apply_panel_aware_figure_typography,
+)
 from scripts.plot_topic5_interictal_template_direction_rose import (  # noqa: E402
     TA_COLOR,
     TB_COLOR,
@@ -47,6 +53,7 @@ from src.topic5_interictal_direction_rose import (  # noqa: E402
 from src.topic5_tspectral_field_concordance import (  # noqa: E402
     bootstrap_median_ci,
 )
+from scripts.paper_figures.patient_public_labels import public_patient_label  # noqa: E402
 
 
 DEFAULT_ANALYSIS_ROOT = (
@@ -60,7 +67,9 @@ PAPER_STEM = "fig2b-spatial-information-gain"
 VIOLIN_FIGURE_STEM = "interictal_spatial_information_gain_paired_violin"
 VIOLIN_PAPER_STEM = "fig2b-spatial-information-gain-paired-violin"
 DEFAULT_EXAMPLES = ("epilepsiae_1146", "epilepsiae_548")
-DEFAULT_EXAMPLE_LABELS = ("E1146", "E548")
+DEFAULT_EXAMPLE_LABELS = tuple(
+    public_patient_label(*subject.split("_", 1)) for subject in DEFAULT_EXAMPLES
+)
 ROSE_FOLD_INDEX = 0
 ROSE_BINS = 18
 
@@ -494,7 +503,7 @@ def draw_paired_scores(
     ax.set_ylim(-0.055, max(1.04, top + 0.075))
     ax.set_xticks([x_timing, x_hybrid])
     ax.set_xticklabels(
-        ["Timing", "Timing + space"],
+        ["Timing-only", "Timing + 3D\ndirection"],
         fontsize=8.5,
     )
     ax.set_ylabel(ylabel, fontsize=9.2, labelpad=7)
@@ -618,12 +627,6 @@ def draw_gain_and_null(
         labelpad=6,
     )
     ax.set_ylabel("Patients (ordered)", fontsize=9.2, labelpad=7)
-    ax.set_title(
-        "Two-way held-out cohort comparison",
-        fontsize=9.5,
-        fontweight="bold",
-        pad=7,
-    )
     ax.text(
         0.985,
         0.97,
@@ -819,28 +822,28 @@ def draw_absolute_scores_and_null(
     ax.text(
         null_median,
         label_y,
-        "Null",
+        "Direction-\nshuffle null",
         ha="center",
         va="top",
-        fontsize=6.4,
+        fontsize=5.8,
         color=TEXT,
     )
     ax.text(
         timing_median - 0.012,
         label_y,
-        "Timing",
+        "Timing-only",
         ha="right",
         va="top",
-        fontsize=6.5,
+        fontsize=6.1,
         color=TEMPORAL_COLOR,
     )
     ax.text(
         hybrid_median + 0.012,
         label_y,
-        "+Space",
+        "Timing + 3D\ndirection",
         ha="left",
         va="top",
-        fontsize=6.5,
+        fontsize=5.8,
         color=HYBRID_COLOR,
     )
 
@@ -898,7 +901,7 @@ def draw_absolute_scores_and_null(
     ax.text(
         0.02,
         0.80,
-        f"{summary['n_positive_gain']}/{summary['n']} improve",
+        f"{summary['n_positive_gain']}/{summary['n']} higher with\n3D direction",
         transform=ax.transAxes,
         ha="left",
         va="top",
@@ -931,7 +934,7 @@ def _write_readme(
         f"### {filename}.png / .pdf",
         "",
         (
-            "左侧固定复用原 Fig. 2B 的 E1146 与 E548，每位患者只画一张 fold-0 held-out 全事件 rose；同色虚线是 Timing 训练模板轴，同色实线是 Timing + space 训练模板轴，两种方法严格共享事件集合和二维显示基底，并将空间模型的 Mode 1 红色实线固定为 0°。"
+            "左侧固定复用原 Fig. 2B 的 E10 与 E14，每位患者只画一张 fold-0 held-out 全事件 rose；同色虚线是 Timing 训练模板轴，同色实线是 Timing + space 训练模板轴，两种方法严格共享事件集合和二维显示基底，并将空间模型的 Mode 1 红色实线固定为 0°。"
         ),
         (
             f"右侧恢复原 Fig. 2B 的绝对 direction-score/零假设语法：底部同一行叠加蓝色 Timing、橙色 +Space 的 10,000 次患者 bootstrap cohort-median 分布，以及冻结 Timing + space 模型后在 held-out recording block 内打乱事件方向得到的灰色 cohort-median null；空间模型真实中位分数为 {absolute['timing_plus_space_median']:.3f}，对 null 的经验 p={absolute['hybrid_observed_vs_null_empirical_p']:.4g}。"
@@ -1007,22 +1010,33 @@ def build_figure(
         "pdf.fonttype": 42,
         "ps.fonttype": 42,
     })
-    fig = plt.figure(figsize=(7.15, 4.55), facecolor="white")
+    fig = plt.figure(figsize=(9.20, 4.55), facecolor="white")
     grid = fig.add_gridspec(
-        2,
+        1,
         2,
         width_ratios=(1.05, 1.35),
-        height_ratios=(1, 1),
         left=0.028,
         right=0.992,
-        top=0.945,
-        bottom=0.145,
-        wspace=0.18,
-        hspace=0.26,
+        top=0.90,
+        bottom=0.19,
+        wspace=0.20,
     )
+    left_box = grid[0, 0].get_position(fig)
+    left_grid = fig.add_gridspec(
+        3,
+        1,
+        left=left_box.x0,
+        right=left_box.x1,
+        top=0.985,
+        bottom=0.035,
+        height_ratios=(0.27, 1.0, 1.0),
+        hspace=0.28,
+    )
+    legend_ax = fig.add_subplot(left_grid[0, 0])
+    legend_ax.set_axis_off()
     rose_axes: list[plt.Axes] = []
     for row_index, (payload, label) in enumerate(zip(rose_payloads, example_labels)):
-        ax = fig.add_subplot(grid[row_index, 0], projection="polar")
+        ax = fig.add_subplot(left_grid[row_index + 1, 0], projection="polar")
         draw_combined_probability_rose(
             ax,
             payload,
@@ -1032,7 +1046,7 @@ def build_figure(
         )
         rose_axes.append(ax)
 
-    gain_ax = fig.add_subplot(grid[:, 1])
+    gain_ax = fig.add_subplot(grid[0, 1])
     draw_absolute_scores_and_null(
         gain_ax,
         rows,
@@ -1040,33 +1054,41 @@ def build_figure(
         cohort_null_hybrid,
         example_labels=example_label_map,
     )
-    rose_legend = [
-        Patch(
+    event_handle = Patch(
             facecolor=matplotlib.colors.to_rgba("#8B8B8B", 0.24),
             edgecolor="#6F6F6F",
             linewidth=0.8,
             label="Events",
-        ),
-        (
+        )
+    mode_handle = (
             Line2D([0], [0], color=TA_COLOR, lw=2.0),
             Line2D([0], [0], color=TB_COLOR, lw=2.0),
-        ),
-        (
-            Line2D([0], [0], color=TEXT, lw=1.4, ls=(0, (3, 2))),
-            Line2D([0], [0], color=TEXT, lw=2.2),
-        ),
-    ]
-    fig.legend(
-        handles=rose_legend,
-        labels=["Events", "Modes 1 / 2", "Timing dashed / +Space solid"],
-        loc="lower left",
-        bbox_to_anchor=(0.028, 0.012),
-        ncol=3,
+        )
+    timing_handle = Line2D([0], [0], color=TEXT, lw=2.0, ls=(0, (3, 2)))
+    space_handle = Line2D([0], [0], color=TEXT, lw=2.6)
+    legend_ax.legend(
+        handles=[event_handle, timing_handle, mode_handle, space_handle],
+        labels=[
+            "Event directions",
+            "Timing-only axis",
+            "Template A / B",
+            "Timing + 3D axis",
+        ],
+        loc="center",
+        bbox_to_anchor=(0.5, 0.5),
+        ncol=2,
         frameon=False,
-        fontsize=6.8,
-        handlelength=1.7,
-        columnspacing=0.95,
+        fontsize=7.7,
+        handlelength=1.5,
+        columnspacing=1.5,
         handler_map={tuple: HandlerTuple(ndivide=None, pad=0.35)},
+    )
+    apply_panel_aware_figure_typography(
+        fig,
+        spec=DENSE_COMPARISON_TYPOGRAPHY,
+        policy=LOCKED_PANEL_TYPOGRAPHY_POLICY,
+        dense_axes=rose_axes,
+        enforce_atomic_axis_gate=False,
     )
 
     analysis_figures = analysis_root / "figures"
@@ -1156,7 +1178,7 @@ def build_figure(
         "analysis_contract": summary_payload["contract"],
         "rose_examples": rose_metadata,
         "visual_contract": {
-            "left": "one shared held-out all-event rose per locked E1146/E548 example; timing axes are dashed and timing-plus-space axes are solid in matched mode colors",
+            "left": "one shared held-out all-event rose per locked E10/E14 example; timing axes are dashed and timing-plus-space axes are solid in matched mode colors",
             "right": "original Figure 2B absolute-score/null grammar with paired timing-to-space patient endpoints",
             "rose_fold_role": "visual explanation only; cohort inference uses both cross-fit directions",
             "rose_event_identity": "within each patient, both methods show exactly the same held-out QC-clean events as one neutral all-event distribution",

@@ -7,7 +7,11 @@ concatenated, and then a fresh spectrogram is computed over the concatenated
 signal. That gives the old "Normalized Spectrogram" look with one frequency
 block per channel and a mass-center trajectory per group event.
 
-Panels a1 and a2 share the same spectrogram quantity: magnitude followed by a
+The stacked traces and spectrogram use equal-width data axes with the same
+time extent and ticks.  The colorbar occupies a dedicated narrow column, so it
+does not compress the spectrogram axis and create a false time-scale contrast.
+
+Panels B1 and B2 share the same spectrogram quantity: magnitude followed by a
 Gaussian smooth (sigma=1.5).  A2 keeps its original shorter STFT window for the
 320-ms group-event display; no display-only power transform is applied.  The
 spectrogram is drawn on its real STFT time-cell edges rather than stretched with
@@ -323,7 +327,7 @@ def _plot(
     display_label: str,
     output_png: Path,
     output_pdf: Path,
-) -> None:
+) -> dict:
     mpl.rcParams["pdf.fonttype"] = 42
     mpl.rcParams["ps.fonttype"] = 42
     mpl.rcParams["font.sans-serif"] = ["Arial", "DejaVu Sans"]
@@ -337,9 +341,17 @@ def _plot(
     stacked_freq_edges = np.arange(n_channels * n_freq + 1, dtype=np.float64)
 
     fig = plt.figure(figsize=(6.5, 4.25))
-    gs = fig.add_gridspec(1, 2, width_ratios=[0.52, 1.45], wspace=0.055)
+    gs = fig.add_gridspec(
+        1,
+        3,
+        width_ratios=[1.0, 1.0, 0.035],
+        wspace=0.10,
+    )
     ax_trace = fig.add_subplot(gs[0, 0])
     ax_spec = fig.add_subplot(gs[0, 1])
+    cax = fig.add_subplot(gs[0, 2])
+
+    common_xticks = np.arange(0.0, total_t + 1e-9, 0.2)
 
     gap = np.nanstd(split_conti_high) * 8.0
     x = np.arange(split_conti_high.shape[1], dtype=np.float64) / float(fs)
@@ -348,14 +360,15 @@ def _plot(
     for border in split_borders[:-1]:
         ax_trace.axvline(float(border), color="#b9b9b9", linestyle="--", linewidth=0.55, alpha=0.9)
     ax_trace.set_yticks(np.arange(n_channels) * gap)
-    ax_trace.set_yticklabels(labels, fontsize=8)
+    ax_trace.set_yticklabels(labels, fontsize=12)
     ax_trace.set_xlim(0.0, total_t)
+    ax_trace.set_xticks(common_xticks)
     ax_trace.margins(x=0.0)
     ax_trace.set_ylim(-0.8 * gap, (n_channels - 0.2) * gap)
     ax_trace.invert_yaxis()
-    ax_trace.set_title("80-250Hz", fontsize=10)
-    ax_trace.set_xlabel("Time (s)", fontsize=9)
-    ax_trace.tick_params(axis="x", labelsize=8, length=2)
+    ax_trace.set_title("80-250Hz", fontsize=14, pad=6)
+    ax_trace.set_xlabel("Time (s)", fontsize=13, labelpad=6)
+    ax_trace.tick_params(axis="x", labelsize=11.5, length=3, pad=2.5)
     ax_trace.tick_params(axis="y", length=0)
     ax_trace.spines["top"].set_visible(False)
     ax_trace.spines["right"].set_visible(False)
@@ -399,24 +412,49 @@ def _plot(
     ax_spec.set_yticks([])
     ax_spec.set_yticklabels([])
     ax_spec.set_xlim(0.0, total_t)
+    ax_spec.set_xticks(common_xticks)
     ax_spec.set_ylim(n_channels * n_freq, 0.0)
     ax_spec.margins(x=0.0)
-    ax_spec.set_title("Normalized Spectrogram", fontsize=10)
-    ax_spec.set_xlabel("Time (s)", fontsize=9)
-    ax_spec.tick_params(axis="x", labelsize=8, length=2)
+    ax_spec.set_title("Normalized Spectrogram", fontsize=14, pad=6)
+    ax_spec.set_xlabel("Time (s)", fontsize=13, labelpad=6)
+    ax_spec.tick_params(axis="x", labelsize=11.5, length=3, pad=2.5)
     ax_spec.tick_params(axis="y", length=0)
     ax_spec.spines["top"].set_visible(False)
     ax_spec.spines["right"].set_visible(False)
 
-    cbar = fig.colorbar(im, ax=ax_spec, fraction=0.018, pad=0.015)
+    cbar = fig.colorbar(im, cax=cax)
     cbar.set_ticks([0, 1])
-    cbar.ax.tick_params(labelsize=8, length=0)
+    cbar.ax.tick_params(labelsize=11.5, length=0, pad=2.5)
     cbar.outline.set_visible(False)
 
-    fig.suptitle(display_label, x=0.11, y=0.98, ha="left", fontsize=11, fontweight="bold")
+    fig.canvas.draw()
+    trace_width_in = float(ax_trace.get_position().width * fig.get_figwidth())
+    spectrogram_width_in = float(ax_spec.get_position().width * fig.get_figwidth())
+    width_delta_in = abs(trace_width_in - spectrogram_width_in)
+    if width_delta_in > 1e-6:
+        raise RuntimeError(
+            "Fig1-B2 time axes must be equal width; "
+            f"got {trace_width_in:.6f} in and {spectrogram_width_in:.6f} in"
+        )
+
+    fig.suptitle(display_label, x=0.11, y=0.985, ha="left", fontsize=15, fontweight="bold")
     fig.savefig(output_png, dpi=300, bbox_inches="tight")
     fig.savefig(output_pdf, bbox_inches="tight")
     plt.close(fig)
+
+    return {
+        "figure_size_in": [6.5, 4.25],
+        "grid_width_ratios": [1.0, 1.0, 0.035],
+        "data_axis_widths_in": {
+            "stacked_traces": trace_width_in,
+            "normalized_spectrogram": spectrogram_width_in,
+        },
+        "data_axis_width_delta_in": width_delta_in,
+        "data_axes_equal_width": True,
+        "colorbar_column": "dedicated",
+        "x_extent_sec": [0.0, total_t],
+        "shared_xticks_sec": common_xticks.tolist(),
+    }
 
 
 def main() -> None:
@@ -518,7 +556,7 @@ def main() -> None:
         window_sec=float(args.window_sec),
         acceptance_threshold=0.70,
     )
-    _plot(
+    layout_metadata = _plot(
         split_conti_high=split_high,
         fs=fs,
         normed_specs=normed_specs,
@@ -543,7 +581,7 @@ def main() -> None:
             "packed_times": str(packed_path),
         },
         "selection": {
-            "figure_label": "Fig1-A",
+            "figure_label": "Fig1-B2",
             "display_label": str(args.display_label),
             "candidate_channels": candidate_channels,
             "selected_channels": selected_channels,
@@ -580,11 +618,7 @@ def main() -> None:
             },
             "centroid_alignment_audit": centroid_alignment,
             "outputs": [str(output_png), str(output_pdf)],
-            "layout": {
-                "figure_size_in": [6.5, 4.25],
-                "panel_width_ratios": [0.52, 1.45],
-                "x_extent_sec": [0.0, float(split_high.shape[1] / float(fs))],
-            },
+            "layout": layout_metadata,
         },
     }
     with metadata_path.open("w", encoding="utf-8") as f:

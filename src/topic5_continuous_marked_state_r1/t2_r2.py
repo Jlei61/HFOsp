@@ -239,6 +239,49 @@ def exponential_event_exposure(innovation: np.ndarray, segment: np.ndarray,
     }
 
 
+def standardise_exposure(exposure: np.ndarray, train_mask: np.ndarray,
+                        eligible: np.ndarray, *, label: str = "") -> tuple[
+                            np.ndarray, dict]:
+    """Put every fitted arm's exposure on the same TRAIN scale.
+
+    ``B @ x`` is unchanged by rescaling ``x`` and inversely rescaling ``B``, so
+    this is a reparameterisation, not a different model.  It matters because the
+    arms are not fitted to convergence: they share one AdamW budget, one
+    learning rate, one weight decay and one gradient clip.  AdamW's step is
+    roughly a fixed absolute size per coordinate, so an arm whose optimum sits
+    at a 15x smaller ``B`` reaches it in a few epochs while an arm whose optimum
+    sits 15x further away is still travelling when the budget ends.
+
+    The exponential accumulator does exactly that: the per-event innovation is
+    already divided by its TRAIN residual SD, but ``x_e = alpha x_(e-1) + eta_e``
+    with ``alpha = exp(-1/100)`` multiplies the scale again, so the cumulative
+    arm arrives with SD 12-21 while the current-event arm sits at SD 1.  Without
+    this step ``real - current_event_only`` is confounded by the optimiser.
+    """
+    value = np.asarray(exposure, dtype=np.float64)
+    scalar = value.ndim == 1
+    if scalar:
+        value = value[:, None]
+    rows = np.asarray(train_mask, dtype=bool) & np.asarray(eligible, dtype=bool)
+    if not rows.any():
+        raise ValueError(f"exposure standardisation has no TRAIN rows ({label})")
+    scale = value[rows].std(0)
+    unscaled = scale <= 1e-8
+    safe = np.where(unscaled, 1.0, scale)
+    output = value / safe
+    return (output[:, 0] if scalar else output).astype(np.float32), {
+        "label": label,
+        "train_sd_before": scale.tolist(),
+        "train_sd_after": output[rows].std(0).tolist(),
+        "constant_columns_left_unscaled": [int(x) for x in np.flatnonzero(unscaled)],
+        "reparameterisation_only": True,
+        "reason": (
+            "arms share one early-stopped AdamW budget, so their exposures must "
+            "share one scale or the comparison is an optimiser artefact"
+        ),
+    }
+
+
 def state_matched_nonoverlap_placebo(
     exposure: np.ndarray,
     pre_event_state: np.ndarray,

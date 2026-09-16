@@ -1,0 +1,39 @@
+contract:
+  name: topic5_event_indexed_evolving_rank_field_v2_2_phase1
+  phase: minimal_event_history_increment
+
+phase0_state: results/topic5_event_indexed_evolving_rank_field/development/phase0_observability/EERF_V2_2_PHASE0_STATE.json
+input_audit_dir: results/topic5_event_indexed_evolving_rank_field/development/input_audit
+dataset_dir: results/topic5_interictal_rank_distribution/dataset_v0_4
+output_dir: results/topic5_event_indexed_evolving_rank_field/development/phase1_event_history
+
+data:
+  train80_calibration_fraction: 0.75
+  old_heldout20_policy: forbidden
+  require_true_adjacent_blocks: true
+
+estimation:
+  ridge_alpha_grid: [0.001, 0.01, 0.1, 1.0, 10.0, 100.0]
+  switching_state_grid: [2, 3, 4]
+  inner_validation_fraction: 0.20
+  shrinkage_prior_events: 4.0
+  beta_prior: 0.5
+  null_draws: 200
+  random_seed: 20260801
+  middle_rank_lower: 0.20
+  middle_rank_upper: 0.80
+
+gate:
+  permutation_p_threshold: 0.05
+  full_required_nulls: [order_shuffle, block_permutation, circular_shift]
+  middle_required_nulls: [order_shuffle, circular_shift]
+  require_positive_increment: true
+
+forbidden_inputs:
+  old_heldout20: true
+  snn: true
+  ab_labels: true
+  pathological_axis: true
+  soz: true
+  ictal_targets: true
+  geometry: true
