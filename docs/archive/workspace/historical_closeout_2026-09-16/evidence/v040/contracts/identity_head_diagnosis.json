@@ -1,0 +1,175 @@
+{
+  "selected": "/data/hfosp_group_event_state_epilepsy_state_v040/runs/epilepsiae_1125__S_marks__S-E__outer__persistent__seed20260906/selected.pt",
+  "split": {
+    "train_events": 708,
+    "validation_events": 167,
+    "test_events": 639,
+    "train_units": 543,
+    "validation_units": 144,
+    "test_units": 452
+  },
+  "no_fit_reference": {
+    "n_units": 452,
+    "intercept_only": 1.509584903717041,
+    "readable_recent_history_as_logits": 1.4587351083755493,
+    "history_plus_intercept": 1.5731126070022583,
+    "note": "lower is better; the recent-history logit is a direct empirical estimate of who participates, so it is the positive control for this readout family"
+  },
+  "C+H+S_trajectory": [
+    {
+      "step": 0,
+      "train": 1.9717421531677246,
+      "validation": 1.920978307723999,
+      "test": 1.509584903717041,
+      "weight_norm": 0.0
+    },
+    {
+      "step": 20,
+      "train": 1.8220360279083252,
+      "validation": 2.218435049057007,
+      "test": 2.637895107269287,
+      "weight_norm": 1.9054754972457886
+    },
+    {
+      "step": 40,
+      "train": 1.7918624877929688,
+      "validation": 2.3277125358581543,
+      "test": 3.891846179962158,
+      "weight_norm": 3.212165117263794
+    },
+    {
+      "step": 60,
+      "train": 1.772958755493164,
+      "validation": 2.582930326461792,
+      "test": 5.168346881866455,
+      "weight_norm": 4.482655048370361
+    },
+    {
+      "step": 80,
+      "train": 1.7586605548858643,
+      "validation": 2.8564321994781494,
+      "test": 6.096566200256348,
+      "weight_norm": 5.725671291351318
+    },
+    {
+      "step": 100,
+      "train": 1.747373104095459,
+      "validation": 3.1134579181671143,
+      "test": 6.898819923400879,
+      "weight_norm": 6.9091796875
+    },
+    {
+      "step": 120,
+      "train": 1.7382527589797974,
+      "validation": 3.355726957321167,
+      "test": 7.626612663269043,
+      "weight_norm": 8.012877464294434
+    },
+    {
+      "step": 140,
+      "train": 1.7307215929031372,
+      "validation": 3.5765626430511475,
+      "test": 8.240591049194336,
+      "weight_norm": 9.032527923583984
+    },
+    {
+      "step": 160,
+      "train": 1.7243596315383911,
+      "validation": 3.7750244140625,
+      "test": 8.731228828430176,
+      "weight_norm": 9.977224349975586
+    },
+    {
+      "step": 180,
+      "train": 1.7188724279403687,
+      "validation": 3.9535586833953857,
+      "test": 9.116471290588379,
+      "weight_norm": 10.8612699508667
+    },
+    {
+      "step": 200,
+      "train": 1.7140580415725708,
+      "validation": 4.11452579498291,
+      "test": 9.415593147277832,
+      "weight_norm": 11.698227882385254
+    },
+    {
+      "step": 220,
+      "train": 1.7097785472869873,
+      "validation": 4.26078462600708,
+      "test": 9.644685745239258,
+      "weight_norm": 12.499822616577148
+    },
+    {
+      "step": 240,
+      "train": 1.705937385559082,
+      "validation": 4.395012855529785,
+      "test": 9.81651782989502,
+      "weight_norm": 13.275516510009766
+    },
+    {
+      "step": 260,
+      "train": 1.7024646997451782,
+      "validation": 4.519575119018555,
+      "test": 9.94201946258545,
+      "weight_norm": 14.032630920410156
+    },
+    {
+      "step": 280,
+      "train": 1.6993073225021362,
+      "validation": 4.636440277099609,
+      "test": 10.030623435974121,
+      "weight_norm": 14.776701927185059
+    },
+    {
+      "step": 300,
+      "train": 1.6964240074157715,
+      "validation": 4.747161388397217,
+      "test": 10.090347290039062,
+      "weight_norm": 15.511836051940918
+    },
+    {
+      "step": 320,
+      "train": 1.6937804222106934,
+      "validation": 4.852912425994873,
+      "test": 10.127902030944824,
+      "weight_norm": 16.241003036499023
+    },
+    {
+      "step": 340,
+      "train": 1.6913485527038574,
+      "validation": 4.954545974731445,
+      "test": 10.148774147033691,
+      "weight_norm": 16.966291427612305
+    },
+    {
+      "step": 360,
+      "train": 1.6891045570373535,
+      "validation": 5.052669048309326,
+      "test": 10.157365798950195,
+      "weight_norm": 17.689130783081055
+    },
+    {
+      "step": 380,
+      "train": 1.6870278120040894,
+      "validation": 5.147694110870361,
+      "test": 10.15718936920166,
+      "weight_norm": 18.410457611083984
+    },
+    {
+      "step": 400,
+      "train": 1.6850998401641846,
+      "validation": 5.239904403686523,
+      "test": 10.151089668273926,
+      "weight_norm": 19.130889892578125
+    }
+  ],
+  "interpretation": {
+    "best_validation_step": 0,
+    "train_improved": 0.28664231300354004,
+    "validation_improved": 0.0,
+    "test_at_best_validation": 1.509584903717041,
+    "test_at_step_zero": 1.509584903717041,
+    "test_at_step_400": 10.151089668273926
+  }
+}

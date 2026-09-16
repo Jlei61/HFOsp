@@ -1,0 +1,31 @@
+{
+  "status": "COMPLETE",
+  "generated_epoch": 1788750106.4604256,
+  "implementation_verified": true,
+  "main_plan_complete": true,
+  "estimable": {
+    "S-E": true,
+    "S-ID": true,
+    "fine_contact": true,
+    "S-A": true,
+    "S-B_clinical_onset_spatial": true,
+    "S-C_risk": false,
+    "strict_history": false,
+    "D-local": false
+  },
+  "scientific": {
+    "rich_forward_state": "NOT_ESTABLISHED",
+    "retrospective_local_state": "LOCAL_SUPPORT_COARSE_ONLY",
+    "shared_multi_view_state": "NOT_ESTABLISHED",
+    "seizure_relation": "NOT_ESTABLISHED",
+    "nonlinear_multiscale": "NOT_TESTED",
+    "IED_feedback": "NOT_TESTED"
+  },
+  "power_calibrated": false,
+  "confirmatory": false,
+  "source_digest_of_scientific_cards": [
+    "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137"
+  ],
+  "synthetic_replication_status": "COMPLETE_WITH_NUMERICAL_NOT_ESTIMABLE",
+  "remaining_main_tasks": []
+}

@@ -1,0 +1,355 @@
+{
+  "status": "COMPLETE",
+  "scope": "corrected secondary diagnostic only; no score is recomputed",
+  "supersedes": "old_summary_oracle.rows[].old_summary_published_at_query_fraction, which reads [q-360, q) instead of the registered [t-360, t-240) window and is therefore invalid",
+  "worlds": {
+    "synthetic_conditional_zero_901": {
+      "registered_window_minutes_before_target": [
+        360,
+        240
+      ],
+      "inner_validation": [
+        {
+          "horizon": 1,
+          "n_targets": 14,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        },
+        {
+          "horizon": 5,
+          "n_targets": 14,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        },
+        {
+          "horizon": 30,
+          "n_targets": 14,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        },
+        {
+          "horizon": 120,
+          "n_targets": 14,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        }
+      ],
+      "untouched_future_test": [
+        {
+          "horizon": 1,
+          "n_targets": 72,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        },
+        {
+          "horizon": 5,
+          "n_targets": 72,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        },
+        {
+          "horizon": 30,
+          "n_targets": 72,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        },
+        {
+          "horizon": 120,
+          "n_targets": 72,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        }
+      ]
+    },
+    "synthetic_conditional_zero_902": {
+      "registered_window_minutes_before_target": [
+        360,
+        240
+      ],
+      "inner_validation": [
+        {
+          "horizon": 1,
+          "n_targets": 14,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        },
+        {
+          "horizon": 5,
+          "n_targets": 14,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        },
+        {
+          "horizon": 30,
+          "n_targets": 14,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        },
+        {
+          "horizon": 120,
+          "n_targets": 14,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        }
+      ],
+      "untouched_future_test": [
+        {
+          "horizon": 1,
+          "n_targets": 72,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        },
+        {
+          "horizon": 5,
+          "n_targets": 72,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        },
+        {
+          "horizon": 30,
+          "n_targets": 72,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        },
+        {
+          "horizon": 120,
+          "n_targets": 72,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        }
+      ]
+    },
+    "synthetic_conditional_zero_903": {
+      "registered_window_minutes_before_target": [
+        360,
+        240
+      ],
+      "inner_validation": [
+        {
+          "horizon": 1,
+          "n_targets": 14,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        },
+        {
+          "horizon": 5,
+          "n_targets": 14,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        },
+        {
+          "horizon": 30,
+          "n_targets": 14,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        },
+        {
+          "horizon": 120,
+          "n_targets": 14,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        }
+      ],
+      "untouched_future_test": [
+        {
+          "horizon": 1,
+          "n_targets": 72,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        },
+        {
+          "horizon": 5,
+          "n_targets": 72,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        },
+        {
+          "horizon": 30,
+          "n_targets": 72,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        },
+        {
+          "horizon": 120,
+          "n_targets": 72,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        }
+      ]
+    },
+    "synthetic_organization_positive_901": {
+      "registered_window_minutes_before_target": [
+        360,
+        240
+      ],
+      "inner_validation": [
+        {
+          "horizon": 1,
+          "n_targets": 14,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        },
+        {
+          "horizon": 5,
+          "n_targets": 14,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        },
+        {
+          "horizon": 30,
+          "n_targets": 14,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        },
+        {
+          "horizon": 120,
+          "n_targets": 14,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        }
+      ],
+      "untouched_future_test": [
+        {
+          "horizon": 1,
+          "n_targets": 72,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        },
+        {
+          "horizon": 5,
+          "n_targets": 72,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        },
+        {
+          "horizon": 30,
+          "n_targets": 72,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        },
+        {
+          "horizon": 120,
+          "n_targets": 72,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        }
+      ]
+    },
+    "synthetic_organization_positive_902": {
+      "registered_window_minutes_before_target": [
+        360,
+        240
+      ],
+      "inner_validation": [
+        {
+          "horizon": 1,
+          "n_targets": 14,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        },
+        {
+          "horizon": 5,
+          "n_targets": 14,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        },
+        {
+          "horizon": 30,
+          "n_targets": 14,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        },
+        {
+          "horizon": 120,
+          "n_targets": 14,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        }
+      ],
+      "untouched_future_test": [
+        {
+          "horizon": 1,
+          "n_targets": 72,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        },
+        {
+          "horizon": 5,
+          "n_targets": 72,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        },
+        {
+          "horizon": 30,
+          "n_targets": 72,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        },
+        {
+          "horizon": 120,
+          "n_targets": 72,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        }
+      ]
+    },
+    "synthetic_organization_positive_903": {
+      "registered_window_minutes_before_target": [
+        360,
+        240
+      ],
+      "inner_validation": [
+        {
+          "horizon": 1,
+          "n_targets": 14,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        },
+        {
+          "horizon": 5,
+          "n_targets": 14,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        },
+        {
+          "horizon": 30,
+          "n_targets": 14,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        },
+        {
+          "horizon": 120,
+          "n_targets": 14,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        }
+      ],
+      "untouched_future_test": [
+        {
+          "horizon": 1,
+          "n_targets": 72,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        },
+        {
+          "horizon": 5,
+          "n_targets": 72,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        },
+        {
+          "horizon": 30,
+          "n_targets": 72,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        },
+        {
+          "horizon": 120,
+          "n_targets": 72,
+          "window_exists_fraction": 1.0,
+          "fully_published_at_query_fraction": 1.0
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,120 @@
+{
+  "H2a_A": {
+    "query": "the last registered minute query strictly before the event, reading only release<=q_i",
+    "task": "fine identity given the event size or coarse composition; not an unconditional set forecast",
+    "conditions": [
+      "C",
+      "C+H",
+      "C+S",
+      "C+H+S"
+    ],
+    "weighting": "event-equal-weight",
+    "budget": {
+      "max_steps": 400,
+      "validate_every": 20,
+      "patience": 6,
+      "optimizer": "AdamW",
+      "lr": 0.01,
+      "weight_decay": 0.001,
+      "report_step_zero": true
+    },
+    "normalisation": "per community c given K_c: exp(sum_{j in A_c} l_j) / e_{K_c}(exp l_c); community log-probabilities are summed",
+    "units": "K_c=0 and K_c=|c| are deterministic; an event whose communities are all deterministic is not a unit",
+    "communities": {
+      "0": 6,
+      "1": 1,
+      "2": 2
+    },
+    "entry": "v040/consumers.py:h2a_a, reusing v0312/frozen.py:conditional_set_lp and identity_units"
+  },
+  "wrong_time": {
+    "head": "the fixed C+H+S conditional identity head",
+    "swapped": "the state slot only",
+    "unchanged": [
+      "recipient C",
+      "recipient H",
+      "target",
+      "K_c"
+    ],
+    "donor_rule": {
+      "min_lead_hours": 4.0,
+      "max_clock_seconds": 7200.0,
+      "max_support_age_minutes": 10.0,
+      "max_exposure_fraction_difference": 0.2,
+      "max_log_segment_age_difference": 0.6931471805599453
+    },
+    "selection": "nearest legal FIT donor by time distance; no target, seizure or score is read",
+    "no_donor": "locally not estimable; the criteria are never relaxed",
+    "entry": "v040/engine.py:donor_match, v040/engine.py:wrong_time_control"
+  },
+  "H2a_B": {
+    "prefix": "the genuinely observed prefix of the event, in occurrence order",
+    "forbidden": [
+      "final K",
+      "normalised rank",
+      "whole-event waveform",
+      "suffix statistics",
+      "event end time"
+    ],
+    "endpoints": [
+      "next contact",
+      "next synchronous group",
+      "STOP"
+    ],
+    "protocols": [
+      "teacher forced one step",
+      "free continuation"
+    ],
+    "entry": "v040/consumers.py:h2a_b"
+  },
+  "S_A": {
+    "windows": {
+      "primary": [
+        -7200,
+        -1800
+      ],
+      "secondary": [
+        -1800,
+        -300
+      ]
+    },
+    "coordinates": [
+      "shaft softmax posterior mean",
+      "band_ratio predicted mean per component",
+      "signed_xlag predicted mean per component",
+      "delay IQR zero probability",
+      "(1-p0)-weighted normalised positive standardised log-IQR conditional mean"
+    ],
+    "forbidden": [
+      "future real K",
+      "future participation",
+      "future morphology"
+    ],
+    "reference": "the FIT reference state distribution at the identical query, C and MC noise",
+    "primary_output": "per case window, per coordinate signed mean difference against matched controls",
+    "overall": "sqrt(0.5*spatial + 0.5*mean over the three morphology families of mean squared standardised differences)",
+    "caveat": "non-negative by construction; it is not a positivity verdict and no latent axis is picked",
+    "entry": "v040/consumers.py:s_a"
+  },
+  "S_B": {
+    "query": "the last legal minute query at least 5 minutes before EEG onset",
+    "predictor": "the frozen interictal H2a-A contact head on the same m and C",
+    "target": "clinical onset [0,10] seconds, CAR, 1-150 Hz baseline robust-z broadband activation",
+    "primary": "within-community Spearman on identical valid contacts, equal weight over qualified communities",
+    "minimum_contacts_per_community": 3,
+    "undefined": "constant prediction or constant target",
+    "auxiliary": "all-contact Spearman, retained as the legacy convention with a cross-community bias caveat",
+    "forbidden": "substituting continuous broadband energy into the IED set likelihood",
+    "entry": "v040/consumers.py:s_b"
+  },
+  "S_C": {
+    "status": "NOT_RUN",
+    "requires": [
+      "complete observable person-hours",
+      "event annotation",
+      "legal time validation"
+    ],
+    "note": "a missing denominator limits S-C only; it does not block S-A or S-B"
+  },
+  "no_new_seizure_head": "the first package adds no seizure-supervised head"
+}

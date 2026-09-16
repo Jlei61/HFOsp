@@ -1,0 +1,99 @@
+{
+  "status": "NEXT_RUN_ENGINEERING_READY",
+  "generated_epoch": 1788749809.433616,
+  "scientific_card_source_digest": "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137",
+  "next_run_source_digest": "cb20be5f3481b3071515d1a1538e1d179e56119493528e9e8a0be60e8bbec2de",
+  "next_run_source_files": {
+    "src/topic5_group_event_state/v0312/__init__.py": "e7ef8cadaff0e7b75a25e98eba2941013691acb46d31e1d598a5a6dc046968a1",
+    "src/topic5_group_event_state/v0312/baselines.py": "ad0b8e9a9efa6547fc87000f393394536631659e364911a11ad944eaeb7ab85f",
+    "src/topic5_group_event_state/v0312/data.py": "bfdfcefba00fc00b75b01f14c2ab18170ab33d117cbee7c33ab4b8fd583e14d0",
+    "src/topic5_group_event_state/v0312/engine.py": "bae328097264391cbba2a5fcb6743c779ec96f9edf727ac32515c52086a775eb",
+    "src/topic5_group_event_state/v0312/frozen.py": "4434b858d4d1c8a0fc98a548a796c2906beeca14fe5f0b3ab02e0e90b94e8848",
+    "src/topic5_group_event_state/v0312/instruments.py": "38a9438976c61727465da29df36d238e4c5d5546f5f5bb80f6182d796c6050c7",
+    "src/topic5_group_event_state/v0312/model.py": "499ed3e5985b6a89ba5ece1904ce59cc7ec79c365e71f39ce6849add5a98ab9c",
+    "src/topic5_group_event_state/v0312/numerics.py": "a9906321837116861cea8d38b7f3ee5b82e5ad8fccac60f179ffec6302dfa992",
+    "src/topic5_group_event_state/v0312/objective.py": "d300f44c9ba404deb75f9330e68bcc4d8758de317e18b9f6603c2db96fe1c433",
+    "src/topic5_group_event_state/v0312/prepare.py": "f7a8dd47424077e73e14a09d58ea0c823c5fea50a59311bcdbcc737200919c6b",
+    "src/topic5_group_event_state/v0312/queue.py": "63794aaf2dd80c344e91116de9334b4842c301bb04348768f9cdc568907cd092",
+    "src/topic5_group_event_state/v0312/report.py": "0eaa4c8b396ee5e08b25040181da5980409b03ffc8a9bdc56e8b7e1f2e73d1a6",
+    "src/topic5_group_event_state/v0312/seizure.py": "a3436858add91f977727453f2b29e74d838b473fd3a66e9a4867601c825f3d78",
+    "src/topic5_group_event_state/v0312/spatial_transfer.py": "b42cfe99ecd130e18231cca2aba255ab4600f407587719e0d16b7cdc5bbfa4c3",
+    "src/topic5_group_event_state/v0312/synthetic.py": "95e11e2b9c44df13bfa1b379f6aafed5fa089032d4e8eea83c06d5ffde5cc83d",
+    "src/topic5_group_event_state/v0312/train.py": "fdb76aeca105219a1c18c575d6284304a41cffcc06707682b570c86006df86e4",
+    "src/topic5_group_event_state/v0311/data.py": "9f461b8898ddc47d89a79abc0a594644a2339b6790d6bb99a68afdd7879d3219",
+    "src/topic5_group_event_state/v0311/packets.py": "a7334e4e19e7e5bb26def2c7a4078bc0eab01d6a2c6e34cbe4e73e8fb2861902",
+    "src/topic5_group_event_state/v039/human_data.py": "79c3094c4bab10815de7d299d20ecd7aa700056d331f29c794a2932636958635",
+    "scripts/audit_group_event_state_v0312_readiness.py": "87a008ab3d45ea88904033efcc7bba82870d547d0d94a656fa50f725af8470bb",
+    "scripts/report_group_event_state_v0312.py": "b9a129a1668fb82ed2b17edb03ec8aae42d1a83140e29f6f027cb70ad17c8239",
+    "scripts/run_group_event_state_v0312_cell.py": "4930d57813a2dab910d9c1beb73b22970b7a91c671ce718022b97cb5ea0acabd",
+    "scripts/run_group_event_state_v0312_queue.py": "fc1afd65905b7edaf4889c882c927d6a4a9adb602140f7ea81cfd09c88a90764",
+    "scripts/stress_group_event_state_v0312_lyapunov.py": "d8f55b5b3c13b86233cc01c5304b06cd9db52a91af85464039640946911811bf"
+  },
+  "science_results_recomputed_under_next_digest": false,
+  "changes": [
+    "INNER recipe eligibility requires both temporal origins to select non-origin checkpoints",
+    "training interpretation separates origin, fixed OUTER recipe, local patience evidence and unresolved budget stop",
+    "one training process per GPU; same-GPU concurrent FP64 Lyapunov solves are prohibited",
+    "TF32 disabled and deterministic thread/backend settings explicit in all v0312 entrypoints"
+  ],
+  "isolated_gpu_stress": {
+    "status": "COMPLETE",
+    "kind": "engineering_concurrent_lyapunov_forward_backward_stress",
+    "process_layout": "one process per RTX 3090",
+    "repeats_per_process": 500,
+    "wall_seconds": 11.469961166381836,
+    "rows": [
+      {
+        "status": "COMPLETE",
+        "device": 0,
+        "slot": 0,
+        "repeats": 500,
+        "seconds": 9.178610801696777,
+        "maximum_residual": 1.862645149230957e-09,
+        "minimum_gradient_norm": 0.0011817843651308678
+      },
+      {
+        "status": "COMPLETE",
+        "device": 1,
+        "slot": 0,
+        "repeats": 500,
+        "seconds": 9.229166746139526,
+        "maximum_residual": 1.862645149230957e-09,
+        "minimum_gradient_norm": 0.0011817843651308678
+      }
+    ],
+    "exit_codes": [
+      0,
+      0
+    ]
+  },
+  "exact_recovery": {
+    "status": "COMPLETE",
+    "model_identical": true,
+    "optimizer_identical": true,
+    "sampler_identical": true,
+    "scheduler_identical": true,
+    "weight_max_abs": 0.0,
+    "source_digest": "cb20be5f3481b3071515d1a1538e1d179e56119493528e9e8a0be60e8bbec2de"
+  },
+  "tests": {
+    "status": "PASS",
+    "command": "pytest -q test_group_event_state_v0312_contract.py test_group_event_state_v0312_numerics.py test_group_event_state_v0311_scoring.py",
+    "passed": 47
+  },
+  "superseded_attempts": [
+    {
+      "path": "/data/hfosp_group_event_state_observable_state_validation_v0312/final_reports/superseded_cpu_lyapunov_concurrency_stress.json",
+      "reason": "CPU Lyapunov solve passed same-GPU concurrency stress but failed bitwise fresh-process/recovery identity; not admitted"
+    },
+    {
+      "path": "/data/hfosp_group_event_state_observable_state_validation_v0312/postrun_readiness/recovery_cpu_lyapunov_20260907",
+      "reason": "weight_max_abs=1.1641532182693481e-10; exact contract failed"
+    },
+    {
+      "path": "/data/hfosp_group_event_state_observable_state_validation_v0312/postrun_readiness/fresh_quantized_20260907",
+      "reason": "gradient quantization experiment failed exact identity and was reverted"
+    }
+  ],
+  "scope": "engineering readiness only; existing scientific cards retain their recorded source digest"
+}

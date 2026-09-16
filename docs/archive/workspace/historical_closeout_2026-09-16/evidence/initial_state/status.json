@@ -1,0 +1,25 @@
+{
+ "status": "INITIAL_STATE_ROUND_COMPLETE_PENDING_SCIENTIFIC_REVIEW",
+ "updated_unix": 1788815819.4120271,
+ "updated_iso": "2026-09-08T05:16:59",
+ "initial_state_effect": "SMALL_EFFECT_BOUNDED_FOR_TESTED_PROBE",
+ "patient_conditional_propagation": "STRUCTURE_GAP_UNRESOLVED_ALL_ARM_MODE_OUTSIDE_PATIENT_BAND_NO_SEPARATED_IMPROVEMENT_VS_B0",
+ "stage_verdicts": {
+  "screen": "SMALL_EFFECT_BOUNDED_FOR_TESTED_PROBE"
+ },
+ "rendered_stages": [
+  "screen"
+ ],
+ "figures_human_review": "PENDING",
+ "summary": {
+  "screen": {
+   "total": 36,
+   "complete": 36,
+   "failed": {}
+  },
+  "replication": {
+   "skipped": true,
+   "reason": "screen verdict SMALL_EFFECT_BOUNDED_FOR_TESTED_PROBE does not open I2"
+  }
+ }
+}

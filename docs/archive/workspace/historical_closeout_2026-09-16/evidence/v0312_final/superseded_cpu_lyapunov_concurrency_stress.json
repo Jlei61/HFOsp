@@ -1,0 +1,51 @@
+{
+  "status": "COMPLETE",
+  "kind": "engineering_concurrent_lyapunov_forward_backward_stress",
+  "process_layout": "two processes per RTX 3090",
+  "repeats_per_process": 100,
+  "wall_seconds": 4.445609092712402,
+  "rows": [
+    {
+      "status": "COMPLETE",
+      "device": 0,
+      "slot": 0,
+      "repeats": 100,
+      "seconds": 1.7916221618652344,
+      "maximum_residual": 1.862645149230957e-09,
+      "minimum_gradient_norm": 0.0011817843651308678
+    },
+    {
+      "status": "COMPLETE",
+      "device": 0,
+      "slot": 1,
+      "repeats": 100,
+      "seconds": 1.82936692237854,
+      "maximum_residual": 1.862645149230957e-09,
+      "minimum_gradient_norm": 0.0011817843651308678
+    },
+    {
+      "status": "COMPLETE",
+      "device": 1,
+      "slot": 0,
+      "repeats": 100,
+      "seconds": 1.5580952167510986,
+      "maximum_residual": 1.862645149230957e-09,
+      "minimum_gradient_norm": 0.0011817843651308678
+    },
+    {
+      "status": "COMPLETE",
+      "device": 1,
+      "slot": 1,
+      "repeats": 100,
+      "seconds": 1.7183902263641357,
+      "maximum_residual": 1.862645149230957e-09,
+      "minimum_gradient_norm": 0.0011817843651308678
+    }
+  ],
+  "exit_codes": [
+    0,
+    0,
+    0,
+    0
+  ]
+}

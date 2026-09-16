@@ -1,0 +1,132 @@
+{
+ "status": "I0_QUALIFICATION_PASS",
+ "created_unix": 1788782957.641638,
+ "checks": {
+  "default_none_equals_explicit_B0": true,
+  "observer_does_not_change_trajectory": true,
+  "historical_arrays_hash_ok": true,
+  "mainline_prefix_active_fraction_identical": true,
+  "mainline_prefix_contact_envelope_identical": true,
+  "static_identity_matches_historical_worker": true,
+  "static_arrays_unchanged_after_all_runs": true,
+  "static_identity_equal_across_arms": true,
+  "B1_differs_from_B0_on_exactly_K_core_A_cells": true,
+  "B2_differs_from_B0_on_exactly_K_core_B_cells": true,
+  "initial_voltage_below_threshold_margin": true,
+  "increment_matched_B1_B2": true,
+  "external_inputs_identical_B0_B1_all_segments": true,
+  "external_inputs_identical_B0_B2_all_segments": true,
+  "external_inputs_differ_across_dynamics_seeds": true,
+  "exact_poisson_segment_sums_identical_across_arms": true,
+  "short_unit_digest_prefix_matches_direct_engine_run": true,
+  "initial_state_changes_the_trajectory": true,
+  "raw_acquisition_starts_at_zero": true,
+  "no_runaway_in_short_units": true
+ },
+ "divergence_ms": {
+  "B1_vs_B0_ms": 29.1,
+  "B2_vs_B0_ms": 22.0,
+  "B1_vs_B2_ms": 22.0
+ },
+ "digest_comparisons": {
+  "B0_B1": {
+   "n_segments_compared": 2,
+   "n_complete_segments_compared": 2,
+   "all_complete_segments_equal": true,
+   "prefix_only": false,
+   "rows": [
+    {
+     "index": 0,
+     "steps_compared": 10000,
+     "same_length": true,
+     "stream_equal": true,
+     "ext_sum_equal": true,
+     "delta_sum_equal": true
+    },
+    {
+     "index": 1,
+     "steps_compared": 10000,
+     "same_length": true,
+     "stream_equal": true,
+     "ext_sum_equal": true,
+     "delta_sum_equal": true
+    }
+   ]
+  },
+  "B0_B2": {
+   "n_segments_compared": 2,
+   "n_complete_segments_compared": 2,
+   "all_complete_segments_equal": true,
+   "prefix_only": false,
+   "rows": [
+    {
+     "index": 0,
+     "steps_compared": 10000,
+     "same_length": true,
+     "stream_equal": true,
+     "ext_sum_equal": true,
+     "delta_sum_equal": true
+    },
+    {
+     "index": 1,
+     "steps_compared": 10000,
+     "same_length": true,
+     "stream_equal": true,
+     "ext_sum_equal": true,
+     "delta_sum_equal": true
+    }
+   ]
+  },
+  "B0_other_seed": {
+   "n_segments_compared": 2,
+   "n_complete_segments_compared": 2,
+   "all_complete_segments_equal": false,
+   "prefix_only": false,
+   "rows": [
+    {
+     "index": 0,
+     "steps_compared": 10000,
+     "same_length": true,
+     "stream_equal": false,
+     "ext_sum_equal": false,
+     "delta_sum_equal": false
+    },
+    {
+     "index": 1,
+     "steps_compared": 10000,
+     "same_length": true,
+     "stream_equal": false,
+     "ext_sum_equal": false,
+     "delta_sum_equal": false
+    }
+   ]
+  }
+ },
+ "resources": {
+  "substrate_build_seconds": 24.116336345672607,
+  "short_run_ms": 1500.0,
+  "short_run_wall_seconds": 127.21902537345886,
+  "unit_ms": 2000.0,
+  "unit_wall_seconds_mean": 215.53467726707458,
+  "unit_simulation_wall_seconds_mean": 211.11853472391763,
+  "projected_formal_simulation_seconds": 2533.4224166870117,
+  "projected_formal_unit_seconds": 2610.5324635505676,
+  "projected_screen_worker_hours_36_units": 26.105324635505678,
+  "peak_rss_gib_this_process": 3.323322296142578,
+  "short_unit_npz_bytes": 1138499,
+  "projected_formal_npz_bytes": 13661988,
+  "note": "projection is linear in duration; not a wall-clock guarantee"
+ },
+ "frozen_manifest_sha256": "48a58180101bcc75086bef427d817dde704ff74a8bdd1bafebcf3c80562b0f9a",
+ "scientific_sample": false,
+ "n_short_units": 4,
+ "unit_outputs": [
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/initial_state_conditioned_propagation_v1/qualification/qual_2511_dyn_820101_B0.json",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/initial_state_conditioned_propagation_v1/qualification/qual_2511_dyn_820101_B1.json",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/initial_state_conditioned_propagation_v1/qualification/qual_2511_dyn_820101_B2.json",
+  "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/initial_state_conditioned_propagation_v1/qualification/qual_2511_dyn_820102_B0.json"
+ ],
+ "membership_K": 733,
+ "increment_mV": 1.0,
+ "rng_note": "initial voltage and observer consume no simulation RNG: the None-vs-explicit and observer on/off checks are byte-identical and the per-segment digests are equal across arms"
+}

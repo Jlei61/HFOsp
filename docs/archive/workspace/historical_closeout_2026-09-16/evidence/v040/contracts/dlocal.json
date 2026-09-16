@@ -1,0 +1,384 @@
+{
+  "subject": "epilepsiae_1125",
+  "field_table": [
+    {
+      "field": "participation / contact_ok",
+      "producer": "detector gpu asset -> cache.participation",
+      "left": "event context window",
+      "right": "event context window",
+      "dependency": "event-local",
+      "verdict": "available_with_bounded_context",
+      "conclusion": "bounded and verifiable: the value needs only the event context window, so a local pipeline could publish it within the measured processing time",
+      "earliest_verifiable_release": "event end + the block processing time charged pro rata"
+    },
+    {
+      "field": "event count per minute",
+      "producer": "packets.build_packets over event_abs_time",
+      "left": "none",
+      "right": "the minute packet boundary",
+      "dependency": "event-local",
+      "verdict": "available_with_bounded_context",
+      "conclusion": "bounded and verifiable: the value needs only the event context window, so a local pipeline could publish it within the measured processing time",
+      "earliest_verifiable_release": "event end + the block processing time charged pro rata"
+    },
+    {
+      "field": "core_seconds_raw / event end",
+      "producer": "cache.core_start_seconds, core_end_seconds",
+      "left": "event context window",
+      "right": "event context window",
+      "dependency": "event-local",
+      "verdict": "available_with_bounded_context",
+      "conclusion": "bounded and verifiable: the value needs only the event context window, so a local pipeline could publish it within the measured processing time",
+      "earliest_verifiable_release": "event end + the block processing time charged pro rata"
+    },
+    {
+      "field": "relative_delay_s / tied_group_id (synchronous group)",
+      "producer": "v0311/packets.py:block_event_tables (delay, order, rank, lead)",
+      "left": "event context window",
+      "right": "the full event, to normalise the rank fraction",
+      "dependency": "event-local",
+      "verdict": "available_with_bounded_context",
+      "conclusion": "bounded and verifiable: the value needs only the event context window, so a local pipeline could publish it within the measured processing time",
+      "earliest_verifiable_release": "event end + the block processing time charged pro rata"
+    },
+    {
+      "field": "delay_iqr_s / delay_span_s",
+      "producer": "v0311/packets.py:_iqr and block_event_tables",
+      "left": "event context window",
+      "right": "the full event",
+      "dependency": "event-local; needs at least four participating delays",
+      "verdict": "available_with_bounded_context",
+      "conclusion": "bounded and verifiable: the value needs only the event context window, so a local pipeline could publish it within the measured processing time",
+      "earliest_verifiable_release": "event end + the block processing time charged pro rata"
+    },
+    {
+      "field": "band_log_energy / band_centroid_s / band_log_peak",
+      "producer": "raw_views stitched spectrogram -> cache.band_features",
+      "left": "the closed 200-second processing segment",
+      "right": "the closed 200-second processing segment",
+      "dependency": "200-second segment",
+      "verdict": "recomputable_with_local_release",
+      "conclusion": "needs local recomputation: the value closes with its 200-second processing segment; recomputed here from the raw cache and compared at the original time",
+      "earliest_verifiable_release": "200-second segment close + the processing time of that segment",
+      "recomputation_steps": [
+        "load the block cache npz named by the card cache_path",
+        "load the sibling manifest for the band and cross-band pair order",
+        "call v0311/packets.py:block_event_tables",
+        "compare against the packaged arrays on the same event times"
+      ]
+    },
+    {
+      "field": "cross_band_lag_s",
+      "producer": "raw_views stitched spectrogram -> cache.cross_band_lag_s",
+      "left": "the closed 200-second processing segment",
+      "right": "the closed 200-second processing segment",
+      "dependency": "200-second segment",
+      "verdict": "recomputable_with_local_release",
+      "conclusion": "needs local recomputation: the value closes with its 200-second processing segment; recomputed here from the raw cache and compared at the original time",
+      "earliest_verifiable_release": "200-second segment close + the processing time of that segment",
+      "recomputation_steps": [
+        "load the block cache npz named by the card cache_path",
+        "load the sibling manifest for the band and cross-band pair order",
+        "call v0311/packets.py:block_event_tables",
+        "compare against the packaged arrays on the same event times"
+      ]
+    },
+    {
+      "field": "band_ratio (target)",
+      "producer": "v0311/packets.py:block_event_tables via _participant_mean",
+      "left": "inherits band_log_energy",
+      "right": "inherits band_log_energy",
+      "dependency": "200-second segment",
+      "verdict": "recomputable_with_local_release",
+      "conclusion": "needs local recomputation: the value closes with its 200-second processing segment; recomputed here from the raw cache and compared at the original time",
+      "earliest_verifiable_release": "200-second segment close + the processing time of that segment",
+      "recomputation_steps": [
+        "load the block cache npz named by the card cache_path",
+        "load the sibling manifest for the band and cross-band pair order",
+        "call v0311/packets.py:block_event_tables",
+        "compare against the packaged arrays on the same event times"
+      ]
+    },
+    {
+      "field": "signed_xlag (target)",
+      "producer": "v0311/packets.py:block_event_tables via _participant_mean",
+      "left": "inherits cross_band_lag_s",
+      "right": "inherits cross_band_lag_s",
+      "dependency": "200-second segment",
+      "verdict": "recomputable_with_local_release",
+      "conclusion": "needs local recomputation: the value closes with its 200-second processing segment; recomputed here from the raw cache and compared at the original time",
+      "earliest_verifiable_release": "200-second segment close + the processing time of that segment",
+      "recomputation_steps": [
+        "load the block cache npz named by the card cache_path",
+        "load the sibling manifest for the band and cross-band pair order",
+        "call v0311/packets.py:block_event_tables",
+        "compare against the packaged arrays on the same event times"
+      ]
+    },
+    {
+      "field": "waveform descriptors (wave_log_rms / peak / line length, bipolar and shaft-CAR means)",
+      "producer": "v0311/packets.py:_wave_stats over cache.waveform_*",
+      "left": "event context window",
+      "right": "event context window",
+      "dependency": "event-local",
+      "verdict": "available_with_bounded_context",
+      "conclusion": "bounded and verifiable: the value needs only the event context window, so a local pipeline could publish it within the measured processing time",
+      "earliest_verifiable_release": "event end + the block processing time charged pro rata"
+    },
+    {
+      "field": "block background summary (block_context)",
+      "producer": "v039/human_data.py:background_summary over cache.background_features",
+      "left": "the whole one-hour block",
+      "right": "the whole one-hour block",
+      "dependency": "block",
+      "verdict": "block_bound_but_not_consumed",
+      "conclusion": "block bound, but this field never reaches the producer: block_context is not read by the v0311, v0312 or v040 input path, so it does not constrain D-local for any fitted arm",
+      "earliest_verifiable_release": "block close"
+    }
+  ],
+  "n_cards": 130,
+  "status": "COMPLETE",
+  "processing_latency_seconds": {
+    "median": 45.3575325012207,
+    "min": 1.9158389568328857,
+    "max": 82.97794103622437
+  },
+  "observed_publication_lag_seconds": {
+    "median": 3600.0,
+    "min": 139.0,
+    "max": 3600.0,
+    "note": "block close relative to block start; not all blocks are a full hour, so some publish earlier than start plus 3600"
+  },
+  "packet_release_minus_end_minutes": {
+    "median": 29.25,
+    "max": 59.983333333333334
+  },
+  "comparisons": [
+    {
+      "status": "RECOMPUTED",
+      "block": 0,
+      "n_events_in_cache": 553,
+      "n_events_matched_in_package": 553,
+      "n_events_in_cache_not_in_package": 0,
+      "packaged_events_in_block_window": 569,
+      "packaged_events_in_window_without_a_cache_event": 16,
+      "events_dropped_by_segment_crossing": 16,
+      "cache_events_without_a_packaged_counterpart": {
+        "n": 0,
+        "in_ambiguous_interval": 0,
+        "in_seizure_or_postictal_exclusion": 0,
+        "inside_observed_support": 0,
+        "note": "cache events with no packaged counterpart; the packaging applies the registered ictal and post-ictal exclusion, so the difference is reported rather than intersected away"
+      },
+      "event_set_note": "the packaged stream already excludes events crossing a 200-second processing boundary; both event sets are reported rather than intersected away",
+      "recomputation": {
+        "band_ratio": {
+          "n": 2212,
+          "max_abs_difference": 0.0,
+          "identical_missing_pattern": true
+        },
+        "signed_xlag": {
+          "n": 2212,
+          "max_abs_difference": 0.0,
+          "identical_missing_pattern": true
+        },
+        "delay_iqr": {
+          "n": 553,
+          "max_abs_difference": 0.0,
+          "identical_missing_pattern": true
+        },
+        "participation": {
+          "n": 4977,
+          "max_abs_difference": 0.0,
+          "identical_missing_pattern": true
+        },
+        "contact_tokens": {
+          "n": 123380,
+          "max_abs_difference": 0.0,
+          "identical_missing_pattern": true
+        }
+      },
+      "elapsed_seconds": 57.6390814781189,
+      "delayed_release_epoch": 1253006532.0,
+      "local_release_seconds_saved": {
+        "median": 1596.797828912735,
+        "min": -3.2021710872650146,
+        "max": 3396.797828912735
+      }
+    },
+    {
+      "status": "RECOMPUTED",
+      "block": 1,
+      "n_events_in_cache": 625,
+      "n_events_matched_in_package": 216,
+      "n_events_in_cache_not_in_package": 409,
+      "packaged_events_in_block_window": 220,
+      "packaged_events_in_window_without_a_cache_event": 4,
+      "events_dropped_by_segment_crossing": 15,
+      "cache_events_without_a_packaged_counterpart": {
+        "n": 409,
+        "in_ambiguous_interval": 0,
+        "in_seizure_or_postictal_exclusion": 409,
+        "inside_observed_support": 0,
+        "note": "cache events with no packaged counterpart; the packaging applies the registered ictal and post-ictal exclusion, so the difference is reported rather than intersected away"
+      },
+      "event_set_note": "the packaged stream already excludes events crossing a 200-second processing boundary; both event sets are reported rather than intersected away",
+      "recomputation": {
+        "band_ratio": {
+          "n": 864,
+          "max_abs_difference": 0.0,
+          "identical_missing_pattern": true
+        },
+        "signed_xlag": {
+          "n": 864,
+          "max_abs_difference": 0.0,
+          "identical_missing_pattern": true
+        },
+        "delay_iqr": {
+          "n": 216,
+          "max_abs_difference": 0.0,
+          "identical_missing_pattern": true
+        },
+        "participation": {
+          "n": 1944,
+          "max_abs_difference": 0.0,
+          "identical_missing_pattern": true
+        },
+        "contact_tokens": {
+          "n": 47864,
+          "max_abs_difference": 0.0,
+          "identical_missing_pattern": true
+        }
+      },
+      "elapsed_seconds": 61.076597929000854,
+      "delayed_release_epoch": 1253010133.0,
+      "local_release_seconds_saved": {
+        "median": 1996.6068556308746,
+        "min": -3.393144369125366,
+        "max": 3396.6068556308746
+      }
+    },
+    {
+      "status": "RECOMPUTED",
+      "block": 2,
+      "n_events_in_cache": 526,
+      "n_events_matched_in_package": 323,
+      "n_events_in_cache_not_in_package": 203,
+      "packaged_events_in_block_window": 334,
+      "packaged_events_in_window_without_a_cache_event": 11,
+      "events_dropped_by_segment_crossing": 14,
+      "cache_events_without_a_packaged_counterpart": {
+        "n": 203,
+        "in_ambiguous_interval": 0,
+        "in_seizure_or_postictal_exclusion": 203,
+        "inside_observed_support": 0,
+        "note": "cache events with no packaged counterpart; the packaging applies the registered ictal and post-ictal exclusion, so the difference is reported rather than intersected away"
+      },
+      "event_set_note": "the packaged stream already excludes events crossing a 200-second processing boundary; both event sets are reported rather than intersected away",
+      "recomputation": {
+        "band_ratio": {
+          "n": 1292,
+          "max_abs_difference": 0.0,
+          "identical_missing_pattern": true
+        },
+        "signed_xlag": {
+          "n": 1292,
+          "max_abs_difference": 0.0,
+          "identical_missing_pattern": true
+        },
+        "delay_iqr": {
+          "n": 323,
+          "max_abs_difference": 0.0,
+          "identical_missing_pattern": true
+        },
+        "participation": {
+          "n": 2907,
+          "max_abs_difference": 0.0,
+          "identical_missing_pattern": true
+        },
+        "contact_tokens": {
+          "n": 65596,
+          "max_abs_difference": 0.0,
+          "identical_missing_pattern": true
+        }
+      },
+      "elapsed_seconds": 59.458431243896484,
+      "delayed_release_epoch": 1253013734.0,
+      "local_release_seconds_saved": {
+        "median": 1996.6967537403107,
+        "min": -3.303246259689331,
+        "max": 3396.6967537403107
+      }
+    },
+    {
+      "status": "RECOMPUTED",
+      "block": 3,
+      "n_events_in_cache": 647,
+      "n_events_matched_in_package": 647,
+      "n_events_in_cache_not_in_package": 0,
+      "packaged_events_in_block_window": 660,
+      "packaged_events_in_window_without_a_cache_event": 13,
+      "events_dropped_by_segment_crossing": 13,
+      "cache_events_without_a_packaged_counterpart": {
+        "n": 0,
+        "in_ambiguous_interval": 0,
+        "in_seizure_or_postictal_exclusion": 0,
+        "inside_observed_support": 0,
+        "note": "cache events with no packaged counterpart; the packaging applies the registered ictal and post-ictal exclusion, so the difference is reported rather than intersected away"
+      },
+      "event_set_note": "the packaged stream already excludes events crossing a 200-second processing boundary; both event sets are reported rather than intersected away",
+      "recomputation": {
+        "band_ratio": {
+          "n": 2588,
+          "max_abs_difference": 0.0,
+          "identical_missing_pattern": true
+        },
+        "signed_xlag": {
+          "n": 2588,
+          "max_abs_difference": 0.0,
+          "identical_missing_pattern": true
+        },
+        "delay_iqr": {
+          "n": 646,
+          "max_abs_difference": 0.0,
+          "identical_missing_pattern": true
+        },
+        "participation": {
+          "n": 5823,
+          "max_abs_difference": 0.0,
+          "identical_missing_pattern": true
+        },
+        "contact_tokens": {
+          "n": 134044,
+          "max_abs_difference": 0.0,
+          "identical_missing_pattern": true
+        }
+      },
+      "elapsed_seconds": 50.10927772521973,
+      "delayed_release_epoch": 1253017335.0,
+      "local_release_seconds_saved": {
+        "median": 1397.2161512374878,
+        "min": -2.783848762512207,
+        "max": 3397.216151237488
+      }
+    }
+  ],
+  "verdicts": {
+    "participation / contact_ok": "available_with_bounded_context",
+    "event count per minute": "available_with_bounded_context",
+    "core_seconds_raw / event end": "available_with_bounded_context",
+    "relative_delay_s / tied_group_id (synchronous group)": "available_with_bounded_context",
+    "delay_iqr_s / delay_span_s": "available_with_bounded_context",
+    "band_log_energy / band_centroid_s / band_log_peak": "recomputable_with_local_release",
+    "cross_band_lag_s": "recomputable_with_local_release",
+    "band_ratio (target)": "recomputable_with_local_release",
+    "signed_xlag (target)": "recomputable_with_local_release",
+    "waveform descriptors (wave_log_rms / peak / line length, bipolar and shaft-CAR means)": "available_with_bounded_context",
+    "block background summary (block_context)": "block_bound_but_not_consumed"
+  },
+  "conclusion": "every field the producer actually reads has a bounded right context: event-local for participation, timing, delay dispersion and waveform descriptors, and a closed 200-second processing segment for the band and cross-band coordinates. The observed zero-to-sixty-minute publication lag is a one-hour packaging convention, not an intrinsic measurement latency. A complete low-latency rebuild of the whole recording was not produced in this package, and that does not block the D-delayed main line.",
+  "not_done": [
+    "a full low-latency re-release of every block",
+    "a re-fit of any arm on a locally released stream"
+  ]
+}

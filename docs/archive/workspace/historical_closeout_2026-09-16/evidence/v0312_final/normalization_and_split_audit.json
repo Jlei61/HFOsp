@@ -1,0 +1,4558 @@
+{
+  "t001": {
+    "selected_path": "/data/hfosp_group_event_state_observable_state_validation_v0312/runs/epilepsiae_1125__S-E__inner0__P_stats__I-L-G1__state__persistent__seed20260906/selected.pt",
+    "selected_sha256": "950d90341126380aa6c4cd19361ad534834f309fbb3fc0b972aa9a5b8af56069",
+    "selected_updates": 150,
+    "source_digest": "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137",
+    "scaling": {
+      "contact_center": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": -0.01171875,
+        "median": 0.0788951963186264,
+        "max": 9.452872276306152,
+        "sha256": "0fc43148d01af810745ae13af47ef4ecf2b95f2f16596bb7dd9aa40652c3cfbf"
+      },
+      "contact_scale": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": 0.0009765625,
+        "median": 0.0556640625,
+        "max": 1.7517328262329102,
+        "sha256": "c2f63c579cd48d59a10033673b976b2941f4e1b5616177c8ac10e30ffb7408c0"
+      },
+      "event_center": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014712793752551079,
+        "median": 1.0,
+        "max": 5.516292572021484,
+        "sha256": "e1247b53a24bcfad881a1fff0d7e64bbc65ff4e2c4b6c470838793c142478674"
+      },
+      "event_scale": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014908497221767902,
+        "median": 0.2823171615600586,
+        "max": 1.108154058456421,
+        "sha256": "3cd6355873b4f69ef9e0bd1fc63ce2f516a023f11627acd9136c08038d063109"
+      },
+      "packet_center": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": -0.35633033514022827,
+        "median": 1.0,
+        "max": 4.255587577819824,
+        "sha256": "654aec5e484b40833e510a88b3417dce397bdbbf3a8023f362a771542dc2b9e6"
+      },
+      "packet_scale": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": 0.03998757153749466,
+        "median": 0.19001922011375427,
+        "max": 1.4763084650039673,
+        "sha256": "dec6b40559f63fec6990e6f96d97f4ae3b7088fc3868b43bce4107397661add9"
+      },
+      "band_ratio_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -9.185462951660156,
+        "median": -6.749117851257324,
+        "max": -3.8610756397247314,
+        "sha256": "ba9a286935246204d21187fcd317b8269d2d90020755330a8d731bef30c1fae9"
+      },
+      "band_ratio_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.8019447326660156,
+        "median": 0.8899497985839844,
+        "max": 1.0656886100769043,
+        "sha256": "66d21d118dc71885eb08a69b0a8c641d591af2aa7c37fe5cef49766fd54fceb2"
+      },
+      "xlag_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -0.016357421875,
+        "median": -0.008056640625,
+        "max": -0.0004185267898719758,
+        "sha256": "5090fc7d623ee3639294092c3fadf1235b432c8c2d0a72ce9915f9e5fc44d6d7"
+      },
+      "xlag_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.0058903768658638,
+        "median": 0.0212324857711792,
+        "max": 0.03432617336511612,
+        "sha256": "85da040ab3c69a50f895631d76f641fadba8e1377a2645a1008e9bce5b1df546"
+      },
+      "log_iqr_center": -4.219038009643555,
+      "log_iqr_scale": 1.0235517024993896,
+      "log_load_center": 4.290459441148391,
+      "log_load_scale": 1.2538843339475716,
+      "base_rate_per_hour": 735.8011803671353,
+      "fit_hours": 28.360277777777778,
+      "note": "v0312: full permission mask, not a calendar cutoff alone",
+      "nb_size": 1.744814708984069,
+      "nb_fit_nll": 3.4858566718099286,
+      "fit_packet_count": 1706,
+      "fit_event_count": 20873,
+      "fit_mask_digest": "d5b491164dcbf4a45bacc4cd658532e2b47046e87d9a3ec602b699161f2a1abc",
+      "transform_id": "6f13f91cd7381ff747c3131f398730c8b7cb1414050b37cdba5d42b4dbc0b126"
+    },
+    "split": {
+      "subject": "epilepsiae_1125",
+      "protocol": "S-E",
+      "stage": "inner0",
+      "split_seed": 20260906,
+      "support_start": 1253002932.0,
+      "support_end": 1253470889.0000005,
+      "se_cutoff": 1253236910.5000002,
+      "fit_end": 1253143319.1000001,
+      "measurement_definition_end": 1253139285.6669915,
+      "split_id": "969bf8d0ef740e9283de7d4a2f410676b9447ae221abe16885227b3e978d05f9",
+      "contract": "v0312: fixed split RNG; FIT-only transforms; explicit physical target IDs"
+    }
+  },
+  "t002": {
+    "selected_path": "/data/hfosp_group_event_state_observable_state_validation_v0312/runs/epilepsiae_1125__S-E__inner1__P_stats__I-L-G1__state__persistent__seed20260906/selected.pt",
+    "selected_sha256": "f314060df82be13a1dadb4e8da12274735b017411d629659e7a49632128a559b",
+    "selected_updates": 50,
+    "source_digest": "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137",
+    "scaling": {
+      "contact_center": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": -0.01171875,
+        "median": 0.07877497375011444,
+        "max": 9.441267013549805,
+        "sha256": "e4d15c828b00aca0e27d8be847e16f307811d2b0a9f44a2fc6f7f539e4971ee0"
+      },
+      "contact_scale": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": 0.0009765625,
+        "median": 0.056640625,
+        "max": 1.7443089485168457,
+        "sha256": "1402fd30fa40000d86a8ae17487ae22fec9078327779298197cafb89d3284791"
+      },
+      "event_center": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014676542952656746,
+        "median": 1.0,
+        "max": 5.512163162231445,
+        "sha256": "8b012338b3a58e3cab50837b6bb3370f34fa92efc02570dfb75b7ceb823f2c1c"
+      },
+      "event_scale": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014989558607339859,
+        "median": 0.28212690353393555,
+        "max": 1.0941822528839111,
+        "sha256": "6f5ba55865dfabe5512f97ce346ac4ab2b3f5122bbb9651aacd9b87add4985d1"
+      },
+      "packet_center": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": -0.26934006810188293,
+        "median": 1.0,
+        "max": 4.043051242828369,
+        "sha256": "69ec4d28fa001e776e639be90fa1b3e981eb3c3f08fd59f22e3207b2000c9898"
+      },
+      "packet_scale": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": 0.035342756658792496,
+        "median": 0.2886570692062378,
+        "max": 1.8099825382232666,
+        "sha256": "71803312172060f7bdbb20ab9e4c5aa320263c83fd379949c9f1cf9730e7a728"
+      },
+      "band_ratio_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -9.1732759475708,
+        "median": -6.7387285232543945,
+        "max": -3.8464083671569824,
+        "sha256": "b05304c4578b27c2e894751e1f36f02cb977ffc6f0eba8e61885a16b8f78a200"
+      },
+      "band_ratio_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.7996940612792969,
+        "median": 0.8849958181381226,
+        "max": 1.0527037382125854,
+        "sha256": "620bbd5f7589e66330bf3402e72e2eb2c88a3ba9d91648f2d1745aebb5d23bbd"
+      },
+      "xlag_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -0.0167236328125,
+        "median": -0.00821940042078495,
+        "max": -0.0004340277810115367,
+        "sha256": "d6ca55cd35fd5c14203cbe45bf7aab9c0b159e9e8f5ac3c417de8e546fae2591"
+      },
+      "xlag_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.005859375,
+        "median": 0.0213487409055233,
+        "max": 0.034644715487957,
+        "sha256": "06967de9ddf3513e67b6fb9eb5c605b1513a99a9616eb1e75f31b2a1777daa9c"
+      },
+      "log_iqr_center": -4.2215046882629395,
+      "log_iqr_scale": 1.034596562385559,
+      "log_load_center": 4.1588830833596715,
+      "log_load_scale": 1.5125880864441825,
+      "base_rate_per_hour": 659.2700243205586,
+      "fit_hours": 36.44027777777778,
+      "note": "v0312: full permission mask, not a calendar cutoff alone",
+      "nb_size": 1.0522640128869456,
+      "nb_fit_nll": 3.436660316731774,
+      "fit_packet_count": 2191,
+      "fit_event_count": 24028,
+      "fit_mask_digest": "ce463fd8d07f7bdfd427ef02ab6aaca188d7b32f97b9a6808bdfa179e4712320",
+      "transform_id": "d4a769cbaee63cf81d6e0916684c2fd951d9c7885e514bc04159f2c9acff3201"
+    },
+    "split": {
+      "subject": "epilepsiae_1125",
+      "protocol": "S-E",
+      "stage": "inner1",
+      "split_seed": 20260906,
+      "support_start": 1253002932.0,
+      "support_end": 1253470889.0000005,
+      "se_cutoff": 1253236910.5000002,
+      "fit_end": 1253190114.8000002,
+      "measurement_definition_end": 1253139285.6669915,
+      "split_id": "27f164c28a3211a37090ce3421a64ad12dc850026699e3e0bbabc3d8fef4f814",
+      "contract": "v0312: fixed split RNG; FIT-only transforms; explicit physical target IDs"
+    }
+  },
+  "t004": {
+    "selected_path": "/data/hfosp_group_event_state_observable_state_validation_v0312/runs/epilepsiae_1125__S-E__outer__P_stats__I-L-G1__state__persistent__seed20260906/selected.pt",
+    "selected_sha256": "fbd702c8b0964aea8d901be4d3d73cdc4db30356292eb01f646e5ac54e0a4c86",
+    "selected_updates": 100,
+    "source_digest": "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137",
+    "scaling": {
+      "contact_center": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": -0.0126953125,
+        "median": 0.07993762195110321,
+        "max": 9.408634185791016,
+        "sha256": "098f143fe7914e02cbe0faaeea47e1bae1a1d8cddb1dac30462ba466434d57bc"
+      },
+      "contact_scale": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": 0.0009765625,
+        "median": 0.0576171875,
+        "max": 1.73651123046875,
+        "sha256": "74d8b9f30020febe32dcfe92694c1d12de065601527f025ef734b76b0961458e"
+      },
+      "event_center": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014397526159882545,
+        "median": 1.0,
+        "max": 5.506242275238037,
+        "sha256": "42317524c30bb1c1fedc5c9fdb711c4faddf2ba3407d4ff765a8f52371527dba"
+      },
+      "event_scale": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014693976379930973,
+        "median": 0.28559374809265137,
+        "max": 1.1184535026550293,
+        "sha256": "81edbd10064e7b4cb3e9cc77378451c07558f207850ef77d0c913e5bf139013b"
+      },
+      "packet_center": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": -0.30070507526397705,
+        "median": 1.0,
+        "max": 3.9512436389923096,
+        "sha256": "8556e7ad73663fa23a9c31ac3a1b21efc98d8cb355fd25669a74661b7aa8bdf9"
+      },
+      "packet_scale": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": 0.03196491673588753,
+        "median": 0.3038952350616455,
+        "max": 1.9459099769592285,
+        "sha256": "f4e63b473b5d790c38a4556858ca6e703eebaad418d29eae0728bdde027a261e"
+      },
+      "band_ratio_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -9.17958927154541,
+        "median": -6.749734401702881,
+        "max": -3.808469533920288,
+        "sha256": "ba0c2b2536dfc70f5a8abf61f1a9e8e69947f2e8638ad32f7f1662295d9d34ea"
+      },
+      "band_ratio_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.8016698360443115,
+        "median": 0.878605842590332,
+        "max": 1.0244560241699219,
+        "sha256": "4e7777bebaf56c10bfbbbfa013c6fcd7c0512b9a75b189862b57a0dc42c052bf"
+      },
+      "xlag_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -0.01774088479578495,
+        "median": -0.0087270587682724,
+        "max": -0.00048828125,
+        "sha256": "05ee62b67583699d26aadb0900839c24c0efcc356f9add0f7a3c7a3eb6ef35d6"
+      },
+      "xlag_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.0059988838620483875,
+        "median": 0.02143593318760395,
+        "max": 0.0349392332136631,
+        "sha256": "9edb77d1a5de608c02466c7e2bde3b37a932e0e9660c324ac55d735c24212d01"
+      },
+      "log_iqr_center": -4.24069881439209,
+      "log_iqr_scale": 1.0365405082702637,
+      "log_load_center": 4.110873864173311,
+      "log_load_scale": 1.5740359853831842,
+      "base_rate_per_hour": 616.7745892054585,
+      "fit_hours": 48.474999999999994,
+      "note": "v0312: full permission mask, not a calendar cutoff alone",
+      "nb_size": 0.9890990847585013,
+      "nb_fit_nll": 3.374106334564747,
+      "fit_packet_count": 2914,
+      "fit_event_count": 29900,
+      "fit_mask_digest": "e529596f2fbb31bf03cbe381ae2116a2f4ad8995130ccf735cca5b628a98287c",
+      "transform_id": "8fd08d0df2e4745ca5d118925f82ce2ce8e8013dea920db6f06ace9da2fa29c5"
+    },
+    "split": {
+      "subject": "epilepsiae_1125",
+      "protocol": "S-E",
+      "stage": "outer",
+      "split_seed": 20260906,
+      "support_start": 1253002932.0,
+      "support_end": 1253470889.0000005,
+      "se_cutoff": 1253236910.5000002,
+      "fit_end": 1253236910.5000002,
+      "measurement_definition_end": 1253139285.6669915,
+      "split_id": "737d269177536b6dc8cee07d7b03a93f405fa564790b0562e5fcb19873ea43eb",
+      "contract": "v0312: fixed split RNG; FIT-only transforms; explicit physical target IDs"
+    }
+  },
+  "t006": {
+    "selected_path": "/data/hfosp_group_event_state_observable_state_validation_v0312/runs/epilepsiae_1125__S-E__outer__P_stats__I-L-G1__state__persistent__seed20260907/selected.pt",
+    "selected_sha256": "9fc38dfce4b18e32895d2a6d3706148cfccc608957aa5f933ecf5e3f8845c0de",
+    "selected_updates": 100,
+    "source_digest": "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137",
+    "scaling": {
+      "contact_center": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": -0.0126953125,
+        "median": 0.07993762195110321,
+        "max": 9.408634185791016,
+        "sha256": "098f143fe7914e02cbe0faaeea47e1bae1a1d8cddb1dac30462ba466434d57bc"
+      },
+      "contact_scale": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": 0.0009765625,
+        "median": 0.0576171875,
+        "max": 1.73651123046875,
+        "sha256": "74d8b9f30020febe32dcfe92694c1d12de065601527f025ef734b76b0961458e"
+      },
+      "event_center": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014397526159882545,
+        "median": 1.0,
+        "max": 5.506242275238037,
+        "sha256": "42317524c30bb1c1fedc5c9fdb711c4faddf2ba3407d4ff765a8f52371527dba"
+      },
+      "event_scale": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014693976379930973,
+        "median": 0.28559374809265137,
+        "max": 1.1184535026550293,
+        "sha256": "81edbd10064e7b4cb3e9cc77378451c07558f207850ef77d0c913e5bf139013b"
+      },
+      "packet_center": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": -0.30070507526397705,
+        "median": 1.0,
+        "max": 3.9512436389923096,
+        "sha256": "8556e7ad73663fa23a9c31ac3a1b21efc98d8cb355fd25669a74661b7aa8bdf9"
+      },
+      "packet_scale": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": 0.03196491673588753,
+        "median": 0.3038952350616455,
+        "max": 1.9459099769592285,
+        "sha256": "f4e63b473b5d790c38a4556858ca6e703eebaad418d29eae0728bdde027a261e"
+      },
+      "band_ratio_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -9.17958927154541,
+        "median": -6.749734401702881,
+        "max": -3.808469533920288,
+        "sha256": "ba0c2b2536dfc70f5a8abf61f1a9e8e69947f2e8638ad32f7f1662295d9d34ea"
+      },
+      "band_ratio_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.8016698360443115,
+        "median": 0.878605842590332,
+        "max": 1.0244560241699219,
+        "sha256": "4e7777bebaf56c10bfbbbfa013c6fcd7c0512b9a75b189862b57a0dc42c052bf"
+      },
+      "xlag_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -0.01774088479578495,
+        "median": -0.0087270587682724,
+        "max": -0.00048828125,
+        "sha256": "05ee62b67583699d26aadb0900839c24c0efcc356f9add0f7a3c7a3eb6ef35d6"
+      },
+      "xlag_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.0059988838620483875,
+        "median": 0.02143593318760395,
+        "max": 0.0349392332136631,
+        "sha256": "9edb77d1a5de608c02466c7e2bde3b37a932e0e9660c324ac55d735c24212d01"
+      },
+      "log_iqr_center": -4.24069881439209,
+      "log_iqr_scale": 1.0365405082702637,
+      "log_load_center": 4.110873864173311,
+      "log_load_scale": 1.5740359853831842,
+      "base_rate_per_hour": 616.7745892054585,
+      "fit_hours": 48.474999999999994,
+      "note": "v0312: full permission mask, not a calendar cutoff alone",
+      "nb_size": 0.9890990847585013,
+      "nb_fit_nll": 3.374106334564747,
+      "fit_packet_count": 2914,
+      "fit_event_count": 29900,
+      "fit_mask_digest": "e529596f2fbb31bf03cbe381ae2116a2f4ad8995130ccf735cca5b628a98287c",
+      "transform_id": "8fd08d0df2e4745ca5d118925f82ce2ce8e8013dea920db6f06ace9da2fa29c5"
+    },
+    "split": {
+      "subject": "epilepsiae_1125",
+      "protocol": "S-E",
+      "stage": "outer",
+      "split_seed": 20260906,
+      "support_start": 1253002932.0,
+      "support_end": 1253470889.0000005,
+      "se_cutoff": 1253236910.5000002,
+      "fit_end": 1253236910.5000002,
+      "measurement_definition_end": 1253139285.6669915,
+      "split_id": "737d269177536b6dc8cee07d7b03a93f405fa564790b0562e5fcb19873ea43eb",
+      "contract": "v0312: fixed split RNG; FIT-only transforms; explicit physical target IDs"
+    }
+  },
+  "t008": {
+    "selected_path": "/data/hfosp_group_event_state_observable_state_validation_v0312/runs/epilepsiae_1125__S-E__outer__P_stats__I-L-G1__state__persistent__seed20260908/selected.pt",
+    "selected_sha256": "0cb6198aafe3679149ba1d8352241e7dabf2a689eb29ff34d5c5895205cf41a9",
+    "selected_updates": 100,
+    "source_digest": "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137",
+    "scaling": {
+      "contact_center": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": -0.0126953125,
+        "median": 0.07993762195110321,
+        "max": 9.408634185791016,
+        "sha256": "098f143fe7914e02cbe0faaeea47e1bae1a1d8cddb1dac30462ba466434d57bc"
+      },
+      "contact_scale": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": 0.0009765625,
+        "median": 0.0576171875,
+        "max": 1.73651123046875,
+        "sha256": "74d8b9f30020febe32dcfe92694c1d12de065601527f025ef734b76b0961458e"
+      },
+      "event_center": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014397526159882545,
+        "median": 1.0,
+        "max": 5.506242275238037,
+        "sha256": "42317524c30bb1c1fedc5c9fdb711c4faddf2ba3407d4ff765a8f52371527dba"
+      },
+      "event_scale": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014693976379930973,
+        "median": 0.28559374809265137,
+        "max": 1.1184535026550293,
+        "sha256": "81edbd10064e7b4cb3e9cc77378451c07558f207850ef77d0c913e5bf139013b"
+      },
+      "packet_center": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": -0.30070507526397705,
+        "median": 1.0,
+        "max": 3.9512436389923096,
+        "sha256": "8556e7ad73663fa23a9c31ac3a1b21efc98d8cb355fd25669a74661b7aa8bdf9"
+      },
+      "packet_scale": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": 0.03196491673588753,
+        "median": 0.3038952350616455,
+        "max": 1.9459099769592285,
+        "sha256": "f4e63b473b5d790c38a4556858ca6e703eebaad418d29eae0728bdde027a261e"
+      },
+      "band_ratio_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -9.17958927154541,
+        "median": -6.749734401702881,
+        "max": -3.808469533920288,
+        "sha256": "ba0c2b2536dfc70f5a8abf61f1a9e8e69947f2e8638ad32f7f1662295d9d34ea"
+      },
+      "band_ratio_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.8016698360443115,
+        "median": 0.878605842590332,
+        "max": 1.0244560241699219,
+        "sha256": "4e7777bebaf56c10bfbbbfa013c6fcd7c0512b9a75b189862b57a0dc42c052bf"
+      },
+      "xlag_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -0.01774088479578495,
+        "median": -0.0087270587682724,
+        "max": -0.00048828125,
+        "sha256": "05ee62b67583699d26aadb0900839c24c0efcc356f9add0f7a3c7a3eb6ef35d6"
+      },
+      "xlag_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.0059988838620483875,
+        "median": 0.02143593318760395,
+        "max": 0.0349392332136631,
+        "sha256": "9edb77d1a5de608c02466c7e2bde3b37a932e0e9660c324ac55d735c24212d01"
+      },
+      "log_iqr_center": -4.24069881439209,
+      "log_iqr_scale": 1.0365405082702637,
+      "log_load_center": 4.110873864173311,
+      "log_load_scale": 1.5740359853831842,
+      "base_rate_per_hour": 616.7745892054585,
+      "fit_hours": 48.474999999999994,
+      "note": "v0312: full permission mask, not a calendar cutoff alone",
+      "nb_size": 0.9890990847585013,
+      "nb_fit_nll": 3.374106334564747,
+      "fit_packet_count": 2914,
+      "fit_event_count": 29900,
+      "fit_mask_digest": "e529596f2fbb31bf03cbe381ae2116a2f4ad8995130ccf735cca5b628a98287c",
+      "transform_id": "8fd08d0df2e4745ca5d118925f82ce2ce8e8013dea920db6f06ace9da2fa29c5"
+    },
+    "split": {
+      "subject": "epilepsiae_1125",
+      "protocol": "S-E",
+      "stage": "outer",
+      "split_seed": 20260906,
+      "support_start": 1253002932.0,
+      "support_end": 1253470889.0000005,
+      "se_cutoff": 1253236910.5000002,
+      "fit_end": 1253236910.5000002,
+      "measurement_definition_end": 1253139285.6669915,
+      "split_id": "737d269177536b6dc8cee07d7b03a93f405fa564790b0562e5fcb19873ea43eb",
+      "contract": "v0312: fixed split RNG; FIT-only transforms; explicit physical target IDs"
+    }
+  },
+  "t010": {
+    "selected_path": "/data/hfosp_group_event_state_observable_state_validation_v0312/runs/epilepsiae_1125__S-E__inner0__P_marks__I-L-G1__state__persistent__seed20260906/selected.pt",
+    "selected_sha256": "bf507ad0069d5f1613f310524c33544753d420fe9bf1164e7c62b75180871079",
+    "selected_updates": 400,
+    "source_digest": "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137",
+    "scaling": {
+      "contact_center": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": -0.01171875,
+        "median": 0.0788951963186264,
+        "max": 9.452872276306152,
+        "sha256": "0fc43148d01af810745ae13af47ef4ecf2b95f2f16596bb7dd9aa40652c3cfbf"
+      },
+      "contact_scale": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": 0.0009765625,
+        "median": 0.0556640625,
+        "max": 1.7517328262329102,
+        "sha256": "c2f63c579cd48d59a10033673b976b2941f4e1b5616177c8ac10e30ffb7408c0"
+      },
+      "event_center": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014712793752551079,
+        "median": 1.0,
+        "max": 5.516292572021484,
+        "sha256": "e1247b53a24bcfad881a1fff0d7e64bbc65ff4e2c4b6c470838793c142478674"
+      },
+      "event_scale": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014908497221767902,
+        "median": 0.2823171615600586,
+        "max": 1.108154058456421,
+        "sha256": "3cd6355873b4f69ef9e0bd1fc63ce2f516a023f11627acd9136c08038d063109"
+      },
+      "packet_center": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": -0.35633033514022827,
+        "median": 1.0,
+        "max": 4.255587577819824,
+        "sha256": "654aec5e484b40833e510a88b3417dce397bdbbf3a8023f362a771542dc2b9e6"
+      },
+      "packet_scale": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": 0.03998757153749466,
+        "median": 0.19001922011375427,
+        "max": 1.4763084650039673,
+        "sha256": "dec6b40559f63fec6990e6f96d97f4ae3b7088fc3868b43bce4107397661add9"
+      },
+      "band_ratio_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -9.185462951660156,
+        "median": -6.749117851257324,
+        "max": -3.8610756397247314,
+        "sha256": "ba9a286935246204d21187fcd317b8269d2d90020755330a8d731bef30c1fae9"
+      },
+      "band_ratio_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.8019447326660156,
+        "median": 0.8899497985839844,
+        "max": 1.0656886100769043,
+        "sha256": "66d21d118dc71885eb08a69b0a8c641d591af2aa7c37fe5cef49766fd54fceb2"
+      },
+      "xlag_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -0.016357421875,
+        "median": -0.008056640625,
+        "max": -0.0004185267898719758,
+        "sha256": "5090fc7d623ee3639294092c3fadf1235b432c8c2d0a72ce9915f9e5fc44d6d7"
+      },
+      "xlag_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.0058903768658638,
+        "median": 0.0212324857711792,
+        "max": 0.03432617336511612,
+        "sha256": "85da040ab3c69a50f895631d76f641fadba8e1377a2645a1008e9bce5b1df546"
+      },
+      "log_iqr_center": -4.219038009643555,
+      "log_iqr_scale": 1.0235517024993896,
+      "log_load_center": 4.290459441148391,
+      "log_load_scale": 1.2538843339475716,
+      "base_rate_per_hour": 735.8011803671353,
+      "fit_hours": 28.360277777777778,
+      "note": "v0312: full permission mask, not a calendar cutoff alone",
+      "nb_size": 1.744814708984069,
+      "nb_fit_nll": 3.4858566718099286,
+      "fit_packet_count": 1706,
+      "fit_event_count": 20873,
+      "fit_mask_digest": "d5b491164dcbf4a45bacc4cd658532e2b47046e87d9a3ec602b699161f2a1abc",
+      "transform_id": "6f13f91cd7381ff747c3131f398730c8b7cb1414050b37cdba5d42b4dbc0b126"
+    },
+    "split": {
+      "subject": "epilepsiae_1125",
+      "protocol": "S-E",
+      "stage": "inner0",
+      "split_seed": 20260906,
+      "support_start": 1253002932.0,
+      "support_end": 1253470889.0000005,
+      "se_cutoff": 1253236910.5000002,
+      "fit_end": 1253143319.1000001,
+      "measurement_definition_end": 1253139285.6669915,
+      "split_id": "969bf8d0ef740e9283de7d4a2f410676b9447ae221abe16885227b3e978d05f9",
+      "contract": "v0312: fixed split RNG; FIT-only transforms; explicit physical target IDs"
+    }
+  },
+  "t011": {
+    "selected_path": "/data/hfosp_group_event_state_observable_state_validation_v0312/runs/epilepsiae_1125__S-E__inner1__P_marks__I-L-G1__state__persistent__seed20260906/selected.pt",
+    "selected_sha256": "f68cdbceb98d57404912e8e534f088da1708a83187f3d1001716dea3433c0322",
+    "selected_updates": 50,
+    "source_digest": "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137",
+    "scaling": {
+      "contact_center": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": -0.01171875,
+        "median": 0.07877497375011444,
+        "max": 9.441267013549805,
+        "sha256": "e4d15c828b00aca0e27d8be847e16f307811d2b0a9f44a2fc6f7f539e4971ee0"
+      },
+      "contact_scale": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": 0.0009765625,
+        "median": 0.056640625,
+        "max": 1.7443089485168457,
+        "sha256": "1402fd30fa40000d86a8ae17487ae22fec9078327779298197cafb89d3284791"
+      },
+      "event_center": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014676542952656746,
+        "median": 1.0,
+        "max": 5.512163162231445,
+        "sha256": "8b012338b3a58e3cab50837b6bb3370f34fa92efc02570dfb75b7ceb823f2c1c"
+      },
+      "event_scale": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014989558607339859,
+        "median": 0.28212690353393555,
+        "max": 1.0941822528839111,
+        "sha256": "6f5ba55865dfabe5512f97ce346ac4ab2b3f5122bbb9651aacd9b87add4985d1"
+      },
+      "packet_center": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": -0.26934006810188293,
+        "median": 1.0,
+        "max": 4.043051242828369,
+        "sha256": "69ec4d28fa001e776e639be90fa1b3e981eb3c3f08fd59f22e3207b2000c9898"
+      },
+      "packet_scale": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": 0.035342756658792496,
+        "median": 0.2886570692062378,
+        "max": 1.8099825382232666,
+        "sha256": "71803312172060f7bdbb20ab9e4c5aa320263c83fd379949c9f1cf9730e7a728"
+      },
+      "band_ratio_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -9.1732759475708,
+        "median": -6.7387285232543945,
+        "max": -3.8464083671569824,
+        "sha256": "b05304c4578b27c2e894751e1f36f02cb977ffc6f0eba8e61885a16b8f78a200"
+      },
+      "band_ratio_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.7996940612792969,
+        "median": 0.8849958181381226,
+        "max": 1.0527037382125854,
+        "sha256": "620bbd5f7589e66330bf3402e72e2eb2c88a3ba9d91648f2d1745aebb5d23bbd"
+      },
+      "xlag_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -0.0167236328125,
+        "median": -0.00821940042078495,
+        "max": -0.0004340277810115367,
+        "sha256": "d6ca55cd35fd5c14203cbe45bf7aab9c0b159e9e8f5ac3c417de8e546fae2591"
+      },
+      "xlag_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.005859375,
+        "median": 0.0213487409055233,
+        "max": 0.034644715487957,
+        "sha256": "06967de9ddf3513e67b6fb9eb5c605b1513a99a9616eb1e75f31b2a1777daa9c"
+      },
+      "log_iqr_center": -4.2215046882629395,
+      "log_iqr_scale": 1.034596562385559,
+      "log_load_center": 4.1588830833596715,
+      "log_load_scale": 1.5125880864441825,
+      "base_rate_per_hour": 659.2700243205586,
+      "fit_hours": 36.44027777777778,
+      "note": "v0312: full permission mask, not a calendar cutoff alone",
+      "nb_size": 1.0522640128869456,
+      "nb_fit_nll": 3.436660316731774,
+      "fit_packet_count": 2191,
+      "fit_event_count": 24028,
+      "fit_mask_digest": "ce463fd8d07f7bdfd427ef02ab6aaca188d7b32f97b9a6808bdfa179e4712320",
+      "transform_id": "d4a769cbaee63cf81d6e0916684c2fd951d9c7885e514bc04159f2c9acff3201"
+    },
+    "split": {
+      "subject": "epilepsiae_1125",
+      "protocol": "S-E",
+      "stage": "inner1",
+      "split_seed": 20260906,
+      "support_start": 1253002932.0,
+      "support_end": 1253470889.0000005,
+      "se_cutoff": 1253236910.5000002,
+      "fit_end": 1253190114.8000002,
+      "measurement_definition_end": 1253139285.6669915,
+      "split_id": "27f164c28a3211a37090ce3421a64ad12dc850026699e3e0bbabc3d8fef4f814",
+      "contract": "v0312: fixed split RNG; FIT-only transforms; explicit physical target IDs"
+    }
+  },
+  "t013": {
+    "selected_path": "/data/hfosp_group_event_state_observable_state_validation_v0312/runs/epilepsiae_1125__S-E__outer__P_marks__I-L-G1__state__persistent__seed20260906/selected.pt",
+    "selected_sha256": "8562830cdbcc11980964b2f5493d2846f72d5bf77cc23927e09b5973b7b12bf9",
+    "selected_updates": 225,
+    "source_digest": "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137",
+    "scaling": {
+      "contact_center": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": -0.0126953125,
+        "median": 0.07993762195110321,
+        "max": 9.408634185791016,
+        "sha256": "098f143fe7914e02cbe0faaeea47e1bae1a1d8cddb1dac30462ba466434d57bc"
+      },
+      "contact_scale": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": 0.0009765625,
+        "median": 0.0576171875,
+        "max": 1.73651123046875,
+        "sha256": "74d8b9f30020febe32dcfe92694c1d12de065601527f025ef734b76b0961458e"
+      },
+      "event_center": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014397526159882545,
+        "median": 1.0,
+        "max": 5.506242275238037,
+        "sha256": "42317524c30bb1c1fedc5c9fdb711c4faddf2ba3407d4ff765a8f52371527dba"
+      },
+      "event_scale": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014693976379930973,
+        "median": 0.28559374809265137,
+        "max": 1.1184535026550293,
+        "sha256": "81edbd10064e7b4cb3e9cc77378451c07558f207850ef77d0c913e5bf139013b"
+      },
+      "packet_center": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": -0.30070507526397705,
+        "median": 1.0,
+        "max": 3.9512436389923096,
+        "sha256": "8556e7ad73663fa23a9c31ac3a1b21efc98d8cb355fd25669a74661b7aa8bdf9"
+      },
+      "packet_scale": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": 0.03196491673588753,
+        "median": 0.3038952350616455,
+        "max": 1.9459099769592285,
+        "sha256": "f4e63b473b5d790c38a4556858ca6e703eebaad418d29eae0728bdde027a261e"
+      },
+      "band_ratio_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -9.17958927154541,
+        "median": -6.749734401702881,
+        "max": -3.808469533920288,
+        "sha256": "ba0c2b2536dfc70f5a8abf61f1a9e8e69947f2e8638ad32f7f1662295d9d34ea"
+      },
+      "band_ratio_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.8016698360443115,
+        "median": 0.878605842590332,
+        "max": 1.0244560241699219,
+        "sha256": "4e7777bebaf56c10bfbbbfa013c6fcd7c0512b9a75b189862b57a0dc42c052bf"
+      },
+      "xlag_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -0.01774088479578495,
+        "median": -0.0087270587682724,
+        "max": -0.00048828125,
+        "sha256": "05ee62b67583699d26aadb0900839c24c0efcc356f9add0f7a3c7a3eb6ef35d6"
+      },
+      "xlag_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.0059988838620483875,
+        "median": 0.02143593318760395,
+        "max": 0.0349392332136631,
+        "sha256": "9edb77d1a5de608c02466c7e2bde3b37a932e0e9660c324ac55d735c24212d01"
+      },
+      "log_iqr_center": -4.24069881439209,
+      "log_iqr_scale": 1.0365405082702637,
+      "log_load_center": 4.110873864173311,
+      "log_load_scale": 1.5740359853831842,
+      "base_rate_per_hour": 616.7745892054585,
+      "fit_hours": 48.474999999999994,
+      "note": "v0312: full permission mask, not a calendar cutoff alone",
+      "nb_size": 0.9890990847585013,
+      "nb_fit_nll": 3.374106334564747,
+      "fit_packet_count": 2914,
+      "fit_event_count": 29900,
+      "fit_mask_digest": "e529596f2fbb31bf03cbe381ae2116a2f4ad8995130ccf735cca5b628a98287c",
+      "transform_id": "8fd08d0df2e4745ca5d118925f82ce2ce8e8013dea920db6f06ace9da2fa29c5"
+    },
+    "split": {
+      "subject": "epilepsiae_1125",
+      "protocol": "S-E",
+      "stage": "outer",
+      "split_seed": 20260906,
+      "support_start": 1253002932.0,
+      "support_end": 1253470889.0000005,
+      "se_cutoff": 1253236910.5000002,
+      "fit_end": 1253236910.5000002,
+      "measurement_definition_end": 1253139285.6669915,
+      "split_id": "737d269177536b6dc8cee07d7b03a93f405fa564790b0562e5fcb19873ea43eb",
+      "contract": "v0312: fixed split RNG; FIT-only transforms; explicit physical target IDs"
+    }
+  },
+  "t015": {
+    "selected_path": "/data/hfosp_group_event_state_observable_state_validation_v0312/runs/epilepsiae_1125__S-E__outer__P_marks__I-L-G1__state__persistent__seed20260907/selected.pt",
+    "selected_sha256": "89068a326f619407873c425c75ddb17a6bae57937b141e40be3ee3cb2c41de31",
+    "selected_updates": 225,
+    "source_digest": "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137",
+    "scaling": {
+      "contact_center": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": -0.0126953125,
+        "median": 0.07993762195110321,
+        "max": 9.408634185791016,
+        "sha256": "098f143fe7914e02cbe0faaeea47e1bae1a1d8cddb1dac30462ba466434d57bc"
+      },
+      "contact_scale": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": 0.0009765625,
+        "median": 0.0576171875,
+        "max": 1.73651123046875,
+        "sha256": "74d8b9f30020febe32dcfe92694c1d12de065601527f025ef734b76b0961458e"
+      },
+      "event_center": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014397526159882545,
+        "median": 1.0,
+        "max": 5.506242275238037,
+        "sha256": "42317524c30bb1c1fedc5c9fdb711c4faddf2ba3407d4ff765a8f52371527dba"
+      },
+      "event_scale": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014693976379930973,
+        "median": 0.28559374809265137,
+        "max": 1.1184535026550293,
+        "sha256": "81edbd10064e7b4cb3e9cc77378451c07558f207850ef77d0c913e5bf139013b"
+      },
+      "packet_center": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": -0.30070507526397705,
+        "median": 1.0,
+        "max": 3.9512436389923096,
+        "sha256": "8556e7ad73663fa23a9c31ac3a1b21efc98d8cb355fd25669a74661b7aa8bdf9"
+      },
+      "packet_scale": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": 0.03196491673588753,
+        "median": 0.3038952350616455,
+        "max": 1.9459099769592285,
+        "sha256": "f4e63b473b5d790c38a4556858ca6e703eebaad418d29eae0728bdde027a261e"
+      },
+      "band_ratio_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -9.17958927154541,
+        "median": -6.749734401702881,
+        "max": -3.808469533920288,
+        "sha256": "ba0c2b2536dfc70f5a8abf61f1a9e8e69947f2e8638ad32f7f1662295d9d34ea"
+      },
+      "band_ratio_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.8016698360443115,
+        "median": 0.878605842590332,
+        "max": 1.0244560241699219,
+        "sha256": "4e7777bebaf56c10bfbbbfa013c6fcd7c0512b9a75b189862b57a0dc42c052bf"
+      },
+      "xlag_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -0.01774088479578495,
+        "median": -0.0087270587682724,
+        "max": -0.00048828125,
+        "sha256": "05ee62b67583699d26aadb0900839c24c0efcc356f9add0f7a3c7a3eb6ef35d6"
+      },
+      "xlag_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.0059988838620483875,
+        "median": 0.02143593318760395,
+        "max": 0.0349392332136631,
+        "sha256": "9edb77d1a5de608c02466c7e2bde3b37a932e0e9660c324ac55d735c24212d01"
+      },
+      "log_iqr_center": -4.24069881439209,
+      "log_iqr_scale": 1.0365405082702637,
+      "log_load_center": 4.110873864173311,
+      "log_load_scale": 1.5740359853831842,
+      "base_rate_per_hour": 616.7745892054585,
+      "fit_hours": 48.474999999999994,
+      "note": "v0312: full permission mask, not a calendar cutoff alone",
+      "nb_size": 0.9890990847585013,
+      "nb_fit_nll": 3.374106334564747,
+      "fit_packet_count": 2914,
+      "fit_event_count": 29900,
+      "fit_mask_digest": "e529596f2fbb31bf03cbe381ae2116a2f4ad8995130ccf735cca5b628a98287c",
+      "transform_id": "8fd08d0df2e4745ca5d118925f82ce2ce8e8013dea920db6f06ace9da2fa29c5"
+    },
+    "split": {
+      "subject": "epilepsiae_1125",
+      "protocol": "S-E",
+      "stage": "outer",
+      "split_seed": 20260906,
+      "support_start": 1253002932.0,
+      "support_end": 1253470889.0000005,
+      "se_cutoff": 1253236910.5000002,
+      "fit_end": 1253236910.5000002,
+      "measurement_definition_end": 1253139285.6669915,
+      "split_id": "737d269177536b6dc8cee07d7b03a93f405fa564790b0562e5fcb19873ea43eb",
+      "contract": "v0312: fixed split RNG; FIT-only transforms; explicit physical target IDs"
+    }
+  },
+  "t017": {
+    "selected_path": "/data/hfosp_group_event_state_observable_state_validation_v0312/runs/epilepsiae_1125__S-E__outer__P_marks__I-L-G1__state__persistent__seed20260908/selected.pt",
+    "selected_sha256": "0196e71fbc14155ba4dc640285fd5a381917bd925a810101c6a823c737e21f27",
+    "selected_updates": 225,
+    "source_digest": "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137",
+    "scaling": {
+      "contact_center": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": -0.0126953125,
+        "median": 0.07993762195110321,
+        "max": 9.408634185791016,
+        "sha256": "098f143fe7914e02cbe0faaeea47e1bae1a1d8cddb1dac30462ba466434d57bc"
+      },
+      "contact_scale": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": 0.0009765625,
+        "median": 0.0576171875,
+        "max": 1.73651123046875,
+        "sha256": "74d8b9f30020febe32dcfe92694c1d12de065601527f025ef734b76b0961458e"
+      },
+      "event_center": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014397526159882545,
+        "median": 1.0,
+        "max": 5.506242275238037,
+        "sha256": "42317524c30bb1c1fedc5c9fdb711c4faddf2ba3407d4ff765a8f52371527dba"
+      },
+      "event_scale": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014693976379930973,
+        "median": 0.28559374809265137,
+        "max": 1.1184535026550293,
+        "sha256": "81edbd10064e7b4cb3e9cc77378451c07558f207850ef77d0c913e5bf139013b"
+      },
+      "packet_center": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": -0.30070507526397705,
+        "median": 1.0,
+        "max": 3.9512436389923096,
+        "sha256": "8556e7ad73663fa23a9c31ac3a1b21efc98d8cb355fd25669a74661b7aa8bdf9"
+      },
+      "packet_scale": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": 0.03196491673588753,
+        "median": 0.3038952350616455,
+        "max": 1.9459099769592285,
+        "sha256": "f4e63b473b5d790c38a4556858ca6e703eebaad418d29eae0728bdde027a261e"
+      },
+      "band_ratio_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -9.17958927154541,
+        "median": -6.749734401702881,
+        "max": -3.808469533920288,
+        "sha256": "ba0c2b2536dfc70f5a8abf61f1a9e8e69947f2e8638ad32f7f1662295d9d34ea"
+      },
+      "band_ratio_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.8016698360443115,
+        "median": 0.878605842590332,
+        "max": 1.0244560241699219,
+        "sha256": "4e7777bebaf56c10bfbbbfa013c6fcd7c0512b9a75b189862b57a0dc42c052bf"
+      },
+      "xlag_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -0.01774088479578495,
+        "median": -0.0087270587682724,
+        "max": -0.00048828125,
+        "sha256": "05ee62b67583699d26aadb0900839c24c0efcc356f9add0f7a3c7a3eb6ef35d6"
+      },
+      "xlag_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.0059988838620483875,
+        "median": 0.02143593318760395,
+        "max": 0.0349392332136631,
+        "sha256": "9edb77d1a5de608c02466c7e2bde3b37a932e0e9660c324ac55d735c24212d01"
+      },
+      "log_iqr_center": -4.24069881439209,
+      "log_iqr_scale": 1.0365405082702637,
+      "log_load_center": 4.110873864173311,
+      "log_load_scale": 1.5740359853831842,
+      "base_rate_per_hour": 616.7745892054585,
+      "fit_hours": 48.474999999999994,
+      "note": "v0312: full permission mask, not a calendar cutoff alone",
+      "nb_size": 0.9890990847585013,
+      "nb_fit_nll": 3.374106334564747,
+      "fit_packet_count": 2914,
+      "fit_event_count": 29900,
+      "fit_mask_digest": "e529596f2fbb31bf03cbe381ae2116a2f4ad8995130ccf735cca5b628a98287c",
+      "transform_id": "8fd08d0df2e4745ca5d118925f82ce2ce8e8013dea920db6f06ace9da2fa29c5"
+    },
+    "split": {
+      "subject": "epilepsiae_1125",
+      "protocol": "S-E",
+      "stage": "outer",
+      "split_seed": 20260906,
+      "support_start": 1253002932.0,
+      "support_end": 1253470889.0000005,
+      "se_cutoff": 1253236910.5000002,
+      "fit_end": 1253236910.5000002,
+      "measurement_definition_end": 1253139285.6669915,
+      "split_id": "737d269177536b6dc8cee07d7b03a93f405fa564790b0562e5fcb19873ea43eb",
+      "contract": "v0312: fixed split RNG; FIT-only transforms; explicit physical target IDs"
+    }
+  },
+  "t019": {
+    "selected_path": "/data/hfosp_group_event_state_observable_state_validation_v0312/runs/epilepsiae_1125__S-E__inner0__P_marks__I-L-G1__marked_history__persistent__seed20260906/selected.pt",
+    "selected_sha256": "c3d74eb3d4006e9e82e0cba9fb70f73e885493fd8354335c865211bd0ad29bf0",
+    "selected_updates": 400,
+    "source_digest": "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137",
+    "scaling": {
+      "contact_center": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": -0.01171875,
+        "median": 0.0788951963186264,
+        "max": 9.452872276306152,
+        "sha256": "0fc43148d01af810745ae13af47ef4ecf2b95f2f16596bb7dd9aa40652c3cfbf"
+      },
+      "contact_scale": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": 0.0009765625,
+        "median": 0.0556640625,
+        "max": 1.7517328262329102,
+        "sha256": "c2f63c579cd48d59a10033673b976b2941f4e1b5616177c8ac10e30ffb7408c0"
+      },
+      "event_center": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014712793752551079,
+        "median": 1.0,
+        "max": 5.516292572021484,
+        "sha256": "e1247b53a24bcfad881a1fff0d7e64bbc65ff4e2c4b6c470838793c142478674"
+      },
+      "event_scale": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014908497221767902,
+        "median": 0.2823171615600586,
+        "max": 1.108154058456421,
+        "sha256": "3cd6355873b4f69ef9e0bd1fc63ce2f516a023f11627acd9136c08038d063109"
+      },
+      "packet_center": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": -0.35633033514022827,
+        "median": 1.0,
+        "max": 4.255587577819824,
+        "sha256": "654aec5e484b40833e510a88b3417dce397bdbbf3a8023f362a771542dc2b9e6"
+      },
+      "packet_scale": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": 0.03998757153749466,
+        "median": 0.19001922011375427,
+        "max": 1.4763084650039673,
+        "sha256": "dec6b40559f63fec6990e6f96d97f4ae3b7088fc3868b43bce4107397661add9"
+      },
+      "band_ratio_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -9.185462951660156,
+        "median": -6.749117851257324,
+        "max": -3.8610756397247314,
+        "sha256": "ba9a286935246204d21187fcd317b8269d2d90020755330a8d731bef30c1fae9"
+      },
+      "band_ratio_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.8019447326660156,
+        "median": 0.8899497985839844,
+        "max": 1.0656886100769043,
+        "sha256": "66d21d118dc71885eb08a69b0a8c641d591af2aa7c37fe5cef49766fd54fceb2"
+      },
+      "xlag_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -0.016357421875,
+        "median": -0.008056640625,
+        "max": -0.0004185267898719758,
+        "sha256": "5090fc7d623ee3639294092c3fadf1235b432c8c2d0a72ce9915f9e5fc44d6d7"
+      },
+      "xlag_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.0058903768658638,
+        "median": 0.0212324857711792,
+        "max": 0.03432617336511612,
+        "sha256": "85da040ab3c69a50f895631d76f641fadba8e1377a2645a1008e9bce5b1df546"
+      },
+      "log_iqr_center": -4.219038009643555,
+      "log_iqr_scale": 1.0235517024993896,
+      "log_load_center": 4.290459441148391,
+      "log_load_scale": 1.2538843339475716,
+      "base_rate_per_hour": 735.8011803671353,
+      "fit_hours": 28.360277777777778,
+      "note": "v0312: full permission mask, not a calendar cutoff alone",
+      "nb_size": 1.744814708984069,
+      "nb_fit_nll": 3.4858566718099286,
+      "fit_packet_count": 1706,
+      "fit_event_count": 20873,
+      "fit_mask_digest": "d5b491164dcbf4a45bacc4cd658532e2b47046e87d9a3ec602b699161f2a1abc",
+      "transform_id": "6f13f91cd7381ff747c3131f398730c8b7cb1414050b37cdba5d42b4dbc0b126"
+    },
+    "split": {
+      "subject": "epilepsiae_1125",
+      "protocol": "S-E",
+      "stage": "inner0",
+      "split_seed": 20260906,
+      "support_start": 1253002932.0,
+      "support_end": 1253470889.0000005,
+      "se_cutoff": 1253236910.5000002,
+      "fit_end": 1253143319.1000001,
+      "measurement_definition_end": 1253139285.6669915,
+      "split_id": "969bf8d0ef740e9283de7d4a2f410676b9447ae221abe16885227b3e978d05f9",
+      "contract": "v0312: fixed split RNG; FIT-only transforms; explicit physical target IDs"
+    }
+  },
+  "t020": {
+    "selected_path": "/data/hfosp_group_event_state_observable_state_validation_v0312/runs/epilepsiae_1125__S-E__inner1__P_marks__I-L-G1__marked_history__persistent__seed20260906/selected.pt",
+    "selected_sha256": "78b19f54492995ffbef99ee7eeb239d41f162a69efeb8ac553d776a3818f133b",
+    "selected_updates": 50,
+    "source_digest": "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137",
+    "scaling": {
+      "contact_center": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": -0.01171875,
+        "median": 0.07877497375011444,
+        "max": 9.441267013549805,
+        "sha256": "e4d15c828b00aca0e27d8be847e16f307811d2b0a9f44a2fc6f7f539e4971ee0"
+      },
+      "contact_scale": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": 0.0009765625,
+        "median": 0.056640625,
+        "max": 1.7443089485168457,
+        "sha256": "1402fd30fa40000d86a8ae17487ae22fec9078327779298197cafb89d3284791"
+      },
+      "event_center": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014676542952656746,
+        "median": 1.0,
+        "max": 5.512163162231445,
+        "sha256": "8b012338b3a58e3cab50837b6bb3370f34fa92efc02570dfb75b7ceb823f2c1c"
+      },
+      "event_scale": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014989558607339859,
+        "median": 0.28212690353393555,
+        "max": 1.0941822528839111,
+        "sha256": "6f5ba55865dfabe5512f97ce346ac4ab2b3f5122bbb9651aacd9b87add4985d1"
+      },
+      "packet_center": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": -0.26934006810188293,
+        "median": 1.0,
+        "max": 4.043051242828369,
+        "sha256": "69ec4d28fa001e776e639be90fa1b3e981eb3c3f08fd59f22e3207b2000c9898"
+      },
+      "packet_scale": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": 0.035342756658792496,
+        "median": 0.2886570692062378,
+        "max": 1.8099825382232666,
+        "sha256": "71803312172060f7bdbb20ab9e4c5aa320263c83fd379949c9f1cf9730e7a728"
+      },
+      "band_ratio_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -9.1732759475708,
+        "median": -6.7387285232543945,
+        "max": -3.8464083671569824,
+        "sha256": "b05304c4578b27c2e894751e1f36f02cb977ffc6f0eba8e61885a16b8f78a200"
+      },
+      "band_ratio_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.7996940612792969,
+        "median": 0.8849958181381226,
+        "max": 1.0527037382125854,
+        "sha256": "620bbd5f7589e66330bf3402e72e2eb2c88a3ba9d91648f2d1745aebb5d23bbd"
+      },
+      "xlag_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -0.0167236328125,
+        "median": -0.00821940042078495,
+        "max": -0.0004340277810115367,
+        "sha256": "d6ca55cd35fd5c14203cbe45bf7aab9c0b159e9e8f5ac3c417de8e546fae2591"
+      },
+      "xlag_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.005859375,
+        "median": 0.0213487409055233,
+        "max": 0.034644715487957,
+        "sha256": "06967de9ddf3513e67b6fb9eb5c605b1513a99a9616eb1e75f31b2a1777daa9c"
+      },
+      "log_iqr_center": -4.2215046882629395,
+      "log_iqr_scale": 1.034596562385559,
+      "log_load_center": 4.1588830833596715,
+      "log_load_scale": 1.5125880864441825,
+      "base_rate_per_hour": 659.2700243205586,
+      "fit_hours": 36.44027777777778,
+      "note": "v0312: full permission mask, not a calendar cutoff alone",
+      "nb_size": 1.0522640128869456,
+      "nb_fit_nll": 3.436660316731774,
+      "fit_packet_count": 2191,
+      "fit_event_count": 24028,
+      "fit_mask_digest": "ce463fd8d07f7bdfd427ef02ab6aaca188d7b32f97b9a6808bdfa179e4712320",
+      "transform_id": "d4a769cbaee63cf81d6e0916684c2fd951d9c7885e514bc04159f2c9acff3201"
+    },
+    "split": {
+      "subject": "epilepsiae_1125",
+      "protocol": "S-E",
+      "stage": "inner1",
+      "split_seed": 20260906,
+      "support_start": 1253002932.0,
+      "support_end": 1253470889.0000005,
+      "se_cutoff": 1253236910.5000002,
+      "fit_end": 1253190114.8000002,
+      "measurement_definition_end": 1253139285.6669915,
+      "split_id": "27f164c28a3211a37090ce3421a64ad12dc850026699e3e0bbabc3d8fef4f814",
+      "contract": "v0312: fixed split RNG; FIT-only transforms; explicit physical target IDs"
+    }
+  },
+  "t022": {
+    "selected_path": "/data/hfosp_group_event_state_observable_state_validation_v0312/runs/epilepsiae_1125__S-E__outer__P_marks__I-L-G1__marked_history__persistent__seed20260906/selected.pt",
+    "selected_sha256": "678440a94292e5bea92df5957561dfd71e2b61253508de63576317b7fec19d15",
+    "selected_updates": 225,
+    "source_digest": "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137",
+    "scaling": {
+      "contact_center": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": -0.0126953125,
+        "median": 0.07993762195110321,
+        "max": 9.408634185791016,
+        "sha256": "098f143fe7914e02cbe0faaeea47e1bae1a1d8cddb1dac30462ba466434d57bc"
+      },
+      "contact_scale": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": 0.0009765625,
+        "median": 0.0576171875,
+        "max": 1.73651123046875,
+        "sha256": "74d8b9f30020febe32dcfe92694c1d12de065601527f025ef734b76b0961458e"
+      },
+      "event_center": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014397526159882545,
+        "median": 1.0,
+        "max": 5.506242275238037,
+        "sha256": "42317524c30bb1c1fedc5c9fdb711c4faddf2ba3407d4ff765a8f52371527dba"
+      },
+      "event_scale": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014693976379930973,
+        "median": 0.28559374809265137,
+        "max": 1.1184535026550293,
+        "sha256": "81edbd10064e7b4cb3e9cc77378451c07558f207850ef77d0c913e5bf139013b"
+      },
+      "packet_center": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": -0.30070507526397705,
+        "median": 1.0,
+        "max": 3.9512436389923096,
+        "sha256": "8556e7ad73663fa23a9c31ac3a1b21efc98d8cb355fd25669a74661b7aa8bdf9"
+      },
+      "packet_scale": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": 0.03196491673588753,
+        "median": 0.3038952350616455,
+        "max": 1.9459099769592285,
+        "sha256": "f4e63b473b5d790c38a4556858ca6e703eebaad418d29eae0728bdde027a261e"
+      },
+      "band_ratio_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -9.17958927154541,
+        "median": -6.749734401702881,
+        "max": -3.808469533920288,
+        "sha256": "ba0c2b2536dfc70f5a8abf61f1a9e8e69947f2e8638ad32f7f1662295d9d34ea"
+      },
+      "band_ratio_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.8016698360443115,
+        "median": 0.878605842590332,
+        "max": 1.0244560241699219,
+        "sha256": "4e7777bebaf56c10bfbbbfa013c6fcd7c0512b9a75b189862b57a0dc42c052bf"
+      },
+      "xlag_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -0.01774088479578495,
+        "median": -0.0087270587682724,
+        "max": -0.00048828125,
+        "sha256": "05ee62b67583699d26aadb0900839c24c0efcc356f9add0f7a3c7a3eb6ef35d6"
+      },
+      "xlag_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.0059988838620483875,
+        "median": 0.02143593318760395,
+        "max": 0.0349392332136631,
+        "sha256": "9edb77d1a5de608c02466c7e2bde3b37a932e0e9660c324ac55d735c24212d01"
+      },
+      "log_iqr_center": -4.24069881439209,
+      "log_iqr_scale": 1.0365405082702637,
+      "log_load_center": 4.110873864173311,
+      "log_load_scale": 1.5740359853831842,
+      "base_rate_per_hour": 616.7745892054585,
+      "fit_hours": 48.474999999999994,
+      "note": "v0312: full permission mask, not a calendar cutoff alone",
+      "nb_size": 0.9890990847585013,
+      "nb_fit_nll": 3.374106334564747,
+      "fit_packet_count": 2914,
+      "fit_event_count": 29900,
+      "fit_mask_digest": "e529596f2fbb31bf03cbe381ae2116a2f4ad8995130ccf735cca5b628a98287c",
+      "transform_id": "8fd08d0df2e4745ca5d118925f82ce2ce8e8013dea920db6f06ace9da2fa29c5"
+    },
+    "split": {
+      "subject": "epilepsiae_1125",
+      "protocol": "S-E",
+      "stage": "outer",
+      "split_seed": 20260906,
+      "support_start": 1253002932.0,
+      "support_end": 1253470889.0000005,
+      "se_cutoff": 1253236910.5000002,
+      "fit_end": 1253236910.5000002,
+      "measurement_definition_end": 1253139285.6669915,
+      "split_id": "737d269177536b6dc8cee07d7b03a93f405fa564790b0562e5fcb19873ea43eb",
+      "contract": "v0312: fixed split RNG; FIT-only transforms; explicit physical target IDs"
+    }
+  },
+  "t024": {
+    "selected_path": "/data/hfosp_group_event_state_observable_state_validation_v0312/runs/epilepsiae_1125__S-E__outer__P_marks__I-L-G1__marked_history__persistent__seed20260907/selected.pt",
+    "selected_sha256": "0aa09eaf41ca77aeae925323fec098f0aaa1d6ef099cd0a074aa9a31b30c2309",
+    "selected_updates": 225,
+    "source_digest": "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137",
+    "scaling": {
+      "contact_center": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": -0.0126953125,
+        "median": 0.07993762195110321,
+        "max": 9.408634185791016,
+        "sha256": "098f143fe7914e02cbe0faaeea47e1bae1a1d8cddb1dac30462ba466434d57bc"
+      },
+      "contact_scale": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": 0.0009765625,
+        "median": 0.0576171875,
+        "max": 1.73651123046875,
+        "sha256": "74d8b9f30020febe32dcfe92694c1d12de065601527f025ef734b76b0961458e"
+      },
+      "event_center": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014397526159882545,
+        "median": 1.0,
+        "max": 5.506242275238037,
+        "sha256": "42317524c30bb1c1fedc5c9fdb711c4faddf2ba3407d4ff765a8f52371527dba"
+      },
+      "event_scale": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014693976379930973,
+        "median": 0.28559374809265137,
+        "max": 1.1184535026550293,
+        "sha256": "81edbd10064e7b4cb3e9cc77378451c07558f207850ef77d0c913e5bf139013b"
+      },
+      "packet_center": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": -0.30070507526397705,
+        "median": 1.0,
+        "max": 3.9512436389923096,
+        "sha256": "8556e7ad73663fa23a9c31ac3a1b21efc98d8cb355fd25669a74661b7aa8bdf9"
+      },
+      "packet_scale": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": 0.03196491673588753,
+        "median": 0.3038952350616455,
+        "max": 1.9459099769592285,
+        "sha256": "f4e63b473b5d790c38a4556858ca6e703eebaad418d29eae0728bdde027a261e"
+      },
+      "band_ratio_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -9.17958927154541,
+        "median": -6.749734401702881,
+        "max": -3.808469533920288,
+        "sha256": "ba0c2b2536dfc70f5a8abf61f1a9e8e69947f2e8638ad32f7f1662295d9d34ea"
+      },
+      "band_ratio_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.8016698360443115,
+        "median": 0.878605842590332,
+        "max": 1.0244560241699219,
+        "sha256": "4e7777bebaf56c10bfbbbfa013c6fcd7c0512b9a75b189862b57a0dc42c052bf"
+      },
+      "xlag_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -0.01774088479578495,
+        "median": -0.0087270587682724,
+        "max": -0.00048828125,
+        "sha256": "05ee62b67583699d26aadb0900839c24c0efcc356f9add0f7a3c7a3eb6ef35d6"
+      },
+      "xlag_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.0059988838620483875,
+        "median": 0.02143593318760395,
+        "max": 0.0349392332136631,
+        "sha256": "9edb77d1a5de608c02466c7e2bde3b37a932e0e9660c324ac55d735c24212d01"
+      },
+      "log_iqr_center": -4.24069881439209,
+      "log_iqr_scale": 1.0365405082702637,
+      "log_load_center": 4.110873864173311,
+      "log_load_scale": 1.5740359853831842,
+      "base_rate_per_hour": 616.7745892054585,
+      "fit_hours": 48.474999999999994,
+      "note": "v0312: full permission mask, not a calendar cutoff alone",
+      "nb_size": 0.9890990847585013,
+      "nb_fit_nll": 3.374106334564747,
+      "fit_packet_count": 2914,
+      "fit_event_count": 29900,
+      "fit_mask_digest": "e529596f2fbb31bf03cbe381ae2116a2f4ad8995130ccf735cca5b628a98287c",
+      "transform_id": "8fd08d0df2e4745ca5d118925f82ce2ce8e8013dea920db6f06ace9da2fa29c5"
+    },
+    "split": {
+      "subject": "epilepsiae_1125",
+      "protocol": "S-E",
+      "stage": "outer",
+      "split_seed": 20260906,
+      "support_start": 1253002932.0,
+      "support_end": 1253470889.0000005,
+      "se_cutoff": 1253236910.5000002,
+      "fit_end": 1253236910.5000002,
+      "measurement_definition_end": 1253139285.6669915,
+      "split_id": "737d269177536b6dc8cee07d7b03a93f405fa564790b0562e5fcb19873ea43eb",
+      "contract": "v0312: fixed split RNG; FIT-only transforms; explicit physical target IDs"
+    }
+  },
+  "t026": {
+    "selected_path": "/data/hfosp_group_event_state_observable_state_validation_v0312/runs/epilepsiae_1125__S-E__outer__P_marks__I-L-G1__marked_history__persistent__seed20260908/selected.pt",
+    "selected_sha256": "09703252e5c44d54d6f4936e21c69163fb7efb2683cff699954a9ed7faa42c84",
+    "selected_updates": 225,
+    "source_digest": "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137",
+    "scaling": {
+      "contact_center": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": -0.0126953125,
+        "median": 0.07993762195110321,
+        "max": 9.408634185791016,
+        "sha256": "098f143fe7914e02cbe0faaeea47e1bae1a1d8cddb1dac30462ba466434d57bc"
+      },
+      "contact_scale": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": 0.0009765625,
+        "median": 0.0576171875,
+        "max": 1.73651123046875,
+        "sha256": "74d8b9f30020febe32dcfe92694c1d12de065601527f025ef734b76b0961458e"
+      },
+      "event_center": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014397526159882545,
+        "median": 1.0,
+        "max": 5.506242275238037,
+        "sha256": "42317524c30bb1c1fedc5c9fdb711c4faddf2ba3407d4ff765a8f52371527dba"
+      },
+      "event_scale": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014693976379930973,
+        "median": 0.28559374809265137,
+        "max": 1.1184535026550293,
+        "sha256": "81edbd10064e7b4cb3e9cc77378451c07558f207850ef77d0c913e5bf139013b"
+      },
+      "packet_center": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": -0.30070507526397705,
+        "median": 1.0,
+        "max": 3.9512436389923096,
+        "sha256": "8556e7ad73663fa23a9c31ac3a1b21efc98d8cb355fd25669a74661b7aa8bdf9"
+      },
+      "packet_scale": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": 0.03196491673588753,
+        "median": 0.3038952350616455,
+        "max": 1.9459099769592285,
+        "sha256": "f4e63b473b5d790c38a4556858ca6e703eebaad418d29eae0728bdde027a261e"
+      },
+      "band_ratio_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -9.17958927154541,
+        "median": -6.749734401702881,
+        "max": -3.808469533920288,
+        "sha256": "ba0c2b2536dfc70f5a8abf61f1a9e8e69947f2e8638ad32f7f1662295d9d34ea"
+      },
+      "band_ratio_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.8016698360443115,
+        "median": 0.878605842590332,
+        "max": 1.0244560241699219,
+        "sha256": "4e7777bebaf56c10bfbbbfa013c6fcd7c0512b9a75b189862b57a0dc42c052bf"
+      },
+      "xlag_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -0.01774088479578495,
+        "median": -0.0087270587682724,
+        "max": -0.00048828125,
+        "sha256": "05ee62b67583699d26aadb0900839c24c0efcc356f9add0f7a3c7a3eb6ef35d6"
+      },
+      "xlag_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.0059988838620483875,
+        "median": 0.02143593318760395,
+        "max": 0.0349392332136631,
+        "sha256": "9edb77d1a5de608c02466c7e2bde3b37a932e0e9660c324ac55d735c24212d01"
+      },
+      "log_iqr_center": -4.24069881439209,
+      "log_iqr_scale": 1.0365405082702637,
+      "log_load_center": 4.110873864173311,
+      "log_load_scale": 1.5740359853831842,
+      "base_rate_per_hour": 616.7745892054585,
+      "fit_hours": 48.474999999999994,
+      "note": "v0312: full permission mask, not a calendar cutoff alone",
+      "nb_size": 0.9890990847585013,
+      "nb_fit_nll": 3.374106334564747,
+      "fit_packet_count": 2914,
+      "fit_event_count": 29900,
+      "fit_mask_digest": "e529596f2fbb31bf03cbe381ae2116a2f4ad8995130ccf735cca5b628a98287c",
+      "transform_id": "8fd08d0df2e4745ca5d118925f82ce2ce8e8013dea920db6f06ace9da2fa29c5"
+    },
+    "split": {
+      "subject": "epilepsiae_1125",
+      "protocol": "S-E",
+      "stage": "outer",
+      "split_seed": 20260906,
+      "support_start": 1253002932.0,
+      "support_end": 1253470889.0000005,
+      "se_cutoff": 1253236910.5000002,
+      "fit_end": 1253236910.5000002,
+      "measurement_definition_end": 1253139285.6669915,
+      "split_id": "737d269177536b6dc8cee07d7b03a93f405fa564790b0562e5fcb19873ea43eb",
+      "contract": "v0312: fixed split RNG; FIT-only transforms; explicit physical target IDs"
+    }
+  },
+  "t028": {
+    "selected_path": "/data/hfosp_group_event_state_observable_state_validation_v0312/runs/epilepsiae_1125__S-E__inner0__P_marks__I-L-G1__fixed_marked_history__persistent__seed20260906/selected.pt",
+    "selected_sha256": "d4ed233b576dd39e21765ec0a82c0090e7119ccf212453c833ea8e2ac71ac7f7",
+    "selected_updates": 400,
+    "source_digest": "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137",
+    "scaling": {
+      "contact_center": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": -0.01171875,
+        "median": 0.0788951963186264,
+        "max": 9.452872276306152,
+        "sha256": "0fc43148d01af810745ae13af47ef4ecf2b95f2f16596bb7dd9aa40652c3cfbf"
+      },
+      "contact_scale": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": 0.0009765625,
+        "median": 0.0556640625,
+        "max": 1.7517328262329102,
+        "sha256": "c2f63c579cd48d59a10033673b976b2941f4e1b5616177c8ac10e30ffb7408c0"
+      },
+      "event_center": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014712793752551079,
+        "median": 1.0,
+        "max": 5.516292572021484,
+        "sha256": "e1247b53a24bcfad881a1fff0d7e64bbc65ff4e2c4b6c470838793c142478674"
+      },
+      "event_scale": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014908497221767902,
+        "median": 0.2823171615600586,
+        "max": 1.108154058456421,
+        "sha256": "3cd6355873b4f69ef9e0bd1fc63ce2f516a023f11627acd9136c08038d063109"
+      },
+      "packet_center": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": -0.35633033514022827,
+        "median": 1.0,
+        "max": 4.255587577819824,
+        "sha256": "654aec5e484b40833e510a88b3417dce397bdbbf3a8023f362a771542dc2b9e6"
+      },
+      "packet_scale": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": 0.03998757153749466,
+        "median": 0.19001922011375427,
+        "max": 1.4763084650039673,
+        "sha256": "dec6b40559f63fec6990e6f96d97f4ae3b7088fc3868b43bce4107397661add9"
+      },
+      "band_ratio_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -9.185462951660156,
+        "median": -6.749117851257324,
+        "max": -3.8610756397247314,
+        "sha256": "ba9a286935246204d21187fcd317b8269d2d90020755330a8d731bef30c1fae9"
+      },
+      "band_ratio_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.8019447326660156,
+        "median": 0.8899497985839844,
+        "max": 1.0656886100769043,
+        "sha256": "66d21d118dc71885eb08a69b0a8c641d591af2aa7c37fe5cef49766fd54fceb2"
+      },
+      "xlag_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -0.016357421875,
+        "median": -0.008056640625,
+        "max": -0.0004185267898719758,
+        "sha256": "5090fc7d623ee3639294092c3fadf1235b432c8c2d0a72ce9915f9e5fc44d6d7"
+      },
+      "xlag_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.0058903768658638,
+        "median": 0.0212324857711792,
+        "max": 0.03432617336511612,
+        "sha256": "85da040ab3c69a50f895631d76f641fadba8e1377a2645a1008e9bce5b1df546"
+      },
+      "log_iqr_center": -4.219038009643555,
+      "log_iqr_scale": 1.0235517024993896,
+      "log_load_center": 4.290459441148391,
+      "log_load_scale": 1.2538843339475716,
+      "base_rate_per_hour": 735.8011803671353,
+      "fit_hours": 28.360277777777778,
+      "note": "v0312: full permission mask, not a calendar cutoff alone",
+      "nb_size": 1.744814708984069,
+      "nb_fit_nll": 3.4858566718099286,
+      "fit_packet_count": 1706,
+      "fit_event_count": 20873,
+      "fit_mask_digest": "d5b491164dcbf4a45bacc4cd658532e2b47046e87d9a3ec602b699161f2a1abc",
+      "transform_id": "6f13f91cd7381ff747c3131f398730c8b7cb1414050b37cdba5d42b4dbc0b126"
+    },
+    "split": {
+      "subject": "epilepsiae_1125",
+      "protocol": "S-E",
+      "stage": "inner0",
+      "split_seed": 20260906,
+      "support_start": 1253002932.0,
+      "support_end": 1253470889.0000005,
+      "se_cutoff": 1253236910.5000002,
+      "fit_end": 1253143319.1000001,
+      "measurement_definition_end": 1253139285.6669915,
+      "split_id": "969bf8d0ef740e9283de7d4a2f410676b9447ae221abe16885227b3e978d05f9",
+      "contract": "v0312: fixed split RNG; FIT-only transforms; explicit physical target IDs"
+    }
+  },
+  "t029": {
+    "selected_path": "/data/hfosp_group_event_state_observable_state_validation_v0312/runs/epilepsiae_1125__S-E__inner1__P_marks__I-L-G1__fixed_marked_history__persistent__seed20260906/selected.pt",
+    "selected_sha256": "54be60ce69a86a94569cfb3f1957682c577d884b1b08a28865906f91ee8b8c6f",
+    "selected_updates": 50,
+    "source_digest": "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137",
+    "scaling": {
+      "contact_center": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": -0.01171875,
+        "median": 0.07877497375011444,
+        "max": 9.441267013549805,
+        "sha256": "e4d15c828b00aca0e27d8be847e16f307811d2b0a9f44a2fc6f7f539e4971ee0"
+      },
+      "contact_scale": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": 0.0009765625,
+        "median": 0.056640625,
+        "max": 1.7443089485168457,
+        "sha256": "1402fd30fa40000d86a8ae17487ae22fec9078327779298197cafb89d3284791"
+      },
+      "event_center": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014676542952656746,
+        "median": 1.0,
+        "max": 5.512163162231445,
+        "sha256": "8b012338b3a58e3cab50837b6bb3370f34fa92efc02570dfb75b7ceb823f2c1c"
+      },
+      "event_scale": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014989558607339859,
+        "median": 0.28212690353393555,
+        "max": 1.0941822528839111,
+        "sha256": "6f5ba55865dfabe5512f97ce346ac4ab2b3f5122bbb9651aacd9b87add4985d1"
+      },
+      "packet_center": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": -0.26934006810188293,
+        "median": 1.0,
+        "max": 4.043051242828369,
+        "sha256": "69ec4d28fa001e776e639be90fa1b3e981eb3c3f08fd59f22e3207b2000c9898"
+      },
+      "packet_scale": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": 0.035342756658792496,
+        "median": 0.2886570692062378,
+        "max": 1.8099825382232666,
+        "sha256": "71803312172060f7bdbb20ab9e4c5aa320263c83fd379949c9f1cf9730e7a728"
+      },
+      "band_ratio_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -9.1732759475708,
+        "median": -6.7387285232543945,
+        "max": -3.8464083671569824,
+        "sha256": "b05304c4578b27c2e894751e1f36f02cb977ffc6f0eba8e61885a16b8f78a200"
+      },
+      "band_ratio_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.7996940612792969,
+        "median": 0.8849958181381226,
+        "max": 1.0527037382125854,
+        "sha256": "620bbd5f7589e66330bf3402e72e2eb2c88a3ba9d91648f2d1745aebb5d23bbd"
+      },
+      "xlag_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -0.0167236328125,
+        "median": -0.00821940042078495,
+        "max": -0.0004340277810115367,
+        "sha256": "d6ca55cd35fd5c14203cbe45bf7aab9c0b159e9e8f5ac3c417de8e546fae2591"
+      },
+      "xlag_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.005859375,
+        "median": 0.0213487409055233,
+        "max": 0.034644715487957,
+        "sha256": "06967de9ddf3513e67b6fb9eb5c605b1513a99a9616eb1e75f31b2a1777daa9c"
+      },
+      "log_iqr_center": -4.2215046882629395,
+      "log_iqr_scale": 1.034596562385559,
+      "log_load_center": 4.1588830833596715,
+      "log_load_scale": 1.5125880864441825,
+      "base_rate_per_hour": 659.2700243205586,
+      "fit_hours": 36.44027777777778,
+      "note": "v0312: full permission mask, not a calendar cutoff alone",
+      "nb_size": 1.0522640128869456,
+      "nb_fit_nll": 3.436660316731774,
+      "fit_packet_count": 2191,
+      "fit_event_count": 24028,
+      "fit_mask_digest": "ce463fd8d07f7bdfd427ef02ab6aaca188d7b32f97b9a6808bdfa179e4712320",
+      "transform_id": "d4a769cbaee63cf81d6e0916684c2fd951d9c7885e514bc04159f2c9acff3201"
+    },
+    "split": {
+      "subject": "epilepsiae_1125",
+      "protocol": "S-E",
+      "stage": "inner1",
+      "split_seed": 20260906,
+      "support_start": 1253002932.0,
+      "support_end": 1253470889.0000005,
+      "se_cutoff": 1253236910.5000002,
+      "fit_end": 1253190114.8000002,
+      "measurement_definition_end": 1253139285.6669915,
+      "split_id": "27f164c28a3211a37090ce3421a64ad12dc850026699e3e0bbabc3d8fef4f814",
+      "contract": "v0312: fixed split RNG; FIT-only transforms; explicit physical target IDs"
+    }
+  },
+  "t031": {
+    "selected_path": "/data/hfosp_group_event_state_observable_state_validation_v0312/runs/epilepsiae_1125__S-E__outer__P_marks__I-L-G1__fixed_marked_history__persistent__seed20260906/selected.pt",
+    "selected_sha256": "e00ecce0fc5faeb9668a08a92dac668b33ead0aa0529a594e277df02e00c8ef4",
+    "selected_updates": 225,
+    "source_digest": "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137",
+    "scaling": {
+      "contact_center": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": -0.0126953125,
+        "median": 0.07993762195110321,
+        "max": 9.408634185791016,
+        "sha256": "098f143fe7914e02cbe0faaeea47e1bae1a1d8cddb1dac30462ba466434d57bc"
+      },
+      "contact_scale": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": 0.0009765625,
+        "median": 0.0576171875,
+        "max": 1.73651123046875,
+        "sha256": "74d8b9f30020febe32dcfe92694c1d12de065601527f025ef734b76b0961458e"
+      },
+      "event_center": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014397526159882545,
+        "median": 1.0,
+        "max": 5.506242275238037,
+        "sha256": "42317524c30bb1c1fedc5c9fdb711c4faddf2ba3407d4ff765a8f52371527dba"
+      },
+      "event_scale": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014693976379930973,
+        "median": 0.28559374809265137,
+        "max": 1.1184535026550293,
+        "sha256": "81edbd10064e7b4cb3e9cc77378451c07558f207850ef77d0c913e5bf139013b"
+      },
+      "packet_center": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": -0.30070507526397705,
+        "median": 1.0,
+        "max": 3.9512436389923096,
+        "sha256": "8556e7ad73663fa23a9c31ac3a1b21efc98d8cb355fd25669a74661b7aa8bdf9"
+      },
+      "packet_scale": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": 0.03196491673588753,
+        "median": 0.3038952350616455,
+        "max": 1.9459099769592285,
+        "sha256": "f4e63b473b5d790c38a4556858ca6e703eebaad418d29eae0728bdde027a261e"
+      },
+      "band_ratio_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -9.17958927154541,
+        "median": -6.749734401702881,
+        "max": -3.808469533920288,
+        "sha256": "ba0c2b2536dfc70f5a8abf61f1a9e8e69947f2e8638ad32f7f1662295d9d34ea"
+      },
+      "band_ratio_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.8016698360443115,
+        "median": 0.878605842590332,
+        "max": 1.0244560241699219,
+        "sha256": "4e7777bebaf56c10bfbbbfa013c6fcd7c0512b9a75b189862b57a0dc42c052bf"
+      },
+      "xlag_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -0.01774088479578495,
+        "median": -0.0087270587682724,
+        "max": -0.00048828125,
+        "sha256": "05ee62b67583699d26aadb0900839c24c0efcc356f9add0f7a3c7a3eb6ef35d6"
+      },
+      "xlag_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.0059988838620483875,
+        "median": 0.02143593318760395,
+        "max": 0.0349392332136631,
+        "sha256": "9edb77d1a5de608c02466c7e2bde3b37a932e0e9660c324ac55d735c24212d01"
+      },
+      "log_iqr_center": -4.24069881439209,
+      "log_iqr_scale": 1.0365405082702637,
+      "log_load_center": 4.110873864173311,
+      "log_load_scale": 1.5740359853831842,
+      "base_rate_per_hour": 616.7745892054585,
+      "fit_hours": 48.474999999999994,
+      "note": "v0312: full permission mask, not a calendar cutoff alone",
+      "nb_size": 0.9890990847585013,
+      "nb_fit_nll": 3.374106334564747,
+      "fit_packet_count": 2914,
+      "fit_event_count": 29900,
+      "fit_mask_digest": "e529596f2fbb31bf03cbe381ae2116a2f4ad8995130ccf735cca5b628a98287c",
+      "transform_id": "8fd08d0df2e4745ca5d118925f82ce2ce8e8013dea920db6f06ace9da2fa29c5"
+    },
+    "split": {
+      "subject": "epilepsiae_1125",
+      "protocol": "S-E",
+      "stage": "outer",
+      "split_seed": 20260906,
+      "support_start": 1253002932.0,
+      "support_end": 1253470889.0000005,
+      "se_cutoff": 1253236910.5000002,
+      "fit_end": 1253236910.5000002,
+      "measurement_definition_end": 1253139285.6669915,
+      "split_id": "737d269177536b6dc8cee07d7b03a93f405fa564790b0562e5fcb19873ea43eb",
+      "contract": "v0312: fixed split RNG; FIT-only transforms; explicit physical target IDs"
+    }
+  },
+  "t033": {
+    "selected_path": "/data/hfosp_group_event_state_observable_state_validation_v0312/runs/epilepsiae_1125__S-E__outer__P_marks__I-L-G1__fixed_marked_history__persistent__seed20260907/selected.pt",
+    "selected_sha256": "999e50504ca8b6164a38e21c20b013e1dc6d8b67b9c5a1cd857b3757de02d383",
+    "selected_updates": 225,
+    "source_digest": "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137",
+    "scaling": {
+      "contact_center": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": -0.0126953125,
+        "median": 0.07993762195110321,
+        "max": 9.408634185791016,
+        "sha256": "098f143fe7914e02cbe0faaeea47e1bae1a1d8cddb1dac30462ba466434d57bc"
+      },
+      "contact_scale": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": 0.0009765625,
+        "median": 0.0576171875,
+        "max": 1.73651123046875,
+        "sha256": "74d8b9f30020febe32dcfe92694c1d12de065601527f025ef734b76b0961458e"
+      },
+      "event_center": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014397526159882545,
+        "median": 1.0,
+        "max": 5.506242275238037,
+        "sha256": "42317524c30bb1c1fedc5c9fdb711c4faddf2ba3407d4ff765a8f52371527dba"
+      },
+      "event_scale": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014693976379930973,
+        "median": 0.28559374809265137,
+        "max": 1.1184535026550293,
+        "sha256": "81edbd10064e7b4cb3e9cc77378451c07558f207850ef77d0c913e5bf139013b"
+      },
+      "packet_center": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": -0.30070507526397705,
+        "median": 1.0,
+        "max": 3.9512436389923096,
+        "sha256": "8556e7ad73663fa23a9c31ac3a1b21efc98d8cb355fd25669a74661b7aa8bdf9"
+      },
+      "packet_scale": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": 0.03196491673588753,
+        "median": 0.3038952350616455,
+        "max": 1.9459099769592285,
+        "sha256": "f4e63b473b5d790c38a4556858ca6e703eebaad418d29eae0728bdde027a261e"
+      },
+      "band_ratio_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -9.17958927154541,
+        "median": -6.749734401702881,
+        "max": -3.808469533920288,
+        "sha256": "ba0c2b2536dfc70f5a8abf61f1a9e8e69947f2e8638ad32f7f1662295d9d34ea"
+      },
+      "band_ratio_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.8016698360443115,
+        "median": 0.878605842590332,
+        "max": 1.0244560241699219,
+        "sha256": "4e7777bebaf56c10bfbbbfa013c6fcd7c0512b9a75b189862b57a0dc42c052bf"
+      },
+      "xlag_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -0.01774088479578495,
+        "median": -0.0087270587682724,
+        "max": -0.00048828125,
+        "sha256": "05ee62b67583699d26aadb0900839c24c0efcc356f9add0f7a3c7a3eb6ef35d6"
+      },
+      "xlag_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.0059988838620483875,
+        "median": 0.02143593318760395,
+        "max": 0.0349392332136631,
+        "sha256": "9edb77d1a5de608c02466c7e2bde3b37a932e0e9660c324ac55d735c24212d01"
+      },
+      "log_iqr_center": -4.24069881439209,
+      "log_iqr_scale": 1.0365405082702637,
+      "log_load_center": 4.110873864173311,
+      "log_load_scale": 1.5740359853831842,
+      "base_rate_per_hour": 616.7745892054585,
+      "fit_hours": 48.474999999999994,
+      "note": "v0312: full permission mask, not a calendar cutoff alone",
+      "nb_size": 0.9890990847585013,
+      "nb_fit_nll": 3.374106334564747,
+      "fit_packet_count": 2914,
+      "fit_event_count": 29900,
+      "fit_mask_digest": "e529596f2fbb31bf03cbe381ae2116a2f4ad8995130ccf735cca5b628a98287c",
+      "transform_id": "8fd08d0df2e4745ca5d118925f82ce2ce8e8013dea920db6f06ace9da2fa29c5"
+    },
+    "split": {
+      "subject": "epilepsiae_1125",
+      "protocol": "S-E",
+      "stage": "outer",
+      "split_seed": 20260906,
+      "support_start": 1253002932.0,
+      "support_end": 1253470889.0000005,
+      "se_cutoff": 1253236910.5000002,
+      "fit_end": 1253236910.5000002,
+      "measurement_definition_end": 1253139285.6669915,
+      "split_id": "737d269177536b6dc8cee07d7b03a93f405fa564790b0562e5fcb19873ea43eb",
+      "contract": "v0312: fixed split RNG; FIT-only transforms; explicit physical target IDs"
+    }
+  },
+  "t035": {
+    "selected_path": "/data/hfosp_group_event_state_observable_state_validation_v0312/runs/epilepsiae_1125__S-E__outer__P_marks__I-L-G1__fixed_marked_history__persistent__seed20260908/selected.pt",
+    "selected_sha256": "e76895d03b99bad4e4e09ca692f59488e721852e068f74586a62216d3ac9dd81",
+    "selected_updates": 225,
+    "source_digest": "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137",
+    "scaling": {
+      "contact_center": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": -0.0126953125,
+        "median": 0.07993762195110321,
+        "max": 9.408634185791016,
+        "sha256": "098f143fe7914e02cbe0faaeea47e1bae1a1d8cddb1dac30462ba466434d57bc"
+      },
+      "contact_scale": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": 0.0009765625,
+        "median": 0.0576171875,
+        "max": 1.73651123046875,
+        "sha256": "74d8b9f30020febe32dcfe92694c1d12de065601527f025ef734b76b0961458e"
+      },
+      "event_center": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014397526159882545,
+        "median": 1.0,
+        "max": 5.506242275238037,
+        "sha256": "42317524c30bb1c1fedc5c9fdb711c4faddf2ba3407d4ff765a8f52371527dba"
+      },
+      "event_scale": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014693976379930973,
+        "median": 0.28559374809265137,
+        "max": 1.1184535026550293,
+        "sha256": "81edbd10064e7b4cb3e9cc77378451c07558f207850ef77d0c913e5bf139013b"
+      },
+      "packet_center": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": -0.30070507526397705,
+        "median": 1.0,
+        "max": 3.9512436389923096,
+        "sha256": "8556e7ad73663fa23a9c31ac3a1b21efc98d8cb355fd25669a74661b7aa8bdf9"
+      },
+      "packet_scale": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": 0.03196491673588753,
+        "median": 0.3038952350616455,
+        "max": 1.9459099769592285,
+        "sha256": "f4e63b473b5d790c38a4556858ca6e703eebaad418d29eae0728bdde027a261e"
+      },
+      "band_ratio_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -9.17958927154541,
+        "median": -6.749734401702881,
+        "max": -3.808469533920288,
+        "sha256": "ba0c2b2536dfc70f5a8abf61f1a9e8e69947f2e8638ad32f7f1662295d9d34ea"
+      },
+      "band_ratio_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.8016698360443115,
+        "median": 0.878605842590332,
+        "max": 1.0244560241699219,
+        "sha256": "4e7777bebaf56c10bfbbbfa013c6fcd7c0512b9a75b189862b57a0dc42c052bf"
+      },
+      "xlag_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -0.01774088479578495,
+        "median": -0.0087270587682724,
+        "max": -0.00048828125,
+        "sha256": "05ee62b67583699d26aadb0900839c24c0efcc356f9add0f7a3c7a3eb6ef35d6"
+      },
+      "xlag_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.0059988838620483875,
+        "median": 0.02143593318760395,
+        "max": 0.0349392332136631,
+        "sha256": "9edb77d1a5de608c02466c7e2bde3b37a932e0e9660c324ac55d735c24212d01"
+      },
+      "log_iqr_center": -4.24069881439209,
+      "log_iqr_scale": 1.0365405082702637,
+      "log_load_center": 4.110873864173311,
+      "log_load_scale": 1.5740359853831842,
+      "base_rate_per_hour": 616.7745892054585,
+      "fit_hours": 48.474999999999994,
+      "note": "v0312: full permission mask, not a calendar cutoff alone",
+      "nb_size": 0.9890990847585013,
+      "nb_fit_nll": 3.374106334564747,
+      "fit_packet_count": 2914,
+      "fit_event_count": 29900,
+      "fit_mask_digest": "e529596f2fbb31bf03cbe381ae2116a2f4ad8995130ccf735cca5b628a98287c",
+      "transform_id": "8fd08d0df2e4745ca5d118925f82ce2ce8e8013dea920db6f06ace9da2fa29c5"
+    },
+    "split": {
+      "subject": "epilepsiae_1125",
+      "protocol": "S-E",
+      "stage": "outer",
+      "split_seed": 20260906,
+      "support_start": 1253002932.0,
+      "support_end": 1253470889.0000005,
+      "se_cutoff": 1253236910.5000002,
+      "fit_end": 1253236910.5000002,
+      "measurement_definition_end": 1253139285.6669915,
+      "split_id": "737d269177536b6dc8cee07d7b03a93f405fa564790b0562e5fcb19873ea43eb",
+      "contract": "v0312: fixed split RNG; FIT-only transforms; explicit physical target IDs"
+    }
+  },
+  "t037": {
+    "selected_path": "/data/hfosp_group_event_state_observable_state_validation_v0312/runs/epilepsiae_1125__S-E__inner0__P_stats__I-L-G1__constant_state__persistent__seed20260906/selected.pt",
+    "selected_sha256": "c7e860a7640af58814b6e900818bbc8eb2ee2d3fff336b6bdf7272c6ebd48844",
+    "selected_updates": 400,
+    "source_digest": "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137",
+    "scaling": {
+      "contact_center": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": -0.01171875,
+        "median": 0.0788951963186264,
+        "max": 9.452872276306152,
+        "sha256": "0fc43148d01af810745ae13af47ef4ecf2b95f2f16596bb7dd9aa40652c3cfbf"
+      },
+      "contact_scale": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": 0.0009765625,
+        "median": 0.0556640625,
+        "max": 1.7517328262329102,
+        "sha256": "c2f63c579cd48d59a10033673b976b2941f4e1b5616177c8ac10e30ffb7408c0"
+      },
+      "event_center": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014712793752551079,
+        "median": 1.0,
+        "max": 5.516292572021484,
+        "sha256": "e1247b53a24bcfad881a1fff0d7e64bbc65ff4e2c4b6c470838793c142478674"
+      },
+      "event_scale": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014908497221767902,
+        "median": 0.2823171615600586,
+        "max": 1.108154058456421,
+        "sha256": "3cd6355873b4f69ef9e0bd1fc63ce2f516a023f11627acd9136c08038d063109"
+      },
+      "packet_center": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": -0.35633033514022827,
+        "median": 1.0,
+        "max": 4.255587577819824,
+        "sha256": "654aec5e484b40833e510a88b3417dce397bdbbf3a8023f362a771542dc2b9e6"
+      },
+      "packet_scale": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": 0.03998757153749466,
+        "median": 0.19001922011375427,
+        "max": 1.4763084650039673,
+        "sha256": "dec6b40559f63fec6990e6f96d97f4ae3b7088fc3868b43bce4107397661add9"
+      },
+      "band_ratio_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -9.185462951660156,
+        "median": -6.749117851257324,
+        "max": -3.8610756397247314,
+        "sha256": "ba9a286935246204d21187fcd317b8269d2d90020755330a8d731bef30c1fae9"
+      },
+      "band_ratio_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.8019447326660156,
+        "median": 0.8899497985839844,
+        "max": 1.0656886100769043,
+        "sha256": "66d21d118dc71885eb08a69b0a8c641d591af2aa7c37fe5cef49766fd54fceb2"
+      },
+      "xlag_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -0.016357421875,
+        "median": -0.008056640625,
+        "max": -0.0004185267898719758,
+        "sha256": "5090fc7d623ee3639294092c3fadf1235b432c8c2d0a72ce9915f9e5fc44d6d7"
+      },
+      "xlag_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.0058903768658638,
+        "median": 0.0212324857711792,
+        "max": 0.03432617336511612,
+        "sha256": "85da040ab3c69a50f895631d76f641fadba8e1377a2645a1008e9bce5b1df546"
+      },
+      "log_iqr_center": -4.219038009643555,
+      "log_iqr_scale": 1.0235517024993896,
+      "log_load_center": 4.290459441148391,
+      "log_load_scale": 1.2538843339475716,
+      "base_rate_per_hour": 735.8011803671353,
+      "fit_hours": 28.360277777777778,
+      "note": "v0312: full permission mask, not a calendar cutoff alone",
+      "nb_size": 1.744814708984069,
+      "nb_fit_nll": 3.4858566718099286,
+      "fit_packet_count": 1706,
+      "fit_event_count": 20873,
+      "fit_mask_digest": "d5b491164dcbf4a45bacc4cd658532e2b47046e87d9a3ec602b699161f2a1abc",
+      "transform_id": "6f13f91cd7381ff747c3131f398730c8b7cb1414050b37cdba5d42b4dbc0b126"
+    },
+    "split": {
+      "subject": "epilepsiae_1125",
+      "protocol": "S-E",
+      "stage": "inner0",
+      "split_seed": 20260906,
+      "support_start": 1253002932.0,
+      "support_end": 1253470889.0000005,
+      "se_cutoff": 1253236910.5000002,
+      "fit_end": 1253143319.1000001,
+      "measurement_definition_end": 1253139285.6669915,
+      "split_id": "969bf8d0ef740e9283de7d4a2f410676b9447ae221abe16885227b3e978d05f9",
+      "contract": "v0312: fixed split RNG; FIT-only transforms; explicit physical target IDs"
+    }
+  },
+  "t038": {
+    "selected_path": "/data/hfosp_group_event_state_observable_state_validation_v0312/runs/epilepsiae_1125__S-E__inner1__P_stats__I-L-G1__constant_state__persistent__seed20260906/selected.pt",
+    "selected_sha256": "f25426173fee3bff5318686047c8f8a303812b1ef6e87c15173afdc2faca2395",
+    "selected_updates": 700,
+    "source_digest": "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137",
+    "scaling": {
+      "contact_center": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": -0.01171875,
+        "median": 0.07877497375011444,
+        "max": 9.441267013549805,
+        "sha256": "e4d15c828b00aca0e27d8be847e16f307811d2b0a9f44a2fc6f7f539e4971ee0"
+      },
+      "contact_scale": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": 0.0009765625,
+        "median": 0.056640625,
+        "max": 1.7443089485168457,
+        "sha256": "1402fd30fa40000d86a8ae17487ae22fec9078327779298197cafb89d3284791"
+      },
+      "event_center": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014676542952656746,
+        "median": 1.0,
+        "max": 5.512163162231445,
+        "sha256": "8b012338b3a58e3cab50837b6bb3370f34fa92efc02570dfb75b7ceb823f2c1c"
+      },
+      "event_scale": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014989558607339859,
+        "median": 0.28212690353393555,
+        "max": 1.0941822528839111,
+        "sha256": "6f5ba55865dfabe5512f97ce346ac4ab2b3f5122bbb9651aacd9b87add4985d1"
+      },
+      "packet_center": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": -0.26934006810188293,
+        "median": 1.0,
+        "max": 4.043051242828369,
+        "sha256": "69ec4d28fa001e776e639be90fa1b3e981eb3c3f08fd59f22e3207b2000c9898"
+      },
+      "packet_scale": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": 0.035342756658792496,
+        "median": 0.2886570692062378,
+        "max": 1.8099825382232666,
+        "sha256": "71803312172060f7bdbb20ab9e4c5aa320263c83fd379949c9f1cf9730e7a728"
+      },
+      "band_ratio_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -9.1732759475708,
+        "median": -6.7387285232543945,
+        "max": -3.8464083671569824,
+        "sha256": "b05304c4578b27c2e894751e1f36f02cb977ffc6f0eba8e61885a16b8f78a200"
+      },
+      "band_ratio_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.7996940612792969,
+        "median": 0.8849958181381226,
+        "max": 1.0527037382125854,
+        "sha256": "620bbd5f7589e66330bf3402e72e2eb2c88a3ba9d91648f2d1745aebb5d23bbd"
+      },
+      "xlag_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -0.0167236328125,
+        "median": -0.00821940042078495,
+        "max": -0.0004340277810115367,
+        "sha256": "d6ca55cd35fd5c14203cbe45bf7aab9c0b159e9e8f5ac3c417de8e546fae2591"
+      },
+      "xlag_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.005859375,
+        "median": 0.0213487409055233,
+        "max": 0.034644715487957,
+        "sha256": "06967de9ddf3513e67b6fb9eb5c605b1513a99a9616eb1e75f31b2a1777daa9c"
+      },
+      "log_iqr_center": -4.2215046882629395,
+      "log_iqr_scale": 1.034596562385559,
+      "log_load_center": 4.1588830833596715,
+      "log_load_scale": 1.5125880864441825,
+      "base_rate_per_hour": 659.2700243205586,
+      "fit_hours": 36.44027777777778,
+      "note": "v0312: full permission mask, not a calendar cutoff alone",
+      "nb_size": 1.0522640128869456,
+      "nb_fit_nll": 3.436660316731774,
+      "fit_packet_count": 2191,
+      "fit_event_count": 24028,
+      "fit_mask_digest": "ce463fd8d07f7bdfd427ef02ab6aaca188d7b32f97b9a6808bdfa179e4712320",
+      "transform_id": "d4a769cbaee63cf81d6e0916684c2fd951d9c7885e514bc04159f2c9acff3201"
+    },
+    "split": {
+      "subject": "epilepsiae_1125",
+      "protocol": "S-E",
+      "stage": "inner1",
+      "split_seed": 20260906,
+      "support_start": 1253002932.0,
+      "support_end": 1253470889.0000005,
+      "se_cutoff": 1253236910.5000002,
+      "fit_end": 1253190114.8000002,
+      "measurement_definition_end": 1253139285.6669915,
+      "split_id": "27f164c28a3211a37090ce3421a64ad12dc850026699e3e0bbabc3d8fef4f814",
+      "contract": "v0312: fixed split RNG; FIT-only transforms; explicit physical target IDs"
+    }
+  },
+  "t040": {
+    "selected_path": "/data/hfosp_group_event_state_observable_state_validation_v0312/runs/epilepsiae_1125__S-E__outer__P_stats__I-L-G1__constant_state__persistent__seed20260906/selected.pt",
+    "selected_sha256": "4b47bfe78a10ac3e733957b8a4e90b14f7077287cfaa5a804890e941e5e7244c",
+    "selected_updates": 550,
+    "source_digest": "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137",
+    "scaling": {
+      "contact_center": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": -0.0126953125,
+        "median": 0.07993762195110321,
+        "max": 9.408634185791016,
+        "sha256": "098f143fe7914e02cbe0faaeea47e1bae1a1d8cddb1dac30462ba466434d57bc"
+      },
+      "contact_scale": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": 0.0009765625,
+        "median": 0.0576171875,
+        "max": 1.73651123046875,
+        "sha256": "74d8b9f30020febe32dcfe92694c1d12de065601527f025ef734b76b0961458e"
+      },
+      "event_center": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014397526159882545,
+        "median": 1.0,
+        "max": 5.506242275238037,
+        "sha256": "42317524c30bb1c1fedc5c9fdb711c4faddf2ba3407d4ff765a8f52371527dba"
+      },
+      "event_scale": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014693976379930973,
+        "median": 0.28559374809265137,
+        "max": 1.1184535026550293,
+        "sha256": "81edbd10064e7b4cb3e9cc77378451c07558f207850ef77d0c913e5bf139013b"
+      },
+      "packet_center": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": -0.30070507526397705,
+        "median": 1.0,
+        "max": 3.9512436389923096,
+        "sha256": "8556e7ad73663fa23a9c31ac3a1b21efc98d8cb355fd25669a74661b7aa8bdf9"
+      },
+      "packet_scale": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": 0.03196491673588753,
+        "median": 0.3038952350616455,
+        "max": 1.9459099769592285,
+        "sha256": "f4e63b473b5d790c38a4556858ca6e703eebaad418d29eae0728bdde027a261e"
+      },
+      "band_ratio_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -9.17958927154541,
+        "median": -6.749734401702881,
+        "max": -3.808469533920288,
+        "sha256": "ba0c2b2536dfc70f5a8abf61f1a9e8e69947f2e8638ad32f7f1662295d9d34ea"
+      },
+      "band_ratio_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.8016698360443115,
+        "median": 0.878605842590332,
+        "max": 1.0244560241699219,
+        "sha256": "4e7777bebaf56c10bfbbbfa013c6fcd7c0512b9a75b189862b57a0dc42c052bf"
+      },
+      "xlag_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -0.01774088479578495,
+        "median": -0.0087270587682724,
+        "max": -0.00048828125,
+        "sha256": "05ee62b67583699d26aadb0900839c24c0efcc356f9add0f7a3c7a3eb6ef35d6"
+      },
+      "xlag_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.0059988838620483875,
+        "median": 0.02143593318760395,
+        "max": 0.0349392332136631,
+        "sha256": "9edb77d1a5de608c02466c7e2bde3b37a932e0e9660c324ac55d735c24212d01"
+      },
+      "log_iqr_center": -4.24069881439209,
+      "log_iqr_scale": 1.0365405082702637,
+      "log_load_center": 4.110873864173311,
+      "log_load_scale": 1.5740359853831842,
+      "base_rate_per_hour": 616.7745892054585,
+      "fit_hours": 48.474999999999994,
+      "note": "v0312: full permission mask, not a calendar cutoff alone",
+      "nb_size": 0.9890990847585013,
+      "nb_fit_nll": 3.374106334564747,
+      "fit_packet_count": 2914,
+      "fit_event_count": 29900,
+      "fit_mask_digest": "e529596f2fbb31bf03cbe381ae2116a2f4ad8995130ccf735cca5b628a98287c",
+      "transform_id": "8fd08d0df2e4745ca5d118925f82ce2ce8e8013dea920db6f06ace9da2fa29c5"
+    },
+    "split": {
+      "subject": "epilepsiae_1125",
+      "protocol": "S-E",
+      "stage": "outer",
+      "split_seed": 20260906,
+      "support_start": 1253002932.0,
+      "support_end": 1253470889.0000005,
+      "se_cutoff": 1253236910.5000002,
+      "fit_end": 1253236910.5000002,
+      "measurement_definition_end": 1253139285.6669915,
+      "split_id": "737d269177536b6dc8cee07d7b03a93f405fa564790b0562e5fcb19873ea43eb",
+      "contract": "v0312: fixed split RNG; FIT-only transforms; explicit physical target IDs"
+    }
+  },
+  "t042": {
+    "selected_path": "/data/hfosp_group_event_state_observable_state_validation_v0312/runs/epilepsiae_1125__S-E__outer__P_stats__I-L-G1__constant_state__persistent__seed20260907/selected.pt",
+    "selected_sha256": "a06d86e6bbcbe34acf390b2330870922e2ace4e95a5a352146e349807b5df71f",
+    "selected_updates": 550,
+    "source_digest": "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137",
+    "scaling": {
+      "contact_center": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": -0.0126953125,
+        "median": 0.07993762195110321,
+        "max": 9.408634185791016,
+        "sha256": "098f143fe7914e02cbe0faaeea47e1bae1a1d8cddb1dac30462ba466434d57bc"
+      },
+      "contact_scale": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": 0.0009765625,
+        "median": 0.0576171875,
+        "max": 1.73651123046875,
+        "sha256": "74d8b9f30020febe32dcfe92694c1d12de065601527f025ef734b76b0961458e"
+      },
+      "event_center": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014397526159882545,
+        "median": 1.0,
+        "max": 5.506242275238037,
+        "sha256": "42317524c30bb1c1fedc5c9fdb711c4faddf2ba3407d4ff765a8f52371527dba"
+      },
+      "event_scale": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014693976379930973,
+        "median": 0.28559374809265137,
+        "max": 1.1184535026550293,
+        "sha256": "81edbd10064e7b4cb3e9cc77378451c07558f207850ef77d0c913e5bf139013b"
+      },
+      "packet_center": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": -0.30070507526397705,
+        "median": 1.0,
+        "max": 3.9512436389923096,
+        "sha256": "8556e7ad73663fa23a9c31ac3a1b21efc98d8cb355fd25669a74661b7aa8bdf9"
+      },
+      "packet_scale": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": 0.03196491673588753,
+        "median": 0.3038952350616455,
+        "max": 1.9459099769592285,
+        "sha256": "f4e63b473b5d790c38a4556858ca6e703eebaad418d29eae0728bdde027a261e"
+      },
+      "band_ratio_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -9.17958927154541,
+        "median": -6.749734401702881,
+        "max": -3.808469533920288,
+        "sha256": "ba0c2b2536dfc70f5a8abf61f1a9e8e69947f2e8638ad32f7f1662295d9d34ea"
+      },
+      "band_ratio_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.8016698360443115,
+        "median": 0.878605842590332,
+        "max": 1.0244560241699219,
+        "sha256": "4e7777bebaf56c10bfbbbfa013c6fcd7c0512b9a75b189862b57a0dc42c052bf"
+      },
+      "xlag_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -0.01774088479578495,
+        "median": -0.0087270587682724,
+        "max": -0.00048828125,
+        "sha256": "05ee62b67583699d26aadb0900839c24c0efcc356f9add0f7a3c7a3eb6ef35d6"
+      },
+      "xlag_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.0059988838620483875,
+        "median": 0.02143593318760395,
+        "max": 0.0349392332136631,
+        "sha256": "9edb77d1a5de608c02466c7e2bde3b37a932e0e9660c324ac55d735c24212d01"
+      },
+      "log_iqr_center": -4.24069881439209,
+      "log_iqr_scale": 1.0365405082702637,
+      "log_load_center": 4.110873864173311,
+      "log_load_scale": 1.5740359853831842,
+      "base_rate_per_hour": 616.7745892054585,
+      "fit_hours": 48.474999999999994,
+      "note": "v0312: full permission mask, not a calendar cutoff alone",
+      "nb_size": 0.9890990847585013,
+      "nb_fit_nll": 3.374106334564747,
+      "fit_packet_count": 2914,
+      "fit_event_count": 29900,
+      "fit_mask_digest": "e529596f2fbb31bf03cbe381ae2116a2f4ad8995130ccf735cca5b628a98287c",
+      "transform_id": "8fd08d0df2e4745ca5d118925f82ce2ce8e8013dea920db6f06ace9da2fa29c5"
+    },
+    "split": {
+      "subject": "epilepsiae_1125",
+      "protocol": "S-E",
+      "stage": "outer",
+      "split_seed": 20260906,
+      "support_start": 1253002932.0,
+      "support_end": 1253470889.0000005,
+      "se_cutoff": 1253236910.5000002,
+      "fit_end": 1253236910.5000002,
+      "measurement_definition_end": 1253139285.6669915,
+      "split_id": "737d269177536b6dc8cee07d7b03a93f405fa564790b0562e5fcb19873ea43eb",
+      "contract": "v0312: fixed split RNG; FIT-only transforms; explicit physical target IDs"
+    }
+  },
+  "t044": {
+    "selected_path": "/data/hfosp_group_event_state_observable_state_validation_v0312/runs/epilepsiae_1125__S-E__outer__P_stats__I-L-G1__constant_state__persistent__seed20260908/selected.pt",
+    "selected_sha256": "cb321715c877ff2665021e7901db0c545fcf9fbd5da85c28013db0a5d063c0ef",
+    "selected_updates": 550,
+    "source_digest": "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137",
+    "scaling": {
+      "contact_center": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": -0.0126953125,
+        "median": 0.07993762195110321,
+        "max": 9.408634185791016,
+        "sha256": "098f143fe7914e02cbe0faaeea47e1bae1a1d8cddb1dac30462ba466434d57bc"
+      },
+      "contact_scale": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": 0.0009765625,
+        "median": 0.0576171875,
+        "max": 1.73651123046875,
+        "sha256": "74d8b9f30020febe32dcfe92694c1d12de065601527f025ef734b76b0961458e"
+      },
+      "event_center": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014397526159882545,
+        "median": 1.0,
+        "max": 5.506242275238037,
+        "sha256": "42317524c30bb1c1fedc5c9fdb711c4faddf2ba3407d4ff765a8f52371527dba"
+      },
+      "event_scale": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.014693976379930973,
+        "median": 0.28559374809265137,
+        "max": 1.1184535026550293,
+        "sha256": "81edbd10064e7b4cb3e9cc77378451c07558f207850ef77d0c913e5bf139013b"
+      },
+      "packet_center": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": -0.30070507526397705,
+        "median": 1.0,
+        "max": 3.9512436389923096,
+        "sha256": "8556e7ad73663fa23a9c31ac3a1b21efc98d8cb355fd25669a74661b7aa8bdf9"
+      },
+      "packet_scale": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": 0.03196491673588753,
+        "median": 0.3038952350616455,
+        "max": 1.9459099769592285,
+        "sha256": "f4e63b473b5d790c38a4556858ca6e703eebaad418d29eae0728bdde027a261e"
+      },
+      "band_ratio_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -9.17958927154541,
+        "median": -6.749734401702881,
+        "max": -3.808469533920288,
+        "sha256": "ba0c2b2536dfc70f5a8abf61f1a9e8e69947f2e8638ad32f7f1662295d9d34ea"
+      },
+      "band_ratio_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.8016698360443115,
+        "median": 0.878605842590332,
+        "max": 1.0244560241699219,
+        "sha256": "4e7777bebaf56c10bfbbbfa013c6fcd7c0512b9a75b189862b57a0dc42c052bf"
+      },
+      "xlag_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -0.01774088479578495,
+        "median": -0.0087270587682724,
+        "max": -0.00048828125,
+        "sha256": "05ee62b67583699d26aadb0900839c24c0efcc356f9add0f7a3c7a3eb6ef35d6"
+      },
+      "xlag_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.0059988838620483875,
+        "median": 0.02143593318760395,
+        "max": 0.0349392332136631,
+        "sha256": "9edb77d1a5de608c02466c7e2bde3b37a932e0e9660c324ac55d735c24212d01"
+      },
+      "log_iqr_center": -4.24069881439209,
+      "log_iqr_scale": 1.0365405082702637,
+      "log_load_center": 4.110873864173311,
+      "log_load_scale": 1.5740359853831842,
+      "base_rate_per_hour": 616.7745892054585,
+      "fit_hours": 48.474999999999994,
+      "note": "v0312: full permission mask, not a calendar cutoff alone",
+      "nb_size": 0.9890990847585013,
+      "nb_fit_nll": 3.374106334564747,
+      "fit_packet_count": 2914,
+      "fit_event_count": 29900,
+      "fit_mask_digest": "e529596f2fbb31bf03cbe381ae2116a2f4ad8995130ccf735cca5b628a98287c",
+      "transform_id": "8fd08d0df2e4745ca5d118925f82ce2ce8e8013dea920db6f06ace9da2fa29c5"
+    },
+    "split": {
+      "subject": "epilepsiae_1125",
+      "protocol": "S-E",
+      "stage": "outer",
+      "split_seed": 20260906,
+      "support_start": 1253002932.0,
+      "support_end": 1253470889.0000005,
+      "se_cutoff": 1253236910.5000002,
+      "fit_end": 1253236910.5000002,
+      "measurement_definition_end": 1253139285.6669915,
+      "split_id": "737d269177536b6dc8cee07d7b03a93f405fa564790b0562e5fcb19873ea43eb",
+      "contract": "v0312: fixed split RNG; FIT-only transforms; explicit physical target IDs"
+    }
+  },
+  "t048": {
+    "selected_path": "/data/hfosp_group_event_state_observable_state_validation_v0312/instruments/runs/synthetic_morphology_901__S-E__inner0__P_stats__I-L-G1__state__persistent__seed20260906/selected.pt",
+    "selected_sha256": "3eac6d467b3f8ed8c811057230dce105e87df5ee042de88dbbea8b45d9b4912a",
+    "selected_updates": 150,
+    "source_digest": "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137",
+    "scaling": {
+      "contact_center": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": -0.001381431007757783,
+        "median": 0.0,
+        "max": 1.1126196384429932,
+        "sha256": "245bd02bcf9b8966de050ae96359e353a9621b5c9c2fec6cb4a972b0c2d832db"
+      },
+      "contact_scale": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": 0.006653179414570332,
+        "median": 0.26424989104270935,
+        "max": 1.0,
+        "sha256": "220864f0a0bfec695e56dd2083709a96f124749ade8353f146e51cd90b28cc5b"
+      },
+      "event_center": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.009693796746432781,
+        "median": 0.6833816766738892,
+        "max": 1.8565906286239624,
+        "sha256": "f117d2b2656991651c20241fb658986e779f5befe618f812b81160ced3a4ded9"
+      },
+      "event_scale": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.007698729168623686,
+        "median": 1.0,
+        "max": 1.3102834224700928,
+        "sha256": "38bd9511f12aad9e3a3d50150e439b884feb43b2374231120b394ba7d85920cd"
+      },
+      "packet_center": {
+        "shape": [
+          10
+        ],
+        "dtype": "float32",
+        "min": 0.16217753291130066,
+        "median": 1.0,
+        "max": 3.4965076446533203,
+        "sha256": "f6cedfb5962cb562cfa1da53ee1c9d66a619230c73a53bf5ab89fc82ac35cab9"
+      },
+      "packet_scale": {
+        "shape": [
+          10
+        ],
+        "dtype": "float32",
+        "min": 0.21164286136627197,
+        "median": 1.0,
+        "max": 1.0,
+        "sha256": "b445e36ab817ae741582c0f0d49071ec4d18698f01afd27fb40f8e1feaef9d97"
+      },
+      "band_ratio_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -0.005152679979801178,
+        "median": -0.0029266662895679474,
+        "max": 0.293918251991272,
+        "sha256": "0f12e6f4eac69bdc4d3c449477d94a899b7abda9fae025efec8379cac7d38ed2"
+      },
+      "band_ratio_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.18893757462501526,
+        "median": 0.1914837658405304,
+        "max": 0.8328800201416016,
+        "sha256": "42ec8abf93f2b075d945b144b2c1b29bc15cc817a00d82f31c6f4d465ceb02d9"
+      },
+      "xlag_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 1.1739262845367193e-05,
+        "median": 5.235630669631064e-05,
+        "max": 0.005843415856361389,
+        "sha256": "6b3acd02817679f59b1136a0b08cf34bf714a1a909d3a7782590e3828a201e48"
+      },
+      "xlag_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.003300580196082592,
+        "median": 0.0033483635634183884,
+        "max": 0.01641039177775383,
+        "sha256": "cc3145d97d3e70a1390f37de00ccf563377b0bdeeafd9db0c0828847a5cca3d2"
+      },
+      "log_iqr_center": -4.6362690925598145,
+      "log_iqr_scale": 0.7836389541625977,
+      "log_load_center": 3.4657359027997265,
+      "log_load_scale": 0.5108256237659909,
+      "base_rate_per_hour": 480.40087395594605,
+      "fit_hours": 7.199999999999999,
+      "note": "v0312: full permission mask, not a calendar cutoff alone",
+      "nb_size": 703743.8982075949,
+      "nb_fit_nll": 2.3991131039599973,
+      "fit_packet_count": 432,
+      "fit_event_count": 3461,
+      "fit_mask_digest": "3fb6ffd7c1c0c4671d84a64788c9c69eee482f3cd52a905b265c8483b60e393a",
+      "transform_id": "6fe3817e6995d7ab68a3f59e6fa218f3d68b08fadfb2eec50bd68bdd4b21953d"
+    },
+    "split": {
+      "subject": "synthetic_morphology_901",
+      "protocol": "S-E",
+      "stage": "inner0",
+      "split_seed": 20260906,
+      "support_start": 1000000000.0,
+      "support_end": 1000086400.0,
+      "se_cutoff": 1000043200.0,
+      "fit_end": 1000025920.0,
+      "measurement_definition_end": 1000017280.0,
+      "split_id": "058baece96c46d548fed6f86840d2be13cb68c88847b451084edded41034c5c9",
+      "contract": "v0312: fixed split RNG; FIT-only transforms; explicit physical target IDs"
+    }
+  },
+  "t050": {
+    "selected_path": "/data/hfosp_group_event_state_observable_state_validation_v0312/instruments/runs/synthetic_morphology_901__S-E__inner0__P_marks__I-L-G1__state__persistent__seed20260906/selected.pt",
+    "selected_sha256": "728d7072e6551434975eff44fb29a80ea63210ec907e4d89343002e653c7ad2d",
+    "selected_updates": 100,
+    "source_digest": "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137",
+    "scaling": {
+      "contact_center": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": -0.001381431007757783,
+        "median": 0.0,
+        "max": 1.1126196384429932,
+        "sha256": "245bd02bcf9b8966de050ae96359e353a9621b5c9c2fec6cb4a972b0c2d832db"
+      },
+      "contact_scale": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": 0.006653179414570332,
+        "median": 0.26424989104270935,
+        "max": 1.0,
+        "sha256": "220864f0a0bfec695e56dd2083709a96f124749ade8353f146e51cd90b28cc5b"
+      },
+      "event_center": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.009693796746432781,
+        "median": 0.6833816766738892,
+        "max": 1.8565906286239624,
+        "sha256": "f117d2b2656991651c20241fb658986e779f5befe618f812b81160ced3a4ded9"
+      },
+      "event_scale": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.007698729168623686,
+        "median": 1.0,
+        "max": 1.3102834224700928,
+        "sha256": "38bd9511f12aad9e3a3d50150e439b884feb43b2374231120b394ba7d85920cd"
+      },
+      "packet_center": {
+        "shape": [
+          10
+        ],
+        "dtype": "float32",
+        "min": 0.16217753291130066,
+        "median": 1.0,
+        "max": 3.4965076446533203,
+        "sha256": "f6cedfb5962cb562cfa1da53ee1c9d66a619230c73a53bf5ab89fc82ac35cab9"
+      },
+      "packet_scale": {
+        "shape": [
+          10
+        ],
+        "dtype": "float32",
+        "min": 0.21164286136627197,
+        "median": 1.0,
+        "max": 1.0,
+        "sha256": "b445e36ab817ae741582c0f0d49071ec4d18698f01afd27fb40f8e1feaef9d97"
+      },
+      "band_ratio_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -0.005152679979801178,
+        "median": -0.0029266662895679474,
+        "max": 0.293918251991272,
+        "sha256": "0f12e6f4eac69bdc4d3c449477d94a899b7abda9fae025efec8379cac7d38ed2"
+      },
+      "band_ratio_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.18893757462501526,
+        "median": 0.1914837658405304,
+        "max": 0.8328800201416016,
+        "sha256": "42ec8abf93f2b075d945b144b2c1b29bc15cc817a00d82f31c6f4d465ceb02d9"
+      },
+      "xlag_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 1.1739262845367193e-05,
+        "median": 5.235630669631064e-05,
+        "max": 0.005843415856361389,
+        "sha256": "6b3acd02817679f59b1136a0b08cf34bf714a1a909d3a7782590e3828a201e48"
+      },
+      "xlag_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.003300580196082592,
+        "median": 0.0033483635634183884,
+        "max": 0.01641039177775383,
+        "sha256": "cc3145d97d3e70a1390f37de00ccf563377b0bdeeafd9db0c0828847a5cca3d2"
+      },
+      "log_iqr_center": -4.6362690925598145,
+      "log_iqr_scale": 0.7836389541625977,
+      "log_load_center": 3.4657359027997265,
+      "log_load_scale": 0.5108256237659909,
+      "base_rate_per_hour": 480.40087395594605,
+      "fit_hours": 7.199999999999999,
+      "note": "v0312: full permission mask, not a calendar cutoff alone",
+      "nb_size": 703743.8982075949,
+      "nb_fit_nll": 2.3991131039599973,
+      "fit_packet_count": 432,
+      "fit_event_count": 3461,
+      "fit_mask_digest": "3fb6ffd7c1c0c4671d84a64788c9c69eee482f3cd52a905b265c8483b60e393a",
+      "transform_id": "6fe3817e6995d7ab68a3f59e6fa218f3d68b08fadfb2eec50bd68bdd4b21953d"
+    },
+    "split": {
+      "subject": "synthetic_morphology_901",
+      "protocol": "S-E",
+      "stage": "inner0",
+      "split_seed": 20260906,
+      "support_start": 1000000000.0,
+      "support_end": 1000086400.0,
+      "se_cutoff": 1000043200.0,
+      "fit_end": 1000025920.0,
+      "measurement_definition_end": 1000017280.0,
+      "split_id": "058baece96c46d548fed6f86840d2be13cb68c88847b451084edded41034c5c9",
+      "contract": "v0312: fixed split RNG; FIT-only transforms; explicit physical target IDs"
+    }
+  },
+  "t053": {
+    "selected_path": "/data/hfosp_group_event_state_observable_state_validation_v0312/instruments/runs/synthetic_identity_902__S-E__inner0__P_stats__I-L-G1__state__persistent__seed20260906/selected.pt",
+    "selected_sha256": "dfafc299b18e9bd6395e861a6954f0ba1339c394cc55b4927b6dc1ba8b8f4984",
+    "selected_updates": 450,
+    "source_digest": "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137",
+    "scaling": {
+      "contact_center": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": -0.0013434224529191852,
+        "median": 0.0,
+        "max": 1.1107860803604126,
+        "sha256": "ca4bb2549d88153a51456203601f28b56aa58a67e402487328d9c74ac579d8ae"
+      },
+      "contact_scale": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": 0.006654117722064257,
+        "median": 0.2645254135131836,
+        "max": 1.0,
+        "sha256": "9b090b315141c827e721020935b3eedd4fdb6da6a7e39459b8ad90bf84bda825"
+      },
+      "event_center": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.009947046637535095,
+        "median": 0.6803774833679199,
+        "max": 1.829239010810852,
+        "sha256": "e1c05176d5d42f2e0ee7971d15678a2751b19137e9cd27b71e54137e3d9ef96d"
+      },
+      "event_scale": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.007735482882708311,
+        "median": 1.0,
+        "max": 1.2881947755813599,
+        "sha256": "461dd4d3205209a42bb86c1484f31fb8bb52bafd2055b2f61f1a293a22443381"
+      },
+      "packet_center": {
+        "shape": [
+          10
+        ],
+        "dtype": "float32",
+        "min": 0.16217753291130066,
+        "median": 1.0,
+        "max": 3.4965076446533203,
+        "sha256": "f6cedfb5962cb562cfa1da53ee1c9d66a619230c73a53bf5ab89fc82ac35cab9"
+      },
+      "packet_scale": {
+        "shape": [
+          10
+        ],
+        "dtype": "float32",
+        "min": 0.21164286136627197,
+        "median": 1.0,
+        "max": 1.0,
+        "sha256": "b445e36ab817ae741582c0f0d49071ec4d18698f01afd27fb40f8e1feaef9d97"
+      },
+      "band_ratio_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -0.0007765330374240875,
+        "median": 0.0013966672122478485,
+        "max": 0.5061091184616089,
+        "sha256": "099e3ed6d8d2320c91281b249b27c1df1db5643a9940aa3a8fe4ddc0947452cd"
+      },
+      "band_ratio_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.19245153665542603,
+        "median": 0.19441989064216614,
+        "max": 0.8461987972259521,
+        "sha256": "e1704f40576d37a66d068fcbd59574fc387782f201884e54d6fe6e5e32c34ede"
+      },
+      "xlag_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -6.84170809108764e-05,
+        "median": 1.02115300251171e-05,
+        "max": 0.010071104392409325,
+        "sha256": "d876e1e3f46e7aff722fc7084eb71c9006f48bf861f6fe4f69a5957d1f0927aa"
+      },
+      "xlag_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.0033491025678813457,
+        "median": 0.003417384345084429,
+        "max": 0.016735974699258804,
+        "sha256": "c11b8b0c6956241071b2ec4eaef09934bacead5b44311592f7e43cfe6dba6c8a"
+      },
+      "log_iqr_center": -4.6104795932769775,
+      "log_iqr_scale": 0.7692776918411255,
+      "log_load_center": 3.4657359027997265,
+      "log_load_scale": 0.5108256237659909,
+      "base_rate_per_hour": 473.3609961381075,
+      "fit_hours": 7.199999999999999,
+      "note": "v0312: full permission mask, not a calendar cutoff alone",
+      "nb_size": 33826.692109702446,
+      "nb_fit_nll": 2.4351046898895237,
+      "fit_packet_count": 432,
+      "fit_event_count": 3406,
+      "fit_mask_digest": "3fb6ffd7c1c0c4671d84a64788c9c69eee482f3cd52a905b265c8483b60e393a",
+      "transform_id": "e462bafbb868a881f528c19d730413fb8c2fbeee8a78a670ed932cfdb3afe55c"
+    },
+    "split": {
+      "subject": "synthetic_identity_902",
+      "protocol": "S-E",
+      "stage": "inner0",
+      "split_seed": 20260906,
+      "support_start": 1000000000.0,
+      "support_end": 1000086400.0,
+      "se_cutoff": 1000043200.0,
+      "fit_end": 1000025920.0,
+      "measurement_definition_end": 1000017280.0,
+      "split_id": "748596dbe8cd24b75e89d70334f0e6f4dac225c99e235a49dbdf63f9838954c6",
+      "contract": "v0312: fixed split RNG; FIT-only transforms; explicit physical target IDs"
+    }
+  },
+  "t055": {
+    "selected_path": "/data/hfosp_group_event_state_observable_state_validation_v0312/instruments/runs/synthetic_identity_902__S-E__inner0__P_marks__I-L-G1__state__persistent__seed20260906/selected.pt",
+    "selected_sha256": "5e8e6f3db56fefb2d62c150632412c17837a65eddd8860fdd9b70e0b31807510",
+    "selected_updates": 450,
+    "source_digest": "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137",
+    "scaling": {
+      "contact_center": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": -0.0013434224529191852,
+        "median": 0.0,
+        "max": 1.1107860803604126,
+        "sha256": "ca4bb2549d88153a51456203601f28b56aa58a67e402487328d9c74ac579d8ae"
+      },
+      "contact_scale": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": 0.006654117722064257,
+        "median": 0.2645254135131836,
+        "max": 1.0,
+        "sha256": "9b090b315141c827e721020935b3eedd4fdb6da6a7e39459b8ad90bf84bda825"
+      },
+      "event_center": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.009947046637535095,
+        "median": 0.6803774833679199,
+        "max": 1.829239010810852,
+        "sha256": "e1c05176d5d42f2e0ee7971d15678a2751b19137e9cd27b71e54137e3d9ef96d"
+      },
+      "event_scale": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.007735482882708311,
+        "median": 1.0,
+        "max": 1.2881947755813599,
+        "sha256": "461dd4d3205209a42bb86c1484f31fb8bb52bafd2055b2f61f1a293a22443381"
+      },
+      "packet_center": {
+        "shape": [
+          10
+        ],
+        "dtype": "float32",
+        "min": 0.16217753291130066,
+        "median": 1.0,
+        "max": 3.4965076446533203,
+        "sha256": "f6cedfb5962cb562cfa1da53ee1c9d66a619230c73a53bf5ab89fc82ac35cab9"
+      },
+      "packet_scale": {
+        "shape": [
+          10
+        ],
+        "dtype": "float32",
+        "min": 0.21164286136627197,
+        "median": 1.0,
+        "max": 1.0,
+        "sha256": "b445e36ab817ae741582c0f0d49071ec4d18698f01afd27fb40f8e1feaef9d97"
+      },
+      "band_ratio_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -0.0007765330374240875,
+        "median": 0.0013966672122478485,
+        "max": 0.5061091184616089,
+        "sha256": "099e3ed6d8d2320c91281b249b27c1df1db5643a9940aa3a8fe4ddc0947452cd"
+      },
+      "band_ratio_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.19245153665542603,
+        "median": 0.19441989064216614,
+        "max": 0.8461987972259521,
+        "sha256": "e1704f40576d37a66d068fcbd59574fc387782f201884e54d6fe6e5e32c34ede"
+      },
+      "xlag_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -6.84170809108764e-05,
+        "median": 1.02115300251171e-05,
+        "max": 0.010071104392409325,
+        "sha256": "d876e1e3f46e7aff722fc7084eb71c9006f48bf861f6fe4f69a5957d1f0927aa"
+      },
+      "xlag_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.0033491025678813457,
+        "median": 0.003417384345084429,
+        "max": 0.016735974699258804,
+        "sha256": "c11b8b0c6956241071b2ec4eaef09934bacead5b44311592f7e43cfe6dba6c8a"
+      },
+      "log_iqr_center": -4.6104795932769775,
+      "log_iqr_scale": 0.7692776918411255,
+      "log_load_center": 3.4657359027997265,
+      "log_load_scale": 0.5108256237659909,
+      "base_rate_per_hour": 473.3609961381075,
+      "fit_hours": 7.199999999999999,
+      "note": "v0312: full permission mask, not a calendar cutoff alone",
+      "nb_size": 33826.692109702446,
+      "nb_fit_nll": 2.4351046898895237,
+      "fit_packet_count": 432,
+      "fit_event_count": 3406,
+      "fit_mask_digest": "3fb6ffd7c1c0c4671d84a64788c9c69eee482f3cd52a905b265c8483b60e393a",
+      "transform_id": "e462bafbb868a881f528c19d730413fb8c2fbeee8a78a670ed932cfdb3afe55c"
+    },
+    "split": {
+      "subject": "synthetic_identity_902",
+      "protocol": "S-E",
+      "stage": "inner0",
+      "split_seed": 20260906,
+      "support_start": 1000000000.0,
+      "support_end": 1000086400.0,
+      "se_cutoff": 1000043200.0,
+      "fit_end": 1000025920.0,
+      "measurement_definition_end": 1000017280.0,
+      "split_id": "748596dbe8cd24b75e89d70334f0e6f4dac225c99e235a49dbdf63f9838954c6",
+      "contract": "v0312: fixed split RNG; FIT-only transforms; explicit physical target IDs"
+    }
+  },
+  "t058": {
+    "selected_path": "/data/hfosp_group_event_state_observable_state_validation_v0312/instruments/runs/synthetic_zero_903__S-E__inner0__P_stats__I-L-G1__state__persistent__seed20260906/selected.pt",
+    "selected_sha256": "2cad65a4a0c91460260c0098ac61775ffeab3a77176e2961a3316d02fbd70aaa",
+    "selected_updates": 350,
+    "source_digest": "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137",
+    "scaling": {
+      "contact_center": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": -0.0033144145272672176,
+        "median": 0.0,
+        "max": 1.1080222129821777,
+        "sha256": "93d8612367e43c0f499ac760b671be44a5b56565584caf7104ebc6ad6b7f1656"
+      },
+      "contact_scale": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": 0.006634891033172607,
+        "median": 0.2671390473842621,
+        "max": 1.651401400566101,
+        "sha256": "0e4db7625fe47dc588ac72fc2969b8cbcccff58ab86e0ad4b89f78618a713d20"
+      },
+      "event_center": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.008466817438602448,
+        "median": 0.6814141273498535,
+        "max": 1.8340368270874023,
+        "sha256": "c9639515ac5f0bc5651bdb1ec6eb15718013cdd4943aa781fbb286c20d6188f8"
+      },
+      "event_scale": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.007865475490689278,
+        "median": 1.0,
+        "max": 1.228975772857666,
+        "sha256": "b45841b912708faaaed7ea64d1fb4fe4d3bfa9745a0035906bb86266561d3d6c"
+      },
+      "packet_center": {
+        "shape": [
+          10
+        ],
+        "dtype": "float32",
+        "min": 0.16217753291130066,
+        "median": 1.0,
+        "max": 3.4965076446533203,
+        "sha256": "f6cedfb5962cb562cfa1da53ee1c9d66a619230c73a53bf5ab89fc82ac35cab9"
+      },
+      "packet_scale": {
+        "shape": [
+          10
+        ],
+        "dtype": "float32",
+        "min": 0.21164286136627197,
+        "median": 1.0,
+        "max": 1.0,
+        "sha256": "b445e36ab817ae741582c0f0d49071ec4d18698f01afd27fb40f8e1feaef9d97"
+      },
+      "band_ratio_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -0.015338696539402008,
+        "median": -0.0013407841324806213,
+        "max": 0.0016394369304180145,
+        "sha256": "9e87673354a7ee130807c10053c07b786bee096fad17f9ad0ed9b58636410fcd"
+      },
+      "band_ratio_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.1861439347267151,
+        "median": 0.18703386187553406,
+        "max": 1.6414964199066162,
+        "sha256": "860a91fa38603d0da8d3dfc5d7f7c68aa21b95f1606e74309b0a4b679ea6bd87"
+      },
+      "xlag_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -0.00024657740141265094,
+        "median": 2.044408756773919e-05,
+        "max": 6.505439523607492e-05,
+        "sha256": "479211e77f3bd98192b22bd01a69ea9ac0dc4b25fbfb5a984081a037067a4055"
+      },
+      "xlag_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.0033479826524853706,
+        "median": 0.0034176837652921677,
+        "max": 0.03313580900430679,
+        "sha256": "5f2e9b2afbd4085e7ea0dbfe2b9b00ecaae0fd340644f105e0218a2381e82f1f"
+      },
+      "log_iqr_center": -4.771600723266602,
+      "log_iqr_scale": 0.8867945671081543,
+      "log_load_center": 3.4657359027997265,
+      "log_load_scale": 0.5108256237659909,
+      "base_rate_per_hour": 477.20263412223073,
+      "fit_hours": 7.199999999999999,
+      "note": "v0312: full permission mask, not a calendar cutoff alone",
+      "nb_size": 278718.0135612912,
+      "nb_fit_nll": 2.4338518515849477,
+      "fit_packet_count": 432,
+      "fit_event_count": 3437,
+      "fit_mask_digest": "3fb6ffd7c1c0c4671d84a64788c9c69eee482f3cd52a905b265c8483b60e393a",
+      "transform_id": "cd8ef7750a4fc5183591e32f212c89eaa6929afa2ec06ed9dd71db6ebae2fc55"
+    },
+    "split": {
+      "subject": "synthetic_zero_903",
+      "protocol": "S-E",
+      "stage": "inner0",
+      "split_seed": 20260906,
+      "support_start": 1000000000.0,
+      "support_end": 1000086400.0,
+      "se_cutoff": 1000043200.0,
+      "fit_end": 1000025920.0,
+      "measurement_definition_end": 1000017280.0,
+      "split_id": "ec3b9a4c41207cb0f2d1ab2d653971646cde2bb482d03b7a47a8ef704e763869",
+      "contract": "v0312: fixed split RNG; FIT-only transforms; explicit physical target IDs"
+    }
+  },
+  "t060": {
+    "selected_path": "/data/hfosp_group_event_state_observable_state_validation_v0312/instruments/runs/synthetic_zero_903__S-E__inner0__P_marks__I-L-G1__state__persistent__seed20260906/selected.pt",
+    "selected_sha256": "1c2ab1a8a3659b9790ba878d28d7db888b6d16ebd24378e3626e5ff8d0005de9",
+    "selected_updates": 300,
+    "source_digest": "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137",
+    "scaling": {
+      "contact_center": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": -0.0033144145272672176,
+        "median": 0.0,
+        "max": 1.1080222129821777,
+        "sha256": "93d8612367e43c0f499ac760b671be44a5b56565584caf7104ebc6ad6b7f1656"
+      },
+      "contact_scale": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": 0.006634891033172607,
+        "median": 0.2671390473842621,
+        "max": 1.651401400566101,
+        "sha256": "0e4db7625fe47dc588ac72fc2969b8cbcccff58ab86e0ad4b89f78618a713d20"
+      },
+      "event_center": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.008466817438602448,
+        "median": 0.6814141273498535,
+        "max": 1.8340368270874023,
+        "sha256": "c9639515ac5f0bc5651bdb1ec6eb15718013cdd4943aa781fbb286c20d6188f8"
+      },
+      "event_scale": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.007865475490689278,
+        "median": 1.0,
+        "max": 1.228975772857666,
+        "sha256": "b45841b912708faaaed7ea64d1fb4fe4d3bfa9745a0035906bb86266561d3d6c"
+      },
+      "packet_center": {
+        "shape": [
+          10
+        ],
+        "dtype": "float32",
+        "min": 0.16217753291130066,
+        "median": 1.0,
+        "max": 3.4965076446533203,
+        "sha256": "f6cedfb5962cb562cfa1da53ee1c9d66a619230c73a53bf5ab89fc82ac35cab9"
+      },
+      "packet_scale": {
+        "shape": [
+          10
+        ],
+        "dtype": "float32",
+        "min": 0.21164286136627197,
+        "median": 1.0,
+        "max": 1.0,
+        "sha256": "b445e36ab817ae741582c0f0d49071ec4d18698f01afd27fb40f8e1feaef9d97"
+      },
+      "band_ratio_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -0.015338696539402008,
+        "median": -0.0013407841324806213,
+        "max": 0.0016394369304180145,
+        "sha256": "9e87673354a7ee130807c10053c07b786bee096fad17f9ad0ed9b58636410fcd"
+      },
+      "band_ratio_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.1861439347267151,
+        "median": 0.18703386187553406,
+        "max": 1.6414964199066162,
+        "sha256": "860a91fa38603d0da8d3dfc5d7f7c68aa21b95f1606e74309b0a4b679ea6bd87"
+      },
+      "xlag_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -0.00024657740141265094,
+        "median": 2.044408756773919e-05,
+        "max": 6.505439523607492e-05,
+        "sha256": "479211e77f3bd98192b22bd01a69ea9ac0dc4b25fbfb5a984081a037067a4055"
+      },
+      "xlag_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.0033479826524853706,
+        "median": 0.0034176837652921677,
+        "max": 0.03313580900430679,
+        "sha256": "5f2e9b2afbd4085e7ea0dbfe2b9b00ecaae0fd340644f105e0218a2381e82f1f"
+      },
+      "log_iqr_center": -4.771600723266602,
+      "log_iqr_scale": 0.8867945671081543,
+      "log_load_center": 3.4657359027997265,
+      "log_load_scale": 0.5108256237659909,
+      "base_rate_per_hour": 477.20263412223073,
+      "fit_hours": 7.199999999999999,
+      "note": "v0312: full permission mask, not a calendar cutoff alone",
+      "nb_size": 278718.0135612912,
+      "nb_fit_nll": 2.4338518515849477,
+      "fit_packet_count": 432,
+      "fit_event_count": 3437,
+      "fit_mask_digest": "3fb6ffd7c1c0c4671d84a64788c9c69eee482f3cd52a905b265c8483b60e393a",
+      "transform_id": "cd8ef7750a4fc5183591e32f212c89eaa6929afa2ec06ed9dd71db6ebae2fc55"
+    },
+    "split": {
+      "subject": "synthetic_zero_903",
+      "protocol": "S-E",
+      "stage": "inner0",
+      "split_seed": 20260906,
+      "support_start": 1000000000.0,
+      "support_end": 1000086400.0,
+      "se_cutoff": 1000043200.0,
+      "fit_end": 1000025920.0,
+      "measurement_definition_end": 1000017280.0,
+      "split_id": "ec3b9a4c41207cb0f2d1ab2d653971646cde2bb482d03b7a47a8ef704e763869",
+      "contract": "v0312: fixed split RNG; FIT-only transforms; explicit physical target IDs"
+    }
+  },
+  "t062": {
+    "selected_path": "/data/hfosp_group_event_state_observable_state_validation_v0312/runs/epilepsiae_1125__S-ID__sid__P_stats__I-L-G1__state__persistent__seed20260906/selected.pt",
+    "selected_sha256": "b50da017727802e43f341c262a8d1d99e468b2dd6dcd0e6ce1f1928b9eb52ca5",
+    "selected_updates": 200,
+    "source_digest": "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137",
+    "scaling": {
+      "contact_center": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": -0.017578125,
+        "median": 0.08211403340101242,
+        "max": 9.32470703125,
+        "sha256": "8df2b7481c67462c7a7353973d26ad26b46c91ff6f9ef3c14a665cb2ab749c9c"
+      },
+      "contact_scale": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": 0.0027296487241983414,
+        "median": 0.060546875,
+        "max": 1.704200267791748,
+        "sha256": "ca3f41d228d0ecd19a7ad964a2e592410d92fa2cd87f0a69c6f6cb536542af92"
+      },
+      "event_center": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.013487652875483036,
+        "median": 1.0,
+        "max": 5.460309982299805,
+        "sha256": "9e220d126b200dbba1e93632e08e0a53eb8ce19926b8c2771f5c5a87b643cf5f"
+      },
+      "event_scale": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.013871042057871819,
+        "median": 0.3181185722351074,
+        "max": 1.1785149574279785,
+        "sha256": "2ff79c1628270f1ba6dffab4b6b9e2fb4cfb90114e9639bd0998013b0733ce83"
+      },
+      "packet_center": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": -0.18008996546268463,
+        "median": 1.0,
+        "max": 3.25809645652771,
+        "sha256": "38fabcdb662b48aa62ea1ae34e9e82041a554bef40a9f0b154f81d81cf0fa1a7"
+      },
+      "packet_scale": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": 0.02652476169168949,
+        "median": 1.0,
+        "max": 4.394449234008789,
+        "sha256": "4358af1852d64219356c10531a3ee6d68c682a21af20a3d5a0cd2e30d450aa84"
+      },
+      "band_ratio_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -9.105609893798828,
+        "median": -6.680966854095459,
+        "max": -3.6946651935577393,
+        "sha256": "5b0e4aaf2c2771e9c81370e2e2575ec6dd55de462436d99354c025f625d3e060"
+      },
+      "band_ratio_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.8279449939727783,
+        "median": 0.8873956799507141,
+        "max": 1.0111262798309326,
+        "sha256": "c57a040e4824b59b9080aebaf74873206fa54a57c2be7eb3fbc65434cef69a87"
+      },
+      "xlag_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -0.0224609375,
+        "median": -0.011035156436264515,
+        "max": -0.0004185267898719758,
+        "sha256": "1ee66b198581a2bfe484d4887ef4bea5358e342506d61a843da2bad8497c366c"
+      },
+      "xlag_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.00621744804084301,
+        "median": 0.0226556695997715,
+        "max": 0.0379231758415699,
+        "sha256": "7d651eda4d2ff20e02585c9cf27563ac9aad9657314af7992443f4281fbf2113"
+      },
+      "log_iqr_center": -4.305980682373047,
+      "log_iqr_scale": 1.0405717492103577,
+      "log_load_center": 3.9702919135521215,
+      "log_load_scale": 1.6607312068216507,
+      "base_rate_per_hour": 435.75795248794094,
+      "fit_hours": 90.55555555555554,
+      "note": "v0312: full permission mask, not a calendar cutoff alone",
+      "nb_size": 0.5143856746005,
+      "nb_fit_nll": 2.9609805544620795,
+      "fit_packet_count": 5441,
+      "fit_event_count": 39459,
+      "fit_mask_digest": "a63d53d23c1d84db4ecbec1739fd66125e92b0fa54b42f4b0e30cd9ecb9956c7",
+      "transform_id": "eeddb9c05972bc9afd2eb3bc545f6d3d1fa82214778c50bbf6aa437f0c274956"
+    },
+    "split": {
+      "subject": "epilepsiae_1125",
+      "protocol": "S-ID",
+      "stage": "sid",
+      "split_seed": 20260906,
+      "support_start": 1253002932.0,
+      "support_end": 1253470889.0000005,
+      "se_cutoff": null,
+      "fit_end": 1253470889.0000005,
+      "measurement_definition_end": 1253139285.6669915,
+      "split_id": "2e27cf5985bf37bc77618a0b437bf8ea55855bcdcd0c5bd1bc655c82bcb5804d",
+      "contract": "v0312: fixed split RNG; FIT-only transforms; explicit physical target IDs"
+    }
+  },
+  "t064": {
+    "selected_path": "/data/hfosp_group_event_state_observable_state_validation_v0312/runs/epilepsiae_1125__S-ID__sid__P_marks__I-L-G1__state__persistent__seed20260906/selected.pt",
+    "selected_sha256": "64444310004bf5800a3d122e0f67062788a22529147c17ba178c1f34fe6dc6ab",
+    "selected_updates": 200,
+    "source_digest": "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137",
+    "scaling": {
+      "contact_center": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": -0.017578125,
+        "median": 0.08211403340101242,
+        "max": 9.32470703125,
+        "sha256": "8df2b7481c67462c7a7353973d26ad26b46c91ff6f9ef3c14a665cb2ab749c9c"
+      },
+      "contact_scale": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": 0.0027296487241983414,
+        "median": 0.060546875,
+        "max": 1.704200267791748,
+        "sha256": "ca3f41d228d0ecd19a7ad964a2e592410d92fa2cd87f0a69c6f6cb536542af92"
+      },
+      "event_center": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.013487652875483036,
+        "median": 1.0,
+        "max": 5.460309982299805,
+        "sha256": "9e220d126b200dbba1e93632e08e0a53eb8ce19926b8c2771f5c5a87b643cf5f"
+      },
+      "event_scale": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.013871042057871819,
+        "median": 0.3181185722351074,
+        "max": 1.1785149574279785,
+        "sha256": "2ff79c1628270f1ba6dffab4b6b9e2fb4cfb90114e9639bd0998013b0733ce83"
+      },
+      "packet_center": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": -0.18008996546268463,
+        "median": 1.0,
+        "max": 3.25809645652771,
+        "sha256": "38fabcdb662b48aa62ea1ae34e9e82041a554bef40a9f0b154f81d81cf0fa1a7"
+      },
+      "packet_scale": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": 0.02652476169168949,
+        "median": 1.0,
+        "max": 4.394449234008789,
+        "sha256": "4358af1852d64219356c10531a3ee6d68c682a21af20a3d5a0cd2e30d450aa84"
+      },
+      "band_ratio_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -9.105609893798828,
+        "median": -6.680966854095459,
+        "max": -3.6946651935577393,
+        "sha256": "5b0e4aaf2c2771e9c81370e2e2575ec6dd55de462436d99354c025f625d3e060"
+      },
+      "band_ratio_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.8279449939727783,
+        "median": 0.8873956799507141,
+        "max": 1.0111262798309326,
+        "sha256": "c57a040e4824b59b9080aebaf74873206fa54a57c2be7eb3fbc65434cef69a87"
+      },
+      "xlag_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -0.0224609375,
+        "median": -0.011035156436264515,
+        "max": -0.0004185267898719758,
+        "sha256": "1ee66b198581a2bfe484d4887ef4bea5358e342506d61a843da2bad8497c366c"
+      },
+      "xlag_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.00621744804084301,
+        "median": 0.0226556695997715,
+        "max": 0.0379231758415699,
+        "sha256": "7d651eda4d2ff20e02585c9cf27563ac9aad9657314af7992443f4281fbf2113"
+      },
+      "log_iqr_center": -4.305980682373047,
+      "log_iqr_scale": 1.0405717492103577,
+      "log_load_center": 3.9702919135521215,
+      "log_load_scale": 1.6607312068216507,
+      "base_rate_per_hour": 435.75795248794094,
+      "fit_hours": 90.55555555555554,
+      "note": "v0312: full permission mask, not a calendar cutoff alone",
+      "nb_size": 0.5143856746005,
+      "nb_fit_nll": 2.9609805544620795,
+      "fit_packet_count": 5441,
+      "fit_event_count": 39459,
+      "fit_mask_digest": "a63d53d23c1d84db4ecbec1739fd66125e92b0fa54b42f4b0e30cd9ecb9956c7",
+      "transform_id": "eeddb9c05972bc9afd2eb3bc545f6d3d1fa82214778c50bbf6aa437f0c274956"
+    },
+    "split": {
+      "subject": "epilepsiae_1125",
+      "protocol": "S-ID",
+      "stage": "sid",
+      "split_seed": 20260906,
+      "support_start": 1253002932.0,
+      "support_end": 1253470889.0000005,
+      "se_cutoff": null,
+      "fit_end": 1253470889.0000005,
+      "measurement_definition_end": 1253139285.6669915,
+      "split_id": "2e27cf5985bf37bc77618a0b437bf8ea55855bcdcd0c5bd1bc655c82bcb5804d",
+      "contract": "v0312: fixed split RNG; FIT-only transforms; explicit physical target IDs"
+    }
+  },
+  "t066": {
+    "selected_path": "/data/hfosp_group_event_state_observable_state_validation_v0312/runs/epilepsiae_1125__S-ID__sid__P_marks__I-L-G1__marked_history__persistent__seed20260906/selected.pt",
+    "selected_sha256": "fe5d95b9fed0a3da5db61902250ad39c2f0884a425ed1a6911dd2d00bac91eee",
+    "selected_updates": 50,
+    "source_digest": "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137",
+    "scaling": {
+      "contact_center": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": -0.017578125,
+        "median": 0.08211403340101242,
+        "max": 9.32470703125,
+        "sha256": "8df2b7481c67462c7a7353973d26ad26b46c91ff6f9ef3c14a665cb2ab749c9c"
+      },
+      "contact_scale": {
+        "shape": [
+          31
+        ],
+        "dtype": "float32",
+        "min": 0.0027296487241983414,
+        "median": 0.060546875,
+        "max": 1.704200267791748,
+        "sha256": "ca3f41d228d0ecd19a7ad964a2e592410d92fa2cd87f0a69c6f6cb536542af92"
+      },
+      "event_center": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.013487652875483036,
+        "median": 1.0,
+        "max": 5.460309982299805,
+        "sha256": "9e220d126b200dbba1e93632e08e0a53eb8ce19926b8c2771f5c5a87b643cf5f"
+      },
+      "event_scale": {
+        "shape": [
+          9
+        ],
+        "dtype": "float32",
+        "min": 0.013871042057871819,
+        "median": 0.3181185722351074,
+        "max": 1.1785149574279785,
+        "sha256": "2ff79c1628270f1ba6dffab4b6b9e2fb4cfb90114e9639bd0998013b0733ce83"
+      },
+      "packet_center": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": -0.18008996546268463,
+        "median": 1.0,
+        "max": 3.25809645652771,
+        "sha256": "38fabcdb662b48aa62ea1ae34e9e82041a554bef40a9f0b154f81d81cf0fa1a7"
+      },
+      "packet_scale": {
+        "shape": [
+          11
+        ],
+        "dtype": "float32",
+        "min": 0.02652476169168949,
+        "median": 1.0,
+        "max": 4.394449234008789,
+        "sha256": "4358af1852d64219356c10531a3ee6d68c682a21af20a3d5a0cd2e30d450aa84"
+      },
+      "band_ratio_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -9.105609893798828,
+        "median": -6.680966854095459,
+        "max": -3.6946651935577393,
+        "sha256": "5b0e4aaf2c2771e9c81370e2e2575ec6dd55de462436d99354c025f625d3e060"
+      },
+      "band_ratio_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.8279449939727783,
+        "median": 0.8873956799507141,
+        "max": 1.0111262798309326,
+        "sha256": "c57a040e4824b59b9080aebaf74873206fa54a57c2be7eb3fbc65434cef69a87"
+      },
+      "xlag_center": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": -0.0224609375,
+        "median": -0.011035156436264515,
+        "max": -0.0004185267898719758,
+        "sha256": "1ee66b198581a2bfe484d4887ef4bea5358e342506d61a843da2bad8497c366c"
+      },
+      "xlag_scale": {
+        "shape": [
+          4
+        ],
+        "dtype": "float32",
+        "min": 0.00621744804084301,
+        "median": 0.0226556695997715,
+        "max": 0.0379231758415699,
+        "sha256": "7d651eda4d2ff20e02585c9cf27563ac9aad9657314af7992443f4281fbf2113"
+      },
+      "log_iqr_center": -4.305980682373047,
+      "log_iqr_scale": 1.0405717492103577,
+      "log_load_center": 3.9702919135521215,
+      "log_load_scale": 1.6607312068216507,
+      "base_rate_per_hour": 435.75795248794094,
+      "fit_hours": 90.55555555555554,
+      "note": "v0312: full permission mask, not a calendar cutoff alone",
+      "nb_size": 0.5143856746005,
+      "nb_fit_nll": 2.9609805544620795,
+      "fit_packet_count": 5441,
+      "fit_event_count": 39459,
+      "fit_mask_digest": "a63d53d23c1d84db4ecbec1739fd66125e92b0fa54b42f4b0e30cd9ecb9956c7",
+      "transform_id": "eeddb9c05972bc9afd2eb3bc545f6d3d1fa82214778c50bbf6aa437f0c274956"
+    },
+    "split": {
+      "subject": "epilepsiae_1125",
+      "protocol": "S-ID",
+      "stage": "sid",
+      "split_seed": 20260906,
+      "support_start": 1253002932.0,
+      "support_end": 1253470889.0000005,
+      "se_cutoff": null,
+      "fit_end": 1253470889.0000005,
+      "measurement_definition_end": 1253139285.6669915,
+      "split_id": "2e27cf5985bf37bc77618a0b437bf8ea55855bcdcd0c5bd1bc655c82bcb5804d",
+      "contract": "v0312: fixed split RNG; FIT-only transforms; explicit physical target IDs"
+    }
+  }
+}

@@ -1,0 +1,350 @@
+{
+  "candidate": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/seed_parity/dualcore_s39_reference_seed_2521.npz",
+  "archived": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_mechanism_atlas/confirmation/workers/dualcore_s39_reference_seed_2521.npz",
+  "arrays": {
+    "contact_names": {
+      "identical": true,
+      "dtype": "<U16",
+      "shape": [
+        15
+      ]
+    },
+    "shaft_ids": {
+      "identical": true,
+      "dtype": "<U8",
+      "shape": [
+        15
+      ]
+    },
+    "contact_xy_mm": {
+      "identical": true,
+      "dtype": "float64",
+      "shape": [
+        15,
+        2
+      ]
+    },
+    "onsets": {
+      "identical": true,
+      "dtype": "float32",
+      "shape": [
+        43,
+        15
+      ]
+    },
+    "ranks": {
+      "identical": true,
+      "dtype": "float32",
+      "shape": [
+        43,
+        15
+      ]
+    },
+    "event_t_on_ms": {
+      "identical": true,
+      "dtype": "float32",
+      "shape": [
+        43
+      ]
+    },
+    "event_trigger_t_on_ms": {
+      "identical": true,
+      "dtype": "float32",
+      "shape": [
+        43
+      ]
+    },
+    "event_t_off_ms": {
+      "identical": true,
+      "dtype": "float32",
+      "shape": [
+        43
+      ]
+    },
+    "event_returned": {
+      "identical": true,
+      "dtype": "bool",
+      "shape": [
+        43
+      ]
+    },
+    "event_fragment_count": {
+      "identical": true,
+      "dtype": "int16",
+      "shape": [
+        43
+      ]
+    },
+    "event_directed_root_id": {
+      "identical": true,
+      "dtype": "int32",
+      "shape": [
+        43
+      ]
+    },
+    "event_root_count": {
+      "identical": true,
+      "dtype": "int32",
+      "shape": [
+        43
+      ]
+    },
+    "active_fraction": {
+      "identical": true,
+      "dtype": "float32",
+      "shape": [
+        20000
+      ]
+    },
+    "active_fraction_bin_ms": {
+      "identical": true,
+      "dtype": "float64",
+      "shape": []
+    },
+    "contact_envelope": {
+      "identical": true,
+      "dtype": "float32",
+      "shape": [
+        15,
+        10000
+      ]
+    },
+    "contact_envelope_dt_ms": {
+      "identical": true,
+      "dtype": "float64",
+      "shape": []
+    },
+    "source_onset_maps_ms": {
+      "identical": true,
+      "dtype": "float32",
+      "shape": [
+        43,
+        20,
+        20
+      ]
+    },
+    "source_activity_counts": {
+      "identical": true,
+      "dtype": "uint16",
+      "shape": [
+        43,
+        0,
+        20,
+        20
+      ]
+    },
+    "source_activity_relative_ms": {
+      "identical": true,
+      "dtype": "float64",
+      "shape": [
+        0
+      ]
+    },
+    "source_onset_evaluable": {
+      "identical": true,
+      "dtype": "bool",
+      "shape": [
+        43
+      ]
+    },
+    "source_bin_mm": {
+      "identical": true,
+      "dtype": "float64",
+      "shape": []
+    },
+    "source_sheet_mm": {
+      "identical": true,
+      "dtype": "float64",
+      "shape": []
+    },
+    "positions_E": {
+      "identical": true,
+      "dtype": "float32",
+      "shape": [
+        32000,
+        2
+      ]
+    },
+    "h": {
+      "identical": true,
+      "dtype": "float32",
+      "shape": [
+        32000
+      ]
+    },
+    "delta_vtheta": {
+      "identical": true,
+      "dtype": "float32",
+      "shape": [
+        32000
+      ]
+    },
+    "edge_coefficients": {
+      "identical": true,
+      "dtype": "float64",
+      "shape": [
+        2,
+        6
+      ]
+    },
+    "mechanism_parameters": {
+      "identical": true,
+      "dtype": "float64",
+      "shape": [
+        6
+      ]
+    },
+    "sheet_activity_counts": {
+      "identical": true,
+      "dtype": "uint16",
+      "shape": [
+        10000,
+        20,
+        20
+      ]
+    },
+    "sheet_activity_frame_ms": {
+      "identical": true,
+      "dtype": "float64",
+      "shape": []
+    },
+    "directed_lineage_labels": {
+      "identical": true,
+      "dtype": "int16",
+      "shape": [
+        10000,
+        20,
+        20
+      ]
+    },
+    "directed_lineage_collision_mask": {
+      "identical": true,
+      "dtype": "bool",
+      "shape": [
+        10000,
+        20,
+        20
+      ]
+    },
+    "detector_fragment_dominant_lineage_id": {
+      "identical": true,
+      "dtype": "int32",
+      "shape": [
+        112
+      ]
+    },
+    "detector_fragment_dominance": {
+      "identical": true,
+      "dtype": "float32",
+      "shape": [
+        112
+      ]
+    },
+    "detector_fragment_collision_fraction": {
+      "identical": true,
+      "dtype": "float32",
+      "shape": [
+        112
+      ]
+    },
+    "detector_fragment_compound": {
+      "identical": true,
+      "dtype": "bool",
+      "shape": [
+        112
+      ]
+    },
+    "local_directed_lineage_labels": {
+      "identical": true,
+      "dtype": "int16",
+      "shape": [
+        10000,
+        20,
+        20
+      ]
+    },
+    "lineage_sensitivity_values": {
+      "identical": true,
+      "dtype": "float32",
+      "shape": [
+        9
+      ]
+    },
+    "lineage_sensitivity_minimum_dominances": {
+      "identical": true,
+      "dtype": "float32",
+      "shape": [
+        9
+      ]
+    },
+    "lineage_sensitivity_minimum_parent_supports": {
+      "identical": true,
+      "dtype": "float32",
+      "shape": [
+        9
+      ]
+    },
+    "lineage_sensitivity_edge_delay_roundings": {
+      "identical": true,
+      "dtype": "<U7",
+      "shape": [
+        9
+      ]
+    },
+    "lineage_sensitivity_primary": {
+      "identical": true,
+      "dtype": "bool",
+      "shape": [
+        9
+      ]
+    },
+    "lineage_sensitivity_event_counts": {
+      "identical": true,
+      "dtype": "int16",
+      "shape": [
+        9
+      ]
+    },
+    "lineage_sensitivity_onsets": {
+      "identical": true,
+      "dtype": "float32",
+      "shape": [
+        9,
+        61,
+        15
+      ]
+    },
+    "lineage_sensitivity_ranks": {
+      "identical": true,
+      "dtype": "float32",
+      "shape": [
+        9,
+        61,
+        15
+      ]
+    },
+    "lineage_sensitivity_returned": {
+      "identical": true,
+      "dtype": "bool",
+      "shape": [
+        9,
+        61
+      ]
+    },
+    "lineage_sensitivity_fragment_partition": {
+      "identical": true,
+      "dtype": "int32",
+      "shape": [
+        9,
+        112
+      ]
+    }
+  },
+  "missing_in_candidate": [],
+  "extra_in_candidate": [
+    "dynamics_seed",
+    "topology_seed"
+  ],
+  "mismatched": [],
+  "status": "SEED_PARITY_BYTE_IDENTICAL"
+}

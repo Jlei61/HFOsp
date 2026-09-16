@@ -1,0 +1,8 @@
+{
+  "status": "FAILED",
+  "task": "t027",
+  "kind": "synthetic_fit",
+  "error": "KeyError: 'old_summary_z'",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-ges-v033-training-lab/src/topic5_group_event_state/v040/queue.py\", line 154, in run_worker\n    result = _dispatch(task, device, deadline, plan, path)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-ges-v033-training-lab/src/topic5_group_event_state/v040/queue.py\", line 213, in _dispatch\n    return fit_and_score(cfg, task['task'], task['realization'], task['output'])\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-ges-v033-training-lab/src/topic5_group_event_state/v040/synthetic.py\", line 298, in fit_and_score\n    oracle=old_summary_oracle(prep.payload, split, 'outer'),\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-ges-v033-training-lab/src/topic5_group_event_state/v040/synthetic.py\", line 181, in old_summary_oracle\n    z_old = payload['old_summary_z']\n            ~~~~~~~^^^^^^^^^^^^^^^^^\nKeyError: 'old_summary_z'\n",
+  "device": "cuda:1"
+}

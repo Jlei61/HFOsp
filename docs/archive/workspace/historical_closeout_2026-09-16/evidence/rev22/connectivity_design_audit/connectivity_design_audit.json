@@ -1,0 +1,245 @@
+{
+  "candidate_count": 96,
+  "claim_boundary": "Structure-only audit of the exact final ellipse-plus-learned redistribution; no SNN time stepping, patient validation endpoint, Z/M, or biological synaptic-strength claim.",
+  "elapsed_seconds": 866.7598230838776,
+  "expected_cells": 384,
+  "failed_cells": [],
+  "git_commit": "7d7e5d6611b452d33744e02dc7fb1fe55b218764",
+  "minimal_transition_config_sha256": "ac7d9ab0c71dec1a8b733d9d386a8effe8a6ff886a2ef9f44b79a8ba15b1f026",
+  "observed_cells": 384,
+  "passing_cells": 384,
+  "per_topology": {
+    "2511": {
+      "coefficient_sha256": "c8808bff6f24ac5f9479a29432635fcb58a371b46f834ba1cf01453c160ccb2c",
+      "edge_counts": {
+        "E_to_E": 25600000,
+        "E_to_I": 6400000
+      },
+      "elapsed_seconds": 831.810697555542,
+      "network_cache": {
+        "cache_sha256": "346be83d4d3427f5758837e6886c0a7c04c3d813552ef0d6581b6c038ebe67be",
+        "frozen_cache_key": "a7970b2b8f13782532377fb11a7831a2204f53e37ecfc0ffcc02d948c129f618",
+        "frozen_cache_path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_core_field_rev9/network_cache/a7970b2b8f13782532377fb11a7831a2204f53e37ecfc0ffcc02d948c129f618.pkl",
+        "frozen_cache_present": true,
+        "hit": true,
+        "source_artifact": "results/topic4_sef_hfo/data_driven_core_field_rev9/node_edge_calibration/node_kick_canary.json",
+        "source_commit": "e785eb28534c31b90d486359a7f6f32c4e3b6616"
+      },
+      "producer_parity": {
+        "E_to_E": {
+          "max_abs_difference": 1.3500311979441904e-13,
+          "max_relative_difference": 2.0524024174390873e-15
+        },
+        "E_to_I": {
+          "max_abs_difference": 8.526512829121202e-14,
+          "max_relative_difference": 8.711741941993078e-15
+        },
+        "candidate_id": "dci_p030",
+        "ellipse_topology_unchanged": true,
+        "learned_delay_assignment_unchanged": true,
+        "learned_topology_unchanged": true,
+        "pass": true
+      },
+      "raw_logit_clip": 0.75
+    },
+    "2512": {
+      "coefficient_sha256": "c8808bff6f24ac5f9479a29432635fcb58a371b46f834ba1cf01453c160ccb2c",
+      "edge_counts": {
+        "E_to_E": 25600000,
+        "E_to_I": 6400000
+      },
+      "elapsed_seconds": 841.7832953929901,
+      "network_cache": {
+        "cache_sha256": "624ced1b8f368b890ae6913e91fd2e34d92bc1f78ea7391c69c8ff83ddff5ed5",
+        "frozen_cache_key": "17230c95c13cd4db9740c15b1b13d7196a3a11f7d42728ed2d9096eb4b185b72",
+        "frozen_cache_path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_core_field_rev9/network_cache/17230c95c13cd4db9740c15b1b13d7196a3a11f7d42728ed2d9096eb4b185b72.pkl",
+        "frozen_cache_present": true,
+        "hit": true,
+        "source_artifact": "results/topic4_sef_hfo/data_driven_core_field_rev9/node_edge_calibration/node_kick_canary.json",
+        "source_commit": "e785eb28534c31b90d486359a7f6f32c4e3b6616"
+      },
+      "producer_parity": {
+        "E_to_E": {
+          "max_abs_difference": 1.3500311979441904e-13,
+          "max_relative_difference": 2.4462935712206707e-15
+        },
+        "E_to_I": {
+          "max_abs_difference": 7.993605777301127e-14,
+          "max_relative_difference": 8.475656359251623e-15
+        },
+        "candidate_id": "dci_p030",
+        "ellipse_topology_unchanged": true,
+        "learned_delay_assignment_unchanged": true,
+        "learned_topology_unchanged": true,
+        "pass": true
+      },
+      "raw_logit_clip": 0.75
+    },
+    "2513": {
+      "coefficient_sha256": "c8808bff6f24ac5f9479a29432635fcb58a371b46f834ba1cf01453c160ccb2c",
+      "edge_counts": {
+        "E_to_E": 25600000,
+        "E_to_I": 6400000
+      },
+      "elapsed_seconds": 813.1054575443268,
+      "network_cache": {
+        "cache_sha256": "f9ce4d7e5f9ed8e811d5ef4cb26db8a8f938072efb3dc41157649e90a3ba85bd",
+        "frozen_cache_key": "ef932d713bc9bcf9470818d3f714b89ba8cebefdf2a9fb236e404cec597e8b62",
+        "frozen_cache_path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_core_field_rev9/network_cache/ef932d713bc9bcf9470818d3f714b89ba8cebefdf2a9fb236e404cec597e8b62.pkl",
+        "frozen_cache_present": true,
+        "hit": true,
+        "source_artifact": "results/topic4_sef_hfo/data_driven_core_field_rev9/node_edge_calibration/node_kick_canary.json",
+        "source_commit": "e785eb28534c31b90d486359a7f6f32c4e3b6616"
+      },
+      "producer_parity": {
+        "E_to_E": {
+          "max_abs_difference": 1.5631940186722204e-13,
+          "max_relative_difference": 3.4618107580918555e-15
+        },
+        "E_to_I": {
+          "max_abs_difference": 8.79296635503124e-14,
+          "max_relative_difference": 9.13380934962602e-15
+        },
+        "candidate_id": "dci_p030",
+        "ellipse_topology_unchanged": true,
+        "learned_delay_assignment_unchanged": true,
+        "learned_topology_unchanged": true,
+        "pass": true
+      },
+      "raw_logit_clip": 0.75
+    },
+    "2514": {
+      "coefficient_sha256": "c8808bff6f24ac5f9479a29432635fcb58a371b46f834ba1cf01453c160ccb2c",
+      "edge_counts": {
+        "E_to_E": 25600000,
+        "E_to_I": 6400000
+      },
+      "elapsed_seconds": 866.4773423671722,
+      "network_cache": {
+        "cache_sha256": "27c9faa22c3299510f620f0bc9872437000dffcb37a3ac58a018e90ad150d729",
+        "frozen_cache_key": "79521d0fb21700c4d029b73c20fe1928d80654c5a152e6f8f4d18128cad0d203",
+        "frozen_cache_path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_core_field_rev9/network_cache/79521d0fb21700c4d029b73c20fe1928d80654c5a152e6f8f4d18128cad0d203.pkl",
+        "frozen_cache_present": true,
+        "hit": true,
+        "source_artifact": "results/topic4_sef_hfo/data_driven_core_field_rev9/node_edge_calibration/node_kick_canary.json",
+        "source_commit": "e785eb28534c31b90d486359a7f6f32c4e3b6616"
+      },
+      "producer_parity": {
+        "E_to_E": {
+          "max_abs_difference": 1.4921397450962104e-13,
+          "max_relative_difference": 3.3012562396604808e-15
+        },
+        "E_to_I": {
+          "max_abs_difference": 8.79296635503124e-14,
+          "max_relative_difference": 9.08874856021643e-15
+        },
+        "candidate_id": "dci_p030",
+        "ellipse_topology_unchanged": true,
+        "learned_delay_assignment_unchanged": true,
+        "learned_topology_unchanged": true,
+        "pass": true
+      },
+      "raw_logit_clip": 0.75
+    }
+  },
+  "producer_parity": {
+    "2511": {
+      "E_to_E": {
+        "max_abs_difference": 1.3500311979441904e-13,
+        "max_relative_difference": 2.0524024174390873e-15
+      },
+      "E_to_I": {
+        "max_abs_difference": 8.526512829121202e-14,
+        "max_relative_difference": 8.711741941993078e-15
+      },
+      "candidate_id": "dci_p030",
+      "ellipse_topology_unchanged": true,
+      "learned_delay_assignment_unchanged": true,
+      "learned_topology_unchanged": true,
+      "pass": true
+    },
+    "2512": {
+      "E_to_E": {
+        "max_abs_difference": 1.3500311979441904e-13,
+        "max_relative_difference": 2.4462935712206707e-15
+      },
+      "E_to_I": {
+        "max_abs_difference": 7.993605777301127e-14,
+        "max_relative_difference": 8.475656359251623e-15
+      },
+      "candidate_id": "dci_p030",
+      "ellipse_topology_unchanged": true,
+      "learned_delay_assignment_unchanged": true,
+      "learned_topology_unchanged": true,
+      "pass": true
+    },
+    "2513": {
+      "E_to_E": {
+        "max_abs_difference": 1.5631940186722204e-13,
+        "max_relative_difference": 3.4618107580918555e-15
+      },
+      "E_to_I": {
+        "max_abs_difference": 8.79296635503124e-14,
+        "max_relative_difference": 9.13380934962602e-15
+      },
+      "candidate_id": "dci_p030",
+      "ellipse_topology_unchanged": true,
+      "learned_delay_assignment_unchanged": true,
+      "learned_topology_unchanged": true,
+      "pass": true
+    },
+    "2514": {
+      "E_to_E": {
+        "max_abs_difference": 1.4921397450962104e-13,
+        "max_relative_difference": 3.3012562396604808e-15
+      },
+      "E_to_I": {
+        "max_abs_difference": 8.79296635503124e-14,
+        "max_relative_difference": 9.08874856021643e-15
+      },
+      "candidate_id": "dci_p030",
+      "ellipse_topology_unchanged": true,
+      "learned_delay_assignment_unchanged": true,
+      "learned_topology_unchanged": true,
+      "pass": true
+    }
+  },
+  "relaxed_band_candidates": [
+    "dci_p005",
+    "dci_p034",
+    "dci_p038",
+    "dci_p045",
+    "dci_p061"
+  ],
+  "relaxed_band_cells": 20,
+  "response_design_manifest_sha256": "d9ce44f0228e9db71795180e4d72e876c7e454a9c0fa355fffac7d08ffb81bef",
+  "rev20_config_sha256": "fed5fbceca3a3bf90a73aa6b6189f74f3e162f998e841b715f476020ab9d0bf0",
+  "schema_id": "topic4_rev22_dci_final_connectivity_design_audit_v1",
+  "seed_manifest_sha256": "3418a35c857ef21e76203008260368d748a3d6ee457a5e7f430434a0a9a52468",
+  "status": "CONNECTIVITY_DESIGN_ADMISSIBLE",
+  "table": {
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/connectivity_design_audit/connectivity_design_audit.csv",
+    "sha256": "a98a0c43c4d7556cce0fd1386120f2d6d28463a891b90e497a124bba1d7d7c3e"
+  },
+  "threshold_provenance": {
+    "amendment": "v5.2",
+    "composed_edge_ratio_p01_min": 0.2,
+    "decided": "2026-09-03, after the first composed audit reported 20 of 384 cells at 0.212-0.238",
+    "decision_order": "threshold relaxed after the data were seen; not a pre-registered value",
+    "obligation": "every candidate with composed edge-ratio p01 below the single-step floor is flagged relaxed_band; the closeout must state whether any conclusion depends on those candidates",
+    "single_step_edge_ratio_p01_min": 0.25
+  },
+  "thresholds": {
+    "budget_error_max": 1e-09,
+    "edge_ratio_p01_min": 0.2,
+    "edge_ratio_p99_max": 4.0,
+    "effective_source_median_ratio_min": 0.75,
+    "effective_source_p05_ratio_min": 0.5
+  },
+  "topology_seeds": [
+    2511,
+    2512,
+    2513,
+    2514
+  ]
+}

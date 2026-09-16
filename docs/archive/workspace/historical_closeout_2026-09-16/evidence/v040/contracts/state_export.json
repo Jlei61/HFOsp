@@ -1,0 +1,89 @@
+{
+  "exported": {
+    "name": "QueryState",
+    "m": {
+      "dim": 24,
+      "meaning": "posterior mean of the generative state"
+    },
+    "P": {
+      "shape": [
+        24,
+        24
+      ],
+      "meaning": "posterior covariance"
+    },
+    "cond": {
+      "dim": 10,
+      "names": [
+        "log_episode_age_hours",
+        "log_clinical_reset_age_hours",
+        "clinical_reset_known",
+        "log_count_support_age_minutes",
+        "count_support_missing",
+        "log_marks_support_age_minutes",
+        "marks_support_missing",
+        "short_window_published_coverage",
+        "log_published_exposure_hours",
+        "has_observation"
+      ]
+    },
+    "metadata": [
+      "query_packet",
+      "query_time",
+      "source_time",
+      "release_time",
+      "information_age_minutes",
+      "available_exposure_seconds",
+      "readable_events",
+      "prefix_start",
+      "input_digest",
+      "producer_hash"
+    ],
+    "entry": "v040/engine.py:QueryState.export"
+  },
+  "withheld": {
+    "inference_gru_c64": "the inference GRU hidden state is never handed to a consumer",
+    "within_minute_event_memory": "the per-event GRU state is internal to the encoder",
+    "reason": "the single export contract keeps every consumer reading the same object"
+  },
+  "consumer_routes": {
+    "H1": {
+      "reads": "posterior samples of the same Q, advanced by f and read out by g",
+      "note": "P is part of the predictive uncertainty, not a separate score"
+    },
+    "H2a_A": {
+      "reads": "m only, 24 dimensions, standardised inside the consumer FIT",
+      "forbidden": [
+        "inference GRU c",
+        "covariance diagonal"
+      ]
+    },
+    "H2a_B": {
+      "reads": "m only, alongside the genuinely observed event prefix"
+    },
+    "S_A": {
+      "reads": "the fixed functional coordinates of the frozen g applied to the same Q"
+    },
+    "S_B": {
+      "reads": "the same m and C as H2a-A, through the frozen interictal contact head"
+    },
+    "common_C": {
+      "reads": "the legal clock, measurement support and deterministic recording timers",
+      "availability": "offered identically to every arm and every consumer"
+    }
+  },
+  "representation_classes": {
+    "static_trait": "FIT contact dictionary, geometry and templates; never refitted on the scored period",
+    "unlearned_input_driven": "a checkpoint selected at step 0 still varies with history through the fixed recurrent map; this is not a static trait",
+    "learned": "parameters that moved away from initialisation, evidenced by the parameter inventory",
+    "decided_by": [
+      "selected_updates",
+      "parameter_inventory relative_update",
+      "consumer weight change"
+    ]
+  },
+  "identity": {
+    "same_state_means": "one producer, one export function and its fixed projections",
+    "does_not_mean": "that consumer input tensors are identical or that Q is a sufficient statistic"
+  }
+}

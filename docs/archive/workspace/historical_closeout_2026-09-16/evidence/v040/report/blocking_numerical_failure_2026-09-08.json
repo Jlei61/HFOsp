@@ -1,0 +1,95 @@
+{
+  "status": "BLOCKING_NUMERICAL_FAILURE",
+  "date": "2026-09-08",
+  "scope": "first-seed human chain; discovered while reading the first completed arms",
+  "finding_1": {
+    "name": "fixed-recipe final refit ships a model far worse than its own initialisation on the monitored views",
+    "evidence": {
+      "S_marks_final_outer": {
+        "count@30": 15.3815,
+        "load@30": 2537.05,
+        "spatial@30": 4.9814,
+        "morphology@30": 2.3181
+      },
+      "S_stats_final_outer": {
+        "count@30": 3.2841,
+        "load@30": 1.7545,
+        "spatial@30": 3.7741,
+        "morphology@30": 1.6422
+      },
+      "S_marks_paired_inner_trajectory_load_at_30": "1.15-2.64 across 0-400 updates on both INNER legs",
+      "S_marks_final_selected_updates": 300,
+      "S_stats_final_selected_updates": 100,
+      "readout_last_layer_relative_update": {
+        "S_marks": 28.87,
+        "S_stats": 15.05
+      }
+    },
+    "mechanism": "the training loss does not improve over the refit (3.386 -> 3.420, median 3.13, range 1.52-5.49) while 173/300 updates hit the gradient clip; the optimisation diffuses rather than converges. The paired INNER survives this because it selects a checkpoint; the final refit takes whatever parameters exist at the frozen step count, by registered design, and therefore ships the drift."
+  },
+  "finding_2": {
+    "name": "the registered selection score is blind to the degradation",
+    "evidence": {
+      "inner0_J_by_update": {
+        "0": 2.2041,
+        "50": 2.2102,
+        "100": 2.2092,
+        "150": 2.2196,
+        "200": 2.21,
+        "250": 2.2255,
+        "300": 2.2335,
+        "400": 2.2464
+      },
+      "inner1_J_by_update": {
+        "0": 2.5981,
+        "100": 2.4743,
+        "200": 2.4419,
+        "300": 2.3867,
+        "400": 2.4708
+      }
+    },
+    "reading": "J = 0.5*spatial@30 + 0.5*morphology@30 moves only in the third decimal on INNER0 and is minimised at step 0 there; count and load are monitored only, so a catastrophic collapse in those two views cannot influence checkpoint selection. Monitoring caught it only because it was read by hand."
+  },
+  "finding_3": {
+    "name": "every conditional fine-identity head degenerates to the intercept",
+    "evidence": {
+      "selected_step": 0,
+      "parameter_change_l2": 0.0,
+      "learned": false,
+      "step_zero_validation": 1.92098,
+      "test_units": 452,
+      "train_units": 543,
+      "validation_units": 144,
+      "trajectory": "train 1.972->1.738 while validation 1.921->3.356 and test 1.510->10.151 by step 120",
+      "positive_control": {
+        "intercept_only": 1.50958,
+        "readable_recent_history_as_logits": 1.45874,
+        "note": "an untrained, hand-specified use of the readable recent history beats the intercept by 0.051 nats per event on the same 452 test units"
+      }
+    },
+    "reading": "the linear conditional-identity readout overfits from the first evaluation, so early stopping returns the intercept for all four condition sets. R(C+H)-R(C+H+S) is then exactly 0 by construction and says nothing about the state. The positive control shows the endpoint is not intrinsically dead. Per spec section 6.2 these four identical degenerate readouts are ONE degeneracy, not four independent negatives."
+  },
+  "consequences": [
+    "the five registered differences cannot be read off the current final refits",
+    "the wrong-time difference of exactly 0.0 is a construction artefact of the degenerate head, not a time-correspondence result",
+    "S-B agreement is identical across all four condition sets for the same reason; only its baseline value is a real measurement",
+    "S-A functional coordinates come from the same drifted readout and are therefore also suspect"
+  ],
+  "not_claimed": [
+    "that the persistent state carries no information",
+    "that rich event content carries no future information",
+    "any comparison between arms from these runs"
+  ],
+  "repair_options": {
+    "configuration_only": "lower the network/dynamics learning rate and/or raise the effective batch so the optimisation converges instead of diffusing; these live in the plan config, not in the frozen source, so they do not invalidate the digest",
+    "code_change": "refuse to ship a final refit whose monitored views are worse than its own initialisation by more than a registered margin; and give the identity head a capacity/regularisation budget matched to 543 training units",
+    "registered_status": "the work package counts numerical-repair reruns separately from the 25 main fits"
+  },
+  "sources": [
+    "runs/epilepsiae_1125__S_marks__S-E__outer__persistent__seed20260906/card.json",
+    "runs/epilepsiae_1125__S_stats__S-E__outer__persistent__seed20260906/card.json",
+    "recipes/S_marks.json",
+    "frozen/epilepsiae_1125__S_marks__S-E__outer__persistent__seed20260906/consumers.json",
+    "contracts/identity_head_diagnosis.json"
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "date": "2026-09-16",
+  "archive_status": "HISTORICAL_ARCHIVE_ACCEPTED",
+  "scope": "historical work before 2026-09-11 plus rev22-postfit; recent active packages not closed",
+  "scientific_disposition": "per-route bounded decisions in docs/historical_results_closeout.md; no blanket scientific success",
+  "source_snapshots": [
+    {
+      "branch": "codex/archive-history-20260916-root",
+      "commit": "73a8302ee4df1c4ad10c1b123c743042701c4a8c",
+      "file_count": 484,
+      "remote_verified": true
+    },
+    {
+      "branch": "codex/archive-history-20260916-continuous-core",
+      "commit": "67a3f6e99350ddd2fd085b2ffdac02d96ad9279b",
+      "file_count": 47,
+      "remote_verified": true
+    },
+    {
+      "branch": "codex/archive-history-20260916-substrate",
+      "commit": "dc01ba2be92cb1a90ac146513ee146e0aefd555b",
+      "file_count": 265,
+      "remote_verified": true
+    },
+    {
+      "branch": "codex/archive-history-20260916-training-lab",
+      "commit": "5e588cde4a369304f6273526f13c56ed7e06c088",
+      "file_count": 300,
+      "remote_verified": true
+    },
+    {
+      "branch": "codex/topic4-rev22-postfit",
+      "commit": "140c8e99e3663239afc70e4486f95c8047ccca19",
+      "included_previously_unpushed_commits": [
+        "836d1d2d",
+        "c5f0eca8",
+        "e0d87055",
+        "6e9ce3ac"
+      ],
+      "remote_verified": true
+    }
+  ],
+  "historical_modified_files": 1096,
+  "source_syntax_errors": [],
+  "evidence_files": 257,
+  "protected_live_state": "No live historical code overwritten; unresolved conflicts, deletions, active jobs, data and worktree paths retained. Rev22 receives only its closeout document.",
+  "new_visual_acceptance": false,
+  "validation": {
+    "rev22_regression_tests_passed": 20,
+    "junit": "rev22_tests.xml",
+    "central_index_links": "PASS",
+    "evidence_hashes": "257/257 PASS",
+    "all_scientific_experiments_rerun": false
+  }
+}

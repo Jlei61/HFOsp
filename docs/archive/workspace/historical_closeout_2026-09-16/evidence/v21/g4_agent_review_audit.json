@@ -1,0 +1,68 @@
+{
+  "status": "AGENT_REVIEW_PASS_USER_VISUAL_REVIEW_PENDING",
+  "date": "2026-09-07",
+  "formal_simulations": {
+    "total": 156,
+    "complete_no_runaway": 114,
+    "physical_runaway": 42,
+    "engineering_failures": 0
+  },
+  "g3": {
+    "conditions": 7,
+    "runs": 28,
+    "complete_no_runaway": 28,
+    "primary_events": 1082,
+    "parameter_application_audit": "PASS",
+    "same_graph_static_identity_pairs_passed": 14,
+    "distinct_dynamics_output_pairs_passed": 14
+  },
+  "software_checks": {
+    "pytest": "34 passed",
+    "py_compile": "PASS",
+    "json_files_parsed": 522,
+    "amendment_file_hashes": "PASS"
+  },
+  "visual_checks": {
+    "png_manifest_entries_verified": 316,
+    "pdf_manifest_entries_verified": 316,
+    "pdf_single_pages_parsed": 316,
+    "gif_files_verified": 14,
+    "gif_frames_decoded": 3985,
+    "hash_or_decode_failures": 0,
+    "overview_legend_nonprimary_vs_burnin_corrected": true,
+    "agent_spot_check": [
+      "patient_model_distribution_summary.png",
+      "overview_v2_1_pop1_de_b_002_topo_6101_dyn_7101.png",
+      "overview_v2_1_pop1_de_b_002_topo_6101_dyn_7102.png",
+      "native_v2_1_pop1_de_b_002_topo_6101_dyn_7101_page_01.png",
+      "native_v2_anchor_old_joint__baseline_topo_6101_dyn_7101_page_01.png",
+      "patient_packet_mode0_page_01.png",
+      "patient_packet_mode1_page_01.png"
+    ],
+    "user_visual_review_pending": true
+  },
+  "scientific_decision": {
+    "accepted": "v2_1_pop1_de_b_002 improves the frozen multievent feature distribution on four new paired runs and retains both modes across all six-second segments",
+    "not_accepted": "patient continuous propagation mechanism, two origin cores, unique parameter mechanism, or mode-switching dynamics",
+    "next_step_only": "frozen-output timing representation audit against v2_anchor_old_joint__baseline",
+    "automatic_new_search_or_fig5": false
+  },
+  "known_limits": [
+    "Four G3 replays do not decompose all topology and dynamics variance.",
+    "The patient block reference reuses the development probe and is not an independent clinical holdout.",
+    "An independent exact repeat of one full 24-second execution unit was not added outside the fixed 156-run budget.",
+    "Sparse-contact centroid routes are descriptive and are not continuous tissue paths or causal origins."
+  ],
+  "artifact_sha256": {
+    "scientific_review.md": "954e656c73eb9e13784b4e90dead4428794fecf55bb431cb0fa9de5e2322f56e",
+    "g3_scores.json": "d22d23cce55f7529f8e249ca73c38c956a2c9a275bf95d6be706904d75e02cfd",
+    "g3_confirmation_analysis.json": "57bfa201ea027fb242efe5439159e1b0544f95754ea9f908aa840b68381394fd",
+    "g3_patient_block_matched_reference.json": "8004277c7aa8335c179eae67e319b8f0fdbac582338058a62a74f12292aba826",
+    "g3_six_second_segments.json": "624e4eba4bd2fb64b0be5763251427f0302b3244f8d45fc7a8d6af4c35228c71",
+    "g4_patient_model_comparison.json": "e905b97343d4721b58981b7de5e37002da165591d3dc959d676b2349e27f67e8",
+    "g4_visual_manifest.json": "c4b25ac2a6013f1262d44d406b592d0dc168f97da4f568dcde43013cf5946f1e",
+    "nomination.json": "cf1bb54243f3a35fb39c6834b5aada5b8ecddbd10e26af9b9642ecd6873e0cd5",
+    "status.json": "350c3c813cfa2251316c9e9f457c72859633f5502e45d2eea4d4a2dca7268b6f",
+    "execution_amendment_two_batch_g2_2026-09-07.json": "90b9ee9fbf00279e72d0d20c72ea164b0b146a72db4a91ed715e6043dde91966"
+  }
+}

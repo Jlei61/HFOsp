@@ -1,0 +1,199 @@
+{
+  "status": "COMPLETE",
+  "n_incidents": 6,
+  "incidents": [
+    {
+      "path": "/data/hfosp_group_event_state_observable_state_validation_v0312/instruments_replication/incidents/r004_device_assert_20260907T0410/manifest.json",
+      "sha256": "1d0a01b7526bbc35376886b56e4229531c2d1bbb063bb943d3ed2e8ddef8d269",
+      "manifest": {
+        "created_epoch": 1788725162.1047351,
+        "task": "r004",
+        "failure": "asynchronous CUDA device-side assert after update 627; traceback location is not assumed causal",
+        "source_digest": "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137",
+        "action": "preserve failed state; resume exact checkpoint in fresh CUDA_LAUNCH_BLOCKING=1 process",
+        "boundary": "No OOM; failure is not assigned to a deterministic batch or hardware without synchronous reproduction.",
+        "files": {
+          "queue_failed.json": {
+            "sha256": "48ce454c430e1588ee3f0208c765ee9b00c73b4df08c005a8020b7bfc8aa9182",
+            "bytes": 3356
+          },
+          "progress_failed.json": {
+            "sha256": "320d49d2ed41f808a58f0c258b3ee63c70093c7cec834002f242689a6d01a0f9",
+            "bytes": 446
+          },
+          "last.pt": {
+            "sha256": "c029d28d97d537ce7f70ab931b0659f91eb3121e26b4331ccd648e9d05ee208c",
+            "bytes": 1000824
+          },
+          "process_state.txt": {
+            "sha256": "0b5ce18ddd195ecb35c25e8fb4ade5b1d84e69d79582addc34121aef319d9db5",
+            "bytes": 25
+          }
+        },
+        "synchronous_recovery": {
+          "resume_checkpoint_update": 625,
+          "crossed_original_failure_to_update": 664,
+          "status": "PASSED_NO_REPRODUCTION",
+          "next_action": "resume same exact state without CUDA_LAUNCH_BLOCKING"
+        },
+        "final_recovery": {
+          "status": "COMPLETE",
+          "updates": 1000,
+          "selected_updates": 0,
+          "stop_reason": "plateau",
+          "source_digest": "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137",
+          "no_oom": true
+        }
+      }
+    },
+    {
+      "path": "/data/hfosp_group_event_state_observable_state_validation_v0312/instruments_replication/incidents/r017_device_assert_20260907T0455/manifest.json",
+      "sha256": "5ce592433ba3bdee0abc3219a8b0ce9e88a14a868ec8508d60f744825313d8ba",
+      "manifest": {
+        "created_epoch": 1788728119.9937432,
+        "task": "r017",
+        "failure": "asynchronous CUDA device-side assert after exact recovery crossed original stationary-covariance failure",
+        "failed_progress": {
+          "status": "FAILED",
+          "updates": 209,
+          "error": "RuntimeError: CUDA error: device-side assert triggered\nCUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\n",
+          "source_digest": "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137"
+        },
+        "resume_checkpoint_update": 200,
+        "source_digest": "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137",
+        "action": "preserve second failed state; one bounded fresh CUDA_LAUNCH_BLOCKING recovery from latest exact checkpoint",
+        "stop_rule": "if the fresh blocking recovery fails again at the same boundary, stop this unit as numerically non-estimable",
+        "boundary": "No OOM; traceback site may not identify the originating CUDA operation.",
+        "files": {
+          "queue_failed.json": {
+            "sha256": "ba11c99be45d91f085052fcf8f0d81c64bc7191b73507b382daa8710946e4d04",
+            "bytes": 3473
+          },
+          "progress_failed.json": {
+            "sha256": "5e161f25f2c13f07f793b691707f862c4093d03cbe0a94bb06e3357b652e3019",
+            "bytes": 446
+          },
+          "last.pt": {
+            "sha256": "c7072d9f3c25b2871840264e367b670b8bf81568782f0e9bdea410c2806d19ce",
+            "bytes": 702252
+          }
+        },
+        "recovery_outcome": "FAILED_BOUNDED_STOP",
+        "blocking_failure": {
+          "status": "FAILED",
+          "task": "r017",
+          "error": "_LinAlgError: torch.linalg.solve: The solver failed because the input matrix is singular.",
+          "traceback": "Traceback (most recent call last):\n  File \"/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-ges-v033-training-lab/src/topic5_group_event_state/v0312/queue.py\", line 154, in run_worker\n    result=run_cell(cfg,deadline=deadline,progress=lambda row,action:atomic_json(dict(status='RUNNING',task=task['id'],device=device,pid=os.getpid(),heartbeat=time.time(),update=row['update']),path))\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-ges-v033-training-lab/src/topic5_group_event_state/v0312/train.py\", line 327, in run_cell\n    loss,norm=update(model,prep,cfg,opt,batch,normalizers,updates,micro);break\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-ges-v033-training-lab/src/topic5_group_event_state/v0312/train.py\", line 201, in update\n    loss=loss_for_targets(model,prep,cfg,ids[a:a+microbatch],normalizers,step,credit)\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-ges-v033-training-lab/src/topic5_group_event_state/v0312/train.py\", line 167, in loss_for_targets\n    state=infer_asof(model,prep,queries,'fit',cfg.history_hours,training=True,\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-ges-v033-training-lab/src/topic5_group_event_state/v0312/engine.py\", line 165, in infer_asof\n    m,P=propagate_moments(model.dynamics,m,P,dt,cache=caches[on])\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-ges-v033-training-lab/src/topic5_group_event_state/v0312/numerics.py\", line 195, in propagate_moments\n    F,Q=ou_transition(A,sigma,dt_hours,_p_inf(dyn,A,sigma,cache))\n                                       ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-ges-v033-training-lab/src/topic5_group_event_state/v0312/numerics.py\", line 163, in _p_inf\n    if 'p_inf' not in cache:cache['p_inf']=stationary_covariance(A,sigma)\n                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-ges-v033-training-lab/src/topic5_group_event_state/v0312/numerics.py\", line 46, in stationary_covariance\n    P=torch.linalg.solve(M,rhs).reshape(d,d)\n      ^^^^^^^^^^^^^^^^^^^^^^^^^\ntorch._C._LinAlgError: torch.linalg.solve: The solver failed because the input matrix is singular.\n",
+          "device": "cuda:1"
+        },
+        "conclusion": "Fresh CUDA_LAUNCH_BLOCKING replay crossed update 209 then exposed a singular stationary-covariance solve at update 212; this realization/input arm is numerically not estimable under the frozen implementation.",
+        "further_restarts_authorized": false,
+        "updated_epoch": 1788728310.6468399
+      }
+    },
+    {
+      "path": "/data/hfosp_group_event_state_observable_state_validation_v0312/instruments_replication/incidents/r017_stationary_covariance_20260907T0434/manifest.json",
+      "sha256": "3c8d1f0fc458e5dd4f789d6c50b4cf71ffe50dd24cef5c34d35985649c1046a1",
+      "manifest": {
+        "created_epoch": 1788726955.711638,
+        "task": "r017",
+        "failure": "stationary covariance solve returned non-finite during training",
+        "failed_progress": {
+          "status": "FAILED",
+          "updates": 178,
+          "error": "FloatingPointError: stationary covariance solve produced non-finite values",
+          "source_digest": "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137"
+        },
+        "resume_checkpoint_update": 175,
+        "source_digest": "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137",
+        "action": "preserve failed state; atomically return task to pending for exact checkpoint recovery on next free admitted slot",
+        "boundary": "No OOM and no device-side assert; one failure does not establish a deterministic numerical instability.",
+        "files": {
+          "queue_failed.json": {
+            "sha256": "001ea9ffc8cc6a6c4d63aa8c7708291e370ed6989314e46cb49f27b8ce21f6a5",
+            "bytes": 2911
+          },
+          "progress_failed.json": {
+            "sha256": "f4ad9ccd70147904260760c5d69a58cb0bcfb096930a7b4726c8d099332a89a5",
+            "bytes": 219
+          },
+          "last.pt": {
+            "sha256": "14b31c4d109ff7db772269fceb9b43bd2ee125d07f70737df941cfbc42d700c5",
+            "bytes": 698092
+          }
+        }
+      }
+    },
+    {
+      "path": "/data/hfosp_group_event_state_observable_state_validation_v0312/instruments_replication/incidents/r019_identity905_singular_20260907T0459/manifest.json",
+      "sha256": "7fd86725cf30f619b8da6f0c1f0a67e91abbc1e6ad4d2e39cc9cbca427944cd8",
+      "manifest": {
+        "created_epoch": 1788728377.8784122,
+        "task": "r019",
+        "failure": {
+          "status": "FAILED",
+          "task": "r019",
+          "error": "_LinAlgError: torch.linalg.solve: The solver failed because the input matrix is singular.",
+          "traceback": "Traceback (most recent call last):\n  File \"/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-ges-v033-training-lab/src/topic5_group_event_state/v0312/queue.py\", line 154, in run_worker\n    result=run_cell(cfg,deadline=deadline,progress=lambda row,action:atomic_json(dict(status='RUNNING',task=task['id'],device=device,pid=os.getpid(),heartbeat=time.time(),update=row['update']),path))\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-ges-v033-training-lab/src/topic5_group_event_state/v0312/train.py\", line 327, in run_cell\n    loss,norm=update(model,prep,cfg,opt,batch,normalizers,updates,micro);break\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-ges-v033-training-lab/src/topic5_group_event_state/v0312/train.py\", line 201, in update\n    loss=loss_for_targets(model,prep,cfg,ids[a:a+microbatch],normalizers,step,credit)\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-ges-v033-training-lab/src/topic5_group_event_state/v0312/train.py\", line 170, in loss_for_targets\n    predictions=predict(model,prep,state,tuple(np.unique(legal[:,1])),paths=cfg.train_paths,seed=cfg.seed+1000003*update)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-ges-v033-training-lab/src/topic5_group_event_state/v0312/engine.py\", line 245, in predict\n    z=propagate_samples(model.dynamics,z,dt,cache=cache,noise=[noise[ni],noise[ni+1]])\n      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-ges-v033-training-lab/src/topic5_group_event_state/v0312/numerics.py\", line 226, in propagate_samples\n    F,Q=ou_transition(A,sigma,h/2.,_p_inf(dyn,A,sigma,cache))\n                                   ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-ges-v033-training-lab/src/topic5_group_event_state/v0312/numerics.py\", line 163, in _p_inf\n    if 'p_inf' not in cache:cache['p_inf']=stationary_covariance(A,sigma)\n                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-ges-v033-training-lab/src/topic5_group_event_state/v0312/numerics.py\", line 46, in stationary_covariance\n    P=torch.linalg.solve(M,rhs).reshape(d,d)\n      ^^^^^^^^^^^^^^^^^^^^^^^^^\ntorch._C._LinAlgError: torch.linalg.solve: The solver failed because the input matrix is singular.\n",
+          "device": "cuda:1"
+        },
+        "action": "stop identity realization 905 as numerically not estimable after both P_stats and P_marks arms failed in stationary-covariance solve; replace realization under pre-specified identity expansion rule",
+        "further_restarts_authorized": false,
+        "source_digest": "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137",
+        "boundary": "No OOM. No paired input comparison exists for realization 905."
+      }
+    },
+    {
+      "path": "/data/hfosp_group_event_state_observable_state_validation_v0312/instruments_replication_stage2/incidents/resume_device_swap_20260907T0833/manifest.json",
+      "sha256": "cfab693d2be706eb7a4c3a0edb934fa38c222a7ebca3b464c820d25f0d4310e6",
+      "manifest": {
+        "created_epoch": 1788741357.1319022,
+        "tasks": {
+          "s019": {
+            "original_device": "cuda:0",
+            "first_pause_update": 892,
+            "temporary_device": "cuda:1",
+            "second_pause_update": 923,
+            "final_device": "cuda:0"
+          },
+          "s022": {
+            "original_device": "cuda:1",
+            "first_pause_update": 123,
+            "temporary_device": "cuda:0",
+            "second_pause_update": 137,
+            "final_device": "cuda:1"
+          }
+        },
+        "cause": "two PAUSED tasks were returned to PENDING simultaneously; dependency queue selected the lower task id regardless of original device",
+        "action": "paused both at loop boundary, then released one task at a time to restore original GPU assignment",
+        "scientific_boundary": "Both devices are RTX 3090 and deterministic algorithms were enabled, but cross-device bitwise identity was not directly proven. These are synthetic diagnostic tasks and the device segment is retained in provenance; no human card was affected.",
+        "prevention": "future exact resumes release one task at a time with expected device asserted before the second task is made pending"
+      }
+    },
+    {
+      "path": "/data/hfosp_group_event_state_observable_state_validation_v0312/instruments_replication_stage2/incidents/s002_device_assert_20260907T0542/manifest.json",
+      "sha256": "923a340704d9f270e39f32f3779df501609deeb67c5ea61b87353bbcc66986d7",
+      "manifest": {
+        "created_epoch": 1788730969.1405988,
+        "task": "s002",
+        "failure": {
+          "status": "FAILED",
+          "task": "s002",
+          "error": "RuntimeError: CUDA error: device-side assert triggered\nCUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\n",
+          "traceback": "Traceback (most recent call last):\n  File \"/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-ges-v033-training-lab/src/topic5_group_event_state/v0312/queue.py\", line 154, in run_worker\n    result=run_cell(cfg,deadline=deadline,progress=lambda row,action:atomic_json(dict(status='RUNNING',task=task['id'],device=device,pid=os.getpid(),heartbeat=time.time(),update=row['update']),path))\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-ges-v033-training-lab/src/topic5_group_event_state/v0312/train.py\", line 327, in run_cell\n    loss,norm=update(model,prep,cfg,opt,batch,normalizers,updates,micro);break\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-ges-v033-training-lab/src/topic5_group_event_state/v0312/train.py\", line 201, in update\n    loss=loss_for_targets(model,prep,cfg,ids[a:a+microbatch],normalizers,step,credit)\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-ges-v033-training-lab/src/topic5_group_event_state/v0312/train.py\", line 170, in loss_for_targets\n    predictions=predict(model,prep,state,tuple(np.unique(legal[:,1])),paths=cfg.train_paths,seed=cfg.seed+1000003*update)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-ges-v033-training-lab/src/topic5_group_event_state/v0312/engine.py\", line 245, in predict\n    z=propagate_samples(model.dynamics,z,dt,cache=cache,noise=[noise[ni],noise[ni+1]])\n      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-ges-v033-training-lab/src/topic5_group_event_state/v0312/numerics.py\", line 226, in propagate_samples\n    F,Q=ou_transition(A,sigma,h/2.,_p_inf(dyn,A,sigma,cache))\n                                   ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-ges-v033-training-lab/src/topic5_group_event_state/v0312/numerics.py\", line 163, in _p_inf\n    if 'p_inf' not in cache:cache['p_inf']=stationary_covariance(A,sigma)\n                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-ges-v033-training-lab/src/topic5_group_event_state/v0312/numerics.py\", line 46, in stationary_covariance\n    P=torch.linalg.solve(M,rhs).reshape(d,d)\n      ^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: CUDA error: device-side assert triggered\nCUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\n\n",
+          "device": "cuda:1"
+        },
+        "resume_checkpoint_update": 125,
+        "source_digest": "bdf901caf0ff7dbddbd028095cfbd6f7365b6bc148b6699b4e6921b303264137",
+        "action": "one exact retry on an isolated single-process GPU after current s007 completes",
+        "stop_rule": "if isolated retry fails, mark numerically not estimable and do not restart",
+        "boundary": "No OOM; same source/config/checkpoint. Multi-process CUDA Lyapunov reliability is now a suspected engineering cause, not proven hardware root cause.",
+        "recovery_outcome": "COMPLETE_ISOLATED_GPU",
+        "recovery_crossed_failed_update": true,
+        "updated_epoch": 1788735886.228608,
+        "interpretation": "Exact checkpoint recovery succeeded when the task ran as the sole training process on its GPU; this supports, but does not prove uniquely, a multi-process CUDA solver reliability cause."
+      }
+    }
+  ],
+  "interpretation": "all retained in denominator; identity realization 905 remains numerical NOT_ESTIMABLE; stage2 completed"
+}

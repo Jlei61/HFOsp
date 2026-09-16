@@ -1,0 +1,156 @@
+{
+  "optimization": {
+    "horizon_weights": {
+      "1": 0.625,
+      "5": 0.125,
+      "30": 0.125,
+      "120": 0.125
+    },
+    "view_weights": {
+      "count": 0.3333333333333333,
+      "spatial": 0.3333333333333333,
+      "morphology": 0.3333333333333333,
+      "load": 0.25
+    },
+    "current_packet_reconstruction_weight": 0.0,
+    "entry": "src/topic5_group_event_state/v040/objective.py:training_loss",
+    "denominator": "expected number of scored windows of that view and horizon in a batch; fixed before every microbatch so accumulation is boundary independent",
+    "denominator_entry": "src/topic5_group_event_state/v040/train.py:training_normalizers"
+  },
+  "selection": {
+    "score": "0.5*spatial@30 + 0.5*morphology@30",
+    "views": [
+      "spatial",
+      "morphology"
+    ],
+    "weighting": "window-equal-weight",
+    "entry": "src/topic5_group_event_state/v040/objective.py:selection_score",
+    "monitored_only": [
+      "count",
+      "load",
+      "legacy_packet_joint_component_score"
+    ],
+    "note": "count, load and the preserved v0312 packet-joint score never select a checkpoint"
+  },
+  "targets": [
+    {
+      "name": "count",
+      "distribution": "negative binomial on the exposure-integrated rate",
+      "grid": "13-point 5-second trapezoid on the observed support",
+      "coordinate": "log rate",
+      "support": "every valid window, including zero-event windows",
+      "weight": "w_h/3",
+      "role": "trained and monitored; not in the main selection",
+      "entry": "v040/objective.py:window_scores -> v0312/model.py:count_log_prob"
+    },
+    {
+      "name": "shaft_composition",
+      "distribution": "multinomial given the total participating contacts",
+      "coordinate": "softmax logits",
+      "support": "windows with at least one participating contact",
+      "weight": "w_h/3",
+      "role": "trained; enters the main selection at h=30",
+      "conditioning": "conditioned on the total participation count, not on the number of events",
+      "entry": "v040/objective.py:window_scores -> v0312/model.py:composition_log_prob"
+    },
+    {
+      "name": "band_ratio",
+      "distribution": "per-component Normal on FIT-standardised coordinates",
+      "n_components": 4,
+      "support": "event-time paths with a finite original component",
+      "weight": "w_h/3 shared by the three morphology families",
+      "role": "trained; enters the main selection at h=30",
+      "entry": "v040/objective.py:morphology_terms"
+    },
+    {
+      "name": "signed_xlag",
+      "distribution": "per-component Normal on FIT-standardised coordinates",
+      "n_components": 4,
+      "support": "event-time paths with a finite original component",
+      "weight": "shares w_h/3",
+      "role": "trained; enters the main selection at h=30",
+      "entry": "v040/objective.py:morphology_terms"
+    },
+    {
+      "name": "delay_iqr",
+      "distribution": "point mass at exact zero plus a Normal on the standardised log",
+      "n_components": 1,
+      "support": "events with a finite delay IQR",
+      "weight": "shares w_h/3",
+      "role": "trained; enters the main selection at h=30",
+      "entry": "v040/objective.py:morphology_terms"
+    },
+    {
+      "name": "total_load",
+      "distribution": "Normal on the FIT-standardised log total load",
+      "support": "windows with at least one event",
+      "weight": "0.25*w_h",
+      "role": "trained and monitored; not in the main selection",
+      "entry": "v040/objective.py:window_scores -> v0312/model.py:load_log_prob"
+    },
+    {
+      "name": "current_packet_reconstruction",
+      "distribution": null,
+      "support": null,
+      "weight": 0.0,
+      "role": "no independent target exists; the h=1 target is the next minute, not a reconstruction"
+    },
+    {
+      "name": "conditional_identity / continuation / seizure",
+      "distribution": "consumer-defined",
+      "support": "frozen-consumer FIT and validation",
+      "weight": 0.0,
+      "role": "never in the producer loss and never in checkpoint selection"
+    }
+  ],
+  "morphology_estimator": {
+    "per_component": "-log mean_s p(y_bik | z_s) on the event-time prediction path",
+    "order": [
+      "mixture per valid scalar component",
+      "mean over the valid components of a family",
+      "equal weight over the families present for that event",
+      "equal weight over the events with morphology support in the window",
+      "equal weight over the windows with at least one scorable event"
+    ],
+    "companion": "event-equal-weight Delta_event is reported alongside the window-equal-weight main effect",
+    "zero_event_windows": "score the count target; conditional morphology is not applicable and is not zero-filled",
+    "entry": "v040/objective.py:morphology_terms, v040/objective.py:aggregate"
+  },
+  "preserved_legacy": {
+    "name": "legacy_packet_joint_component_score",
+    "definition": "the v0312 rule: sum every event and component log-probability inside the packet, mix over paths once, normalise by the total valid component count",
+    "status": "monitored only; never divided by an event count and renamed as the new estimator",
+    "entry": "v040/objective.py:legacy_packet_joint_component_score"
+  },
+  "transforms": {
+    "band_ratio": "FIT median/IQR per component",
+    "signed_xlag": "FIT median/IQR per component",
+    "delay_iqr": "FIT median/IQR of log positive values, with an explicit zero mass",
+    "total_load": "FIT median/IQR of the log total load",
+    "packet_inputs": "FIT median/IQR per column, clipped to +-8",
+    "conditions": "FIT median/IQR of the continuous entries only; flags are never rescaled"
+  },
+  "conditions": {
+    "names": [
+      "log_episode_age_hours",
+      "log_clinical_reset_age_hours",
+      "clinical_reset_known",
+      "log_count_support_age_minutes",
+      "count_support_missing",
+      "log_marks_support_age_minutes",
+      "marks_support_missing",
+      "short_window_published_coverage",
+      "log_published_exposure_hours",
+      "has_observation"
+    ],
+    "dim": 10,
+    "readout_conditioning_dim": 12,
+    "layout": "intraday sin/cos at the evaluation time, then the query-time condition vector",
+    "entry": "v040/conditions.py"
+  },
+  "fit_support": {
+    "fit_packets": 2139,
+    "late_release_packets_removed": 52,
+    "fit_events": 23627
+  }
+}

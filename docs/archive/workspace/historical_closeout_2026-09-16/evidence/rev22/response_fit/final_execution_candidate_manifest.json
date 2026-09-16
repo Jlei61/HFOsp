@@ -1,0 +1,5320 @@
+{
+  "branch": "PRIMARY_4D_BRANCH",
+  "candidate_count": 96,
+  "candidates": [
+    {
+      "block": "reference",
+      "candidate_id": "dci_p000",
+      "family_membership": [
+        "M0000",
+        "M1000",
+        "M0100",
+        "M0010",
+        "M0001",
+        "M1100",
+        "M0011",
+        "M1111",
+        "M0111",
+        "M1011",
+        "M1101",
+        "M1110"
+      ],
+      "free_dimensions": [],
+      "is_reference": true,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -22.80538396505847,
+        "ellipse_aspect_ratio": 2.0,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.5,
+        "g_EtoI": 1.0
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.0,
+        "g_LEE": 0.5,
+        "g_LEI": 1.0,
+        "theta_FT_deg": 0.0
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.5714285714285714,
+        "g_LEE": 0.5,
+        "g_LEI": 0.6666666666666666,
+        "theta_FT_deg": 0.4999999999999999
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p001",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -26.39538396505847,
+        "ellipse_aspect_ratio": 2.0245,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.6762,
+        "g_EtoI": 0.4509
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.0245,
+        "g_LEE": 0.6762,
+        "g_LEI": 0.4509,
+        "theta_FT_deg": -3.59
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.5994074700777967,
+        "g_LEE": 0.676235100365729,
+        "g_LEI": 0.3006112513583297,
+        "theta_FT_deg": 0.32037765156499187
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p002",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -13.155383965058471,
+        "ellipse_aspect_ratio": 2.1373,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.125,
+        "g_EtoI": 0.3974
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.1373,
+        "g_LEE": 0.125,
+        "g_LEI": 0.3974,
+        "theta_FT_deg": 9.65
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.7283346256433292,
+        "g_LEE": 0.12498997410576142,
+        "g_LEI": 0.2649228184409576,
+        "theta_FT_deg": 0.9823453348216592
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p003",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -26.52538396505847,
+        "ellipse_aspect_ratio": 1.9337,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.9479,
+        "g_EtoI": 1.0435
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.9337,
+        "g_LEE": 0.9479,
+        "g_LEI": 1.0435,
+        "theta_FT_deg": -3.72
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.49566327394760173,
+        "g_LEE": 0.9478702310387502,
+        "g_LEI": 0.6956561317846217,
+        "theta_FT_deg": 0.3139254050979704
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p004",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -22.54538396505847,
+        "ellipse_aspect_ratio": 2.2592,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.1828,
+        "g_EtoI": 0.8408
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.2592,
+        "g_LEE": 0.1828,
+        "g_LEI": 0.8408,
+        "theta_FT_deg": 0.26
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.8676893963825422,
+        "g_LEE": 0.1828125373853454,
+        "g_LEI": 0.5605605955912352,
+        "theta_FT_deg": 0.5129096707330415
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p005",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -27.605383965058472,
+        "ellipse_aspect_ratio": 1.5141,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.7359,
+        "g_EtoI": 0.3795
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.5141,
+        "g_LEE": 0.7359,
+        "g_LEI": 0.3795,
+        "theta_FT_deg": -4.8
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.016069271861614276,
+        "g_LEE": 0.7358617923390968,
+        "g_LEI": 0.2530208257562015,
+        "theta_FT_deg": 0.2601768472422786
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p006",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -23.46538396505847,
+        "ellipse_aspect_ratio": 2.3358,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.0144,
+        "g_EtoI": 1.1385
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.3358,
+        "g_LEE": 0.0144,
+        "g_LEI": 1.1385,
+        "theta_FT_deg": -0.66
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.9552361148260856,
+        "g_LEE": 0.014436847548192397,
+        "g_LEI": 0.7589899080002916,
+        "theta_FT_deg": 0.4668390120719947
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p007",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -28.16538396505847,
+        "ellipse_aspect_ratio": 1.9865,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.8112,
+        "g_EtoI": 0.6458
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.9865,
+        "g_LEE": 0.8112,
+        "g_LEI": 0.6458,
+        "theta_FT_deg": -5.36
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.5559815828487005,
+        "g_LEE": 0.8111758788409439,
+        "g_LEI": 0.4305650787048539,
+        "theta_FT_deg": 0.23216143911492806
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p008",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -32.32538396505847,
+        "ellipse_aspect_ratio": 2.045,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.1371,
+        "g_EtoI": 0.1212
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.045,
+        "g_LEE": 0.1371,
+        "g_LEI": 0.1212,
+        "theta_FT_deg": -9.52
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.6229065401050925,
+        "g_LEE": 0.13705227445138765,
+        "g_LEI": 0.0808019604986928,
+        "theta_FT_deg": 0.024021712721969478
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p009",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -30.09538396505847,
+        "ellipse_aspect_ratio": 2.0172,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.3828,
+        "g_EtoI": 0.5673
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.0172,
+        "g_LEE": 0.3828,
+        "g_LEI": 0.5673,
+        "theta_FT_deg": -7.29
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.591069830699264,
+        "g_LEE": 0.3827724902806105,
+        "g_LEI": 0.37820037564945247,
+        "theta_FT_deg": 0.13571516059687236
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p010",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -19.30538396505847,
+        "ellipse_aspect_ratio": 1.5973,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.8963,
+        "g_EtoI": 0.7285
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.5973,
+        "g_LEE": 0.8963,
+        "g_LEI": 0.7285,
+        "theta_FT_deg": 3.5
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.11123345397949173,
+        "g_LEE": 0.8963182099954411,
+        "g_LEI": 0.48563677518709647,
+        "theta_FT_deg": 0.6748164381772273
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p011",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -24.32538396505847,
+        "ellipse_aspect_ratio": 1.6308,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.5932,
+        "g_EtoI": 0.0158
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.6308,
+        "g_LEE": 0.5932,
+        "g_LEI": 0.0158,
+        "theta_FT_deg": -1.52
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.14945527921445043,
+        "g_LEE": 0.5931577690300144,
+        "g_LEI": 0.010548820066531038,
+        "theta_FT_deg": 0.4240114300189345
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p012",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -29.065383965058473,
+        "ellipse_aspect_ratio": 1.7967,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.2151,
+        "g_EtoI": 1.0043
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.7967,
+        "g_LEE": 0.2151,
+        "g_LEI": 1.0043,
+        "theta_FT_deg": -6.26
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.33907867000313613,
+        "g_LEE": 0.215142074967407,
+        "g_LEI": 0.6695351021770342,
+        "theta_FT_deg": 0.18704239952804083
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p013",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -20.22538396505847,
+        "ellipse_aspect_ratio": 2.2754,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.8439,
+        "g_EtoI": 0.6781
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.2754,
+        "g_LEE": 0.8439,
+        "g_LEI": 0.6781,
+        "theta_FT_deg": 2.58
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.8861800902621474,
+        "g_LEE": 0.8439481127619632,
+        "g_LEI": 0.45207100470950845,
+        "theta_FT_deg": 0.628780520611211
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p014",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -21.105383965058472,
+        "ellipse_aspect_ratio": 2.3585,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.2608,
+        "g_EtoI": 1.074
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.3585,
+        "g_LEE": 0.2608,
+        "g_LEI": 1.074,
+        "theta_FT_deg": 1.7
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.9810983236684264,
+        "g_LEE": 0.26084065388829547,
+        "g_LEI": 0.715985653864503,
+        "theta_FT_deg": 0.5848808584901061
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p015",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -27.90538396505847,
+        "ellipse_aspect_ratio": 1.8613,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.0237,
+        "g_EtoI": 0.2242
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.8613,
+        "g_LEE": 0.0237,
+        "g_LEI": 0.2242,
+        "theta_FT_deg": -5.1
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.41295415450160244,
+        "g_LEE": 0.023715846167098684,
+        "g_LEI": 0.14945811449410387,
+        "theta_FT_deg": 0.24488571940513107
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p016",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -15.855383965058472,
+        "ellipse_aspect_ratio": 2.1025,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.1692,
+        "g_EtoI": 0.8688
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.1025,
+        "g_LEE": 0.1692,
+        "g_LEI": 0.8688,
+        "theta_FT_deg": 6.95
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.6886048900359444,
+        "g_LEE": 0.16920698311638313,
+        "g_LEI": 0.5791690679593805,
+        "theta_FT_deg": 0.8472876820018239
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p017",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -31.87538396505847,
+        "ellipse_aspect_ratio": 1.8287,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.3937,
+        "g_EtoI": 0.2012
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.8287,
+        "g_LEE": 0.3937,
+        "g_LEI": 0.2012,
+        "theta_FT_deg": -9.07
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.37564833305876316,
+        "g_LEE": 0.3936786452682941,
+        "g_LEI": 0.13412953565133234,
+        "theta_FT_deg": 0.04660021373926714
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p018",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -19.89538396505847,
+        "ellipse_aspect_ratio": 1.5456,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.5106,
+        "g_EtoI": 0.1886
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.5456,
+        "g_LEE": 0.5106,
+        "g_LEI": 0.1886,
+        "theta_FT_deg": 2.91
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.052119805098879916,
+        "g_LEE": 0.5105640952154864,
+        "g_LEI": 0.1257059889746024,
+        "theta_FT_deg": 0.6455542244899701
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p019",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -18.57538396505847,
+        "ellipse_aspect_ratio": 1.5631,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.6948,
+        "g_EtoI": 0.6071
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.5631,
+        "g_LEE": 0.6948,
+        "g_LEI": 0.6071,
+        "theta_FT_deg": 4.23
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.07211400963035614,
+        "g_LEE": 0.6947950857354612,
+        "g_LEI": 0.40470107980586895,
+        "theta_FT_deg": 0.7114124166257035
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p020",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -25.22538396505847,
+        "ellipse_aspect_ratio": 1.7165,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.4452,
+        "g_EtoI": 1.3683
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.7165,
+        "g_LEE": 0.4452,
+        "g_LEI": 1.3683,
+        "theta_FT_deg": -2.42
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.24746861071557558,
+        "g_LEE": 0.44520183571298416,
+        "g_LEI": 0.9121895432001799,
+        "theta_FT_deg": 0.3787756550975001
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p021",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -21.86538396505847,
+        "ellipse_aspect_ratio": 1.7244,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.9768,
+        "g_EtoI": 1.4546
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.7244,
+        "g_LEE": 0.9768,
+        "g_LEI": 1.4546,
+        "theta_FT_deg": 0.94
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.25649053846324343,
+        "g_LEE": 0.9768001603859674,
+        "g_LEI": 0.9697313380149049,
+        "theta_FT_deg": 0.5469467987341523
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p022",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -21.635383965058473,
+        "ellipse_aspect_ratio": 1.5298,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.4597,
+        "g_EtoI": 0.5061
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.5298,
+        "g_LEE": 0.4597,
+        "g_LEI": 0.5061,
+        "theta_FT_deg": 1.17
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.034038891369104304,
+        "g_LEE": 0.4597156663908812,
+        "g_LEI": 0.3374094576459958,
+        "theta_FT_deg": 0.5584802802912586
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p023",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -22.945383965058472,
+        "ellipse_aspect_ratio": 1.8826,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.6504,
+        "g_EtoI": 1.4876
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.8826,
+        "g_LEE": 0.6504,
+        "g_LEI": 1.4876,
+        "theta_FT_deg": -0.14
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.43729792428131253,
+        "g_LEE": 0.650409792932113,
+        "g_LEI": 0.9917537806894346,
+        "theta_FT_deg": 0.492884280476285
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p024",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -20.84538396505847,
+        "ellipse_aspect_ratio": 2.1853,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.0661,
+        "g_EtoI": 0.0943
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.1853,
+        "g_LEE": 0.0661,
+        "g_LEI": 0.0943,
+        "theta_FT_deg": 1.96
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.7832164548548616,
+        "g_LEE": 0.06607785423173936,
+        "g_LEI": 0.06287770075804625,
+        "theta_FT_deg": 0.5977770295352184
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p025",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -29.695383965058472,
+        "ellipse_aspect_ratio": 1.6922,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.3427,
+        "g_EtoI": 1.3378
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.6922,
+        "g_LEE": 0.3427,
+        "g_LEI": 1.3378,
+        "theta_FT_deg": -6.89
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.21966664266013242,
+        "g_LEE": 0.34273912109257876,
+        "g_LEI": 0.8918645960400455,
+        "theta_FT_deg": 0.15544896333486125
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p026",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -14.525383965058472,
+        "ellipse_aspect_ratio": 2.1992,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.8868,
+        "g_EtoI": 0.048
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.1992,
+        "g_LEE": 0.8868,
+        "g_LEI": 0.048,
+        "theta_FT_deg": 8.28
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.7991150795980596,
+        "g_LEE": 0.8867510982704574,
+        "g_LEI": 0.031997092914364304,
+        "theta_FT_deg": 0.9141599489039307
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p027",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -13.315383965058471,
+        "ellipse_aspect_ratio": 1.9702,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.9275,
+        "g_EtoI": 0.9418
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.9702,
+        "g_LEE": 0.9275,
+        "g_LEI": 0.9418,
+        "theta_FT_deg": 9.49
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.5373956571229226,
+        "g_LEE": 0.927464606169772,
+        "g_LEI": 0.6278805044452389,
+        "theta_FT_deg": 0.9746146191422046
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p028",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -23.885383965058473,
+        "ellipse_aspect_ratio": 2.0654,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.4884,
+        "g_EtoI": 0.4281
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.0654,
+        "g_LEE": 0.4884,
+        "g_LEI": 0.4281,
+        "theta_FT_deg": -1.08
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.6461703133012048,
+        "g_LEE": 0.4883625333453578,
+        "g_LEI": 0.28537112819079796,
+        "theta_FT_deg": 0.44577798583310113
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p029",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -15.25538396505847,
+        "ellipse_aspect_ratio": 1.9056,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.6369,
+        "g_EtoI": 1.2164
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.9056,
+        "g_LEE": 0.6369,
+        "g_LEI": 1.2164,
+        "theta_FT_deg": 7.55
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.4635865962019783,
+        "g_LEE": 0.6368935019247921,
+        "g_LEI": 0.8109472867466078,
+        "theta_FT_deg": 0.8772621552351617
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p030",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -31.37538396505847,
+        "ellipse_aspect_ratio": 1.6284,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.0454,
+        "g_EtoI": 1.4076
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.6284,
+        "g_LEE": 0.0454,
+        "g_LEI": 1.4076,
+        "theta_FT_deg": -8.57
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.1466974399180572,
+        "g_LEE": 0.04540370927009425,
+        "g_LEI": 0.9384071834282287,
+        "theta_FT_deg": 0.07153598751379478
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p031",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -18.905383965058473,
+        "ellipse_aspect_ratio": 2.1653,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.5633,
+        "g_EtoI": 0.5829
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.1653,
+        "g_LEE": 0.5633,
+        "g_LEI": 0.5829,
+        "theta_FT_deg": 3.9
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.7603276720194376,
+        "g_LEE": 0.5632905187300055,
+        "g_LEI": 0.3885997345011899,
+        "theta_FT_deg": 0.6949894925001675
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p032",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -15.475383965058471,
+        "ellipse_aspect_ratio": 1.8091,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.2038,
+        "g_EtoI": 0.9225
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.8091,
+        "g_LEE": 0.2038,
+        "g_LEI": 0.9225,
+        "theta_FT_deg": 7.33
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.3532922644705357,
+        "g_LEE": 0.20377262777809876,
+        "g_LEI": 0.6149681490308949,
+        "theta_FT_deg": 0.8666168553052404
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p033",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -23.05538396505847,
+        "ellipse_aspect_ratio": 2.1222,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.5992,
+        "g_EtoI": 1.1719
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.1222,
+        "g_LEE": 0.5992,
+        "g_LEI": 1.1719,
+        "theta_FT_deg": -0.25
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.7110865900335743,
+        "g_LEE": 0.5992369156079163,
+        "g_LEI": 0.7812821262693201,
+        "theta_FT_deg": 0.4875652036835919
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p034",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -32.79538396505847,
+        "ellipse_aspect_ratio": 2.2907,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.7154,
+        "g_EtoI": 1.3887
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.2907,
+        "g_LEE": 0.7154,
+        "g_LEI": 1.3887,
+        "theta_FT_deg": -9.99
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.9037049656930554,
+        "g_LEE": 0.7153617741814364,
+        "g_LEI": 0.9257946228832773,
+        "theta_FT_deg": 0.0005732307952915975
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p035",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -17.355383965058472,
+        "ellipse_aspect_ratio": 1.8517,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.7821,
+        "g_EtoI": 0.9692
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.8517,
+        "g_LEE": 0.7821,
+        "g_LEI": 0.9692,
+        "theta_FT_deg": 5.45
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.40191511894716236,
+        "g_LEE": 0.7820992412239384,
+        "g_LEI": 0.646145947442634,
+        "theta_FT_deg": 0.7724968029964435
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p036",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -13.765383965058472,
+        "ellipse_aspect_ratio": 1.9514,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.3063,
+        "g_EtoI": 1.1867
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.9514,
+        "g_LEE": 0.3063,
+        "g_LEI": 1.1867,
+        "theta_FT_deg": 9.04
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.5158744590267288,
+        "g_LEE": 0.30634210895513797,
+        "g_LEI": 0.7911270628357499,
+        "theta_FT_deg": 0.9518020635444272
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p037",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -16.87538396505847,
+        "ellipse_aspect_ratio": 1.6725,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.5288,
+        "g_EtoI": 0.7705
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.6725,
+        "g_LEE": 0.5288,
+        "g_LEI": 0.7705,
+        "theta_FT_deg": 5.93
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.19712080159979944,
+        "g_LEE": 0.5288353328159164,
+        "g_LEI": 0.5136532739077145,
+        "theta_FT_deg": 0.7963347406592546
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p038",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -28.71538396505847,
+        "ellipse_aspect_ratio": 1.584,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.796,
+        "g_EtoI": 1.2477
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.584,
+        "g_LEE": 0.796,
+        "g_LEI": 1.2477,
+        "theta_FT_deg": -5.91
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.09598374922629042,
+        "g_LEE": 0.7960275306388082,
+        "g_LEI": 0.8318225165452033,
+        "theta_FT_deg": 0.2045303895844355
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p039",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -14.125383965058472,
+        "ellipse_aspect_ratio": 1.7732,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.5393,
+        "g_EtoI": 1.2779
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.7732,
+        "g_LEE": 0.5393,
+        "g_LEI": 1.2779,
+        "theta_FT_deg": 8.68
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.3122540537872353,
+        "g_LEE": 0.5392559876299019,
+        "g_LEI": 0.8519568926257377,
+        "theta_FT_deg": 0.933933224919251
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p040",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -25.02538396505847,
+        "ellipse_aspect_ratio": 1.912,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.4086,
+        "g_EtoI": 0.2617
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.912,
+        "g_LEE": 0.4086,
+        "g_LEI": 0.2617,
+        "theta_FT_deg": -2.22
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.47085952231691075,
+        "g_LEE": 0.4085673899375833,
+        "g_LEI": 0.17449678567148816,
+        "theta_FT_deg": 0.3890535160818778
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p041",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -17.945383965058472,
+        "ellipse_aspect_ratio": 2.0788,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.0898,
+        "g_EtoI": 0.5113
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.0788,
+        "g_LEE": 0.0898,
+        "g_LEI": 0.5113,
+        "theta_FT_deg": 4.86
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.6614486302665749,
+        "g_LEE": 0.0897900091460881,
+        "g_LEI": 0.3408594196188145,
+        "theta_FT_deg": 0.7428402834104976
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p042",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -27.11538396505847,
+        "ellipse_aspect_ratio": 2.2426,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.32,
+        "g_EtoI": 0.3452
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.2426,
+        "g_LEE": 0.32,
+        "g_LEI": 0.3452,
+        "theta_FT_deg": -4.31
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.8487237407186796,
+        "g_LEE": 0.3200312536178652,
+        "g_LEI": 0.23010145824677908,
+        "theta_FT_deg": 0.28445259052963145
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p043",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -30.585383965058472,
+        "ellipse_aspect_ratio": 1.658,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.2376,
+        "g_EtoI": 0.1394
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.658,
+        "g_LEE": 0.2376,
+        "g_LEI": 0.1394,
+        "theta_FT_deg": -7.78
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.1806182293527781,
+        "g_LEE": 0.2376014654396367,
+        "g_LEI": 0.09290321934093536,
+        "theta_FT_deg": 0.1112222892668414
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p044",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -17.835383965058472,
+        "ellipse_aspect_ratio": 1.7506,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.2859,
+        "g_EtoI": 0.2928
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.7506,
+        "g_LEE": 0.2859,
+        "g_LEI": 0.2928,
+        "theta_FT_deg": 4.97
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.2863918196301453,
+        "g_LEE": 0.2858735703136406,
+        "g_LEI": 0.19521458524688215,
+        "theta_FT_deg": 0.7484185552107875
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p045",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -30.91538396505847,
+        "ellipse_aspect_ratio": 2.3491,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.8631,
+        "g_EtoI": 0.8078
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.3491,
+        "g_LEE": 0.8631,
+        "g_LEI": 0.8078,
+        "theta_FT_deg": -8.11
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.9704212351861768,
+        "g_LEE": 0.863125123372943,
+        "g_LEI": 0.5385082836420807,
+        "theta_FT_deg": 0.09473668991400143
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p046",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -25.57538396505847,
+        "ellipse_aspect_ratio": 2.2254,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.754,
+        "g_EtoI": 0.7427
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.2254,
+        "g_LEE": 0.754,
+        "g_LEI": 0.7427,
+        "theta_FT_deg": -2.77
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.8289847067540504,
+        "g_LEE": 0.7540269242901018,
+        "g_LEI": 0.4951140714211884,
+        "theta_FT_deg": 0.3616385911946558
+      }
+    },
+    {
+      "block": "full4d",
+      "candidate_id": "dci_p047",
+      "family_membership": [
+        "M1111"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -16.39538396505847,
+        "ellipse_aspect_ratio": 2.3132,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.987,
+        "g_EtoI": 1.1043
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.3132,
+        "g_LEE": 0.987,
+        "g_LEI": 1.1043,
+        "theta_FT_deg": 6.41
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.9294200324191044,
+        "g_LEE": 0.9869992787521177,
+        "g_LEI": 0.7361897352620759,
+        "theta_FT_deg": 0.8202700326991532
+      }
+    },
+    {
+      "block": "lock_g_LEE",
+      "candidate_id": "dci_p048",
+      "family_membership": [
+        "M1111",
+        "M0111"
+      ],
+      "free_dimensions": [
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -28.21538396505847,
+        "ellipse_aspect_ratio": 2.3232,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.5,
+        "g_EtoI": 0.6624
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.3232,
+        "g_LEE": 0.5,
+        "g_LEI": 0.6624,
+        "theta_FT_deg": -5.41
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.9407549602332742,
+        "g_LEE": 0.5,
+        "g_LEI": 0.4416024828230294,
+        "theta_FT_deg": 0.22952055396109805
+      }
+    },
+    {
+      "block": "lock_g_LEE",
+      "candidate_id": "dci_p049",
+      "family_membership": [
+        "M1111",
+        "M0111"
+      ],
+      "free_dimensions": [
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -26.085383965058472,
+        "ellipse_aspect_ratio": 1.8058,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.5,
+        "g_EtoI": 0.4679
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.8058,
+        "g_LEE": 0.5,
+        "g_LEI": 0.4679,
+        "theta_FT_deg": -3.28
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.3494542571440417,
+        "g_LEE": 0.5,
+        "g_LEI": 0.3119105478108852,
+        "theta_FT_deg": 0.3357761443556586
+      }
+    },
+    {
+      "block": "lock_g_LEE",
+      "candidate_id": "dci_p050",
+      "family_membership": [
+        "M1111",
+        "M0111"
+      ],
+      "free_dimensions": [
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -15.02538396505847,
+        "ellipse_aspect_ratio": 1.9586,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.5,
+        "g_EtoI": 0.372
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.9586,
+        "g_LEE": 0.5,
+        "g_LEI": 0.372,
+        "theta_FT_deg": 7.78
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.5240835447737705,
+        "g_LEE": 0.5,
+        "g_LEI": 0.24797649507116098,
+        "theta_FT_deg": 0.8890670195963
+      }
+    },
+    {
+      "block": "lock_g_LEE",
+      "candidate_id": "dci_p051",
+      "family_membership": [
+        "M1111",
+        "M0111"
+      ],
+      "free_dimensions": [
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -32.64538396505847,
+        "ellipse_aspect_ratio": 2.1262,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.5,
+        "g_EtoI": 0.0116
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.1262,
+        "g_LEE": 0.5,
+        "g_LEI": 0.0116,
+        "theta_FT_deg": -9.84
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.7156585117946822,
+        "g_LEE": 0.5,
+        "g_LEI": 0.007723095588817161,
+        "theta_FT_deg": 0.008228518759801129
+      }
+    },
+    {
+      "block": "lock_g_LEE",
+      "candidate_id": "dci_p052",
+      "family_membership": [
+        "M1111",
+        "M0111"
+      ],
+      "free_dimensions": [
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -21.265383965058472,
+        "ellipse_aspect_ratio": 2.215,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.5,
+        "g_EtoI": 1.356
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.215,
+        "g_LEE": 0.5,
+        "g_LEI": 1.356,
+        "theta_FT_deg": 1.54
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.8171209974430571,
+        "g_LEE": 0.5,
+        "g_LEI": 0.9040237254751353,
+        "theta_FT_deg": 0.5770744893062701
+      }
+    },
+    {
+      "block": "lock_g_LEE",
+      "candidate_id": "dci_p053",
+      "family_membership": [
+        "M1111",
+        "M0111"
+      ],
+      "free_dimensions": [
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -25.00538396505847,
+        "ellipse_aspect_ratio": 1.5039,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.5,
+        "g_EtoI": 0.8939
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.5039,
+        "g_LEE": 0.5,
+        "g_LEI": 0.8939,
+        "theta_FT_deg": -2.2
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.004482800145912236,
+        "g_LEE": 0.5,
+        "g_LEI": 0.5959308178394068,
+        "theta_FT_deg": 0.39006408044917673
+      }
+    },
+    {
+      "block": "lock_g_LEE",
+      "candidate_id": "dci_p054",
+      "family_membership": [
+        "M1111",
+        "M0111"
+      ],
+      "free_dimensions": [
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -17.995383965058473,
+        "ellipse_aspect_ratio": 1.8296,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.5,
+        "g_EtoI": 1.297
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.8296,
+        "g_LEE": 0.5,
+        "g_LEI": 1.297,
+        "theta_FT_deg": 4.81
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.3767139534430976,
+        "g_LEE": 0.5,
+        "g_LEI": 0.8646786081786744,
+        "theta_FT_deg": 0.7406540418731086
+      }
+    },
+    {
+      "block": "lock_g_LEE",
+      "candidate_id": "dci_p055",
+      "family_membership": [
+        "M1111",
+        "M0111"
+      ],
+      "free_dimensions": [
+        "g_LEI",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -17.22538396505847,
+        "ellipse_aspect_ratio": 1.6942,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.5,
+        "g_EtoI": 1.0688
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.6942,
+        "g_LEE": 0.5,
+        "g_LEI": 1.0688,
+        "theta_FT_deg": 5.58
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.2219113075836074,
+        "g_LEE": 0.5,
+        "g_LEI": 0.7125268973516616,
+        "theta_FT_deg": 0.7790648396040968
+      }
+    },
+    {
+      "block": "lock_g_LEI",
+      "candidate_id": "dci_p056",
+      "family_membership": [
+        "M1111",
+        "M1011"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -22.86538396505847,
+        "ellipse_aspect_ratio": 1.8684,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.0496,
+        "g_EtoI": 1.0
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.8684,
+        "g_LEE": 0.0496,
+        "g_LEI": 1.0,
+        "theta_FT_deg": -0.06
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.42105133252561683,
+        "g_LEE": 0.04963223084517443,
+        "g_LEI": 0.6666666666666666,
+        "theta_FT_deg": 0.496883244159097
+      }
+    },
+    {
+      "block": "lock_g_LEI",
+      "candidate_id": "dci_p057",
+      "family_membership": [
+        "M1111",
+        "M1011"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -18.245383965058473,
+        "ellipse_aspect_ratio": 1.6375,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.1849,
+        "g_EtoI": 1.0
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.6375,
+        "g_LEE": 0.1849,
+        "g_LEI": 1.0,
+        "theta_FT_deg": 4.56
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.1571994035221585,
+        "g_LEE": 0.1848650035120204,
+        "g_LEI": 0.6666666666666666,
+        "theta_FT_deg": 0.7279073399530798
+      }
+    },
+    {
+      "block": "lock_g_LEI",
+      "candidate_id": "dci_p058",
+      "family_membership": [
+        "M1111",
+        "M1011"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -30.995383965058473,
+        "ellipse_aspect_ratio": 2.1278,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.5508,
+        "g_EtoI": 1.0
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.1278,
+        "g_LEE": 0.5508,
+        "g_LEI": 1.0,
+        "theta_FT_deg": -8.19
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.7174868168654672,
+        "g_LEE": 0.5508180581264353,
+        "g_LEI": 0.6666666666666666,
+        "theta_FT_deg": 0.0906963744894076
+      }
+    },
+    {
+      "block": "lock_g_LEI",
+      "candidate_id": "dci_p059",
+      "family_membership": [
+        "M1111",
+        "M1011"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -22.015383965058472,
+        "ellipse_aspect_ratio": 1.7465,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.434,
+        "g_EtoI": 1.0
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.7465,
+        "g_LEE": 0.434,
+        "g_LEI": 1.0,
+        "theta_FT_deg": 0.79
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.28170189940485857,
+        "g_LEE": 0.434030103931216,
+        "g_LEI": 0.6666666666666666,
+        "theta_FT_deg": 0.5396207778411732
+      }
+    },
+    {
+      "block": "lock_g_LEI",
+      "candidate_id": "dci_p060",
+      "family_membership": [
+        "M1111",
+        "M1011"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -29.98538396505847,
+        "ellipse_aspect_ratio": 2.2207,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.3693,
+        "g_EtoI": 1.0
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.2207,
+        "g_LEE": 0.3693,
+        "g_LEI": 1.0,
+        "theta_FT_deg": -7.18
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.8236996558889985,
+        "g_LEE": 0.36930376615130994,
+        "g_LEI": 0.6666666666666666,
+        "theta_FT_deg": 0.14108610584979958
+      }
+    },
+    {
+      "block": "lock_g_LEI",
+      "candidate_id": "dci_p061",
+      "family_membership": [
+        "M1111",
+        "M1011"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -13.195383965058472,
+        "ellipse_aspect_ratio": 1.5791,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.8996,
+        "g_EtoI": 1.0
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.5791,
+        "g_LEE": 0.8996,
+        "g_LEI": 1.0,
+        "theta_FT_deg": 9.61
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.09041203160491466,
+        "g_LEE": 0.8996393665964691,
+        "g_LEI": 0.6666666666666666,
+        "theta_FT_deg": 0.9803512460594371
+      }
+    },
+    {
+      "block": "lock_g_LEI",
+      "candidate_id": "dci_p062",
+      "family_membership": [
+        "M1111",
+        "M1011"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -17.25538396505847,
+        "ellipse_aspect_ratio": 2.0377,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.8545,
+        "g_EtoI": 1.0
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.0377,
+        "g_LEE": 0.8545,
+        "g_LEI": 1.0,
+        "theta_FT_deg": 5.55
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.6145610284536214,
+        "g_LEE": 0.8544671032940785,
+        "g_LEI": 0.6666666666666666,
+        "theta_FT_deg": 0.7774798673131186
+      }
+    },
+    {
+      "block": "lock_g_LEI",
+      "candidate_id": "dci_p063",
+      "family_membership": [
+        "M1111",
+        "M1011"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -26.515383965058472,
+        "ellipse_aspect_ratio": 2.2778,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.6544,
+        "g_EtoI": 1.0
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.2778,
+        "g_LEE": 0.6544,
+        "g_LEI": 1.0,
+        "theta_FT_deg": -3.71
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.8889223806356479,
+        "g_LEE": 0.6543635098377848,
+        "g_LEI": 0.6666666666666666,
+        "theta_FT_deg": 0.31465586281748714
+      }
+    },
+    {
+      "block": "lock_theta",
+      "candidate_id": "dci_p064",
+      "family_membership": [
+        "M1111",
+        "M1101"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -22.80538396505847,
+        "ellipse_aspect_ratio": 2.0761,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.019,
+        "g_EtoI": 1.3714
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.0761,
+        "g_LEE": 0.019,
+        "g_LEI": 1.3714,
+        "theta_FT_deg": 0.0
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.6584472489813223,
+        "g_LEE": 0.01897310388163978,
+        "g_LEI": 0.9142353623468715,
+        "theta_FT_deg": 0.4999999999999999
+      }
+    },
+    {
+      "block": "lock_theta",
+      "candidate_id": "dci_p065",
+      "family_membership": [
+        "M1111",
+        "M1101"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -22.80538396505847,
+        "ellipse_aspect_ratio": 2.3283,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.4854,
+        "g_EtoI": 0.0584
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.3283,
+        "g_LEE": 0.4854,
+        "g_LEI": 0.0584,
+        "theta_FT_deg": 0.0
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.9465943867957217,
+        "g_LEE": 0.4853804325909764,
+        "g_LEI": 0.0389391285064271,
+        "theta_FT_deg": 0.4999999999999999
+      }
+    },
+    {
+      "block": "lock_theta",
+      "candidate_id": "dci_p066",
+      "family_membership": [
+        "M1111",
+        "M1101"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -22.80538396505847,
+        "ellipse_aspect_ratio": 1.8339,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.1255,
+        "g_EtoI": 0.7297
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.8339,
+        "g_LEE": 0.1255,
+        "g_LEI": 0.7297,
+        "theta_FT_deg": 0.0
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.3816220978038366,
+        "g_LEE": 0.12550647862032327,
+        "g_LEI": 0.48648975574207776,
+        "theta_FT_deg": 0.4999999999999999
+      }
+    },
+    {
+      "block": "lock_theta",
+      "candidate_id": "dci_p067",
+      "family_membership": [
+        "M1111",
+        "M1101"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -22.80538396505847,
+        "ellipse_aspect_ratio": 1.9793,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.9063,
+        "g_EtoI": 0.2005
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.9793,
+        "g_LEE": 0.9063,
+        "g_LEI": 0.2005,
+        "theta_FT_deg": 0.0
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.547786260853785,
+        "g_LEE": 0.9062905710098427,
+        "g_LEI": 0.13366083586739308,
+        "theta_FT_deg": 0.4999999999999999
+      }
+    },
+    {
+      "block": "lock_theta",
+      "candidate_id": "dci_p068",
+      "family_membership": [
+        "M1111",
+        "M1101"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -22.80538396505847,
+        "ellipse_aspect_ratio": 1.506,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.3016,
+        "g_EtoI": 1.0524
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.506,
+        "g_LEE": 0.3016,
+        "g_LEI": 1.0524,
+        "theta_FT_deg": 0.0
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.006856435059158894,
+        "g_LEE": 0.30159345455258463,
+        "g_LEI": 0.7015740783722644,
+        "theta_FT_deg": 0.4999999999999999
+      }
+    },
+    {
+      "block": "lock_theta",
+      "candidate_id": "dci_p069",
+      "family_membership": [
+        "M1111",
+        "M1101"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -22.80538396505847,
+        "ellipse_aspect_ratio": 1.8226,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.8672,
+        "g_EtoI": 1.1479
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.8226,
+        "g_LEE": 0.8672,
+        "g_LEI": 1.1479,
+        "theta_FT_deg": 0.0
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.36863813284517366,
+        "g_LEE": 0.867211663671189,
+        "g_LEI": 0.7652616569649587,
+        "theta_FT_deg": 0.4999999999999999
+      }
+    },
+    {
+      "block": "lock_theta",
+      "candidate_id": "dci_p070",
+      "family_membership": [
+        "M1111",
+        "M1101"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -22.80538396505847,
+        "ellipse_aspect_ratio": 2.1571,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.6039,
+        "g_EtoI": 0.8443
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.1571,
+        "g_LEE": 0.6039,
+        "g_LEI": 0.8443,
+        "theta_FT_deg": 0.0
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.7509574851451195,
+        "g_LEE": 0.6038829215344349,
+        "g_LEI": 0.5628862166353696,
+        "theta_FT_deg": 0.4999999999999999
+      }
+    },
+    {
+      "block": "lock_theta",
+      "candidate_id": "dci_p071",
+      "family_membership": [
+        "M1111",
+        "M1101"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -22.80538396505847,
+        "ellipse_aspect_ratio": 1.7157,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.7493,
+        "g_EtoI": 0.5077
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.7157,
+        "g_LEE": 0.7493,
+        "g_LEI": 0.5077,
+        "theta_FT_deg": 0.0
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.2464623694170041,
+        "g_LEE": 0.7492526984693134,
+        "g_LEI": 0.33846908266779463,
+        "theta_FT_deg": 0.4999999999999999
+      }
+    },
+    {
+      "block": "lock_AR",
+      "candidate_id": "dci_p072",
+      "family_membership": [
+        "M1111",
+        "M1110"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -31.945383965058472,
+        "ellipse_aspect_ratio": 2.0,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.0849,
+        "g_EtoI": 0.6287
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.0,
+        "g_LEE": 0.0849,
+        "g_LEI": 0.6287,
+        "theta_FT_deg": -9.14
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.5714285714285714,
+        "g_LEE": 0.08493246413273682,
+        "g_LEI": 0.4191018828284306,
+        "theta_FT_deg": 0.04312662797508324
+      }
+    },
+    {
+      "block": "lock_AR",
+      "candidate_id": "dci_p073",
+      "family_membership": [
+        "M1111",
+        "M1110"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -18.34538396505847,
+        "ellipse_aspect_ratio": 2.0,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.307,
+        "g_EtoI": 0.9068
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.0,
+        "g_LEE": 0.307,
+        "g_LEI": 0.9068,
+        "theta_FT_deg": 4.46
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.5714285714285714,
+        "g_LEE": 0.30697492433661483,
+        "g_LEI": 0.6045349230042315,
+        "theta_FT_deg": 0.7230235721790157
+      }
+    },
+    {
+      "block": "lock_AR",
+      "candidate_id": "dci_p074",
+      "family_membership": [
+        "M1111",
+        "M1110"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -13.025383965058472,
+        "ellipse_aspect_ratio": 2.0,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.8374,
+        "g_EtoI": 0.4863
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.0,
+        "g_LEE": 0.8374,
+        "g_LEI": 0.4863,
+        "theta_FT_deg": 9.78
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.5714285714285714,
+        "g_LEE": 0.8373573480136328,
+        "g_LEI": 0.32418105455789775,
+        "theta_FT_deg": 0.9892470460198377
+      }
+    },
+    {
+      "block": "lock_AR",
+      "candidate_id": "dci_p075",
+      "family_membership": [
+        "M1111",
+        "M1110"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -30.245383965058473,
+        "ellipse_aspect_ratio": 2.0,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.4214,
+        "g_EtoI": 1.154
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.0,
+        "g_LEE": 0.4214,
+        "g_LEI": 1.154,
+        "theta_FT_deg": -7.44
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.5714285714285714,
+        "g_LEE": 0.4213843113567276,
+        "g_LEI": 0.769320593642684,
+        "theta_FT_deg": 0.12794747452304284
+      }
+    },
+    {
+      "block": "lock_AR",
+      "candidate_id": "dci_p076",
+      "family_membership": [
+        "M1111",
+        "M1110"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -25.335383965058472,
+        "ellipse_aspect_ratio": 2.0,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.2138,
+        "g_EtoI": 0.3163
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.0,
+        "g_LEE": 0.2138,
+        "g_LEI": 0.3163,
+        "theta_FT_deg": -2.53
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.5714285714285714,
+        "g_LEE": 0.21379379954910083,
+        "g_LEI": 0.2108643317000013,
+        "theta_FT_deg": 0.37344681259367174
+      }
+    },
+    {
+      "block": "lock_AR",
+      "candidate_id": "dci_p077",
+      "family_membership": [
+        "M1111",
+        "M1110"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -24.14538396505847,
+        "ellipse_aspect_ratio": 2.0,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.7188,
+        "g_EtoI": 0.1154
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.0,
+        "g_LEE": 0.7188,
+        "g_LEI": 0.1154,
+        "theta_FT_deg": -1.34
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.5714285714285714,
+        "g_LEE": 0.7187727283027041,
+        "g_LEI": 0.07695379854897981,
+        "theta_FT_deg": 0.4331876331342566
+      }
+    },
+    {
+      "block": "lock_AR",
+      "candidate_id": "dci_p078",
+      "family_membership": [
+        "M1111",
+        "M1110"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -17.245383965058473,
+        "ellipse_aspect_ratio": 2.0,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.6077,
+        "g_EtoI": 1.4964
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.0,
+        "g_LEE": 0.6077,
+        "g_LEI": 1.4964,
+        "theta_FT_deg": 5.56
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.5714285714285714,
+        "g_LEE": 0.6077327857477716,
+        "g_LEI": 0.9975868321633778,
+        "theta_FT_deg": 0.7780911068287663
+      }
+    },
+    {
+      "block": "lock_AR",
+      "candidate_id": "dci_p079",
+      "family_membership": [
+        "M1111",
+        "M1110"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI",
+        "theta_FT_deg"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -21.515383965058472,
+        "ellipse_aspect_ratio": 2.0,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.9844,
+        "g_EtoI": 0.9845
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.0,
+        "g_LEE": 0.9844,
+        "g_LEI": 0.9845,
+        "theta_FT_deg": 1.29
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.5714285714285714,
+        "g_LEE": 0.9843682320490607,
+        "g_LEI": 0.6563183408417015,
+        "theta_FT_deg": 0.5647464470140169
+      }
+    },
+    {
+      "block": "dose_plane",
+      "candidate_id": "dci_p080",
+      "family_membership": [
+        "M1100",
+        "M1111",
+        "M1101",
+        "M1110"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -22.80538396505847,
+        "ellipse_aspect_ratio": 2.0,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.3935,
+        "g_EtoI": 1.2806
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.0,
+        "g_LEE": 0.3935,
+        "g_LEI": 1.2806,
+        "theta_FT_deg": 0.0
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.5714285714285714,
+        "g_LEE": 0.3934502085426801,
+        "g_LEI": 0.8537312783502138,
+        "theta_FT_deg": 0.4999999999999999
+      }
+    },
+    {
+      "block": "dose_plane",
+      "candidate_id": "dci_p081",
+      "family_membership": [
+        "M1100",
+        "M1111",
+        "M1101",
+        "M1110"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -22.80538396505847,
+        "ellipse_aspect_ratio": 2.0,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.8556,
+        "g_EtoI": 0.457
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.0,
+        "g_LEE": 0.8556,
+        "g_LEI": 0.457,
+        "theta_FT_deg": 0.0
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.5714285714285714,
+        "g_LEE": 0.8556141290615237,
+        "g_LEI": 0.3046783149779364,
+        "theta_FT_deg": 0.4999999999999999
+      }
+    },
+    {
+      "block": "dose_plane",
+      "candidate_id": "dci_p082",
+      "family_membership": [
+        "M1100",
+        "M1111",
+        "M1101",
+        "M1110"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -22.80538396505847,
+        "ellipse_aspect_ratio": 2.0,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.7452,
+        "g_EtoI": 0.7138
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.0,
+        "g_LEE": 0.7452,
+        "g_LEI": 0.7138,
+        "theta_FT_deg": 0.0
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.5714285714285714,
+        "g_LEE": 0.7451534110449874,
+        "g_LEI": 0.4758674771223343,
+        "theta_FT_deg": 0.4999999999999999
+      }
+    },
+    {
+      "block": "dose_plane",
+      "candidate_id": "dci_p083",
+      "family_membership": [
+        "M1100",
+        "M1111",
+        "M1101",
+        "M1110"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -22.80538396505847,
+        "ellipse_aspect_ratio": 2.0,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.3238,
+        "g_EtoI": 0.332
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.0,
+        "g_LEE": 0.3238,
+        "g_LEI": 0.332,
+        "theta_FT_deg": 0.0
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.5714285714285714,
+        "g_LEE": 0.3237607366129583,
+        "g_LEI": 0.22133082293337983,
+        "theta_FT_deg": 0.4999999999999999
+      }
+    },
+    {
+      "block": "dose_plane",
+      "candidate_id": "dci_p084",
+      "family_membership": [
+        "M1100",
+        "M1111",
+        "M1101",
+        "M1110"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -22.80538396505847,
+        "ellipse_aspect_ratio": 2.0,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.5074,
+        "g_EtoI": 0.0338
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.0,
+        "g_LEE": 0.5074,
+        "g_LEI": 0.0338,
+        "theta_FT_deg": 0.0
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.5714285714285714,
+        "g_LEE": 0.5073792086294058,
+        "g_LEI": 0.022509765658960373,
+        "theta_FT_deg": 0.4999999999999999
+      }
+    },
+    {
+      "block": "dose_plane",
+      "candidate_id": "dci_p085",
+      "family_membership": [
+        "M1100",
+        "M1111",
+        "M1101",
+        "M1110"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -22.80538396505847,
+        "ellipse_aspect_ratio": 2.0,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.9637,
+        "g_EtoI": 1.3763
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.0,
+        "g_LEE": 0.9637,
+        "g_LEI": 1.3763,
+        "theta_FT_deg": 0.0
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.5714285714285714,
+        "g_LEE": 0.963660514533531,
+        "g_LEI": 0.9175322380102464,
+        "theta_FT_deg": 0.4999999999999999
+      }
+    },
+    {
+      "block": "dose_plane",
+      "candidate_id": "dci_p086",
+      "family_membership": [
+        "M1100",
+        "M1111",
+        "M1101",
+        "M1110"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -22.80538396505847,
+        "ellipse_aspect_ratio": 2.0,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.1181,
+        "g_EtoI": 1.1124
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.0,
+        "g_LEE": 0.1181,
+        "g_LEI": 1.1124,
+        "theta_FT_deg": 0.0
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.5714285714285714,
+        "g_LEE": 0.11809810686372721,
+        "g_LEI": 0.7415888602070605,
+        "theta_FT_deg": 0.4999999999999999
+      }
+    },
+    {
+      "block": "dose_plane",
+      "candidate_id": "dci_p087",
+      "family_membership": [
+        "M1100",
+        "M1111",
+        "M1101",
+        "M1110"
+      ],
+      "free_dimensions": [
+        "g_LEE",
+        "g_LEI"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -22.80538396505847,
+        "ellipse_aspect_ratio": 2.0,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.206,
+        "g_EtoI": 0.848
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.0,
+        "g_LEE": 0.206,
+        "g_LEI": 0.848,
+        "theta_FT_deg": 0.0
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.5714285714285714,
+        "g_LEE": 0.2059666988854801,
+        "g_LEI": 0.5653121274417615,
+        "theta_FT_deg": 0.4999999999999999
+      }
+    },
+    {
+      "block": "geometry_plane",
+      "candidate_id": "dci_p088",
+      "family_membership": [
+        "M0011",
+        "M1111",
+        "M0111",
+        "M1011"
+      ],
+      "free_dimensions": [
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -20.97538396505847,
+        "ellipse_aspect_ratio": 2.265,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.5,
+        "g_EtoI": 1.0
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.265,
+        "g_LEE": 0.5,
+        "g_LEI": 1.0,
+        "theta_FT_deg": 1.83
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.8743203490142577,
+        "g_LEE": 0.5,
+        "g_LEI": 0.6666666666666666,
+        "theta_FT_deg": 0.5915813580037125
+      }
+    },
+    {
+      "block": "geometry_plane",
+      "candidate_id": "dci_p089",
+      "family_membership": [
+        "M0011",
+        "M1111",
+        "M0111",
+        "M1011"
+      ],
+      "free_dimensions": [
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -30.695383965058472,
+        "ellipse_aspect_ratio": 1.7346,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.5,
+        "g_EtoI": 1.0
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.7346,
+        "g_LEE": 0.5,
+        "g_LEI": 1.0,
+        "theta_FT_deg": -7.89
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.2681319005858912,
+        "g_LEE": 0.5,
+        "g_LEI": 0.6666666666666666,
+        "theta_FT_deg": 0.10533714278209481
+      }
+    },
+    {
+      "block": "geometry_plane",
+      "candidate_id": "dci_p090",
+      "family_membership": [
+        "M0011",
+        "M1111",
+        "M0111",
+        "M1011"
+      ],
+      "free_dimensions": [
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -15.135383965058471,
+        "ellipse_aspect_ratio": 1.9602,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.5,
+        "g_EtoI": 1.0
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.9602,
+        "g_LEE": 0.5,
+        "g_LEI": 1.0,
+        "theta_FT_deg": 7.67
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.5259866101473845,
+        "g_LEE": 0.5,
+        "g_LEI": 0.6666666666666666,
+        "theta_FT_deg": 0.8833088106133997
+      }
+    },
+    {
+      "block": "geometry_plane",
+      "candidate_id": "dci_p091",
+      "family_membership": [
+        "M0011",
+        "M1111",
+        "M0111",
+        "M1011"
+      ],
+      "free_dimensions": [
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -23.945383965058472,
+        "ellipse_aspect_ratio": 1.6665,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.5,
+        "g_EtoI": 1.0
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.6665,
+        "g_LEE": 0.5,
+        "g_LEI": 1.0,
+        "theta_FT_deg": -1.14
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.19031496503757142,
+        "g_LEE": 0.5,
+        "g_LEI": 0.6666666666666666,
+        "theta_FT_deg": 0.4427883026344285
+      }
+    },
+    {
+      "block": "geometry_plane",
+      "candidate_id": "dci_p092",
+      "family_membership": [
+        "M0011",
+        "M1111",
+        "M0111",
+        "M1011"
+      ],
+      "free_dimensions": [
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -28.18538396505847,
+        "ellipse_aspect_ratio": 2.2838,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.5,
+        "g_EtoI": 1.0
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.2838,
+        "g_LEE": 0.5,
+        "g_LEI": 1.0,
+        "theta_FT_deg": -5.38
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.8957382563278009,
+        "g_LEE": 0.5,
+        "g_LEI": 0.6666666666666666,
+        "theta_FT_deg": 0.2311124940149738
+      }
+    },
+    {
+      "block": "geometry_plane",
+      "candidate_id": "dci_p093",
+      "family_membership": [
+        "M0011",
+        "M1111",
+        "M0111",
+        "M1011"
+      ],
+      "free_dimensions": [
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -18.675383965058472,
+        "ellipse_aspect_ratio": 1.5559,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.5,
+        "g_EtoI": 1.0
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.5559,
+        "g_LEE": 0.5,
+        "g_LEI": 1.0,
+        "theta_FT_deg": 4.13
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.06392428264587491,
+        "g_LEE": 0.5,
+        "g_LEI": 0.6666666666666666,
+        "theta_FT_deg": 0.7065453211106514
+      }
+    },
+    {
+      "block": "geometry_plane",
+      "candidate_id": "dci_p094",
+      "family_membership": [
+        "M0011",
+        "M1111",
+        "M0111",
+        "M1011"
+      ],
+      "free_dimensions": [
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -25.95538396505847,
+        "ellipse_aspect_ratio": 2.1284,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.5,
+        "g_EtoI": 1.0
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 2.1284,
+        "g_LEE": 0.5,
+        "g_LEI": 1.0,
+        "theta_FT_deg": -3.15
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.7182071682797605,
+        "g_LEE": 0.5,
+        "g_LEI": 0.6666666666666666,
+        "theta_FT_deg": 0.3426340260518688
+      }
+    },
+    {
+      "block": "geometry_plane",
+      "candidate_id": "dci_p095",
+      "family_membership": [
+        "M0011",
+        "M1111",
+        "M0111",
+        "M1011"
+      ],
+      "free_dimensions": [
+        "theta_FT_deg",
+        "AR_FT"
+      ],
+      "is_reference": false,
+      "mechanisms": {
+        "Z_M": "off",
+        "ellipse_angle_deg": -17.50538396505847,
+        "ellipse_aspect_ratio": 1.8999,
+        "ellipse_reference_angle_deg": -22.80538396505847,
+        "ellipse_reference_aspect_ratio": 2.0,
+        "g_EE": 0.5,
+        "g_EtoI": 1.0
+      },
+      "node_field": {
+        "centers_mm": [
+          [
+            1.5377342579886317,
+            1.2264179880730808
+          ],
+          [
+            18.606612137053162,
+            2.417713414411992
+          ]
+        ],
+        "field_sha256": "901f6e839a59ac8d3b2ffc28d13359677b0bf5e2fa7fbd180b38c1d99dc91128",
+        "field_type": "manual_dual_core_budget_matched",
+        "target_count": 1499
+      },
+      "node_mapping": {
+        "node_gain": 1.0,
+        "signed_depth_shrinkage": 1.0
+      },
+      "physical": {
+        "AR_FT": 1.8999,
+        "g_LEE": 0.5,
+        "g_LEI": 1.0,
+        "theta_FT_deg": 5.3
+      },
+      "selection_eligible": true,
+      "unit_cube": {
+        "AR_FT": 0.4569933352853439,
+        "g_LEE": 0.5,
+        "g_LEI": 0.6666666666666666,
+        "theta_FT_deg": 0.764825353155217
+      }
+    }
+  ],
+  "claim_boundary": "Execution binding only; parameter values are copied byte-for-byte from the frozen design.",
+  "config_sha256": "eb4027f704d652565778e5b299db1683ccd14c375160087e2cc1a96eb0d4a266",
+  "design_candidate_count": 96,
+  "git_commit": "c362f41ceb33ec00d47b54d26651778764db669f",
+  "proposal_candidates": {
+    "candidate_count": 0,
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/response_fit/proposal_candidates.json",
+    "sha256": "d0e742a491712234fd7416255120d75fe52c8eb872a8f5b8ce8254bc74aa5a11"
+  },
+  "response_design_manifest_sha256": "d9ce44f0228e9db71795180e4d72e876c7e454a9c0fa355fffac7d08ffb81bef",
+  "schema_id": "topic4_rev22_dci_execution_candidate_manifest_v1",
+  "seed_manifest_sha256": "3418a35c857ef21e76203008260368d748a3d6ee457a5e7f430434a0a9a52468"
+}

@@ -1,0 +1,132 @@
+{
+  "version": "same_network_multievent_distribution_revision_v2_1",
+  "status": "DESIGN_REVISION_IMPLEMENTATION_PENDING",
+  "new_simulations_launched_by_this_revision": 0,
+  "new_D_off_implementation_verified": false,
+  "new_offline_scans_completed": false,
+  "new_controller_completed": false,
+  "old_8_checks_qualify_new_ranking": false,
+  "design_config": {
+    "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/config/topic4_multievent_distribution_search_v2_1.json",
+    "sha256": "25389f23f66e2e36f94fbaefb74769975078f94104c8708f6a90f4738d701b25"
+  },
+  "inherited_inputs": {
+    "old_config": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/config/topic4_multievent_distribution_search_v2.json",
+      "sha256": "bb7c6842ae379aafb01d3191af81c34982b976d6af4c0d08b21611cacc793c81"
+    },
+    "initial_candidate_manifest": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multievent_distribution_search_v2/initial_candidate_manifest.json",
+      "sha256": "161980af00f3131f3ea14bcb014d0826ea280267387cebe57c33b174a132df36"
+    },
+    "normalizer_source": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multievent_distribution_search_v2/loss_qualification.json",
+      "sha256": "f02ef4e0ec8b4cc76decafe09b3594604838d2c64028fb4fc32fb582006f49b7"
+    },
+    "old_payload": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multievent_distribution_search_v2/training_objective.pkl",
+      "sha256": "b29d9869ed998d48e6b9c99af82aa420f3d22c21775c35816ccdda2e173894e5"
+    },
+    "reuse_initial_candidates_without_regeneration": true,
+    "old_payload_is_v2_1_objective": false,
+    "master_seed": 3854897931
+  },
+  "provenance": [
+    {
+      "object": "baseline_weights",
+      "origin_category": "engineering_formulas_and_inherited_historical_working_point",
+      "evidence": [
+        {
+          "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/params.py",
+          "sha256": "c2036d1e1548c3db89adab27f8a7a57f9cdf584b5fed360963c966004cf88884"
+        },
+        {
+          "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/data_driven_core_field/config/stage_config.json",
+          "sha256": "470de45715194f357396084a9cdad2f2e6a3bae044206be394d05207f2dd9fae"
+        }
+      ],
+      "interpretation": "Weight formulas and inherited g=3.6 are not patient measured synaptic weights; complete early tuning history not established."
+    },
+    {
+      "object": "signed_threshold_offsets",
+      "origin_category": "inherited_engineering_distribution_plus_historical_and_new_positions",
+      "evidence": [
+        {
+          "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/data_driven_core_field/config/stage_config.json",
+          "sha256": "470de45715194f357396084a9cdad2f2e6a3bae044206be394d05207f2dd9fae"
+        },
+        {
+          "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_zm_ictal_transition.py",
+          "sha256": "1c72a016e6b5d42bf0018768e9f222c434221072f0fa68ee77e22e12f2bdda18"
+        },
+        {
+          "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_manual_dual_core.py",
+          "sha256": "e5d7b29fa8f0fdb192d7b1c95e58d16f5b74caf534b8c95ff726585df31d8b8f"
+        }
+      ],
+      "interpretation": "core_mean=17.5, core_std=1, v_base=18, quantile_seed=20260806; signed gain searched this round."
+    },
+    {
+      "object": "graph_reference_axis",
+      "origin_category": "patient_geometry_and_inherited_propagation_registration",
+      "evidence": [
+        {
+          "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multidimensional_interictal_pilot_round1/execution/paired_round1/execution_config.json",
+          "sha256": "7703a940932b0cf4484675bb0d7c35dca25c99bf0a797ad548e11a37d10fe31b"
+        },
+        {
+          "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/config/topic4_rev22_dci_transition_execution.json",
+          "sha256": "ac7d9ab0c71dec1a8b733d9d386a8effe8a6ff886a2ef9f44b79a8ba15b1f026"
+        },
+        {
+          "path": "/home/honglab/leijiaxin/HFOsp/results/spatial_modulation/propagation_geometry/observation_readout/real_subjects/epilepsiae_1146_t_a.json",
+          "sha256": "61bcd9dfc8b9426643a05883a741af8b1224f618cf346297096a269f96ebb96c"
+        },
+        {
+          "path": "/home/honglab/leijiaxin/HFOsp/results/spatial_modulation/propagation_geometry/observation_readout/real_subjects/epilepsiae_1146_t_b.json",
+          "sha256": "8a286d2c3cd62e3fc6e52df47ee0fd3c349d8f8a914ec8b72e32ba0f0af88470"
+        },
+        {
+          "path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/template_gradient_fields/per_subject/epilepsiae_1146.json",
+          "sha256": "e46c883f4c3b7f9f31c3355ba9e289dcd65a7c9f89d1a6f989ca1796a75efa70"
+        },
+        {
+          "path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/rank_displacement/per_subject/epilepsiae_1146.json",
+          "sha256": "5134537ca908b2f151b1ff7ac6af7fe4eb8d06907b3953a97d7d8de1dace7f8e"
+        }
+      ],
+      "interpretation": "Inherited reference angle about -22.80538396505847 degrees; graph AR=2 is engineering setting; optimized edge weights are distinct from graph generation."
+    },
+    {
+      "object": "contact_mapping",
+      "origin_category": "patient_contact_identity_and_inherited_geometry",
+      "evidence": [
+        {
+          "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/contact_shaft_contract.json",
+          "sha256": "548643b6e89b61408b8bdf4cbc1566133937204dc36e8d512049cb25762fde91"
+        },
+        {
+          "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/config/topic4_rev22_dci_transition_execution.json",
+          "sha256": "ac7d9ab0c71dec1a8b733d9d386a8effe8a6ff886a2ef9f44b79a8ba15b1f026"
+        }
+      ],
+      "interpretation": "Inherited patient mapping is not independent validation data."
+    },
+    {
+      "object": "spatial_OU",
+      "origin_category": "inherited_historical_engineering_accessibility_process",
+      "evidence": [
+        {
+          "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/config/topic4_rev22_dci_transition_execution.json",
+          "sha256": "ac7d9ab0c71dec1a8b733d9d386a8effe8a6ff886a2ef9f44b79a8ba15b1f026"
+        },
+        {
+          "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_zm_ictal_transition.py",
+          "sha256": "1c72a016e6b5d42bf0018768e9f222c434221072f0fa68ee77e22e12f2bdda18"
+        }
+      ],
+      "interpretation": "local sigma_rate_per_ms=0.1, tau_ms=20, ell_mm=0.38, grid_spacing=0.4, update_interval_ms=1, seed_offset=500000; fixed this round; earlier candidate-driven tuning history not fully audited."
+    }
+  ],
+  "payload_isolation_statement": "Absence of raw event tables in payload documents interface isolation only; upstream provenance must be read separately."
+}

@@ -1,0 +1,44 @@
+{
+  "status": "DOWNSTREAM_EXECUTION_AMENDMENT_FROZEN_DURING_G1",
+  "date": "2026-09-07",
+  "reason": "Scientific review found that a single deferred batch had no score-to-next-proposal feedback and that static-array-only nomination deduplication omitted GABA decay.",
+  "G1_physical_trajectories_invalidated": false,
+  "G1_rerun_required_by_amendment": false,
+  "G1_frozen_runtime_snapshot": {
+    "path": "results/topic4_sef_hfo/multievent_distribution_search_v2_1/execution/training_24s/runtime_snapshot.json",
+    "sha256": "56640370f94aad6100815f26d836fb118f937e1153667fe40048a758b7a59233"
+  },
+  "G1_frozen_candidate_manifest": {
+    "path": "results/topic4_sef_hfo/multievent_distribution_search_v2_1/execution/training_24s/candidate_manifest.json",
+    "sha256": "69c0a3f95048c500e8bfb2a8d86c3bf349ab8ea36c230d55cd8d66a2de470a0e"
+  },
+  "ranking_objective": {
+    "payload_path": "results/topic4_sef_hfo/multievent_distribution_search_v2_1/training_objective_v2_1.pkl",
+    "payload_sha256": "02c99998a10daa66702c48897a3ca02b82955ec0e278a47052c8a225e84c9337",
+    "D_off_ranking_changed": false,
+    "A_B_decomposition_added_as_diagnostic_only": true
+  },
+  "downstream_changes": {
+    "G2": "Two sequential deferred batches: four offspring per population in G2-A, update, then four per population in G2-B; total remains 16 conditions and 32 training runs.",
+    "nomination": "Exact full physical parameter identity including time constants; no training-topology static-hash equivalence and no unproven core-swap equivalence.",
+    "parameter_audit": "Independent node-array reconstruction and sparse-weight dose ratios supplement self-declared requested/effective fields.",
+    "randomness_language": "Cross-candidate runs are described as sharing an integer seed unless random-call correspondence is separately verified."
+  },
+  "original_design_config_sha256": "25389f23f66e2e36f94fbaefb74769975078f94104c8708f6a90f4738d701b25",
+  "amended_files": {
+    "config/topic4_multievent_distribution_search_v2_1.json": "22ee43a3a9c42a51af0b220b721e3751beefeffa516234b273aeecedbe208a4f",
+    "docs/archive/topic4/sef_hfo/same_network_multievent_distribution_design_v2_1_2026-09-07.md": "e31c6899d7376e2f1f64c98aa9bd6e95b75f009e02bd65c6f3c950982b950f6f",
+    "src/topic4_multievent_distribution_objective_v2_1.py": "05523c18928399d20f16ccc39ac1ddcf1626411f5fcb86808fe813577db9397a",
+    "src/topic4_multievent_condition_identity_v2_1.py": "45692e4bb99225b160dda8d2aac6e60cc4e6805ea632ea7dabcbb4302783cd4a",
+    "scripts/analyze_topic4_multievent_distribution_v2_1.py": "b0bccbf189d1e3f1c9a3097cab8f5d208b315e465f25efb193ea6af7763aab37",
+    "scripts/run_topic4_multievent_distribution_v2_1_followup.py": "f5f5556d52e6c4942e91eaf13fa9322304b09b0290e4365e5717df407083bf31",
+    "scripts/audit_topic4_multievent_execution_parameters_v2_1.py": "61fb8a64b04c6842c857299bbf2a33d0dabec9513f4d03cf9093800adabd1225",
+    "scripts/analyze_topic4_multievent_confirmation_v2_1.py": "76152700c21b302507dfd88c5d6fa0ba617bbcd6985985351c98549ef5942c82",
+    "tests/test_topic4_multievent_distribution_objective_v2_1.py": "34571db418783b14489a2345657d55c53904edee9048aa47a4cbfa8679e60d4f",
+    "tests/test_topic4_multievent_g2_two_batch.py": "b2f650fdd1eb09eccedc1bec0000f57d0226a591848797cd73d84227e8f410d0"
+  },
+  "G2_proposals_created_before_amendment": 0,
+  "formal_simulation_budget_changed": false,
+  "automatic_search_extension": false,
+  "automatic_model_freeze_or_Fig5": false
+}

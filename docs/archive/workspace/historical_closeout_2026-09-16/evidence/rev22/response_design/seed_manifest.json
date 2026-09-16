@@ -1,0 +1,251 @@
+{
+  "confirmation": {
+    "units": [
+      {
+        "dynamics_seed": 2621,
+        "seed_mode": "legacy",
+        "topology_seed": 2621
+      },
+      {
+        "dynamics_seed": 2622,
+        "seed_mode": "legacy",
+        "topology_seed": 2622
+      },
+      {
+        "dynamics_seed": 2623,
+        "seed_mode": "legacy",
+        "topology_seed": 2623
+      },
+      {
+        "dynamics_seed": 2624,
+        "seed_mode": "legacy",
+        "topology_seed": 2624
+      },
+      {
+        "dynamics_seed": 2625,
+        "seed_mode": "legacy",
+        "topology_seed": 2625
+      },
+      {
+        "dynamics_seed": 2626,
+        "seed_mode": "legacy",
+        "topology_seed": 2626
+      },
+      {
+        "dynamics_seed": 2627,
+        "seed_mode": "legacy",
+        "topology_seed": 2627
+      },
+      {
+        "dynamics_seed": 2628,
+        "seed_mode": "legacy",
+        "topology_seed": 2628
+      },
+      {
+        "dynamics_seed": 2629,
+        "seed_mode": "legacy",
+        "topology_seed": 2629
+      },
+      {
+        "dynamics_seed": 2630,
+        "seed_mode": "legacy",
+        "topology_seed": 2630
+      },
+      {
+        "dynamics_seed": 2631,
+        "seed_mode": "legacy",
+        "topology_seed": 2631
+      },
+      {
+        "dynamics_seed": 2632,
+        "seed_mode": "legacy",
+        "topology_seed": 2632
+      }
+    ]
+  },
+  "fit": {
+    "note": "Fit topology seeds are the rev20 screen seeds with dynamics_seed == topology_seed, i.e. the legacy RNG path. The rev20 one-factor screen trajectories on these seeds are therefore exact fit units of the same design and are reused, not rerun.",
+    "units": [
+      {
+        "dynamics_seed": 2511,
+        "rev20_screen_equivalent": true,
+        "seed_mode": "legacy",
+        "topology_seed": 2511
+      },
+      {
+        "dynamics_seed": 2512,
+        "rev20_screen_equivalent": true,
+        "seed_mode": "legacy",
+        "topology_seed": 2512
+      },
+      {
+        "dynamics_seed": 2513,
+        "rev20_screen_equivalent": true,
+        "seed_mode": "legacy",
+        "topology_seed": 2513
+      },
+      {
+        "dynamics_seed": 2514,
+        "rev20_screen_equivalent": true,
+        "seed_mode": "legacy",
+        "topology_seed": 2514
+      }
+    ]
+  },
+  "null_and_node_block": {
+    "note": "first six confirmation topology seeds, one dynamics seed each",
+    "topology_seeds": [
+      2621,
+      2622,
+      2623,
+      2624,
+      2625,
+      2626
+    ]
+  },
+  "qualification": {
+    "units": [
+      {
+        "dynamics_seed": 2601,
+        "seed_mode": "legacy",
+        "topology_seed": 2601
+      },
+      {
+        "dynamics_seed": 2602,
+        "seed_mode": "legacy",
+        "topology_seed": 2602
+      },
+      {
+        "dynamics_seed": 2603,
+        "seed_mode": "legacy",
+        "topology_seed": 2603
+      },
+      {
+        "dynamics_seed": 2604,
+        "seed_mode": "legacy",
+        "topology_seed": 2604
+      },
+      {
+        "dynamics_seed": 2605,
+        "seed_mode": "legacy",
+        "topology_seed": 2605
+      },
+      {
+        "dynamics_seed": 2606,
+        "seed_mode": "legacy",
+        "topology_seed": 2606
+      }
+    ]
+  },
+  "response_design_manifest_sha256": "d9ce44f0228e9db71795180e4d72e876c7e454a9c0fa355fffac7d08ffb81bef",
+  "rev20_seeds": {
+    "canary": [
+      2501,
+      2502,
+      2503
+    ],
+    "confirmation": [
+      2521,
+      2522,
+      2523,
+      2524,
+      2525,
+      2526,
+      2527,
+      2528,
+      2529,
+      2530,
+      2531,
+      2532
+    ],
+    "screen": [
+      2511,
+      2512,
+      2513,
+      2514
+    ]
+  },
+  "schema_id": "topic4_rev22_dci_seed_manifest_v1",
+  "unit": "topology seed with one dynamics seed; crossed only in the decomposition block",
+  "variance_decomposition_block": {
+    "candidates": [
+      "dci_p000",
+      "dci_p028"
+    ],
+    "new_trajectories": 16,
+    "units": [
+      {
+        "dynamics_seed": 2511,
+        "new_run": false,
+        "seed_mode": "legacy",
+        "topology_seed": 2511
+      },
+      {
+        "dynamics_seed": 3101,
+        "new_run": true,
+        "seed_mode": "split",
+        "topology_seed": 2511
+      },
+      {
+        "dynamics_seed": 3102,
+        "new_run": true,
+        "seed_mode": "split",
+        "topology_seed": 2511
+      },
+      {
+        "dynamics_seed": 2512,
+        "new_run": false,
+        "seed_mode": "legacy",
+        "topology_seed": 2512
+      },
+      {
+        "dynamics_seed": 3101,
+        "new_run": true,
+        "seed_mode": "split",
+        "topology_seed": 2512
+      },
+      {
+        "dynamics_seed": 3102,
+        "new_run": true,
+        "seed_mode": "split",
+        "topology_seed": 2512
+      },
+      {
+        "dynamics_seed": 2513,
+        "new_run": false,
+        "seed_mode": "legacy",
+        "topology_seed": 2513
+      },
+      {
+        "dynamics_seed": 3101,
+        "new_run": true,
+        "seed_mode": "split",
+        "topology_seed": 2513
+      },
+      {
+        "dynamics_seed": 3102,
+        "new_run": true,
+        "seed_mode": "split",
+        "topology_seed": 2513
+      },
+      {
+        "dynamics_seed": 2514,
+        "new_run": false,
+        "seed_mode": "legacy",
+        "topology_seed": 2514
+      },
+      {
+        "dynamics_seed": 3101,
+        "new_run": true,
+        "seed_mode": "split",
+        "topology_seed": 2514
+      },
+      {
+        "dynamics_seed": 3102,
+        "new_run": true,
+        "seed_mode": "split",
+        "topology_seed": 2514
+      }
+    ]
+  }
+}

@@ -1,0 +1,481 @@
+{
+  "status": "COMPLETE",
+  "scope": "interface verification at initialisation; not a scientific result and not a training stage",
+  "checks_status": {
+    "morphology_estimator": "COMPLETE",
+    "weight_formula": "COMPLETE",
+    "set_normalization": "COMPLETE",
+    "release_cutoff": "COMPLETE",
+    "replay_and_streams": "COMPLETE",
+    "extreme_scores": "COMPLETE"
+  },
+  "results": {
+    "morphology_estimator": {
+      "status": "COMPLETE",
+      "n_events_checked": 44,
+      "max_event_error": 1.5894571947505653e-07,
+      "max_window_error": 1.1920928955078125e-07,
+      "tolerance": 2e-05,
+      "n_events": 92,
+      "n_windows": 11,
+      "events_without_any_family": 3,
+      "windows_with_events_but_no_family": 0,
+      "rule": "per-component mixture, family mean, event mean over families, window mean over events"
+    },
+    "weight_formula": {
+      "status": "COMPLETE",
+      "loss": 0.5351591110229492,
+      "independently_recomputed": 0.5351591388640095,
+      "difference": 2.7841060235012094e-08,
+      "horizon_weights": {
+        "1": 0.625,
+        "5": 0.125,
+        "30": 0.125,
+        "120": 0.125
+      },
+      "view_weights": {
+        "count": 0.3333333333333333,
+        "spatial": 0.3333333333333333,
+        "morphology": 0.3333333333333333,
+        "load": 0.25
+      },
+      "batch_targets": [
+        3,
+        4,
+        6,
+        11,
+        39,
+        181,
+        203,
+        457
+      ],
+      "events_per_target": [
+        10,
+        22,
+        22,
+        1,
+        2,
+        0,
+        2,
+        0
+      ],
+      "scored_events_per_window": [
+        1,
+        2,
+        9,
+        21,
+        22
+      ],
+      "terms": [
+        {
+          "horizon": 1,
+          "view": "count",
+          "n_valid": 8,
+          "denominator": 32.0,
+          "contribution": 0.1639946053425471
+        },
+        {
+          "horizon": 1,
+          "view": "spatial",
+          "n_valid": 6,
+          "denominator": 29.03898543917332,
+          "contribution": 0.16482483414358481
+        },
+        {
+          "horizon": 1,
+          "view": "morphology",
+          "n_valid": 6,
+          "denominator": 28.64819163926726,
+          "contribution": 0.06567213917558283
+        },
+        {
+          "horizon": 1,
+          "view": "load",
+          "n_valid": 6,
+          "denominator": 29.03898543917332,
+          "contribution": 0.044059937048074836
+        },
+        {
+          "horizon": 5,
+          "view": "count",
+          "n_valid": 6,
+          "denominator": 31.398778769375294,
+          "contribution": 0.023194296897475333
+        },
+        {
+          "horizon": 5,
+          "view": "spatial",
+          "n_valid": 4,
+          "denominator": 28.497886331611085,
+          "contribution": 0.020216766678703275
+        },
+        {
+          "horizon": 5,
+          "view": "morphology",
+          "n_valid": 4,
+          "denominator": 28.122123062470642,
+          "contribution": 0.009554850650360915
+        },
+        {
+          "horizon": 5,
+          "view": "load",
+          "n_valid": 4,
+          "denominator": 28.497886331611085,
+          "contribution": 0.0070321389875779485
+        },
+        {
+          "horizon": 30,
+          "view": "count",
+          "n_valid": 4,
+          "denominator": 27.77642085486144,
+          "contribution": 0.015730704078759896
+        },
+        {
+          "horizon": 30,
+          "view": "spatial",
+          "n_valid": 2,
+          "denominator": 25.236261155472054,
+          "contribution": 0.010672205600925255
+        },
+        {
+          "horizon": 30,
+          "view": "morphology",
+          "n_valid": 2,
+          "denominator": 24.890558947862846,
+          "contribution": 0.0065786907844539375
+        },
+        {
+          "horizon": 30,
+          "view": "load",
+          "n_valid": 2,
+          "denominator": 25.236261155472054,
+          "contribution": 0.003627969475963362
+        }
+      ],
+      "note": "windows with different event counts enter with identical weight; a zero-event window still scores the count target and contributes no morphology weight"
+    },
+    "set_normalization": {
+      "status": "COMPLETE",
+      "max_mass_error": 1.1920928955078125e-07,
+      "enumerated_size_profiles": 16,
+      "by_profile": [
+        {
+          "sizes": [
+            0,
+            0
+          ],
+          "n_sets": 1,
+          "probability_mass": 1.0
+        },
+        {
+          "sizes": [
+            0,
+            1
+          ],
+          "n_sets": 3,
+          "probability_mass": 0.9999999813735485
+        },
+        {
+          "sizes": [
+            0,
+            2
+          ],
+          "n_sets": 3,
+          "probability_mass": 1.0000001192092896
+        },
+        {
+          "sizes": [
+            0,
+            3
+          ],
+          "n_sets": 1,
+          "probability_mass": 1.0
+        },
+        {
+          "sizes": [
+            1,
+            0
+          ],
+          "n_sets": 3,
+          "probability_mass": 0.9999999701976776
+        },
+        {
+          "sizes": [
+            1,
+            1
+          ],
+          "n_sets": 9,
+          "probability_mass": 0.9999999785795808
+        },
+        {
+          "sizes": [
+            1,
+            2
+          ],
+          "n_sets": 9,
+          "probability_mass": 1.0000000819563866
+        },
+        {
+          "sizes": [
+            1,
+            3
+          ],
+          "n_sets": 3,
+          "probability_mass": 0.9999999701976776
+        },
+        {
+          "sizes": [
+            2,
+            0
+          ],
+          "n_sets": 3,
+          "probability_mass": 0.9999999552965164
+        },
+        {
+          "sizes": [
+            2,
+            1
+          ],
+          "n_sets": 9,
+          "probability_mass": 0.9999999878928065
+        },
+        {
+          "sizes": [
+            2,
+            2
+          ],
+          "n_sets": 9,
+          "probability_mass": 1.000000071246177
+        },
+        {
+          "sizes": [
+            2,
+            3
+          ],
+          "n_sets": 3,
+          "probability_mass": 0.9999999552965164
+        },
+        {
+          "sizes": [
+            3,
+            0
+          ],
+          "n_sets": 1,
+          "probability_mass": 1.0
+        },
+        {
+          "sizes": [
+            3,
+            1
+          ],
+          "n_sets": 3,
+          "probability_mass": 0.9999999813735485
+        },
+        {
+          "sizes": [
+            3,
+            2
+          ],
+          "n_sets": 3,
+          "probability_mass": 1.0000001192092896
+        },
+        {
+          "sizes": [
+            3,
+            3
+          ],
+          "n_sets": 1,
+          "probability_mass": 1.0
+        }
+      ],
+      "deterministic_units": {
+        "single_contact": true,
+        "full_universe": false,
+        "one_per_community": true
+      },
+      "rule": "per community, exp(sum l_j) / e_K(exp l); K=0 and K=C are deterministic and are not units"
+    },
+    "release_cutoff": {
+      "status": "COMPLETE",
+      "violations": [],
+      "stages": {
+        "inner0": {
+          "fit_end": 1253143319.1000001,
+          "release_boundary": 1253143319.1000001,
+          "fit_packets_end_only": 1706,
+          "fit_packets_released": 1669,
+          "late_release_packets_removed": 37,
+          "late_release_fraction_of_end_only": 0.021688159437280186,
+          "max_release_in_fit": 1253140621.0,
+          "release_within_cutoff": true,
+          "fit_events": 20434,
+          "max_event_release_in_fit": 1253140621.0,
+          "event_release_within_cutoff": true,
+          "scaler_support": "fit_scaling reads packets and events through train_packet only",
+          "right_context": "packet marks close with their one-hour block; the block release is the earliest verifiable publication and already bounds the right context"
+        },
+        "inner1": {
+          "fit_end": 1253190114.8000002,
+          "release_boundary": 1253190114.8000002,
+          "fit_packets_end_only": 2191,
+          "fit_packets_released": 2139,
+          "late_release_packets_removed": 52,
+          "late_release_fraction_of_end_only": 0.023733455043359195,
+          "max_release_in_fit": 1253186950.0,
+          "release_within_cutoff": true,
+          "fit_events": 23627,
+          "max_event_release_in_fit": 1253186950.0,
+          "event_release_within_cutoff": true,
+          "scaler_support": "fit_scaling reads packets and events through train_packet only",
+          "right_context": "packet marks close with their one-hour block; the block release is the earliest verifiable publication and already bounds the right context"
+        },
+        "outer": {
+          "fit_end": 1253236910.5000002,
+          "release_boundary": 1253236910.5000002,
+          "fit_packets_end_only": 2914,
+          "fit_packets_released": 2871,
+          "late_release_packets_removed": 43,
+          "late_release_fraction_of_end_only": 0.014756348661633494,
+          "max_release_in_fit": 1253234295.0,
+          "release_within_cutoff": true,
+          "fit_events": 29863,
+          "max_event_release_in_fit": 1253234295.0,
+          "event_release_within_cutoff": true,
+          "scaler_support": "fit_scaling reads packets and events through train_packet only",
+          "right_context": "packet marks close with their one-hour block; the block release is the earliest verifiable publication and already bounds the right context"
+        }
+      }
+    },
+    "replay_and_streams": {
+      "status": "COMPLETE",
+      "tolerance": 1e-05,
+      "continuous_vs_batched_state_max_abs": 1.1641532182693481e-10,
+      "covariance_max_abs": 0.0,
+      "condition_max_abs": 0.0,
+      "horizon_subset_max_abs": 0.0,
+      "chunked_score_max_abs": 0.0,
+      "n_common_targets": 4,
+      "rule": "one physical-query-keyed noise stream; chunk size and horizon subset are bookkeeping only"
+    },
+    "extreme_scores": {
+      "status": "COMPLETE",
+      "per_view": {
+        "count": {
+          "n": 43,
+          "median": 2.9922029972076416,
+          "p99": 4.30312870979309,
+          "max": 4.377305507659912,
+          "finite": true
+        },
+        "spatial": {
+          "n": 41,
+          "median": 3.833718776702881,
+          "p99": 6.564743709564209,
+          "max": 6.596831798553467,
+          "finite": true
+        },
+        "morphology": {
+          "n": 38,
+          "median": 1.1327887773513794,
+          "p99": 1.3703217828273773,
+          "max": 1.3751837015151978,
+          "finite": true
+        },
+        "load": {
+          "n": 41,
+          "median": 0.8282318115234375,
+          "p99": 3.8556498527526863,
+          "max": 4.126298904418945,
+          "finite": true
+        }
+      },
+      "largest": [
+        {
+          "view": "spatial",
+          "packet": 3660,
+          "nll": 6.596831798553467,
+          "count": 14.0,
+          "exposure_seconds": 60.00000312924385,
+          "events": 14
+        },
+        {
+          "view": "spatial",
+          "packet": 3600,
+          "nll": 6.516611576080322,
+          "count": 10.0,
+          "exposure_seconds": 60.00000312924385,
+          "events": 10
+        },
+        {
+          "view": "spatial",
+          "packet": 3270,
+          "nll": 5.997590065002441,
+          "count": 8.0,
+          "exposure_seconds": 60.00000312924385,
+          "events": 8
+        },
+        {
+          "view": "spatial",
+          "packet": 3420,
+          "nll": 5.892200469970703,
+          "count": 22.0,
+          "exposure_seconds": 60.00000312924385,
+          "events": 22
+        },
+        {
+          "view": "spatial",
+          "packet": 3330,
+          "nll": 5.879312515258789,
+          "count": 16.0,
+          "exposure_seconds": 60.00000312924385,
+          "events": 16
+        },
+        {
+          "view": "spatial",
+          "packet": 3565,
+          "nll": 5.866178512573242,
+          "count": 20.0,
+          "exposure_seconds": 60.00000312924385,
+          "events": 20
+        },
+        {
+          "view": "spatial",
+          "packet": 3240,
+          "nll": 5.685464859008789,
+          "count": 17.0,
+          "exposure_seconds": 60.00000312924385,
+          "events": 17
+        },
+        {
+          "view": "spatial",
+          "packet": 3265,
+          "nll": 5.398064613342285,
+          "count": 19.0,
+          "exposure_seconds": 60.00000312924385,
+          "events": 19
+        },
+        {
+          "view": "spatial",
+          "packet": 3325,
+          "nll": 5.245436668395996,
+          "count": 9.0,
+          "exposure_seconds": 60.00000312924385,
+          "events": 9
+        },
+        {
+          "view": "spatial",
+          "packet": 3329,
+          "nll": 4.952404975891113,
+          "count": 10.0,
+          "exposure_seconds": 60.00000312924385,
+          "events": 10
+        }
+      ],
+      "note": "window-level negative log-likelihoods on their own physical support; no score is clipped, and a large finite value is reported with its count, exposure and event load"
+    }
+  },
+  "source_digest": "b580de0c14ef8b928674679f9417116616f786febb8ee5f397f0fbf70b1cc09a",
+  "packets_sha256": "038d680278fd0240fae601ce61cb9bb29531b81381133f6b46e625ba61572913",
+  "short_history_minutes": 120,
+  "note": "G0 fixes definitions and repairs interfaces; independently valid work continues in parallel"
+}

@@ -1,0 +1,1908 @@
+{
+  "branch": "PRIMARY_4D_BRANCH",
+  "claim_boundary": "Training-only surrogate fit and conditional proposals; no validation endpoint was read and no parameter may change after this freeze.",
+  "domain": {
+    "AR_FT": [
+      1.5,
+      2.375
+    ],
+    "g_LEE": [
+      0.0,
+      1.0
+    ],
+    "g_LEI": [
+      0.0,
+      1.5
+    ],
+    "theta_FT_deg": [
+      -9.999999999999996,
+      10.0
+    ]
+  },
+  "elapsed_seconds": 69.91417717933655,
+  "feasibility_model": {
+    "constant": null
+  },
+  "feasible_rows": 66,
+  "git_commit": "c362f41ceb33ec00d47b54d26651778764db669f",
+  "identifiable_components": [
+    "D_support",
+    "D_order",
+    "D_lag",
+    "D_cover"
+  ],
+  "input_hashes": {
+    "fit_aggregate": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/fit/aggregate/fit_aggregate.json",
+      "sha256": "89a016e30fe7a427e4cd427767cfb1591f729f6c403eb6c190210ce37caa3ba1"
+    },
+    "objective_qualification": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/objective_qualification/objective_qualification.json",
+      "sha256": "6077a49c1b5ed6e930d35623f305b32da5155de4a989f092f21067fd2ee9c18c"
+    },
+    "response_design_manifest": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/response_design/response_design_manifest.json",
+      "sha256": "d9ce44f0228e9db71795180e4d72e876c7e454a9c0fa355fffac7d08ffb81bef"
+    },
+    "seed_manifest": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/response_design/seed_manifest.json",
+      "sha256": "3418a35c857ef21e76203008260368d748a3d6ee457a5e7f430434a0a9a52468"
+    }
+  },
+  "loo_diagnostics": {
+    "D_cover": {
+      "convergence_warning_count": 0,
+      "convergence_warnings": [],
+      "coverage_90": 0.8181818181818182,
+      "kernel": "0.986**2 * Matern(length_scale=[0.553, 0.248, 0.342, 0.261], nu=2.5)",
+      "n": 66,
+      "observed_range": 5.222743400801555,
+      "optimizer_failed_fold_count": 0,
+      "refit_hyperparameters": true,
+      "rmse": 1.227609369788324,
+      "spearman": 0.49825696691368343,
+      "status": "OK"
+    },
+    "D_lag": {
+      "convergence_warning_count": 13,
+      "convergence_warnings": [
+        "The optimal value found for dimension 0 of parameter k2__length_scale is close to the specified upper bound 5.0. Increasing the bound and calling fit again may find a better value."
+      ],
+      "coverage_90": 0.7878787878787878,
+      "kernel": "1.14**2 * Matern(length_scale=[4.39, 0.981, 1.53, 0.194], nu=2.5)",
+      "n": 66,
+      "observed_range": 61.56532007725231,
+      "optimizer_failed_fold_count": 0,
+      "refit_hyperparameters": true,
+      "rmse": 5.272200875707937,
+      "spearman": 0.908360296419998,
+      "status": "OK"
+    },
+    "D_order": {
+      "convergence_warning_count": 0,
+      "convergence_warnings": [],
+      "coverage_90": 0.9090909090909091,
+      "kernel": "1.33**2 * Matern(length_scale=[0.979, 0.533, 0.37, 0.499], nu=2.5)",
+      "n": 66,
+      "observed_range": 92.3333969445655,
+      "optimizer_failed_fold_count": 0,
+      "refit_hyperparameters": true,
+      "rmse": 8.759456382348539,
+      "spearman": 0.8300386180983198,
+      "status": "OK"
+    },
+    "D_support": {
+      "convergence_warning_count": 0,
+      "convergence_warnings": [],
+      "coverage_90": 0.8333333333333334,
+      "kernel": "0.926**2 * Matern(length_scale=[0.387, 0.419, 0.527, 0.264], nu=2.5)",
+      "n": 66,
+      "observed_range": 10.988982890263863,
+      "optimizer_failed_fold_count": 0,
+      "refit_hyperparameters": true,
+      "rmse": 1.557891492316325,
+      "spearman": 0.8125874125874127,
+      "status": "OK"
+    }
+  },
+  "noise_model": {
+    "D_cover": {
+      "n_finite": 66,
+      "n_usable": 66,
+      "s_pool_sq": 1.5463837000132918
+    },
+    "D_lag": {
+      "n_finite": 66,
+      "n_usable": 66,
+      "s_pool_sq": 24.777621488264955
+    },
+    "D_order": {
+      "n_finite": 66,
+      "n_usable": 66,
+      "s_pool_sq": 54.69390159423694
+    },
+    "D_support": {
+      "n_finite": 66,
+      "n_usable": 66,
+      "s_pool_sq": 0.963959085367784
+    }
+  },
+  "proposals": {
+    "M0000": {
+      "frozen_points": [
+        {
+          "candidate_id": "dci_p000",
+          "execution_candidate_id": "dci_p000",
+          "existing_candidate_id": "dci_p000",
+          "is_reference_return": true,
+          "origin": "observed",
+          "x": [
+            0.5,
+            1.0,
+            0.0,
+            2.0
+          ]
+        }
+      ],
+      "mask": "M0000",
+      "observed_pareto": [
+        {
+          "J": 27.43241413445941,
+          "candidate_id": "dci_p000",
+          "excess": {
+            "D_cover": 7.168982149684187,
+            "D_lag": 27.43241413445941,
+            "D_order": 20.19753915915216,
+            "D_support": 7.384873127007267
+          },
+          "x": [
+            0.5,
+            1.0,
+            0.0,
+            2.0
+          ]
+        }
+      ],
+      "source": "observed_nondominated_design_points",
+      "status": "REFERENCE_RETURN"
+    },
+    "M0001": {
+      "frozen_points": [
+        {
+          "candidate_id": "dci_p000",
+          "execution_candidate_id": "dci_p000",
+          "existing_candidate_id": "dci_p000",
+          "is_reference_return": true,
+          "origin": "observed",
+          "x": [
+            0.5,
+            1.0,
+            0.0,
+            2.0
+          ]
+        }
+      ],
+      "mask": "M0001",
+      "observed_pareto": [
+        {
+          "J": 27.43241413445941,
+          "candidate_id": "dci_p000",
+          "excess": {
+            "D_cover": 7.168982149684187,
+            "D_lag": 27.43241413445941,
+            "D_order": 20.19753915915216,
+            "D_support": 7.384873127007267
+          },
+          "x": [
+            0.5,
+            1.0,
+            0.0,
+            2.0
+          ]
+        }
+      ],
+      "source": "observed_nondominated_design_points",
+      "status": "REFERENCE_RETURN"
+    },
+    "M0010": {
+      "frozen_points": [
+        {
+          "candidate_id": "dci_p000",
+          "execution_candidate_id": "dci_p000",
+          "existing_candidate_id": "dci_p000",
+          "is_reference_return": true,
+          "origin": "observed",
+          "x": [
+            0.5,
+            1.0,
+            0.0,
+            2.0
+          ]
+        }
+      ],
+      "mask": "M0010",
+      "observed_pareto": [
+        {
+          "J": 27.43241413445941,
+          "candidate_id": "dci_p000",
+          "excess": {
+            "D_cover": 7.168982149684187,
+            "D_lag": 27.43241413445941,
+            "D_order": 20.19753915915216,
+            "D_support": 7.384873127007267
+          },
+          "x": [
+            0.5,
+            1.0,
+            0.0,
+            2.0
+          ]
+        }
+      ],
+      "source": "observed_nondominated_design_points",
+      "status": "REFERENCE_RETURN"
+    },
+    "M0011": {
+      "frozen_points": [
+        {
+          "candidate_id": "dci_p089",
+          "execution_candidate_id": "dci_p089",
+          "existing_candidate_id": "dci_p089",
+          "is_reference_return": false,
+          "origin": "observed",
+          "x": [
+            0.5,
+            1.0,
+            -7.89,
+            1.7346
+          ]
+        }
+      ],
+      "mask": "M0011",
+      "observed_pareto": [
+        {
+          "J": 27.43241413445941,
+          "candidate_id": "dci_p000",
+          "excess": {
+            "D_cover": 7.168982149684187,
+            "D_lag": 27.43241413445941,
+            "D_order": 20.19753915915216,
+            "D_support": 7.384873127007267
+          },
+          "x": [
+            0.5,
+            1.0,
+            0.0,
+            2.0
+          ]
+        },
+        {
+          "J": 21.06912374362451,
+          "candidate_id": "dci_p089",
+          "excess": {
+            "D_cover": 3.534840145616291,
+            "D_lag": 13.018926847884646,
+            "D_order": 21.06912374362451,
+            "D_support": 3.38297516998069
+          },
+          "x": [
+            0.5,
+            1.0,
+            -7.89,
+            1.7346
+          ]
+        },
+        {
+          "J": 36.2309982091413,
+          "candidate_id": "dci_p090",
+          "excess": {
+            "D_cover": 4.95376856082974,
+            "D_lag": 36.2309982091413,
+            "D_order": 24.231732020417247,
+            "D_support": 1.3922379951875188
+          },
+          "x": [
+            0.5,
+            1.0,
+            7.67,
+            1.9602
+          ]
+        },
+        {
+          "J": 54.46119705002581,
+          "candidate_id": "dci_p091",
+          "excess": {
+            "D_cover": 4.951510552569618,
+            "D_lag": 15.28727787427507,
+            "D_order": 54.46119705002581,
+            "D_support": 1.395763341361452
+          },
+          "x": [
+            0.5,
+            1.0,
+            -1.14,
+            1.6665
+          ]
+        },
+        {
+          "J": 37.531428027761955,
+          "candidate_id": "dci_p093",
+          "excess": {
+            "D_cover": 5.126154610478609,
+            "D_lag": 13.752925953420267,
+            "D_order": 37.531428027761955,
+            "D_support": 1.2077586895632466
+          },
+          "x": [
+            0.5,
+            1.0,
+            4.13,
+            1.5559
+          ]
+        },
+        {
+          "J": 30.13466787588911,
+          "candidate_id": "dci_p095",
+          "excess": {
+            "D_cover": 5.238893489767204,
+            "D_lag": 29.120931129276393,
+            "D_order": 30.13466787588911,
+            "D_support": 1.277385048511435
+          },
+          "x": [
+            0.5,
+            1.0,
+            5.3,
+            1.8999
+          ]
+        }
+      ],
+      "source": "observed_nondominated_design_points",
+      "status": "OK"
+    },
+    "M0100": {
+      "frozen_points": [
+        {
+          "candidate_id": "dci_p000",
+          "execution_candidate_id": "dci_p000",
+          "existing_candidate_id": "dci_p000",
+          "is_reference_return": true,
+          "origin": "observed",
+          "x": [
+            0.5,
+            1.0,
+            0.0,
+            2.0
+          ]
+        }
+      ],
+      "mask": "M0100",
+      "observed_pareto": [
+        {
+          "J": 27.43241413445941,
+          "candidate_id": "dci_p000",
+          "excess": {
+            "D_cover": 7.168982149684187,
+            "D_lag": 27.43241413445941,
+            "D_order": 20.19753915915216,
+            "D_support": 7.384873127007267
+          },
+          "x": [
+            0.5,
+            1.0,
+            0.0,
+            2.0
+          ]
+        }
+      ],
+      "source": "observed_nondominated_design_points",
+      "status": "REFERENCE_RETURN"
+    },
+    "M0111": {
+      "frozen_points": [
+        {
+          "candidate_id": "dci_p089",
+          "execution_candidate_id": "dci_p089",
+          "existing_candidate_id": "dci_p089",
+          "is_reference_return": false,
+          "origin": "observed",
+          "x": [
+            0.5,
+            1.0,
+            -7.89,
+            1.7346
+          ]
+        }
+      ],
+      "mask": "M0111",
+      "observed_pareto": [
+        {
+          "J": 27.43241413445941,
+          "candidate_id": "dci_p000",
+          "excess": {
+            "D_cover": 7.168982149684187,
+            "D_lag": 27.43241413445941,
+            "D_order": 20.19753915915216,
+            "D_support": 7.384873127007267
+          },
+          "x": [
+            0.5,
+            1.0,
+            0.0,
+            2.0
+          ]
+        },
+        {
+          "J": 46.13887259951979,
+          "candidate_id": "dci_p053",
+          "excess": {
+            "D_cover": 4.843264244239694,
+            "D_lag": 8.901873393640662,
+            "D_order": 46.13887259951979,
+            "D_support": 1.4466951236170136
+          },
+          "x": [
+            0.5,
+            0.8939,
+            -2.2,
+            1.5039
+          ]
+        },
+        {
+          "J": 21.06912374362451,
+          "candidate_id": "dci_p089",
+          "excess": {
+            "D_cover": 3.534840145616291,
+            "D_lag": 13.018926847884646,
+            "D_order": 21.06912374362451,
+            "D_support": 3.38297516998069
+          },
+          "x": [
+            0.5,
+            1.0,
+            -7.89,
+            1.7346
+          ]
+        },
+        {
+          "J": 36.2309982091413,
+          "candidate_id": "dci_p090",
+          "excess": {
+            "D_cover": 4.95376856082974,
+            "D_lag": 36.2309982091413,
+            "D_order": 24.231732020417247,
+            "D_support": 1.3922379951875188
+          },
+          "x": [
+            0.5,
+            1.0,
+            7.67,
+            1.9602
+          ]
+        },
+        {
+          "J": 54.46119705002581,
+          "candidate_id": "dci_p091",
+          "excess": {
+            "D_cover": 4.951510552569618,
+            "D_lag": 15.28727787427507,
+            "D_order": 54.46119705002581,
+            "D_support": 1.395763341361452
+          },
+          "x": [
+            0.5,
+            1.0,
+            -1.14,
+            1.6665
+          ]
+        },
+        {
+          "J": 37.531428027761955,
+          "candidate_id": "dci_p093",
+          "excess": {
+            "D_cover": 5.126154610478609,
+            "D_lag": 13.752925953420267,
+            "D_order": 37.531428027761955,
+            "D_support": 1.2077586895632466
+          },
+          "x": [
+            0.5,
+            1.0,
+            4.13,
+            1.5559
+          ]
+        },
+        {
+          "J": 30.13466787588911,
+          "candidate_id": "dci_p095",
+          "excess": {
+            "D_cover": 5.238893489767204,
+            "D_lag": 29.120931129276393,
+            "D_order": 30.13466787588911,
+            "D_support": 1.277385048511435
+          },
+          "x": [
+            0.5,
+            1.0,
+            5.3,
+            1.8999
+          ]
+        }
+      ],
+      "source": "observed_nondominated_design_points",
+      "status": "OK"
+    },
+    "M1000": {
+      "frozen_points": [
+        {
+          "candidate_id": "dci_p000",
+          "execution_candidate_id": "dci_p000",
+          "existing_candidate_id": "dci_p000",
+          "is_reference_return": true,
+          "origin": "observed",
+          "x": [
+            0.5,
+            1.0,
+            0.0,
+            2.0
+          ]
+        }
+      ],
+      "mask": "M1000",
+      "observed_pareto": [
+        {
+          "J": 27.43241413445941,
+          "candidate_id": "dci_p000",
+          "excess": {
+            "D_cover": 7.168982149684187,
+            "D_lag": 27.43241413445941,
+            "D_order": 20.19753915915216,
+            "D_support": 7.384873127007267
+          },
+          "x": [
+            0.5,
+            1.0,
+            0.0,
+            2.0
+          ]
+        }
+      ],
+      "source": "observed_nondominated_design_points",
+      "status": "REFERENCE_RETURN"
+    },
+    "M1011": {
+      "frozen_points": [
+        {
+          "candidate_id": "dci_p089",
+          "execution_candidate_id": "dci_p089",
+          "existing_candidate_id": "dci_p089",
+          "is_reference_return": false,
+          "origin": "observed",
+          "x": [
+            0.5,
+            1.0,
+            -7.89,
+            1.7346
+          ]
+        }
+      ],
+      "mask": "M1011",
+      "observed_pareto": [
+        {
+          "J": 27.43241413445941,
+          "candidate_id": "dci_p000",
+          "excess": {
+            "D_cover": 7.168982149684187,
+            "D_lag": 27.43241413445941,
+            "D_order": 20.19753915915216,
+            "D_support": 7.384873127007267
+          },
+          "x": [
+            0.5,
+            1.0,
+            0.0,
+            2.0
+          ]
+        },
+        {
+          "J": 24.58337565699122,
+          "candidate_id": "dci_p056",
+          "excess": {
+            "D_cover": 8.58802671130654,
+            "D_lag": 24.58337565699122,
+            "D_order": 18.919334034206255,
+            "D_support": 10.087939439195743
+          },
+          "x": [
+            0.0496,
+            1.0,
+            -0.06,
+            1.8684
+          ]
+        },
+        {
+          "J": 31.925013944632706,
+          "candidate_id": "dci_p057",
+          "excess": {
+            "D_cover": 3.7195982221104416,
+            "D_lag": 14.450892460610069,
+            "D_order": 31.925013944632706,
+            "D_support": 1.0455546515733456
+          },
+          "x": [
+            0.1849,
+            1.0,
+            4.56,
+            1.6375
+          ]
+        },
+        {
+          "J": 60.534766112470315,
+          "candidate_id": "dci_p060",
+          "excess": {
+            "D_cover": 6.609026145029287,
+            "D_lag": 60.534766112470315,
+            "D_order": 14.605660276633563,
+            "D_support": 8.601452490687375
+          },
+          "x": [
+            0.3693,
+            1.0,
+            -7.18,
+            2.2207
+          ]
+        },
+        {
+          "J": 31.250791549769186,
+          "candidate_id": "dci_p062",
+          "excess": {
+            "D_cover": 3.6456954006907427,
+            "D_lag": 31.250791549769186,
+            "D_order": 16.22358733569972,
+            "D_support": 0.6761359943410226
+          },
+          "x": [
+            0.8545,
+            1.0,
+            5.55,
+            2.0377
+          ]
+        },
+        {
+          "J": 21.06912374362451,
+          "candidate_id": "dci_p089",
+          "excess": {
+            "D_cover": 3.534840145616291,
+            "D_lag": 13.018926847884646,
+            "D_order": 21.06912374362451,
+            "D_support": 3.38297516998069
+          },
+          "x": [
+            0.5,
+            1.0,
+            -7.89,
+            1.7346
+          ]
+        },
+        {
+          "J": 37.531428027761955,
+          "candidate_id": "dci_p093",
+          "excess": {
+            "D_cover": 5.126154610478609,
+            "D_lag": 13.752925953420267,
+            "D_order": 37.531428027761955,
+            "D_support": 1.2077586895632466
+          },
+          "x": [
+            0.5,
+            1.0,
+            4.13,
+            1.5559
+          ]
+        },
+        {
+          "J": 30.13466787588911,
+          "candidate_id": "dci_p095",
+          "excess": {
+            "D_cover": 5.238893489767204,
+            "D_lag": 29.120931129276393,
+            "D_order": 30.13466787588911,
+            "D_support": 1.277385048511435
+          },
+          "x": [
+            0.5,
+            1.0,
+            5.3,
+            1.8999
+          ]
+        }
+      ],
+      "source": "observed_nondominated_design_points",
+      "status": "OK"
+    },
+    "M1100": {
+      "frozen_points": [
+        {
+          "candidate_id": "dci_p000",
+          "execution_candidate_id": "dci_p000",
+          "existing_candidate_id": "dci_p000",
+          "is_reference_return": true,
+          "origin": "observed",
+          "x": [
+            0.5,
+            1.0,
+            0.0,
+            2.0
+          ]
+        }
+      ],
+      "mask": "M1100",
+      "observed_pareto": [
+        {
+          "J": 27.43241413445941,
+          "candidate_id": "dci_p000",
+          "excess": {
+            "D_cover": 7.168982149684187,
+            "D_lag": 27.43241413445941,
+            "D_order": 20.19753915915216,
+            "D_support": 7.384873127007267
+          },
+          "x": [
+            0.5,
+            1.0,
+            0.0,
+            2.0
+          ]
+        },
+        {
+          "J": 29.300108640724073,
+          "candidate_id": "dci_p080",
+          "excess": {
+            "D_cover": 6.421137736370041,
+            "D_lag": 29.300108640724073,
+            "D_order": 25.81393274370398,
+            "D_support": 8.29840427035645
+          },
+          "x": [
+            0.3935,
+            1.2806,
+            0.0,
+            2.0
+          ]
+        },
+        {
+          "J": 29.718584263178563,
+          "candidate_id": "dci_p081",
+          "excess": {
+            "D_cover": 6.962904163818441,
+            "D_lag": 29.718584263178563,
+            "D_order": 23.232470811489375,
+            "D_support": 8.708705055381307
+          },
+          "x": [
+            0.8556,
+            0.457,
+            0.0,
+            2.0
+          ]
+        },
+        {
+          "J": 28.21444592290771,
+          "candidate_id": "dci_p082",
+          "excess": {
+            "D_cover": 3.8486147776017785,
+            "D_lag": 27.836388744584305,
+            "D_order": 28.21444592290771,
+            "D_support": 4.321822071701428
+          },
+          "x": [
+            0.7452,
+            0.7138,
+            0.0,
+            2.0
+          ]
+        },
+        {
+          "J": 31.18844840180417,
+          "candidate_id": "dci_p085",
+          "excess": {
+            "D_cover": 4.743214494064244,
+            "D_lag": 31.18844840180417,
+            "D_order": 24.272132622778,
+            "D_support": 5.394584540926363
+          },
+          "x": [
+            0.9637,
+            1.3763,
+            0.0,
+            2.0
+          ]
+        }
+      ],
+      "source": "observed_nondominated_design_points",
+      "status": "REFERENCE_RETURN"
+    },
+    "M1101": {
+      "frozen_points": [
+        {
+          "candidate_id": "dci_p066",
+          "execution_candidate_id": "dci_p066",
+          "existing_candidate_id": "dci_p066",
+          "is_reference_return": false,
+          "origin": "observed",
+          "x": [
+            0.1255,
+            0.7297,
+            0.0,
+            1.8339
+          ]
+        }
+      ],
+      "mask": "M1101",
+      "observed_pareto": [
+        {
+          "J": 27.43241413445941,
+          "candidate_id": "dci_p000",
+          "excess": {
+            "D_cover": 7.168982149684187,
+            "D_lag": 27.43241413445941,
+            "D_order": 20.19753915915216,
+            "D_support": 7.384873127007267
+          },
+          "x": [
+            0.5,
+            1.0,
+            0.0,
+            2.0
+          ]
+        },
+        {
+          "J": 19.640953268278604,
+          "candidate_id": "dci_p066",
+          "excess": {
+            "D_cover": 5.443306439377601,
+            "D_lag": 19.640953268278604,
+            "D_order": 14.611367028092923,
+            "D_support": 7.919592764631802
+          },
+          "x": [
+            0.1255,
+            0.7297,
+            0.0,
+            1.8339
+          ]
+        },
+        {
+          "J": 30.144641618477845,
+          "candidate_id": "dci_p068",
+          "excess": {
+            "D_cover": 3.4916902766729088,
+            "D_lag": 11.110794796054995,
+            "D_order": 30.144641618477845,
+            "D_support": 1.228050574489675
+          },
+          "x": [
+            0.3016,
+            1.0524,
+            0.0,
+            1.506
+          ]
+        },
+        {
+          "J": 28.21444592290771,
+          "candidate_id": "dci_p082",
+          "excess": {
+            "D_cover": 3.8486147776017785,
+            "D_lag": 27.836388744584305,
+            "D_order": 28.21444592290771,
+            "D_support": 4.321822071701428
+          },
+          "x": [
+            0.7452,
+            0.7138,
+            0.0,
+            2.0
+          ]
+        },
+        {
+          "J": 31.18844840180417,
+          "candidate_id": "dci_p085",
+          "excess": {
+            "D_cover": 4.743214494064244,
+            "D_lag": 31.18844840180417,
+            "D_order": 24.272132622778,
+            "D_support": 5.394584540926363
+          },
+          "x": [
+            0.9637,
+            1.3763,
+            0.0,
+            2.0
+          ]
+        }
+      ],
+      "source": "observed_nondominated_design_points",
+      "status": "OK"
+    },
+    "M1110": {
+      "frozen_points": [
+        {
+          "candidate_id": "dci_p075",
+          "execution_candidate_id": "dci_p075",
+          "existing_candidate_id": "dci_p075",
+          "is_reference_return": false,
+          "origin": "observed",
+          "x": [
+            0.4214,
+            1.154,
+            -7.44,
+            2.0
+          ]
+        }
+      ],
+      "mask": "M1110",
+      "observed_pareto": [
+        {
+          "J": 27.43241413445941,
+          "candidate_id": "dci_p000",
+          "excess": {
+            "D_cover": 7.168982149684187,
+            "D_lag": 27.43241413445941,
+            "D_order": 20.19753915915216,
+            "D_support": 7.384873127007267
+          },
+          "x": [
+            0.5,
+            1.0,
+            0.0,
+            2.0
+          ]
+        },
+        {
+          "J": 31.898919460481718,
+          "candidate_id": "dci_p072",
+          "excess": {
+            "D_cover": 7.267051334065108,
+            "D_lag": 12.37528691563775,
+            "D_order": 31.898919460481718,
+            "D_support": 11.665118884604885
+          },
+          "x": [
+            0.0849,
+            0.6287,
+            -9.14,
+            2.0
+          ]
+        },
+        {
+          "J": 17.48304364131066,
+          "candidate_id": "dci_p075",
+          "excess": {
+            "D_cover": 5.51555336013706,
+            "D_lag": 17.48304364131066,
+            "D_order": 8.477592573532247,
+            "D_support": 8.802038531200672
+          },
+          "x": [
+            0.4214,
+            1.154,
+            -7.44,
+            2.0
+          ]
+        },
+        {
+          "J": 20.764678698362655,
+          "candidate_id": "dci_p076",
+          "excess": {
+            "D_cover": 7.877845641156836,
+            "D_lag": 14.196953373892187,
+            "D_order": 20.764678698362655,
+            "D_support": 8.184467407511812
+          },
+          "x": [
+            0.2138,
+            0.3163,
+            -2.53,
+            2.0
+          ]
+        },
+        {
+          "J": 31.24153607731214,
+          "candidate_id": "dci_p078",
+          "excess": {
+            "D_cover": 5.875269822972375,
+            "D_lag": 25.699681782664314,
+            "D_order": 31.24153607731214,
+            "D_support": 1.3770122626806194
+          },
+          "x": [
+            0.6077,
+            1.4964,
+            5.56,
+            2.0
+          ]
+        },
+        {
+          "J": 36.15425281379231,
+          "candidate_id": "dci_p079",
+          "excess": {
+            "D_cover": 4.412482294116043,
+            "D_lag": 36.15425281379231,
+            "D_order": 21.358991218848928,
+            "D_support": 5.69055085668981
+          },
+          "x": [
+            0.9844,
+            0.9845,
+            1.29,
+            2.0
+          ]
+        },
+        {
+          "J": 29.300108640724073,
+          "candidate_id": "dci_p080",
+          "excess": {
+            "D_cover": 6.421137736370041,
+            "D_lag": 29.300108640724073,
+            "D_order": 25.81393274370398,
+            "D_support": 8.29840427035645
+          },
+          "x": [
+            0.3935,
+            1.2806,
+            0.0,
+            2.0
+          ]
+        },
+        {
+          "J": 29.718584263178563,
+          "candidate_id": "dci_p081",
+          "excess": {
+            "D_cover": 6.962904163818441,
+            "D_lag": 29.718584263178563,
+            "D_order": 23.232470811489375,
+            "D_support": 8.708705055381307
+          },
+          "x": [
+            0.8556,
+            0.457,
+            0.0,
+            2.0
+          ]
+        },
+        {
+          "J": 28.21444592290771,
+          "candidate_id": "dci_p082",
+          "excess": {
+            "D_cover": 3.8486147776017785,
+            "D_lag": 27.836388744584305,
+            "D_order": 28.21444592290771,
+            "D_support": 4.321822071701428
+          },
+          "x": [
+            0.7452,
+            0.7138,
+            0.0,
+            2.0
+          ]
+        },
+        {
+          "J": 31.18844840180417,
+          "candidate_id": "dci_p085",
+          "excess": {
+            "D_cover": 4.743214494064244,
+            "D_lag": 31.18844840180417,
+            "D_order": 24.272132622778,
+            "D_support": 5.394584540926363
+          },
+          "x": [
+            0.9637,
+            1.3763,
+            0.0,
+            2.0
+          ]
+        }
+      ],
+      "source": "observed_nondominated_design_points",
+      "status": "OK"
+    },
+    "M1111": {
+      "frozen_points": [
+        {
+          "candidate_id": "dci_p030",
+          "execution_candidate_id": "dci_p030",
+          "existing_candidate_id": "dci_p030",
+          "is_reference_return": false,
+          "origin": "observed",
+          "x": [
+            0.0454,
+            1.4076,
+            -8.57,
+            1.6284
+          ]
+        }
+      ],
+      "mask": "M1111",
+      "observed_pareto": [
+        {
+          "J": 49.555995852731364,
+          "candidate_id": "dci_p005",
+          "excess": {
+            "D_cover": 3.6157546251166615,
+            "D_lag": 8.382351404726192,
+            "D_order": 49.555995852731364,
+            "D_support": 1.5429177557858431
+          },
+          "x": [
+            0.7359,
+            0.3795,
+            -4.8,
+            1.5141
+          ]
+        },
+        {
+          "J": 59.33223582111615,
+          "candidate_id": "dci_p006",
+          "excess": {
+            "D_cover": 8.714433677474464,
+            "D_lag": 59.33223582111615,
+            "D_order": 10.625737815965074,
+            "D_support": 7.445459792776342
+          },
+          "x": [
+            0.0144,
+            1.1385,
+            -0.66,
+            2.3358
+          ]
+        },
+        {
+          "J": 20.693621655844083,
+          "candidate_id": "dci_p007",
+          "excess": {
+            "D_cover": 5.471358058253567,
+            "D_lag": 20.693621655844083,
+            "D_order": 17.494659793969813,
+            "D_support": 6.447400346338564
+          },
+          "x": [
+            0.8112,
+            0.6458,
+            -5.36,
+            1.9865
+          ]
+        },
+        {
+          "J": 29.338030869269673,
+          "candidate_id": "dci_p011",
+          "excess": {
+            "D_cover": 3.5249919706010804,
+            "D_lag": 18.544695599810193,
+            "D_order": 29.338030869269673,
+            "D_support": 3.743204875732805
+          },
+          "x": [
+            0.5932,
+            0.0158,
+            -1.52,
+            1.6308
+          ]
+        },
+        {
+          "J": 13.78468970955022,
+          "candidate_id": "dci_p012",
+          "excess": {
+            "D_cover": 4.0932362201260135,
+            "D_lag": 13.78468970955022,
+            "D_order": 12.36049591281179,
+            "D_support": 6.637987653204455
+          },
+          "x": [
+            0.2151,
+            1.0043,
+            -6.26,
+            1.7967
+          ]
+        },
+        {
+          "J": 12.699750050614984,
+          "candidate_id": "dci_p030",
+          "excess": {
+            "D_cover": 3.6970552481450007,
+            "D_lag": 12.284656301803675,
+            "D_order": 12.699750050614984,
+            "D_support": 7.294371987657399
+          },
+          "x": [
+            0.0454,
+            1.4076,
+            -8.57,
+            1.6284
+          ]
+        },
+        {
+          "J": 25.666480424767123,
+          "candidate_id": "dci_p032",
+          "excess": {
+            "D_cover": 4.316606223224065,
+            "D_lag": 25.666480424767123,
+            "D_order": 20.157847176000406,
+            "D_support": 4.57868884098114
+          },
+          "x": [
+            0.2038,
+            0.9225,
+            7.33,
+            1.8091
+          ]
+        },
+        {
+          "J": 46.13887259951979,
+          "candidate_id": "dci_p053",
+          "excess": {
+            "D_cover": 4.843264244239694,
+            "D_lag": 8.901873393640662,
+            "D_order": 46.13887259951979,
+            "D_support": 1.4466951236170136
+          },
+          "x": [
+            0.5,
+            0.8939,
+            -2.2,
+            1.5039
+          ]
+        },
+        {
+          "J": 31.925013944632706,
+          "candidate_id": "dci_p057",
+          "excess": {
+            "D_cover": 3.7195982221104416,
+            "D_lag": 14.450892460610069,
+            "D_order": 31.925013944632706,
+            "D_support": 1.0455546515733456
+          },
+          "x": [
+            0.1849,
+            1.0,
+            4.56,
+            1.6375
+          ]
+        },
+        {
+          "J": 31.250791549769186,
+          "candidate_id": "dci_p062",
+          "excess": {
+            "D_cover": 3.6456954006907427,
+            "D_lag": 31.250791549769186,
+            "D_order": 16.22358733569972,
+            "D_support": 0.6761359943410226
+          },
+          "x": [
+            0.8545,
+            1.0,
+            5.55,
+            2.0377
+          ]
+        },
+        {
+          "J": 30.144641618477845,
+          "candidate_id": "dci_p068",
+          "excess": {
+            "D_cover": 3.4916902766729088,
+            "D_lag": 11.110794796054995,
+            "D_order": 30.144641618477845,
+            "D_support": 1.228050574489675
+          },
+          "x": [
+            0.3016,
+            1.0524,
+            0.0,
+            1.506
+          ]
+        },
+        {
+          "J": 17.48304364131066,
+          "candidate_id": "dci_p075",
+          "excess": {
+            "D_cover": 5.51555336013706,
+            "D_lag": 17.48304364131066,
+            "D_order": 8.477592573532247,
+            "D_support": 8.802038531200672
+          },
+          "x": [
+            0.4214,
+            1.154,
+            -7.44,
+            2.0
+          ]
+        },
+        {
+          "J": 21.06912374362451,
+          "candidate_id": "dci_p089",
+          "excess": {
+            "D_cover": 3.534840145616291,
+            "D_lag": 13.018926847884646,
+            "D_order": 21.06912374362451,
+            "D_support": 3.38297516998069
+          },
+          "x": [
+            0.5,
+            1.0,
+            -7.89,
+            1.7346
+          ]
+        },
+        {
+          "J": 37.531428027761955,
+          "candidate_id": "dci_p093",
+          "excess": {
+            "D_cover": 5.126154610478609,
+            "D_lag": 13.752925953420267,
+            "D_order": 37.531428027761955,
+            "D_support": 1.2077586895632466
+          },
+          "x": [
+            0.5,
+            1.0,
+            4.13,
+            1.5559
+          ]
+        },
+        {
+          "J": 30.13466787588911,
+          "candidate_id": "dci_p095",
+          "excess": {
+            "D_cover": 5.238893489767204,
+            "D_lag": 29.120931129276393,
+            "D_order": 30.13466787588911,
+            "D_support": 1.277385048511435
+          },
+          "x": [
+            0.5,
+            1.0,
+            5.3,
+            1.8999
+          ]
+        }
+      ],
+      "source": "observed_nondominated_design_points",
+      "status": "OK"
+    }
+  },
+  "recall_support_budget": {
+    "counts": [
+      38,
+      43,
+      22,
+      40
+    ],
+    "draws": 1000,
+    "n_cov": 22,
+    "quantile": 0.95,
+    "r_cov": 9.475667738045885,
+    "radius_q05": 9.01064463322426,
+    "radius_q95": 10.054736759497697,
+    "reason": null,
+    "reference_candidate_id": "dci_p000",
+    "seed": 20260910,
+    "status": "OK"
+  },
+  "schema_id": "topic4_rev22_dci_response_fit_v1",
+  "status": "RESPONSE_FIT_COMPLETE",
+  "surface_rows": 96,
+  "surrogate_adequacy": {
+    "components": {
+      "D_cover": {
+        "coverage_ok": true,
+        "optimizer_ok": true,
+        "pass": false,
+        "rank_ok": false,
+        "rmse_ok": true,
+        "status_ok": true
+      },
+      "D_lag": {
+        "coverage_ok": true,
+        "optimizer_ok": true,
+        "pass": true,
+        "rank_ok": true,
+        "rmse_ok": true,
+        "status_ok": true
+      },
+      "D_order": {
+        "coverage_ok": true,
+        "optimizer_ok": true,
+        "pass": true,
+        "rank_ok": true,
+        "rmse_ok": true,
+        "status_ok": true
+      },
+      "D_support": {
+        "coverage_ok": true,
+        "optimizer_ok": true,
+        "pass": true,
+        "rank_ok": true,
+        "rmse_ok": true,
+        "status_ok": true
+      }
+    },
+    "proposal_source": "observed_nondominated_design_points",
+    "status": "OBSERVED_PARETO_FALLBACK",
+    "thresholds": {
+      "coverage_90_min": 0.6,
+      "optimizer_failed_fold_fraction_max": 0.1,
+      "optimizer_failed_fold_min_allowance": 2,
+      "rmse_fraction_of_range_max": 0.5,
+      "spearman_min": 0.5
+    }
+  },
+  "training_only": true,
+  "variance_decomposition": {
+    "candidates": {
+      "dci_p000": {
+        "D_cover": {
+          "dynamics_variance_fraction": 1.0,
+          "mean": 10.862360427207005,
+          "n_dynamics_per_topology": 3,
+          "n_topologies": 4,
+          "sigma2_dynamics": 0.5074271347288928,
+          "sigma2_topology": 0.0,
+          "status": "OK",
+          "topology_variance_fraction": 0.0
+        },
+        "D_lag": {
+          "status": "NOT_ESTIMABLE_MISSING_UNIT"
+        },
+        "D_order": {
+          "status": "NOT_ESTIMABLE_MISSING_UNIT"
+        },
+        "D_support": {
+          "dynamics_variance_fraction": 0.9371872639195812,
+          "mean": 0.3103715239334044,
+          "n_dynamics_per_topology": 3,
+          "n_topologies": 4,
+          "sigma2_dynamics": 0.0020515045958970713,
+          "sigma2_topology": 0.00013749719155477813,
+          "status": "OK",
+          "topology_variance_fraction": 0.06281273608041885
+        }
+      },
+      "dci_p028": {
+        "D_cover": {
+          "dynamics_variance_fraction": 1.0,
+          "mean": 11.670148154290008,
+          "n_dynamics_per_topology": 3,
+          "n_topologies": 4,
+          "sigma2_dynamics": 0.94842798465535,
+          "sigma2_topology": 0.0,
+          "status": "OK",
+          "topology_variance_fraction": 0.0
+        },
+        "D_lag": {
+          "status": "NOT_ESTIMABLE_MISSING_UNIT"
+        },
+        "D_order": {
+          "status": "NOT_ESTIMABLE_MISSING_UNIT"
+        },
+        "D_support": {
+          "dynamics_variance_fraction": 0.8132518145859365,
+          "mean": 0.3918647797661327,
+          "n_dynamics_per_topology": 3,
+          "n_topologies": 4,
+          "sigma2_dynamics": 0.0006266923376455858,
+          "sigma2_topology": 0.00014390826404463405,
+          "status": "OK",
+          "topology_variance_fraction": 0.18674818541406346
+        }
+      }
+    },
+    "components": {
+      "D_cover": {
+        "n_candidates": 2,
+        "topology_variance_fraction_median": 0.0
+      },
+      "D_lag": {
+        "n_candidates": 0,
+        "topology_variance_fraction_median": null
+      },
+      "D_order": {
+        "n_candidates": 0,
+        "topology_variance_fraction_median": null
+      },
+      "D_support": {
+        "n_candidates": 2,
+        "topology_variance_fraction_median": 0.12478046074724115
+      }
+    },
+    "summary": {
+      "dynamics_dominates": true,
+      "reading": "topology replication is the binding constraint when the topology fraction is high; a dynamics-dominated block must be reported before any network-level interval is interpreted",
+      "topology_variance_fraction_median_over_components": 0.06239023037362058
+    },
+    "units": [
+      {
+        "candidate_id": "dci_p000",
+        "components": {
+          "D_cover": 11.029243626299865,
+          "D_lag": 13.58886523263655,
+          "D_order": 0.13085318379240127,
+          "D_support": 0.3330655426840868
+        },
+        "dynamics_seed": 2511,
+        "feasibility": false,
+        "inventory_status": "PRESENT_VALIDATED",
+        "n_returned_families": 38,
+        "new_run": false,
+        "topology_seed": 2511,
+        "worker_dir": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/fit/workers"
+      },
+      {
+        "candidate_id": "dci_p000",
+        "components": {
+          "D_cover": 10.651522816869983,
+          "D_lag": 30.603229920688815,
+          "D_order": 0.10046140794133045,
+          "D_support": 0.301884768964095
+        },
+        "dynamics_seed": 3101,
+        "feasibility": false,
+        "inventory_status": "PRESENT_VALIDATED",
+        "n_returned_families": 39,
+        "new_run": true,
+        "topology_seed": 2511,
+        "worker_dir": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/decomposition/workers"
+      },
+      {
+        "candidate_id": "dci_p000",
+        "components": {
+          "D_cover": 12.096768475456054,
+          "D_lag": 14.971830742052225,
+          "D_order": 0.11255901849866363,
+          "D_support": 0.3664231441568609
+        },
+        "dynamics_seed": 3102,
+        "feasibility": false,
+        "inventory_status": "PRESENT_VALIDATED",
+        "n_returned_families": 22,
+        "new_run": true,
+        "topology_seed": 2511,
+        "worker_dir": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/decomposition/workers"
+      },
+      {
+        "candidate_id": "dci_p000",
+        "components": {
+          "D_cover": 10.128341253883525,
+          "D_lag": 18.41257482106874,
+          "D_order": 0.09803593488772044,
+          "D_support": 0.35701457645019596
+        },
+        "dynamics_seed": 2512,
+        "feasibility": false,
+        "inventory_status": "PRESENT_VALIDATED",
+        "n_returned_families": 43,
+        "new_run": false,
+        "topology_seed": 2512,
+        "worker_dir": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/fit/workers"
+      },
+      {
+        "candidate_id": "dci_p000",
+        "components": {
+          "D_cover": 10.70136714420294,
+          "D_lag": 26.71723345342221,
+          "D_order": 0.1466108747190305,
+          "D_support": 0.2993041853888929
+        },
+        "dynamics_seed": 3101,
+        "feasibility": false,
+        "inventory_status": "PRESENT_VALIDATED",
+        "n_returned_families": 24,
+        "new_run": true,
+        "topology_seed": 2512,
+        "worker_dir": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/decomposition/workers"
+      },
+      {
+        "candidate_id": "dci_p000",
+        "components": {
+          "D_cover": 11.360455907521464,
+          "D_lag": 26.935476981539193,
+          "D_order": 0.13276108503307169,
+          "D_support": 0.2525373213836779
+        },
+        "dynamics_seed": 3102,
+        "feasibility": true,
+        "inventory_status": "PRESENT_VALIDATED",
+        "n_returned_families": 30,
+        "new_run": true,
+        "topology_seed": 2512,
+        "worker_dir": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/decomposition/workers"
+      },
+      {
+        "candidate_id": "dci_p000",
+        "components": {
+          "D_cover": 11.577252877821296,
+          "D_lag": 16.66807204237145,
+          "D_order": 0.1490999749029702,
+          "D_support": 0.310980756861538
+        },
+        "dynamics_seed": 2513,
+        "feasibility": false,
+        "inventory_status": "PRESENT_VALIDATED",
+        "n_returned_families": 22,
+        "new_run": false,
+        "topology_seed": 2513,
+        "worker_dir": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/fit/workers"
+      },
+      {
+        "candidate_id": "dci_p000",
+        "components": {
+          "D_cover": 10.398128359962227,
+          "D_lag": 30.3456689671839,
+          "D_order": 0.11551152571285084,
+          "D_support": 0.3025151245670232
+        },
+        "dynamics_seed": 3101,
+        "feasibility": true,
+        "inventory_status": "PRESENT_VALIDATED",
+        "n_returned_families": 30,
+        "new_run": true,
+        "topology_seed": 2513,
+        "worker_dir": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/decomposition/workers"
+      },
+      {
+        "candidate_id": "dci_p000",
+        "components": {
+          "D_cover": 9.774193379644267,
+          "D_lag": 22.445404466399932,
+          "D_order": 0.09698047759406159,
+          "D_support": 0.20532297901456056
+        },
+        "dynamics_seed": 3102,
+        "feasibility": true,
+        "inventory_status": "PRESENT_VALIDATED",
+        "n_returned_families": 30,
+        "new_run": true,
+        "topology_seed": 2513,
+        "worker_dir": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/decomposition/workers"
+      },
+      {
+        "candidate_id": "dci_p000",
+        "components": {
+          "D_cover": 10.779229981230822,
+          "D_lag": 28.04327054131913,
+          "D_order": 0.09061470964613531,
+          "D_support": 0.2960222760596525
+        },
+        "dynamics_seed": 2514,
+        "feasibility": true,
+        "inventory_status": "PRESENT_VALIDATED",
+        "n_returned_families": 40,
+        "new_run": false,
+        "topology_seed": 2514,
+        "worker_dir": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/fit/workers"
+      },
+      {
+        "candidate_id": "dci_p000",
+        "components": {
+          "D_cover": 11.417962010444613,
+          "D_lag": null,
+          "D_order": null,
+          "D_support": 0.35397555485411986
+        },
+        "dynamics_seed": 3101,
+        "feasibility": false,
+        "inventory_status": "PRESENT_VALIDATED",
+        "n_returned_families": 32,
+        "new_run": true,
+        "topology_seed": 2514,
+        "worker_dir": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/decomposition/workers"
+      },
+      {
+        "candidate_id": "dci_p000",
+        "components": {
+          "D_cover": 10.43385929314699,
+          "D_lag": 23.13350368959378,
+          "D_order": 0.12301292614028987,
+          "D_support": 0.34541205681614945
+        },
+        "dynamics_seed": 3102,
+        "feasibility": false,
+        "inventory_status": "PRESENT_VALIDATED",
+        "n_returned_families": 38,
+        "new_run": true,
+        "topology_seed": 2514,
+        "worker_dir": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/decomposition/workers"
+      },
+      {
+        "candidate_id": "dci_p028",
+        "components": {
+          "D_cover": 12.581170420074182,
+          "D_lag": null,
+          "D_order": null,
+          "D_support": 0.34971105625682314
+        },
+        "dynamics_seed": 2511,
+        "feasibility": false,
+        "inventory_status": "PRESENT_VALIDATED",
+        "n_returned_families": 52,
+        "new_run": false,
+        "topology_seed": 2511,
+        "worker_dir": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/fit/workers"
+      },
+      {
+        "candidate_id": "dci_p028",
+        "components": {
+          "D_cover": 12.702066396832421,
+          "D_lag": null,
+          "D_order": null,
+          "D_support": 0.41152612130095284
+        },
+        "dynamics_seed": 3101,
+        "feasibility": false,
+        "inventory_status": "PRESENT_VALIDATED",
+        "n_returned_families": 46,
+        "new_run": true,
+        "topology_seed": 2511,
+        "worker_dir": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/decomposition/workers"
+      },
+      {
+        "candidate_id": "dci_p028",
+        "components": {
+          "D_cover": 10.566255226213833,
+          "D_lag": 13.295232918227219,
+          "D_order": 0.14944006416940528,
+          "D_support": 0.36825525463292114
+        },
+        "dynamics_seed": 3102,
+        "feasibility": false,
+        "inventory_status": "PRESENT_VALIDATED",
+        "n_returned_families": 48,
+        "new_run": true,
+        "topology_seed": 2511,
+        "worker_dir": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/decomposition/workers"
+      },
+      {
+        "candidate_id": "dci_p028",
+        "components": {
+          "D_cover": 10.998772253563374,
+          "D_lag": null,
+          "D_order": null,
+          "D_support": 0.39545550416710856
+        },
+        "dynamics_seed": 2512,
+        "feasibility": false,
+        "inventory_status": "PRESENT_VALIDATED",
+        "n_returned_families": 37,
+        "new_run": false,
+        "topology_seed": 2512,
+        "worker_dir": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/fit/workers"
+      },
+      {
+        "candidate_id": "dci_p028",
+        "components": {
+          "D_cover": 11.46467873399792,
+          "D_lag": null,
+          "D_order": null,
+          "D_support": 0.4390762486281472
+        },
+        "dynamics_seed": 3101,
+        "feasibility": false,
+        "inventory_status": "PRESENT_VALIDATED",
+        "n_returned_families": 39,
+        "new_run": true,
+        "topology_seed": 2512,
+        "worker_dir": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/decomposition/workers"
+      },
+      {
+        "candidate_id": "dci_p028",
+        "components": {
+          "D_cover": 12.468885613379681,
+          "D_lag": null,
+          "D_order": null,
+          "D_support": 0.4222255622774609
+        },
+        "dynamics_seed": 3102,
+        "feasibility": false,
+        "inventory_status": "PRESENT_VALIDATED",
+        "n_returned_families": 50,
+        "new_run": true,
+        "topology_seed": 2512,
+        "worker_dir": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/decomposition/workers"
+      },
+      {
+        "candidate_id": "dci_p028",
+        "components": {
+          "D_cover": 12.129869531861923,
+          "D_lag": 17.880729057547466,
+          "D_order": 0.1375065881178893,
+          "D_support": 0.4030806759138245
+        },
+        "dynamics_seed": 2513,
+        "feasibility": false,
+        "inventory_status": "PRESENT_VALIDATED",
+        "n_returned_families": 32,
+        "new_run": false,
+        "topology_seed": 2513,
+        "worker_dir": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/fit/workers"
+      },
+      {
+        "candidate_id": "dci_p028",
+        "components": {
+          "D_cover": 11.074055712300598,
+          "D_lag": null,
+          "D_order": null,
+          "D_support": 0.36184882511672417
+        },
+        "dynamics_seed": 3101,
+        "feasibility": false,
+        "inventory_status": "PRESENT_VALIDATED",
+        "n_returned_families": 31,
+        "new_run": true,
+        "topology_seed": 2513,
+        "worker_dir": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/decomposition/workers"
+      },
+      {
+        "candidate_id": "dci_p028",
+        "components": {
+          "D_cover": 10.843715499974762,
+          "D_lag": null,
+          "D_order": null,
+          "D_support": 0.4030917238936225
+        },
+        "dynamics_seed": 3102,
+        "feasibility": false,
+        "inventory_status": "PRESENT_VALIDATED",
+        "n_returned_families": 40,
+        "new_run": true,
+        "topology_seed": 2513,
+        "worker_dir": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/decomposition/workers"
+      },
+      {
+        "candidate_id": "dci_p028",
+        "components": {
+          "D_cover": 12.399849951528976,
+          "D_lag": null,
+          "D_order": null,
+          "D_support": 0.38006335863544094
+        },
+        "dynamics_seed": 2514,
+        "feasibility": false,
+        "inventory_status": "PRESENT_VALIDATED",
+        "n_returned_families": 34,
+        "new_run": false,
+        "topology_seed": 2514,
+        "worker_dir": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/fit/workers"
+      },
+      {
+        "candidate_id": "dci_p028",
+        "components": {
+          "D_cover": 10.411007856610768,
+          "D_lag": null,
+          "D_order": null,
+          "D_support": 0.36293624448966405
+        },
+        "dynamics_seed": 3101,
+        "feasibility": false,
+        "inventory_status": "PRESENT_VALIDATED",
+        "n_returned_families": 58,
+        "new_run": true,
+        "topology_seed": 2514,
+        "worker_dir": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/decomposition/workers"
+      },
+      {
+        "candidate_id": "dci_p028",
+        "components": {
+          "D_cover": 12.401450655141637,
+          "D_lag": null,
+          "D_order": null,
+          "D_support": 0.40510678188090266
+        },
+        "dynamics_seed": 3102,
+        "feasibility": false,
+        "inventory_status": "PRESENT_VALIDATED",
+        "n_returned_families": 45,
+        "new_run": true,
+        "topology_seed": 2514,
+        "worker_dir": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_dual_core_interictal_identifiability/decomposition/workers"
+      }
+    ]
+  }
+}
