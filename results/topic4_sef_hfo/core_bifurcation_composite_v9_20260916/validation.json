@@ -1,0 +1,48 @@
+{
+  "status": "PASS",
+  "png_count": 2,
+  "pdf_checks": [
+    {
+      "file": "00_joint_core_bifurcation_composite.pdf",
+      "pages": 1,
+      "all_text_within_page": true
+    },
+    {
+      "file": "01_core_A_reference_layout.pdf",
+      "pages": 1,
+      "all_text_within_page": true
+    },
+    {
+      "file": "core_bifurcation_composite_comparison.pdf",
+      "pages": 2,
+      "all_text_within_page": true
+    }
+  ],
+  "original_bifurcation_curves_unchanged": true,
+  "source_readouts": [
+    {
+      "letter": "b",
+      "mean_rate_error_hz": 0.0,
+      "period_ms": 836.719772031536
+    },
+    {
+      "letter": "c",
+      "mean_rate_error_hz": 0.0,
+      "period_ms": 343.92120627614713
+    },
+    {
+      "letter": "d",
+      "mean_rate_error_hz": 0.0,
+      "period_ms": 183.5904057213304
+    },
+    {
+      "letter": "e",
+      "mean_rate_error_hz": 0.0,
+      "period_ms": 150.92314860457356
+    }
+  ],
+  "matched_coexistence_parameters": true,
+  "model_changed": false,
+  "human_acceptance": "PENDING",
+  "scope": "Composition and inherited orbit correspondence; no new dynamical proof."
+}

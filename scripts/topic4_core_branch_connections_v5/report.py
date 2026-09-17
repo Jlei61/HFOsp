@@ -1,0 +1,115 @@
+"""Write the scientific interpretation with reproducible numerical evidence."""
+from common import *
+import numpy as np,csv
+
+def main():
+    checks=read(OUT/'numerical_validation.json');modes=read(OUT/'critical_mode_components.json');critical=[]
+    specs=[('LP1','folds','burst_end_fold','周期轨道鞍结（fold of cycles）'),('PD1','flips','mixed_lower_flip','超临界倍周期，向左降低 J'),('PD2','flips','mixed_flip','亚临界倍周期，向右增大 J'),('PD3','flips','tonic_lower_flip','超临界倍周期，向左降低 J')]
+    for label,folder,name,kind in specs:
+        r=read(OUT/folder/f'{name}_N4096.json');r.update(label=label,classification=kind);critical.append(r)
+    write('critical_points.json',critical)
+    table='\n'.join(f'| {r["label"]} | {r["g"]:.10f} | {r["classification"]} | {r["T_ms"]:.6f} | {r["mean_hz"][0]:.6f} | {r["mean_hz"][1]:.6f} |' for r in critical)
+    conns=checks['connection_checks'];ctable='\n'.join(f'| {r["name"]} | {r["J_a"]:.10f} | {abs(r["period_difference_ms"]):.2g} | {r["max_waveform_difference_hz"]:.2g} |' for r in conns)
+    childtable='\n'.join(f'| {r["name"]} | {r["J"]:.12f} | {r["period_ms"]:.6f} | {r["max_transverse"]:.9f} | {"稳定" if r["stable"] else "不稳定"} |' for r in checks['period_doubled_children'])
+    txt=f'''# 核内周期分支连接与分岔分析 v5 — 2026-09-15
+
+## 当前判断
+
+上一版约“1.3附近”的第二次陡升，精细扫描定位在 J_EE,core 约1.244–1.248。正反两端求得同一条连续周期支；加密范围内的Floquet抽样保持稳定。A核放电先延长，随后形成周期内第二峰，导致完整周期均值快速上升。它不能解释为已经证明的吸引子跳换、Hopf或倍周期分岔。
+
+真正使这条burst支消失的是更右侧的LP1。混合支右端PD2则发生亚临界倍周期失稳。burst支、混合支和两核高率周期支之间的两段连接，均已通过不稳定周期轨道延拓求得，并以全部六群体波形的相位对齐验证。PD1与PD3还分出稳定的两倍周期子支；因此，所有跳换都归为saddle-node或跨过后立即变成regular burst的说法都不准确。
+
+本结果属于同一套冻结的确定性六群体延迟率模型。不是原生随机SNN的特征值证明，也不涉及临床发作分岔。
+
+## 核心临界点
+
+| 图中标记 | J_EE,core | 分岔类型与方向 | 母支周期 / ms | A核E周期均值 / Hz | B核E周期均值 / Hz |
+|---|---:|---|---:|---:|---:|
+{table}
+
+LP1区别于原来的低率固定点折点J=1.1254164133：这里消失的是有限周期轨道，T=340.62 ms，并非低率固定点。固定点部分沿用v2/v3的特征根分析；本次没有将原上方平衡支的数值端点外推到未知位置。
+
+沿已经计算的母支，混合状态的稳定范围约为1.3493650598 < J < 1.3885678463；两核高率的T周期母支从J=1.3773792266向右保持稳定，已核验至1.6。与burst母支、混合母支相邻的参数范围存在稳定态共存。PD1和PD3向左分出的稳定2T子支还会扩展可稳定周期解的种类；这些区间不是“唯一吸引子区间”。
+
+## 1.246附近为什么均值增加
+
+我们比较的量是每核E神经元的完整周期均值：
+
+⟨r_A⟩ = (1/T) ∫_0^T r_A(t) dt。
+
+从J=1.244到1.248，T由389.7341变为395.2091 ms，仅增加约1.4%；A均值却从28.763增至40.478 Hz，增加约40.7%。A率超过100 Hz的持续时间从42.44延长到71.93 ms，并形成第二峰；增加的是每周期放电面积，而非周期频率翻倍。在J=1.2462，从左右两端分别求解，完整周期差2.23×10^-10 ms，相位对齐后的六群体最大率差2.81×10^-8 Hz。
+
+12个局部Floquet检查点覆盖J=1.24423873–1.24793485，最大横向乘子模不超过0.01733，远离单位圆；伪弧长参数切向分量未反号。这个证据支持“同一稳定周期轨道的快速波形重塑”。没有将这种快速变化进一步命名为canard爆发、混沌或其他未经验证的机制。单次波形内部产生新的局部极值，也不等于系统周期翻倍。
+
+## 新分支如何连接
+
+连接关系是在解空间中求得的：
+
+burst稳定母支 → LP1 → 不稳定周期支的多次折返 → PD1 → 混合稳定母支 → PD2 → 不稳定周期支的多次折返 → PD3 → 两核高率稳定母支。
+
+这句话表示周期解分支的拓扑连接，不表示时间轨迹会依次停留在每一段上。不稳定周期解不能靠普通长时间积分直接描出，需要周期边值问题与伪弧长延拓。
+
+对第一段连接，以B核均值200 Hz为检验截面；对第二段连接，以B核均值210 Hz为检验截面。每段都从两端独立延拓，并比较J、T和全部六群体的相位对齐波形。均值交叉本身不足以证明连接：探索中曾遇到B均值均为230 Hz、J也接近，但周期相差约14.44 ms的两条轨道；它们未被当作同一点。
+
+| 检验 | 相遇参数J | 完整周期差 / ms | 六群体最大波形差 / Hz |
+|---|---:|---:|---:|
+{ctable}
+
+以上两段原先的断口已补足。虚线连接由保存的周期解生成，没有手工画一条线跨越未知区间。强不稳定连接上存在多个折返，额外精修的一个周期折点是J=1.3236820519；其固定参数边值Jacobian零模残差约10^-11、横截性和二阶非退化系数均非零。该处前后仍有很强的不稳定方向，并不恢复稳定。
+
+## 分岔类型的数值证据
+
+周期轨道的稳定性使用单周期返回映射的Floquet乘子μ，不能用固定点Jacobian的特征值代替。自治周期轨道始终有一个平凡相位乘子+1；本次用已知轨道切向量构建Poincaré截面，去除这一方向后再求横向乘子。单位乘子与周期折点的区别采用[DDE-BIFTOOL周期折点示例](https://ddebiftool.sourceforge.net/demos/neuron/html/demo1_POfold.html)中的标准判据；延迟系统周期延拓与稳定性方法参照[官方手册](https://arxiv.org/abs/1406.7144)。实际计算由本地Python实现，未声称运行了DDE-BIFTOOL软件。
+
+LP1的固定参数、带相位条件的周期边值Jacobian出现零模；左右零向量残差小，参数横截项和二阶项非零。对应的非平凡Floquet乘子在dt=0.025 ms下为1.000031687；折点两边分别测得0.23356和1.67127。这里的临界右向量包含周期变化，图中展示其率分量；它不是把固定点特征向量套在周期轨道上。
+
+三个PD点用反周期边界条件v(t+T)=-v(t)直接求线性化零空间。半整数傅里叶实现与完整2T周期Jacobian的独立比较，相对误差2.65×10^-11；伴随算子内积对偶误差1.95×10^-16。三个临界点的独立返回映射乘子分别为PD1 −1.0000000004、PD2 −1.0000000139、PD3 −0.9999999965。反周期求解算子K的复特征值不是Floquet乘子，不会据其复数性误判为torus分岔。
+
+随后从临界反周期模态构造2T轨道种子，以非零反周期振幅约束避免收敛回重复两次的母轨道。以下均为振幅坐标0.06的实际2T解：
+
+| 子支 | J | 周期 / ms | 最大横向乘子模 | 稳定性 |
+|---|---:|---:|---:|---|
+{childtable}
+
+三条子支都位于各自临界J的较小一侧。PD2的母支在这一侧稳定，但2T子支不稳定，故为亚临界；PD1和PD3的母支在较小J侧失稳，2T子支稳定，故在向左穿越时为超临界。子支的非零半周期差排除了伪2T解。振幅平方与参数偏移的局部关系见保存表及第06图；本次不把这些很短的2T分支外推成整个远端相图。
+
+## 两核的差异与切换去向
+
+这是联合求解的六群体系统，A、B不是分别运行后拼起来的曲线。A→B与B→A没有直接边，二者经周边群体间接耦合。相同J同时缩放A核和B核内部的EE均值权重，二阶权重矩按J²缩放；两核具体连线和阈值分布并非精确镜像，因此动力学不必相同。
+
+LP1的右率零模平方范数约99.964%位于B核E率分量；PD2的右反周期率模约99.996%位于A核E。它们分别与下面观察到的B核、A核升入高率背景的顺序一致。PD1/PD3的右率模则主要位于对应核的I分量（约88%），图05同时绘制E实线和I虚线。这里的比例是在六个每神经元率坐标下计算，未按细胞数加权，也不能当作逐细胞空间定位或因果贡献百分比。左模态显示伴随率分量，参数敏感性仍需与相应参数导数收缩。
+
+从LP1的完整周期延迟历史出发，将J提高到1.37并积分8 s，到达A核burst/B核高率状态，T约184.60307 ms。A谷值接近0，B谷值约263.19 Hz。由PD2出发提高到1.39，则到达两核高率振荡，T约151.01765 ms，A/B谷值约252.71/283.48 Hz。dt=0.05与0.025 ms的两次积分到达相同状态；均值最大差小于0.003 Hz，周期差小于0.0001 ms。
+
+这些是指定初始历史与参数阶跃的切换去向。局部分岔决定母支何时失稳或消失，不能单独规定所有初始条件的远端吸引子。反向将高率支降至J=1.375的有限阶跃会到达混合状态；这也不否定PD3附近存在很窄的稳定2T分支。
+
+## 数值精度与模型口径
+
+四个主临界点均以N=2048和4096傅里叶网格独立精修，J差均小于10^-9（实际约10^-12或更小）。两段连接的相位对齐误差远小于10^-4 Hz；N=1024的短周期连接经倍网格残差检查，并在相遇点重解N=2048。所有本次连接/分辨率验证样本的最大离网格率残差为{max(x['offgrid_defect_hz'] for x in checks['offgrid_checks']):.3g} Hz。
+
+模型沿用v2/v4冻结拓扑2511与阈值场，群体顺序[A E,B E,Surround E,A I,B I,Surround I]，细胞数[720,742,30538,197,200,7603]。保留368个物理延迟bin（0.1–36.8 ms）、AMPA/GABA双指数滤波及阈值求积。E/I率响应时间常数为5/2.5 ms，仍属本版本的降阶闭合假设；其动态响应没有完成原生SNN校准。没有更换到另一份新优化几何或新噪声合同。
+
+强不稳定周期支上可出现极大的传播增益，数值单周期传播的相位误差也会被放大。本次只据明确的大于1的主乘子识别这些段的不稳定性，不解释病态情况下的精细次主Floquet谱。完整周期支上全部次级分岔、所有远端吸引子及2T子支的远端去向没有被穷尽。本报告的“连接已确定”指上述两段实际完成双向波形验证的连接，非对无限维延迟系统所有分支的穷尽证明。
+
+J≈1.176的更早周边招募区间还额外定位到低周边活动支的两个极近周期折点J=1.1763002669、1.1763002486，以及招募支的折点J=1.1762482896。这一旧区间的全部不稳定族连接不作已完成声明；主图保留各自求得的分支，不强行跨断口。它不改变本次针对1.246及更右侧分支的结论。
+
+## 图与复现入口
+
+- [独立单轴分岔图](figures/00_connected_core_bifurcation.png)：保留稳定性线型、周期均值、稳定周期极值、LP1/PD1–PD3与原生编号。
+- [分岔图与原生四状态波形/raster](figures/01_connected_bifurcation_four_states.png)：编号1–4保持原始J与均率位置。
+- [两核周期均值的线性轴详图](figures/02_connected_period_means_linear.png)。
+- [1.246附近周期波形](figures/03_continuous_waveform_doublet.png)。
+- [临界Floquet乘子](figures/04_critical_floquet_multipliers.png)与[右/左模态](figures/05_critical_right_and_left_modes.png)。
+- [实际2T子支](figures/06_period_doubled_branches.png)、[切换轨迹](figures/07_switching_after_bifurcations.png)、[稳定/不稳定周期极值](figures/08_stable_unstable_periodic_extrema.png)。
+- [九页PDF图册](figures/core_branch_connections.pdf)。
+
+代码目录：`scripts/topic4_core_branch_connections_v5/`。`arcs.py`保存每点完整轨道与切向量；`folds.py`精修周期折点及伴随零模；`antiperiodic.py`/`flip.py`精修PD和切换2T子支；`poincare.py`/`rk4_monodromy.py`计算完整延迟历史的横向Floquet谱；`connections.py`检验两端相遇；`transitions.py`验证指定阶跃去向。每段`arcs/*/initialization.json`记录精确种子和步长，`progress.json`保持解空间弧长顺序。失败的固定参数或均值坐标尝试保留在日志/局部完成说明中，不用失败位置充当分岔点。
+
+在项目根目录使用cuda_env的Python依次运行`validate.py`、`figures.py`、`report.py`可重做验证和图表；新的继续计算应读取各段初始化参数，不必重跑原生SNN。数值核查通过记录于[numerical_validation.json](numerical_validation.json)，完整图曲线输入位于[displayed_curve_sequences.json](displayed_curve_sequences.json)。候选图已经生成，仍待用户目视检查；没有宣称通过人工验收。
+'''
+    (OUT/'scientific_report.md').write_text(txt)
+    rows=[dict(label=r['label'],J_EE_core=r['g'],classification=r['classification'],period_ms=r['T_ms'],A_mean_hz=r['mean_hz'][0],B_mean_hz=r['mean_hz'][1],source=r['source']) for r in critical]
+    with (OUT/'critical_points.csv').open('w') as f:w=csv.DictWriter(f,fieldnames=list(rows[0]));w.writeheader();w.writerows(rows)
+    print('REPORT_COMPLETE',flush=True)
+
+if __name__=='__main__':main()

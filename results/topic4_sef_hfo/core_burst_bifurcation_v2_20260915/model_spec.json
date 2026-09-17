@@ -1,0 +1,87 @@
+{
+  "model_layer": "Six-population deterministic colored-Siegert delay-rate closure",
+  "parameter": "same-core A and B E-to-E multiplier; other edges unchanged",
+  "threshold_depth": 1.0,
+  "groups": [
+    "Core A E",
+    "Core B E",
+    "Surround E",
+    "Core A I",
+    "Core B I",
+    "Surround I"
+  ],
+  "counts": [
+    720,
+    742,
+    30538,
+    197,
+    200,
+    7603
+  ],
+  "rate_response_ms": [
+    5.0,
+    5.0,
+    5.0,
+    2.5,
+    2.5,
+    2.5
+  ],
+  "rate_response_calibration": "Inherited E=5 ms / I=2.5 ms approximation; not calibrated on this graph.",
+  "threshold_quadrature": "32-node Gaussian quadrature of each actual empirical distribution; checked against 16/24/48 nodes and explicit per-core thresholds.",
+  "integral_quadrature": 24,
+  "synaptic_rise_ms": [
+    0.7,
+    0.7,
+    0.7,
+    1.0,
+    1.0,
+    1.0
+  ],
+  "synaptic_decay_ms": [
+    3.5,
+    3.5,
+    3.5,
+    18.0,
+    18.0,
+    18.0
+  ],
+  "delay_bins": 368,
+  "delay_range_ms": [
+    0.1,
+    36.800000000000004
+  ],
+  "ext_mean": [
+    12.222368214536816,
+    12.222368214536816,
+    12.865650752144017,
+    12.017366087167487,
+    12.017366087167487,
+    12.017366087167487
+  ],
+  "ext_variance": [
+    5.182209435685259,
+    5.182209435685259,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "external_drive": "Private core-E Poisson retained through moments; shared OU removed; surround and I external drive deterministic.",
+  "recurrent_variance": "Instantaneous independent-spike diffusion closure, squared actual edge weights.",
+  "synaptic_area": "Native discrete DC area held fixed; continuous two-pole temporal response.",
+  "physical_parameters": {
+    "dt": 0.1,
+    "tau_m_E": 20.0,
+    "tau_m_I": 10.0,
+    "tau_r_AMPA": 0.7,
+    "tau_d_AMPA": 3.5,
+    "tau_r_GABA": 1.0,
+    "tau_d_GABA": 18.0,
+    "V_reset": 11.0,
+    "V_th": 18.0,
+    "tau_ref_E": 2.0,
+    "tau_ref_I": 1.0,
+    "J_ext_E": 0.455,
+    "J_ext_I": 0.85
+  }
+}

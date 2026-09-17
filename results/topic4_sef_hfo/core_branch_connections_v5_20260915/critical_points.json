@@ -1,0 +1,110 @@
+[
+  {
+    "name": "burst_end_fold",
+    "g": 1.3645475252622103,
+    "T_ms": 340.61849264350025,
+    "N": 4096,
+    "residual": 1.1657341758564144e-13,
+    "tangent_g": 1.7176175499751326e-14,
+    "fixed_parameter_null_residual": 4.434378201683938e-12,
+    "adjoint_last": 1.995294845240956e-09,
+    "adjoint_duality_error": 0.0,
+    "left_Fg": 0.5573155681560976,
+    "second_derivatives": [
+      {
+        "step": 0.003,
+        "left_Fvv": 1.2738604458959688e-05
+      },
+      {
+        "step": 0.001,
+        "left_Fvv": 1.3003680531131265e-05
+      }
+    ],
+    "predicted_g_curvature": -2.3332706412911625e-05,
+    "measured_g_curvature": -2.5252094815186865e-05,
+    "left_source": "results/topic4_sef_hfo/core_branch_connections_v5_20260915/arcs/burst_end/point014_g1.3645472485.npz",
+    "right_source": "results/topic4_sef_hfo/core_branch_connections_v5_20260915/arcs/burst_end/point015_g1.3645475134.npz",
+    "mean_hz": [
+      67.84703434487706,
+      54.9825922849551,
+      14.268361011064346,
+      66.64923459043918,
+      48.22100020921745,
+      26.11795984386749
+    ],
+    "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/folds/burst_end_fold_N4096.npz",
+    "label": "LP1",
+    "classification": "\u5468\u671f\u8f68\u9053\u978d\u7ed3\uff08fold of cycles\uff09"
+  },
+  {
+    "name": "mixed_lower_flip",
+    "g": 1.3493650597619273,
+    "T_ms": 187.53699287267838,
+    "N": 4096,
+    "anti_eigenvalue": 0.9999999999891809,
+    "anti_null_residual": 3.4931169068386225e-11,
+    "left_null_residual": 3.34187538753028e-13,
+    "crossing_test": "two_mode_determinant",
+    "crossing_slope_per_arc": -0.005347485293950981,
+    "mean_hz": [
+      54.94534332179567,
+      309.27137624713004,
+      25.950824214179075,
+      64.62682383551382,
+      280.05593299047837,
+      47.44367582995976
+    ],
+    "left_source": "results/topic4_sef_hfo/core_branch_connections_v5_20260915/arcs/mixed_low/point060_g1.3493843208.npz",
+    "right_source": "results/topic4_sef_hfo/core_branch_connections_v5_20260915/arcs/mixed_low/point061_g1.3493561767.npz",
+    "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/flips/mixed_lower_flip_N4096.npz",
+    "label": "PD1",
+    "classification": "\u8d85\u4e34\u754c\u500d\u5468\u671f\uff0c\u5411\u5de6\u964d\u4f4e J"
+  },
+  {
+    "name": "mixed_flip",
+    "g": 1.3885678462993365,
+    "T_ms": 182.8162813415111,
+    "N": 4096,
+    "anti_eigenvalue": 0.9999999999817266,
+    "anti_null_residual": 9.069101025716009e-11,
+    "left_null_residual": 5.924219448338874e-13,
+    "anti_eigenvalue_slope_per_arc": -0.4021424314513318,
+    "mean_hz": [
+      78.32936596963638,
+      357.72096897156666,
+      26.757332449602906,
+      67.11163101007968,
+      322.5392309344593,
+      48.923501814589436
+    ],
+    "left_source": "results/topic4_sef_hfo/core_branch_connections_v5_20260915/arcs/mixed_high_fine/point004_g1.3885677674.npz",
+    "right_source": "results/topic4_sef_hfo/core_branch_connections_v5_20260915/arcs/mixed_high_fine/point006_g1.3885678580.npz",
+    "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/flips/mixed_flip_N4096.npz",
+    "label": "PD2",
+    "classification": "\u4e9a\u4e34\u754c\u500d\u5468\u671f\uff0c\u5411\u53f3\u589e\u5927 J"
+  },
+  {
+    "name": "tonic_lower_flip",
+    "g": 1.3773792265782046,
+    "T_ms": 151.6429404486839,
+    "N": 4096,
+    "anti_eigenvalue": 0.9999999999978361,
+    "anti_null_residual": 6.410427744185654e-12,
+    "left_null_residual": 6.46011022453763e-14,
+    "crossing_test": "anti_eigenvalue_minus_one",
+    "crossing_slope_per_arc": -0.03350822311480132,
+    "mean_hz": [
+      313.2275273328987,
+      348.059561729903,
+      34.37412467682927,
+      278.6602478665009,
+      311.3461983629374,
+      62.54206198126046
+    ],
+    "left_source": "results/topic4_sef_hfo/core_branch_connections_v5_20260915/arcs/tonic_low/point050_g1.3773969952.npz",
+    "right_source": "results/topic4_sef_hfo/core_branch_connections_v5_20260915/arcs/tonic_low/point060_g1.3767372564.npz",
+    "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/flips/tonic_lower_flip_N4096.npz",
+    "label": "PD3",
+    "classification": "\u8d85\u4e34\u754c\u500d\u5468\u671f\uff0c\u5411\u5de6\u964d\u4f4e J"
+  }
+]

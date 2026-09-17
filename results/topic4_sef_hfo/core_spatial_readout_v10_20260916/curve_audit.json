@@ -1,0 +1,40 @@
+{
+  "status": "PASS",
+  "mother_sequences": 8,
+  "mother_samples": 841,
+  "daughter_sequences": 3,
+  "daughter_samples": 9,
+  "AB_same_solution_ids_and_stability": true,
+  "continuation_order_preserved": true,
+  "J_sorting": false,
+  "time_mean": "uniform-grid periodic quadrature; equal weight valid for this Fourier collocation",
+  "dense_extrema_points": 32768,
+  "max_16384_to_32768_extrema_change_hz": 0.0037524785118421278,
+  "max_original_mean_change_hz": 0.0,
+  "max_original_extrema_change_hz": 0.03837719955799912,
+  "B_low_rate_projection_check": {
+    "J": 1.1247479472476345,
+    "stable_hz": [
+      0.4369155556587724,
+      0.3061331832217192,
+      1.0937008597046102e-29,
+      3.306989295757296e-29,
+      -1.155343392851515e-33,
+      -8.920896985813916e-30
+    ],
+    "unstable_hz": [
+      0.4722039723099068,
+      0.30613318322171834,
+      9.505457831475799e-208,
+      7.435020049006197e-97,
+      5.563849667937225e-156,
+      0.0
+    ],
+    "difference_AB_hz": [
+      0.03528841665113441,
+      -8.326672684688674e-16
+    ],
+    "unstable_residual": 4.87890977618477e-19
+  },
+  "source_sequences": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/displayed_curve_sequences.json"
+}

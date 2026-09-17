@@ -1,0 +1,30 @@
+{
+  "status": "PASS",
+  "critical": {
+    "J_grid_difference": 8.881784197001252e-16,
+    "period_grid_difference_ms": 1.576040631334763e-09,
+    "waveform_difference_hz": 8.255867411152001e-07,
+    "mode_cosine": 0.9999999999975043,
+    "left_mode_cosine": 0.9999999999940822
+  },
+  "accepted_children": [
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/surround_period4_refined/amp2e-05_N8192.npz",
+      "J": 1.1763002486474254,
+      "T_ms": 1821.886190123124,
+      "amplitude": 2e-05,
+      "offgrid_hz": 2.1505019986989282e-10,
+      "half_period_max_difference_hz": 0.004477343702136106,
+      "residual": 6.106226635438361e-14
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/surround_period4_refined/amp4e-05_N8192.npz",
+      "J": 1.1763002486475436,
+      "T_ms": 1821.8861899266033,
+      "amplitude": 4e-05,
+      "offgrid_hz": 2.1571633368466792e-10,
+      "half_period_max_difference_hz": 0.008958757747799502,
+      "residual": 3.090843553321676e-13
+    }
+  ]
+}

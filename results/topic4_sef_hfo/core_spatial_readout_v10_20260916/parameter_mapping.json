@@ -1,0 +1,37 @@
+{
+  "parameter": "J_EE,core",
+  "units": "dimensionless reference weight multiplier",
+  "populations": [
+    "A E",
+    "B E",
+    "Surround E",
+    "A I",
+    "B I",
+    "Surround I"
+  ],
+  "counts": [
+    720,
+    742,
+    30538,
+    197,
+    200,
+    7603
+  ],
+  "matrix_orientation": "target rows, source columns",
+  "changed_blocks": [
+    "A E -> A E",
+    "B E -> B E"
+  ],
+  "mean_moment_scale": "J",
+  "variance_moment_scale": "J^2",
+  "other_blocks_exactly_unchanged": true,
+  "native_mask_source": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_core_connectivity_v2.py",
+  "reduced_mask_source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_core_bifurcation_v2/model.py",
+  "cross_core_direct_W": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "model": "six-population deterministic delay-rate closure; not a spatial SNN state"
+}

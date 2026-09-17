@@ -1,0 +1,204 @@
+{
+  "figure": "six_rate_model_structure_colored",
+  "producer": "scripts/paper_figures/plot_topic4_six_rate_schematic.py",
+  "source_model": "results/topic4_sef_hfo/core_burst_bifurcation_v2_20260915",
+  "model_layer": "Six-population deterministic colored-Siegert delay-rate closure",
+  "display_order": [
+    "Core A",
+    "Surround",
+    "Core B"
+  ],
+  "populations": [
+    "Core A E",
+    "Core B E",
+    "Surround E",
+    "Core A I",
+    "Core B I",
+    "Surround I"
+  ],
+  "drawn_population_pathways": 28,
+  "drawn_strokes": 24,
+  "stroke_groups_source_target_indices": [
+    [
+      [
+        3,
+        2
+      ]
+    ],
+    [
+      [
+        3,
+        5
+      ],
+      [
+        5,
+        3
+      ]
+    ],
+    [
+      [
+        4,
+        2
+      ]
+    ],
+    [
+      [
+        4,
+        5
+      ],
+      [
+        5,
+        4
+      ]
+    ],
+    [
+      [
+        5,
+        0
+      ]
+    ],
+    [
+      [
+        5,
+        1
+      ]
+    ],
+    [
+      [
+        0,
+        2
+      ],
+      [
+        2,
+        0
+      ]
+    ],
+    [
+      [
+        0,
+        5
+      ]
+    ],
+    [
+      [
+        1,
+        2
+      ],
+      [
+        2,
+        1
+      ]
+    ],
+    [
+      [
+        1,
+        5
+      ]
+    ],
+    [
+      [
+        2,
+        3
+      ]
+    ],
+    [
+      [
+        2,
+        4
+      ]
+    ],
+    [
+      [
+        3,
+        0
+      ]
+    ],
+    [
+      [
+        3,
+        3
+      ]
+    ],
+    [
+      [
+        4,
+        1
+      ]
+    ],
+    [
+      [
+        4,
+        4
+      ]
+    ],
+    [
+      [
+        5,
+        2
+      ]
+    ],
+    [
+      [
+        5,
+        5
+      ]
+    ],
+    [
+      [
+        0,
+        0
+      ]
+    ],
+    [
+      [
+        0,
+        3
+      ]
+    ],
+    [
+      [
+        1,
+        1
+      ]
+    ],
+    [
+      [
+        1,
+        4
+      ]
+    ],
+    [
+      [
+        2,
+        2
+      ]
+    ],
+    [
+      [
+        2,
+        5
+      ]
+    ]
+  ],
+  "self_pathways": 6,
+  "inter_region_pathways": 16,
+  "direct_core_A_B_pathways": 0,
+  "external_drive": "Private core-E Poisson retained through moments; shared OU removed; surround and I external drive deterministic.",
+  "shared_parameter": "Displayed J_EE,core is the dimensionless multiplier g in model.py: W_AE,AE and W_BE,BE scale by g; corresponding Q scales by g^2.",
+  "omitted_from_drawing": [
+    "External input arrows and repeated moment labels, for visual simplicity only",
+    "Two synaptic filters per population",
+    "368 delay bins",
+    "Recurrent variance closure",
+    "Empirical threshold distributions"
+  ],
+  "adaptation_a_or_Z_M": "Absent in this source model",
+  "edge_convention": "Source E: red AMPA with a circular receiving terminal; source I: blue GABA with a triangular receiving terminal, per user instruction. Triangles point toward the receiving population. Same-type reciprocal pathways share one line with the corresponding marker at each end, without implying equal weights. Crossing gaps indicate no junction; line width does not encode weights, delays or variance coefficients.",
+  "synaptic_terminal_counts": {
+    "E_circles": 14,
+    "I_triangles": 14
+  },
+  "node_convention": "Solid red/blue circles contain the six population rates. Self-loops are within-population recurrence, not single-cell autapses.",
+  "scope": "Historical six-population model structure; no claim of native-SNN correspondence or clinical mechanism.",
+  "human_visual_acceptance": "PENDING"
+}

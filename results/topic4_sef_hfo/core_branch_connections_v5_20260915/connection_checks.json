@@ -1,0 +1,82 @@
+[
+  {
+    "name": "doublet_continuity",
+    "source_a": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/periodic/join_doublet_up/g1.24620000_N2048.npz",
+    "source_b": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/periodic/join_doublet_down/g1.24620000_N2048.npz",
+    "J_a": 1.2462,
+    "J_b": 1.2462,
+    "J_difference": 0.0,
+    "period_difference_ms": 2.22655671677785e-10,
+    "phase_shift": 0.0006623144560491039,
+    "max_waveform_difference_hz": 2.8069435664690445e-08,
+    "rms_waveform_difference_hz": 7.302635375686205e-10,
+    "mean_difference_hz": [
+      -2.2398749521812533e-11,
+      -1.3808398868775384e-11,
+      -6.810524366684945e-12,
+      -2.203098814490545e-11,
+      -1.851643838257644e-11,
+      -1.2472661792273243e-11
+    ]
+  },
+  {
+    "name": "burst_mixed_connection",
+    "source_a": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/means/burst_to_B200/mean200.000000.npz",
+    "source_b": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/means/mixed_to_B200/mean200.000000.npz",
+    "J_a": 1.3486392292983655,
+    "J_b": 1.3486392292983638,
+    "J_difference": 1.7763568394002505e-15,
+    "period_difference_ms": 1.4495071809506044e-12,
+    "phase_shift": 0.045206347613331706,
+    "max_waveform_difference_hz": 8.553907582253828e-08,
+    "rms_waveform_difference_hz": 1.0767390718647566e-08,
+    "mean_difference_hz": [
+      2.914335439641036e-13,
+      1.942890293094024e-13,
+      1.6306400674181987e-13,
+      7.077671781985373e-13,
+      -2.7755575615628914e-14,
+      1.8735013540549517e-13
+    ]
+  },
+  {
+    "name": "mixed_tonic_connection",
+    "source_a": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/means/connection_mixed_high_continued_N1024/mean210.000000.npz",
+    "source_b": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/means/connection_tonic_low_continued_N1024/mean210.000000.npz",
+    "J_a": 1.3496462076434677,
+    "J_b": 1.3496462076434665,
+    "J_difference": 1.1102230246251565e-15,
+    "period_difference_ms": -2.8421709430404007e-13,
+    "phase_shift": 0.8424705277809634,
+    "max_waveform_difference_hz": 2.1728999155534723e-07,
+    "rms_waveform_difference_hz": 3.0288446115691594e-08,
+    "mean_difference_hz": [
+      8.326672684688674e-13,
+      2.7755575615628914e-14,
+      4.614364446098307e-13,
+      7.771561172376096e-13,
+      -1.6653345369377348e-13,
+      6.869504964868156e-13
+    ]
+  },
+  {
+    "name": "mixed_tonic_N2048",
+    "source_a": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/periodic/verified_mixed_high_continued_N1024/g1.34964621_N2048.npz",
+    "source_b": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/periodic/verified_tonic_low_continued_N1024/g1.34964621_N2048.npz",
+    "J_a": 1.349646207643467,
+    "J_b": 1.349646207643467,
+    "J_difference": 0.0,
+    "period_difference_ms": -2.8421709430404007e-13,
+    "phase_shift": 0.8424705277809634,
+    "max_waveform_difference_hz": 2.1728985277746915e-07,
+    "rms_waveform_difference_hz": 3.0288443118735065e-08,
+    "mean_difference_hz": [
+      8.326672684688674e-13,
+      5.551115123125783e-14,
+      4.579669976578771e-13,
+      7.494005416219807e-13,
+      -1.6653345369377348e-13,
+      6.938893903907228e-13
+    ]
+  }
+]

@@ -1,0 +1,903 @@
+{
+  "status": "PASS",
+  "observable_order_checked": 784,
+  "dense_micro_orbit_count": 67,
+  "critical_orbit_and_mode_convergence": [
+    {
+      "name": "LP0a",
+      "offgrid_defect_hz": 6.106226635438361e-13,
+      "grid_orbit_difference_hz": 3.765708448191796e-09,
+      "right_rate_mode_cosine": 0.9999999999999999,
+      "left_rate_mode_cosine": 0.9999999999999999
+    },
+    {
+      "name": "LP0b",
+      "offgrid_defect_hz": 5.689893001203927e-13,
+      "grid_orbit_difference_hz": 2.726152636967072e-10,
+      "right_rate_mode_cosine": 1.0000000000000004,
+      "left_rate_mode_cosine": 1.0000000000000002
+    },
+    {
+      "name": "LP0c",
+      "offgrid_defect_hz": 8.798517470154366e-12,
+      "grid_orbit_difference_hz": 0.00011525596022021745,
+      "right_rate_mode_cosine": 0.9999999999999171,
+      "left_rate_mode_cosine": 0.9999999999999907
+    },
+    {
+      "name": "PD0",
+      "offgrid_defect_hz": 6.938893903907228e-13,
+      "grid_orbit_difference_hz": 1.889685808439262e-06,
+      "right_rate_mode_cosine": 0.999999999995381,
+      "left_rate_mode_cosine": 0.9999999999998601
+    }
+  ],
+  "same_J_coexistence": [
+    {
+      "name": "Low-surround cycle",
+      "g": 1.176275354400993,
+      "T": 455.29858191246336,
+      "mean": [
+        16.86023539162083,
+        17.436304945786635,
+        0.17051956759900866,
+        21.761083647341707,
+        22.735809182025704,
+        0.01144353502932566
+      ],
+      "lo": [
+        5.804270942350032e-06,
+        4.844694215244694e-06,
+        -6.166399856011306e-16,
+        -1.1449174941446927e-13,
+        -1.249000902703301e-13,
+        -5.421010862427522e-17
+      ],
+      "hi": [
+        269.7083481024057,
+        278.46108804338775,
+        2.470310158930568,
+        422.5852396355001,
+        438.10301489338786,
+        0.20726374164640538
+      ],
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_observable_bifurcation_v6_20260915/periodic/low_coexist_exact/g1.17627535_N4096.npz",
+      "stable": true,
+      "floquet": {
+        "g": 1.176275354400993,
+        "T_ms": 455.29858191246336,
+        "N": 4096,
+        "dt_ms": 0.024999922134442312,
+        "history_dimension": 8874,
+        "method": "rk4",
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_observable_bifurcation_v6_20260915/periodic/low_coexist_exact/g1.17627535_N4096.npz",
+        "section": "orthogonal",
+        "requested_multipliers": 2,
+        "multipliers": [
+          [
+            0.002230925902952369,
+            0.0
+          ],
+          [
+            -1.746863379442257e-07,
+            0.0
+          ]
+        ],
+        "residuals": [
+          4.1158931079786125e-14,
+          1.737747564848967e-13
+        ],
+        "orbit_tangent_defect": 4.67562725414698e-08,
+        "section_tangent_defect": 6.162556431737815e-11,
+        "max_transverse": 0.002230925902952369
+      },
+      "offgrid_defect_hz": 1.933849890119188e-09
+    },
+    {
+      "name": "Recruited-surround cycle",
+      "g": 1.176275354400993,
+      "T": 548.1729589550491,
+      "mean": [
+        23.793513741225365,
+        14.686105492240886,
+        7.991553221196137,
+        30.882248225247785,
+        19.138728291832535,
+        14.286812159749363
+      ],
+      "lo": [
+        2.9368283965196078e-06,
+        5.0392030825907597e-08,
+        -6.938893903907228e-14,
+        -1.8041124150158794e-13,
+        -1.6653345369377348e-13,
+        -1.6653345369377348e-13
+      ],
+      "hi": [
+        269.7085402998162,
+        279.34477857940675,
+        199.0381288820824,
+        431.1117419994568,
+        440.1265414915464,
+        411.1476058195531
+      ],
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_observable_bifurcation_v6_20260915/periodic/recruited_coexist_exact/g1.17627535_N4096.npz",
+      "stable": true,
+      "floquet": {
+        "g": 1.176275354400993,
+        "T_ms": 548.1729589550491,
+        "N": 4096,
+        "dt_ms": 0.024999906916361066,
+        "history_dimension": 8874,
+        "method": "rk4",
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_observable_bifurcation_v6_20260915/periodic/recruited_coexist_exact/g1.17627535_N4096.npz",
+        "section": "orthogonal",
+        "requested_multipliers": 2,
+        "multipliers": [
+          [
+            -0.09569183871572762,
+            0.0
+          ],
+          [
+            8.596340680200414e-09,
+            0.0
+          ]
+        ],
+        "residuals": [
+          5.129170335736565e-13,
+          4.967699974007592e-13
+        ],
+        "orbit_tangent_defect": 1.0643364591932946e-05,
+        "section_tangent_defect": 8.238358722694798e-10,
+        "max_transverse": 0.09569183871572762
+      },
+      "offgrid_defect_hz": 6.938893903907228e-13
+    }
+  ],
+  "peak_exchange": {
+    "g": 1.1762741938334356,
+    "T_ms": 548.6598241333041,
+    "residual": 1.1587952819525071e-13,
+    "arc_dJ": -4.397971023927916e-06,
+    "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_observable_bifurcation_v6_20260915/periodic/peak_exchange/equal_peaks_N2048.npz",
+    "primary_hz": 269.7076692659505,
+    "primary_time_ms": -82.61375647807992,
+    "secondary_hz": 269.70766926600345,
+    "secondary_time_ms": 10.180211580598417,
+    "floquet": {
+      "g": 1.1762741938334356,
+      "T_ms": 548.6598241333041,
+      "N": 2048,
+      "dt_ms": 0.024999308522044204,
+      "history_dimension": 8874,
+      "method": "rk4",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_observable_bifurcation_v6_20260915/periodic/peak_exchange/equal_peaks_N2048.npz",
+      "section": "orthogonal",
+      "requested_multipliers": 2,
+      "multipliers": [
+        [
+          -0.09414809952674716,
+          0.0
+        ],
+        [
+          -4.827340988931637e-07,
+          0.0
+        ]
+      ],
+      "residuals": [
+        7.117270396068359e-13,
+        3.5205285106669214e-13
+      ],
+      "orbit_tangent_defect": 0.00018009422643995915,
+      "section_tangent_defect": 1.1945480946595903e-08,
+      "max_transverse": 0.09414809952674716
+    }
+  },
+  "crossing": {
+    "g": 1.3795519528089406,
+    "stable": {
+      "g": 1.3795519528089406,
+      "T_ms": 150.91295172824357,
+      "mean_hz": [
+        333.1147372843635,
+        349.4937716391474,
+        34.610012482843416,
+        295.6934102537083,
+        312.53219713127095,
+        62.95486038836888
+      ],
+      "min_hz": [
+        201.7110629118423,
+        264.84645886777975,
+        8.375290435139182e-06,
+        0.0638604884309335,
+        0.5487879529511019,
+        7.277511926417901e-11
+      ],
+      "max_hz": [
+        373.0692064713568,
+        379.26484725356704,
+        242.21019185084765,
+        544.417685051702,
+        539.0132005604015,
+        497.08426911655465
+      ],
+      "refined_A_min_hz": 201.7110605639244,
+      "residual": 2.220446049250313e-13,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_observable_bifurcation_v6_20260915/periodic/projection_stable/g1.379551952809.npz"
+    },
+    "unstable": {
+      "g": 1.3795519528089406,
+      "T_ms": 148.1222035782175,
+      "mean_hz": [
+        201.71106056559339,
+        349.52745248061535,
+        35.21639627796942,
+        177.2378092783819,
+        312.32997207284603,
+        64.00126679090387
+      ],
+      "min_hz": [
+        15.673613553174427,
+        265.89851647072953,
+        4.6881964300277135e-06,
+        1.917704606224646e-07,
+        0.5732854873952142,
+        2.6957602816679582e-12
+      ],
+      "max_hz": [
+        372.70859012121826,
+        379.28316978784125,
+        241.59532102795274,
+        541.5475742400147,
+        538.5734980535087,
+        495.8272166754606
+      ],
+      "refined_A_min_hz": 15.673612697741286,
+      "residual": 2.8831104170734534e-13,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_observable_bifurcation_v6_20260915/periodic/projection_unstable/g1.379551952809.npz"
+    },
+    "observable_difference_hz": 1.6689796211721841e-09,
+    "meaning": "unstable A mean equals stable A minimum; distinct full-network periodic orbits, not a branch intersection",
+    "stable_floquet": {
+      "g": 1.3795519528089406,
+      "T_ms": 150.91295172824357,
+      "N": 2048,
+      "dt_ms": 0.024998004261759743,
+      "history_dimension": 8874,
+      "method": "rk4",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_observable_bifurcation_v6_20260915/periodic/projection_stable/g1.379551952809.npz",
+      "section": "orthogonal",
+      "requested_multipliers": 2,
+      "multipliers": [
+        [
+          0.33015516595230937,
+          0.0
+        ],
+        [
+          -0.046524962466615145,
+          0.0
+        ]
+      ],
+      "residuals": [
+        1.7009785950806507e-14,
+        3.4883262052614272e-15
+      ],
+      "orbit_tangent_defect": 1.1253905052762052e-09,
+      "section_tangent_defect": 1.12274099318059e-09,
+      "max_transverse": 0.33015516595230937
+    },
+    "unstable_floquet": {
+      "g": 1.3795519528089406,
+      "T_ms": 148.1222035782175,
+      "N": 2048,
+      "dt_ms": 0.0249995280300789,
+      "history_dimension": 8874,
+      "method": "rk4",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_observable_bifurcation_v6_20260915/periodic/projection_unstable/g1.379551952809.npz",
+      "section": "orthogonal",
+      "requested_multipliers": 2,
+      "multipliers": [
+        [
+          1977841.270239958,
+          0.0
+        ],
+        [
+          -0.013461412228697449,
+          0.0
+        ]
+      ],
+      "residuals": [
+        6.405418045952015e-09,
+        1.5562089162224333e-09
+      ],
+      "orbit_tangent_defect": 0.0005676327984344875,
+      "section_tangent_defect": 0.0005167441451640889,
+      "max_transverse": 1977841.270239958
+    }
+  },
+  "time_step_checks": [
+    {
+      "name": "recruitment_up",
+      "max_tail_mean_change_hz": 0.0010793168861340519,
+      "period_change_ms": 0.005815394493311032,
+      "refined_period_ms": 533.0254397437344
+    },
+    {
+      "name": "recruitment_down",
+      "max_tail_mean_change_hz": 6.492623664300368e-05,
+      "period_change_ms": 4.4059218055281235e-05,
+      "refined_period_ms": 455.3924033708898
+    }
+  ],
+  "fold_grid_checks": [
+    {
+      "label": "LP0a",
+      "grid_J_difference": 4.440892098500626e-16,
+      "name": "surround_first_fold",
+      "g": 1.1763002668681966,
+      "T_ms": 455.44043186219557,
+      "N": 4096,
+      "residual": 5.2735593669694936e-14,
+      "tangent_g": -8.88907648020922e-15,
+      "fixed_parameter_null_residual": 4.155048267256989e-12,
+      "adjoint_last": -7.690080253770229e-10,
+      "adjoint_duality_error": 1.0330138755812293e-15,
+      "left_Fg": 4.9060990695543145,
+      "second_derivatives": [
+        {
+          "step": 0.003,
+          "left_Fvv": 0.0007532271755554727
+        },
+        {
+          "step": 0.001,
+          "left_Fvv": 0.0007250127503703386
+        }
+      ],
+      "predicted_g_curvature": -0.000147777845512647,
+      "measured_g_curvature": -0.00031415185759442465,
+      "left_source": "results/topic4_sef_hfo/core_burst_right_branch_v4_20260915/arcs/recruitment_turn/point004_g1.1763002669.npz",
+      "right_source": "results/topic4_sef_hfo/core_burst_right_branch_v4_20260915/arcs/recruitment_turn/point005_g1.1763002521.npz",
+      "mean_hz": [
+        16.856897996365,
+        17.470524601395635,
+        0.3473560631588368,
+        21.75611132638653,
+        22.798135454350195,
+        0.02295747677521826
+      ],
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_observable_bifurcation_v6_20260915/folds/surround_first_fold_N4096.npz"
+    },
+    {
+      "label": "LP0b",
+      "grid_J_difference": 1.7763568394002505e-15,
+      "name": "surround_second_fold",
+      "g": 1.1763002486332057,
+      "T_ms": 455.4715039068153,
+      "N": 4096,
+      "residual": 6.487865800153259e-14,
+      "tangent_g": 7.152946850009859e-16,
+      "fixed_parameter_null_residual": 4.594748409872396e-12,
+      "adjoint_last": -5.8050899519230154e-12,
+      "adjoint_duality_error": 1.2228540813423366e-15,
+      "left_Fg": 4.905936588793913,
+      "second_derivatives": [
+        {
+          "step": 0.003,
+          "left_Fvv": -0.0009017346704530511
+        },
+        {
+          "step": 0.001,
+          "left_Fvv": -0.0009048313956350395
+        }
+      ],
+      "predicted_g_curvature": 0.00018443601527623607,
+      "measured_g_curvature": 0.0002558673173780335,
+      "left_source": "results/topic4_sef_hfo/core_burst_right_branch_v4_20260915/arcs/recruitment_turn/point005_g1.1763002521.npz",
+      "right_source": "results/topic4_sef_hfo/core_burst_right_branch_v4_20260915/arcs/recruitment_turn/point006_g1.1763002686.npz",
+      "mean_hz": [
+        16.85614833386393,
+        17.469374710982496,
+        0.3998535710135137,
+        21.754625846620563,
+        22.79661384804914,
+        0.023711279819043043
+      ],
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_observable_bifurcation_v6_20260915/folds/surround_second_fold_N4096.npz"
+    },
+    {
+      "label": "LP0c",
+      "grid_J_difference": 1.6209256159527285e-14,
+      "name": "surround_recruited_fold",
+      "g": 1.1762482895779023,
+      "T_ms": 571.9334836474496,
+      "N": 4096,
+      "residual": 6.938893903907228e-14,
+      "tangent_g": -2.1945544044790877e-14,
+      "fixed_parameter_null_residual": 3.9605263513209366e-12,
+      "adjoint_last": -1.5959615818463166e-11,
+      "adjoint_duality_error": 1.901060974555835e-16,
+      "left_Fg": 4.392986800404813,
+      "second_derivatives": [
+        {
+          "step": 0.003,
+          "left_Fvv": -5.68540181431536e-07
+        },
+        {
+          "step": 0.001,
+          "left_Fvv": -5.958742991323567e-07
+        }
+      ],
+      "predicted_g_curvature": 1.3564217836426162e-07,
+      "measured_g_curvature": 1.2770442481269129e-07,
+      "left_source": "results/topic4_sef_hfo/core_branch_connections_v5_20260915/arcs/surround_recruited_back/point040_g1.1762483312.npz",
+      "right_source": "results/topic4_sef_hfo/core_branch_connections_v5_20260915/arcs/surround_recruited_back/point041_g1.1762482920.npz",
+      "mean_hz": [
+        24.720175088148515,
+        14.272773831422747,
+        7.671830396120351,
+        33.20276572103197,
+        18.515268433861817,
+        13.637062691210772
+      ],
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/folds/surround_recruited_fold_N4096.npz"
+    }
+  ],
+  "PD0": {
+    "name": "surround_micro_flip",
+    "g": 1.1763002486428242,
+    "T_ms": 455.4715526428036,
+    "N": 4096,
+    "anti_eigenvalue": 1.0000000019672537,
+    "anti_null_residual": 1.700008311900092e-08,
+    "left_null_residual": 4.2639565489555054e-10,
+    "crossing_test": "two_mode_determinant",
+    "crossing_slope_per_arc": -0.0036202860859184103,
+    "mean_hz": [
+      16.85616290790183,
+      17.46937286955441,
+      0.40048090833275923,
+      21.754623519547298,
+      22.796611454323795,
+      0.02371976974095251
+    ],
+    "left_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/folds/surround_second_fold_N2048.npz",
+    "right_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_burst_right_branch_v4_20260915/arcs/recruitment_turn/point006_g1.1763002686.npz",
+    "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_observable_bifurcation_v6_20260915/flips/surround_micro_flip_N4096.npz",
+    "grid_J_difference": 8.881784197001252e-16,
+    "floquet": {
+      "g": 1.1763002486428242,
+      "T_ms": 455.4715526428036,
+      "N": 4096,
+      "dt_ms": 0.012499905391152193,
+      "history_dimension": 17706,
+      "method": "rk4",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_observable_bifurcation_v6_20260915/flips/surround_micro_flip_N4096.npz",
+      "section": "orthogonal",
+      "requested_multipliers": 2,
+      "multipliers": [
+        [
+          -0.9998900353076164,
+          0.0
+        ],
+        [
+          1.857204181036587e-05,
+          0.0
+        ]
+      ],
+      "residuals": [
+        2.564135611078991e-10,
+        1.4938590682692795e-10
+      ],
+      "orbit_tangent_defect": 7.837470455024209e-06,
+      "section_tangent_defect": 7.408064007588379e-11,
+      "max_transverse": 0.9998900353076164
+    },
+    "classification": "supercritical toward increasing J"
+  },
+  "micro_neighborhood": [
+    {
+      "fraction": 0.25,
+      "g": 1.1763002486337992,
+      "T_ms": 455.4715180628342,
+      "mean_hz": [
+        16.856151846474454,
+        17.46937417658825,
+        0.4000104187672326,
+        21.754625170533945,
+        22.79661315099061,
+        0.023713405155981814
+      ],
+      "residual": 9.992007221626409e-14,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_observable_bifurcation_v6_20260915/arcs/micro_neighborhood/fraction0.25.npz",
+      "floquet": {
+        "g": 1.1763002486337992,
+        "T_ms": 455.4715180628342,
+        "N": 2048,
+        "dt_ms": 0.024999808884287513,
+        "history_dimension": 8874,
+        "method": "rk4",
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_observable_bifurcation_v6_20260915/arcs/micro_neighborhood/fraction0.25.npz",
+        "section": "orthogonal",
+        "requested_multipliers": 2,
+        "multipliers": [
+          [
+            0.5249770866360329,
+            0.0
+          ],
+          [
+            -3.4206968683127016e-05,
+            0.0
+          ]
+        ],
+        "residuals": [
+          1.5626703503821514e-10,
+          1.92181419859079e-10
+        ],
+        "orbit_tangent_defect": 1.0661183443995048e-05,
+        "section_tangent_defect": 6.538516413606941e-11,
+        "max_transverse": 0.5249770866360329
+      }
+    },
+    {
+      "fraction": 0.75,
+      "g": 1.176300248638594,
+      "T_ms": 455.4715424471367,
+      "mean_hz": [
+        16.85615913296247,
+        17.469373255259804,
+        0.40032410298798704,
+        21.754624006217405,
+        22.7966119533106,
+        0.023717650342623322
+      ],
+      "residual": 5.065392549852277e-14,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_observable_bifurcation_v6_20260915/arcs/micro_neighborhood/fraction0.75.npz",
+      "floquet": {
+        "g": 1.176300248638594,
+        "T_ms": 455.4715424471367,
+        "N": 2048,
+        "dt_ms": 0.024999810222687123,
+        "history_dimension": 8874,
+        "method": "rk4",
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_observable_bifurcation_v6_20260915/arcs/micro_neighborhood/fraction0.75.npz",
+        "section": "orthogonal",
+        "requested_multipliers": 2,
+        "multipliers": [
+          [
+            -0.47455922743294465,
+            0.0
+          ],
+          [
+            3.869707366642543e-05,
+            0.0
+          ]
+        ],
+        "residuals": [
+          3.334440168506173e-10,
+          2.306756859017303e-10
+        ],
+        "orbit_tangent_defect": 8.805514921843657e-06,
+        "section_tangent_defect": 6.414195003223167e-11,
+        "max_transverse": 0.47455922743294465
+      }
+    },
+    {
+      "fraction": 1.25,
+      "g": 1.176300248648298,
+      "T_ms": 455.4715614941119,
+      "mean_hz": [
+        16.856166774845097,
+        17.469372534324,
+        0.4006378110450338,
+        21.754623097176253,
+        22.796611022586777,
+        0.02372188863436377
+      ],
+      "residual": 5.551115123125783e-14,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_observable_bifurcation_v6_20260915/arcs/micro_neighborhood/fraction1.25.npz",
+      "floquet": {
+        "g": 1.176300248648298,
+        "T_ms": 455.4715614941119,
+        "N": 2048,
+        "dt_ms": 0.024999811268132822,
+        "history_dimension": 8874,
+        "method": "rk4",
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_observable_bifurcation_v6_20260915/arcs/micro_neighborhood/fraction1.25.npz",
+        "section": "orthogonal",
+        "requested_multipliers": 2,
+        "multipliers": [
+          [
+            -1.543359601617052,
+            0.0
+          ],
+          [
+            1.2167640159021167e-05,
+            0.0
+          ]
+        ],
+        "residuals": [
+          1.4968859741878486e-10,
+          9.298044053373498e-11
+        ],
+        "orbit_tangent_defect": 6.767440464159688e-06,
+        "section_tangent_defect": 8.885269236232139e-11,
+        "max_transverse": 1.543359601617052
+      }
+    }
+  ],
+  "PD0_children": [
+    {
+      "g": 1.1763002486437752,
+      "T_ms": 910.9431031381787,
+      "N": 4096,
+      "residual": 6.661338147750939e-14,
+      "amplitude": 0.0001,
+      "mean_hz": [
+        16.85616296744516,
+        17.469372909876792,
+        0.40048049524631874,
+        21.75462357089868,
+        22.79661150800043,
+        0.02371976274643481
+      ],
+      "half_period_difference": 1.4264453076488598e-05,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_observable_bifurcation_v6_20260915/periodic/surround_period2/amp0.0001_N4096.npz",
+      "floquet": {
+        "g": 1.1763002486437752,
+        "T_ms": 910.9431031381787,
+        "N": 4096,
+        "dt_ms": 0.02499981072337062,
+        "history_dimension": 8874,
+        "method": "rk4",
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_observable_bifurcation_v6_20260915/periodic/surround_period2/amp0.0001_N4096.npz",
+        "section": "orthogonal",
+        "requested_multipliers": 2,
+        "multipliers": [
+          [
+            0.5811281887754975,
+            0.0
+          ],
+          [
+            3.973630432615887e-07,
+            0.0
+          ]
+        ],
+        "residuals": [
+          1.7019306772913345e-10,
+          3.177863373606261e-10
+        ],
+        "orbit_tangent_defect": 7.937587529328312e-05,
+        "section_tangent_defect": 7.524859850661226e-10,
+        "max_transverse": 0.5811281887754975
+      }
+    },
+    {
+      "g": 1.1763002486466263,
+      "T_ms": 910.9430966806603,
+      "N": 4096,
+      "residual": 2.0422032120936962e-13,
+      "amplitude": 0.0002,
+      "mean_hz": [
+        16.856163143258964,
+        17.469373031131727,
+        0.4004791394454507,
+        21.754623725316307,
+        22.79661166940336,
+        0.023719740188065046
+      ],
+      "half_period_difference": 2.852890621526392e-05,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_observable_bifurcation_v6_20260915/periodic/surround_period2/amp0.0002_N4096.npz",
+      "floquet": {
+        "g": 1.1763002486466263,
+        "T_ms": 910.9430966806603,
+        "N": 4096,
+        "dt_ms": 0.02499981054615128,
+        "history_dimension": 8874,
+        "method": "rk4",
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_observable_bifurcation_v6_20260915/periodic/surround_period2/amp0.0002_N4096.npz",
+        "section": "orthogonal",
+        "requested_multipliers": 2,
+        "multipliers": [
+          [
+            -0.6751297762591644,
+            0.0
+          ],
+          [
+            -5.50205890395746e-07,
+            0.0
+          ]
+        ],
+        "residuals": [
+          2.3256082789671278e-10,
+          6.300509611542271e-10
+        ],
+        "orbit_tangent_defect": 6.922825598680995e-05,
+        "section_tangent_defect": 1.1284138230771953e-09,
+        "max_transverse": 0.6751297762591644
+      }
+    },
+    {
+      "g": 1.1763002486580325,
+      "T_ms": 910.9430708508643,
+      "N": 4096,
+      "residual": 7.354555332794721e-12,
+      "amplitude": 0.0004,
+      "mean_hz": [
+        16.856163847294514,
+        17.46937351614443,
+        0.40047374411354364,
+        21.754624342980446,
+        22.796612315008282,
+        0.02371965032630816
+      ],
+      "half_period_difference": 5.7057816559406123e-05,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_observable_bifurcation_v6_20260915/periodic/surround_period2/amp0.0004_N4096.npz",
+      "floquet": {
+        "g": 1.1763002486580325,
+        "T_ms": 910.9430708508643,
+        "N": 4096,
+        "dt_ms": 0.024999809837281527,
+        "history_dimension": 8874,
+        "method": "rk4",
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_observable_bifurcation_v6_20260915/periodic/surround_period2/amp0.0004_N4096.npz",
+        "section": "orthogonal",
+        "requested_multipliers": 2,
+        "multipliers": [
+          [
+            -5.696034452981468,
+            0.0
+          ],
+          [
+            -1.2945842978618595e-07,
+            0.0
+          ]
+        ],
+        "residuals": [
+          1.2468683610656491e-09,
+          7.945780687958677e-10
+        ],
+        "orbit_tangent_defect": 4.1760179433811566e-05,
+        "section_tangent_defect": 2.026548994677451e-09,
+        "max_transverse": 5.696034452981468
+      }
+    },
+    {
+      "g": 1.1763002495049868,
+      "T_ms": 910.9411507755983,
+      "N": 4096,
+      "residual": 5.828670879282072e-14,
+      "amplitude": 0.003,
+      "mean_hz": [
+        16.856216117703365,
+        17.46940956707142,
+        0.4000720497127278,
+        21.754670257483433,
+        22.796660301804142,
+        0.0237129507623326
+      ],
+      "half_period_difference": 0.0004280512710731566,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_observable_bifurcation_v6_20260915/periodic/surround_period2/amp0.003_N4096.npz",
+      "floquet": {
+        "g": 1.1763002495049868,
+        "T_ms": 910.9411507755983,
+        "N": 4096,
+        "dt_ms": 0.024999757142971576,
+        "history_dimension": 8874,
+        "method": "rk4",
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_observable_bifurcation_v6_20260915/periodic/surround_period2/amp0.003_N4096.npz",
+        "section": "orthogonal",
+        "requested_multipliers": 2,
+        "multipliers": [
+          [
+            -358.65050685967606,
+            0.0
+          ],
+          [
+            -3.593707159404749e-08,
+            0.0
+          ]
+        ],
+        "residuals": [
+          2.1713160830880173e-08,
+          2.24037048522466e-08
+        ],
+        "orbit_tangent_defect": 0.0012443760372389627,
+        "section_tangent_defect": 3.126430995952371e-08,
+        "max_transverse": 358.65050685967606
+      }
+    },
+    {
+      "g": 1.1763002521892194,
+      "T_ms": 910.9350363262105,
+      "N": 4096,
+      "residual": 5.134781488891349e-14,
+      "amplitude": 0.006,
+      "mean_hz": [
+        16.856382202783553,
+        17.46952432969016,
+        0.3988043240650259,
+        21.7548164718478,
+        22.7968130487496,
+        0.023691597912022244
+      ],
+      "half_period_difference": 0.0008593022861284516,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_observable_bifurcation_v6_20260915/periodic/surround_period2/amp0.006_N4096.npz",
+      "floquet": {
+        "g": 1.1763002521892194,
+        "T_ms": 910.9350363262105,
+        "N": 4096,
+        "dt_ms": 0.024999589338773,
+        "history_dimension": 8874,
+        "method": "rk4",
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_observable_bifurcation_v6_20260915/periodic/surround_period2/amp0.006_N4096.npz",
+        "section": "orthogonal",
+        "requested_multipliers": 2,
+        "multipliers": [
+          [
+            -1249.4232968848912,
+            0.0
+          ],
+          [
+            -1.1214672486714908e-08,
+            -2.789426015473413e-08
+          ]
+        ],
+        "residuals": [
+          6.093230646113755e-08,
+          4.141666368943241e-08
+        ],
+        "orbit_tangent_defect": 0.004864996433338425,
+        "section_tangent_defect": 1.0535981291728164e-07,
+        "max_transverse": 1249.4232968848912
+      }
+    },
+    {
+      "g": 1.176300265217791,
+      "T_ms": 910.9041692534789,
+      "N": 4096,
+      "residual": 4.054124657509872e-12,
+      "amplitude": 0.012,
+      "mean_hz": [
+        16.857210949082173,
+        17.470102150276578,
+        0.39249745409013487,
+        21.75555458592074,
+        22.797581636020695,
+        0.023582369484308884
+      ],
+      "half_period_difference": 0.001809949312494064,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_observable_bifurcation_v6_20260915/periodic/surround_period2/amp0.012_N4096.npz",
+      "floquet": {
+        "g": 1.176300265217791,
+        "T_ms": 910.9041692534789,
+        "N": 4096,
+        "dt_ms": 0.024999428307859565,
+        "history_dimension": 8874,
+        "method": "rk4",
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_observable_bifurcation_v6_20260915/periodic/surround_period2/amp0.012_N4096.npz",
+        "section": "orthogonal",
+        "requested_multipliers": 2,
+        "multipliers": [
+          [
+            -2480.816828897617,
+            0.0
+          ],
+          [
+            -7.29865115399433e-08,
+            0.0
+          ]
+        ],
+        "residuals": [
+          2.9629631368234416e-07,
+          2.5196326945747047e-07
+        ],
+        "orbit_tangent_defect": 0.02147296279048551,
+        "section_tangent_defect": 4.3442902923076023e-07,
+        "max_transverse": 2480.816828897617
+      }
+    }
+  ],
+  "prior_right_branch_validation": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/numerical_validation.json",
+  "scope": "targeted local and projection checks; not exhaustive global attractor census"
+}

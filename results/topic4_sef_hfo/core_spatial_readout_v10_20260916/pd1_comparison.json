@@ -1,0 +1,112 @@
+{
+  "mother": {
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_spatial_readout_v10_20260916/pd1_mother_T_control.npz",
+    "solution_id": "94a8019d9e9a24352e0cd6d38dc9b7826ba77661d8310558157538022804720a",
+    "J_exact": 1.3493651357914933,
+    "T_full_ms": 187.5370594837144,
+    "mesh": {
+      "kind": "uniform periodic Fourier phase",
+      "points": 4096,
+      "dt_ms": 0.04578541491301621,
+      "endpoint": false
+    },
+    "state_array": "r",
+    "state_units": "spikes/ms/cell",
+    "residual": 1.5543122344752192e-13,
+    "mean": [
+      54.94533622189397,
+      309.2724271853854,
+      25.95081591239497,
+      64.6268068826202,
+      280.0568778896784,
+      47.44366098277995
+    ],
+    "lo": [
+      2.451436165173959e-06,
+      115.6472641302748,
+      2.3353110972790248e-06,
+      -2.463307335887066e-13,
+      0.002947482105775112,
+      2.4980018054066022e-12
+    ],
+    "hi": [
+      365.52610468447205,
+      365.6790728802634,
+      225.5759825820023,
+      593.084320109548,
+      547.4868201139142,
+      465.4475868460739
+    ],
+    "extrema_grid_error_hz": 1.2969686054020713e-06
+  },
+  "daughter": {
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/periodic/mixed_lower_period2/amp0.12_N4096.npz",
+    "solution_id": "323329dd3a365067a13f12669c7dffed4405ddb88b16270e1561aef08ca8af42",
+    "J_exact": 1.34936498373232,
+    "T_full_ms": 375.0738808653397,
+    "mesh": {
+      "kind": "uniform periodic Fourier phase",
+      "points": 4096,
+      "dt_ms": 0.09157077169563957,
+      "endpoint": false
+    },
+    "state_array": "r",
+    "state_units": "spikes/ms/cell",
+    "residual": 1.8179902028236938e-13,
+    "mean": [
+      54.945347265209236,
+      309.2711997914878,
+      25.950833549494167,
+      64.62684333276006,
+      280.05575829519455,
+      47.44369335070906
+    ],
+    "lo": [
+      2.4513263753654212e-06,
+      115.24087159198895,
+      2.3228029467374967e-06,
+      -2.0824474414836425e-13,
+      0.0028828514354100276,
+      2.4941732164850128e-12
+    ],
+    "hi": [
+      365.52688336156683,
+      365.6890286377218,
+      225.5769012701714,
+      593.0866137101805,
+      547.5041927574471,
+      465.4495868122112
+    ],
+    "extrema_grid_error_hz": 3.2548752869843156e-05,
+    "label": "b",
+    "S": "S2",
+    "title": "PD1: stable 2T",
+    "stable": true,
+    "native_key": "b",
+    "source_condition": null
+  },
+  "critical_J": 1.3493650597619067,
+  "mother_side": "stable T side, inherited refined PD1 crossing; new orbit is not independently Floquet reclassified",
+  "max_half_difference_hz": [
+    0.28803408852991197,
+    2.988275533554514,
+    0.26616007306006395,
+    0.8809082302617526,
+    7.745557023975238,
+    0.7360273061563021
+  ],
+  "rms_half_difference_hz": [
+    0.0765194661102556,
+    0.7971430150544175,
+    0.05366652214304552,
+    0.15541474884681683,
+    2.2529157514121256,
+    0.12666715854975566
+  ],
+  "A_peak_intervals_ms": [
+    187.52549408620789,
+    187.5483867791318
+  ],
+  "same_parent": true,
+  "spatial_propagation_alternation": "NOT_ESTABLISHED_BY_AGGREGATE_MODEL"
+}

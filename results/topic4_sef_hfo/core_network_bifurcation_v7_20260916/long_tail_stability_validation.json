@@ -1,0 +1,190 @@
+{
+  "status": "STABLE_BOUND",
+  "scope": "Stable 2200ms finite-period sample. Exact small multiplier not precision accepted; no infinite-time homoclinic BVP.",
+  "accepted_analytic_returns": [
+    {
+      "g": 1.1218371447051094,
+      "T_ms": 2199.999999999931,
+      "N": 16384,
+      "dt_ms": 0.024999999999999214,
+      "history_dimension": 8874,
+      "method": "rk4",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/long_period_tail/T2200_N16384.npz",
+      "gain_derivative": "analytic frozen transfer quadrature",
+      "section": "orthogonal",
+      "requested_multipliers": 1,
+      "multipliers": [
+        [
+          -0.004133802216875482,
+          0.0
+        ]
+      ],
+      "residuals": [
+        5.166624107388135e-06
+      ],
+      "orbit_tangent_defect": 0.001046600296155494,
+      "section_tangent_defect": 0.0010163478392686525,
+      "max_transverse": 0.004133802216875482
+    },
+    {
+      "g": 1.1218371447051094,
+      "T_ms": 2199.999999999931,
+      "N": 16384,
+      "dt_ms": 0.012499999999999607,
+      "history_dimension": 17706,
+      "method": "rk4",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/long_period_tail/T2200_N16384.npz",
+      "gain_derivative": "analytic frozen transfer quadrature",
+      "section": "orthogonal",
+      "requested_multipliers": 1,
+      "multipliers": [
+        [
+          -4.238829782914727e-06,
+          0.0
+        ]
+      ],
+      "residuals": [
+        5.316181071701801e-06
+      ],
+      "orbit_tangent_defect": 1.7151065456619353e-06,
+      "section_tangent_defect": 1.6747230000316649e-06,
+      "max_transverse": 4.238829782914727e-06
+    },
+    {
+      "g": 1.1218371447051094,
+      "T_ms": 2199.999999999931,
+      "N": 16384,
+      "dt_ms": 0.024999999999999214,
+      "history_dimension": 8874,
+      "method": "rk4",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/long_period_tail_phase/T2200_N16384.npz",
+      "gain_derivative": "analytic frozen transfer quadrature",
+      "section": "orthogonal",
+      "requested_multipliers": 1,
+      "multipliers": [
+        [
+          -0.004340720008131545,
+          0.0
+        ]
+      ],
+      "residuals": [
+        6.748222474042524e-08
+      ],
+      "orbit_tangent_defect": 4.3836463321456625e-05,
+      "section_tangent_defect": 8.147490268725056e-11,
+      "max_transverse": 0.004340720008131545
+    }
+  ],
+  "rejected_finite_difference_gain_returns": [
+    {
+      "g": 1.1218371447051094,
+      "T_ms": 2199.999999999931,
+      "N": 16384,
+      "dt_ms": 0.024999999999999214,
+      "history_dimension": 8874,
+      "method": "rk4",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/long_period_tail/T2200_N16384.npz",
+      "section": "orthogonal",
+      "requested_multipliers": 2,
+      "multipliers": [
+        [
+          -1.1835134871851944,
+          0.0
+        ],
+        [
+          1.2488326467148005e-14,
+          0.0
+        ]
+      ],
+      "residuals": [
+        1.4115805986197622e-06,
+        2.394459591002177e-07
+      ],
+      "orbit_tangent_defect": 0.29962129359245737,
+      "section_tangent_defect": 0.2909579184275447,
+      "max_transverse": 1.1835134871851944
+    },
+    {
+      "g": 1.1218371447051094,
+      "T_ms": 2199.999999999931,
+      "N": 16384,
+      "dt_ms": 0.012499999999999607,
+      "history_dimension": 17706,
+      "method": "rk4",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/long_period_tail/T2200_N16384.npz",
+      "section": "orthogonal",
+      "requested_multipliers": 1,
+      "multipliers": [
+        [
+          -1.1799738121879604,
+          0.0
+        ]
+      ],
+      "residuals": [
+        3.96876774480315e-06
+      ],
+      "orbit_tangent_defect": 0.298906353551683,
+      "section_tangent_defect": 0.2902540276378049,
+      "max_transverse": 1.1799738121879604
+    },
+    {
+      "g": 1.1218371447051094,
+      "T_ms": 2199.999999999931,
+      "N": 16384,
+      "dt_ms": 0.024999999999999214,
+      "history_dimension": 8874,
+      "method": "rk4",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/long_period_tail_phase/T2200_N16384.npz",
+      "section": "orthogonal",
+      "requested_multipliers": 1,
+      "multipliers": [
+        [
+          -1.2548034482647088,
+          0.0
+        ]
+      ],
+      "residuals": [
+        2.725570128603447e-06
+      ],
+      "orbit_tangent_defect": 0.0019021488125515933,
+      "section_tangent_defect": 5.829321569086006e-10,
+      "max_transverse": 1.2548034482647088
+    }
+  ],
+  "gain_validation": {
+    "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/long_period_tail/T2200_N16384.npz",
+    "analytic_chain_rule_error": 3.673710641249883e-15,
+    "finite_difference": [
+      {
+        "step": 0.0001,
+        "max_gain_difference": 2.3467450738744178e-09,
+        "chain_rule_error": 8.856517210147768e-10
+      },
+      {
+        "step": 1e-05,
+        "max_gain_difference": 2.345878938152246e-11,
+        "chain_rule_error": 8.875407353503562e-12
+      },
+      {
+        "step": 1e-06,
+        "max_gain_difference": 4.7959182435661826e-12,
+        "chain_rule_error": 1.793957343787511e-11
+      },
+      {
+        "step": 1e-07,
+        "max_gain_difference": 3.7363618058880443e-11,
+        "chain_rule_error": 1.52322958066331e-10
+      }
+    ]
+  },
+  "phase_origin": {
+    "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/long_period_tail/T2200_N16384.npz",
+    "rolled_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/long_period_tail_phase/T2200_N16384.npz",
+    "phase_shift_index": 12103,
+    "phase_shift_ms": 1625.1586914061988,
+    "initial_rate_velocity_norm": 2.2573363974016353e-10,
+    "new_rate_velocity_norm": 0.052587330686162864,
+    "mean_difference_hz": 8.239936510889834e-15
+  },
+  "interpretation": "Analytic differentiation of the same transfer removes the apparent multiplier below -1. Independent starting phases and step sizes have transverse modulus far below one. Finite-difference gain bias is strongly amplified near the saddle; reducing only integration dt did not cure it."
+}

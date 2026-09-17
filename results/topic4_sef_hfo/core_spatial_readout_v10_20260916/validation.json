@@ -1,0 +1,125 @@
+{
+  "status": "PASS",
+  "scope": "Numerical, provenance and figure checks; not native bifurcation equivalence",
+  "native_runs": [
+    {
+      "key": "a",
+      "count_conservation": true,
+      "independent_metric_recompute": true,
+      "N": 28,
+      "native_replay": "Exact full-duration spike/count parity with V7",
+      "contact_count": 15,
+      "pair_count": 61
+    },
+    {
+      "key": "b",
+      "count_conservation": true,
+      "independent_metric_recompute": true,
+      "N": 30,
+      "native_replay": "Same frozen executor; newly evaluated exact PD1 daughter parameter",
+      "contact_count": 15,
+      "pair_count": 61
+    },
+    {
+      "key": "cd",
+      "count_conservation": true,
+      "independent_metric_recompute": true,
+      "N": 30,
+      "native_replay": "Exact full-duration spike/count parity with V7",
+      "contact_count": 15,
+      "pair_count": 61
+    }
+  ],
+  "figures": [
+    {
+      "name": "03_native_network_contacts_metrics.png",
+      "readable": true
+    },
+    {
+      "name": "05_native_three_metrics.png",
+      "readable": true
+    },
+    {
+      "name": "06_all_events_contact_sequence.png",
+      "readable": true
+    },
+    {
+      "name": "04_native_a_snapshots_01.png",
+      "readable": true
+    },
+    {
+      "name": "04_native_a_snapshots_02.png",
+      "readable": true
+    },
+    {
+      "name": "04_native_a_snapshots_03.png",
+      "readable": true
+    },
+    {
+      "name": "04_native_b_snapshots_01.png",
+      "readable": true
+    },
+    {
+      "name": "04_native_b_snapshots_02.png",
+      "readable": true
+    },
+    {
+      "name": "04_native_b_snapshots_03.png",
+      "readable": true
+    },
+    {
+      "name": "04_native_b_snapshots_04.png",
+      "readable": true
+    },
+    {
+      "name": "04_native_cd_snapshots_01.png",
+      "readable": true
+    },
+    {
+      "name": "04_native_cd_snapshots_02.png",
+      "readable": true
+    },
+    {
+      "name": "04_native_cd_snapshots_03.png",
+      "readable": true
+    },
+    {
+      "name": "04_native_cd_snapshots_04.png",
+      "readable": true
+    },
+    {
+      "name": "08_native_a_4to6s.gif",
+      "readable": true
+    },
+    {
+      "name": "08_native_b_4to6s.gif",
+      "readable": true
+    },
+    {
+      "name": "08_native_cd_4to6s.gif",
+      "readable": true
+    },
+    {
+      "name": "00_corrected_bifurcation_network.png",
+      "readable": true
+    },
+    {
+      "name": "01_right_branch_detail.png",
+      "readable": true
+    },
+    {
+      "name": "02_PD1_same_parent_comparison.png",
+      "readable": true
+    },
+    {
+      "name": "07_raw_contact_metrics.png",
+      "readable": true
+    }
+  ],
+  "all_displayed_windows_include_both_frozen_labels": true,
+  "same_geometry_thresholds_and_inhibition": true,
+  "three_metric_values_recomputed_from_raw_events": true,
+  "reduced_inherited_validation": "core_network_bifurcation_v7_20260916/numerical_validation.json",
+  "scientific_state_mapping": "NOT_ESTABLISHED",
+  "human_visual_review": "PENDING"
+}

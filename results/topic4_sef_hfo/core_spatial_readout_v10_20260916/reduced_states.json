@@ -1,0 +1,186 @@
+[
+  {
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/condition_12a/g1.35500000_N2048.npz",
+    "solution_id": "a264f5affb9c1f5fbcaa5c7a910c3e9ad880bdf7884e638bd199519442f23399",
+    "J_exact": 1.355,
+    "T_full_ms": 343.92120627614713,
+    "mesh": {
+      "kind": "uniform periodic Fourier phase",
+      "points": 2048,
+      "dt_ms": 0.16793027650202497,
+      "endpoint": false
+    },
+    "state_array": "r",
+    "state_units": "spikes/ms/cell",
+    "residual": 2.1639417688290585e-11,
+    "mean": [
+      65.19503713275577,
+      44.331070234309045,
+      14.136299818928794,
+      65.86498572636725,
+      46.94155129831976,
+      25.87430692375012
+    ],
+    "lo": [
+      3.7433013216903177e-06,
+      3.088710249371518e-06,
+      -8.326672684688674e-14,
+      -3.608224830031759e-13,
+      -3.885780586188048e-13,
+      -5.93275428784068e-13
+    ],
+    "hi": [
+      359.177603120827,
+      377.27022180122094,
+      226.31220461533613,
+      530.115476158042,
+      586.4579285077078,
+      465.0363107968594
+    ],
+    "extrema_grid_error_hz": 0.00017491435039573844,
+    "label": "a",
+    "S": "S1",
+    "title": "Two-core self-limited bursts",
+    "stable": true,
+    "native_key": "a",
+    "source_condition": "12a"
+  },
+  {
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_branch_connections_v5_20260915/periodic/mixed_lower_period2/amp0.12_N4096.npz",
+    "solution_id": "323329dd3a365067a13f12669c7dffed4405ddb88b16270e1561aef08ca8af42",
+    "J_exact": 1.34936498373232,
+    "T_full_ms": 375.0738808653397,
+    "mesh": {
+      "kind": "uniform periodic Fourier phase",
+      "points": 4096,
+      "dt_ms": 0.09157077169563957,
+      "endpoint": false
+    },
+    "state_array": "r",
+    "state_units": "spikes/ms/cell",
+    "residual": 1.8179902028236938e-13,
+    "mean": [
+      54.945347265209236,
+      309.2711997914878,
+      25.950833549494167,
+      64.62684333276006,
+      280.05575829519455,
+      47.44369335070906
+    ],
+    "lo": [
+      2.4513263753654212e-06,
+      115.24087159198895,
+      2.3228029467374967e-06,
+      -2.0824474414836425e-13,
+      0.0028828514354100276,
+      2.4941732164850128e-12
+    ],
+    "hi": [
+      365.52688336156683,
+      365.6890286377218,
+      225.5769012701714,
+      593.0866137101805,
+      547.5041927574471,
+      465.4495868122112
+    ],
+    "extrema_grid_error_hz": 3.2548752869843156e-05,
+    "label": "b",
+    "S": "S2",
+    "title": "PD1: stable 2T",
+    "stable": true,
+    "native_key": "b",
+    "source_condition": null
+  },
+  {
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/condition_15a/g1.38000000_N2048.npz",
+    "solution_id": "29663307944eba47eebdb01945804e18b22ad2b0e461b2152d9f7397fd79badc",
+    "J_exact": 1.38,
+    "T_full_ms": 183.5904057213304,
+    "mesh": {
+      "kind": "uniform periodic Fourier phase",
+      "points": 2048,
+      "dt_ms": 0.08964375279361836,
+      "endpoint": false
+    },
+    "state_array": "r",
+    "state_units": "spikes/ms/cell",
+    "residual": 1.6306400674181987e-13,
+    "mean": [
+      63.26726838735489,
+      353.0542498615608,
+      26.62183135622101,
+      66.65305771907227,
+      318.43320550269175,
+      48.67572100628767
+    ],
+    "lo": [
+      5.324673535422875e-06,
+      281.43133750310295,
+      1.9545370599782785e-06,
+      -3.3306690738754696e-13,
+      1.2486139197243895,
+      1.3877787807814457e-12
+    ],
+    "hi": [
+      371.80986501275515,
+      379.53517510883626,
+      226.53388541436865,
+      597.9331567917728,
+      531.1225787048215,
+      467.358874168302
+    ],
+    "extrema_grid_error_hz": 2.762247686405317e-05,
+    "label": "c",
+    "S": "S3",
+    "title": "A bursts / B high background",
+    "stable": true,
+    "native_key": "cd",
+    "source_condition": "15a"
+  },
+  {
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/condition_15b/g1.38000000_N2048.npz",
+    "solution_id": "001b7882782358ed9f61972351a45d70d769eb2564bf701aa5ae94afd0405159",
+    "J_exact": 1.38,
+    "T_full_ms": 150.92314860457356,
+    "mesh": {
+      "kind": "uniform periodic Fourier phase",
+      "points": 2048,
+      "dt_ms": 0.07369294365457693,
+      "endpoint": false
+    },
+    "state_array": "r",
+    "state_units": "spikes/ms/cell",
+    "residual": 1.609823385706477e-13,
+    "mean": [
+      334.31776343919614,
+      349.80623294897066,
+      34.611496808956055,
+      296.7166697674487,
+      312.80670011433597,
+      62.95740563197344
+    ],
+    "lo": [
+      206.62755284847208,
+      265.7610076434684,
+      8.216902512570012e-06,
+      0.07555992170768522,
+      0.5628483231199244,
+      7.16093850883226e-11
+    ],
+    "hi": [
+      373.32616302761323,
+      379.42735159132764,
+      242.2382167814631,
+      543.6949419388185,
+      538.9578904702668,
+      497.13992968712364
+    ],
+    "extrema_grid_error_hz": 4.541882140074449e-05,
+    "label": "d",
+    "S": "S4",
+    "title": "Both cores: high background",
+    "stable": true,
+    "native_key": "cd",
+    "source_condition": "15b"
+  }
+]

@@ -1,0 +1,40 @@
+{
+  "figure": "six_rate_model_structure",
+  "producer": "scripts/paper_figures/plot_topic4_six_rate_schematic.py",
+  "source_model": "results/topic4_sef_hfo/core_burst_bifurcation_v2_20260915",
+  "model_layer": "Six-population deterministic colored-Siegert delay-rate closure",
+  "display_order": [
+    "Core A",
+    "Surround",
+    "Core B"
+  ],
+  "populations": [
+    "Core A E",
+    "Core B E",
+    "Surround E",
+    "Core A I",
+    "Core B I",
+    "Surround I"
+  ],
+  "drawn_population_pathways": 28,
+  "self_pathways": 6,
+  "inter_region_pathways": 16,
+  "direct_core_A_B_pathways": 0,
+  "external_drive": "Private core-E Poisson retained through moments; shared OU removed; surround and I external drive deterministic.",
+  "input_labels": {
+    "mu_ext": "External mean input",
+    "sigma_ext_squared": "External input variance (V_ext in source equations), not a time-dependent noise realization"
+  },
+  "shared_parameter": "Displayed J_EE,core is the dimensionless multiplier g in model.py: W_AE,AE and W_BE,BE scale by g; corresponding Q scales by g^2.",
+  "omitted_from_drawing": [
+    "Two synaptic filters per population",
+    "368 delay bins",
+    "Recurrent variance closure",
+    "Empirical threshold distributions"
+  ],
+  "adaptation_a_or_Z_M": "Absent in this source model",
+  "edge_convention": "Triangle: excitatory AMPA mean input; filled dot: inhibitory GABA mean input. Pathway weights, delays and variance coefficients are not encoded by line width. Crossings are not connections.",
+  "node_convention": "Population variables; self-loops are within-population recurrence, not single-cell autapses.",
+  "scope": "Historical six-population model structure; no claim of native-SNN correspondence or clinical mechanism.",
+  "human_visual_acceptance": "PENDING"
+}

@@ -1,0 +1,145 @@
+{
+  "fits": [
+    {
+      "first_T_ms": 1000.0000000000016,
+      "J_infinite_period": 1.1218371467133592,
+      "rate_per_s": 5.891844764798378,
+      "amplitude": 0.000985713548214019,
+      "max_J_residual": 5.049387699713747e-10
+    },
+    {
+      "first_T_ms": 1200.0000000000286,
+      "J_infinite_period": 1.1218371470498445,
+      "rate_per_s": 5.872668712487023,
+      "amplitude": 0.0009634382888048051,
+      "max_J_residual": 2.02845372854199e-11
+    },
+    {
+      "first_T_ms": 1499.9999999999907,
+      "J_infinite_period": 1.121837147073973,
+      "rate_per_s": 5.8671003033287334,
+      "amplitude": 0.0009555438060010881,
+      "max_J_residual": 0.0
+    }
+  ],
+  "orbits": [
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/long_period_tail/T1000_N8192.npz",
+      "g": 1.1218344242560954,
+      "T_ms": 1000.0000000000016,
+      "distance_to_saddle_hz": 0.0055886033776353745,
+      "near_saddle_fraction": 0.5469970703125,
+      "mean_hz": [
+        6.129815443212099,
+        6.243278654939854,
+        0.018588337508905848,
+        7.978298819811283,
+        8.383475091203119,
+        0.0017349126793854697
+      ]
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/long_period_tail/T1200_N8192.npz",
+      "g": 1.121836309013173,
+      "T_ms": 1200.0000000000286,
+      "distance_to_saddle_hz": 0.0021288035934018644,
+      "near_saddle_fraction": 0.6224365234375,
+      "mean_hz": [
+        5.191301900006112,
+        5.253406419038611,
+        0.015490803657733372,
+        6.648641793688113,
+        6.986289372203201,
+        0.0014458206404472358
+      ]
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/long_period_tail/T1500_N8192.npz",
+      "g": 1.1218370031355727,
+      "T_ms": 1499.9999999999907,
+      "distance_to_saddle_hz": 0.0005153989355293043,
+      "near_saddle_fraction": 0.697998046875,
+      "mean_hz": [
+        4.252673380843851,
+        4.263489386441156,
+        0.012392796871242655,
+        5.318930948588066,
+        5.589049213446436,
+        0.0011566742154654884
+      ]
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/long_period_tail/T1800_N8192.npz",
+      "g": 1.1218371223133319,
+      "T_ms": 1799.9999999999318,
+      "distance_to_saddle_hz": 0.00012609134322316977,
+      "near_saddle_fraction": 0.748291015625,
+      "mean_hz": [
+        3.626895635098734,
+        3.6035345735429725,
+        0.010327352751702672,
+        4.432444963000125,
+        4.657543545955816,
+        0.0009638977124266287
+      ]
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/long_period_tail/T2200_N8192.npz",
+      "g": 1.1218371447050979,
+      "T_ms": 2199.999999999964,
+      "distance_to_saddle_hz": 1.936232400067622e-05,
+      "near_saddle_fraction": 0.7940673828125,
+      "mean_hz": [
+        3.05800196311478,
+        3.0035736704453044,
+        0.008449655637251715,
+        3.6265462640275423,
+        3.8107178363440637,
+        0.0007886439722561496
+      ]
+    }
+  ],
+  "saddle_hz": [
+    0.4979762350506005,
+    0.30374780144381197,
+    1.1680306583317462e-204,
+    6.191211444869581e-91,
+    2.4458921901775976e-157,
+    0.0
+  ],
+  "saddle_roots_per_s": [
+    [
+      5.865984401756469,
+      0.0
+    ],
+    [
+      -23.19342381188558,
+      4.111211050595595e-14
+    ],
+    [
+      -1073.5071468308472,
+      1394.76220469687
+    ]
+  ],
+  "right_rate_mode_fraction": [
+    1.0,
+    5.345009031280435e-31,
+    6.642117739078025e-32,
+    6.608809051816642e-32,
+    0.0,
+    3.480569240367185e-32
+  ],
+  "left_rate_mode_fraction": [
+    0.32937520325452624,
+    4.930380657631324e-32,
+    0.2708472502532237,
+    0.2618648435471799,
+    1.232595164407831e-32,
+    0.13791270294507024
+  ],
+  "interpretation": "Numerical homoclinic termination: increasing period, convergence to the same saddle, and exponential parameter convergence consistent with its unstable eigenvalue. Finite-period extrapolation, not an exact infinite-time connecting-orbit solve.",
+  "grid": {
+    "J_difference": 1.1546319456101628e-14,
+    "mean_difference_hz": 2.654126918244515e-13
+  }
+}

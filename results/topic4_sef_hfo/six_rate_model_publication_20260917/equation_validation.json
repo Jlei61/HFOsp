@@ -1,0 +1,42 @@
+{
+  "status": "PASS",
+  "source_root": "/tmp/hfosp-six-rate-publish-20260917",
+  "model_source": "results/topic4_sef_hfo/core_burst_bifurcation_v2_20260915",
+  "coupling_scaling": "Only AA/BB EE first moments scale by g; second moments by g^2",
+  "no_direct_core_AB_edges": true,
+  "fold_g_error": 2.162714451969805e-13,
+  "fold_rate_error_hz": 5.783706846784753e-13,
+  "fold_residual": 5.878630915390204e-13,
+  "fold_zero_mode_error": 5.878630915390204e-13,
+  "periodic_orbit_checks": [
+    {
+      "condition": "20b",
+      "file": "results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/condition_20b/g1.12183000_N4096.npz",
+      "period_ms": 836.719772031536,
+      "residual": 7.216449660063518e-14,
+      "mean_error_hz": 0.0
+    },
+    {
+      "condition": "12a",
+      "file": "results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/condition_12a/g1.35500000_N2048.npz",
+      "period_ms": 343.92120627614713,
+      "residual": 2.1639417688290585e-11,
+      "mean_error_hz": 0.0
+    },
+    {
+      "condition": "15a",
+      "file": "results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/condition_15a/g1.38000000_N2048.npz",
+      "period_ms": 183.5904057213304,
+      "residual": 1.6306400674181987e-13,
+      "mean_error_hz": 0.0
+    },
+    {
+      "condition": "15b",
+      "file": "results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/condition_15b/g1.38000000_N2048.npz",
+      "period_ms": 150.92314860457356,
+      "residual": 1.609823385706477e-13,
+      "mean_error_hz": 0.0
+    }
+  ],
+  "scope": "Published equations and four saved periodic solutions re-evaluated. Historical Floquet classifications are not all recomputed; native-SNN correspondence remains unvalidated."
+}

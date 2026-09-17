@@ -1,0 +1,205 @@
+{
+  "model": "Frozen deterministic six-population delayed rate closure, v2-v7",
+  "changed": "Figure composition only",
+  "native_snn_points_or_rasters_added": false,
+  "curve_sequences": 8,
+  "periodic_curve_points": 841,
+  "source_curve_path": "/tmp/hfosp-six-rate-publish-20260917/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/displayed_curve_sequences.json",
+  "source_curve_sha256": "e17bff6633bdb07d9d1da9a3b11a52ec90926d2483bbcfe129770ba47334a9df",
+  "yscale": {
+    "type": "symlog",
+    "linear_below_hz": 1,
+    "linscale": 0.65
+  },
+  "waveform_time": "Seconds; two full periods for each periodic solution, one second for the equilibrium",
+  "phase": "Original saved joint phase; no independent alignment between A and B",
+  "source_conditions": [
+    {
+      "number": "20a",
+      "g": 1.12183,
+      "T": 500.0,
+      "mean": [
+        0.41596270063933105,
+        0.303742063710448,
+        1.1201546012836471e-244,
+        2.6143885250539214e-112,
+        2.4274362979596706e-157,
+        0.0
+      ],
+      "kind": "Stable equilibrium",
+      "path": "/tmp/hfosp-six-rate-publish-20260917/results/topic4_sef_hfo/core_burst_bifurcation_v2_20260915/equilibrium_spectrum.json",
+      "letter": "a",
+      "title": "Low-rate equilibrium",
+      "source_id": "20a"
+    },
+    {
+      "g": 1.1218299999999921,
+      "T": 836.719772031536,
+      "mean": [
+        7.228399770448184,
+        7.402172126744045,
+        0.022213978067305337,
+        9.535009975411567,
+        10.01925137136533,
+        0.002073268130014486
+      ],
+      "lo": [
+        6.663898191724624e-06,
+        5.394250633466383e-06,
+        -2.1684043449710089e-16,
+        -7.880400671936558e-13,
+        -7.242212803146222e-13,
+        -2.710505431213761e-17
+      ],
+      "hi": [
+        223.3483465187247,
+        231.33835336353647,
+        0.842113751710514,
+        364.162400458701,
+        377.3736827238506,
+        0.11408139594106417
+      ],
+      "path": "/tmp/hfosp-six-rate-publish-20260917/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/condition_20b/g1.12183000_N4096.npz",
+      "number": "20b",
+      "kind": "Stable periodic orbit",
+      "letter": "b",
+      "title": "Coexisting periodic burst",
+      "source_id": "20b"
+    },
+    {
+      "g": 1.355,
+      "T": 343.92120627614713,
+      "mean": [
+        65.19503713275577,
+        44.331070234309045,
+        14.136299818928794,
+        65.86498572636725,
+        46.94155129831976,
+        25.87430692375012
+      ],
+      "lo": [
+        3.7434159418092694e-06,
+        3.088793429362191e-06,
+        -8.326672684688674e-14,
+        -3.3306690738754696e-13,
+        -3.3306690738754696e-13,
+        -5.902684618213153e-13
+      ],
+      "hi": [
+        359.1775070748774,
+        377.270161890025,
+        226.3120078415101,
+        530.1153012436916,
+        586.4578439376207,
+        465.0357911286882
+      ],
+      "path": "/tmp/hfosp-six-rate-publish-20260917/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/condition_12a/g1.35500000_N2048.npz",
+      "number": "12a",
+      "kind": "Stable periodic orbit",
+      "letter": "c",
+      "title": "Two-core bursts; before LP1",
+      "source_id": "12a"
+    },
+    {
+      "g": 1.38,
+      "T": 183.5904057213304,
+      "mean": [
+        63.26726838735489,
+        353.0542498615608,
+        26.62183135622101,
+        66.65305771907227,
+        318.43320550269175,
+        48.67572100628767
+      ],
+      "lo": [
+        5.324676990992039e-06,
+        281.43133750310295,
+        1.9545370738560663e-06,
+        -3.3306690738754696e-13,
+        1.2486139197243895,
+        1.4155343563970746e-12
+      ],
+      "hi": [
+        371.8098369017781,
+        379.535159005735,
+        226.53388541436865,
+        597.9330297976658,
+        531.1223562362876,
+        467.3587162403406
+      ],
+      "path": "/tmp/hfosp-six-rate-publish-20260917/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/condition_15a/g1.38000000_N2048.npz",
+      "number": "15a",
+      "kind": "Stable periodic orbit",
+      "letter": "d",
+      "title": "A bursts / B high background",
+      "source_id": "15a"
+    },
+    {
+      "g": 1.38,
+      "T": 150.92314860457356,
+      "mean": [
+        334.31776343919614,
+        349.80623294897066,
+        34.611496808956055,
+        296.7166697674487,
+        312.80670011433597,
+        62.95740563197344
+      ],
+      "lo": [
+        206.62755284847208,
+        265.7610287157468,
+        8.216960717746802e-06,
+        0.0755643412126139,
+        0.5628484206778028,
+        7.163714066393823e-11
+      ],
+      "hi": [
+        373.3261501276673,
+        379.427344040253,
+        242.23812306712523,
+        543.6948965199971,
+        538.9577436021801,
+        497.13992968712364
+      ],
+      "path": "/tmp/hfosp-six-rate-publish-20260917/results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/condition_15b/g1.38000000_N2048.npz",
+      "number": "15b",
+      "kind": "Stable periodic orbit",
+      "letter": "e",
+      "title": "Both cores: high background",
+      "source_id": "15b"
+    }
+  ],
+  "figures": [
+    {
+      "name": "00_joint_core_bifurcation_composite",
+      "pixels": [
+        3150,
+        2562
+      ],
+      "main_axes": 7,
+      "inset_axes": 2
+    },
+    {
+      "name": "01_core_A_reference_layout",
+      "pixels": [
+        3150,
+        2058
+      ],
+      "main_axes": 6,
+      "inset_axes": 1
+    }
+  ],
+  "coexistence_pairs": [
+    [
+      "a",
+      "b"
+    ],
+    [
+      "d",
+      "e"
+    ]
+  ],
+  "HC_star": "Finite-period numerical homoclinic-limit evidence, not an infinite-time connecting-orbit proof",
+  "branch_types": "Fold: equilibrium saddle-node; LP/cycle fold: periodic saddle-node; PD: period doubling",
+  "human_acceptance": "PENDING"
+}
