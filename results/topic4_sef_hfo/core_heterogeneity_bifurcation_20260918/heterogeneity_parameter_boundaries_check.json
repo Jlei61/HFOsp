@@ -1,0 +1,15 @@
+{
+  "status": "AGENT_CHECKED_HUMAN_REVIEW_PENDING",
+  "axes": "Core EE coupling x Core A threshold standard-deviation ratio",
+  "checks": [
+    "Accepted critical curves and source files verified",
+    "Input SHA256 values match metadata",
+    "No extrapolation of unresolved fold endpoints",
+    "Sample labels agree with saved trajectory classifications",
+    "Two coexisting cycles retain existing Floquet stability validation",
+    "Final PNG and rendered PDF inspected for layout"
+  ],
+  "critical_points": 145,
+  "new_simulations": false,
+  "limitation": "Local cycle-fold endpoints and narrow LP0/PD0 families remain unresolved in two parameters."
+}

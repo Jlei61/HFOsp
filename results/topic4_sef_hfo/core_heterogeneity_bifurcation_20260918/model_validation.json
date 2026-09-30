@@ -1,0 +1,68 @@
+{
+  "status": "PASS",
+  "mean_variance": [
+    {
+      "h": 0,
+      "mean_mV": 17.263953681279073,
+      "std_mV": 3.552713678800501e-15,
+      "quadrature_mean_mV": 17.263953681279073,
+      "quadrature_variance": 0.0,
+      "max_mV": 17.26395368127907
+    },
+    {
+      "h": 0.25,
+      "mean_mV": 17.26395368127907,
+      "std_mV": 0.18493605769899443,
+      "quadrature_mean_mV": 17.26395368127907,
+      "quadrature_variance": 0.03420134543724586,
+      "max_mV": 17.4479652609593
+    },
+    {
+      "h": 0.5,
+      "mean_mV": 17.26395368127907,
+      "std_mV": 0.36987211539799003,
+      "quadrature_mean_mV": 17.26395368127907,
+      "quadrature_variance": 0.1368053817489836,
+      "max_mV": 17.631976840639535
+    },
+    {
+      "h": 0.75,
+      "mean_mV": 17.26395368127907,
+      "std_mV": 0.5548081730969855,
+      "quadrature_mean_mV": 17.26395368127907,
+      "quadrature_variance": 0.30781210893521305,
+      "max_mV": 17.81598842031977
+    },
+    {
+      "h": 1,
+      "mean_mV": 17.26395368127907,
+      "std_mV": 0.73974423079598,
+      "quadrature_mean_mV": 17.26395368127907,
+      "quadrature_variance": 0.5472215269959342,
+      "max_mV": 18.0
+    }
+  ],
+  "baseline_periodic": [
+    {
+      "condition": "20b",
+      "source": "results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/condition_20b/g1.12183000_N4096.npz",
+      "residual": 7.216449660063518e-14
+    },
+    {
+      "condition": "12a",
+      "source": "results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/condition_12a/g1.35500000_N2048.npz",
+      "residual": 2.1639417688290585e-11
+    },
+    {
+      "condition": "15a",
+      "source": "results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/condition_15a/g1.38000000_N2048.npz",
+      "residual": 1.6306400674181987e-13
+    },
+    {
+      "condition": "15b",
+      "source": "results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/condition_15b/g1.38000000_N2048.npz",
+      "residual": 1.609823385706477e-13
+    }
+  ],
+  "source_commit": "5a5516a8ce04283dc24294b4c951e01675b40eaf"
+}

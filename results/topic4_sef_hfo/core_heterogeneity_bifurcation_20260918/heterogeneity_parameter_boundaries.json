@@ -1,0 +1,259 @@
+{
+  "figure": "heterogeneity_parameter_boundaries",
+  "producer": "scripts/topic4_core_heterogeneity_v11/parameter_portrait.py",
+  "x": "J_EE,core: simultaneous AA and BB recurrent E-to-E weight multiplier",
+  "y": "h: Core A E threshold standard deviation divided by reference standard deviation",
+  "fixed": "Core A threshold mean; all other cell thresholds, connections, inputs and delays",
+  "presentation": "Accepted bifurcation curves in the parameter plane; no heatmap or state-space trajectories",
+  "interpolation": "Straight segments between adjacent accepted continuation points; no extrapolation",
+  "line_styles": "Solid: fold; dashed: period doubling. These do not encode branch stability.",
+  "open_endpoints": "Continuation stopped here; not a classified codimension-two bifurcation",
+  "region_scope": "State annotations are sampled attraction outcomes, not an exhaustive region partition",
+  "curves": {
+    "SN": {
+      "n": 62,
+      "h_range": [
+        0.0,
+        1.0
+      ],
+      "status": "DOMAIN_COVERED"
+    },
+    "LPC_onset": {
+      "n": 12,
+      "h_range": [
+        0.980525,
+        1.0
+      ],
+      "status": "PARTIAL_UNRESOLVED_ENDPOINT"
+    },
+    "LP1": {
+      "n": 5,
+      "h_range": [
+        0.9639921874999999,
+        1.0
+      ],
+      "status": "PARTIAL_UNRESOLVED_ENDPOINT"
+    },
+    "PD1": {
+      "n": 23,
+      "h_range": [
+        0,
+        1.0
+      ],
+      "status": "DOMAIN_COVERED"
+    },
+    "PD2": {
+      "n": 22,
+      "h_range": [
+        0.0,
+        1.0
+      ],
+      "status": "DOMAIN_COVERED"
+    },
+    "PD3": {
+      "n": 21,
+      "h_range": [
+        0,
+        1.0
+      ],
+      "status": "DOMAIN_COVERED"
+    }
+  },
+  "samples": [
+    {
+      "mean_hz": [
+        0.09212368041006683,
+        0.28839840585486165,
+        0.0,
+        -3.7245169021985563e-265,
+        1.3290839357302939e-166,
+        0.0
+      ],
+      "min_hz": [
+        0.0921236804100762,
+        0.28839840585483056,
+        0.0,
+        -3.7245169021984555e-265,
+        1.3290839357303886e-166,
+        0.0
+      ],
+      "max_hz": [
+        0.0921236804100762,
+        0.28839840585483056,
+        0.0,
+        -3.7245169021984555e-265,
+        1.3290839357303886e-166,
+        0.0
+      ],
+      "observed_ms": 3000.0,
+      "kind": "equilibrium_candidate",
+      "period_ms": null,
+      "recurrence_error_hz": null,
+      "equilibrium_residual": 2.0328790734103208e-19,
+      "equilibrium_solve": true,
+      "h": 0.5,
+      "g": 1.1,
+      "direction": "up",
+      "dt_ms": 0.1,
+      "save_dt_ms": 0.5,
+      "duration_ms": 0,
+      "elapsed_s": 0.010713266034144908,
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/state_scan_v2/h0.50000/up/g1p10000.npz",
+      "state_index": 0,
+      "display_label": "Rest"
+    },
+    {
+      "mean_hz": [
+        16.723669736360176,
+        32.677306555568826,
+        9.259012995414821,
+        22.61373801889893,
+        33.39069385390667,
+        16.924850421689467
+      ],
+      "min_hz": [
+        8.032222105562563e-07,
+        3.5092403427599163e-06,
+        2.034558293888298e-33,
+        2.066557869743215e-70,
+        2.8325660665909835e-59,
+        1.3965530698671034e-67
+      ],
+      "max_hz": [
+        335.10152259483255,
+        316.8326937356407,
+        213.9497140447406,
+        563.0202702879504,
+        482.8527837500825,
+        441.5252962070957
+      ],
+      "observed_ms": 1500.0,
+      "kind": "periodic_candidate",
+      "pattern": "both_burst",
+      "period_ms": 467.28596795689384,
+      "recurrence_error_hz": 0.0005905667700696701,
+      "peak_count": 3,
+      "reference_population": 3,
+      "h": 0.5,
+      "g": 1.24,
+      "direction": "up",
+      "dt_ms": 0.1,
+      "save_dt_ms": 0.5,
+      "duration_ms": 3000,
+      "elapsed_s": 15.85265828599222,
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/state_scan_v2/h0.50000/up/g1p24000.npz",
+      "state_index": 2,
+      "display_label": "Both cores burst"
+    },
+    {
+      "mean_hz": [
+        56.22298478759331,
+        339.0870582773355,
+        25.993999942354755,
+        64.03960365025866,
+        306.56491603344676,
+        47.52828425525952
+      ],
+      "min_hz": [
+        1.6692272236497545e-06,
+        236.2040508462749,
+        1.4492551273559592e-06,
+        1.5535686867504168e-22,
+        0.3429313947794641,
+        1.0099067108892667e-12
+      ],
+      "max_hz": [
+        366.22825791795805,
+        371.90095909594686,
+        225.93460254450784,
+        591.0801688785723,
+        534.5180848466787,
+        466.18322003815916
+      ],
+      "observed_ms": 1500.0,
+      "kind": "periodic_candidate",
+      "pattern": "A_burst_B_high",
+      "period_ms": 185.80763236719676,
+      "recurrence_error_hz": 0.000808930709152648,
+      "peak_count": 8,
+      "reference_population": 3,
+      "h": 0.5,
+      "g": 1.36,
+      "direction": "up",
+      "dt_ms": 0.1,
+      "save_dt_ms": 0.5,
+      "duration_ms": 3000,
+      "elapsed_s": 16.95205297600478,
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/state_scan_v2/h0.50000/up/g1p36000.npz",
+      "state_index": 3,
+      "display_label": "A burst / B high"
+    },
+    {
+      "mean_hz": [
+        363.85815497371925,
+        370.58639532177614,
+        34.9876302898053,
+        322.01182339266813,
+        330.9686626838632,
+        63.63742251023287
+      ],
+      "min_hz": [
+        301.309358588447,
+        318.45341296981945,
+        1.1277960847891171e-05,
+        1.1666366437993578,
+        2.093558541077232,
+        2.7143667179291882e-11
+      ],
+      "max_hz": [
+        387.37538485194847,
+        391.8454117958702,
+        243.2767205130096,
+        536.1276436758776,
+        536.9996522865806,
+        499.03037883238767
+      ],
+      "observed_ms": 1500.0,
+      "kind": "periodic_candidate",
+      "pattern": "both_high",
+      "period_ms": 150.25296105968752,
+      "recurrence_error_hz": 0.0006406512425472174,
+      "peak_count": 39,
+      "reference_population": 3,
+      "h": 0.5,
+      "g": 1.4200000000000002,
+      "direction": "up",
+      "dt_ms": 0.1,
+      "save_dt_ms": 0.5,
+      "duration_ms": 3000,
+      "elapsed_s": 18.1448856809875,
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/state_scan_v2/h0.50000/up/g1p42000.npz",
+      "state_index": 5,
+      "display_label": "High-background oscillations"
+    }
+  ],
+  "coexistence": {
+    "h": 0,
+    "J_EE_core": 1.38,
+    "validated_stable_cycles": 2
+  },
+  "sources": [
+    {
+      "path": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/bifurcation_curves.json",
+      "sha256": "1d6f295a9e4d5552aed41cb8964f0ce2b73d988c9e75646031302e3fe879d21f"
+    },
+    {
+      "path": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/state_map_summary.json",
+      "sha256": "79642e97860f6e29276ceed1b0bd37ecf84dd0e09e0f75cde8de6d7abde20169"
+    },
+    {
+      "path": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/validated_attractors/h0.00000_up_g1.38000.json",
+      "sha256": "4ff13a09ad1dae3c8a836e20bfbcfc9ab8af5f93cb139a0bbc3d067c5e2de2e4"
+    },
+    {
+      "path": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/validated_attractors/h0.00000_down_g1.38000.json",
+      "sha256": "7bffce1ad497d10078770269fe202fdb5527f6b1499a8065a841826677c3442c"
+    }
+  ],
+  "human_visual_acceptance": "PENDING"
+}

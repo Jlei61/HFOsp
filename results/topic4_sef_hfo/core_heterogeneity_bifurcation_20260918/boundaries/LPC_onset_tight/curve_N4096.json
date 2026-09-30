@@ -1,0 +1,26 @@
+{
+  "label": "LPC_onset",
+  "points": [
+    {
+      "h": 0.981525,
+      "g": 1.1216438806025024,
+      "T_ms": 971.0906365819086,
+      "N": 4096,
+      "orbit_residual": 9.298117831235686e-14,
+      "critical_residual": 1.2871328562908936e-16,
+      "null_residual": 2.947539989861525e-10,
+      "criterion": "Cycle-fold tangent dJ/ds = 0; nontrivial periodic null mode",
+      "bracket_tangent": [
+        -5.072735084143699e-13,
+        5.062405396279933e-13
+      ],
+      "label": "LPC_onset",
+      "status": "REFINED",
+      "sigma_A_mV": 0.7260774561320242,
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/boundaries/LPC_onset_tight/h0.98152500_N4096.npz"
+    }
+  ],
+  "failures": [],
+  "status": "PARTIAL_UNRESOLVED_ENDPOINT",
+  "reason": "Long-period fold: repeated predictor/corrector failures; endpoint not classified."
+}

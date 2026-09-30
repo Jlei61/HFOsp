@@ -1,0 +1,22 @@
+{
+  "label": "LP1",
+  "points": [
+    {
+      "h": 0.9639921874999999,
+      "g": 1.3236825314039058,
+      "T_ms": 369.65926765357545,
+      "N": 1024,
+      "orbit_residual": 1.7208456881689926e-13,
+      "critical_residual": 1.0101759684331817e-12,
+      "null_residual": 5.8697326072744676e-12,
+      "criterion": "Joint orbital and bordered fixed-parameter null equations; cycle fold",
+      "label": "LP1",
+      "status": "REFINED",
+      "sigma_A_mV": 0.7131076592355216,
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/boundaries/LP1_endpoint/h0.96399219_N1024.npz"
+    }
+  ],
+  "failures": [],
+  "status": "PARTIAL_UNRESOLVED_ENDPOINT",
+  "reason": "Repeated stalled joint and fixed-h fold correctors below h=0.963992; no endpoint type assigned."
+}

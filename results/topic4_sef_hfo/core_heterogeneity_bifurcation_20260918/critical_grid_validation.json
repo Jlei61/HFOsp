@@ -1,0 +1,91 @@
+[
+  {
+    "h": 0,
+    "g": 1.3492468225182972,
+    "T_ms": 187.54933106591278,
+    "N": 2048,
+    "orbit_residual": 1.1407541578023483e-11,
+    "critical_residual": 1.9662210706519144e-13,
+    "null_residual": 3.0176382226354548e-12,
+    "criterion": "Joint orbital and bordered antiperiodic null equations; Floquet -1",
+    "critical_mode_percent": [
+      0.09527990508524371,
+      11.032451635021822,
+      0.04989532666106626,
+      0.4026868270133519,
+      88.1417534106405,
+      0.2779328955778571
+    ],
+    "label": "PD1",
+    "previous_N": 1024,
+    "g_difference": 0.0,
+    "T_difference_ms": 0.0,
+    "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/critical_validation/PD1_h0.00000000_N2048.npz"
+  },
+  {
+    "h": 0.0,
+    "g": 1.3862490265075909,
+    "T_ms": 183.0080729072481,
+    "N": 2048,
+    "orbit_residual": 5.991040996633501e-12,
+    "critical_residual": 7.697832972825798e-14,
+    "null_residual": 8.915066818451778e-12,
+    "criterion": "Joint orbital and bordered antiperiodic null equations; Floquet -1",
+    "critical_mode_percent": [
+      99.93009370273138,
+      0.0005439996402030129,
+      0.002818841466980875,
+      0.02526922126873024,
+      0.025574131646341865,
+      0.015700103246470403
+    ],
+    "label": "PD2",
+    "previous_N": 1024,
+    "g_difference": 0.0,
+    "T_difference_ms": 0.0,
+    "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/critical_validation/PD2_h0.00000000_N2048.npz"
+  },
+  {
+    "h": 0,
+    "g": 1.3783895278764828,
+    "T_ms": 151.64859738292105,
+    "N": 2048,
+    "orbit_residual": 2.1110613257491195e-10,
+    "critical_residual": 1.326590270080239e-13,
+    "null_residual": 3.4678353938444317e-12,
+    "criterion": "Joint orbital and bordered antiperiodic null equations; Floquet -1",
+    "critical_mode_percent": [
+      11.036423820442993,
+      0.015996256240915854,
+      0.06716354032477181,
+      87.99595002227679,
+      0.5143109709817024,
+      0.3701553897328672
+    ],
+    "label": "PD3",
+    "previous_N": 1024,
+    "g_difference": 0.0,
+    "T_difference_ms": 0.0,
+    "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/critical_validation/PD3_h0.00000000_N2048.npz"
+  },
+  {
+    "h": 0.975,
+    "g": 1.331137852684861,
+    "T_ms": 361.73552907635616,
+    "N": 2048,
+    "orbit_residual": 9.280770596475918e-13,
+    "critical_residual": 7.617998132757617e-10,
+    "null_residual": 1.1084199097032444e-09,
+    "criterion": "Joint orbital and bordered fixed-parameter null equations; cycle fold",
+    "label": "LP1",
+    "previous_N": 512,
+    "g_difference": -6.288946319266131e-08,
+    "T_difference_ms": 2.708398301365378e-05,
+    "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/critical_validation/LP1_h0.97500000_N2048.npz"
+  },
+  {
+    "label": "LPC_onset",
+    "status": "REPLACED_BY_STRICT_SIGN_CHANGE_CONTINUATION",
+    "reason": "Original flat-tail candidate was rejected; strict N4096 continuation is separate."
+  }
+]

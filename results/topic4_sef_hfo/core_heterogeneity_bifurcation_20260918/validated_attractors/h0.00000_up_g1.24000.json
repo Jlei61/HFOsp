@@ -1,0 +1,162 @@
+{
+  "h": 0,
+  "g": 1.24,
+  "direction": "up",
+  "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/refined_scan/h0.00000_up_g1p24000_N2048.npz",
+  "grid_refinement": {
+    "period_difference_ms": 1.2774989954777993e-09,
+    "rate_difference_hz": 0.0014804766293174954,
+    "residual": 7.466249840604178e-13
+  },
+  "poincare": [
+    {
+      "g": 1.24,
+      "T_ms": 467.29604512036923,
+      "N": 2048,
+      "dt_ms": 0.049999576837189086,
+      "history_dimension": 4458,
+      "method": "rk4",
+      "source": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-six-rate-heterogeneity/results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/refined_scan/h0.00000_up_g1p24000_N2048.npz",
+      "gain_derivative": "analytic frozen transfer quadrature",
+      "section": "orthogonal",
+      "requested_multipliers": 4,
+      "multipliers": [
+        [
+          7.400367887492086e-08,
+          0.0
+        ],
+        [
+          -5.6902563412254614e-09,
+          0.0
+        ],
+        [
+          1.7382762870724613e-10,
+          0.0
+        ],
+        [
+          4.353082897427831e-16,
+          0.0
+        ]
+      ],
+      "residuals": [
+        5.000383250701671e-16,
+        7.662597480311159e-17,
+        7.937515690883684e-17,
+        2.4630199841241414e-16
+      ],
+      "orbit_tangent_defect": 7.053569104962406e-07,
+      "section_tangent_defect": 7.018990386641555e-07,
+      "max_transverse": 7.400367887492086e-08
+    },
+    {
+      "g": 1.24,
+      "T_ms": 467.29604512036923,
+      "N": 2048,
+      "dt_ms": 0.024999788418594543,
+      "history_dimension": 8874,
+      "method": "rk4",
+      "source": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-six-rate-heterogeneity/results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/refined_scan/h0.00000_up_g1p24000_N2048.npz",
+      "gain_derivative": "analytic frozen transfer quadrature",
+      "section": "orthogonal",
+      "requested_multipliers": 4,
+      "multipliers": [
+        [
+          7.353523771366246e-08,
+          0.0
+        ],
+        [
+          -5.691347659053404e-09,
+          0.0
+        ],
+        [
+          1.7384063930465233e-10,
+          0.0
+        ],
+        [
+          -9.392347257283924e-16,
+          0.0
+        ]
+      ],
+      "residuals": [
+        3.0491630806816115e-16,
+        1.6666030130013026e-16,
+        1.5407117511557795e-16,
+        3.617472184866847e-16
+      ],
+      "orbit_tangent_defect": 5.03031798591134e-07,
+      "section_tangent_defect": 4.982323059857178e-07,
+      "max_transverse": 7.353523771366246e-08
+    }
+  ],
+  "time_step": [
+    {
+      "mean_hz": [
+        16.63077083274057,
+        34.74671279601126,
+        9.258195922482406,
+        22.511131067500784,
+        36.256104681767795,
+        16.92083039392071
+      ],
+      "min_hz": [
+        6.466422640230588e-07,
+        3.5154860218639127e-06,
+        2.036337346148762e-33,
+        1.949290408276839e-70,
+        2.8390582899240203e-59,
+        1.4023126493893406e-67
+      ],
+      "max_hz": [
+        334.49660987327445,
+        316.8326980279552,
+        213.884031192209,
+        561.8139719874433,
+        482.8494152775258,
+        441.41066900081563
+      ],
+      "observed_ms": 1500.0,
+      "kind": "periodic_candidate",
+      "pattern": "both_burst",
+      "period_ms": 467.29481696418776,
+      "recurrence_error_hz": 0.0005331302304715731,
+      "peak_count": 3,
+      "reference_population": 3,
+      "dt_ms": 0.1
+    },
+    {
+      "mean_hz": [
+        16.63079362965796,
+        34.745530444914216,
+        9.258330592787006,
+        22.511264598236103,
+        36.25423891868566,
+        16.921111557004107
+      ],
+      "min_hz": [
+        6.466400546575819e-07,
+        3.5156225388712654e-06,
+        2.037188670841825e-33,
+        1.9520753634932188e-70,
+        2.839130486233404e-59,
+        1.3936870869373256e-67
+      ],
+      "max_hz": [
+        334.49805106323277,
+        316.8332554563939,
+        213.8857710064398,
+        561.8170882745304,
+        482.8504668728964,
+        441.41628636166604
+      ],
+      "observed_ms": 1500.0,
+      "kind": "periodic_candidate",
+      "pattern": "both_burst",
+      "period_ms": 467.29573210462087,
+      "recurrence_error_hz": 0.0005262965011516881,
+      "peak_count": 3,
+      "reference_population": 3,
+      "dt_ms": 0.05
+    }
+  ],
+  "stable_periodic_attractor": true
+}

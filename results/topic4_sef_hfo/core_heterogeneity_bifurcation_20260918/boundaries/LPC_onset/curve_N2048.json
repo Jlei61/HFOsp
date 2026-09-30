@@ -1,0 +1,645 @@
+{
+  "label": "LPC_onset",
+  "points": [
+    {
+      "h": 1.0,
+      "g": 1.12181722041743,
+      "T_ms": 618.7100463199126,
+      "N": 2048,
+      "orbit_residual": 1.637578961322106e-13,
+      "critical_residual": 2.5065502155972445e-11,
+      "null_residual": 2.1702537544854295e-09,
+      "criterion": "Cycle-fold tangent dJ/ds = 0; nontrivial periodic null mode",
+      "bracket_tangent": [
+        -1.0688537793010592e-09,
+        1.0179466088104152e-09
+      ],
+      "label": "LPC_onset",
+      "status": "REFINED",
+      "sigma_A_mV": 0.73974423079598,
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/boundaries/LPC_onset/h1.00000000_N2048.npz"
+    },
+    {
+      "h": 0.9975,
+      "g": 1.1217830455061546,
+      "T_ms": 646.9858026311294,
+      "N": 2048,
+      "orbit_residual": 1.2212453270876722e-13,
+      "critical_residual": 9.528086225307159e-13,
+      "null_residual": 8.779158650051855e-11,
+      "criterion": "Cycle-fold tangent dJ/ds = 0; nontrivial periodic null mode",
+      "bracket_tangent": [
+        -5.815940923311136e-10,
+        5.793260031889689e-10
+      ],
+      "label": "LPC_onset",
+      "status": "REFINED",
+      "sigma_A_mV": 0.73789487021899,
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/boundaries/LPC_onset/h0.99750000_N2048.npz"
+    },
+    {
+      "h": 0.99575,
+      "g": 1.1217617959137796,
+      "T_ms": 669.0856268048481,
+      "N": 2048,
+      "orbit_residual": 5.101995215195387e-12,
+      "critical_residual": 2.2993758641917424e-10,
+      "null_residual": 1.9880031398855635e-08,
+      "criterion": "Cycle-fold tangent dJ/ds = 0; nontrivial periodic null mode",
+      "bracket_tangent": [
+        -5.818955968212846e-10,
+        1.2170898044771946e-10
+      ],
+      "label": "LPC_onset",
+      "status": "REFINED",
+      "sigma_A_mV": 0.736600317815097,
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/boundaries/LPC_onset/h0.99575000_N2048.npz"
+    },
+    {
+      "h": 0.994525,
+      "g": 1.121748091788111,
+      "T_ms": 685.8917099627078,
+      "N": 2048,
+      "orbit_residual": 4.718447854656915e-14,
+      "critical_residual": 4.3997290527563506e-11,
+      "null_residual": 3.798251269060415e-09,
+      "criterion": "Cycle-fold tangent dJ/ds = 0; nontrivial periodic null mode",
+      "bracket_tangent": [
+        -2.860449009190157e-10,
+        1.9794091325872314e-10
+      ],
+      "label": "LPC_onset",
+      "status": "REFINED",
+      "sigma_A_mV": 0.7356941311323719,
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/boundaries/LPC_onset/h0.99452500_N2048.npz"
+    }
+  ],
+  "failures": [
+    {
+      "h": 0.99,
+      "step": 0.01,
+      "error": "('preconditioned line search', [38.643584841691705, 37.43627858736497, 21.18182301782933, 19.869668176257395, 16.763766759826513, 16.701937798002362, 17.17113554796738, 18.184408132643306])"
+    },
+    {
+      "h": 0.995,
+      "step": 0.005,
+      "error": "('preconditioned no convergence', [15.928079833557412, 11.796288167611754, 21.93767470042028, 18.80348042894677, 15.54567316646887, 13.349528499835827, 13.332243572612867, 9.444139614776606, 6.113793886927047, 3.054264313186197, 2.2506273724552623, 1.4982059717700809, 1.1036018024329237, 0.8155450929980547, 0.42130787033254224, 0.5911569308913825, 0.27692461045506506, 0.05648139533361157])"
+    },
+    {
+      "h": 0.9940000000000001,
+      "step": 0.0034999999999999996,
+      "error": "('preconditioned no convergence', [10.550033926846625, 7.3756692045251615, 7.287513981459676, 7.174154601838809, 5.501471768339224, 3.0978430651817273, 2.2689615605880933, 1.918657756366099, 1.9962743561554697, 2.0485597512437836, 2.3683110823510347, 2.155569264925561, 1.966386290801591, 1.7180119379489218, 1.5797000642760566, 1.7897236688567482, 1.7544698831885186, 1.685508218451294])"
+    },
+    {
+      "h": 0.9933000000000001,
+      "step": 0.0024499999999999995,
+      "error": "('preconditioned line search', [6.271931825473111, 5.452412710112998, 4.303968072484641, 4.301867406874857])"
+    },
+    {
+      "h": 0.98234164,
+      "step": 0.004705959999999998,
+      "error": "('preconditioned no convergence', [26.498631370580778, 19.330597872415193, 19.311723489610994, 16.921118294252256, 7.5451485999027526, 8.380816459146125, 10.681938818532453, 10.989537377188555, 11.015847793824516, 10.806111876826149, 10.573204669792513, 10.571924871332516, 10.571282268682548, 10.570639784830275, 10.570317938626067, 10.569996183974252, 10.569674550587077, 10.569033425101251])"
+    },
+    {
+      "h": 0.981400448,
+      "step": 0.0032941719999999984,
+      "error": "('preconditioned no convergence', [19.1541703505821, 10.277448671180936, 10.55433084427645, 10.416627069497538, 10.32851972003027, 10.608130213068701, 10.455373097980022, 8.130798157896143, 7.00507187709031, 6.95131841486386, 6.482466337677111, 4.433200654563368, 5.6865590249357565, 5.05059378885077, 8.51512421100257, 6.863894905440184, 4.713463104596556, 4.27046677464267])"
+    },
+    {
+      "h": 0.9807416136000001,
+      "step": 0.0023059203999999988,
+      "error": "('preconditioned line search', [9.260305638680585, 4.7179334373613395, 2.4124247155686533, 1.5011419273050082, 1.4764038309242296, 2.0266498955367434, 1.4987696742879286, 1.4870859520838708, 1.103963716676473, 0.8222370548438869, 0.8234805448474158, 0.8236092849646423])"
+    },
+    {
+      "h": 0.9818945738000001,
+      "step": 0.0011529601999999994,
+      "error": "('preconditioned line search', [2.5223643087307854, 2.3186066469351583, 0.9044420666087023, 1.597546797483531, 1.9662256145991923, 0.8324202340949299, 0.5753027452907887, 0.5747405127038349, 0.5747229725789127])"
+    }
+  ],
+  "status": "PARTIAL_UNRESOLVED_ENDPOINT",
+  "rejected_points": [
+    {
+      "h": 0.99281,
+      "g": 1.121730363515521,
+      "T_ms": 711.3841964042186,
+      "N": 2048,
+      "orbit_residual": 2.4243974883209063e-11,
+      "critical_residual": 1.4902550530595005e-10,
+      "null_residual": 1.2844824315294545e-08,
+      "criterion": "Cycle-fold tangent dJ/ds = 0; nontrivial periodic null mode",
+      "bracket_tangent": [
+        -2.9022984532855373e-10,
+        -7.931823705293807e-12
+      ],
+      "label": "LPC_onset",
+      "status": "REJECTED_FOLD_NO_SIGN_CHANGE",
+      "sigma_A_mV": 0.7344254697765569,
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/boundaries/LPC_onset/h0.99281000_N2048.npz"
+    },
+    {
+      "h": 0.990409,
+      "g": 1.1217080556221926,
+      "T_ms": 751.4128599616791,
+      "N": 2048,
+      "orbit_residual": 6.938893903907228e-14,
+      "critical_residual": 4.3710732383244633e-10,
+      "null_residual": 3.7767773797270365e-08,
+      "criterion": "Cycle-fold tangent dJ/ds = 0; nontrivial periodic null mode",
+      "bracket_tangent": [
+        -4.995247091553558e-10,
+        -3.748573698836537e-10
+      ],
+      "label": "LPC_onset",
+      "status": "REJECTED_FOLD_NO_SIGN_CHANGE",
+      "sigma_A_mV": 0.7326493438784157,
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/boundaries/LPC_onset/h0.99040900_N2048.npz"
+    },
+    {
+      "h": 0.9870476,
+      "g": 1.1216808876090671,
+      "T_ms": 816.6246178426089,
+      "N": 2048,
+      "orbit_residual": 2.9034500498292815e-12,
+      "critical_residual": 7.543543562132829e-10,
+      "null_residual": 6.512415606785282e-08,
+      "criterion": "Cycle-fold tangent dJ/ds = 0; nontrivial periodic null mode",
+      "bracket_tangent": [
+        -7.720705954271179e-10,
+        -7.364930489464247e-10
+      ],
+      "label": "LPC_onset",
+      "status": "REJECTED_FOLD_NO_SIGN_CHANGE",
+      "sigma_A_mV": 0.7301627676210182,
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/boundaries/LPC_onset/h0.98704760_N2048.npz"
+    },
+    {
+      "h": 0.9846946200000001,
+      "g": 1.121664133981246,
+      "T_ms": 873.7564700983851,
+      "N": 2048,
+      "orbit_residual": 1.625002216121274e-13,
+      "critical_residual": 2.0483860346367174e-10,
+      "null_residual": 1.7727113776899728e-08,
+      "criterion": "Cycle-fold tangent dJ/ds = 0; nontrivial periodic null mode",
+      "bracket_tangent": [
+        -2.095607369732813e-10,
+        -1.9987798810294675e-10
+      ],
+      "label": "LPC_onset",
+      "status": "REJECTED_FOLD_NO_SIGN_CHANGE",
+      "sigma_A_mV": 0.7284221642408398,
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/boundaries/LPC_onset/h0.98469462_N2048.npz"
+    },
+    {
+      "h": 0.9830475340000001,
+      "g": 1.1216533121101382,
+      "T_ms": 911.236315042926,
+      "N": 2048,
+      "orbit_residual": 3.1259717037102064e-13,
+      "critical_residual": 3.4377742769039955e-10,
+      "null_residual": 2.9664380729599316e-08,
+      "criterion": "Cycle-fold tangent dJ/ds = 0; nontrivial periodic null mode",
+      "bracket_tangent": [
+        -3.4596228589633964e-10,
+        -3.415954230042707e-10
+      ],
+      "label": "LPC_onset",
+      "status": "REJECTED_FOLD_NO_SIGN_CHANGE",
+      "sigma_A_mV": 0.727203741874715,
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/boundaries/LPC_onset/h0.98304753_N2048.npz"
+    },
+    {
+      "h": 0.9824710539000001,
+      "g": 1.1216496801375742,
+      "T_ms": 924.2427413997597,
+      "N": 2048,
+      "orbit_residual": 1.3696739055435447e-10,
+      "critical_residual": 3.4848825755780555e-10,
+      "null_residual": 3.011598748159372e-08,
+      "criterion": "Cycle-fold tangent dJ/ds = 0; nontrivial periodic null mode",
+      "bracket_tangent": [
+        -3.495299817851507e-10,
+        -3.462263722141339e-10
+      ],
+      "label": "LPC_onset",
+      "status": "REJECTED_FOLD_NO_SIGN_CHANGE",
+      "sigma_A_mV": 0.7267772940465713,
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/boundaries/LPC_onset/h0.98247105_N2048.npz"
+    },
+    {
+      "h": 0.9816639817600001,
+      "g": 1.1216447206606102,
+      "T_ms": 941.0100743717679,
+      "N": 2048,
+      "orbit_residual": 3.908728375690007e-10,
+      "critical_residual": 3.5667778000180226e-10,
+      "null_residual": 3.082222854722261e-08,
+      "criterion": "Cycle-fold tangent dJ/ds = 0; nontrivial periodic null mode",
+      "bracket_tangent": [
+        -3.5748100784708114e-10,
+        -3.5490980922325864e-10
+      ],
+      "label": "LPC_onset",
+      "status": "REJECTED_FOLD_NO_SIGN_CHANGE",
+      "sigma_A_mV": 0.7261802670871702,
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/boundaries/LPC_onset/h0.98166398_N2048.npz"
+    },
+    {
+      "h": 0.9805340807640002,
+      "g": 1.1216380078328312,
+      "T_ms": 960.2731821225111,
+      "N": 2048,
+      "orbit_residual": 8.246268251577149e-12,
+      "critical_residual": 3.7420395591539146e-10,
+      "null_residual": 3.234179213329469e-08,
+      "criterion": "Cycle-fold tangent dJ/ds = 0; nontrivial periodic null mode",
+      "bracket_tangent": [
+        -3.751346799797537e-10,
+        -3.731842875534005e-10
+      ],
+      "label": "LPC_onset",
+      "status": "REJECTED_FOLD_NO_SIGN_CHANGE",
+      "sigma_A_mV": 0.7253444293440086,
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/boundaries/LPC_onset/h0.98053408_N2048.npz"
+    },
+    {
+      "h": 0.9789522193696002,
+      "g": 1.1216290240525257,
+      "T_ms": 980.3765755006292,
+      "N": 2048,
+      "orbit_residual": 1.27675647831893e-13,
+      "critical_residual": 3.8473200081292766e-10,
+      "null_residual": 3.324487440892199e-08,
+      "criterion": "Cycle-fold tangent dJ/ds = 0; nontrivial periodic null mode",
+      "bracket_tangent": [
+        -3.8554974128527055e-10,
+        -3.8394895181905503e-10
+      ],
+      "label": "LPC_onset",
+      "status": "REJECTED_FOLD_NO_SIGN_CHANGE",
+      "sigma_A_mV": 0.7241742565035824,
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/boundaries/LPC_onset/h0.97895222_N2048.npz"
+    },
+    {
+      "h": 0.9767376134174401,
+      "g": 1.121617169596331,
+      "T_ms": 997.9268157193532,
+      "N": 2048,
+      "orbit_residual": 8.638922910364499e-14,
+      "critical_residual": 3.8572447455309827e-10,
+      "null_residual": 3.325238351337134e-08,
+      "criterion": "Cycle-fold tangent dJ/ds = 0; nontrivial periodic null mode",
+      "bracket_tangent": [
+        -3.8620595676150213e-10,
+        -3.8517111675738143e-10
+      ],
+      "label": "LPC_onset",
+      "status": "REJECTED_FOLD_NO_SIGN_CHANGE",
+      "sigma_A_mV": 0.7225360145269855,
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/boundaries/LPC_onset/h0.97673761_N2048.npz"
+    },
+    {
+      "h": 0.9736371650844161,
+      "g": 1.1216017892180634,
+      "T_ms": 1014.4149414405299,
+      "N": 2048,
+      "orbit_residual": 8.743006318923108e-14,
+      "critical_residual": 3.483068086829118e-10,
+      "null_residual": 3.005839244174524e-08,
+      "criterion": "Cycle-fold tangent dJ/ds = 0; nontrivial periodic null mode",
+      "bracket_tangent": [
+        -3.4836309036557727e-10,
+        -3.4727360239254355e-10
+      ],
+      "label": "LPC_onset",
+      "status": "REJECTED_FOLD_NO_SIGN_CHANGE",
+      "sigma_A_mV": 0.72024247575975,
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/boundaries/LPC_onset/h0.97363717_N2048.npz"
+    },
+    {
+      "h": 0.9692965374181826,
+      "g": 1.1215822119408057,
+      "T_ms": 1025.1103170030467,
+      "N": 2048,
+      "orbit_residual": 5.492568205811565e-13,
+      "critical_residual": 3.2638281959543844e-10,
+      "null_residual": 2.816387389970032e-08,
+      "criterion": "Cycle-fold tangent dJ/ds = 0; nontrivial periodic null mode",
+      "bracket_tangent": [
+        -3.2680079082690315e-10,
+        -3.2598782502483424e-10
+      ],
+      "label": "LPC_onset",
+      "status": "REJECTED_FOLD_NO_SIGN_CHANGE",
+      "sigma_A_mV": 0.7170315214856202,
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/boundaries/LPC_onset/h0.96929654_N2048.npz"
+    },
+    {
+      "h": 0.9632196586854556,
+      "g": 1.1215577785177657,
+      "T_ms": 1030.9874821554397,
+      "N": 2048,
+      "orbit_residual": 1.3555714710455913e-11,
+      "critical_residual": 3.104850793899037e-10,
+      "null_residual": 2.6767866589949563e-08,
+      "criterion": "Cycle-fold tangent dJ/ds = 0; nontrivial periodic null mode",
+      "bracket_tangent": [
+        -3.1073161386931884e-10,
+        -3.1022810888503144e-10
+      ],
+      "label": "LPC_onset",
+      "status": "REJECTED_FOLD_NO_SIGN_CHANGE",
+      "sigma_A_mV": 0.7125361855018387,
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/boundaries/LPC_onset/h0.96321966_N2048.npz"
+    },
+    {
+      "h": 0.9547120284596378,
+      "g": 1.1215277901160325,
+      "T_ms": 1033.154833485478,
+      "N": 2048,
+      "orbit_residual": 6.245004513516506e-14,
+      "critical_residual": 3.088382088727832e-10,
+      "null_residual": 2.6635926131390875e-08,
+      "criterion": "Cycle-fold tangent dJ/ds = 0; nontrivial periodic null mode",
+      "bracket_tangent": [
+        -3.093674225826634e-10,
+        -3.082790510969797e-10
+      ],
+      "label": "LPC_onset",
+      "status": "REJECTED_FOLD_NO_SIGN_CHANGE",
+      "sigma_A_mV": 0.7062427151245445,
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/boundaries/LPC_onset/h0.95471203_N2048.npz"
+    },
+    {
+      "h": 0.9447120284596378,
+      "g": 1.1214967771037956,
+      "T_ms": 1036.9781931984867,
+      "N": 2048,
+      "orbit_residual": 6.661338147750939e-14,
+      "critical_residual": 2.8748865520611124e-10,
+      "null_residual": 2.4838765044776778e-08,
+      "criterion": "Cycle-fold tangent dJ/ds = 0; nontrivial periodic null mode",
+      "bracket_tangent": [
+        -2.880687918851764e-10,
+        -2.8686858013270406e-10
+      ],
+      "label": "LPC_onset",
+      "status": "REJECTED_FOLD_NO_SIGN_CHANGE",
+      "sigma_A_mV": 0.6988452728165846,
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/boundaries/LPC_onset/h0.94471203_N2048.npz"
+    },
+    {
+      "h": 0.9347120284596377,
+      "g": 1.121468642979326,
+      "T_ms": 1041.2251208901152,
+      "N": 2048,
+      "orbit_residual": 4.649058915617843e-14,
+      "critical_residual": 2.6751013048369893e-10,
+      "null_residual": 2.3059987031004425e-08,
+      "criterion": "Cycle-fold tangent dJ/ds = 0; nontrivial periodic null mode",
+      "bracket_tangent": [
+        -2.6795393719592417e-10,
+        -2.6699689974795885e-10
+      ],
+      "label": "LPC_onset",
+      "status": "REJECTED_FOLD_NO_SIGN_CHANGE",
+      "sigma_A_mV": 0.6914478305086248,
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/boundaries/LPC_onset/h0.93471203_N2048.npz"
+    },
+    {
+      "h": 0.9247120284596377,
+      "g": 1.121442165649001,
+      "T_ms": 1045.664580016279,
+      "N": 2048,
+      "orbit_residual": 6.938893903907228e-14,
+      "critical_residual": 2.4363681048062984e-10,
+      "null_residual": 2.1011350215260904e-08,
+      "criterion": "Cycle-fold tangent dJ/ds = 0; nontrivial periodic null mode",
+      "bracket_tangent": [
+        -2.4411156137842496e-10,
+        -2.430914731320421e-10
+      ],
+      "label": "LPC_onset",
+      "status": "REJECTED_FOLD_NO_SIGN_CHANGE",
+      "sigma_A_mV": 0.684050388200665,
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/boundaries/LPC_onset/h0.92471203_N2048.npz"
+    },
+    {
+      "h": 0.9147120284596377,
+      "g": 1.1214164535892805,
+      "T_ms": 1048.729400269969,
+      "N": 2048,
+      "orbit_residual": 8.049116928532385e-14,
+      "critical_residual": 2.3073124587437838e-10,
+      "null_residual": 1.992041731568861e-08,
+      "criterion": "Cycle-fold tangent dJ/ds = 0; nontrivial periodic null mode",
+      "bracket_tangent": [
+        -2.3101251241956326e-10,
+        -2.3037766887058953e-10
+      ],
+      "label": "LPC_onset",
+      "status": "REJECTED_FOLD_NO_SIGN_CHANGE",
+      "sigma_A_mV": 0.6766529458927052,
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/boundaries/LPC_onset/h0.91471203_N2048.npz"
+    },
+    {
+      "h": 0.9047120284596377,
+      "g": 1.1213908088250566,
+      "T_ms": 1051.2061185068555,
+      "N": 2048,
+      "orbit_residual": 8.326672684688674e-14,
+      "critical_residual": 2.2350773716366067e-10,
+      "null_residual": 1.930099302605015e-08,
+      "criterion": "Cycle-fold tangent dJ/ds = 0; nontrivial periodic null mode",
+      "bracket_tangent": [
+        -2.2376340812189464e-10,
+        -2.231275930072737e-10
+      ],
+      "label": "LPC_onset",
+      "status": "REJECTED_FOLD_NO_SIGN_CHANGE",
+      "sigma_A_mV": 0.6692555035847454,
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/boundaries/LPC_onset/h0.90471203_N2048.npz"
+    },
+    {
+      "h": 0.8947120284596377,
+      "g": 1.121364649544422,
+      "T_ms": 1053.7435786859774,
+      "N": 2048,
+      "orbit_residual": 1.7208456881689926e-13,
+      "critical_residual": 2.183040878152064e-10,
+      "null_residual": 1.886725264910183e-08,
+      "criterion": "Cycle-fold tangent dJ/ds = 0; nontrivial periodic null mode",
+      "bracket_tangent": [
+        -2.1870806510388673e-10,
+        -2.1792851328747941e-10
+      ],
+      "label": "LPC_onset",
+      "status": "REJECTED_FOLD_NO_SIGN_CHANGE",
+      "sigma_A_mV": 0.6618580612767856,
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/boundaries/LPC_onset/h0.89471203_N2048.npz"
+    },
+    {
+      "h": 0.8847120284596377,
+      "g": 1.1213374616785374,
+      "T_ms": 1058.9766898571268,
+      "N": 2048,
+      "orbit_residual": 8.049116928532385e-14,
+      "critical_residual": 2.0377351438110107e-10,
+      "null_residual": 1.7543035246703198e-08,
+      "criterion": "Cycle-fold tangent dJ/ds = 0; nontrivial periodic null mode",
+      "bracket_tangent": [
+        -2.0400808388334973e-10,
+        -2.035451461457962e-10
+      ],
+      "label": "LPC_onset",
+      "status": "REJECTED_FOLD_NO_SIGN_CHANGE",
+      "sigma_A_mV": 0.6544606189688258,
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/boundaries/LPC_onset/h0.88471203_N2048.npz"
+    },
+    {
+      "h": 0.8747120284596377,
+      "g": 1.1213087654175091,
+      "T_ms": 1060.1815965936587,
+      "N": 2048,
+      "orbit_residual": 1.5126788710517758e-13,
+      "critical_residual": 2.089272543109521e-10,
+      "null_residual": 1.8039973070926862e-08,
+      "criterion": "Cycle-fold tangent dJ/ds = 0; nontrivial periodic null mode",
+      "bracket_tangent": [
+        -2.0928959682184112e-10,
+        -2.0852703213371602e-10
+      ],
+      "label": "LPC_onset",
+      "status": "REJECTED_FOLD_NO_SIGN_CHANGE",
+      "sigma_A_mV": 0.647063176660866,
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/boundaries/LPC_onset/h0.87471203_N2048.npz"
+    },
+    {
+      "h": 0.8647120284596377,
+      "g": 1.1212780887121725,
+      "T_ms": 1067.0233253159788,
+      "N": 2048,
+      "orbit_residual": 5.0306980803327406e-14,
+      "critical_residual": 1.7418800043875762e-10,
+      "null_residual": 1.504131819096699e-08,
+      "criterion": "Cycle-fold tangent dJ/ds = 0; nontrivial periodic null mode",
+      "bracket_tangent": [
+        -1.7474795216985588e-10,
+        -1.7366784462372906e-10
+      ],
+      "label": "LPC_onset",
+      "status": "REJECTED_FOLD_NO_SIGN_CHANGE",
+      "sigma_A_mV": 0.6396657343529062,
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/boundaries/LPC_onset/h0.86471203_N2048.npz"
+    },
+    {
+      "h": 0.8547120284596377,
+      "g": 1.1212449440731407,
+      "T_ms": 1072.829750725588,
+      "N": 2048,
+      "orbit_residual": 8.951173136040325e-14,
+      "critical_residual": 1.570888467784174e-10,
+      "null_residual": 1.3581062274781175e-08,
+      "criterion": "Cycle-fold tangent dJ/ds = 0; nontrivial periodic null mode",
+      "bracket_tangent": [
+        -1.571084455995062e-10,
+        -1.5711743177813885e-10
+      ],
+      "label": "LPC_onset",
+      "status": "REJECTED_FOLD_NO_SIGN_CHANGE",
+      "sigma_A_mV": 0.6322682920449464,
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/boundaries/LPC_onset/h0.85471203_N2048.npz"
+    },
+    {
+      "h": 0.8447120284596377,
+      "g": 1.1212088046046123,
+      "T_ms": 1037.5414688404499,
+      "N": 2048,
+      "orbit_residual": 5.906733435701028e-14,
+      "critical_residual": 3.710584697330638e-10,
+      "null_residual": 3.2012032358252895e-08,
+      "criterion": "Cycle-fold tangent dJ/ds = 0; nontrivial periodic null mode",
+      "bracket_tangent": [
+        -3.7128148314371766e-10,
+        -3.7017616006136803e-10
+      ],
+      "label": "LPC_onset",
+      "status": "REJECTED_FOLD_NO_SIGN_CHANGE",
+      "sigma_A_mV": 0.6248708497369866,
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/boundaries/LPC_onset/h0.84471203_N2048.npz"
+    },
+    {
+      "h": 0.8347120284596377,
+      "g": 1.1211690738022293,
+      "T_ms": 1041.3206694588475,
+      "N": 2048,
+      "orbit_residual": 2.4674706722294104e-12,
+      "critical_residual": 3.543313227740008e-10,
+      "null_residual": 3.0537810280506505e-08,
+      "criterion": "Cycle-fold tangent dJ/ds = 0; nontrivial periodic null mode",
+      "bracket_tangent": [
+        -3.5468311103866847e-10,
+        -3.5401133352195145e-10
+      ],
+      "label": "LPC_onset",
+      "status": "REJECTED_FOLD_NO_SIGN_CHANGE",
+      "sigma_A_mV": 0.6174734074290268,
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/boundaries/LPC_onset/h0.83471203_N2048.npz"
+    },
+    {
+      "h": 0.8247120284596376,
+      "g": 1.121125051462781,
+      "T_ms": 1042.5420449146022,
+      "N": 2048,
+      "orbit_residual": 2.3352431099965543e-10,
+      "critical_residual": 3.6294937562582767e-10,
+      "null_residual": 3.129958781045161e-08,
+      "criterion": "Cycle-fold tangent dJ/ds = 0; nontrivial periodic null mode",
+      "bracket_tangent": [
+        -3.636762624025887e-10,
+        -3.631795669932513e-10
+      ],
+      "label": "LPC_onset",
+      "status": "REJECTED_FOLD_NO_SIGN_CHANGE",
+      "sigma_A_mV": 0.610075965121067,
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/boundaries/LPC_onset/h0.82471203_N2048.npz"
+    },
+    {
+      "h": 0.8147120284596376,
+      "g": 1.1210758791294997,
+      "T_ms": 1044.7818136851529,
+      "N": 2048,
+      "orbit_residual": 7.355227538141662e-14,
+      "critical_residual": 3.637965678782916e-10,
+      "null_residual": 3.128544179276105e-08,
+      "criterion": "Cycle-fold tangent dJ/ds = 0; nontrivial periodic null mode",
+      "bracket_tangent": [
+        -3.645535831227209e-10,
+        -3.635388621022358e-10
+      ],
+      "label": "LPC_onset",
+      "status": "REJECTED_FOLD_NO_SIGN_CHANGE",
+      "sigma_A_mV": 0.6026785228131072,
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/boundaries/LPC_onset/h0.81471203_N2048.npz"
+    },
+    {
+      "h": 0.8047120284596376,
+      "g": 1.121020460649404,
+      "T_ms": 1051.3252444779753,
+      "N": 2048,
+      "orbit_residual": 1.7303658506051534e-10,
+      "critical_residual": 3.2344912573065405e-10,
+      "null_residual": 2.786531716481022e-08,
+      "criterion": "Cycle-fold tangent dJ/ds = 0; nontrivial periodic null mode",
+      "bracket_tangent": [
+        -3.2432911727748976e-10,
+        -3.2359254619200705e-10
+      ],
+      "label": "LPC_onset",
+      "status": "REJECTED_FOLD_NO_SIGN_CHANGE",
+      "sigma_A_mV": 0.5952810805051474,
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/boundaries/LPC_onset/h0.80471203_N2048.npz"
+    }
+  ],
+  "rejection_reason": "A small absolute tangent parameter component on a long-period flat tail is insufficient; no local sign change."
+}

@@ -1,0 +1,111 @@
+{
+  "axis": "spread",
+  "value": 0.5,
+  "g": 1.3824369493168316,
+  "branch": "high",
+  "rate_min_hz": [
+    219.5305206150576,
+    270.5942759013587,
+    8.048664176113496e-06,
+    0.11590345223241871,
+    0.6441294680298582,
+    6.444844657949034e-11
+  ],
+  "rate_max_hz": [
+    373.9914463637814,
+    380.29945649717854,
+    242.31048776965542,
+    541.517365034525,
+    538.6406131961068,
+    497.27827469250394
+  ],
+  "T_ms": 150.96888612046354,
+  "stable": true,
+  "grid_period_difference_ms": 0.0,
+  "residual": 4.1494585545365226e-12,
+  "spectra": [
+    {
+      "g": 1.3824369493168316,
+      "T_ms": 150.96888612046354,
+      "N": 2048,
+      "dt_ms": 0.049989697390881965,
+      "history_dimension": 4458,
+      "method": "rk4",
+      "source": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-six-rate-heterogeneity/results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/core_a_focus/spread_0.500000_high_N2048.npz",
+      "gain_derivative": "analytic frozen transfer quadrature",
+      "section": "orthogonal",
+      "requested_multipliers": 4,
+      "multipliers": [
+        [
+          0.14164643626975965,
+          0.0
+        ],
+        [
+          -0.050610155630238844,
+          0.0
+        ],
+        [
+          0.0004110094711967798,
+          0.0
+        ],
+        [
+          -0.0003724434177603136,
+          0.0
+        ]
+      ],
+      "residuals": [
+        2.488709145370495e-15,
+        1.94566702732977e-15,
+        2.097138493991913e-15,
+        1.4129614621744473e-15
+      ],
+      "orbit_tangent_defect": 4.4373530210311054e-09,
+      "section_tangent_defect": 3.39081662959931e-09,
+      "max_transverse": 0.14164643626975965
+    },
+    {
+      "g": 1.3824369493168316,
+      "T_ms": 150.96888612046354,
+      "N": 2048,
+      "dt_ms": 0.024998987600672883,
+      "history_dimension": 8874,
+      "method": "rk4",
+      "source": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-six-rate-heterogeneity/results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/core_a_focus/spread_0.500000_high_N2048.npz",
+      "gain_derivative": "analytic frozen transfer quadrature",
+      "section": "orthogonal",
+      "requested_multipliers": 4,
+      "multipliers": [
+        [
+          0.14164643815825606,
+          0.0
+        ],
+        [
+          -0.05061015518569828,
+          0.0
+        ],
+        [
+          0.0004110094844689002,
+          0.0
+        ],
+        [
+          -0.00037244337509415086,
+          0.0
+        ]
+      ],
+      "residuals": [
+        3.1053737261633875e-15,
+        5.070447462127836e-15,
+        5.630551316867408e-15,
+        6.828709654803142e-16
+      ],
+      "orbit_tangent_defect": 2.8433429848755817e-10,
+      "section_tangent_defect": 2.1355641582861692e-10,
+      "max_transverse": 0.14164643815825606
+    }
+  ],
+  "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/core_a_focus/spread_0.500000_high_N2048.npz",
+  "parameter_interval": [
+    1.3781444776774365,
+    1.3867294209562266
+  ]
+}

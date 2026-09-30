@@ -1,0 +1,79 @@
+{
+  "projection": [
+    "Core A E rate",
+    "Core A I rate"
+  ],
+  "units": "Hz/cell",
+  "equation": "Frozen six-population rate model with all filters and physical delays",
+  "nullclines": false,
+  "autonomous_2D_vector_field": false,
+  "separatrix": false,
+  "cycles": "Exact periodic orbits with existing transverse Floquet validation",
+  "equilibria": "Full six-population equilibrium solve and N40/N64 DDE spectrum",
+  "stability_scope": "Only marked solutions; no claim of exhaustive attractors or planar basins",
+  "initial_histories": "Constant histories for rest examples; full periodic histories for cycle perturbations and the h comparison",
+  "h_comparison": "EE and threshold mean fixed; identical initial periodic history; basin result for this history only",
+  "sources": [
+    {
+      "path": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/refined_scan/h1.00000_up_g1p14000_N2048.npz",
+      "sha256": "cb411903251adbb4ab79df13fcb2d4ef4f3a49e29c426dd4160785fb3c7cb267"
+    },
+    {
+      "path": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/refined_scan/h0.00000_up_g1p38000_N2048.npz",
+      "sha256": "fcfee4b0fd2f1ac299557fab5d95164c50f31593f76df0654ceca84b955b12bc"
+    },
+    {
+      "path": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/refined_scan/h0.00000_down_g1p38000_N2048.npz",
+      "sha256": "c33108ad7e8fd8d0b66761222f1fecfaaf69ea330e64caceecc27338c0fc329f"
+    },
+    {
+      "path": "results/topic4_sef_hfo/core_burst_bifurcation_v2_20260915/periodic/g1.14000000_N2048.npz",
+      "sha256": "3f9f2b739d4e2f01cf2ffdb93917376844c76cbfba091b33b06b89a3768aa44d"
+    },
+    {
+      "path": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/orbit_seed_scan/h0.97500_g1.14000.npz",
+      "sha256": "f055265fd6b7122b693b15a82fedfc02ec7e162ffb1d65e25a4adf39f7711140"
+    },
+    {
+      "path": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/orbit_seed_scan/h0.50000_g1.14000.npz",
+      "sha256": "6b70bfe91574f305c2dfe6aaf8227d03f7a30baae89eee7da124b93019252dc2"
+    },
+    {
+      "path": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/phase_portraits/rest_left.npz",
+      "sha256": "6d156df478b77d27f3c5c3ec49ecee139f4ede8ea63411c644686d9d63982c7f"
+    },
+    {
+      "path": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/phase_portraits/rest_right.npz",
+      "sha256": "240008be118af098653989b0839aaac8716d58137f59c46888d3fe7eab258033"
+    },
+    {
+      "path": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/phase_portraits/burst_entry.npz",
+      "sha256": "ef009b8ae9564258f063c2a2466f0d9ab60b61980915df5c4126ae30858399a5"
+    },
+    {
+      "path": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/phase_portraits/mixed_local.npz",
+      "sha256": "316852a001c53afec47f056ba02ae13e178d1d1269e74467d75b25179666c576"
+    },
+    {
+      "path": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/phase_portraits/high.npz",
+      "sha256": "6239d8fc144a6344a3577f27b934a978335499c9a489c0d5877847fef4a16052"
+    },
+    {
+      "path": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/phase_portraits/equilibrium_h0.50000_g1.14000_low.json",
+      "sha256": "aea6ffc8492c87a9673b730e2d983f5fb00a8e74c78b1829c3b6aaaf76300976"
+    },
+    {
+      "path": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/phase_portraits/equilibrium_h0.97500_g1.14000_low.json",
+      "sha256": "3325441045da090423021497843622ffbe84ed34a71208a87ac4e0c629c85041"
+    },
+    {
+      "path": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/phase_portraits/equilibrium_h1.00000_g1.10000_low.json",
+      "sha256": "4f04e57869fd9d6ab04f7b6e0ab99fd3eb013c9b785eeb5a725d87d265ed1479"
+    },
+    {
+      "path": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/phase_portraits/equilibrium_h1.00000_g1.14000_selected_unstable.json",
+      "sha256": "08104a3b02df25ec3d1a8c8cd33311d84a817a96d97c9fafb0b52636869de781"
+    }
+  ],
+  "human_acceptance": "PENDING"
+}

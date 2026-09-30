@@ -1,0 +1,56 @@
+{
+  "status": "NUMERICAL_CHECKS_PASS_HUMAN_REVIEW_PENDING",
+  "full_six_population_model_retained": true,
+  "x_axis": "common A/B EE multiplier; unchanged pending user preference",
+  "criterion": "A_E+A_I at least 80 percent of rate-mode norm; retained PD curves exceed 99 percent",
+  "new_verified_orbits": [
+    {
+      "file": "mean_16.913954_burst_N2048.json",
+      "branch": "burst",
+      "axis": "mean",
+      "value": 16.913953681279068,
+      "g": 1.3778624323302777,
+      "max_transverse": 0.016549664130010418
+    },
+    {
+      "file": "mean_16.913954_high_N2048.json",
+      "branch": "high",
+      "axis": "mean",
+      "value": 16.913953681279068,
+      "g": 1.3778624323302777,
+      "max_transverse": 0.040462629964128964
+    },
+    {
+      "file": "spread_0.500000_burst_N2048.json",
+      "branch": "burst",
+      "axis": "spread",
+      "value": 0.5,
+      "g": 1.3824369493168316,
+      "max_transverse": 0.013523708184220686
+    },
+    {
+      "file": "spread_0.500000_high_N2048.json",
+      "branch": "high",
+      "axis": "spread",
+      "value": 0.5,
+      "g": 1.3824369493168316,
+      "max_transverse": 0.14164643815825606
+    }
+  ],
+  "scope": "Two verified coexistence examples added; no claim of all attractors or all A-affecting global bifurcations",
+  "sources": [
+    {
+      "path": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/bifurcation_curves.json",
+      "sha256": "1d6f295a9e4d5552aed41cb8964f0ce2b73d988c9e75646031302e3fe879d21f"
+    },
+    {
+      "path": "results/topic4_sef_hfo/core_bifurcation_types_v8_20260916/critical_mode_components.json",
+      "sha256": "4a75853781387fee9342801a6ef4d1ca8db4c19884b980c63a8f70c0675c427f"
+    },
+    {
+      "path": "results/topic4_sef_hfo/core_branch_connections_v5_20260915/scientific_report.md",
+      "sha256": "1adc0f95dce7b4951c81e9c7f031c3d541219f6792195a5b8e75f923ea4ea408"
+    }
+  ],
+  "figure_review": "Final PNG and rendered PDFs inspected; two completed coexistence pairs included"
+}

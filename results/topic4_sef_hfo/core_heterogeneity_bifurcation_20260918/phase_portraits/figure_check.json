@@ -1,0 +1,11 @@
+{
+  "status": "AGENT_CHECKED_HUMAN_REVIEW_PENDING",
+  "checks": [
+    "Script executes and produces both figure sets",
+    "Full-delay equilibrium residuals and N40/N64 stability consistency pass",
+    "All three displayed periodic solutions have existing stable-attractor validation",
+    "Rest transients and both lower-h endpoints agree with full-system equilibria within 0.002 Hz per cell",
+    "Rendered PNG and vector PDF inspected; labels and inset positions corrected"
+  ],
+  "interpretation": "State-space projection, not an autonomous 2D system; no nullclines or separatrices inferred."
+}

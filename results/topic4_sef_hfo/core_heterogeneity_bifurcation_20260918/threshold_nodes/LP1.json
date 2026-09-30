@@ -1,0 +1,25 @@
+{
+  "status": "PARTIAL",
+  "points": [
+    {
+      "g": 1.364547529970599,
+      "T_ms": 340.6184908425767,
+      "N": 512,
+      "orbit_residual": 8.605633566860504e-11,
+      "critical_residual": 1.0460663929057936e-09,
+      "null_residual": 1.5959969460489765e-09,
+      "criterion": "Joint orbital and bordered fixed-parameter null equations; cycle fold",
+      "bracket_tangent": [
+        6.810766226023239e-08,
+        -6.8355968038681e-08
+      ],
+      "mean_A_mV": 17.26395368127907,
+      "sigma_A_mV": 0.73974423079598,
+      "label": "LP1",
+      "status": "REFINED",
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/threshold_nodes/LP1_mean17.263954_N512.npz"
+    }
+  ],
+  "error": "RuntimeError(('fold joint stalled correction', [[0.030144896664163756, 0.0005260773405139574], [0.029590637587495472, 0.0005180811139973377], [0.031171251800607425, 0.000510202690674605], [0.03717760776757173, 0.000502443925215688], [0.03838847709016213, 0.0004985697355009076]]))",
+  "failed_mean": 17.24895368127907
+}

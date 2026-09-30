@@ -1,0 +1,74 @@
+{
+  "model_base_commit": "5a5516a8ce04283dc24294b4c951e01675b40eaf",
+  "reference_paper": {
+    "title": "Loss of neuronal heterogeneity in epileptogenic human tissue impairs network resilience to sudden changes in synchrony(1).pdf",
+    "doi": "10.1016/j.celrep.2022.110863",
+    "sha256": "127fdcc551e1cad5efcf634df8727838bd6c1cea55981c171845be98adff1456"
+  },
+  "mean_core_A_mV": 17.26395368127907,
+  "sigma_reference_mV": 0.73974423079598,
+  "n_core_A_E": 720,
+  "h_domain": [
+    0,
+    1
+  ],
+  "g_domain": [
+    0.5,
+    1.6
+  ],
+  "state_cells": 704,
+  "classifications": {
+    "equilibrium_candidate": 210,
+    "periodic_candidate": 494
+  },
+  "statistical_unit": "One deterministic parameter and initial-history protocol; not neurons, patients, or independent network samples.",
+  "state_scan_status": "COMPLETED",
+  "critical_curve_coverage": [
+    {
+      "label": "SN",
+      "points": 62,
+      "h_min": 0.0,
+      "h_max": 1.0,
+      "status": "DOMAIN_COVERED"
+    },
+    {
+      "label": "LPC_onset",
+      "points": 12,
+      "h_min": 0.980525,
+      "h_max": 1.0,
+      "status": "PARTIAL_UNRESOLVED_ENDPOINT"
+    },
+    {
+      "label": "LP1",
+      "points": 5,
+      "h_min": 0.9639921874999999,
+      "h_max": 1.0,
+      "status": "PARTIAL_UNRESOLVED_ENDPOINT"
+    },
+    {
+      "label": "PD1",
+      "points": 23,
+      "h_min": 0,
+      "h_max": 1.0,
+      "status": "DOMAIN_COVERED"
+    },
+    {
+      "label": "PD2",
+      "points": 22,
+      "h_min": 0.0,
+      "h_max": 1.0,
+      "status": "DOMAIN_COVERED"
+    },
+    {
+      "label": "PD3",
+      "points": 21,
+      "h_min": 0,
+      "h_max": 1.0,
+      "status": "DOMAIN_COVERED"
+    }
+  ],
+  "stable_orbits_verified": 4,
+  "acceptance": "Agent-checked candidate; human visual acceptance pending; partial cycle-fold coverage; LP0/PD0 not continued in h.",
+  "native_SNN_correspondence": "Not established by this scan",
+  "cellular_synchrony": "Not observed by six population rates"
+}

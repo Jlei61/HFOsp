@@ -1,0 +1,111 @@
+{
+  "axis": "mean",
+  "value": 16.913953681279068,
+  "g": 1.3778624323302777,
+  "branch": "high",
+  "rate_min_hz": [
+    247.40087308777433,
+    260.6214063715214,
+    7.81485276490912e-06,
+    0.2681414557864914,
+    0.48106660211225116,
+    6.045164369083977e-11
+  ],
+  "rate_max_hz": [
+    381.698956812551,
+    378.6368976488479,
+    242.59393934137324,
+    544.6909118696075,
+    539.4960847042399,
+    497.82671761662573
+  ],
+  "T_ms": 150.799425327206,
+  "stable": true,
+  "grid_period_difference_ms": 0.0,
+  "residual": 1.5543122344752192e-13,
+  "spectra": [
+    {
+      "g": 1.3778624323302777,
+      "T_ms": 150.799425327206,
+      "N": 2048,
+      "dt_ms": 0.04999980945862268,
+      "history_dimension": 4458,
+      "method": "rk4",
+      "source": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-six-rate-heterogeneity/results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/core_a_focus/mean_16.913954_high_N2048.npz",
+      "gain_derivative": "analytic frozen transfer quadrature",
+      "section": "orthogonal",
+      "requested_multipliers": 4,
+      "multipliers": [
+        [
+          -0.04046263036586854,
+          0.0
+        ],
+        [
+          0.004136274401275147,
+          -0.004751302312141255
+        ],
+        [
+          0.004136274401275147,
+          0.004751302312141255
+        ],
+        [
+          -0.0005569253713086501,
+          0.0
+        ]
+      ],
+      "residuals": [
+        2.783766692347682e-15,
+        1.9769006814379326e-15,
+        1.9769006814379326e-15,
+        2.218095660232481e-15
+      ],
+      "orbit_tangent_defect": 2.5136668399520492e-09,
+      "section_tangent_defect": 1.869606404575706e-09,
+      "max_transverse": 0.04046263036586854
+    },
+    {
+      "g": 1.3778624323302777,
+      "T_ms": 150.799425327206,
+      "N": 2048,
+      "dt_ms": 0.02499990472931134,
+      "history_dimension": 8874,
+      "method": "rk4",
+      "source": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-six-rate-heterogeneity/results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/core_a_focus/mean_16.913954_high_N2048.npz",
+      "gain_derivative": "analytic frozen transfer quadrature",
+      "section": "orthogonal",
+      "requested_multipliers": 4,
+      "multipliers": [
+        [
+          -0.040462629964128964,
+          0.0
+        ],
+        [
+          0.004136274822400719,
+          -0.004751302538999416
+        ],
+        [
+          0.004136274822400719,
+          0.004751302538999416
+        ],
+        [
+          -0.0005569254297120252,
+          0.0
+        ]
+      ],
+      "residuals": [
+        1.7303105621681525e-15,
+        2.7934500064111594e-15,
+        2.7934500064111594e-15,
+        8.7529073311005615e-16
+      ],
+      "orbit_tangent_defect": 1.6547944032846517e-10,
+      "section_tangent_defect": 1.220796329491599e-10,
+      "max_transverse": 0.040462629964128964
+    }
+  ],
+  "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/core_a_focus/mean_16.913954_high_N2048.npz",
+  "parameter_interval": [
+    1.3685642795203077,
+    1.3871605851402475
+  ]
+}

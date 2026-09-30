@@ -1,0 +1,94 @@
+{
+  "label": "PD2",
+  "points": [
+    {
+      "h": 1.0,
+      "g": 1.3885678462993365,
+      "T_ms": 182.8162813415111,
+      "N": 1024,
+      "orbit_residual": 4.704570066849101e-12,
+      "critical_residual": 2.0094488397717433e-14,
+      "null_residual": 4.178011327068921e-12,
+      "criterion": "Joint orbital and bordered antiperiodic null equations; Floquet -1",
+      "critical_mode_percent": [
+        99.99625656272416,
+        2.707468113108039e-05,
+        0.00014791436291317886,
+        0.0014129166409679855,
+        0.0013314489317412409,
+        0.0008240826591492567
+      ],
+      "label": "PD2",
+      "status": "REFINED",
+      "sigma_A_mV": 0.73974423079598,
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/boundaries/PD2_joint/h1.00000000_N1024.npz"
+    },
+    {
+      "h": 0.95,
+      "g": 1.3882969569951646,
+      "T_ms": 182.83886293461816,
+      "N": 1024,
+      "orbit_residual": 1.2212938993449995e-10,
+      "critical_residual": 4.426428354475725e-13,
+      "null_residual": 9.725521711752283e-13,
+      "criterion": "Joint orbital and bordered antiperiodic null equations; Floquet -1",
+      "critical_mode_percent": [
+        99.99561352082435,
+        3.203241491110756e-05,
+        0.0001739112458289309,
+        0.0016445828580712054,
+        0.0015670875001870884,
+        0.0009688651565977455
+      ],
+      "label": "PD2",
+      "status": "REFINED",
+      "sigma_A_mV": 0.702757019256181,
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/boundaries/PD2_joint/h0.95000000_N1024.npz"
+    },
+    {
+      "h": 0.9468749999999999,
+      "g": 1.3882808005231173,
+      "T_ms": 182.84020957620982,
+      "N": 1024,
+      "orbit_residual": 2.8269418056448004e-10,
+      "critical_residual": 8.572964386999172e-13,
+      "null_residual": 3.1752264663051366e-13,
+      "criterion": "Joint orbital and bordered antiperiodic null equations; Floquet -1",
+      "critical_mode_percent": [
+        99.99556968483691,
+        3.237077202908721e-05,
+        0.0001756830005903329,
+        0.0016603800169081764,
+        0.0015831488381367784,
+        0.0009787325353273525
+      ],
+      "label": "PD2",
+      "status": "REFINED",
+      "sigma_A_mV": 0.7004453185349434,
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/boundaries/PD2_joint/h0.94687500_N1024.npz"
+    }
+  ],
+  "failures": [
+    {
+      "h": 0.8999999999999999,
+      "step": 0.05,
+      "error": "joint orbital linear residual"
+    },
+    {
+      "h": 0.9249999999999999,
+      "step": 0.025,
+      "error": "joint orbital linear residual"
+    },
+    {
+      "h": 0.9375,
+      "step": 0.0125,
+      "error": "joint orbital linear residual"
+    },
+    {
+      "h": 0.94375,
+      "step": 0.00625,
+      "error": "joint orbital linear residual"
+    }
+  ],
+  "status": "CONTINUED_IN_PD2_joint_resume"
+}

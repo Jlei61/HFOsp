@@ -1,0 +1,27 @@
+{
+  "accepted_curve_folders": [
+    "LPC_onset (only points, never rejected_points)",
+    "LPC_onset_strict",
+    "LPC_onset_tight",
+    "LP1",
+    "LP1_joint",
+    "LP1_endpoint",
+    "PD1",
+    "PD2_joint",
+    "PD2_joint_resume",
+    "PD3"
+  ],
+  "excluded_curve_folders": [
+    "PD2",
+    "PD2_bordered"
+  ],
+  "excluded_state_scan": "state_scan; filename collision, entire run rejected",
+  "valid_state_scan": "state_scan_v2 plus long_transients",
+  "not_continued_in_h": [
+    "LP0a",
+    "LP0b",
+    "LP0c",
+    "PD0"
+  ],
+  "geometry_note": "Small absolute fold tangent without a sign change is rejected; open endpoints are numerical coverage limits, not identified codimension-two points."
+}

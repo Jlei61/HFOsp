@@ -1,0 +1,29 @@
+{
+  "label": "PD2",
+  "points": [
+    {
+      "h": 1.0,
+      "g": 1.3885678462993365,
+      "T_ms": 182.8162813415111,
+      "N": 1024,
+      "orbit_residual": 4.704570066849101e-12,
+      "critical_residual": 2.0094488397717433e-14,
+      "null_residual": 4.178011327068921e-12,
+      "criterion": "Bordered antiperiodic null condition; Floquet multiplier -1",
+      "critical_mode_percent": [
+        99.99625656272416,
+        2.707468113108039e-05,
+        0.00014791436291317886,
+        0.0014129166409679855,
+        0.0013314489317412409,
+        0.0008240826591492567
+      ],
+      "label": "PD2",
+      "status": "REFINED",
+      "sigma_A_mV": 0.73974423079598,
+      "source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/boundaries/PD2_bordered/h1.00000000_N1024.npz"
+    }
+  ],
+  "failures": [],
+  "status": "SUPERSEDED_BY_JOINT_CORRECTOR"
+}

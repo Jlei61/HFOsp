@@ -1,0 +1,170 @@
+{
+  "model": "Same frozen six-population DDE; actual empirical A thresholds shifted uniformly",
+  "mean_threshold_reference_mV": 17.26395368127907,
+  "threshold_std_mV": 0.73974423079598,
+  "mean_shift_equation": "theta_Ai(new)=theta_Ai(reference)+mean_new-mean_reference",
+  "spread_axis_explanation": "Previous h=1 denotes the reference SD. Affine h>1 raises some core thresholds above 18 mV and changes the established core setting.",
+  "mean_domain": "16.5 mV to reference for SN; actual periodic-curve ranges below",
+  "periodic_coverage": {
+    "PD1": {
+      "status": "DONE",
+      "points": 4,
+      "mean_range": [
+        16.663953681279068,
+        17.26395368127907
+      ]
+    },
+    "PD2": {
+      "status": "DONE",
+      "points": 4,
+      "mean_range": [
+        16.663953681279068,
+        17.26395368127907
+      ]
+    },
+    "PD3": {
+      "status": "PARTIAL",
+      "points": 7,
+      "mean_range": [
+        16.71395368127907,
+        17.26395368127907
+      ]
+    },
+    "LP1": {
+      "status": "PARTIAL",
+      "points": 1,
+      "mean_range": [
+        17.26395368127907,
+        17.26395368127907
+      ]
+    }
+  },
+  "quadrature_checks": [
+    {
+      "mean_A_mV": 17.26395368127907,
+      "quadrature32_64_g_difference": 0.0
+    },
+    {
+      "mean_A_mV": 16.881976840639535,
+      "quadrature32_64_g_difference": 0.0
+    },
+    {
+      "mean_A_mV": 16.5,
+      "quadrature32_64_g_difference": 5.551115123125783e-16
+    }
+  ],
+  "periodic_grid_checks": [
+    {
+      "type": "PD1",
+      "g": 1.349981763824366,
+      "T_ms": 187.52497925114722,
+      "N": 1024,
+      "orbit_residual": 2.1788126858268697e-13,
+      "critical_residual": 3.586810467137613e-14,
+      "null_residual": 1.1350512977431615e-11,
+      "criterion": "Joint orbital and bordered antiperiodic null equations; Floquet -1",
+      "critical_mode_percent": [
+        0.1325298751535563,
+        11.030023906812511,
+        0.050726739736309485,
+        0.5190197616379612,
+        87.98504405956616,
+        0.28265565709344653
+      ],
+      "difference_g": 2.4238389073616418e-12,
+      "difference_T_ms": 1.8026184989139438e-09,
+      "mean_A_mV": 16.663953681279068
+    },
+    {
+      "type": "PD2",
+      "g": 1.3866483775716298,
+      "T_ms": 183.0729686924983,
+      "N": 1024,
+      "orbit_residual": 6.333475410791323e-13,
+      "critical_residual": 5.881921306313056e-14,
+      "null_residual": 3.246416427783033e-12,
+      "criterion": "Joint orbital and bordered antiperiodic null equations; Floquet -1",
+      "critical_mode_percent": [
+        99.99941262673715,
+        3.660252029444011e-06,
+        1.9587965743491135e-05,
+        0.000282925498303838,
+        0.0001718015918011876,
+        0.0001093979549156032
+      ],
+      "difference_g": -7.16537940093076e-13,
+      "difference_T_ms": 3.058460151805775e-10,
+      "mean_A_mV": 16.663953681279068
+    },
+    {
+      "type": "PD3",
+      "g": 1.3632964127166924,
+      "T_ms": 150.90025202939188,
+      "N": 1024,
+      "orbit_residual": 2.1007501294079134e-13,
+      "critical_residual": 1.2890299037970015e-13,
+      "null_residual": 1.0274315252745136e-11,
+      "criterion": "Joint orbital and bordered antiperiodic null equations; Floquet -1",
+      "critical_mode_percent": [
+        10.871053428669457,
+        0.024611092653308308,
+        0.0853524921620124,
+        88.34236660650296,
+        0.20651758398994824,
+        0.4700987960223343
+      ],
+      "difference_g": 9.616751839303106e-13,
+      "difference_T_ms": -4.799574071512325e-10,
+      "mean_A_mV": 16.71395368127907
+    }
+  ],
+  "onset_switch": {
+    "g": 1.1745557617069136,
+    "h": 0.9633352668891074,
+    "sigma_A_mV": 0.7126217060035228,
+    "r_hz": [
+      0.42493426558193587,
+      0.4127321327525467,
+      1.7016362306333644e-30,
+      -5.458163477443711e-31,
+      -8.54541072100918e-33,
+      1.4769993064937797e-32
+    ],
+    "residual": 1.0764722446765518e-12,
+    "static_eigenvalues": [
+      -4.263256414560601e-14,
+      -1.0,
+      -1.0,
+      1.0764722446765518e-12,
+      -1.0,
+      -1.0
+    ],
+    "nearest_dynamic_roots_per_s": [
+      [
+        -1.0053624322274093e-12,
+        0.0
+      ],
+      [
+        8.36831285810453e-11,
+        0.0
+      ],
+      [
+        -55.55555555555555,
+        0.0
+      ],
+      [
+        -55.55555555556411,
+        -6.6126657744598675e-12
+      ]
+    ],
+    "interpretation": "A/B onset switch with two numerically zero modes; no Bogdanov-Takens classification"
+  },
+  "interpretation": "Critical curves of specific branches; a crossing of projected curves does not establish a codimension-two bifurcation on the same orbit.",
+  "unsupported": [
+    "all attractor basins",
+    "complete mean-threshold cycle-fold continuation",
+    "native SNN or pathology validation"
+  ],
+  "human_visual_acceptance": "PENDING",
+  "figure_review": "PNG and rendered PDF inspected; original accepted branch coordinates reused; human review pending"
+}

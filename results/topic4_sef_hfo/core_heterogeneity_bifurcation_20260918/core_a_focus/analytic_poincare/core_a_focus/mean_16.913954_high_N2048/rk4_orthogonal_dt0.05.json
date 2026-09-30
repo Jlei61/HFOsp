@@ -1,0 +1,39 @@
+{
+  "g": 1.3778624323302777,
+  "T_ms": 150.799425327206,
+  "N": 2048,
+  "dt_ms": 0.04999980945862268,
+  "history_dimension": 4458,
+  "method": "rk4",
+  "source": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-six-rate-heterogeneity/results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/core_a_focus/mean_16.913954_high_N2048.npz",
+  "gain_derivative": "analytic frozen transfer quadrature",
+  "section": "orthogonal",
+  "requested_multipliers": 4,
+  "multipliers": [
+    [
+      -0.04046263036586854,
+      0.0
+    ],
+    [
+      0.004136274401275147,
+      -0.004751302312141255
+    ],
+    [
+      0.004136274401275147,
+      0.004751302312141255
+    ],
+    [
+      -0.0005569253713086501,
+      0.0
+    ]
+  ],
+  "residuals": [
+    2.783766692347682e-15,
+    1.9769006814379326e-15,
+    1.9769006814379326e-15,
+    2.218095660232481e-15
+  ],
+  "orbit_tangent_defect": 2.5136668399520492e-09,
+  "section_tangent_defect": 1.869606404575706e-09,
+  "max_transverse": 0.04046263036586854
+}

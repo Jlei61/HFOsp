@@ -1,0 +1,52 @@
+{
+  "h": 0.0,
+  "g": 1.38,
+  "initial_history": "uniform amplitude perturbation of a complete periodic history",
+  "factor": 0.96,
+  "initial_rates_hz": [
+    355.12141466429773,
+    336.6736050958934,
+    86.25007668082556,
+    507.4049867148833,
+    215.46865655430497,
+    137.0573518663361
+  ],
+  "orbit_source": "results/topic4_sef_hfo/core_heterogeneity_bifurcation_20260918/refined_scan/h0.00000_up_g1p38000_N2048.npz",
+  "dt_ms": 0.05,
+  "sample_dt_ms": 0.25,
+  "duration_ms": 1500,
+  "description": {
+    "mean_hz": [
+      330.61279016170886,
+      349.7230871366207,
+      33.466810802423026,
+      293.14671030028785,
+      312.3572674487884,
+      60.54136407968666
+    ],
+    "min_hz": [
+      192.2280440278229,
+      265.8833219917357,
+      8.825556556496142e-06,
+      0.046246836154506116,
+      0.5669256786353407,
+      7.103903990647279e-11
+    ],
+    "max_hz": [
+      372.4258152312254,
+      379.4290785059227,
+      242.16070495263472,
+      545.2624118784754,
+      538.9051791612548,
+      496.9834337066826
+    ],
+    "observed_ms": 750.0,
+    "kind": "periodic_candidate",
+    "pattern": "both_high",
+    "period_ms": 150.91249734846,
+    "recurrence_error_hz": 0.07973208665481137,
+    "peak_count": 19,
+    "reference_population": 3
+  },
+  "final_rate_distance_to_exact_orbit_hz": 116.88489151830278
+}
