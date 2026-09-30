@@ -1,5 +1,10 @@
 # Agent Guide
 
+## SNN 共享科学口径（用户确认，2026-09-09）
+
+本工作树的 Topic 4 / Figure 4–5 任务先读取主目录共享规范：[患者传播几何先验下的网络拟合](/home/honglab/leijiaxin/HFOsp/docs/topic4_patient_geometry_prior_snn.md)。患者传播轴与端点区域几何中心提供 core 初值，在其附近拟合范围、中心及有效连接等参数，再做参数 × 观测分析和独立重演。粗几何先验已获授权；输入过的轴/端点不能再充当独立恢复证据，细粒度路线与原生传播仍需明确验证身份。旧“从零搜索 source”不作为默认任务；本更新不自动修改本分支物理设置、在跑预算、临床 SOZ 口径或状态/分岔验收。
+
+
 This repo is rebuilding the legacy Yuquan HFO pipeline into a maintainable codebase. Do not guess where figures or artifacts come from.
 
 ## Read This First
