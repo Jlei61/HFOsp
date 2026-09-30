@@ -26,4 +26,6 @@ scripts/paper_figures/build_fig5_single_seed_panels.py \
 
 数据根目录只用于读取原有输入；本次修复使重建的比较报告写到新导出目录。原生实验完整重跑依赖冻结基底与数据挂载，不将本包称为脱离数据环境的完整仿真镜像。当前Figure 4文件、活动实验源文件和根目录Git冲突均不参与本次替换。
 
-推送成功后才退役无活跃进程/打开文件引用的四个checkout，保留本地及远端分支。待最终 `retirement.json` 与远端SHA核验写入后，状态页记录实际数量。
+整合提交 `5ac7580b027af9519ca7fbeeb927b7f7140ab337` 已推送并经 `git ls-remote` 确认；六群体异质性和rev22保存分支也已同步。随后无force移除四个无活跃引用的checkout，剩5个，见[实际退役记录](retirement.json)。旧工作区的三个仍被引用模块已逐字节迁入主目录缺失路径，保留已有加载器行为，见[依赖保留清单](retired_dependency_relocations.json)及[移除后导入检查](post_retirement_import_check.json)。
+
+本次有界核验：1603个Python文件语法、15984个JSON、392个PNG文件格式、21个Figure 5清单文件哈希、两套方程及44项相关回归测试通过；Figure 5完整图及六个单panel PNG从整合代码重建后逐字节一致，PNG和PDF完成Agent目视自查。结果详见[validation.json](validation.json)。这些核验不改变历史未完成分岔或原生等价性的科学状态。

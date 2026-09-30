@@ -1,6 +1,6 @@
 # 工作区状态
 
-2026-09-30 整合中。来源盘点、工件清单及核验记录见[本次整合目录](archive/workspace/integration_2026-09-30/)。远端发布完成并重新确认没有运行依赖之后，才移除闲置checkout。
+2026-09-30 整合及清理完成。已将核验后的模型与结果推送origin/main；重新确认无进程/打开文件/内存映射引用后，无force移除了四个checkout。Git工作区从9个减至5个：**4个工作/依赖区，另1个干净main整合区**。除主目录外，是3个工作/依赖区加1个main区。来源盘点、工件清单及核验记录见[本次整合目录](archive/workspace/integration_2026-09-30/)。
 
 ## 保留的工作区
 
@@ -12,8 +12,10 @@
 | `.worktrees/topic5-ges-v033-training-lab` | Topic 5 RNN尚有独立开发/审阅任务与未提交内容；本轮不把它归为已停止的Figure 5补实验。Topic 5不等于Figure 5。 |
 | `.worktrees/main-cherry` | 干净main整合与查阅入口；不运行补实验。 |
 
-## 本次待退役的checkout
+## 本次已退役的checkout
 
-`topic4-dual-core-z-bifurcation`、`topic4-rev22-postfit`、`topic4-six-rate-heterogeneity`、`/tmp/hfosp-six-rate-publish-20260917`。前两者的既有历史成果已按原状态归档；六群体发布及v11异质性代码、数组、图和报告纳入本次main。Git分支及提交保留。实际移除记录以本次整合目录的 `retirement.json` 为准。
+`topic4-dual-core-z-bifurcation`、`topic4-rev22-postfit`、`topic4-six-rate-heterogeneity`、`/tmp/hfosp-six-rate-publish-20260917`。前两者的既有历史成果已按原状态归档；六群体发布及v11异质性代码、数组、图和报告纳入本次main。所有本地及远端分支/提交保留，只有可再生缓存随checkout移除。实际记录见[retirement.json](archive/workspace/integration_2026-09-30/retirement.json)。
+
+旧Z分岔工作区被历史加载器引用的三个模块，逐字节核对与main已整合代码一致后，补入主目录原本缺失的 `src/` 路径；原加载器已有的fallback可直接读取，活动脚本本身未改动。旧目录移除后的Figure 5导入也已核查。主目录只新增模型路由说明、身份标签及这三个相同依赖模块，未切换其分支或解决其他任务的冲突。
 
 当前默认分岔入口为[空间rate模型](topic4_model_versions.md)，Figure 5为[70点A–F版](current_figure5.md)。不能根据仍保留在历史日志中的RUNNING/Goal ACTIVE字样推断当前进程，也不能根据整合验收推断正式分岔已经建立。
